@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from "react";
 import { useAuth } from "@/lib/store";
 import { useLocation } from "wouter";
-import { Send, Plus, LogOut, Paperclip, Loader2, ArrowDown, Settings, FileText } from "lucide-react";
+import { Send, Plus, LogOut, Paperclip, Loader2, ArrowDown, Settings, FileText, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -12,6 +12,8 @@ export default function DashboardPage() {
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [showScrollBtn, setShowScrollBtn] = useState(false);
+  const [attachedFile, setAttachedFile] = useState<File | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -42,13 +44,16 @@ export default function DashboardPage() {
   };
 
   const handleSend = async () => {
-    if (!user || !input.trim() || isLoading) return;
-    const msg = input;
+    if (!user || (!input.trim() && !attachedFile) || isLoading) return;
+    const msg = input.trim() || (attachedFile ? `Analyze my attached ${attachedFile.name}` : "");
+    if (!msg) return;
+    const attachment = attachedFile ? (attachedFile.name.toLowerCase().includes("bank") ? "bank_statement" as const : "credit_report" as const) : undefined;
     setInput("");
+    setAttachedFile(null);
     if (textareaRef.current) textareaRef.current.style.height = "auto";
     setIsLoading(true);
     try {
-      await sendMessage(msg);
+      await sendMessage(msg, attachment);
     } catch {
     } finally {
       setIsLoading(false);
@@ -231,6 +236,21 @@ export default function DashboardPage() {
 
         <div className="shrink-0 px-4 pb-4 pt-2">
           <div className="max-w-3xl mx-auto">
+            {attachedFile && (
+              <div className="flex items-center gap-2 mb-2 px-1">
+                <div className="flex items-center gap-2 bg-[#1A1A1A] border border-white/10 rounded-lg px-3 py-1.5 text-sm text-white/70">
+                  <FileText className="w-4 h-4 text-primary shrink-0" />
+                  <span className="truncate max-w-[200px]">{attachedFile.name}</span>
+                  <button
+                    onClick={() => setAttachedFile(null)}
+                    className="text-white/30 hover:text-white/60 ml-1"
+                    data-testid="button-remove-file"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              </div>
+            )}
             <div className="relative flex items-end bg-[#1A1A1A] border border-white/10 rounded-2xl px-4 py-3 focus-within:border-white/20 transition-colors">
               <textarea
                 ref={textareaRef}
@@ -244,32 +264,38 @@ export default function DashboardPage() {
                 className="flex-1 bg-transparent text-[15px] text-white placeholder:text-white/30 resize-none outline-none max-h-[200px] leading-6 py-0.5"
               />
               <div className="flex items-center gap-1 ml-2 shrink-0">
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept=".pdf,.doc,.docx,.txt,.csv"
+                  className="hidden"
+                  data-testid="input-file-upload"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      setAttachedFile(file);
+                    }
+                    e.target.value = "";
+                  }}
+                />
                 <Button
                   size="icon"
                   variant="ghost"
                   className="w-8 h-8 rounded-full text-white/30 hover:text-white/60 hover:bg-white/5"
-                  onClick={async () => {
-                    if (!input.trim()) {
-                      setInput("Analyze my attached credit report");
-                    }
-                    setIsLoading(true);
-                    try {
-                      await sendMessage(input || "Analyze my attached credit report", "credit_report");
-                      setInput("");
-                    } catch {} finally { setIsLoading(false); }
-                  }}
+                  onClick={() => fileInputRef.current?.click()}
                   disabled={isLoading}
                   title="Attach document"
+                  data-testid="button-attach"
                 >
                   <Paperclip className="w-4 h-4" />
                 </Button>
                 <button
                   data-testid="button-send"
                   onClick={handleSend}
-                  disabled={isLoading || !input.trim()}
+                  disabled={isLoading || (!input.trim() && !attachedFile)}
                   className={cn(
                     "w-8 h-8 rounded-full flex items-center justify-center transition-colors",
-                    input.trim() && !isLoading
+                    (input.trim() || attachedFile) && !isLoading
                       ? "bg-primary text-black hover:bg-primary/90"
                       : "bg-white/10 text-white/20 cursor-not-allowed"
                   )}
