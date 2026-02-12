@@ -94,7 +94,7 @@ export default function LandingPage() {
           </form>
 
           <div className="flex items-center gap-3 mb-14">
-            <div className="flex -space-x-3">
+            <div className="flex -space-x-4">
               {["/avatars/face1.jpg", "/avatars/face2.jpg", "/avatars/face3.jpg", "/avatars/face4.jpg", "/avatars/face5.jpg"].map((src, i) => (
                 <img
                   key={i}
