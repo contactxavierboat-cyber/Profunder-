@@ -108,8 +108,8 @@ export default function LandingPage() {
             </p>
           </div>
 
-          <p className="text-[12px] sm:text-[14px] font-bold tracking-[0.2em] uppercase text-white/80 mb-3 sm:mb-4">
-            OFFICIALLY LAUNCHED
+          <p className="text-center text-[#777] text-[13px] sm:text-[14px] leading-[1.7] max-w-[460px] mb-3 sm:mb-4 px-4 sm:px-2">
+            We are an AI-powered mentorship platform that lets users converse with digital versions of the mentors they admire, delivering trusted guidance anytime, anywhere.
           </p>
 
           <div className="flex items-center gap-2 text-[11px] sm:text-[12px] text-[#666] tracking-[0.15em] uppercase">
