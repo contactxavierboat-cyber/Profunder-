@@ -105,7 +105,7 @@ export function ChatInterface() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = 'Startup-Studio-Analysis.txt';
+    a.download = 'MentXr-Session.txt';
     a.click();
     toast({ title: "Summary Downloaded" });
   };
@@ -118,8 +118,8 @@ export function ChatInterface() {
             <Bot className="w-4 h-4 text-[#999]" />
           </div>
           <div>
-            <CardTitle className="text-sm font-bold text-[#E0E0E0]">Studio AI Analysis</CardTitle>
-            <p className="text-[10px] text-[#555] uppercase tracking-widest">Active Analysis Engine</p>
+            <CardTitle className="text-sm font-bold text-[#E0E0E0]">MentXr® AI</CardTitle>
+            <p className="text-[10px] text-[#555] uppercase tracking-widest">Mentorship On Demand</p>
           </div>
         </div>
         <div className="flex gap-2">
@@ -137,8 +137,8 @@ export function ChatInterface() {
           {messages.length === 0 && (
             <div className="flex flex-col items-center justify-center h-[400px] text-center opacity-30">
               <Bot className="w-12 h-12 mb-4 text-[#555]" />
-              <p className="text-sm font-medium text-[#777]">Ready for Fundability Analysis</p>
-              <p className="text-xs text-[#555]">Ask a question or attach a document to begin.</p>
+              <p className="text-sm font-medium text-[#777]">Your Mentor is Ready</p>
+              <p className="text-xs text-[#555]">Ask anything — strategy, growth, leadership, funding, and more.</p>
             </div>
           )}
           {messages.map((m) => (
