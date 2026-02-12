@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/lib/store";
 import { CalendarDays } from "lucide-react";
 
@@ -30,6 +30,24 @@ export default function LandingPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const { login } = useAuth();
+
+  const getTimeLeft = () => {
+    const release = new Date("2028-01-01T00:00:00").getTime();
+    const now = Date.now();
+    const diff = Math.max(0, release - now);
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+    const minutes = Math.floor((diff / (1000 * 60)) % 60);
+    const seconds = Math.floor((diff / 1000) % 60);
+    return { days, hours, minutes, seconds };
+  };
+
+  const [timeLeft, setTimeLeft] = useState(getTimeLeft);
+
+  useEffect(() => {
+    const timer = setInterval(() => setTimeLeft(getTimeLeft()), 1000);
+    return () => clearInterval(timer);
+  }, []);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -114,7 +132,7 @@ export default function LandingPage() {
 
           <div className="flex items-center gap-2 text-[11px] sm:text-[12px] text-[#666] tracking-[0.15em] uppercase">
             <CalendarDays className="w-[13px] h-[13px] sm:w-[14px] sm:h-[14px]" />
-            LEFT UNTIL FULL RELEASE
+            <span className="font-mono">{timeLeft.days}d {timeLeft.hours}h {timeLeft.minutes}m {timeLeft.seconds}s</span> UNTIL FULL RELEASE
           </div>
         </div>
       </div>
