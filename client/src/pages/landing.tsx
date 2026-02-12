@@ -46,11 +46,7 @@ export default function LandingPage() {
     <div className="min-h-screen bg-[#0D0D0D] text-white" style={{ fontFamily: "'Inter', sans-serif" }}>
 
       <div className="relative overflow-hidden">
-        <svg className="absolute inset-0 w-full h-full opacity-[0.03]" viewBox="0 0 1200 800" fill="none">
-          <path d="M0 400 Q300 200 600 400 T1200 400" stroke="white" strokeWidth="1" />
-          <path d="M0 500 Q400 300 800 500 T1200 300" stroke="white" strokeWidth="1" />
-          <path d="M200 0 Q500 300 800 100 T1200 500" stroke="white" strokeWidth="1" />
-        </svg>
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff06_1px,transparent_1px),linear-gradient(to_bottom,#ffffff06_1px,transparent_1px)] bg-[size:40px_40px]"></div>
 
         <div className="relative z-10 flex flex-col items-center px-6 pt-20 pb-20">
 
