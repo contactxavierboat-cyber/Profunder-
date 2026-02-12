@@ -8,6 +8,13 @@ import { Send, User, Bot, Paperclip, Trash2, Download, FileText, Loader2 } from 
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 
+const MENTOR_INFO: Record<string, { name: string; avatar: string }> = {
+  grant_cardone: {
+    name: "Grant Cardone",
+    avatar: "/images/mentor-grant-cardone.png",
+  },
+};
+
 function cleanContent(text: string): string {
   return text
     .replace(/\*\*\*/g, "")
@@ -141,39 +148,54 @@ export function ChatInterface() {
               <p className="text-xs text-[#555]">Ask anything — strategy, growth, leadership, funding, and more.</p>
             </div>
           )}
-          {messages.map((m) => (
-            <div key={m.id} className={cn("flex gap-3 max-w-[90%]", m.role === 'user' ? "ml-auto flex-row-reverse" : "")}>
-              <div className={cn(
-                "w-8 h-8 rounded-full flex items-center justify-center shrink-0 border",
-                m.role === 'user' ? "bg-[#1A1A1A] border-[#333]" : "bg-[#1A1A1A] border-[#333]"
-              )}>
-                {m.role === 'user' ? <User className="w-4 h-4 text-[#999]" /> : <Bot className="w-4 h-4 text-[#999]" />}
-              </div>
-              <div className="space-y-1 min-w-0 flex-1">
-                <div className={cn(
-                  "rounded-2xl text-sm",
-                  m.role === 'user' 
-                    ? "p-3 bg-[#E0E0E0] text-[#0D0D0D] font-medium leading-relaxed whitespace-pre-wrap" 
-                    : "bg-[#161616] border border-[#222]"
-                )}>
-                  {m.attachment && (
-                    <div className="flex items-center gap-2 mb-2 p-2 rounded bg-black/20 text-xs font-mono text-[#888] mx-3 mt-3">
-                      <FileText className="w-3 h-3" />
-                      Attached: {m.attachment.replace('_', ' ')}.pdf
-                    </div>
+          {messages.map((m) => {
+            const mentorData = m.role === 'assistant' && m.mentor ? MENTOR_INFO[m.mentor] : null;
+            return (
+              <div key={m.id} className={cn("flex gap-3 max-w-[90%]", m.role === 'user' ? "ml-auto flex-row-reverse" : "")}>
+                {m.role === 'user' ? (
+                  <div className="w-8 h-8 rounded-full flex items-center justify-center shrink-0 border bg-[#1A1A1A] border-[#333]">
+                    <User className="w-4 h-4 text-[#999]" />
+                  </div>
+                ) : mentorData ? (
+                  <img
+                    src={mentorData.avatar}
+                    alt={mentorData.name}
+                    className="w-8 h-8 rounded-full object-cover shrink-0 border border-[#444]"
+                  />
+                ) : (
+                  <div className="w-8 h-8 rounded-full flex items-center justify-center shrink-0 border bg-[#1A1A1A] border-[#333]">
+                    <Bot className="w-4 h-4 text-[#999]" />
+                  </div>
+                )}
+                <div className="space-y-1 min-w-0 flex-1">
+                  {mentorData && (
+                    <p className="text-[11px] font-semibold text-[#aaa] tracking-wide">{mentorData.name}</p>
                   )}
-                  {m.role === 'assistant' ? (
-                    <FormatReport content={m.content} />
-                  ) : (
-                    m.content
-                  )}
+                  <div className={cn(
+                    "rounded-2xl text-sm",
+                    m.role === 'user' 
+                      ? "p-3 bg-[#E0E0E0] text-[#0D0D0D] font-medium leading-relaxed whitespace-pre-wrap" 
+                      : "bg-[#161616] border border-[#222]"
+                  )}>
+                    {m.attachment && (
+                      <div className="flex items-center gap-2 mb-2 p-2 rounded bg-black/20 text-xs font-mono text-[#888] mx-3 mt-3">
+                        <FileText className="w-3 h-3" />
+                        Attached: {m.attachment.replace('_', ' ')}.pdf
+                      </div>
+                    )}
+                    {m.role === 'assistant' ? (
+                      <FormatReport content={m.content} />
+                    ) : (
+                      m.content
+                    )}
+                  </div>
+                  <p className="text-[10px] text-[#444] font-mono text-right">
+                    {new Date(m.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                  </p>
                 </div>
-                <p className="text-[10px] text-[#444] font-mono text-right">
-                  {new Date(m.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                </p>
               </div>
-            </div>
-          ))}
+            );
+          })}
           {isLoading && (
             <div className="flex gap-3">
               <div className="w-8 h-8 rounded-full bg-[#1A1A1A] border border-[#333] flex items-center justify-center shrink-0">

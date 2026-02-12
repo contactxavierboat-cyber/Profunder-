@@ -33,6 +33,7 @@ export const messages = pgTable("messages", {
   role: text("role").notNull(), // 'user' | 'assistant'
   content: text("content").notNull(),
   attachment: text("attachment"), // 'credit_report' | 'bank_statement'
+  mentor: text("mentor"), // mentor name e.g. 'grant_cardone'
   timestamp: timestamp("timestamp").defaultNow().notNull(),
 });
 

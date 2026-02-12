@@ -212,6 +212,53 @@ RESPONSE APPROACH
 
 Tone: Professional. Conversational. Direct. Empowering. Realistic.`;
 
+const MENTOR_PROFILES: Record<string, { name: string; keywords: string[]; systemPrompt: string }> = {
+  grant_cardone: {
+    name: "Grant Cardone",
+    keywords: ["grant cardone", "grant", "cardone", "10x", "uncle g"],
+    systemPrompt: `You are now embodying Grant Cardone — the legendary sales trainer, real estate mogul, and 10X advocate. You ARE Grant Cardone in this conversation.
+
+PERSONALITY & VOICE:
+- Extremely high energy, bold, and unapologetic
+- Obsessed with massive action and 10X thinking
+- Direct, sometimes blunt, but always motivating
+- Uses phrases like "10X", "massive action", "average is a failing formula", "be obsessed or be average"
+- Talks about scaling, selling, closing, and building empires
+- References real estate, multifamily investing, and building wealth through cash flow
+- Challenges people who think small — pushes them to set bigger goals
+- Believes in outworking everyone and dominating your space
+
+KEY PRINCIPLES YOU LIVE BY:
+- The 10X Rule: Set targets 10 times greater than what you think you need, then take 10 times the action
+- Sales is everything — everyone is in sales whether they know it or not
+- Cash flow is king — invest in assets that produce income
+- Never reduce your target, increase your actions
+- Average is the enemy — be obsessed or be average
+- Money follows attention — dominate social media and get known
+- Your network is your net worth — surround yourself with winners
+
+SPEAKING STYLE:
+- Talk in first person as Grant
+- Be passionate, loud (in text), and commanding
+- Use short, punchy sentences mixed with longer motivational buildups
+- Reference your own journey from broke to billionaire
+- Don't sugarcoat — tell people what they NEED to hear, not what they want to hear
+- Occasionally use ALL CAPS for emphasis on key points
+
+Always respond AS Grant Cardone, not about him.`
+  }
+};
+
+function detectMentor(content: string): string | null {
+  const lower = content.toLowerCase();
+  for (const [key, profile] of Object.entries(MENTOR_PROFILES)) {
+    if (profile.keywords.some(kw => lower.includes(kw))) {
+      return key;
+    }
+  }
+  return null;
+}
+
 declare module "express-session" {
   interface SessionData {
     userId: number;
@@ -526,7 +573,17 @@ export async function registerRoutes(
       displayContent = content;
     }
 
-    await storage.createMessage({ userId, role: "user", content: displayContent, attachment: attachment || null });
+    let detectedMentor = detectMentor(content);
+
+    if (!detectedMentor) {
+      const prevHistory = await storage.getMessages(userId);
+      const lastAssistant = [...prevHistory].reverse().find(m => m.role === 'assistant' && m.mentor);
+      if (lastAssistant?.mentor) {
+        detectedMentor = lastAssistant.mentor;
+      }
+    }
+
+    await storage.createMessage({ userId, role: "user", content: displayContent, attachment: attachment || null, mentor: null });
 
     const history = await storage.getMessages(userId);
     const last10 = history.slice(-10).map(m => ({ role: m.role as "user" | "assistant", content: m.content }));
@@ -535,10 +592,15 @@ export async function registerRoutes(
     if (manualEntryNeeded && attachment) {
       fileContext = `\n\nThe user uploaded a ${attachment === "bank_statement" ? "bank statement" : "credit report"}, but automated text extraction failed (the document may be an image-based or scanned PDF). Ask the user to manually provide the key data from their document. For a credit report, ask for: credit score, total revolving limits, total balances, number of inquiries, and any derogatory accounts. For a bank statement, ask for: average daily balance, monthly deposits, and any NSF/overdraft occurrences.`;
     } else if (extractedText) {
-      fileContext = `\n\nThe user has uploaded a ${attachment === "bank_statement" ? "bank statement" : "credit report"}. Here is the extracted text from the document (extracted via ${extractionMethod}):\n\n--- START OF DOCUMENT ---\n${extractedText}\n--- END OF DOCUMENT ---\n\nAnalyze this document thoroughly. Extract key financial data, identify patterns, and incorporate your findings into the fundability assessment.`;
+      fileContext = `\n\nThe user has uploaded a ${attachment === "bank_statement" ? "bank statement" : "credit report"}. Here is the extracted text from the document (extracted via ${extractionMethod}):\n\n--- START OF DOCUMENT ---\n${extractedText}\n--- END OF DOCUMENT ---\n\nAnalyze this document thoroughly and incorporate your findings into your mentorship advice.`;
     }
 
-    const systemPrompt = MENTXR_SYSTEM_PROMPT + (fileContext ? `\n\n${fileContext}` : "");
+    let systemPrompt: string;
+    if (detectedMentor && MENTOR_PROFILES[detectedMentor]) {
+      systemPrompt = MENTOR_PROFILES[detectedMentor].systemPrompt + (fileContext ? `\n\n${fileContext}` : "");
+    } else {
+      systemPrompt = MENTXR_SYSTEM_PROMPT + (fileContext ? `\n\n${fileContext}` : "");
+    }
 
     try {
       const response = await openai.chat.completions.create({
@@ -550,16 +612,16 @@ export async function registerRoutes(
         max_tokens: 2048,
       });
 
-      const aiContent = response.choices[0]?.message?.content || "I'm sorry, I couldn't generate an analysis.";
+      const aiContent = response.choices[0]?.message?.content || "I'm sorry, I couldn't generate a response right now.";
 
-      const aiMessage = await storage.createMessage({ userId, role: "assistant", content: aiContent, attachment: null });
+      const aiMessage = await storage.createMessage({ userId, role: "assistant", content: aiContent, attachment: null, mentor: detectedMentor });
 
       await storage.updateUser(userId, { monthlyUsage: user.monthlyUsage + 1 });
 
       res.json(aiMessage);
     } catch (error: any) {
       console.error("OpenAI Error:", error);
-      res.status(500).json({ error: "Error generating AI analysis. Please try again." });
+      res.status(500).json({ error: "Error generating AI response. Please try again." });
     }
   });
 
