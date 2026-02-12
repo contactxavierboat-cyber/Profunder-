@@ -120,27 +120,33 @@ export default function LandingPage() {
         </div>
       </div>
 
-      <div className="relative py-10 sm:py-14 overflow-hidden">
-        <div className="absolute inset-0 flex items-center justify-center">
-          <div className="w-full h-px bg-gradient-to-r from-transparent via-[#333] to-transparent"></div>
-        </div>
-        <div className="relative flex justify-center">
-          <div className="flex items-center gap-3 bg-[#0D0D0D] px-6">
-            <div className="flex flex-col items-end gap-[3px]">
-              <div className="w-[60px] sm:w-[80px] h-[1px] bg-gradient-to-r from-transparent to-[#555]"></div>
-              <div className="w-[40px] sm:w-[55px] h-[1px] bg-gradient-to-r from-transparent to-[#444]"></div>
-              <div className="w-[20px] sm:w-[30px] h-[1px] bg-gradient-to-r from-transparent to-[#333]"></div>
-            </div>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" className="text-[#555] rotate-[-90deg]">
-              <path d="M12 2L4 14h5v8l7-12h-5l1-8z" fill="currentColor" opacity="0.6" />
+      <div className="relative py-12 sm:py-16 overflow-hidden">
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff10_1px,transparent_1px),linear-gradient(to_bottom,#ffffff10_1px,transparent_1px)] bg-[size:40px_40px]"></div>
+
+        <div className="absolute left-0 right-0 top-1/2 -translate-y-1/2 flex items-center">
+          <div className="flex-1 h-px bg-gradient-to-r from-transparent via-[#333] to-[#444]"></div>
+          <div className="w-[40px] h-[40px] relative flex items-center justify-center">
+            <div className="absolute inset-0 border border-[#333] rotate-45"></div>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" className="relative z-10 text-[#666]">
+              <path d="M12 2L4 14h5v8l7-12h-5l1-8z" fill="currentColor" opacity="0.7" />
             </svg>
-            <div className="flex flex-col items-start gap-[3px]">
-              <div className="w-[60px] sm:w-[80px] h-[1px] bg-gradient-to-l from-transparent to-[#555]"></div>
-              <div className="w-[40px] sm:w-[55px] h-[1px] bg-gradient-to-l from-transparent to-[#444]"></div>
-              <div className="w-[20px] sm:w-[30px] h-[1px] bg-gradient-to-l from-transparent to-[#333]"></div>
-            </div>
           </div>
+          <div className="flex-1 h-px bg-gradient-to-l from-transparent via-[#333] to-[#444]"></div>
         </div>
+
+        <div className="absolute left-1/4 top-1/2 -translate-y-1/2 hidden sm:flex flex-col gap-[3px] items-end opacity-40">
+          <div className="w-[50px] h-px bg-gradient-to-r from-transparent to-[#555]"></div>
+          <div className="w-[30px] h-px bg-gradient-to-r from-transparent to-[#444]"></div>
+        </div>
+        <div className="absolute right-1/4 top-1/2 -translate-y-1/2 hidden sm:flex flex-col gap-[3px] items-start opacity-40">
+          <div className="w-[50px] h-px bg-gradient-to-l from-transparent to-[#555]"></div>
+          <div className="w-[30px] h-px bg-gradient-to-l from-transparent to-[#444]"></div>
+        </div>
+
+        <div className="absolute left-[20%] top-[30%] w-1 h-1 rounded-full bg-[#444] hidden sm:block"></div>
+        <div className="absolute right-[35%] top-[25%] w-[3px] h-[3px] rounded-full bg-[#333] hidden sm:block"></div>
+        <div className="absolute left-[40%] bottom-[28%] w-[2px] h-[2px] rounded-full bg-[#3a3a3a] hidden sm:block"></div>
+        <div className="absolute right-[22%] bottom-[35%] w-1 h-1 rounded-full bg-[#444] hidden sm:block"></div>
       </div>
 
       <div className="px-4 sm:px-6 py-16 sm:py-24">
