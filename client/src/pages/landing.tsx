@@ -165,7 +165,7 @@ export default function LandingPage() {
         </div>
       </div>
 
-      <div className="relative h-12 sm:h-16">
+      <div className="relative h-32 sm:h-44">
         <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff10_1px,transparent_1px),linear-gradient(to_bottom,#ffffff10_1px,transparent_1px)] bg-[size:40px_40px]" style={{ maskImage: "linear-gradient(to bottom, white 0%, transparent 100%)", WebkitMaskImage: "linear-gradient(to bottom, white 0%, transparent 100%)" }}></div>
       </div>
 
