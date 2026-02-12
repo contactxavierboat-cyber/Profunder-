@@ -30,17 +30,15 @@ export default function LandingPage() {
 
       <div className="z-10 w-full max-w-md animate-in fade-in zoom-in duration-500 space-y-8">
         <div className="text-center space-y-4">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-white/5 border border-white/10 mb-4 shadow-2xl">
-            <span className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-br from-white to-white/60">X</span>
-          </div>
+          <img src="/logo.png" alt="X+ Logo" className="w-24 h-24 mx-auto mb-2 rounded-2xl shadow-2xl" />
           
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-xs font-mono text-primary mb-2">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-xs font-mono text-primary">
             <span className="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
             NOW AVAILABLE
           </div>
 
-          <h1 className="text-4xl md:text-5xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-b from-white via-white to-white/50">
-            "Digital Underwriting Engine"
+          <h1 className="text-4xl md:text-5xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-b from-white via-white to-white/50 whitespace-nowrap">
+            Digital Underwriting Engine
           </h1>
           
           <p className="text-muted-foreground text-sm md:text-base leading-relaxed">
