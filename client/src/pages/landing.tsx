@@ -120,36 +120,38 @@ export default function LandingPage() {
         </div>
       </div>
 
-      <div className="relative py-12 sm:py-16 overflow-hidden">
+      <div className="relative">
         <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff10_1px,transparent_1px),linear-gradient(to_bottom,#ffffff10_1px,transparent_1px)] bg-[size:40px_40px]"></div>
 
-        <div className="absolute left-0 right-0 top-1/2 -translate-y-1/2 flex items-center">
-          <div className="flex-1 h-px bg-gradient-to-r from-transparent via-[#333] to-[#444]"></div>
-          <div className="w-[40px] h-[40px] relative flex items-center justify-center">
-            <div className="absolute inset-0 border border-[#333] rotate-45"></div>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" className="relative z-10 text-[#666]">
-              <path d="M12 2L4 14h5v8l7-12h-5l1-8z" fill="currentColor" opacity="0.7" />
-            </svg>
+        <div className="relative flex items-center justify-center py-16 sm:py-20">
+          <div className="absolute left-0 right-0 top-1/2 -translate-y-1/2 flex items-center px-4 sm:px-8">
+            <div className="flex-1 h-px bg-gradient-to-r from-transparent via-[#2a2a2a] to-[#3a3a3a]"></div>
+            <div className="mx-3 sm:mx-5 flex items-center gap-2">
+              <div className="w-1 h-1 rounded-full bg-[#444]"></div>
+              <div className="w-[6px] h-[6px] rounded-full border border-[#444]"></div>
+              <div className="w-1 h-1 rounded-full bg-[#444]"></div>
+            </div>
+            <div className="flex-1 h-px bg-gradient-to-l from-transparent via-[#2a2a2a] to-[#3a3a3a]"></div>
           </div>
-          <div className="flex-1 h-px bg-gradient-to-l from-transparent via-[#333] to-[#444]"></div>
+
+          <div className="absolute left-0 right-0 top-[calc(50%-12px)] flex items-center px-[15%] sm:px-[20%] opacity-30">
+            <div className="flex-1 h-px bg-gradient-to-r from-transparent to-[#333]"></div>
+            <div className="w-6"></div>
+            <div className="flex-1 h-px bg-gradient-to-l from-transparent to-[#333]"></div>
+          </div>
+          <div className="absolute left-0 right-0 top-[calc(50%+12px)] flex items-center px-[15%] sm:px-[20%] opacity-30">
+            <div className="flex-1 h-px bg-gradient-to-r from-transparent to-[#333]"></div>
+            <div className="w-6"></div>
+            <div className="flex-1 h-px bg-gradient-to-l from-transparent to-[#333]"></div>
+          </div>
+
+          <div className="hidden sm:block absolute left-[12%] top-[35%] w-[2px] h-[2px] rounded-full bg-[#444]"></div>
+          <div className="hidden sm:block absolute right-[15%] top-[40%] w-[2px] h-[2px] rounded-full bg-[#3a3a3a]"></div>
+          <div className="hidden sm:block absolute left-[25%] bottom-[30%] w-[2px] h-[2px] rounded-full bg-[#444]"></div>
+          <div className="hidden sm:block absolute right-[28%] bottom-[38%] w-[2px] h-[2px] rounded-full bg-[#3a3a3a]"></div>
         </div>
 
-        <div className="absolute left-1/4 top-1/2 -translate-y-1/2 hidden sm:flex flex-col gap-[3px] items-end opacity-40">
-          <div className="w-[50px] h-px bg-gradient-to-r from-transparent to-[#555]"></div>
-          <div className="w-[30px] h-px bg-gradient-to-r from-transparent to-[#444]"></div>
-        </div>
-        <div className="absolute right-1/4 top-1/2 -translate-y-1/2 hidden sm:flex flex-col gap-[3px] items-start opacity-40">
-          <div className="w-[50px] h-px bg-gradient-to-l from-transparent to-[#555]"></div>
-          <div className="w-[30px] h-px bg-gradient-to-l from-transparent to-[#444]"></div>
-        </div>
-
-        <div className="absolute left-[20%] top-[30%] w-1 h-1 rounded-full bg-[#444] hidden sm:block"></div>
-        <div className="absolute right-[35%] top-[25%] w-[3px] h-[3px] rounded-full bg-[#333] hidden sm:block"></div>
-        <div className="absolute left-[40%] bottom-[28%] w-[2px] h-[2px] rounded-full bg-[#3a3a3a] hidden sm:block"></div>
-        <div className="absolute right-[22%] bottom-[35%] w-1 h-1 rounded-full bg-[#444] hidden sm:block"></div>
-      </div>
-
-      <div className="px-4 sm:px-6 py-16 sm:py-24">
+        <div className="relative px-4 sm:px-6 pb-16 sm:pb-24 pt-0">
         <div className="max-w-[560px] mx-auto">
           <h2 className="text-[26px] sm:text-[32px] md:text-[36px] font-normal text-center mb-3 tracking-[-0.03em] text-[#e0e0e0]">Frequently asked questions</h2>
           <p className="text-center text-[#666] text-[13px] sm:text-[14px] mb-8 sm:mb-12 max-w-[420px] mx-auto leading-[1.6]">
@@ -180,6 +182,7 @@ export default function LandingPage() {
               </div>
             ))}
           </div>
+        </div>
         </div>
       </div>
 
