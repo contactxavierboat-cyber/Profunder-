@@ -120,6 +120,29 @@ export default function LandingPage() {
         </div>
       </div>
 
+      <div className="relative py-10 sm:py-14 overflow-hidden">
+        <div className="absolute inset-0 flex items-center justify-center">
+          <div className="w-full h-px bg-gradient-to-r from-transparent via-[#333] to-transparent"></div>
+        </div>
+        <div className="relative flex justify-center">
+          <div className="flex items-center gap-3 bg-[#0D0D0D] px-6">
+            <div className="flex flex-col items-end gap-[3px]">
+              <div className="w-[60px] sm:w-[80px] h-[1px] bg-gradient-to-r from-transparent to-[#555]"></div>
+              <div className="w-[40px] sm:w-[55px] h-[1px] bg-gradient-to-r from-transparent to-[#444]"></div>
+              <div className="w-[20px] sm:w-[30px] h-[1px] bg-gradient-to-r from-transparent to-[#333]"></div>
+            </div>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" className="text-[#555] rotate-[-90deg]">
+              <path d="M12 2L4 14h5v8l7-12h-5l1-8z" fill="currentColor" opacity="0.6" />
+            </svg>
+            <div className="flex flex-col items-start gap-[3px]">
+              <div className="w-[60px] sm:w-[80px] h-[1px] bg-gradient-to-l from-transparent to-[#555]"></div>
+              <div className="w-[40px] sm:w-[55px] h-[1px] bg-gradient-to-l from-transparent to-[#444]"></div>
+              <div className="w-[20px] sm:w-[30px] h-[1px] bg-gradient-to-l from-transparent to-[#333]"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div className="px-4 sm:px-6 py-16 sm:py-24">
         <div className="max-w-[560px] mx-auto">
           <h2 className="text-[26px] sm:text-[32px] md:text-[36px] font-bold text-center mb-3 tracking-[-0.01em]">Frequently asked questions</h2>
