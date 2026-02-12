@@ -126,7 +126,7 @@ export default function LandingPage() {
             </p>
           </div>
 
-          <p className="text-center text-[#777] text-[13px] sm:text-[14px] leading-[1.7] max-w-[460px] mb-8 sm:mb-10 px-4 sm:px-2">
+          <p className="text-center text-[#777] text-[13px] sm:text-[14px] leading-[1.7] max-w-[460px] mb-14 sm:mb-16 px-4 sm:px-2">
             We are an AI-powered mentorship platform that lets users converse with digital versions of the mentors they admire, delivering trusted guidance anytime, anywhere.
           </p>
 
