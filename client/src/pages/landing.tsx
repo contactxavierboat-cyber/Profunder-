@@ -35,11 +35,11 @@ export default function LandingPage() {
     const release = new Date("2028-01-01T00:00:00").getTime();
     const now = Date.now();
     const diff = Math.max(0, release - now);
-    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    const totalDays = diff / (1000 * 60 * 60 * 24);
+    const months = Math.floor(totalDays / 30.44);
     const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
     const minutes = Math.floor((diff / (1000 * 60)) % 60);
-    const seconds = Math.floor((diff / 1000) % 60);
-    return { days, hours, minutes, seconds };
+    return { months, hours, minutes };
   };
 
   const [timeLeft, setTimeLeft] = useState(getTimeLeft);
@@ -134,9 +134,9 @@ export default function LandingPage() {
             <div className="flex items-center gap-3 sm:gap-4">
               <div className="flex flex-col items-center">
                 <div className="bg-[#1A1A1A] border border-[#2A2A2A] rounded-md w-[36px] h-[36px] sm:w-[42px] sm:h-[42px] flex items-center justify-center">
-                  <span className="font-mono text-[14px] sm:text-[17px] font-semibold text-white tabular-nums">{String(timeLeft.days).padStart(2, '0')}</span>
+                  <span className="font-mono text-[14px] sm:text-[17px] font-semibold text-white tabular-nums">{String(timeLeft.months).padStart(2, '0')}</span>
                 </div>
-                <span className="text-[7px] sm:text-[8px] text-[#555] tracking-[0.12em] uppercase mt-1">Days</span>
+                <span className="text-[7px] sm:text-[8px] text-[#555] tracking-[0.12em] uppercase mt-1">Months</span>
               </div>
               <span className="text-[#444] text-[14px] sm:text-[17px] font-mono -mt-3">:</span>
               <div className="flex flex-col items-center">
@@ -151,13 +151,6 @@ export default function LandingPage() {
                   <span className="font-mono text-[14px] sm:text-[17px] font-semibold text-white tabular-nums">{String(timeLeft.minutes).padStart(2, '0')}</span>
                 </div>
                 <span className="text-[7px] sm:text-[8px] text-[#555] tracking-[0.12em] uppercase mt-1">Min</span>
-              </div>
-              <span className="text-[#444] text-[14px] sm:text-[17px] font-mono -mt-3">:</span>
-              <div className="flex flex-col items-center">
-                <div className="bg-[#1A1A1A] border border-[#2A2A2A] rounded-md w-[36px] h-[36px] sm:w-[42px] sm:h-[42px] flex items-center justify-center">
-                  <span className="font-mono text-[14px] sm:text-[17px] font-semibold text-white tabular-nums">{String(timeLeft.seconds).padStart(2, '0')}</span>
-                </div>
-                <span className="text-[7px] sm:text-[8px] text-[#555] tracking-[0.12em] uppercase mt-1">Sec</span>
               </div>
             </div>
             <p className="text-[8px] sm:text-[9px] text-[#555] tracking-[0.15em] uppercase">Until Full Release</p>
