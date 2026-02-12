@@ -90,7 +90,7 @@ export default function LandingPage() {
                 data-testid="button-join"
                 type="submit"
                 disabled={isLoading}
-                className="h-[40px] px-5 rounded-full bg-[#CCFF00] text-black text-[14px] font-bold hover:bg-[#b8e600] transition-colors shrink-0"
+                className="h-[40px] px-5 rounded-full bg-[#E0E0E0] text-black text-[14px] font-bold hover:bg-white transition-colors shrink-0"
               >
                 {isLoading ? "..." : "Join Now"}
               </button>
