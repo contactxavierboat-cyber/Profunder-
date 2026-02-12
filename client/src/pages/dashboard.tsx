@@ -48,12 +48,34 @@ export default function DashboardPage() {
     const msg = input.trim() || (attachedFile ? `Analyze my attached ${attachedFile.name}` : "");
     if (!msg) return;
     const attachment = attachedFile ? (attachedFile.name.toLowerCase().includes("bank") ? "bank_statement" as const : "credit_report" as const) : undefined;
+    const file = attachedFile;
     setInput("");
     setAttachedFile(null);
     if (textareaRef.current) textareaRef.current.style.height = "auto";
     setIsLoading(true);
     try {
-      await sendMessage(msg, attachment);
+      let fileContent: string | undefined;
+      if (file) {
+        fileContent = await new Promise<string>((resolve, reject) => {
+          const reader = new FileReader();
+          const isPdf = file.name.toLowerCase().endsWith(".pdf");
+          reader.onload = () => {
+            if (isPdf) {
+              const base64 = (reader.result as string).split(",")[1];
+              resolve(base64);
+            } else {
+              resolve(reader.result as string);
+            }
+          };
+          reader.onerror = () => reject(new Error("Failed to read file"));
+          if (isPdf) {
+            reader.readAsDataURL(file);
+          } else {
+            reader.readAsText(file);
+          }
+        });
+      }
+      await sendMessage(msg, attachment, fileContent);
     } catch {
     } finally {
       setIsLoading(false);

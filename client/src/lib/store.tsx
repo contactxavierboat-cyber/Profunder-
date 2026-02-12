@@ -16,7 +16,7 @@ interface AuthContextType {
   toggleSubscription: (userId: number) => Promise<void>;
   allUsers: SafeUser[];
   messages: Message[];
-  sendMessage: (content: string, attachment?: "credit_report" | "bank_statement") => Promise<void>;
+  sendMessage: (content: string, attachment?: "credit_report" | "bank_statement", fileContent?: string) => Promise<void>;
   clearChat: () => Promise<void>;
 }
 
@@ -108,11 +108,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   });
 
   const sendMutation = useMutation({
-    mutationFn: async ({ content, attachment }: { content: string, attachment?: string }) => {
+    mutationFn: async ({ content, attachment, fileContent }: { content: string, attachment?: string, fileContent?: string }) => {
       const res = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ content, attachment: attachment || null }),
+        body: JSON.stringify({ content, attachment: attachment || null, fileContent: fileContent || null }),
       });
       if (!res.ok) {
         const err = await res.json();
@@ -190,7 +190,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       toggleSubscription,
       allUsers,
       messages,
-      sendMessage: (content, attachment) => sendMutation.mutateAsync({ content, attachment }),
+      sendMessage: (content, attachment, fileContent) => sendMutation.mutateAsync({ content, attachment, fileContent }),
       clearChat: clearMutation.mutateAsync
     }}>
       {children}

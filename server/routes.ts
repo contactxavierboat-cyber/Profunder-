@@ -5,6 +5,7 @@ import { z } from "zod";
 import OpenAI from "openai";
 import session from "express-session";
 import MemoryStore from "memorystore";
+import * as pdfParse from "pdf-parse";
 
 const openai = new OpenAI({
   apiKey: process.env.AI_INTEGRATIONS_OPENAI_API_KEY,
@@ -53,6 +54,7 @@ const profileSchema = z.object({
 const chatSchema = z.object({
   content: z.string().min(1).max(5000),
   attachment: z.enum(["credit_report", "bank_statement"]).nullable().optional(),
+  fileContent: z.string().nullable().optional(),
 });
 
 export async function registerRoutes(
@@ -141,7 +143,8 @@ export async function registerRoutes(
       return res.status(400).json({ error: "Invalid admin update data" });
     }
 
-    const user = await storage.updateUser(parseInt(req.params.id), result.data);
+    const id = parseInt(req.params.id as string);
+    const user = await storage.updateUser(id, result.data);
     res.json(stripPassword(user));
   });
 
@@ -164,7 +167,7 @@ export async function registerRoutes(
       return res.status(400).json({ error: "Invalid message data" });
     }
 
-    const { content, attachment } = result.data;
+    const { content, attachment, fileContent } = result.data;
 
     const user = await storage.getUser(userId);
     if (!user) return res.status(404).json({ error: "User not found" });
@@ -177,10 +180,37 @@ export async function registerRoutes(
       return res.status(403).json({ error: "Monthly analysis limit reached. Please wait for reset." });
     }
 
-    await storage.createMessage({ userId, role: "user", content, attachment: attachment || null });
+    let extractedText = "";
+    if (fileContent && attachment) {
+      try {
+        const isPdf = fileContent.length > 100 && !fileContent.includes("\n");
+        if (isPdf) {
+          const buffer = Buffer.from(fileContent, "base64");
+          const pdf = (pdfParse as any).default || pdfParse;
+          const pdfData = await pdf(buffer);
+          extractedText = pdfData.text.slice(0, 15000);
+        } else {
+          extractedText = fileContent.slice(0, 15000);
+        }
+      } catch (err) {
+        console.error("File parsing error:", err);
+        extractedText = "[Could not extract text from uploaded file]";
+      }
+    }
+
+    const displayContent = extractedText
+      ? `${content}\n\n[Attached ${attachment === "bank_statement" ? "Bank Statement" : "Credit Report"} - ${extractedText.length} chars extracted]`
+      : content;
+
+    await storage.createMessage({ userId, role: "user", content: displayContent, attachment: attachment || null });
 
     const history = await storage.getMessages(userId);
     const last10 = history.slice(-10).map(m => ({ role: m.role as "user" | "assistant", content: m.content }));
+
+    let fileContext = "";
+    if (extractedText) {
+      fileContext = `\n\nThe user has uploaded a ${attachment === "bank_statement" ? "bank statement" : "credit report"}. Here is the extracted text from the document:\n\n--- START OF DOCUMENT ---\n${extractedText}\n--- END OF DOCUMENT ---\n\nAnalyze this document thoroughly. Extract key financial data, identify patterns, and incorporate your findings into the fundability assessment.`;
+    }
 
     const systemPrompt = `You are the Start-Up Studio® AI, a digital underwriting expert.
 Evaluate the user's fundability based on their profile and the 3-phase system: Structure, Scale, Sequence.
@@ -192,7 +222,7 @@ User Profile:
 - Inquiries: ${user.inquiries || 0}
 - Derogatory Accounts: ${user.derogatoryAccounts || 0}
 - Has Credit Report: ${user.hasCreditReport ? "Yes" : "No"}
-- Has Bank Statement: ${user.hasBankStatement ? "Yes" : "No"}
+- Has Bank Statement: ${user.hasBankStatement ? "Yes" : "No"}${fileContext}
 
 Always structure your response with these sections:
 **Fundability Phase:** (Structure, Scale, or Sequence)
