@@ -66,7 +66,7 @@ export default function LandingPage() {
           </h1>
 
           <p className="text-center text-[#777] text-[14px] sm:text-[16px] leading-[1.7] sm:leading-[1.8] max-w-[520px] mb-8 sm:mb-12 px-4 sm:px-2">
-            We are an AI-powered mentorship platform that enables users to have personalized conversations with digital versions of the mentors they admire. By modeling their principles, decision-making frameworks, and communication style, we make trusted guidance accessible anytime, anywhere.
+            Engage with AI versions of influential mentors and gain their perspective in real time. Guidance, whenever you need it.
           </p>
 
           <form onSubmit={handleLogin} className="w-full max-w-[420px] mb-8 sm:mb-10 px-2 sm:px-0">
