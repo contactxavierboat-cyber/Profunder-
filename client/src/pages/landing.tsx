@@ -44,9 +44,33 @@ export default function LandingPage() {
 
   const [timeLeft, setTimeLeft] = useState(getTimeLeft);
 
+  const proofMessages = [
+    "$50K just funded",
+    "$100K just funded",
+    "Arielle just connected with Nae",
+    "$75K just funded",
+    "Marcus just connected with Jay",
+    "$200K just funded",
+    "Tanya just connected with Alex",
+    "$35K just funded",
+  ];
+  const [proofIndex, setProofIndex] = useState(0);
+  const [proofVisible, setProofVisible] = useState(true);
+
   useEffect(() => {
     const timer = setInterval(() => setTimeLeft(getTimeLeft()), 1000);
     return () => clearInterval(timer);
+  }, []);
+
+  useEffect(() => {
+    const cycle = setInterval(() => {
+      setProofVisible(false);
+      setTimeout(() => {
+        setProofIndex((i) => (i + 1) % proofMessages.length);
+        setProofVisible(true);
+      }, 600);
+    }, 3500);
+    return () => clearInterval(cycle);
   }, []);
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -62,6 +86,18 @@ export default function LandingPage() {
 
   return (
     <div className="min-h-screen bg-[#0D0D0D] text-white" style={{ fontFamily: "'Inter', sans-serif" }}>
+
+      <div
+        className="fixed bottom-6 left-6 z-50 flex items-center gap-2.5 px-4 py-2.5 rounded-xl bg-[#1A1A1A] border border-[#2A2A2A] shadow-lg shadow-black/40"
+        style={{
+          transition: "opacity 0.5s ease, transform 0.5s ease",
+          opacity: proofVisible ? 1 : 0,
+          transform: proofVisible ? "translateY(0)" : "translateY(8px)",
+        }}
+      >
+        <span className="w-2 h-2 rounded-full bg-[#E0E0E0] animate-pulse shrink-0"></span>
+        <span className="text-[12px] sm:text-[13px] text-[#ccc] font-medium whitespace-nowrap">{proofMessages[proofIndex]}</span>
+      </div>
 
       <div className="relative overflow-hidden">
         <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff10_1px,transparent_1px),linear-gradient(to_bottom,#ffffff10_1px,transparent_1px)] bg-[size:40px_40px]"></div>
