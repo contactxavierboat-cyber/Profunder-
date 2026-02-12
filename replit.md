@@ -1,10 +1,12 @@
 # MentXr®
 
 ## Overview
-A subscription-based AI mentorship platform ("Mentorship On Demand") that provides personalized conversations with digital versions of influential mentors. Features ChatGPT-style dark theme interface, session-based authentication, Stripe checkout ($50/month), OpenAI GPT-4o powered conversations, PDF document upload, admin panel, and subscription-based access control.
+A free AI mentorship platform ("Mentorship On Demand") that provides personalized conversations with digital versions of influential mentors. Features ChatGPT-style dark theme interface, session-based authentication, OpenAI GPT-4o powered conversations, PDF document upload, admin panel, and free membership access for all users.
 
 ## Recent Changes
-- 2026-02-12: Added mentor selection panel with 5 mentors (Grant Cardone, Warren Buffett, Gary Vaynerchuk, Oprah Winfrey, Sara Blakely)
+- 2026-02-12: Made memberships free for all users (no subscription required, all users default to active)
+- 2026-02-12: Added 19Keys (Jibrial Muhammad) as 6th mentor - Mindset & Financial Literacy
+- 2026-02-12: Added mentor selection panel with 6 mentors (Grant Cardone, Warren Buffett, Gary Vaynerchuk, Oprah Winfrey, Sara Blakely, 19Keys)
 - 2026-02-12: Each mentor has unique avatar, system prompt, specialty, tagline, and keyword detection
 - 2026-02-12: Users can explicitly select/switch/clear mentors via UI panel or type mentor name
 - 2026-02-12: Added /api/mentors endpoint for listing available mentors
@@ -49,7 +51,7 @@ A subscription-based AI mentorship platform ("Mentorship On Demand") that provid
 - Messages: userId, role (user/assistant), content, attachment type, mentor (nullable), timestamp
 
 ### Mentor System
-- 5 mentors: Grant Cardone, Warren Buffett, Gary Vaynerchuk, Oprah Winfrey, Sara Blakely
+- 6 mentors: Grant Cardone, Warren Buffett, Gary Vaynerchuk, Oprah Winfrey, Sara Blakely, 19Keys
 - Each has: unique avatar (PNG in client/src/assets/), system prompt, specialty, tagline, keyword detection
 - Backend: MENTOR_PROFILES in server/routes.ts, /api/mentors endpoint
 - Frontend: MENTOR_INFO in chat-interface.tsx, mentor selection panel with grid UI

@@ -1,6 +1,6 @@
 import { Link, useLocation } from "wouter";
 import { useAuth } from "@/lib/store";
-import { LayoutDashboard, CreditCard, Shield, LogOut, FileText, Users, BarChart3, Menu, X } from "lucide-react";
+import { LayoutDashboard, Shield, LogOut, FileText, Users, BarChart3, Menu, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
@@ -21,7 +21,6 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
     { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
     { href: "/dashboard/profile", label: "Credit Profile", icon: FileText },
     { href: "/dashboard/analysis", label: "Analysis", icon: BarChart3 },
-    { href: "/subscription", label: "Subscription", icon: CreditCard },
   ];
 
   return (

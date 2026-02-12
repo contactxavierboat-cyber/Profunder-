@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from "react";
 import { useAuth } from "@/lib/store";
 import { useLocation } from "wouter";
-import { Send, Plus, LogOut, Paperclip, Loader2, ArrowDown, Settings, FileText, X, Menu, Bot } from "lucide-react";
+import { Send, Plus, LogOut, Paperclip, Loader2, ArrowDown, FileText, X, Menu, Bot } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -10,6 +10,7 @@ import warrenBuffettAvatar from "@/assets/mentor-warren.png";
 import garyVeeAvatar from "@/assets/mentor-gary.png";
 import oprahWinfreyAvatar from "@/assets/mentor-oprah.png";
 import saraBlakelyAvatar from "@/assets/mentor-sara.png";
+import nineteenKeysAvatar from "@/assets/mentor-19keys.png";
 
 const MENTOR_INFO: Record<string, { name: string; avatar: string; tagline: string; specialty: string }> = {
   grant_cardone: { name: "Grant Cardone", avatar: grantCardoneAvatar, tagline: "10X Everything", specialty: "Sales & Real Estate" },
@@ -17,6 +18,7 @@ const MENTOR_INFO: Record<string, { name: string; avatar: string; tagline: strin
   gary_vee: { name: "Gary Vaynerchuk", avatar: garyVeeAvatar, tagline: "Hustle & Heart", specialty: "Marketing & Social Media" },
   oprah_winfrey: { name: "Oprah Winfrey", avatar: oprahWinfreyAvatar, tagline: "Live Your Best Life", specialty: "Leadership & Growth" },
   sara_blakely: { name: "Sara Blakely", avatar: saraBlakelyAvatar, tagline: "Fearless Innovation", specialty: "Entrepreneurship & Product" },
+  nineteen_keys: { name: "19Keys", avatar: nineteenKeysAvatar, tagline: "Unlock Your Potential", specialty: "Mindset & Financial Literacy" },
 };
 
 export default function DashboardPage() {
@@ -43,9 +45,6 @@ export default function DashboardPage() {
     if (!user) {
       setLocation("/");
       return;
-    }
-    if (user.subscriptionStatus !== "active" && user.role !== "admin") {
-      setLocation("/subscription");
     }
   }, [user, setLocation]);
 
@@ -159,13 +158,6 @@ export default function DashboardPage() {
         </div>
 
         <div className="p-3 border-t border-white/5 space-y-1">
-          <button
-            onClick={() => { setLocation("/subscription"); setSidebarOpen(false); }}
-            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-white/5 transition-colors text-sm text-white/60"
-          >
-            <Settings className="w-4 h-4" />
-            Subscription
-          </button>
           <button
             data-testid="button-logout"
             onClick={logout}
