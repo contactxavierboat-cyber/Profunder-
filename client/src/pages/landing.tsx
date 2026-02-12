@@ -1,25 +1,27 @@
 import { useState } from "react";
 import { useAuth } from "@/lib/store";
-import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card } from "@/components/ui/card";
-import { ArrowRight, Lock } from "lucide-react";
+import { Lock } from "lucide-react";
 
 export default function LandingPage() {
   const [email, setEmail] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const { login } = useAuth();
-  const [, setLocation] = useLocation();
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email) return;
-    login(email);
+    setIsLoading(true);
+    try {
+      await login(email);
+    } catch {
+      setIsLoading(false);
+    }
   };
 
   return (
     <div className="min-h-screen bg-black flex flex-col items-center justify-center relative overflow-hidden font-sans text-white p-4">
-      {/* Abstract Background Shapes */}
       <div className="absolute top-0 left-0 w-full h-full overflow-hidden z-0">
         <div className="absolute top-[-20%] right-[-10%] w-[600px] h-[600px] bg-primary/5 rounded-full blur-[100px]"></div>
         <div className="absolute bottom-[-20%] left-[-10%] w-[500px] h-[500px] bg-blue-500/5 rounded-full blur-[100px]"></div>
@@ -51,18 +53,22 @@ export default function LandingPage() {
             <div className="absolute -inset-0.5 bg-gradient-to-r from-primary/50 to-blue-600/50 rounded-lg blur opacity-30 group-hover:opacity-100 transition duration-1000"></div>
             <div className="relative flex gap-2">
               <Input 
+                data-testid="input-email"
                 type="email" 
                 placeholder="Enter your email" 
                 className="bg-black/80 border-white/10 h-12 text-lg focus-visible:ring-primary/50"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
+                disabled={isLoading}
               />
               <Button 
+                data-testid="button-join"
                 type="submit" 
                 className="h-12 px-8 bg-primary text-black hover:bg-primary/90 font-semibold text-lg"
+                disabled={isLoading}
               >
-                Join Now
+                {isLoading ? "..." : "Join Now"}
               </Button>
             </div>
           </div>

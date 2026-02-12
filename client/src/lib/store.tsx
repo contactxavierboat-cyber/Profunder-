@@ -1,18 +1,20 @@
-import { createContext, useContext, useState, useEffect, type ReactNode } from "react";
+import { createContext, useContext, useState, type ReactNode } from "react";
 import { type User, type Message } from "@shared/schema";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
+type SafeUser = Omit<User, "password">;
+
 interface AuthContextType {
-  user: User | null;
+  user: SafeUser | null;
   isLoading: boolean;
   login: (email: string) => Promise<void>;
   logout: () => void;
-  updateUser: (data: Partial<User>) => Promise<void>;
+  updateUser: (data: Record<string, any>) => Promise<void>;
   resetUsage: (userId: number) => Promise<void>;
   toggleSubscription: (userId: number) => Promise<void>;
-  allUsers: User[];
+  allUsers: SafeUser[];
   messages: Message[];
   sendMessage: (content: string, attachment?: "credit_report" | "bank_statement") => Promise<void>;
   clearChat: () => Promise<void>;
@@ -21,33 +23,50 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [userId, setUserId] = useState<number | null>(() => {
-    const saved = localStorage.getItem("studio_user_id");
-    return saved ? parseInt(saved) : null;
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(() => {
+    return localStorage.getItem("studio_logged_in") === "true";
   });
   
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const [, setLocation] = useLocation();
 
-  const { data: user, isLoading: userLoading } = useQuery<User>({
-    queryKey: ["/api/user", userId],
+  const { data: user, isLoading: userLoading } = useQuery<SafeUser>({
+    queryKey: ["/api/me"],
     queryFn: async () => {
-      const res = await fetch(`/api/user/${userId}`);
-      if (!res.ok) throw new Error("Failed to fetch user");
+      const res = await fetch("/api/me");
+      if (!res.ok) {
+        if (res.status === 401) {
+          setIsLoggedIn(false);
+          localStorage.removeItem("studio_logged_in");
+          throw new Error("Not authenticated");
+        }
+        throw new Error("Failed to fetch user");
+      }
       return res.json();
     },
-    enabled: !!userId,
+    enabled: isLoggedIn,
+    retry: false,
   });
 
   const { data: messages = [] } = useQuery<Message[]>({
-    queryKey: ["/api/chat", userId],
+    queryKey: ["/api/chat"],
     queryFn: async () => {
-      const res = await fetch(`/api/chat/${userId}`);
+      const res = await fetch("/api/chat");
       if (!res.ok) throw new Error("Failed to fetch messages");
       return res.json();
     },
-    enabled: !!userId,
+    enabled: isLoggedIn && !!user,
+  });
+
+  const { data: allUsers = [] } = useQuery<SafeUser[]>({
+    queryKey: ["/api/users"],
+    queryFn: async () => {
+      const res = await fetch("/api/users");
+      if (!res.ok) throw new Error("Failed to fetch users");
+      return res.json();
+    },
+    enabled: isLoggedIn && !!user && user.role === "admin",
   });
 
   const loginMutation = useMutation({
@@ -57,36 +76,43 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email }),
       });
+      if (!res.ok) throw new Error("Login failed");
       return res.json();
     },
     onSuccess: (data) => {
-      setUserId(data.id);
-      localStorage.setItem("studio_user_id", data.id.toString());
+      setIsLoggedIn(true);
+      localStorage.setItem("studio_logged_in", "true");
+      queryClient.invalidateQueries({ queryKey: ["/api/me"] });
       toast({ title: "Welcome back", description: `Logged in as ${data.email}` });
-      setLocation(data.role === 'admin' ? '/admin' : '/dashboard');
+      if (data.subscriptionStatus === "active" || data.role === "admin") {
+        setLocation(data.role === 'admin' ? '/admin' : '/dashboard');
+      } else {
+        setLocation('/subscription');
+      }
     }
   });
 
   const updateMutation = useMutation({
-    mutationFn: async (data: Partial<User>) => {
-      const res = await fetch(`/api/user/${userId}`, {
+    mutationFn: async (data: Record<string, any>) => {
+      const res = await fetch("/api/me", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
       });
+      if (!res.ok) throw new Error("Failed to update profile");
       return res.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/user", userId] });
+      queryClient.invalidateQueries({ queryKey: ["/api/me"] });
     }
   });
 
   const sendMutation = useMutation({
     mutationFn: async ({ content, attachment }: { content: string, attachment?: string }) => {
-      const res = await fetch(`/api/chat/${userId}`, {
+      const res = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ content, attachment }),
+        body: JSON.stringify({ content, attachment: attachment || null }),
       });
       if (!res.ok) {
         const err = await res.json();
@@ -95,8 +121,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return res.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/chat", userId] });
-      queryClient.invalidateQueries({ queryKey: ["/api/user", userId] });
+      queryClient.invalidateQueries({ queryKey: ["/api/chat"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/me"] });
     },
     onError: (error: Error) => {
       toast({ variant: "destructive", title: "Analysis Failed", description: error.message });
@@ -105,17 +131,52 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const clearMutation = useMutation({
     mutationFn: async () => {
-      await fetch(`/api/chat/${userId}`, { method: "DELETE" });
+      await fetch("/api/chat", { method: "DELETE" });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/chat", userId] });
+      queryClient.invalidateQueries({ queryKey: ["/api/chat"] });
     }
   });
 
-  const logout = () => {
-    setUserId(null);
-    localStorage.removeItem("studio_user_id");
+  const logout = async () => {
+    await fetch("/api/logout", { method: "POST" });
+    setIsLoggedIn(false);
+    localStorage.removeItem("studio_logged_in");
+    queryClient.clear();
     setLocation('/');
+  };
+
+  const resetUsage = async (id: number) => {
+    await fetch(`/api/admin/user/${id}`, { 
+      method: "PATCH", 
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ monthlyUsage: 0 })
+    });
+    queryClient.invalidateQueries({ queryKey: ["/api/users"] });
+    toast({ title: "Usage reset successfully" });
+  };
+
+  const toggleSubscription = async (id: number) => {
+    const target = allUsers.find(u => u.id === id);
+    if (!target) {
+      const res = await fetch("/api/me");
+      const me = await res.json();
+      const newStatus = me.subscriptionStatus === 'active' ? 'inactive' : 'active';
+      await fetch("/api/admin/user/" + id, { 
+        method: "PATCH", 
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ subscriptionStatus: newStatus })
+      });
+    } else {
+      const newStatus = target.subscriptionStatus === 'active' ? 'inactive' : 'active';
+      await fetch(`/api/admin/user/${id}`, { 
+        method: "PATCH", 
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ subscriptionStatus: newStatus })
+      });
+    }
+    queryClient.invalidateQueries({ queryKey: ["/api/users"] });
+    queryClient.invalidateQueries({ queryKey: ["/api/me"] });
   };
 
   return (
@@ -125,24 +186,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       login: loginMutation.mutateAsync,
       logout,
       updateUser: updateMutation.mutateAsync,
-      resetUsage: async (id) => {
-        await fetch(`/api/user/${id}`, { 
-          method: "PATCH", 
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ monthlyUsage: 0 })
-        });
-        queryClient.invalidateQueries({ queryKey: ["/api/user"] });
-      },
-      toggleSubscription: async (id) => {
-        const u = await (await fetch(`/api/user/${id}`)).json();
-        await fetch(`/api/user/${id}`, { 
-          method: "PATCH", 
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ subscriptionStatus: u.subscriptionStatus === 'active' ? 'inactive' : 'active' })
-        });
-        queryClient.invalidateQueries({ queryKey: ["/api/user"] });
-      },
-      allUsers: [], // Add fetch if admin list needed
+      resetUsage,
+      toggleSubscription,
+      allUsers,
       messages,
       sendMessage: (content, attachment) => sendMutation.mutateAsync({ content, attachment }),
       clearChat: clearMutation.mutateAsync
