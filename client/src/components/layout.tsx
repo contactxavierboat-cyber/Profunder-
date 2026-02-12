@@ -27,7 +27,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
       <aside className="w-64 border-r border-sidebar-border bg-sidebar flex flex-col fixed h-full z-10 hidden md:flex">
         <div className="p-6 border-b border-sidebar-border">
           <h1 className="font-sans font-bold text-xl tracking-tighter flex items-center gap-2">
-            <span className="w-8 h-8 bg-primary rounded-md flex items-center justify-center text-black font-mono">X</span>
+            <span className="w-8 h-8 bg-[#E0E0E0] rounded-md flex items-center justify-center text-[#0D0D0D] font-mono">X</span>
             Start-Up Studio®
           </h1>
           <p className="text-xs text-muted-foreground mt-1">Digital Underwriting Engine</p>
@@ -38,7 +38,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
             <Link key={item.href} href={item.href} className={cn(
               "flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors",
               location === item.href 
-                ? "bg-sidebar-accent text-primary" 
+                ? "bg-sidebar-accent text-white" 
                 : "text-muted-foreground hover:bg-sidebar-accent/50 hover:text-foreground"
             )}>
               <item.icon className="w-4 h-4" />

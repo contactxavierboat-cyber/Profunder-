@@ -138,7 +138,7 @@ export default function DashboardPage() {
             onClick={logout}
             className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-white/5 transition-colors text-sm text-white/60"
           >
-            <div className="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center text-[10px] font-bold text-primary">
+            <div className="w-6 h-6 rounded-full bg-[#1A1A1A] border border-[#333] flex items-center justify-center text-[10px] font-bold text-[#999]">
               {user.email.substring(0, 2).toUpperCase()}
             </div>
             <span className="flex-1 text-left truncate">{user.email}</span>
@@ -199,7 +199,7 @@ export default function DashboardPage() {
                   <div className="flex gap-4">
                     <div className="shrink-0 mt-0.5">
                       {m.role === "user" ? (
-                        <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-[11px] font-bold text-primary">
+                        <div className="w-8 h-8 rounded-full bg-[#1A1A1A] border border-[#333] flex items-center justify-center text-[11px] font-bold text-[#999]">
                           {user.email.substring(0, 2).toUpperCase()}
                         </div>
                       ) : (
@@ -231,9 +231,9 @@ export default function DashboardPage() {
                     <div className="flex-1">
                       <p className="text-sm font-semibold mb-1 text-white/90">Start-Up Studio®</p>
                       <div className="flex items-center gap-1.5 py-2">
-                        <span className="w-2 h-2 bg-primary/50 rounded-full animate-bounce"></span>
-                        <span className="w-2 h-2 bg-primary/50 rounded-full animate-bounce [animation-delay:0.15s]"></span>
-                        <span className="w-2 h-2 bg-primary/50 rounded-full animate-bounce [animation-delay:0.3s]"></span>
+                        <span className="w-2 h-2 bg-[#555] rounded-full animate-bounce"></span>
+                        <span className="w-2 h-2 bg-[#555] rounded-full animate-bounce [animation-delay:0.15s]"></span>
+                        <span className="w-2 h-2 bg-[#555] rounded-full animate-bounce [animation-delay:0.3s]"></span>
                       </div>
                     </div>
                   </div>
@@ -261,7 +261,7 @@ export default function DashboardPage() {
             {attachedFile && (
               <div className="flex items-center gap-2 mb-2 px-1">
                 <div className="flex items-center gap-2 bg-[#1A1A1A] border border-white/10 rounded-lg px-3 py-1.5 text-sm text-white/70">
-                  <FileText className="w-4 h-4 text-primary shrink-0" />
+                  <FileText className="w-4 h-4 text-[#888] shrink-0" />
                   <span className="truncate max-w-[200px]">{attachedFile.name}</span>
                   <button
                     onClick={() => setAttachedFile(null)}
@@ -318,7 +318,7 @@ export default function DashboardPage() {
                   className={cn(
                     "w-8 h-8 rounded-full flex items-center justify-center transition-colors",
                     (input.trim() || attachedFile) && !isLoading
-                      ? "bg-primary text-black hover:bg-primary/90"
+                      ? "bg-[#E0E0E0] text-[#0D0D0D] hover:bg-white"
                       : "bg-white/10 text-white/20 cursor-not-allowed"
                   )}
                 >
