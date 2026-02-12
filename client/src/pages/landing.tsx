@@ -65,7 +65,7 @@ export default function LandingPage() {
             <span className="text-[12px] font-semibold tracking-[0.18em] text-white/90 uppercase">NOW AVAILABLE</span>
           </div>
 
-          <h1 className="text-[42px] md:text-[52px] font-bold tracking-[-0.02em] text-center leading-[1.1] mb-5" style={{ fontFamily: "'Inter', sans-serif" }}>
+          <h1 className="text-[42px] md:text-[52px] font-normal tracking-[-0.02em] text-center leading-[1.1] mb-5" style={{ fontFamily: "'Inter', sans-serif" }}>
             "Digital Underwriting Engine"
           </h1>
 
