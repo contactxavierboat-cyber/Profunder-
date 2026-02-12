@@ -65,7 +65,7 @@ export default function LandingPage() {
             <span className="text-[13px] font-semibold tracking-[0.12em] text-white/90 uppercase">NOW AVAILABLE</span>
           </div>
 
-          <h1 className="text-[48px] md:text-[64px] font-normal tracking-[-0.03em] text-center leading-[1.05] mb-6 text-[#e0e0e0]">
+          <h1 className="text-[36px] md:text-[46px] font-normal tracking-[-0.03em] text-center leading-[1.05] mb-6 text-[#e0e0e0]">
             "Digital Underwriting Engine"
           </h1>
 
