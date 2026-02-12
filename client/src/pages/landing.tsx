@@ -62,7 +62,7 @@ export default function LandingPage() {
           </div>
 
           <h1 className="text-[28px] sm:text-[36px] md:text-[46px] font-normal tracking-[-0.03em] text-center leading-[1.05] mb-4 sm:mb-6 text-[#e0e0e0] px-2">
-            "Digital Underwriting Engine"
+            "Mentorship, On Demand"
           </h1>
 
           <p className="text-center text-[#777] text-[14px] sm:text-[16px] leading-[1.7] sm:leading-[1.8] max-w-[460px] mb-8 sm:mb-12 px-2">

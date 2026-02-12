@@ -45,7 +45,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
               <span className="w-7 h-7 sm:w-8 sm:h-8 bg-[#E0E0E0] rounded-md flex items-center justify-center text-[#0D0D0D] font-mono text-sm sm:text-base">X</span>
               MentXr®
             </h1>
-            <p className="text-[10px] sm:text-xs text-muted-foreground mt-1">Digital Underwriting Engine</p>
+            <p className="text-[10px] sm:text-xs text-muted-foreground mt-1">Mentorship, On Demand</p>
           </div>
           <button
             className="md:hidden w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white/5"

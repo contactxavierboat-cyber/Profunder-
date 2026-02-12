@@ -121,7 +121,7 @@ export default function SubscriptionPage() {
           <p className="text-[#777] text-[13px] sm:text-[15px] text-center leading-[1.7] max-w-[380px] px-2">
             {isActive
               ? "Your membership is active. Manage your billing below."
-              : "Unlock the full power of the Digital Underwriting Engine."}
+              : "Unlock the full power of MentXr\u00ae."}
           </p>
         </div>
 
