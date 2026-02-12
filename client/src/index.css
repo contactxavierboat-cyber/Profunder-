@@ -81,13 +81,14 @@
   .chat-report {
     line-height: 1.65;
     padding: 1rem 1.25rem;
+    color: rgba(255, 255, 255, 0.85);
   }
 
-  .chat-report > :first-child {
-    margin-top: 0;
+  .chat-report > div:first-child > .w-full {
+    display: none;
   }
 
-  .chat-report > :last-child {
-    margin-bottom: 0;
+  .chat-report > div:last-child > .w-full:last-child {
+    display: none;
   }
 }
