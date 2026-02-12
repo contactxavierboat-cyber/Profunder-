@@ -56,12 +56,17 @@ export default function LandingPage() {
             className="w-[52px] h-[52px] sm:w-[64px] sm:h-[64px] rounded-[14px] sm:rounded-[16px] mb-6 sm:mb-8"
           />
 
+          <div className="flex items-center gap-2 sm:gap-2.5 px-4 sm:px-5 py-1.5 sm:py-2 rounded-full border border-[#333] bg-[#181818] mb-8 sm:mb-12">
+            <span className="w-[7px] h-[7px] sm:w-[8px] sm:h-[8px] rounded-full bg-[#888] animate-ping"></span>
+            <span className="text-[11px] sm:text-[13px] font-semibold tracking-[0.12em] text-white/90 uppercase">NOW AVAILABLE</span>
+          </div>
+
           <h1 className="text-[28px] sm:text-[36px] md:text-[46px] font-normal tracking-[-0.03em] text-center leading-[1.05] mb-4 sm:mb-6 text-[#e0e0e0] px-2">
             Mentorship, On Demand
           </h1>
 
           <p className="text-center text-[#777] text-[14px] sm:text-[16px] leading-[1.7] sm:leading-[1.8] max-w-[520px] mb-8 sm:mb-12 px-4 sm:px-2">
-            We are an AI-powered mentorship platform that enables users to have personalized conversations with digital versions of the mentors they admire. By modeling their principles, decision-making frameworks, and communication style, we make trusted guidance accessible anytime, anywhere.
+            Engage with AI versions of influential mentors, modeled after their thinking and principles. Ask questions, explore decisions, and gain perspective as if speaking with them directly. Guidance becomes personal and available whenever you need it.
           </p>
 
           <form onSubmit={handleLogin} className="w-full max-w-[420px] mb-8 sm:mb-10 px-2 sm:px-0">
