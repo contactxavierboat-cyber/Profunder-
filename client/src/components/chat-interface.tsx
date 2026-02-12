@@ -7,20 +7,20 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Send, User, Bot, Paperclip, Trash2, Download, FileText, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
-import { type Message } from "@/lib/types";
 
 export function ChatInterface() {
-  const { user, updateUser } = useAuth();
+  const { user, messages, sendMessage, clearChat } = useAuth();
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
 
-  const messages = user?.chatHistory || [];
-
   useEffect(() => {
     if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+      const scrollContainer = scrollRef.current.querySelector('[data-radix-scroll-area-viewport]');
+      if (scrollContainer) {
+        scrollContainer.scrollTop = scrollContainer.scrollHeight;
+      }
     }
   }, [messages]);
 
@@ -28,63 +28,15 @@ export function ChatInterface() {
     if (!user) return;
     if (!input.trim() && !attachment) return;
 
-    // 1. Check subscription
-    if (user.subscriptionStatus !== "active") {
-      toast({
-        variant: "destructive",
-        title: "Subscription Required",
-        description: "Please activate your subscription to use the AI Analysis.",
-      });
-      return;
-    }
-
-    // 2. Check usage
-    if (user.monthlyUsage >= user.maxUsage) {
-      toast({
-        variant: "destructive",
-        title: "Limit Reached",
-        description: "You have reached your monthly analysis limit.",
-      });
-      return;
-    }
-
-    const userMessage: Message = {
-      id: Date.now().toString(),
-      role: "user",
-      content: input,
-      timestamp: new Date().toISOString(),
-      attachment
-    };
-
-    const newHistory = [...messages, userMessage];
-    updateUser({ 
-      chatHistory: newHistory,
-      monthlyUsage: user.monthlyUsage + 1 
-    });
-    setInput("");
     setIsLoading(true);
-
-    // Simulate AI response
-    setTimeout(() => {
-      const assistantMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        role: "assistant",
-        content: attachment 
-          ? `I've received your ${attachment.replace('_', ' ')}. Based on the data, your fundability looks promising. I recommend focusing on the Sequence phase next to optimize your capital stack.`
-          : `I've analyzed your request: "${input}". Based on your current score of ${user.creditScoreRange || 'unknown'}, you should prioritize reducing your total balances to under 30% utilization.`,
-        timestamp: new Date().toISOString()
-      };
-      
-      updateUser({ 
-        chatHistory: [...newHistory, assistantMessage] 
-      });
+    try {
+      await sendMessage(input, attachment);
+      setInput("");
+    } catch (e) {
+      // Error handled in store
+    } finally {
       setIsLoading(false);
-    }, 1500);
-  };
-
-  const clearChat = () => {
-    updateUser({ chatHistory: [] });
-    toast({ title: "New Analysis Started" });
+    }
   };
 
   const downloadSummary = () => {
@@ -94,7 +46,6 @@ export function ChatInterface() {
       return;
     }
     
-    // In a real app, this would generate a PDF. Here we'll simulate a download.
     const blob = new Blob([lastAssistantMessage.content], { type: 'text/plain' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -115,7 +66,7 @@ export function ChatInterface() {
           </div>
         </div>
         <div className="flex gap-2">
-          <Button variant="ghost" size="sm" onClick={clearChat} className="h-8 text-xs hover:bg-white/5">
+          <Button variant="ghost" size="sm" onClick={() => clearChat()} className="h-8 text-xs hover:bg-white/5">
             <Trash2 className="w-3.5 h-3.5 mr-1" /> New
           </Button>
           <Button variant="ghost" size="sm" onClick={downloadSummary} className="h-8 text-xs hover:bg-white/5">
@@ -143,7 +94,7 @@ export function ChatInterface() {
               </div>
               <div className="space-y-1">
                 <div className={cn(
-                  "p-3 rounded-2xl text-sm leading-relaxed",
+                  "p-3 rounded-2xl text-sm leading-relaxed whitespace-pre-wrap",
                   m.role === 'user' ? "bg-primary text-black font-medium" : "bg-white/5 border border-white/10"
                 )}>
                   {m.attachment && (
@@ -154,7 +105,7 @@ export function ChatInterface() {
                   )}
                   {m.content}
                 </div>
-                <p className="text-[10px] text-muted-foreground font-mono">
+                <p className="text-[10px] text-muted-foreground font-mono text-right">
                   {new Date(m.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                 </p>
               </div>
@@ -181,8 +132,9 @@ export function ChatInterface() {
             placeholder="Type your question..." 
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && handleSend()}
+            onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && handleSend()}
             className="pr-10 bg-white/5 border-white/10 h-11"
+            disabled={isLoading}
           />
           <div className="absolute right-2 top-1/2 -translate-y-1/2 flex gap-1">
             <Button 
@@ -191,7 +143,7 @@ export function ChatInterface() {
               className="w-8 h-8 rounded-full hover:bg-white/10"
               onClick={() => handleSend("credit_report")}
               title="Attach Credit Report"
-              disabled={!user?.hasCreditReport}
+              disabled={isLoading || !user?.hasCreditReport}
             >
               <Paperclip className="w-4 h-4" />
             </Button>

@@ -1,100 +1,152 @@
 import { createContext, useContext, useState, useEffect, type ReactNode } from "react";
-import { type UserProfile, MOCK_USERS } from "./types";
+import { type User, type Message } from "@shared/schema";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 interface AuthContextType {
-  user: UserProfile | null;
-  login: (email: string) => void;
+  user: User | null;
+  isLoading: boolean;
+  login: (email: string) => Promise<void>;
   logout: () => void;
-  updateUser: (data: Partial<UserProfile>) => void;
-  resetUsage: (userId: string) => void;
-  toggleSubscription: (userId: string) => void;
-  allUsers: UserProfile[];
+  updateUser: (data: Partial<User>) => Promise<void>;
+  resetUsage: (userId: number) => Promise<void>;
+  toggleSubscription: (userId: number) => Promise<void>;
+  allUsers: User[];
+  messages: Message[];
+  sendMessage: (content: string, attachment?: "credit_report" | "bank_statement") => Promise<void>;
+  clearChat: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<UserProfile | null>(null);
-  const [allUsers, setAllUsers] = useState<UserProfile[]>(MOCK_USERS);
+  const [userId, setUserId] = useState<number | null>(() => {
+    const saved = localStorage.getItem("studio_user_id");
+    return saved ? parseInt(saved) : null;
+  });
+  
+  const queryClient = useQueryClient();
   const { toast } = useToast();
   const [, setLocation] = useLocation();
 
-  const login = (email: string) => {
-    // Simple mock login
-    const foundUser = allUsers.find(u => u.email.toLowerCase() === email.toLowerCase());
-    
-    if (foundUser) {
-      setUser(foundUser);
-      toast({
-        title: "Welcome back",
-        description: `Logged in as ${foundUser.email}`,
+  const { data: user, isLoading: userLoading } = useQuery<User>({
+    queryKey: ["/api/user", userId],
+    queryFn: async () => {
+      const res = await fetch(`/api/user/${userId}`);
+      if (!res.ok) throw new Error("Failed to fetch user");
+      return res.json();
+    },
+    enabled: !!userId,
+  });
+
+  const { data: messages = [] } = useQuery<Message[]>({
+    queryKey: ["/api/chat", userId],
+    queryFn: async () => {
+      const res = await fetch(`/api/chat/${userId}`);
+      if (!res.ok) throw new Error("Failed to fetch messages");
+      return res.json();
+    },
+    enabled: !!userId,
+  });
+
+  const loginMutation = useMutation({
+    mutationFn: async (email: string) => {
+      const res = await fetch("/api/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
       });
-      setLocation(foundUser.role === 'admin' ? '/admin' : '/dashboard');
-    } else {
-      // Create new user for demo purposes if not found in mock list
-      const newUser: UserProfile = {
-        id: `user-${Date.now()}`,
-        email,
-        role: "user",
-        subscriptionStatus: "inactive", // Default to inactive until they "pay"
-        monthlyUsage: 0,
-        maxUsage: 5,
-        createdAt: new Date().toISOString(),
-        chatHistory: []
-      };
-      setAllUsers([...allUsers, newUser]);
-      setUser(newUser);
-      toast({
-        title: "Account created",
-        description: "Please set up your subscription.",
-      });
-      setLocation('/subscription');
+      return res.json();
+    },
+    onSuccess: (data) => {
+      setUserId(data.id);
+      localStorage.setItem("studio_user_id", data.id.toString());
+      toast({ title: "Welcome back", description: `Logged in as ${data.email}` });
+      setLocation(data.role === 'admin' ? '/admin' : '/dashboard');
     }
-  };
+  });
+
+  const updateMutation = useMutation({
+    mutationFn: async (data: Partial<User>) => {
+      const res = await fetch(`/api/user/${userId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/user", userId] });
+    }
+  });
+
+  const sendMutation = useMutation({
+    mutationFn: async ({ content, attachment }: { content: string, attachment?: string }) => {
+      const res = await fetch(`/api/chat/${userId}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ content, attachment }),
+      });
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.error || "Failed to send message");
+      }
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/chat", userId] });
+      queryClient.invalidateQueries({ queryKey: ["/api/user", userId] });
+    },
+    onError: (error: Error) => {
+      toast({ variant: "destructive", title: "Analysis Failed", description: error.message });
+    }
+  });
+
+  const clearMutation = useMutation({
+    mutationFn: async () => {
+      await fetch(`/api/chat/${userId}`, { method: "DELETE" });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/chat", userId] });
+    }
+  });
 
   const logout = () => {
-    setUser(null);
+    setUserId(null);
+    localStorage.removeItem("studio_user_id");
     setLocation('/');
-    toast({
-      title: "Logged out",
-    });
-  };
-
-  const updateUser = (data: Partial<UserProfile>) => {
-    if (!user) return;
-    const updatedUser = { ...user, ...data };
-    setUser(updatedUser);
-    setAllUsers(prev => prev.map(u => u.id === user.id ? updatedUser : u));
-  };
-
-  const resetUsage = (userId: string) => {
-    setAllUsers(prev => prev.map(u => {
-      if (u.id === userId) {
-        return { ...u, monthlyUsage: 0 };
-      }
-      return u;
-    }));
-    toast({ title: "Usage reset successfully" });
-  };
-
-  const toggleSubscription = (userId: string) => {
-    setAllUsers(prev => prev.map(u => {
-      if (u.id === userId) {
-        const newStatus = u.subscriptionStatus === 'active' ? 'inactive' : 'active';
-        // If current user is the one being toggled, update local state too
-        if (user && user.id === userId) {
-          setUser({ ...user, subscriptionStatus: newStatus });
-        }
-        return { ...u, subscriptionStatus: newStatus };
-      }
-      return u;
-    }));
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, updateUser, resetUsage, toggleSubscription, allUsers }}>
+    <AuthContext.Provider value={{ 
+      user: user || null, 
+      isLoading: userLoading,
+      login: loginMutation.mutateAsync,
+      logout,
+      updateUser: updateMutation.mutateAsync,
+      resetUsage: async (id) => {
+        await fetch(`/api/user/${id}`, { 
+          method: "PATCH", 
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ monthlyUsage: 0 })
+        });
+        queryClient.invalidateQueries({ queryKey: ["/api/user"] });
+      },
+      toggleSubscription: async (id) => {
+        const u = await (await fetch(`/api/user/${id}`)).json();
+        await fetch(`/api/user/${id}`, { 
+          method: "PATCH", 
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ subscriptionStatus: u.subscriptionStatus === 'active' ? 'inactive' : 'active' })
+        });
+        queryClient.invalidateQueries({ queryKey: ["/api/user"] });
+      },
+      allUsers: [], // Add fetch if admin list needed
+      messages,
+      sendMessage: (content, attachment) => sendMutation.mutateAsync({ content, attachment }),
+      clearChat: clearMutation.mutateAsync
+    }}>
       {children}
     </AuthContext.Provider>
   );
