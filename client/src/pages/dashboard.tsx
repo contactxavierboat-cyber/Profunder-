@@ -4,6 +4,7 @@ import { useLocation } from "wouter";
 import { DashboardLayout } from "@/components/layout";
 import { CreditProfileForm } from "@/components/profile-form";
 import { FileUpload } from "@/components/file-upload";
+import { ChatInterface } from "@/components/chat-interface";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
@@ -142,6 +143,8 @@ export default function DashboardPage() {
 
           {/* Sidebar Column: Status/Chat */}
           <div className="space-y-6">
+            <ChatInterface />
+            
             <Card className="glass-panel bg-primary/5 border-primary/20">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">

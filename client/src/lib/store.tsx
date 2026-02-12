@@ -41,7 +41,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         subscriptionStatus: "inactive", // Default to inactive until they "pay"
         monthlyUsage: 0,
         maxUsage: 5,
-        createdAt: new Date().toISOString()
+        createdAt: new Date().toISOString(),
+        chatHistory: []
       };
       setAllUsers([...allUsers, newUser]);
       setUser(newUser);
