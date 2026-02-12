@@ -188,10 +188,41 @@ export async function registerRoutes(
         if (isPdf) {
           const buffer = Buffer.from(fileContent, "base64");
           extractedText = await new Promise<string>((resolve, reject) => {
-            const pdfParser = new PDFParser(null, true);
+            const pdfParser = new PDFParser(null, false);
             pdfParser.on("pdfParser_dataReady", (pdfData: any) => {
-              const text = pdfParser.getRawTextContent();
-              resolve(text.slice(0, 15000));
+              try {
+                const pages = pdfData?.Pages || [];
+                const lines: string[] = [];
+                for (const page of pages) {
+                  const texts = page.Texts || [];
+                  const lineMap = new Map<number, { x: number; text: string }[]>();
+                  for (const t of texts) {
+                    const y = Math.round((t.y || 0) * 100);
+                    const x = t.x || 0;
+                    const runs = t.R || [];
+                    const decoded = runs.map((r: any) => decodeURIComponent(r.T || "")).join("");
+                    if (decoded.trim()) {
+                      if (!lineMap.has(y)) lineMap.set(y, []);
+                      lineMap.get(y)!.push({ x, text: decoded });
+                    }
+                  }
+                  const sortedYs = [...lineMap.keys()].sort((a, b) => a - b);
+                  for (const y of sortedYs) {
+                    const items = lineMap.get(y)!.sort((a, b) => a.x - b.x);
+                    const lineText = items.map(i => i.text).join("  ");
+                    if (lineText.trim()) lines.push(lineText.trim());
+                  }
+                  lines.push("---");
+                }
+                const fullText = lines.join("\n");
+                console.log(`PDF extracted ${fullText.length} chars from ${pages.length} pages`);
+                resolve(fullText.slice(0, 30000));
+              } catch (e) {
+                const rawText = pdfParser.getRawTextContent();
+                const decoded = decodeURIComponent(rawText);
+                console.log(`PDF fallback extracted ${decoded.length} chars`);
+                resolve(decoded.slice(0, 30000));
+              }
             });
             pdfParser.on("pdfParser_dataError", (errData: any) => {
               reject(new Error(errData.parserError || "PDF parse failed"));
@@ -199,7 +230,7 @@ export async function registerRoutes(
             pdfParser.parseBuffer(buffer);
           });
         } else {
-          extractedText = fileContent.slice(0, 15000);
+          extractedText = fileContent.slice(0, 30000);
         }
       } catch (err) {
         console.error("File parsing error:", err);
