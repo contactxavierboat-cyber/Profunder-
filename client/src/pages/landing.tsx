@@ -130,9 +130,37 @@ export default function LandingPage() {
             We are an AI-powered mentorship platform that lets users converse with digital versions of the mentors they admire, delivering trusted guidance anytime, anywhere.
           </p>
 
-          <div className="flex items-center gap-2 text-[11px] sm:text-[12px] text-[#666] tracking-[0.15em] uppercase">
-            <CalendarDays className="w-[13px] h-[13px] sm:w-[14px] sm:h-[14px]" />
-            <span className="font-mono">{timeLeft.days}d {timeLeft.hours}h {timeLeft.minutes}m {timeLeft.seconds}s</span> UNTIL FULL RELEASE
+          <div className="flex flex-col items-center gap-2">
+            <div className="flex items-center gap-1.5 sm:gap-2">
+              <div className="flex flex-col items-center">
+                <div className="bg-[#1A1A1A] border border-[#2A2A2A] rounded-md w-[36px] h-[36px] sm:w-[42px] sm:h-[42px] flex items-center justify-center">
+                  <span className="font-mono text-[14px] sm:text-[17px] font-semibold text-white tabular-nums">{String(timeLeft.days).padStart(2, '0')}</span>
+                </div>
+                <span className="text-[7px] sm:text-[8px] text-[#555] tracking-[0.12em] uppercase mt-1">Days</span>
+              </div>
+              <span className="text-[#444] text-[14px] sm:text-[17px] font-mono -mt-3">:</span>
+              <div className="flex flex-col items-center">
+                <div className="bg-[#1A1A1A] border border-[#2A2A2A] rounded-md w-[36px] h-[36px] sm:w-[42px] sm:h-[42px] flex items-center justify-center">
+                  <span className="font-mono text-[14px] sm:text-[17px] font-semibold text-white tabular-nums">{String(timeLeft.hours).padStart(2, '0')}</span>
+                </div>
+                <span className="text-[7px] sm:text-[8px] text-[#555] tracking-[0.12em] uppercase mt-1">Hrs</span>
+              </div>
+              <span className="text-[#444] text-[14px] sm:text-[17px] font-mono -mt-3">:</span>
+              <div className="flex flex-col items-center">
+                <div className="bg-[#1A1A1A] border border-[#2A2A2A] rounded-md w-[36px] h-[36px] sm:w-[42px] sm:h-[42px] flex items-center justify-center">
+                  <span className="font-mono text-[14px] sm:text-[17px] font-semibold text-white tabular-nums">{String(timeLeft.minutes).padStart(2, '0')}</span>
+                </div>
+                <span className="text-[7px] sm:text-[8px] text-[#555] tracking-[0.12em] uppercase mt-1">Min</span>
+              </div>
+              <span className="text-[#444] text-[14px] sm:text-[17px] font-mono -mt-3">:</span>
+              <div className="flex flex-col items-center">
+                <div className="bg-[#1A1A1A] border border-[#2A2A2A] rounded-md w-[36px] h-[36px] sm:w-[42px] sm:h-[42px] flex items-center justify-center">
+                  <span className="font-mono text-[14px] sm:text-[17px] font-semibold text-white tabular-nums">{String(timeLeft.seconds).padStart(2, '0')}</span>
+                </div>
+                <span className="text-[7px] sm:text-[8px] text-[#555] tracking-[0.12em] uppercase mt-1">Sec</span>
+              </div>
+            </div>
+            <p className="text-[8px] sm:text-[9px] text-[#555] tracking-[0.15em] uppercase">Until Full Release</p>
           </div>
         </div>
       </div>
