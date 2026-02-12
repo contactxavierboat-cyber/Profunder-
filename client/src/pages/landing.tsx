@@ -145,7 +145,7 @@ export default function LandingPage() {
 
       <div className="px-4 sm:px-6 py-16 sm:py-24">
         <div className="max-w-[560px] mx-auto">
-          <h2 className="text-[26px] sm:text-[32px] md:text-[36px] font-bold text-center mb-3 tracking-[-0.01em]">Frequently asked questions</h2>
+          <h2 className="text-[26px] sm:text-[32px] md:text-[36px] font-normal text-center mb-3 tracking-[-0.03em] text-[#e0e0e0]">Frequently asked questions</h2>
           <p className="text-center text-[#666] text-[13px] sm:text-[14px] mb-8 sm:mb-12 max-w-[420px] mx-auto leading-[1.6]">
             Everything you need to know about MentXr. Find answers to the most common questions below.
           </p>
