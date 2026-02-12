@@ -151,19 +151,17 @@ export function ChatInterface() {
           {messages.map((m) => {
             const mentorData = m.role === 'assistant' && m.mentor ? MENTOR_INFO[m.mentor] : null;
             return (
-              <div key={m.id} className={cn("flex gap-3 max-w-[90%]", m.role === 'user' ? "ml-auto flex-row-reverse" : "")}>
+              <div key={m.id} className={cn("flex gap-3 max-w-[90%] items-start", m.role === 'user' ? "ml-auto flex-row-reverse" : "")}>
                 {m.role === 'user' ? (
                   <div className="w-8 h-8 rounded-full flex items-center justify-center shrink-0 border bg-[#1A1A1A] border-[#333]">
                     <User className="w-4 h-4 text-[#999]" />
                   </div>
                 ) : mentorData ? (
-                  <div className="w-9 h-9 rounded-full shrink-0 overflow-hidden border-2 border-[#555]">
-                    <img
-                      src={mentorData.avatar}
-                      alt={mentorData.name}
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
+                  <img
+                    src={mentorData.avatar}
+                    alt={mentorData.name}
+                    className="w-10 h-10 min-w-[40px] min-h-[40px] rounded-full object-cover shrink-0 border-2 border-[#555] mt-0.5"
+                  />
                 ) : (
                   <div className="w-8 h-8 rounded-full flex items-center justify-center shrink-0 border bg-[#1A1A1A] border-[#333]">
                     <Bot className="w-4 h-4 text-[#999]" />
