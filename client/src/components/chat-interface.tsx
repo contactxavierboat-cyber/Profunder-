@@ -157,11 +157,13 @@ export function ChatInterface() {
                     <User className="w-4 h-4 text-[#999]" />
                   </div>
                 ) : mentorData ? (
-                  <img
-                    src={mentorData.avatar}
-                    alt={mentorData.name}
-                    className="w-8 h-8 rounded-full object-cover shrink-0 border border-[#444]"
-                  />
+                  <div className="w-9 h-9 rounded-full shrink-0 overflow-hidden border-2 border-[#555]">
+                    <img
+                      src={mentorData.avatar}
+                      alt={mentorData.name}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
                 ) : (
                   <div className="w-8 h-8 rounded-full flex items-center justify-center shrink-0 border bg-[#1A1A1A] border-[#333]">
                     <Bot className="w-4 h-4 text-[#999]" />
