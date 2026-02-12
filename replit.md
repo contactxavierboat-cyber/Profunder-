@@ -1,9 +1,13 @@
 # MentXr®
 
 ## Overview
-A subscription-based SaaS web app (formerly Start-Up Studio®, now MentXr®) that evaluates users' credit profiles and determines fundability using a 3-phase system (Structure, Scale, Sequence). Features secure authentication, subscription management, a member dashboard with credit profile inputs, document uploads, an AI-powered chat analysis interface using OpenAI, and an admin panel for user management.
+A subscription-based AI mentorship platform ("Mentorship On Demand") that provides personalized conversations with digital versions of influential mentors. Features ChatGPT-style dark theme interface, session-based authentication, Stripe checkout ($50/month), OpenAI GPT-4o powered conversations, PDF document upload, admin panel, and subscription-based access control.
 
 ## Recent Changes
+- 2026-02-12: Added mentor selection panel with 5 mentors (Grant Cardone, Warren Buffett, Gary Vaynerchuk, Oprah Winfrey, Sara Blakely)
+- 2026-02-12: Each mentor has unique avatar, system prompt, specialty, tagline, and keyword detection
+- 2026-02-12: Users can explicitly select/switch/clear mentors via UI panel or type mentor name
+- 2026-02-12: Added /api/mentors endpoint for listing available mentors
 - 2026-02-12: Graduated from visual prototype to full-stack working app with PostgreSQL + Drizzle ORM
 - 2026-02-12: Implemented OpenAI AI chat integration via Replit AI Integrations (server-side only)
 - 2026-02-12: Added admin panel with user management (toggle subscriptions, reset usage)
@@ -42,7 +46,11 @@ A subscription-based SaaS web app (formerly Start-Up Studio®, now MentXr®) tha
 
 ### Data Model
 - Users: email, password, role, subscriptionStatus, monthlyUsage, maxUsage, credit profile fields, document flags
-- Messages: userId, role (user/assistant), content, attachment type, timestamp
+- Messages: userId, role (user/assistant), content, attachment type, mentor (nullable), timestamp
 
-### AI System Prompt Structure
-Returns: Fundability Phase, Index Score (0-100), Key Findings, Phase-Based Plan, Timeline Estimate, Funding Multiplier, Funding Status Snapshot, Next Move
+### Mentor System
+- 5 mentors: Grant Cardone, Warren Buffett, Gary Vaynerchuk, Oprah Winfrey, Sara Blakely
+- Each has: unique avatar (PNG in client/src/assets/), system prompt, specialty, tagline, keyword detection
+- Backend: MENTOR_PROFILES in server/routes.ts, /api/mentors endpoint
+- Frontend: MENTOR_INFO in chat-interface.tsx, mentor selection panel with grid UI
+- Priority: explicit UI selection > keyword detection > conversation persistence > default MentXr® AI
