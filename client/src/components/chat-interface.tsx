@@ -7,11 +7,12 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Send, User, Bot, Paperclip, Trash2, Download, FileText, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
+import grantCardoneAvatar from "@/assets/mentor-grant-cardone.png";
 
 const MENTOR_INFO: Record<string, { name: string; avatar: string }> = {
   grant_cardone: {
     name: "Grant Cardone",
-    avatar: "/images/mentor-grant-cardone.png",
+    avatar: grantCardoneAvatar,
   },
 };
 
