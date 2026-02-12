@@ -57,19 +57,19 @@ export default function LandingPage() {
           <img
             src="/logo.png"
             alt="X+"
-            className="w-[60px] h-[60px] rounded-[14px] mb-10"
+            className="w-[64px] h-[64px] rounded-[16px] mb-8"
           />
 
-          <div className="flex items-center gap-2 mb-12">
-            <span className="w-[7px] h-[7px] rounded-full bg-[#CCFF00]"></span>
-            <span className="text-[12px] font-semibold tracking-[0.18em] text-white/90 uppercase">NOW AVAILABLE</span>
+          <div className="flex items-center gap-2.5 px-5 py-2 rounded-full border border-[#333] bg-[#181818] mb-12">
+            <span className="w-[8px] h-[8px] rounded-full bg-[#888]"></span>
+            <span className="text-[13px] font-semibold tracking-[0.12em] text-white/90 uppercase">NOW AVAILABLE</span>
           </div>
 
-          <h1 className="text-[42px] md:text-[52px] font-normal tracking-[-0.02em] text-center leading-[1.1] mb-5" style={{ fontFamily: "'Inter', sans-serif" }}>
+          <h1 className="text-[48px] md:text-[64px] font-normal tracking-[-0.03em] text-center leading-[1.05] mb-6 text-[#e0e0e0]">
             "Digital Underwriting Engine"
           </h1>
 
-          <p className="text-center text-[#8A8A8A] text-[15px] leading-[1.7] max-w-[420px] mb-10">
+          <p className="text-center text-[#777] text-[16px] leading-[1.8] max-w-[460px] mb-12">
             Upload your <span className="text-white font-semibold">credit profile</span> and receive a verified Fundability
             {"\n"}Score calculated using real bank-level underwriting logic.
           </p>
