@@ -1,8 +1,8 @@
 import { useAuth } from "@/lib/store";
-import { useLocation } from "wouter";
-import { Check, ShieldCheck, CreditCard } from "lucide-react";
+import { useLocation, useSearch } from "wouter";
+import { Check, ShieldCheck, CreditCard, Loader2, ExternalLink } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 
 export default function SubscriptionPage() {
@@ -10,7 +10,40 @@ export default function SubscriptionPage() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const [isProcessing, setIsProcessing] = useState(false);
+  const [priceId, setPriceId] = useState<string | null>(null);
+  const [loadingPrice, setLoadingPrice] = useState(true);
   const queryClient = useQueryClient();
+  const search = useSearch();
+
+  useEffect(() => {
+    const params = new URLSearchParams(search);
+    if (params.get("success") === "true") {
+      fetch("/api/check-subscription", { method: "POST" })
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.active) {
+            queryClient.invalidateQueries({ queryKey: ["/api/me"] });
+            toast({ title: "Subscription Activated!", description: "Welcome to Start-Up Studio\u00ae." });
+            setTimeout(() => setLocation("/dashboard"), 1500);
+          }
+        });
+    }
+    if (params.get("canceled") === "true") {
+      toast({ title: "Checkout Canceled", description: "You can try again anytime." });
+    }
+  }, [search]);
+
+  useEffect(() => {
+    fetch("/api/subscription-price")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.price_id) {
+          setPriceId(data.price_id);
+        }
+      })
+      .catch(() => {})
+      .finally(() => setLoadingPrice(false));
+  }, []);
 
   if (!user) {
     setLocation("/");
@@ -18,29 +51,46 @@ export default function SubscriptionPage() {
   }
 
   const handleSubscribe = async () => {
+    if (!priceId) return;
     setIsProcessing(true);
-    toast({
-      title: "Processing Payment...",
-      description: "Redirecting to secure checkout.",
-    });
 
-    setTimeout(async () => {
-      try {
-        const res = await fetch("/api/subscribe", { method: "POST" });
-        if (!res.ok) throw new Error("Subscription failed");
-        queryClient.invalidateQueries({ queryKey: ["/api/me"] });
-        toast({
-          title: "Subscription Activated!",
-          description: "Welcome to Start-Up Studio\u00ae.",
-        });
-        setLocation("/dashboard");
-      } catch {
-        toast({ variant: "destructive", title: "Error", description: "Could not activate subscription." });
-      } finally {
+    try {
+      const res = await fetch("/api/create-checkout-session", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ priceId }),
+      });
+      const data = await res.json();
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        toast({ variant: "destructive", title: "Error", description: data.error || "Could not start checkout." });
         setIsProcessing(false);
       }
-    }, 1500);
+    } catch {
+      toast({ variant: "destructive", title: "Error", description: "Could not start checkout." });
+      setIsProcessing(false);
+    }
   };
+
+  const handleManageBilling = async () => {
+    setIsProcessing(true);
+    try {
+      const res = await fetch("/api/create-portal-session", { method: "POST" });
+      const data = await res.json();
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        toast({ variant: "destructive", title: "Error", description: "Could not open billing portal." });
+      }
+    } catch {
+      toast({ variant: "destructive", title: "Error", description: "Could not open billing portal." });
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const isActive = user.subscriptionStatus === "active";
 
   const features = [
     "30 AI-Powered Fundability Analyses",
@@ -60,18 +110,22 @@ export default function SubscriptionPage() {
 
           <div className="flex items-center gap-2.5 px-5 py-2 rounded-full border border-[#333] bg-[#181818] mb-8">
             <span className="w-[8px] h-[8px] rounded-full bg-[#888] animate-pulse"></span>
-            <span className="text-[13px] font-semibold tracking-[0.12em] text-white/90 uppercase">Membership</span>
+            <span className="text-[13px] font-semibold tracking-[0.12em] text-white/90 uppercase">
+              {isActive ? "Active" : "Membership"}
+            </span>
           </div>
 
           <h1 className="text-[32px] font-normal tracking-[-0.03em] text-center leading-[1.1] text-[#e0e0e0] mb-3" data-testid="text-subscription-title">
-            Complete Access
+            {isActive ? "You're All Set" : "Complete Access"}
           </h1>
           <p className="text-[#777] text-[15px] text-center leading-[1.7] max-w-[380px]">
-            Unlock the full power of the Digital Underwriting Engine.
+            {isActive
+              ? "Your membership is active. Manage your billing below."
+              : "Unlock the full power of the Digital Underwriting Engine."}
           </p>
         </div>
 
-        {user.subscriptionStatus === "inactive" && (
+        {!isActive && (
           <div className="bg-[#1A1A1A] border border-[#333] rounded-xl p-4 text-center">
             <p className="text-sm text-[#999]" data-testid="text-subscription-inactive">Subscription inactive. Activate below to continue.</p>
           </div>
@@ -104,15 +158,39 @@ export default function SubscriptionPage() {
           </div>
 
           <div className="px-8 pb-8">
-            <button
-              data-testid="button-activate"
-              onClick={handleSubscribe}
-              disabled={isProcessing || user.subscriptionStatus === 'active'}
-              className="w-full h-[48px] rounded-full bg-[#E0E0E0] text-[#0D0D0D] text-[14px] font-bold hover:bg-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-            >
-              <CreditCard className="w-4 h-4" />
-              {user.subscriptionStatus === 'active' ? 'Already Active' : 'Activate Membership'}
-            </button>
+            {isActive ? (
+              <button
+                data-testid="button-manage-billing"
+                onClick={handleManageBilling}
+                disabled={isProcessing}
+                className="w-full h-[48px] rounded-full bg-[#1A1A1A] border border-[#333] text-[#ccc] text-[14px] font-bold hover:bg-[#222] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              >
+                {isProcessing ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <>
+                    <ExternalLink className="w-4 h-4" />
+                    Manage Billing
+                  </>
+                )}
+              </button>
+            ) : (
+              <button
+                data-testid="button-activate"
+                onClick={handleSubscribe}
+                disabled={isProcessing || loadingPrice || !priceId}
+                className="w-full h-[48px] rounded-full bg-[#E0E0E0] text-[#0D0D0D] text-[14px] font-bold hover:bg-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              >
+                {isProcessing ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <>
+                    <CreditCard className="w-4 h-4" />
+                    Activate Membership
+                  </>
+                )}
+              </button>
+            )}
           </div>
         </div>
 

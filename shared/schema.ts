@@ -19,6 +19,9 @@ export const users = pgTable("users", {
   inquiries: integer("inquiries"),
   derogatoryAccounts: integer("derogatory_accounts"),
   
+  // Stripe
+  stripeCustomerId: text("stripe_customer_id"),
+
   // Document Flags
   hasCreditReport: boolean("has_credit_report").default(false),
   hasBankStatement: boolean("has_bank_statement").default(false),
