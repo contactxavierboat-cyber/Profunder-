@@ -74,7 +74,8 @@ export default function DashboardPage() {
   const hasMessages = messages.length > 0;
 
   return (
-    <div className="h-screen flex bg-[#0A0A0A] text-white">
+    <div className="h-screen flex bg-[#0A0A0A] text-white relative">
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff10_1px,transparent_1px),linear-gradient(to_bottom,#ffffff10_1px,transparent_1px)] bg-[size:40px_40px] pointer-events-none"></div>
 
       <aside className="w-[260px] bg-[#0F0F0F] flex flex-col border-r border-white/5 shrink-0 hidden md:flex">
         <div className="p-3">
