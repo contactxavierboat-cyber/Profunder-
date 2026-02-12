@@ -143,7 +143,7 @@ export function ChatInterface() {
 
     setIsLoading(true);
     try {
-      await sendMessage(input, attachment, undefined, selectedMentor);
+      await sendMessage(input, attachment, undefined, activeMentorKey);
       setInput("");
     } catch (e) {
     } finally {
