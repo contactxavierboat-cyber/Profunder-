@@ -7,6 +7,152 @@ import session from "express-session";
 import MemoryStore from "memorystore";
 // @ts-ignore
 import PDFParser from "pdf2json";
+import { execFile } from "child_process";
+import { promisify } from "util";
+import { writeFile, readdir, readFile, unlink, mkdir } from "fs/promises";
+import path from "path";
+
+const execFileAsync = promisify(execFile);
+
+const EXTRACTION_MIN_CHARS = 200;
+const EXTRACTION_MAX_CHARS = 30000;
+const TMP_DIR = "/tmp/pdf-processing";
+
+async function ensureTmpDir() {
+  await mkdir(TMP_DIR, { recursive: true });
+}
+
+async function cleanupFiles(pattern: string) {
+  try {
+    const files = await readdir(TMP_DIR);
+    for (const f of files) {
+      if (f.startsWith(pattern)) {
+        await unlink(path.join(TMP_DIR, f)).catch(() => {});
+      }
+    }
+  } catch {}
+}
+
+async function extractWithPdf2json(buffer: Buffer): Promise<string> {
+  return new Promise<string>((resolve, reject) => {
+    const pdfParser = new PDFParser(null, false);
+    pdfParser.on("pdfParser_dataReady", (pdfData: any) => {
+      try {
+        const pages = pdfData?.Pages || [];
+        const lines: string[] = [];
+        for (const page of pages) {
+          const texts = page.Texts || [];
+          const lineMap = new Map<number, { x: number; text: string }[]>();
+          for (const t of texts) {
+            const y = Math.round((t.y || 0) * 100);
+            const x = t.x || 0;
+            const runs = t.R || [];
+            const decoded = runs.map((r: any) => decodeURIComponent(r.T || "")).join("");
+            if (decoded.trim()) {
+              if (!lineMap.has(y)) lineMap.set(y, []);
+              lineMap.get(y)!.push({ x, text: decoded });
+            }
+          }
+          const sortedYs = Array.from(lineMap.keys()).sort((a, b) => a - b);
+          for (const y of sortedYs) {
+            const items = lineMap.get(y)!.sort((a, b) => a.x - b.x);
+            const lineText = items.map(i => i.text).join("  ");
+            if (lineText.trim()) lines.push(lineText.trim());
+          }
+          lines.push("---");
+        }
+        const fullText = lines.join("\n");
+        resolve(fullText);
+      } catch (e) {
+        try {
+          const rawText = pdfParser.getRawTextContent();
+          resolve(decodeURIComponent(rawText));
+        } catch {
+          resolve("");
+        }
+      }
+    });
+    pdfParser.on("pdfParser_dataError", () => resolve(""));
+    pdfParser.parseBuffer(buffer);
+  });
+}
+
+async function extractWithPdftotext(pdfPath: string): Promise<string> {
+  try {
+    const { stdout } = await execFileAsync("pdftotext", ["-layout", pdfPath, "-"], { maxBuffer: 10 * 1024 * 1024 });
+    return stdout;
+  } catch {
+    return "";
+  }
+}
+
+async function extractWithOCR(pdfPath: string, sessionId: string): Promise<string> {
+  try {
+    await ensureTmpDir();
+    const prefix = path.join(TMP_DIR, `ocr-${sessionId}`);
+    await execFileAsync("pdftoppm", ["-png", "-r", "300", "-l", "5", pdfPath, prefix], { maxBuffer: 50 * 1024 * 1024 });
+    const files = await readdir(TMP_DIR);
+    const imageFiles = files
+      .filter(f => f.startsWith(`ocr-${sessionId}`) && f.endsWith(".png"))
+      .sort();
+    if (imageFiles.length === 0) return "";
+
+    const ocrResults: string[] = [];
+    for (const imgFile of imageFiles) {
+      const imgPath = path.join(TMP_DIR, imgFile);
+      try {
+        const { stdout } = await execFileAsync("tesseract", [imgPath, "stdout", "--psm", "6"], { maxBuffer: 10 * 1024 * 1024 });
+        if (stdout.trim()) ocrResults.push(stdout.trim());
+      } catch {}
+    }
+
+    await cleanupFiles(`ocr-${sessionId}`);
+    return ocrResults.join("\n---\n");
+  } catch (err) {
+    console.error("OCR processing error:", err);
+    await cleanupFiles(`ocr-${sessionId}`);
+    return "";
+  }
+}
+
+interface ExtractionResult {
+  text: string;
+  method: "pdf2json" | "pdftotext" | "ocr" | "manual_entry_needed" | "raw_text";
+}
+
+async function processPdfBuffer(buffer: Buffer): Promise<ExtractionResult> {
+  await ensureTmpDir();
+  const sessionId = Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+  const pdfPath = path.join(TMP_DIR, `upload-${sessionId}.pdf`);
+  await writeFile(pdfPath, buffer);
+
+  console.log(`[PDF Pipeline] Stage 1: pdf2json text extraction...`);
+  let text = await extractWithPdf2json(buffer);
+  if (text.replace(/[-\s]/g, "").length >= EXTRACTION_MIN_CHARS) {
+    console.log(`[PDF Pipeline] pdf2json succeeded: ${text.length} chars`);
+    await unlink(pdfPath).catch(() => {});
+    return { text: text.slice(0, EXTRACTION_MAX_CHARS), method: "pdf2json" };
+  }
+
+  console.log(`[PDF Pipeline] Stage 2: pdftotext (poppler) extraction...`);
+  text = await extractWithPdftotext(pdfPath);
+  if (text.replace(/\s/g, "").length >= EXTRACTION_MIN_CHARS) {
+    console.log(`[PDF Pipeline] pdftotext succeeded: ${text.length} chars`);
+    await unlink(pdfPath).catch(() => {});
+    return { text: text.slice(0, EXTRACTION_MAX_CHARS), method: "pdftotext" };
+  }
+
+  console.log(`[PDF Pipeline] Stage 3: OCR processing (tesseract)...`);
+  text = await extractWithOCR(pdfPath, sessionId);
+  await unlink(pdfPath).catch(() => {});
+  if (text.replace(/\s/g, "").length >= EXTRACTION_MIN_CHARS) {
+    console.log(`[PDF Pipeline] OCR succeeded: ${text.length} chars`);
+    return { text: text.slice(0, EXTRACTION_MAX_CHARS), method: "ocr" };
+  }
+
+  console.log(`[PDF Pipeline] All extraction methods failed. Manual entry needed.`);
+  return { text: "", method: "manual_entry_needed" };
+}
 
 const openai = new OpenAI({
   apiKey: process.env.AI_INTEGRATIONS_OPENAI_API_KEY,
@@ -527,65 +673,37 @@ export async function registerRoutes(
     }
 
     let extractedText = "";
+    let extractionMethod = "";
+    let manualEntryNeeded = false;
+
     if (fileContent && attachment) {
       try {
         const isPdf = fileContent.length > 100 && !fileContent.includes("\n");
         if (isPdf) {
           const buffer = Buffer.from(fileContent, "base64");
-          extractedText = await new Promise<string>((resolve, reject) => {
-            const pdfParser = new PDFParser(null, false);
-            pdfParser.on("pdfParser_dataReady", (pdfData: any) => {
-              try {
-                const pages = pdfData?.Pages || [];
-                const lines: string[] = [];
-                for (const page of pages) {
-                  const texts = page.Texts || [];
-                  const lineMap = new Map<number, { x: number; text: string }[]>();
-                  for (const t of texts) {
-                    const y = Math.round((t.y || 0) * 100);
-                    const x = t.x || 0;
-                    const runs = t.R || [];
-                    const decoded = runs.map((r: any) => decodeURIComponent(r.T || "")).join("");
-                    if (decoded.trim()) {
-                      if (!lineMap.has(y)) lineMap.set(y, []);
-                      lineMap.get(y)!.push({ x, text: decoded });
-                    }
-                  }
-                  const sortedYs = [...lineMap.keys()].sort((a, b) => a - b);
-                  for (const y of sortedYs) {
-                    const items = lineMap.get(y)!.sort((a, b) => a.x - b.x);
-                    const lineText = items.map(i => i.text).join("  ");
-                    if (lineText.trim()) lines.push(lineText.trim());
-                  }
-                  lines.push("---");
-                }
-                const fullText = lines.join("\n");
-                console.log(`PDF extracted ${fullText.length} chars from ${pages.length} pages`);
-                resolve(fullText.slice(0, 30000));
-              } catch (e) {
-                const rawText = pdfParser.getRawTextContent();
-                const decoded = decodeURIComponent(rawText);
-                console.log(`PDF fallback extracted ${decoded.length} chars`);
-                resolve(decoded.slice(0, 30000));
-              }
-            });
-            pdfParser.on("pdfParser_dataError", (errData: any) => {
-              reject(new Error(errData.parserError || "PDF parse failed"));
-            });
-            pdfParser.parseBuffer(buffer);
-          });
+          const result = await processPdfBuffer(buffer);
+          extractedText = result.text;
+          extractionMethod = result.method;
+          manualEntryNeeded = result.method === "manual_entry_needed";
         } else {
-          extractedText = fileContent.slice(0, 30000);
+          extractedText = fileContent.slice(0, EXTRACTION_MAX_CHARS);
+          extractionMethod = "raw_text";
         }
       } catch (err) {
         console.error("File parsing error:", err);
-        extractedText = "[Could not extract text from uploaded file]";
+        manualEntryNeeded = true;
+        extractionMethod = "manual_entry_needed";
       }
     }
 
-    const displayContent = extractedText
-      ? `${content}\n\n[Attached ${attachment === "bank_statement" ? "Bank Statement" : "Credit Report"} - ${extractedText.length} chars extracted]`
-      : content;
+    let displayContent: string;
+    if (manualEntryNeeded) {
+      displayContent = `${content}\n\n[Attached ${attachment === "bank_statement" ? "Bank Statement" : "Credit Report"} - Could not extract text automatically. Please enter key details manually.]`;
+    } else if (extractedText) {
+      displayContent = `${content}\n\n[Attached ${attachment === "bank_statement" ? "Bank Statement" : "Credit Report"} - ${extractedText.length} chars extracted via ${extractionMethod}]`;
+    } else {
+      displayContent = content;
+    }
 
     await storage.createMessage({ userId, role: "user", content: displayContent, attachment: attachment || null });
 
@@ -593,8 +711,10 @@ export async function registerRoutes(
     const last10 = history.slice(-10).map(m => ({ role: m.role as "user" | "assistant", content: m.content }));
 
     let fileContext = "";
-    if (extractedText) {
-      fileContext = `\n\nThe user has uploaded a ${attachment === "bank_statement" ? "bank statement" : "credit report"}. Here is the extracted text from the document:\n\n--- START OF DOCUMENT ---\n${extractedText}\n--- END OF DOCUMENT ---\n\nAnalyze this document thoroughly. Extract key financial data, identify patterns, and incorporate your findings into the fundability assessment.`;
+    if (manualEntryNeeded && attachment) {
+      fileContext = `\n\nThe user uploaded a ${attachment === "bank_statement" ? "bank statement" : "credit report"}, but automated text extraction failed (the document may be an image-based or scanned PDF). Ask the user to manually provide the key data from their document. For a credit report, ask for: credit score, total revolving limits, total balances, number of inquiries, and any derogatory accounts. For a bank statement, ask for: average daily balance, monthly deposits, and any NSF/overdraft occurrences.`;
+    } else if (extractedText) {
+      fileContext = `\n\nThe user has uploaded a ${attachment === "bank_statement" ? "bank statement" : "credit report"}. Here is the extracted text from the document (extracted via ${extractionMethod}):\n\n--- START OF DOCUMENT ---\n${extractedText}\n--- END OF DOCUMENT ---\n\nAnalyze this document thoroughly. Extract key financial data, identify patterns, and incorporate your findings into the fundability assessment.`;
     }
 
     const systemPrompt = STARTUP_STUDIO_SYSTEM_PROMPT + `\n\n====================================================
