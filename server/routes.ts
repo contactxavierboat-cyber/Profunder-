@@ -5,7 +5,8 @@ import { z } from "zod";
 import OpenAI from "openai";
 import session from "express-session";
 import MemoryStore from "memorystore";
-import * as pdfParse from "pdf-parse";
+// @ts-ignore
+import PDFParser from "pdf2json";
 
 const openai = new OpenAI({
   apiKey: process.env.AI_INTEGRATIONS_OPENAI_API_KEY,
@@ -186,9 +187,17 @@ export async function registerRoutes(
         const isPdf = fileContent.length > 100 && !fileContent.includes("\n");
         if (isPdf) {
           const buffer = Buffer.from(fileContent, "base64");
-          const pdf = (pdfParse as any).default || pdfParse;
-          const pdfData = await pdf(buffer);
-          extractedText = pdfData.text.slice(0, 15000);
+          extractedText = await new Promise<string>((resolve, reject) => {
+            const pdfParser = new PDFParser(null, true);
+            pdfParser.on("pdfParser_dataReady", (pdfData: any) => {
+              const text = pdfParser.getRawTextContent();
+              resolve(text.slice(0, 15000));
+            });
+            pdfParser.on("pdfParser_dataError", (errData: any) => {
+              reject(new Error(errData.parserError || "PDF parse failed"));
+            });
+            pdfParser.parseBuffer(buffer);
+          });
         } else {
           extractedText = fileContent.slice(0, 15000);
         }
