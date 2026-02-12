@@ -79,6 +79,9 @@ export function ChatInterface() {
   const scrollRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
 
+  const lastMentorMsg = [...messages].reverse().find(m => m.role === 'assistant' && m.mentor);
+  const activeMentor = lastMentorMsg?.mentor ? MENTOR_INFO[lastMentorMsg.mentor] : null;
+
   useEffect(() => {
     if (scrollRef.current) {
       const scrollContainer = scrollRef.current.querySelector('[data-radix-scroll-area-viewport]');
@@ -122,12 +125,20 @@ export function ChatInterface() {
     <Card className="flex flex-col h-[600px] bg-[#111111] border border-[#222]">
       <CardHeader className="flex flex-row items-center justify-between py-3 border-b border-[#222]">
         <div className="flex items-center gap-2">
-          <div className="w-7 h-7 rounded-full bg-[#1A1A1A] border border-[#333] flex items-center justify-center">
-            <Bot className="w-4 h-4 text-[#999]" />
-          </div>
+          {activeMentor ? (
+            <img
+              src={activeMentor.avatar}
+              alt={activeMentor.name}
+              className="w-8 h-8 rounded-full object-cover border-2 border-[#555]"
+            />
+          ) : (
+            <div className="w-7 h-7 rounded-full bg-[#1A1A1A] border border-[#333] flex items-center justify-center">
+              <Bot className="w-4 h-4 text-[#999]" />
+            </div>
+          )}
           <div>
-            <CardTitle className="text-sm font-bold text-[#E0E0E0]">MentXr® AI</CardTitle>
-            <p className="text-[10px] text-[#555] uppercase tracking-widest">Mentorship On Demand</p>
+            <CardTitle className="text-sm font-bold text-[#E0E0E0]">{activeMentor ? activeMentor.name : "MentXr® AI"}</CardTitle>
+            <p className="text-[10px] text-[#555] uppercase tracking-widest">{activeMentor ? "Active Mentor" : "Mentorship On Demand"}</p>
           </div>
         </div>
         <div className="flex gap-2">
