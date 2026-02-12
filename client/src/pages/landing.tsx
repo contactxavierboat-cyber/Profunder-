@@ -65,7 +65,7 @@ export default function LandingPage() {
             Mentorship, On Demand
           </h1>
 
-          <p className="text-center text-[#777] text-[14px] sm:text-[16px] leading-[1.7] sm:leading-[1.8] max-w-[520px] mb-8 sm:mb-12 px-2">
+          <p className="text-left sm:text-center text-[#777] text-[14px] sm:text-[16px] leading-[1.7] sm:leading-[1.8] max-w-[520px] mb-8 sm:mb-12 px-4 sm:px-2">
             Engage with AI versions of influential mentors, modeled after their thinking and principles. Ask questions, explore decisions, and gain perspective as if speaking with them directly. Guidance becomes personal and available whenever you need it.
           </p>
 
