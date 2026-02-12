@@ -22,30 +22,30 @@ export default function AdminPage() {
 
   return (
     <DashboardLayout>
-      <div className="space-y-8">
+      <div className="space-y-6 sm:space-y-8">
         <div className="flex justify-between items-center">
           <div>
-            <h2 className="text-3xl font-bold tracking-tight">Admin Console</h2>
-            <p className="text-muted-foreground">Manage users and subscriptions</p>
+            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight">Admin Console</h2>
+            <p className="text-muted-foreground text-sm">Manage users and subscriptions</p>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-3 sm:gap-6">
           <Card className="glass-panel">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Total Users</CardTitle>
+            <CardHeader className="pb-1 sm:pb-2 px-3 sm:px-6 pt-3 sm:pt-6">
+              <CardTitle className="text-xs sm:text-sm font-medium text-muted-foreground">Total Users</CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="text-4xl font-mono font-bold">{allUsers.length}</div>
+            <CardContent className="px-3 sm:px-6 pb-3 sm:pb-6">
+              <div className="text-3xl sm:text-4xl font-mono font-bold">{allUsers.length}</div>
             </CardContent>
           </Card>
           
           <Card className="glass-panel">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Active Subscriptions</CardTitle>
+            <CardHeader className="pb-1 sm:pb-2 px-3 sm:px-6 pt-3 sm:pt-6">
+              <CardTitle className="text-xs sm:text-sm font-medium text-muted-foreground">Active Subs</CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="text-4xl font-mono font-bold text-primary">
+            <CardContent className="px-3 sm:px-6 pb-3 sm:pb-6">
+              <div className="text-3xl sm:text-4xl font-mono font-bold text-primary">
                 {allUsers.filter(u => u.subscriptionStatus === 'active').length}
               </div>
             </CardContent>
@@ -53,62 +53,107 @@ export default function AdminPage() {
         </div>
 
         <Card className="glass-panel">
-          <CardHeader>
-            <CardTitle>User Management</CardTitle>
+          <CardHeader className="px-3 sm:px-6">
+            <CardTitle className="text-base sm:text-lg">User Management</CardTitle>
           </CardHeader>
-          <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow className="border-white/10 hover:bg-transparent">
-                  <TableHead className="w-[100px]">ID</TableHead>
-                  <TableHead>Email</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Usage</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {allUsers.map((u) => (
-                  <TableRow key={u.id} className="border-white/10 hover:bg-white/5">
-                    <TableCell className="font-mono text-xs text-muted-foreground">{u.id}</TableCell>
-                    <TableCell className="font-medium">{u.email}</TableCell>
-                    <TableCell>
-                      <Badge 
-                        variant="outline" 
-                        className={u.subscriptionStatus === 'active' 
-                          ? "border-green-500/50 text-green-500 bg-green-500/10" 
-                          : "border-red-500/50 text-red-500 bg-red-500/10"}
-                      >
-                        {u.subscriptionStatus}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="font-mono">
-                      {u.monthlyUsage} / {u.maxUsage}
-                    </TableCell>
-                    <TableCell className="text-right space-x-2">
+          <CardContent className="px-0 sm:px-6">
+            <div className="hidden sm:block">
+              <Table>
+                <TableHeader>
+                  <TableRow className="border-white/10 hover:bg-transparent">
+                    <TableHead className="w-[80px]">ID</TableHead>
+                    <TableHead>Email</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Usage</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {allUsers.map((u) => (
+                    <TableRow key={u.id} className="border-white/10 hover:bg-white/5">
+                      <TableCell className="font-mono text-xs text-muted-foreground">{u.id}</TableCell>
+                      <TableCell className="font-medium">{u.email}</TableCell>
+                      <TableCell>
+                        <Badge 
+                          variant="outline" 
+                          className={u.subscriptionStatus === 'active' 
+                            ? "border-green-500/50 text-green-500 bg-green-500/10" 
+                            : "border-red-500/50 text-red-500 bg-red-500/10"}
+                        >
+                          {u.subscriptionStatus}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="font-mono">
+                        {u.monthlyUsage} / {u.maxUsage}
+                      </TableCell>
+                      <TableCell className="text-right space-x-2">
+                        <Button 
+                          size="sm" 
+                          variant="outline" 
+                          className="h-8 w-8 p-0"
+                          onClick={() => resetUsage(u.id)}
+                          title="Reset Usage"
+                        >
+                          <RefreshCw className="h-4 w-4" />
+                        </Button>
+                        <Button 
+                          size="sm" 
+                          variant="ghost" 
+                          className="h-8 w-8 p-0 hover:text-destructive hover:bg-destructive/10"
+                          onClick={() => toggleSubscription(u.id)}
+                          title="Toggle Status"
+                        >
+                          <Power className="h-4 w-4" />
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+
+            <div className="sm:hidden space-y-2 px-3">
+              {allUsers.map((u) => (
+                <div key={u.id} className="bg-white/5 border border-white/10 rounded-lg p-3 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium truncate max-w-[180px]">{u.email}</span>
+                    <Badge 
+                      variant="outline" 
+                      className={`text-[10px] px-1.5 py-0 ${u.subscriptionStatus === 'active' 
+                        ? "border-green-500/50 text-green-500 bg-green-500/10" 
+                        : "border-red-500/50 text-red-500 bg-red-500/10"}`}
+                    >
+                      {u.subscriptionStatus}
+                    </Badge>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-muted-foreground font-mono">
+                      ID: {u.id} | Usage: {u.monthlyUsage}/{u.maxUsage}
+                    </span>
+                    <div className="flex gap-1.5">
                       <Button 
                         size="sm" 
                         variant="outline" 
-                        className="h-8 w-8 p-0"
+                        className="h-7 w-7 p-0"
                         onClick={() => resetUsage(u.id)}
                         title="Reset Usage"
                       >
-                        <RefreshCw className="h-4 w-4" />
+                        <RefreshCw className="h-3.5 w-3.5" />
                       </Button>
                       <Button 
                         size="sm" 
                         variant="ghost" 
-                        className="h-8 w-8 p-0 hover:text-destructive hover:bg-destructive/10"
+                        className="h-7 w-7 p-0 hover:text-destructive hover:bg-destructive/10"
                         onClick={() => toggleSubscription(u.id)}
                         title="Toggle Status"
                       >
-                        <Power className="h-4 w-4" />
+                        <Power className="h-3.5 w-3.5" />
                       </Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
           </CardContent>
         </Card>
       </div>

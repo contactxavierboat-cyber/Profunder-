@@ -1,12 +1,14 @@
 import { Link, useLocation } from "wouter";
 import { useAuth } from "@/lib/store";
-import { LayoutDashboard, CreditCard, Shield, LogOut, FileText, Users, BarChart3 } from "lucide-react";
+import { LayoutDashboard, CreditCard, Shield, LogOut, FileText, Users, BarChart3, Menu, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { useState } from "react";
 
 export function DashboardLayout({ children }: { children: React.ReactNode }) {
   const { user, logout } = useAuth();
   const [location] = useLocation();
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   if (!user) return null;
 
@@ -23,19 +25,39 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
   ];
 
   return (
-    <div className="min-h-screen bg-background text-foreground flex">
-      <aside className="w-64 border-r border-sidebar-border bg-sidebar flex flex-col fixed h-full z-10 hidden md:flex">
-        <div className="p-6 border-b border-sidebar-border">
-          <h1 className="font-sans font-bold text-xl tracking-tighter flex items-center gap-2">
-            <span className="w-8 h-8 bg-[#E0E0E0] rounded-md flex items-center justify-center text-[#0D0D0D] font-mono">X</span>
-            MentXr®
-          </h1>
-          <p className="text-xs text-muted-foreground mt-1">Digital Underwriting Engine</p>
+    <div className="min-h-[100dvh] bg-background text-foreground flex">
+      {mobileOpen && (
+        <div
+          className="fixed inset-0 bg-black/60 z-30 md:hidden"
+          onClick={() => setMobileOpen(false)}
+        />
+      )}
+
+      <aside className={cn(
+        "w-64 border-r border-sidebar-border bg-sidebar flex flex-col fixed h-full z-40 transition-transform duration-200 ease-out",
+        mobileOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0",
+        "md:flex",
+        !mobileOpen && "hidden md:flex"
+      )}>
+        <div className="p-4 sm:p-6 border-b border-sidebar-border flex items-center justify-between">
+          <div>
+            <h1 className="font-sans font-bold text-lg sm:text-xl tracking-tighter flex items-center gap-2">
+              <span className="w-7 h-7 sm:w-8 sm:h-8 bg-[#E0E0E0] rounded-md flex items-center justify-center text-[#0D0D0D] font-mono text-sm sm:text-base">X</span>
+              MentXr®
+            </h1>
+            <p className="text-[10px] sm:text-xs text-muted-foreground mt-1">Digital Underwriting Engine</p>
+          </div>
+          <button
+            className="md:hidden w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white/5"
+            onClick={() => setMobileOpen(false)}
+          >
+            <X className="w-5 h-5 text-muted-foreground" />
+          </button>
         </div>
 
-        <nav className="flex-1 p-4 space-y-2">
+        <nav className="flex-1 p-3 sm:p-4 space-y-1 sm:space-y-2">
           {navItems.map((item) => (
-            <Link key={item.href} href={item.href} className={cn(
+            <Link key={item.href} href={item.href} onClick={() => setMobileOpen(false)} className={cn(
               "flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors",
               location === item.href 
                 ? "bg-sidebar-accent text-white" 
@@ -47,9 +69,9 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
           ))}
         </nav>
 
-        <div className="p-4 border-t border-sidebar-border">
-          <div className="flex items-center gap-3 px-3 py-3 mb-2">
-            <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center text-xs font-mono">
+        <div className="p-3 sm:p-4 border-t border-sidebar-border">
+          <div className="flex items-center gap-3 px-3 py-2 sm:py-3 mb-2">
+            <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-muted flex items-center justify-center text-[10px] sm:text-xs font-mono">
               {user.email.substring(0, 2).toUpperCase()}
             </div>
             <div className="overflow-hidden">
@@ -64,12 +86,25 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
         </div>
       </aside>
 
-      <main className="flex-1 md:ml-64 bg-background relative">
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px] pointer-events-none"></div>
-        <div className="relative p-8 max-w-7xl mx-auto animate-in fade-in duration-500">
-          {children}
-        </div>
-      </main>
+      <div className="flex-1 md:ml-64 bg-background relative flex flex-col min-h-[100dvh]">
+        <header className="h-12 flex items-center justify-between px-3 border-b border-sidebar-border md:hidden shrink-0 relative z-10 bg-background">
+          <button
+            onClick={() => setMobileOpen(true)}
+            className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white/5"
+          >
+            <Menu className="w-5 h-5 text-muted-foreground" />
+          </button>
+          <h1 className="text-sm font-bold">MentXr®</h1>
+          <div className="w-8" />
+        </header>
+
+        <main className="flex-1 relative">
+          <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px] pointer-events-none"></div>
+          <div className="relative p-4 sm:p-8 max-w-7xl mx-auto animate-in fade-in duration-500">
+            {children}
+          </div>
+        </main>
+      </div>
     </div>
   );
 }

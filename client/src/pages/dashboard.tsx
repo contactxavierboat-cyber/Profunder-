@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from "react";
 import { useAuth } from "@/lib/store";
 import { useLocation } from "wouter";
-import { Send, Plus, LogOut, Paperclip, Loader2, ArrowDown, Settings, FileText, X } from "lucide-react";
+import { Send, Plus, LogOut, Paperclip, Loader2, ArrowDown, Settings, FileText, X, Menu } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -13,6 +13,7 @@ export default function DashboardPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [showScrollBtn, setShowScrollBtn] = useState(false);
   const [attachedFile, setAttachedFile] = useState<File | null>(null);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -101,13 +102,26 @@ export default function DashboardPage() {
   const hasMessages = messages.length > 0;
 
   return (
-    <div className="h-screen flex bg-[#0A0A0A] text-white">
+    <div className="h-[100dvh] flex bg-[#0A0A0A] text-white">
 
-      <aside className="w-[260px] bg-[#0F0F0F] flex flex-col border-r border-white/5 shrink-0 hidden md:flex relative z-10">
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black/60 z-30 md:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
+      <aside className={cn(
+        "w-[260px] bg-[#0F0F0F] flex flex-col border-r border-white/5 shrink-0 relative z-40",
+        "fixed h-full md:static md:flex transition-transform duration-200 ease-out",
+        sidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0",
+        "md:flex",
+        !sidebarOpen && "hidden md:flex"
+      )}>
         <div className="p-3">
           <button
             data-testid="button-new-chat"
-            onClick={() => clearChat()}
+            onClick={() => { clearChat(); setSidebarOpen(false); }}
             className="w-full flex items-center gap-3 px-3 py-3 rounded-lg border border-white/10 hover:bg-white/5 transition-colors text-sm font-medium"
           >
             <img src="/logo.png" alt="X+" className="w-7 h-7 rounded-lg" />
@@ -127,7 +141,7 @@ export default function DashboardPage() {
 
         <div className="p-3 border-t border-white/5 space-y-1">
           <button
-            onClick={() => setLocation("/subscription")}
+            onClick={() => { setLocation("/subscription"); setSidebarOpen(false); }}
             className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-white/5 transition-colors text-sm text-white/60"
           >
             <Settings className="w-4 h-4" />
@@ -150,10 +164,16 @@ export default function DashboardPage() {
       <main className="flex-1 flex flex-col min-w-0 relative">
         <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff10_1px,transparent_1px),linear-gradient(to_bottom,#ffffff10_1px,transparent_1px)] bg-[size:40px_40px] pointer-events-none"></div>
 
-        <header className="h-12 flex items-center justify-between px-4 border-b border-white/5 shrink-0 md:hidden">
-          <img src="/logo.png" alt="X+" className="w-7 h-7 rounded-lg" />
+        <header className="h-12 flex items-center justify-between px-3 sm:px-4 border-b border-white/5 shrink-0 md:hidden relative z-10">
+          <button
+            data-testid="button-menu"
+            onClick={() => setSidebarOpen(true)}
+            className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white/5 transition-colors"
+          >
+            <Menu className="w-5 h-5 text-white/60" />
+          </button>
           <span className="text-sm font-semibold">MentXr®</span>
-          <button onClick={() => clearChat()}>
+          <button onClick={() => clearChat()} className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white/5 transition-colors">
             <Plus className="w-5 h-5 text-white/40" />
           </button>
         </header>
@@ -165,13 +185,13 @@ export default function DashboardPage() {
         >
           {!hasMessages ? (
             <div className="h-full flex flex-col items-center justify-center px-4">
-              <img src="/logo.png" alt="X+" className="w-14 h-14 rounded-2xl mb-6 opacity-80" />
-              <h2 className="text-2xl font-semibold mb-2">MentXr®</h2>
-              <p className="text-white/40 text-sm text-center max-w-sm">
+              <img src="/logo.png" alt="X+" className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl mb-4 sm:mb-6 opacity-80" />
+              <h2 className="text-xl sm:text-2xl font-semibold mb-2">MentXr®</h2>
+              <p className="text-white/40 text-xs sm:text-sm text-center max-w-sm px-2">
                 Ask me anything about your fundability, credit profile, or financing strategy.
               </p>
 
-              <div className="grid grid-cols-2 gap-3 mt-8 max-w-lg w-full">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3 mt-6 sm:mt-8 max-w-lg w-full px-2">
                 {[
                   "Analyze my fundability score",
                   "What phase am I in?",
@@ -185,7 +205,7 @@ export default function DashboardPage() {
                       setInput(prompt);
                       textareaRef.current?.focus();
                     }}
-                    className="text-left px-4 py-3 rounded-xl border border-white/10 bg-white/[0.02] hover:bg-white/5 transition-colors text-sm text-white/60 hover:text-white/80"
+                    className="text-left px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl border border-white/10 bg-white/[0.02] hover:bg-white/5 transition-colors text-[13px] sm:text-sm text-white/60 hover:text-white/80"
                   >
                     {prompt}
                   </button>
@@ -193,30 +213,30 @@ export default function DashboardPage() {
               </div>
             </div>
           ) : (
-            <div className="max-w-3xl mx-auto w-full px-4 py-6">
+            <div className="max-w-3xl mx-auto w-full px-3 sm:px-4 py-4 sm:py-6">
               {messages.map((m) => (
-                <div key={m.id} className={cn("mb-8", m.role === "user" ? "" : "")}>
-                  <div className="flex gap-4">
+                <div key={m.id} className="mb-6 sm:mb-8">
+                  <div className="flex gap-2.5 sm:gap-4">
                     <div className="shrink-0 mt-0.5">
                       {m.role === "user" ? (
-                        <div className="w-8 h-8 rounded-full bg-[#1A1A1A] border border-[#333] flex items-center justify-center text-[11px] font-bold text-[#999]">
+                        <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-[#1A1A1A] border border-[#333] flex items-center justify-center text-[10px] sm:text-[11px] font-bold text-[#999]">
                           {user.email.substring(0, 2).toUpperCase()}
                         </div>
                       ) : (
-                        <img src="/logo.png" alt="X+" className="w-8 h-8 rounded-lg" />
+                        <img src="/logo.png" alt="X+" className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg" />
                       )}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-semibold mb-1 text-white/90">
+                      <p className="text-[13px] sm:text-sm font-semibold mb-1 text-white/90">
                         {m.role === "user" ? "You" : "MentXr®"}
                       </p>
                       {m.attachment && (
-                        <div className="inline-flex items-center gap-2 mb-2 px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 text-xs text-white/50">
+                        <div className="inline-flex items-center gap-2 mb-2 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg bg-white/5 border border-white/10 text-[11px] sm:text-xs text-white/50">
                           <FileText className="w-3 h-3" />
                           {m.attachment.replace("_", " ")}.pdf
                         </div>
                       )}
-                      <div className="text-[15px] leading-7 text-white/80 whitespace-pre-wrap break-words">
+                      <div className="text-[13px] sm:text-[15px] leading-6 sm:leading-7 text-white/80 whitespace-pre-wrap break-words">
                         {m.content}
                       </div>
                     </div>
@@ -225,11 +245,11 @@ export default function DashboardPage() {
               ))}
 
               {isLoading && (
-                <div className="mb-8">
-                  <div className="flex gap-4">
-                    <img src="/logo.png" alt="X+" className="w-8 h-8 rounded-lg shrink-0 mt-0.5" />
+                <div className="mb-6 sm:mb-8">
+                  <div className="flex gap-2.5 sm:gap-4">
+                    <img src="/logo.png" alt="X+" className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg shrink-0 mt-0.5" />
                     <div className="flex-1">
-                      <p className="text-sm font-semibold mb-1 text-white/90">MentXr®</p>
+                      <p className="text-[13px] sm:text-sm font-semibold mb-1 text-white/90">MentXr®</p>
                       <div className="flex items-center gap-1.5 py-2">
                         <span className="w-2 h-2 bg-[#555] rounded-full animate-bounce"></span>
                         <span className="w-2 h-2 bg-[#555] rounded-full animate-bounce [animation-delay:0.15s]"></span>
@@ -246,7 +266,7 @@ export default function DashboardPage() {
         </div>
 
         {showScrollBtn && (
-          <div className="absolute bottom-32 left-1/2 -translate-x-1/2 z-10 md:left-[calc(50%+130px)]">
+          <div className="absolute bottom-28 sm:bottom-32 left-1/2 -translate-x-1/2 z-10 md:left-[calc(50%+130px)]">
             <button
               onClick={scrollToBottom}
               className="w-8 h-8 rounded-full bg-white/10 border border-white/10 flex items-center justify-center hover:bg-white/20 transition-colors"
@@ -256,13 +276,13 @@ export default function DashboardPage() {
           </div>
         )}
 
-        <div className="shrink-0 px-4 pb-4 pt-2">
+        <div className="shrink-0 px-2 sm:px-4 pb-2 sm:pb-4 pt-2 safe-area-pb">
           <div className="max-w-3xl mx-auto">
             {attachedFile && (
               <div className="flex items-center gap-2 mb-2 px-1">
-                <div className="flex items-center gap-2 bg-[#1A1A1A] border border-white/10 rounded-lg px-3 py-1.5 text-sm text-white/70">
-                  <FileText className="w-4 h-4 text-[#888] shrink-0" />
-                  <span className="truncate max-w-[200px]">{attachedFile.name}</span>
+                <div className="flex items-center gap-2 bg-[#1A1A1A] border border-white/10 rounded-lg px-2.5 sm:px-3 py-1.5 text-[12px] sm:text-sm text-white/70">
+                  <FileText className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#888] shrink-0" />
+                  <span className="truncate max-w-[150px] sm:max-w-[200px]">{attachedFile.name}</span>
                   <button
                     onClick={() => setAttachedFile(null)}
                     className="text-white/30 hover:text-white/60 ml-1"
@@ -273,7 +293,7 @@ export default function DashboardPage() {
                 </div>
               </div>
             )}
-            <div className="relative flex items-end bg-[#1A1A1A] border border-white/10 rounded-2xl px-4 py-3 focus-within:border-white/20 transition-colors">
+            <div className="relative flex items-end bg-[#1A1A1A] border border-white/10 rounded-2xl px-3 sm:px-4 py-2.5 sm:py-3 focus-within:border-white/20 transition-colors">
               <textarea
                 ref={textareaRef}
                 data-testid="input-chat"
@@ -283,9 +303,9 @@ export default function DashboardPage() {
                 onKeyDown={handleKeyDown}
                 rows={1}
                 disabled={isLoading}
-                className="flex-1 bg-transparent text-[15px] text-white placeholder:text-white/30 resize-none outline-none max-h-[200px] leading-6 py-0.5"
+                className="flex-1 bg-transparent text-[14px] sm:text-[15px] text-white placeholder:text-white/30 resize-none outline-none max-h-[200px] leading-6 py-0.5"
               />
-              <div className="flex items-center gap-1 ml-2 shrink-0">
+              <div className="flex items-center gap-1 ml-1.5 sm:ml-2 shrink-0">
                 <input
                   ref={fileInputRef}
                   type="file"
@@ -330,7 +350,7 @@ export default function DashboardPage() {
                 </button>
               </div>
             </div>
-            <p className="text-center text-[11px] text-white/20 mt-2">
+            <p className="text-center text-[10px] sm:text-[11px] text-white/20 mt-1.5 sm:mt-2">
               MentXr® AI can make mistakes. Verify important financial information.
             </p>
           </div>
