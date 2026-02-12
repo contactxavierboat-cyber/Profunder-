@@ -126,12 +126,12 @@ export default function LandingPage() {
             </p>
           </div>
 
-          <p className="text-center text-[#777] text-[13px] sm:text-[14px] leading-[1.7] max-w-[460px] mb-3 sm:mb-4 px-4 sm:px-2">
+          <p className="text-center text-[#777] text-[13px] sm:text-[14px] leading-[1.7] max-w-[460px] mb-6 sm:mb-8 px-4 sm:px-2">
             We are an AI-powered mentorship platform that lets users converse with digital versions of the mentors they admire, delivering trusted guidance anytime, anywhere.
           </p>
 
-          <div className="flex flex-col items-center gap-2">
-            <div className="flex items-center gap-1.5 sm:gap-2">
+          <div className="flex flex-col items-center gap-2 mb-8 sm:mb-12">
+            <div className="flex items-center gap-3 sm:gap-4">
               <div className="flex flex-col items-center">
                 <div className="bg-[#1A1A1A] border border-[#2A2A2A] rounded-md w-[36px] h-[36px] sm:w-[42px] sm:h-[42px] flex items-center justify-center">
                   <span className="font-mono text-[14px] sm:text-[17px] font-semibold text-white tabular-nums">{String(timeLeft.days).padStart(2, '0')}</span>
