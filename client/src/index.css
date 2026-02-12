@@ -77,4 +77,17 @@
   .glow-text {
     text-shadow: 0 0 20px hsla(72, 100%, 50%, 0.3);
   }
+
+  .chat-report {
+    line-height: 1.65;
+    padding: 1rem 1.25rem;
+  }
+
+  .chat-report > :first-child {
+    margin-top: 0;
+  }
+
+  .chat-report > :last-child {
+    margin-bottom: 0;
+  }
 }

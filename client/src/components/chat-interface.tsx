@@ -7,6 +7,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Send, User, Bot, Paperclip, Trash2, Download, FileText, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
+import ReactMarkdown from "react-markdown";
 
 export function ChatInterface() {
   const { user, messages, sendMessage, clearChat } = useAuth();
@@ -92,10 +93,12 @@ export function ChatInterface() {
               )}>
                 {m.role === 'user' ? <User className="w-4 h-4" /> : <Bot className="w-4 h-4 text-primary" />}
               </div>
-              <div className="space-y-1">
+              <div className="space-y-1 min-w-0 flex-1">
                 <div className={cn(
-                  "p-3 rounded-2xl text-sm leading-relaxed whitespace-pre-wrap",
-                  m.role === 'user' ? "bg-primary text-black font-medium" : "bg-white/5 border border-white/10"
+                  "p-3 rounded-2xl text-sm",
+                  m.role === 'user' 
+                    ? "bg-primary text-black font-medium leading-relaxed whitespace-pre-wrap" 
+                    : "bg-white/5 border border-white/10 chat-report"
                 )}>
                   {m.attachment && (
                     <div className="flex items-center gap-2 mb-2 p-2 rounded bg-black/20 text-xs font-mono">
@@ -103,7 +106,28 @@ export function ChatInterface() {
                       Attached: {m.attachment.replace('_', ' ')}.pdf
                     </div>
                   )}
-                  {m.content}
+                  {m.role === 'assistant' ? (
+                    <ReactMarkdown
+                      components={{
+                        h1: ({ children }) => <h1 className="text-lg font-bold text-primary mb-3 mt-1 border-b border-white/10 pb-2">{children}</h1>,
+                        h2: ({ children }) => <h2 className="text-base font-bold text-primary mb-2 mt-4">{children}</h2>,
+                        h3: ({ children }) => <h3 className="text-sm font-bold text-white mb-2 mt-3">{children}</h3>,
+                        p: ({ children }) => <p className="mb-3 leading-[1.65]">{children}</p>,
+                        strong: ({ children }) => <strong className="font-bold text-white">{children}</strong>,
+                        em: ({ children }) => <em className="italic text-white/80">{children}</em>,
+                        ul: ({ children }) => <ul className="list-disc list-outside pl-5 mb-3 space-y-1.5">{children}</ul>,
+                        ol: ({ children }) => <ol className="list-decimal list-outside pl-5 mb-3 space-y-1.5">{children}</ol>,
+                        li: ({ children }) => <li className="leading-[1.65] pl-1">{children}</li>,
+                        hr: () => <hr className="border-white/10 my-4" />,
+                        blockquote: ({ children }) => <blockquote className="border-l-2 border-primary/50 pl-3 my-3 text-white/70 italic">{children}</blockquote>,
+                        code: ({ children }) => <code className="bg-white/10 px-1.5 py-0.5 rounded text-xs font-mono text-primary">{children}</code>,
+                      }}
+                    >
+                      {m.content}
+                    </ReactMarkdown>
+                  ) : (
+                    m.content
+                  )}
                 </div>
                 <p className="text-[10px] text-muted-foreground font-mono text-right">
                   {new Date(m.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
