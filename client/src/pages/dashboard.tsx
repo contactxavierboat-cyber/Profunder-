@@ -152,7 +152,7 @@ export default function DashboardPage() {
 
         <header className="h-12 flex items-center justify-between px-4 border-b border-white/5 shrink-0 md:hidden">
           <img src="/logo.png" alt="X+" className="w-7 h-7 rounded-lg" />
-          <span className="text-sm font-semibold">Start-Up Studio®</span>
+          <span className="text-sm font-semibold">MentXr®</span>
           <button onClick={() => clearChat()}>
             <Plus className="w-5 h-5 text-white/40" />
           </button>
@@ -166,7 +166,7 @@ export default function DashboardPage() {
           {!hasMessages ? (
             <div className="h-full flex flex-col items-center justify-center px-4">
               <img src="/logo.png" alt="X+" className="w-14 h-14 rounded-2xl mb-6 opacity-80" />
-              <h2 className="text-2xl font-semibold mb-2">Start-Up Studio®</h2>
+              <h2 className="text-2xl font-semibold mb-2">MentXr®</h2>
               <p className="text-white/40 text-sm text-center max-w-sm">
                 Ask me anything about your fundability, credit profile, or financing strategy.
               </p>
@@ -208,7 +208,7 @@ export default function DashboardPage() {
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-semibold mb-1 text-white/90">
-                        {m.role === "user" ? "You" : "Start-Up Studio®"}
+                        {m.role === "user" ? "You" : "MentXr®"}
                       </p>
                       {m.attachment && (
                         <div className="inline-flex items-center gap-2 mb-2 px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 text-xs text-white/50">
@@ -229,7 +229,7 @@ export default function DashboardPage() {
                   <div className="flex gap-4">
                     <img src="/logo.png" alt="X+" className="w-8 h-8 rounded-lg shrink-0 mt-0.5" />
                     <div className="flex-1">
-                      <p className="text-sm font-semibold mb-1 text-white/90">Start-Up Studio®</p>
+                      <p className="text-sm font-semibold mb-1 text-white/90">MentXr®</p>
                       <div className="flex items-center gap-1.5 py-2">
                         <span className="w-2 h-2 bg-[#555] rounded-full animate-bounce"></span>
                         <span className="w-2 h-2 bg-[#555] rounded-full animate-bounce [animation-delay:0.15s]"></span>
@@ -277,7 +277,7 @@ export default function DashboardPage() {
               <textarea
                 ref={textareaRef}
                 data-testid="input-chat"
-                placeholder="Message Start-Up Studio..."
+                placeholder="Message MentXr..."
                 value={input}
                 onChange={handleTextareaInput}
                 onKeyDown={handleKeyDown}
@@ -331,7 +331,7 @@ export default function DashboardPage() {
               </div>
             </div>
             <p className="text-center text-[11px] text-white/20 mt-2">
-              Start-Up Studio® AI can make mistakes. Verify important financial information.
+              MentXr® AI can make mistakes. Verify important financial information.
             </p>
           </div>
         </div>

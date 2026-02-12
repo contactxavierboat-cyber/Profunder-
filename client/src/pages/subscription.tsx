@@ -23,7 +23,7 @@ export default function SubscriptionPage() {
         .then((data) => {
           if (data.active) {
             queryClient.invalidateQueries({ queryKey: ["/api/me"] });
-            toast({ title: "Subscription Activated!", description: "Welcome to Start-Up Studio\u00ae." });
+            toast({ title: "Subscription Activated!", description: "Welcome to MentXr\u00ae." });
             setTimeout(() => setLocation("/dashboard"), 1500);
           }
         });
@@ -106,7 +106,7 @@ export default function SubscriptionPage() {
       <div className="z-10 w-full max-w-md space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700">
 
         <div className="flex flex-col items-center">
-          <img src="/logo.png" alt="Start-Up Studio" className="w-[64px] h-[64px] rounded-[16px] mb-8" />
+          <img src="/logo.png" alt="MentXr" className="w-[64px] h-[64px] rounded-[16px] mb-8" />
 
           <div className="flex items-center gap-2.5 px-5 py-2 rounded-full border border-[#333] bg-[#181818] mb-8">
             <span className="w-[8px] h-[8px] rounded-full bg-[#888] animate-pulse"></span>
@@ -135,7 +135,7 @@ export default function SubscriptionPage() {
           <div className="w-full h-px bg-gradient-to-r from-transparent via-[#444] to-transparent"></div>
 
           <div className="px-8 pt-8 pb-2 text-center">
-            <p className="text-[13px] text-[#777] uppercase tracking-[0.1em] font-semibold mb-4">Start-Up Studio\u00ae Monthly</p>
+            <p className="text-[13px] text-[#777] uppercase tracking-[0.1em] font-semibold mb-4">MentXr\u00ae Monthly</p>
             <div className="mb-1">
               <span className="text-[52px] font-bold tracking-tight text-[#E0E0E0]" data-testid="text-price">$50</span>
               <span className="text-[#555] text-[15px] ml-1">/month</span>

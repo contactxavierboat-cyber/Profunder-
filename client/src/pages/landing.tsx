@@ -4,8 +4,8 @@ import { CalendarDays } from "lucide-react";
 
 const faqItems = [
   {
-    q: "What is Start-Up Studio?",
-    a: "Start-Up Studio® is a digital underwriting engine that evaluates your credit profile and determines your fundability using a proprietary 3-phase system: Structure, Scale, and Sequence."
+    q: "What is MentXr?",
+    a: "MentXr® is a digital underwriting engine that evaluates your credit profile and determines your fundability using a proprietary 3-phase system: Structure, Scale, and Sequence."
   },
   {
     q: "What's included in my membership?",
@@ -21,7 +21,7 @@ const faqItems = [
   },
   {
     q: "How much will this cost?",
-    a: "Start-Up Studio® is available for $97/month, giving you full access to all features including AI-powered analyses, document verification, and more."
+    a: "MentXr® is available for $50/month, giving you full access to all features including AI-powered analyses, document verification, and more."
   },
 ];
 
@@ -124,7 +124,7 @@ export default function LandingPage() {
         <div className="max-w-[560px] mx-auto">
           <h2 className="text-[32px] md:text-[36px] font-bold text-center mb-3 tracking-[-0.01em]">Frequently asked questions</h2>
           <p className="text-center text-[#666] text-[14px] mb-12 max-w-[420px] mx-auto leading-[1.6]">
-            Everything you need to know about Start-Up Studio. Find answers to the most common questions below.
+            Everything you need to know about MentXr. Find answers to the most common questions below.
           </p>
 
           <div className="space-y-3">
@@ -156,7 +156,7 @@ export default function LandingPage() {
 
       <footer className="border-t border-[#1A1A1A] px-6 py-8 text-center">
         <p className="text-[12px] text-[#444]">
-          &copy; 2026 Start-Up Studio® by <span className="text-[#666] font-semibold">CMD Supply</span>
+          &copy; 2026 MentXr® by <span className="text-[#666] font-semibold">CMD Supply</span>
         </p>
       </footer>
     </div>

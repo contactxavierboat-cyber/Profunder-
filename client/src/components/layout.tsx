@@ -28,7 +28,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
         <div className="p-6 border-b border-sidebar-border">
           <h1 className="font-sans font-bold text-xl tracking-tighter flex items-center gap-2">
             <span className="w-8 h-8 bg-[#E0E0E0] rounded-md flex items-center justify-center text-[#0D0D0D] font-mono">X</span>
-            Start-Up Studio®
+            MentXr®
           </h1>
           <p className="text-xs text-muted-foreground mt-1">Digital Underwriting Engine</p>
         </div>

@@ -1,7 +1,7 @@
-# Start-Up Studio®
+# MentXr®
 
 ## Overview
-A subscription-based SaaS web app that evaluates users' credit profiles and determines fundability using a 3-phase system (Structure, Scale, Sequence). Features secure authentication, subscription management, a member dashboard with credit profile inputs, document uploads, an AI-powered chat analysis interface using OpenAI, and an admin panel for user management.
+A subscription-based SaaS web app (formerly Start-Up Studio®, now MentXr®) that evaluates users' credit profiles and determines fundability using a 3-phase system (Structure, Scale, Sequence). Features secure authentication, subscription management, a member dashboard with credit profile inputs, document uploads, an AI-powered chat analysis interface using OpenAI, and an admin panel for user management.
 
 ## Recent Changes
 - 2026-02-12: Graduated from visual prototype to full-stack working app with PostgreSQL + Drizzle ORM
@@ -10,7 +10,7 @@ A subscription-based SaaS web app that evaluates users' credit profiles and dete
 - 2026-02-12: Added 30 analyses/month usage limiting with proper error messages
 
 ## User Preferences
-- Dark theme (#0A0A0A background) with Acid Green (#CCFF00) primary color
+- Dark theme (#0D0D0D background) with dark gray color scheme (#0D0D0D, #1A1A1A, #E0E0E0)
 - Inter font for UI, JetBrains Mono for data/metrics
 - "Digital Brutalism/Tech Finance" aesthetic with glass-panel effects and subtle grid backgrounds
 - API key must be stored server-side only, never exposed to frontend

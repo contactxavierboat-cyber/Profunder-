@@ -3,7 +3,7 @@ import { getUncachableStripeClient } from './stripeClient';
 async function createProducts() {
   const stripe = await getUncachableStripeClient();
 
-  const products = await stripe.products.search({ query: "name:'Start-Up Studio Monthly'" });
+  const products = await stripe.products.search({ query: "name:'MentXr Monthly'" });
   if (products.data.length > 0) {
     console.log('Product already exists:', products.data[0].id);
     const prices = await stripe.prices.list({ product: products.data[0].id, active: true });
@@ -14,8 +14,8 @@ async function createProducts() {
   }
 
   const product = await stripe.products.create({
-    name: 'Start-Up Studio Monthly',
-    description: 'Start-Up Studio® Monthly Access — AI-powered fundability analysis, bank-level underwriting logic, document verification, and priority support.',
+    name: 'MentXr Monthly',
+    description: 'MentXr® Monthly Access — AI-powered fundability analysis, bank-level underwriting logic, document verification, and priority support.',
   });
   console.log('Created product:', product.id);
 

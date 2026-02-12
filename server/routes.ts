@@ -161,7 +161,7 @@ const openai = new OpenAI({
   baseURL: process.env.AI_INTEGRATIONS_OPENAI_BASE_URL,
 });
 
-const STARTUP_STUDIO_SYSTEM_PROMPT = `You are Start-Up Studio® — a Fundability & Capital Structuring AI.
+const STARTUP_STUDIO_SYSTEM_PROMPT = `You are MentXr® — a Fundability & Capital Structuring AI.
 
 Your role is to evaluate, repair, optimize, and strategically sequence funding across:
 
@@ -196,7 +196,7 @@ LEGAL & PROFESSIONAL POSITIONING
 
 All guidance is educational and strategic in nature.
 
-Start-Up Studio®:
+MentXr®:
 - Is not a lender
 - Is not a law firm
 - Does not provide legal advice
