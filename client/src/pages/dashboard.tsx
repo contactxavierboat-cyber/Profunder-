@@ -74,10 +74,9 @@ export default function DashboardPage() {
   const hasMessages = messages.length > 0;
 
   return (
-    <div className="h-screen flex bg-[#0A0A0A] text-white relative">
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff10_1px,transparent_1px),linear-gradient(to_bottom,#ffffff10_1px,transparent_1px)] bg-[size:40px_40px] pointer-events-none"></div>
+    <div className="h-screen flex bg-[#0A0A0A] text-white">
 
-      <aside className="w-[260px] bg-[#0F0F0F] flex flex-col border-r border-white/5 shrink-0 hidden md:flex">
+      <aside className="w-[260px] bg-[#0F0F0F] flex flex-col border-r border-white/5 shrink-0 hidden md:flex relative z-10">
         <div className="p-3">
           <button
             data-testid="button-new-chat"
@@ -121,7 +120,8 @@ export default function DashboardPage() {
         </div>
       </aside>
 
-      <main className="flex-1 flex flex-col min-w-0">
+      <main className="flex-1 flex flex-col min-w-0 relative">
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff10_1px,transparent_1px),linear-gradient(to_bottom,#ffffff10_1px,transparent_1px)] bg-[size:40px_40px] pointer-events-none"></div>
 
         <header className="h-12 flex items-center justify-between px-4 border-b border-white/5 shrink-0 md:hidden">
           <img src="/logo.png" alt="X+" className="w-7 h-7 rounded-lg" />
