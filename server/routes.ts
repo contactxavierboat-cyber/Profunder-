@@ -8,6 +8,8 @@ import MemoryStore from "memorystore";
 // @ts-ignore
 import PDFParser from "pdf2json";
 import { execFile } from "child_process";
+// @ts-ignore
+import Parser from "rss-parser";
 import { getUncachableStripeClient, getStripePublishableKey } from "./stripeClient";
 import { sql } from "drizzle-orm";
 import { promisify } from "util";
@@ -938,6 +940,115 @@ export async function registerRoutes(
       userComment,
       aiReply: aiReplyComment,
     });
+  });
+
+  const rssParser = new Parser({
+    timeout: 8000,
+    headers: { 'User-Agent': 'MentXr-Feed/1.0' },
+  });
+
+  const RSS_FEEDS = [
+    { url: "https://feeds.bbci.co.uk/news/business/rss.xml", source: "BBC Business", category: "business" },
+    { url: "https://www.entrepreneur.com/latest.rss", source: "Entrepreneur", category: "entrepreneurship" },
+    { url: "https://feeds.feedburner.com/entrepreneur/latest", source: "Entrepreneur", category: "entrepreneurship" },
+    { url: "https://www.forbes.com/innovation/feed2", source: "Forbes", category: "innovation" },
+    { url: "https://www.forbes.com/money/feed2", source: "Forbes Money", category: "finance" },
+    { url: "https://rss.nytimes.com/services/xml/rss/nyt/Business.xml", source: "NY Times Business", category: "business" },
+    { url: "https://feeds.nbcnews.com/nbcnews/public/business", source: "NBC Business", category: "business" },
+    { url: "https://search.cnbc.com/rs/search/combinedcms/view.xml?partnerId=wrss01&id=10001147", source: "CNBC", category: "finance" },
+    { url: "https://www.investopedia.com/feedbuilder/feed/getfeed/?feedName=rss_headline", source: "Investopedia", category: "investing" },
+  ];
+
+  interface FeedItem {
+    id: string;
+    title: string;
+    description: string;
+    link: string;
+    image: string | null;
+    source: string;
+    category: string;
+    publishedAt: string;
+    author: string | null;
+  }
+
+  let feedCache: FeedItem[] = [];
+  let feedLastFetch = 0;
+  const FEED_CACHE_MS = 3 * 60 * 1000;
+
+  async function fetchAllFeeds(): Promise<FeedItem[]> {
+    const now = Date.now();
+    if (feedCache.length > 0 && now - feedLastFetch < FEED_CACHE_MS) {
+      return feedCache;
+    }
+
+    const results: FeedItem[] = [];
+
+    const feedPromises = RSS_FEEDS.map(async (feedConfig) => {
+      try {
+        const feed = await rssParser.parseURL(feedConfig.url);
+        const items = (feed.items || []).slice(0, 8);
+        for (const item of items) {
+          let image: string | null = null;
+          if (item.enclosure?.url) {
+            image = item.enclosure.url;
+          } else if (item['media:content']?.$.url) {
+            image = item['media:content'].$.url;
+          } else if (item['media:thumbnail']?.$.url) {
+            image = item['media:thumbnail'].$.url;
+          } else {
+            const imgMatch = (item['content:encoded'] || item.content || "").match(/<img[^>]+src="([^"]+)"/);
+            if (imgMatch) image = imgMatch[1];
+          }
+
+          const desc = (item.contentSnippet || item.content || item.summary || "")
+            .replace(/<[^>]*>/g, "")
+            .substring(0, 200)
+            .trim();
+
+          results.push({
+            id: `${feedConfig.source}-${item.guid || item.link || item.title}`,
+            title: item.title || "Untitled",
+            description: desc || "",
+            link: item.link || "",
+            image,
+            source: feedConfig.source,
+            category: feedConfig.category,
+            publishedAt: item.isoDate || item.pubDate || new Date().toISOString(),
+            author: item.creator || item.author || null,
+          });
+        }
+      } catch (err) {
+        console.error(`RSS feed error (${feedConfig.source}):`, (err as Error).message);
+      }
+    });
+
+    await Promise.allSettled(feedPromises);
+
+    results.sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime());
+
+    feedCache = results;
+    feedLastFetch = now;
+    return results;
+  }
+
+  app.get("/api/feed", requireAuth, async (req, res) => {
+    try {
+      const items = await fetchAllFeeds();
+      const page = parseInt(req.query.page as string) || 0;
+      const limit = parseInt(req.query.limit as string) || 20;
+      const offset = page * limit;
+      const paged = items.slice(offset, offset + limit);
+      res.json({
+        items: paged,
+        total: items.length,
+        page,
+        hasMore: offset + limit < items.length,
+        lastUpdated: feedLastFetch ? new Date(feedLastFetch).toISOString() : null,
+      });
+    } catch (error) {
+      console.error("Feed error:", error);
+      res.status(500).json({ error: "Failed to load feed" });
+    }
   });
 
   return httpServer;

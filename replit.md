@@ -4,6 +4,8 @@
 A free AI mentorship platform ("Mentorship On Demand") that provides personalized conversations with digital versions of influential mentors. Features ChatGPT-style dark theme interface, session-based authentication, OpenAI GPT-4o powered conversations, PDF document upload, admin panel, and free membership access for all users.
 
 ## Recent Changes
+- 2026-02-13: Added real-time Discover feed pulling live news from RSS sources (BBC, Forbes, CNBC, Entrepreneur, etc.)
+- 2026-02-13: Dashboard now has Chat/Discover tabs with auto-refreshing content feed
 - 2026-02-13: Added comment system with AI auto-replies (comments table, API endpoints, inline UI)
 - 2026-02-13: Added Charleston White as 7th mentor - Youth Advocacy & Transformation
 - 2026-02-13: Reset all memberships (monthly usage reset to 0 for all users)
