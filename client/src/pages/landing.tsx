@@ -157,96 +157,58 @@ export default function LandingPage() {
         <div className="absolute inset-0 bg-[#080808]"></div>
 
         <div className="absolute inset-0 z-[1] overflow-hidden pointer-events-none">
-          <div
-            className="absolute rounded-full"
-            style={{
-              width: '120vw',
-              height: '120vh',
-              background: 'radial-gradient(circle, rgba(160,160,160,0.5) 0%, rgba(120,120,120,0.2) 30%, transparent 60%)',
-              top: '-20%',
-              left: '-20%',
-              animation: 'fogDrift1 25s ease-in-out infinite',
-              filter: 'blur(100px)',
-            }}
-          />
-          <div
-            className="absolute rounded-full"
-            style={{
-              width: '100vw',
-              height: '80vh',
-              background: 'radial-gradient(circle, rgba(180,180,180,0.4) 0%, rgba(140,140,140,0.15) 35%, transparent 60%)',
-              top: '10%',
-              right: '-30%',
-              animation: 'fogDrift2 30s ease-in-out infinite',
-              filter: 'blur(120px)',
-            }}
-          />
-          <div
-            className="absolute rounded-full"
-            style={{
-              width: '80vw',
-              height: '80vh',
-              background: 'radial-gradient(circle, rgba(150,150,150,0.45) 0%, rgba(100,100,100,0.15) 40%, transparent 60%)',
-              bottom: '-10%',
-              left: '10%',
-              animation: 'fogDrift3 20s ease-in-out infinite',
-              filter: 'blur(110px)',
-            }}
-          />
-          <div
-            className="absolute rounded-full"
-            style={{
-              width: '130vw',
-              height: '60vh',
-              background: 'radial-gradient(ellipse, rgba(170,170,170,0.35) 0%, rgba(130,130,130,0.1) 40%, transparent 60%)',
-              top: '30%',
-              left: '-15%',
-              animation: 'fogDrift4 35s ease-in-out infinite',
-              filter: 'blur(130px)',
-            }}
-          />
-          <div
-            className="absolute rounded-full"
-            style={{
-              width: '90vw',
-              height: '90vh',
-              background: 'radial-gradient(circle, rgba(140,140,140,0.4) 0%, rgba(110,110,110,0.12) 35%, transparent 55%)',
-              top: '-15%',
-              right: '-10%',
-              animation: 'fogDrift5 28s ease-in-out infinite',
-              filter: 'blur(105px)',
-            }}
-          />
+          <div className="absolute" style={{ width: '60vw', height: '50vh', top: '-5%', left: '5%', animation: 'smokeA 22s ease-in-out infinite', filter: 'blur(60px)', background: 'radial-gradient(ellipse at 30% 50%, rgba(255,255,255,0.18) 0%, rgba(200,200,200,0.08) 25%, transparent 55%)' }} />
+          <div className="absolute" style={{ width: '50vw', height: '60vh', top: '15%', right: '-5%', animation: 'smokeB 28s ease-in-out infinite', filter: 'blur(50px)', background: 'radial-gradient(ellipse at 70% 40%, rgba(255,255,255,0.15) 0%, rgba(180,180,180,0.06) 30%, transparent 55%)' }} />
+          <div className="absolute" style={{ width: '45vw', height: '45vh', bottom: '0%', left: '15%', animation: 'smokeC 18s ease-in-out infinite', filter: 'blur(55px)', background: 'radial-gradient(ellipse at 40% 60%, rgba(240,240,240,0.14) 0%, rgba(160,160,160,0.05) 30%, transparent 50%)' }} />
+          <div className="absolute" style={{ width: '70vw', height: '35vh', top: '40%', left: '-10%', animation: 'smokeD 32s ease-in-out infinite', filter: 'blur(45px)', background: 'radial-gradient(ellipse at 50% 50%, rgba(255,255,255,0.12) 0%, rgba(200,200,200,0.04) 35%, transparent 55%)' }} />
+          <div className="absolute" style={{ width: '40vw', height: '55vh', top: '5%', right: '10%', animation: 'smokeE 24s ease-in-out infinite', filter: 'blur(40px)', background: 'radial-gradient(ellipse at 60% 30%, rgba(255,255,255,0.2) 0%, rgba(220,220,220,0.08) 20%, transparent 50%)' }} />
+          <div className="absolute" style={{ width: '55vw', height: '40vh', bottom: '10%', right: '0%', animation: 'smokeF 26s ease-in-out infinite', filter: 'blur(70px)', background: 'radial-gradient(ellipse at 50% 50%, rgba(255,255,255,0.1) 0%, rgba(180,180,180,0.04) 30%, transparent 50%)' }} />
+          <div className="absolute" style={{ width: '35vw', height: '70vh', top: '10%', left: '30%', animation: 'smokeG 20s ease-in-out infinite', filter: 'blur(35px)', background: 'radial-gradient(ellipse at 45% 45%, rgba(255,255,255,0.16) 0%, rgba(200,200,200,0.06) 25%, transparent 45%)' }} />
         </div>
 
         <style>{`
-          @keyframes fogDrift1 {
-            0%, 100% { transform: translate(0, 0) scale(1); opacity: 1; }
-            25% { transform: translate(80px, 40px) scale(1.15); opacity: 0.8; }
-            50% { transform: translate(40px, 80px) scale(0.9); opacity: 1; }
-            75% { transform: translate(-30px, 30px) scale(1.1); opacity: 0.85; }
+          @keyframes smokeA {
+            0%, 100% { transform: translate(0, 0) scale(1) rotate(0deg); opacity: 0.9; }
+            20% { transform: translate(60px, 30px) scale(1.2) rotate(5deg); opacity: 1; }
+            40% { transform: translate(30px, 70px) scale(0.85) rotate(-3deg); opacity: 0.7; }
+            60% { transform: translate(-40px, 50px) scale(1.1) rotate(8deg); opacity: 0.95; }
+            80% { transform: translate(-20px, 10px) scale(0.95) rotate(-2deg); opacity: 0.8; }
           }
-          @keyframes fogDrift2 {
-            0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.9; }
-            25% { transform: translate(-70px, 50px) scale(1.1); opacity: 1; }
-            50% { transform: translate(-120px, -20px) scale(1.2); opacity: 0.7; }
-            75% { transform: translate(-40px, -60px) scale(0.9); opacity: 1; }
+          @keyframes smokeB {
+            0%, 100% { transform: translate(0, 0) scale(1) rotate(0deg); opacity: 0.85; }
+            25% { transform: translate(-80px, 40px) scale(1.15) rotate(-6deg); opacity: 1; }
+            50% { transform: translate(-50px, -30px) scale(1.3) rotate(4deg); opacity: 0.6; }
+            75% { transform: translate(30px, -50px) scale(0.9) rotate(-3deg); opacity: 0.9; }
           }
-          @keyframes fogDrift3 {
-            0%, 100% { transform: translate(0, 0) scale(1); opacity: 1; }
-            33% { transform: translate(80px, -40px) scale(1.15); opacity: 0.75; }
-            66% { transform: translate(-60px, -70px) scale(0.85); opacity: 1; }
+          @keyframes smokeC {
+            0%, 100% { transform: translate(0, 0) scale(1) rotate(0deg); opacity: 1; }
+            30% { transform: translate(50px, -50px) scale(1.25) rotate(7deg); opacity: 0.7; }
+            60% { transform: translate(-30px, -80px) scale(0.8) rotate(-5deg); opacity: 1; }
           }
-          @keyframes fogDrift4 {
-            0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.85; }
-            25% { transform: translate(120px, -30px) scale(1.08); opacity: 1; }
-            50% { transform: translate(60px, 60px) scale(1.15); opacity: 0.7; }
-            75% { transform: translate(-50px, 20px) scale(0.95); opacity: 1; }
+          @keyframes smokeD {
+            0%, 100% { transform: translate(0, 0) scale(1) rotate(0deg); opacity: 0.8; }
+            20% { transform: translate(100px, -20px) scale(1.1) rotate(3deg); opacity: 1; }
+            40% { transform: translate(70px, 40px) scale(1.25) rotate(-4deg); opacity: 0.65; }
+            60% { transform: translate(-20px, 30px) scale(0.9) rotate(6deg); opacity: 0.95; }
+            80% { transform: translate(-60px, -10px) scale(1.05) rotate(-2deg); opacity: 0.75; }
           }
-          @keyframes fogDrift5 {
-            0%, 100% { transform: translate(0, 0) scale(1); opacity: 1; }
-            30% { transform: translate(-80px, 70px) scale(1.12); opacity: 0.8; }
-            60% { transform: translate(60px, 30px) scale(0.88); opacity: 1; }
+          @keyframes smokeE {
+            0%, 100% { transform: translate(0, 0) scale(1) rotate(0deg); opacity: 1; }
+            25% { transform: translate(-40px, 60px) scale(1.2) rotate(-8deg); opacity: 0.75; }
+            50% { transform: translate(20px, 40px) scale(0.85) rotate(5deg); opacity: 1; }
+            75% { transform: translate(50px, -20px) scale(1.15) rotate(-3deg); opacity: 0.8; }
+          }
+          @keyframes smokeF {
+            0%, 100% { transform: translate(0, 0) scale(1) rotate(0deg); opacity: 0.7; }
+            33% { transform: translate(-70px, -40px) scale(1.3) rotate(6deg); opacity: 1; }
+            66% { transform: translate(40px, -60px) scale(0.9) rotate(-4deg); opacity: 0.8; }
+          }
+          @keyframes smokeG {
+            0%, 100% { transform: translate(0, 0) scale(1) rotate(0deg); opacity: 0.85; }
+            20% { transform: translate(30px, 50px) scale(1.15) rotate(-5deg); opacity: 1; }
+            40% { transform: translate(-50px, 30px) scale(1.3) rotate(7deg); opacity: 0.65; }
+            60% { transform: translate(-20px, -40px) scale(0.85) rotate(-3deg); opacity: 0.95; }
+            80% { transform: translate(40px, -20px) scale(1.1) rotate(4deg); opacity: 0.75; }
           }
         `}</style>
 
@@ -261,7 +223,7 @@ export default function LandingPage() {
                   fontWeight: 400,
                   lineHeight: 0.95,
                   letterSpacing: '-0.07em',
-                  background: 'linear-gradient(180deg, #ffffff 0%, #b0b0b0 50%, #666666 100%)',
+                  background: 'linear-gradient(180deg, #ffffff 0%, #f0f0f0 40%, #d0d0d0 100%)',
                   WebkitBackgroundClip: 'text',
                   WebkitTextFillColor: 'transparent',
                   backgroundClip: 'text',
@@ -278,7 +240,7 @@ export default function LandingPage() {
                   lineHeight: 0.95,
                   letterSpacing: '-0.07em',
                   marginLeft: '35%',
-                  background: 'linear-gradient(180deg, #cccccc 0%, #888888 50%, #444444 100%)',
+                  background: 'linear-gradient(180deg, #ffffff 0%, #e8e8e8 40%, #c0c0c0 100%)',
                   WebkitBackgroundClip: 'text',
                   WebkitTextFillColor: 'transparent',
                   backgroundClip: 'text',
@@ -295,7 +257,7 @@ export default function LandingPage() {
                   lineHeight: 0.95,
                   letterSpacing: '-0.07em',
                   marginLeft: '10%',
-                  background: 'linear-gradient(180deg, #aaaaaa 0%, #666666 50%, #333333 100%)',
+                  background: 'linear-gradient(180deg, #ffffff 0%, #e0e0e0 40%, #b8b8b8 100%)',
                   WebkitBackgroundClip: 'text',
                   WebkitTextFillColor: 'transparent',
                   backgroundClip: 'text',
