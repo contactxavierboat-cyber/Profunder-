@@ -45,6 +45,17 @@ export default function DashboardPage() {
   const [mentorCleared, setMentorCleared] = useState(false);
   const [likedMessages, setLikedMessages] = useState<Set<number>>(new Set());
   const [savedMessages, setSavedMessages] = useState<Set<number>>(new Set());
+  const [expandedMessages, setExpandedMessages] = useState<Set<number>>(new Set());
+
+  const TRUNCATE_LENGTH = 280;
+
+  const toggleExpand = (id: number) => {
+    setExpandedMessages(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  };
 
   const lastMentorMsg = [...messages].reverse().find(m => m.role === 'assistant' && m.mentor);
   const activeMentorKey = selectedMentor !== null ? selectedMentor : (mentorCleared ? null : (lastMentorMsg?.mentor || null));
@@ -418,7 +429,31 @@ export default function DashboardPage() {
                           )}
 
                           <div className="text-[14px] sm:text-[15px] leading-[1.6] text-white/80 whitespace-pre-wrap break-words">
-                            {m.content}
+                            {m.content.length > TRUNCATE_LENGTH && !expandedMessages.has(m.id) ? (
+                              <>
+                                {m.content.substring(0, TRUNCATE_LENGTH).trimEnd()}...
+                                <button
+                                  onClick={() => toggleExpand(m.id)}
+                                  className="text-[#E0E0E0]/60 hover:text-[#E0E0E0] ml-1 text-[13px] font-medium"
+                                  data-testid={`button-readmore-${m.id}`}
+                                >
+                                  Read more
+                                </button>
+                              </>
+                            ) : (
+                              <>
+                                {m.content}
+                                {m.content.length > TRUNCATE_LENGTH && (
+                                  <button
+                                    onClick={() => toggleExpand(m.id)}
+                                    className="block text-[#E0E0E0]/40 hover:text-[#E0E0E0]/60 mt-1 text-[13px] font-medium"
+                                    data-testid={`button-showless-${m.id}`}
+                                  >
+                                    Show less
+                                  </button>
+                                )}
+                              </>
+                            )}
                           </div>
 
                           <div className="flex items-center gap-6 mt-3 -ml-2">
@@ -472,7 +507,7 @@ export default function DashboardPage() {
                         <div className="flex items-center gap-1.5 mb-1">
                           <span className="text-[14px] font-bold text-white/90">{activeMentor ? activeMentor.name : "MentXr® AI"}</span>
                           <span className="shrink-0">
-                            <svg className="w-[14px] h-[14px] text-blue-400" viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg>
+                            <svg className="w-[14px] h-[14px] text-[#E0E0E0]" viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg>
                           </span>
                         </div>
                         <div className="flex items-center gap-1.5 py-2">
