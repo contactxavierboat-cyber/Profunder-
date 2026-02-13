@@ -57,6 +57,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return res.json();
     },
     enabled: isLoggedIn && !!user,
+    refetchInterval: 3000,
   });
 
   const { data: allUsers = [] } = useQuery<SafeUser[]>({
