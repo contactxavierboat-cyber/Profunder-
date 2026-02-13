@@ -152,7 +152,6 @@ export default function LandingPage() {
           </div>
 
           <div className="flex items-center gap-2 sm:gap-2.5 px-4 sm:px-5 py-1.5 sm:py-2 rounded-full border border-[#333] bg-[#181818] mb-8 sm:mb-12">
-            <span className="w-[7px] h-[7px] sm:w-[8px] sm:h-[8px] rounded-full bg-[#888] animate-ping"></span>
             <span className="text-[11px] sm:text-[13px] font-semibold tracking-[0.12em] text-white/90 uppercase">NOW AVAILABLE</span>
           </div>
 
