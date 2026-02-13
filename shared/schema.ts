@@ -31,6 +31,11 @@ export const users = pgTable("users", {
   lastAnalysisDate: timestamp("last_analysis_date"),
   analysisSummary: text("analysis_summary"),
   analysisNextSteps: text("analysis_next_steps"),
+
+  // Credit Repair Analysis
+  creditRepairData: text("credit_repair_data"),
+  lastRepairAnalysisDate: timestamp("last_repair_analysis_date"),
+  lastCreditReportText: text("last_credit_report_text"),
 });
 
 export const messages = pgTable("messages", {

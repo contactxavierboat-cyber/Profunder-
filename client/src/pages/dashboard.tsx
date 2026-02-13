@@ -94,6 +94,11 @@ export default function DashboardPage() {
   const [docUploadType, setDocUploadType] = useState<"credit_report" | "bank_statement" | null>(null);
   const creditReportInputRef = useRef<HTMLInputElement>(null);
   const bankStatementInputRef = useRef<HTMLInputElement>(null);
+  const [repairData, setRepairData] = useState<any>(null);
+  const [repairLoading, setRepairLoading] = useState(false);
+  const [repairAnalyzing, setRepairAnalyzing] = useState(false);
+  const [expandedLetters, setExpandedLetters] = useState<Set<number>>(new Set());
+  const [copiedLetter, setCopiedLetter] = useState<number | null>(null);
 
   const TRUNCATE_LENGTH = 280;
 
@@ -216,10 +221,58 @@ export default function DashboardPage() {
     }
   };
 
+  const fetchRepairData = async () => {
+    setRepairLoading(true);
+    try {
+      const res = await fetch("/api/credit-repair-data", { credentials: "include" });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.hasData) setRepairData(data);
+      }
+    } catch (err) {
+      console.error("Failed to fetch repair data", err);
+    } finally {
+      setRepairLoading(false);
+    }
+  };
+
+  const runRepairAnalysis = async () => {
+    setRepairAnalyzing(true);
+    try {
+      const res = await fetch("/api/credit-repair-analysis", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ useStored: true }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setRepairData(data);
+        toast({ title: "Repair Analysis Complete", description: `${data.detectedIssues?.length || 0} issues detected. ${data.letters?.length || 0} letters generated.` });
+      } else {
+        const data = await res.json();
+        toast({ title: "Analysis Failed", description: data.error || "Could not run repair analysis.", variant: "destructive" });
+      }
+    } catch (err) {
+      toast({ title: "Error", description: "Failed to run repair analysis.", variant: "destructive" });
+    } finally {
+      setRepairAnalyzing(false);
+    }
+  };
+
+  const copyLetterToClipboard = (text: string, idx: number) => {
+    navigator.clipboard.writeText(text).then(() => {
+      setCopiedLetter(idx);
+      setTimeout(() => setCopiedLetter(null), 2000);
+      toast({ title: "Copied to clipboard" });
+    });
+  };
+
   useEffect(() => {
     if (user) {
       fetchFriends();
       fetchFundingReadiness();
+      fetchRepairData();
     }
   }, [user]);
 
@@ -1025,6 +1078,161 @@ export default function DashboardPage() {
                       </div>
                     </div>
                   )}
+
+                  <div className="rounded-2xl border border-orange-500/20 bg-[#141414] p-6" data-testid="credit-repair-card">
+                    <div className="flex items-center gap-2 mb-4">
+                      <Shield className="w-4 h-4 text-orange-400" />
+                      <p className="text-xs font-semibold tracking-widest text-orange-400/80 uppercase">Credit Repair System</p>
+                      <span className="ml-auto text-[10px] text-orange-400/60 bg-orange-400/10 px-2 py-0.5 rounded-full font-medium">GPT-4o</span>
+                    </div>
+
+                    {!fundingData?.hasCreditReport ? (
+                      <div className="text-center py-6">
+                        <FileText className="w-8 h-8 text-white/20 mx-auto mb-3" />
+                        <p className="text-sm text-white/50 mb-1">Upload a credit report first</p>
+                        <p className="text-xs text-white/30">The repair system needs your credit report to detect issues and generate dispute letters.</p>
+                      </div>
+                    ) : !repairData ? (
+                      <div className="text-center py-6">
+                        <p className="text-sm text-white/60 mb-3">Credit report uploaded. Run the repair analysis to detect issues and generate dispute letters.</p>
+                        <button
+                          onClick={runRepairAnalysis}
+                          disabled={repairAnalyzing}
+                          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-orange-500/15 border border-orange-500/30 hover:bg-orange-500/25 text-orange-400 text-sm font-medium transition-all disabled:opacity-50"
+                          data-testid="button-run-repair"
+                        >
+                          {repairAnalyzing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Zap className="w-4 h-4" />}
+                          {repairAnalyzing ? "Analyzing Report..." : "Run Credit Repair Analysis"}
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="space-y-4">
+                        <div className="flex items-center gap-2 mb-2">
+                          <span className={cn(
+                            "text-[10px] font-bold uppercase px-2.5 py-1 rounded",
+                            repairData.mode === "repair" ? "bg-amber-500/20 text-amber-400" : "bg-emerald-500/20 text-emerald-400"
+                          )}>{repairData.mode === "repair" ? "Repair Mode" : "Pre-Funding Mode"}</span>
+                          <button
+                            onClick={runRepairAnalysis}
+                            disabled={repairAnalyzing}
+                            className="ml-auto flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#1A1A1A] border border-[#333] hover:border-[#444] text-xs text-white/60 hover:text-white/80 transition-all disabled:opacity-50"
+                            data-testid="button-rerun-repair"
+                          >
+                            {repairAnalyzing ? <Loader2 className="w-3 h-3 animate-spin" /> : <RefreshCw className="w-3 h-3" />}
+                            Re-analyze
+                          </button>
+                        </div>
+
+                        {repairData.summary && (
+                          <div className="p-4 rounded-xl bg-[#1A1A1A] border border-[#2A2A2A]">
+                            <p className="text-xs font-semibold text-white/60 mb-1.5">What's Hurting Your Profile</p>
+                            <p className="text-sm text-white/75 leading-relaxed mb-2">{repairData.summary.mainIssues}</p>
+                            <p className="text-xs font-semibold text-orange-400/80 mb-1">Priority Action</p>
+                            <p className="text-sm text-white/65 leading-relaxed">{repairData.summary.priorityAction}</p>
+                          </div>
+                        )}
+
+                        {repairData.detectedIssues && repairData.detectedIssues.length > 0 && (
+                          <div>
+                            <p className="text-xs font-semibold tracking-widest text-white/40 uppercase mb-3">Detected Issues ({repairData.detectedIssues.length})</p>
+                            <div className="space-y-2">
+                              {repairData.detectedIssues.map((issue: any, idx: number) => (
+                                <div key={idx} className="p-3.5 rounded-xl bg-[#1A1A1A] border border-[#2A2A2A]" data-testid={`repair-issue-${idx}`}>
+                                  <div className="flex items-center gap-2 mb-1.5 flex-wrap">
+                                    <span className={cn(
+                                      "text-[10px] font-bold uppercase px-2 py-0.5 rounded",
+                                      issue.severity === "High" ? "bg-red-500/20 text-red-400" :
+                                      issue.severity === "Medium" ? "bg-yellow-500/20 text-yellow-400" :
+                                      "bg-green-500/20 text-green-400"
+                                    )}>{issue.severity}</span>
+                                    <span className="text-xs text-white/40">{issue.bureau}</span>
+                                    <span className="text-xs text-white/30">·</span>
+                                    <span className="text-xs text-white/50 font-medium">{issue.issueType}</span>
+                                  </div>
+                                  <p className="text-sm text-white/80 font-medium">{issue.creditor} {issue.accountLast4 !== "N/A" ? `(****${issue.accountLast4})` : ""}</p>
+                                  {issue.monthsAffected !== "N/A" && (
+                                    <p className="text-xs text-white/40 mt-1">Months: {issue.monthsAffected}</p>
+                                  )}
+                                  <p className="text-xs text-cyan-400/70 mt-1.5">Attach: {issue.proofToAttach}</p>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        {repairData.actionPlan && repairData.actionPlan.length > 0 && (
+                          <div>
+                            <p className="text-xs font-semibold tracking-widest text-white/40 uppercase mb-3">Repair Action Plan</p>
+                            <div className="space-y-2">
+                              {repairData.actionPlan.map((step: any, idx: number) => (
+                                <div key={idx} className="flex items-start gap-3 p-3 rounded-xl bg-[#1A1A1A]" data-testid={`repair-step-${idx}`}>
+                                  <div className="w-6 h-6 rounded-full bg-orange-500/15 border border-orange-500/25 flex items-center justify-center text-xs font-mono text-orange-400 shrink-0">
+                                    {step.step || idx + 1}
+                                  </div>
+                                  <div className="flex-1 min-w-0">
+                                    <p className="text-sm text-white/80 font-medium">{step.action}</p>
+                                    <div className="flex items-center gap-3 mt-1">
+                                      <span className="text-[10px] text-orange-400/70 font-mono">{step.timing}</span>
+                                      {step.details && <span className="text-xs text-white/40">{step.details}</span>}
+                                    </div>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        {repairData.letters && repairData.letters.length > 0 && (
+                          <div>
+                            <p className="text-xs font-semibold tracking-widest text-white/40 uppercase mb-3">Generated Dispute Letters ({repairData.letters.length})</p>
+                            <div className="space-y-2">
+                              {repairData.letters.map((letter: any, idx: number) => (
+                                <div key={idx} className="rounded-xl bg-[#1A1A1A] border border-[#2A2A2A] overflow-hidden" data-testid={`letter-${idx}`}>
+                                  <button
+                                    onClick={() => setExpandedLetters(prev => {
+                                      const next = new Set(prev);
+                                      if (next.has(idx)) next.delete(idx); else next.add(idx);
+                                      return next;
+                                    })}
+                                    className="w-full text-left p-3.5 flex items-center gap-3 hover:bg-[#1E1E1E] transition-colors"
+                                  >
+                                    <FileText className="w-4 h-4 text-orange-400/70 shrink-0" />
+                                    <div className="flex-1 min-w-0">
+                                      <p className="text-sm text-white/80 font-medium truncate">{letter.subject || `${letter.type === "bureau_dispute" ? "Bureau" : letter.type === "creditor_dispute" ? "Creditor" : "Info Correction"} Letter`}</p>
+                                      <p className="text-xs text-white/40 truncate">To: {letter.recipientName}</p>
+                                    </div>
+                                    <ChevronRight className={cn("w-4 h-4 text-white/25 shrink-0 transition-transform", expandedLetters.has(idx) && "rotate-90")} />
+                                  </button>
+                                  {expandedLetters.has(idx) && (
+                                    <div className="px-3.5 pb-3.5 border-t border-[#222]">
+                                      <div className="flex items-center gap-2 py-2">
+                                        <span className="text-[10px] text-white/30">To: {letter.recipientAddress}</span>
+                                        <button
+                                          onClick={() => copyLetterToClipboard(letter.body, idx)}
+                                          className="ml-auto flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-orange-500/10 border border-orange-500/20 hover:bg-orange-500/20 text-xs text-orange-400 font-medium transition-all"
+                                          data-testid={`button-copy-letter-${idx}`}
+                                        >
+                                          {copiedLetter === idx ? <CheckCircle2 className="w-3 h-3" /> : <Eye className="w-3 h-3" />}
+                                          {copiedLetter === idx ? "Copied!" : "Copy Letter"}
+                                        </button>
+                                      </div>
+                                      <div className="mt-2 p-4 rounded-xl bg-[#0D0D0D] border border-[#222] font-mono text-xs text-white/70 leading-relaxed whitespace-pre-wrap max-h-96 overflow-y-auto" style={{ scrollbarWidth: 'thin' }}>
+                                        {letter.body}
+                                      </div>
+                                    </div>
+                                  )}
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        {repairData.disclaimer && (
+                          <p className="text-[10px] text-white/25 italic mt-2 px-1">{repairData.disclaimer}</p>
+                        )}
+                      </div>
+                    )}
+                  </div>
 
                   <div className="rounded-2xl border border-[#2A2A2A] bg-[#141414] p-6" data-testid="insights-card">
                     <div className="flex items-center gap-2 mb-4">

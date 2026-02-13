@@ -4,6 +4,12 @@
 A free AI mentorship platform ("Mentorship On Demand") combining Capital Readiness analytics with AI-powered mentorship. Features a 6-component Capital Readiness evaluation system (Capital Strength, Credit Quality, Management & Structure, Earnings & Cash Flow, Liquidity & Leverage, Risk Signals), 2.5x exposure ceiling calculation, tier eligibility (Prime/Mid-Tier/Alternative), operating mode (Pre-Funding/Repair), denial simulation, AI chat workspace with 7 bot mentors, PDF document upload with OCR, friends list, admin panel, and free membership access.
 
 ## Recent Changes
+- 2026-02-13: Added Credit Repair System with AI-powered report parsing, issue detection, repair plan, and auto-generated dispute letters
+- 2026-02-13: Added /api/credit-repair-analysis endpoint with GPT-4o parsing of credit report text
+- 2026-02-13: Added /api/credit-repair-data endpoint for retrieving stored repair results
+- 2026-02-13: Dashboard shows Credit Repair section with issues table, action plan timeline, expandable dispute letters with copy functionality
+- 2026-02-13: Auto-generates bureau dispute letters (Experian/Equifax/TransUnion) and creditor dispute letters from report data
+- 2026-02-13: Credit report text stored on upload for re-analysis without re-uploading
 - 2026-02-13: Integrated Master Capital Readiness System Prompt into funding engine and document analysis
 - 2026-02-13: Added 6-component scoring: Capital Strength (0-20), Credit Quality (0-20), Management (0-15), Cash Flow (0-15), Liquidity (0-15), Risk Signals (0-15)
 - 2026-02-13: Added 2.5x exposure ceiling logic with dynamic multiplier adjustments

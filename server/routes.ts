@@ -3765,6 +3765,7 @@ ${extractedText}
 
       if (documentType === "credit_report") {
         updateData.hasCreditReport = true;
+        updateData.lastCreditReportText = extractedText.slice(0, 30000);
         if (analysisResult.creditScoreRange) updateData.creditScoreRange = analysisResult.creditScoreRange;
         if (analysisResult.totalRevolvingLimit !== null && analysisResult.totalRevolvingLimit !== undefined) updateData.totalRevolvingLimit = analysisResult.totalRevolvingLimit;
         if (analysisResult.totalBalances !== null && analysisResult.totalBalances !== undefined) updateData.totalBalances = analysisResult.totalBalances;
@@ -3801,6 +3802,191 @@ ${extractedText}
     } catch (error: any) {
       console.error("Analyze document error:", error);
       res.status(500).json({ error: "Failed to analyze document. Please try again." });
+    }
+  });
+
+  app.post("/api/credit-repair-analysis", requireAuth, async (req: any, res) => {
+    try {
+      const userId = req.session.userId;
+      const user = await storage.getUser(userId);
+      if (!user) return res.status(404).json({ error: "User not found" });
+
+      if (user.monthlyUsage >= user.maxUsage) {
+        return res.status(403).json({ error: "Monthly analysis limit reached. Please wait for reset." });
+      }
+
+      const bodySchema = z.object({
+        reportText: z.string().optional(),
+        useStored: z.boolean().optional(),
+      });
+      const parsed = bodySchema.safeParse(req.body);
+      if (!parsed.success) {
+        return res.status(400).json({ error: "Invalid request." });
+      }
+
+      let reportText = parsed.data.reportText || "";
+      if (parsed.data.useStored && !reportText && user.lastCreditReportText) {
+        reportText = user.lastCreditReportText;
+      }
+
+      if (!reportText || reportText.length < 100) {
+        return res.status(400).json({ error: "No credit report text available. Upload a credit report first." });
+      }
+
+      const userName = user.displayName || user.email.split("@")[0];
+
+      const repairPrompt = `You are a Credit Report Repair & Funding Readiness System embedded inside MentXr®, a business funding app.
+
+Your job is to read the user's uploaded credit report text, identify negative or inaccurate items, and produce:
+1. A clear action plan (what to do first, second, third)
+2. Auto-filled dispute letters to the correct bureau(s)
+3. Optional direct dispute letters to the furnisher/creditor
+
+You must use plain language that the average business owner understands.
+You must not hype. You must not guarantee removals or approvals.
+Your tone must feel like a private capital analyst reviewing a file.
+
+COMPLIANCE & ETHICS (STRICT):
+- Only generate dispute letters for items that appear inaccurate, inconsistent, incomplete, or unverifiable.
+- Do NOT advise disputing accurate late payments just to remove them.
+- Do NOT suggest fraud, "credit sweep," false identity claims, or fake documents.
+- If late payments exist but no evidence they are incorrect, use "request verification / investigate accuracy" language and recommend user attach proof.
+
+RESPOND WITH ONLY VALID JSON matching this exact structure (no markdown, no code blocks):
+
+{
+  "mode": "repair" | "pre_funding",
+  "summary": {
+    "mainIssues": "<What's hurting the profile most>",
+    "priorityAction": "<What needs to be corrected first>"
+  },
+  "detectedIssues": [
+    {
+      "bureau": "<Experian/Equifax/TransUnion/Unknown>",
+      "creditor": "<creditor or agency name>",
+      "accountLast4": "<last 4 digits if shown, or 'N/A'>",
+      "issueType": "<Late | Status Wrong | Balance Wrong | Duplicate | Personal Info | Collection | Charge-Off>",
+      "monthsAffected": "<e.g. 'Jan 2024, Feb 2024' or 'N/A'>",
+      "severity": "High" | "Medium" | "Low",
+      "proofToAttach": "<what documentation to include>"
+    }
+  ],
+  "actionPlan": [
+    {
+      "step": 1,
+      "action": "<what to do>",
+      "timing": "<e.g. 'Day 0', 'Day 7', 'Day 30-35'>",
+      "details": "<additional context>"
+    }
+  ],
+  "letters": [
+    {
+      "type": "bureau_dispute" | "creditor_dispute" | "personal_info_correction",
+      "recipientName": "<Bureau name or Creditor name>",
+      "recipientAddress": "<Full mailing address>",
+      "subject": "<Letter subject line>",
+      "body": "<Full letter text with user info filled in where possible, using [FULL NAME], [ADDRESS], [DOB], [LAST4 SSN] as placeholders for missing info. Include date, disputed items list, request language, attachment checklist, and signature line.>"
+    }
+  ],
+  "disclaimer": "I'm not a lawyer. Dispute only information you believe is inaccurate. Keep copies of everything you send."
+}
+
+BUREAU ADDRESSES TO USE:
+- Experian: P.O. Box 4500, Allen, TX 75013
+- Equifax: Equifax Information Services LLC, P.O. Box 740256, Atlanta, GA 30374-0256
+- TransUnion: TransUnion Consumer Solutions, P.O. Box 2000, Chester, PA 19016-2000
+
+DISPUTE REASON WORDING (use one per item):
+- "Inaccurate payment status"
+- "Incorrect delinquency month(s)"
+- "Account status is incorrect"
+- "Balance/limit is incorrect"
+- "Duplicate reporting"
+- "Information cannot be verified / incomplete"
+- "Personal information is inaccurate"
+
+LETTER RULES:
+- Every letter must include: Date, user identifying info (or placeholders), report number if found, clear list of disputed items, plain-language request, attachment checklist, signature line
+- Tone: firm, professional, short. No legal threats. No complex statutes.
+- Use "${userName}" as the user name where available, or [FULL NAME] as placeholder
+
+EDGE CASES:
+- If bankruptcy, fraud alerts, or active disputes are noted: flag in summary, generate conservative plan
+- If no issues found: set mode to "pre_funding" and return empty detectedIssues/letters arrays with a summary noting the report is clean
+
+Parse the following credit report text and generate the complete analysis:
+
+--- START OF CREDIT REPORT ---
+${reportText.slice(0, 25000)}
+--- END OF CREDIT REPORT ---`;
+
+      const response = await openai.chat.completions.create({
+        model: "gpt-4o",
+        messages: [
+          { role: "system", content: repairPrompt }
+        ],
+        max_tokens: 4096,
+        temperature: 0.1,
+      });
+
+      const aiContent = response.choices[0]?.message?.content || "";
+
+      let repairResult: any;
+      try {
+        const cleaned = aiContent.replace(/```json\s*/g, "").replace(/```\s*/g, "").trim();
+        repairResult = JSON.parse(cleaned);
+      } catch (parseErr) {
+        console.error("Failed to parse credit repair response:", aiContent);
+        return res.status(500).json({ error: "AI analysis returned invalid format. Please try again." });
+      }
+
+      await storage.updateUser(userId, {
+        monthlyUsage: user.monthlyUsage + 1,
+        creditRepairData: JSON.stringify(repairResult),
+        lastRepairAnalysisDate: new Date(),
+      });
+
+      await storage.createMessage({
+        userId,
+        role: "assistant",
+        content: `**Credit Repair Analysis Complete**\n\n${repairResult.summary?.mainIssues || "Analysis complete."}\n\n**Priority:** ${repairResult.summary?.priorityAction || "Review your dashboard for details."}\n\n${repairResult.detectedIssues?.length || 0} issue(s) detected. ${repairResult.letters?.length || 0} dispute letter(s) generated.\n\nView full results in your Dashboard under Credit Repair.`,
+        attachment: "credit_report",
+        mentor: null,
+      });
+
+      res.json({
+        success: true,
+        ...repairResult,
+      });
+    } catch (error: any) {
+      console.error("Credit repair analysis error:", error);
+      res.status(500).json({ error: "Failed to run credit repair analysis. Please try again." });
+    }
+  });
+
+  app.get("/api/credit-repair-data", requireAuth, async (req: any, res) => {
+    try {
+      const userId = req.session.userId;
+      const user = await storage.getUser(userId);
+      if (!user) return res.status(404).json({ error: "User not found" });
+
+      if (!user.creditRepairData) {
+        return res.json({ hasData: false });
+      }
+
+      try {
+        const data = JSON.parse(user.creditRepairData);
+        res.json({
+          hasData: true,
+          lastAnalysisDate: user.lastRepairAnalysisDate,
+          ...data,
+        });
+      } catch {
+        res.json({ hasData: false });
+      }
+    } catch (error) {
+      console.error("Credit repair data error:", error);
+      res.status(500).json({ error: "Failed to load credit repair data" });
     }
   });
 
