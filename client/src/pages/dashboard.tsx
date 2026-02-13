@@ -783,7 +783,7 @@ export default function DashboardPage() {
             >
               <div className="flex items-center justify-center gap-1.5">
                 <MessageCircle className="w-3.5 h-3.5" />
-                Chat
+                Workspace
               </div>
               {activeTab === "chat" && <div className="absolute bottom-0 left-1/4 right-1/4 h-[2px] bg-white rounded-full" />}
             </button>
