@@ -43,6 +43,11 @@ export default function DashboardPage() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [selectedMentor, setSelectedMentor] = useState<string | null>(null);
   const [mentorCleared, setMentorCleared] = useState(false);
+  const [buddyGroups, setBuddyGroups] = useState<Record<string, boolean>>({
+    mentors: true,
+    community: true,
+    offline: false,
+  });
   const [likedMessages, setLikedMessages] = useState<Set<number>>(new Set());
   const [savedMessages, setSavedMessages] = useState<Set<number>>(new Set());
   const [expandedMessages, setExpandedMessages] = useState<Set<number>>(new Set());
@@ -360,61 +365,187 @@ export default function DashboardPage() {
       )}
 
       <aside className={cn(
-        "w-[260px] bg-[#000000] flex flex-col border-r border-white/[0.08] shrink-0 relative z-40",
+        "w-[260px] flex flex-col shrink-0 relative z-40",
         "fixed h-full md:static md:flex transition-transform duration-200 ease-out",
         sidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0",
         "md:flex",
         !sidebarOpen && "hidden md:flex"
-      )}>
-        <div className="p-4 pb-2">
-          <div className="flex items-center gap-2.5 mb-4">
-            <img src="/logo.png" alt="MentXr" className="w-8 h-8 rounded-xl" />
-            <span className="text-[17px] font-bold tracking-tight">MentXr®</span>
+      )} style={{ background: 'linear-gradient(180deg, #e8e6e0 0%, #d4d0c8 100%)' }}>
+        <div className="bg-gradient-to-r from-[#003399] to-[#0066cc] px-3 py-2 flex items-center justify-between shadow-md">
+          <div className="flex items-center gap-2">
+            <div className="w-5 h-5 rounded-sm bg-yellow-400 flex items-center justify-center">
+              <span className="text-[10px] font-black text-[#003399]">X</span>
+            </div>
+            <span className="text-[13px] font-bold text-white drop-shadow-sm tracking-tight">MentXr® Buddy List</span>
           </div>
-          <button
-            data-testid="button-new-chat"
-            onClick={() => { clearChat(); setSelectedMentor(null); setMentorCleared(true); setSidebarOpen(false); }}
-            className="w-full flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl bg-white/[0.06] hover:bg-white/[0.1] border border-white/[0.08] transition-all text-sm font-medium"
-          >
-            <Plus className="w-4 h-4" />
-            New Conversation
+          <button onClick={() => setSidebarOpen(false)} className="md:hidden text-white/80 hover:text-white">
+            <X className="w-4 h-4" />
           </button>
         </div>
 
-        {platformStats.totalUsers > 0 && (
-          <div className="mx-3 mb-2 px-3 py-2.5 rounded-xl bg-white/[0.03] border border-white/[0.06]">
-            <div className="flex items-center justify-between mb-1.5">
-              <span className="text-[11px] text-white/30 font-semibold uppercase tracking-widest">Community</span>
-              <div className="flex items-center gap-1">
-                <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
-                <span className="text-[10px] text-green-400/70">{platformStats.activeNow} online</span>
-              </div>
+        <div className="bg-[#f0ede4] border-b border-[#a0a0a0] px-3 py-2 flex items-center gap-2">
+          <div className="relative">
+            <div className="w-8 h-8 rounded-sm bg-[#d4d0c8] border border-[#808080] flex items-center justify-center text-[11px] font-bold text-[#333] shadow-[inset_1px_1px_0_#fff,inset_-1px_-1px_0_#808080]">
+              {user.email.substring(0, 2).toUpperCase()}
             </div>
-            <p className="text-[20px] font-bold text-white/80" data-testid="text-total-users">{platformStats.totalUsers.toLocaleString()}</p>
-            <p className="text-[10px] text-white/25">members worldwide</p>
+            <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-[#44cc44] border-2 border-[#f0ede4]" />
           </div>
-        )}
-
-        <div className="flex-1 overflow-y-auto px-3 py-2">
-          <p className="px-2 py-2 text-[11px] text-white/25 font-semibold uppercase tracking-widest">Recent</p>
-          {messages.length > 0 && (
-            <div className="px-3 py-2.5 rounded-xl bg-white/[0.04] text-sm text-white/50 truncate">
-              {messages[0]?.content.substring(0, 40)}...
-            </div>
-          )}
+          <div className="flex-1 min-w-0">
+            <p className="text-[12px] font-bold text-[#333] truncate">{user.email.split("@")[0]}</p>
+            <p className="text-[10px] text-[#666] italic truncate">Mentorship On Demand</p>
+          </div>
         </div>
 
-        <div className="p-3 border-t border-white/[0.06]">
+        <div className="bg-[#f0ede4] border-b border-[#a0a0a0] px-2 py-1 flex items-center gap-1">
+          <button
+            data-testid="button-new-chat"
+            onClick={() => { clearChat(); setSelectedMentor(null); setMentorCleared(true); setSidebarOpen(false); setActiveTab("chat"); }}
+            className="flex-1 text-[11px] px-2 py-1 bg-[#d4d0c8] border border-[#808080] shadow-[inset_1px_1px_0_#fff,inset_-1px_-1px_0_#808080] hover:bg-[#c8c4bc] active:shadow-[inset_-1px_-1px_0_#fff,inset_1px_1px_0_#808080] text-[#333] font-medium"
+          >
+            + New Chat
+          </button>
+          <button
+            onClick={() => { fetchInfluencerPosts(); fetchFeed(); }}
+            className="text-[11px] px-2 py-1 bg-[#d4d0c8] border border-[#808080] shadow-[inset_1px_1px_0_#fff,inset_-1px_-1px_0_#808080] hover:bg-[#c8c4bc] active:shadow-[inset_-1px_-1px_0_#808080,inset_1px_1px_0_#fff] text-[#333]"
+          >
+            <RefreshCw className="w-3 h-3" />
+          </button>
+        </div>
+
+        <div className="flex-1 overflow-y-auto bg-white" style={{ scrollbarWidth: 'thin' }}>
+          <div className="border-b border-[#c0c0c0]">
+            <button
+              onClick={() => setBuddyGroups(prev => ({ ...prev, mentors: !prev.mentors }))}
+              className="w-full flex items-center gap-1.5 px-2 py-1.5 hover:bg-[#e8e8ff] text-left"
+              data-testid="buddy-group-mentors"
+            >
+              <span className="text-[11px] text-[#666] font-mono w-3">{buddyGroups.mentors ? "▼" : "►"}</span>
+              <span className="text-[12px] font-bold text-[#333]">Mentors</span>
+              <span className="text-[10px] text-[#999] ml-auto">(7/7)</span>
+            </button>
+            {buddyGroups.mentors && (
+              <div className="pb-1">
+                {Object.entries(MENTOR_INFO).map(([key, mentor]) => {
+                  const isActive = activeMentorKey === key;
+                  const statusMessages: Record<string, string> = {
+                    grant_cardone: "10X or nothing! Let's close deals 💰",
+                    warren_buffett: "Reading annual reports...",
+                    gary_vee: "Creating content rn 🔥",
+                    oprah_winfrey: "Living my best life ✨",
+                    sara_blakely: "Building the next big thing",
+                    nineteen_keys: "Knowledge is the key 🔑",
+                    charleston_white: "Speaking truth to power 💯",
+                  };
+                  return (
+                    <button
+                      key={key}
+                      data-testid={`buddy-${key}`}
+                      onClick={() => {
+                        setSelectedMentor(key);
+                        setMentorCleared(false);
+                        setActiveTab("chat");
+                        setSidebarOpen(false);
+                      }}
+                      className={cn(
+                        "w-full flex items-center gap-2 px-4 py-1.5 text-left transition-colors",
+                        isActive
+                          ? "bg-[#0066cc] text-white"
+                          : "hover:bg-[#e8e8ff]"
+                      )}
+                    >
+                      <div className="relative shrink-0">
+                        <img
+                          src={mentor.avatar}
+                          alt={mentor.name}
+                          className="w-7 h-7 rounded-sm border border-[#c0c0c0] object-cover"
+                        />
+                        <div className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-[#44cc44] border border-white" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className={cn(
+                          "text-[12px] font-bold truncate",
+                          isActive ? "text-white" : "text-[#333]"
+                        )}>
+                          {mentor.name}
+                        </p>
+                        <p className={cn(
+                          "text-[10px] truncate italic",
+                          isActive ? "text-white/70" : "text-[#888]"
+                        )}>
+                          {statusMessages[key] || mentor.tagline}
+                        </p>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
+          <div className="border-b border-[#c0c0c0]">
+            <button
+              onClick={() => setBuddyGroups(prev => ({ ...prev, community: !prev.community }))}
+              className="w-full flex items-center gap-1.5 px-2 py-1.5 hover:bg-[#e8e8ff] text-left"
+              data-testid="buddy-group-community"
+            >
+              <span className="text-[11px] text-[#666] font-mono w-3">{buddyGroups.community ? "▼" : "►"}</span>
+              <span className="text-[12px] font-bold text-[#333]">Community</span>
+              <span className="text-[10px] text-[#999] ml-auto">({platformStats.activeNow} online)</span>
+            </button>
+            {buddyGroups.community && (
+              <div className="pb-1">
+                <div className="px-4 py-1.5 flex items-center gap-2">
+                  <div className="w-2 h-2 rounded-full bg-[#44cc44]" />
+                  <span className="text-[11px] text-[#333]">{platformStats.activeNow} members active now</span>
+                </div>
+                <div className="px-4 py-1.5 flex items-center gap-2">
+                  <div className="w-2 h-2 rounded-full bg-[#cccc00]" />
+                  <span className="text-[11px] text-[#888]">{Math.floor(platformStats.totalUsers * 0.3)} idle</span>
+                </div>
+                <div className="px-4 py-1.5 flex items-center gap-2">
+                  <div className="w-2 h-2 rounded-full bg-[#cc4444]" />
+                  <span className="text-[11px] text-[#aaa]">{platformStats.totalUsers - platformStats.activeNow - Math.floor(platformStats.totalUsers * 0.3)} offline</span>
+                </div>
+                <div className="px-4 py-1 text-[10px] text-[#999] italic">
+                  {platformStats.totalUsers.toLocaleString()} total members
+                </div>
+              </div>
+            )}
+          </div>
+
+          <div className="border-b border-[#c0c0c0]">
+            <button
+              onClick={() => setBuddyGroups(prev => ({ ...prev, offline: !prev.offline }))}
+              className="w-full flex items-center gap-1.5 px-2 py-1.5 hover:bg-[#e8e8ff] text-left"
+              data-testid="buddy-group-offline"
+            >
+              <span className="text-[11px] text-[#666] font-mono w-3">{buddyGroups.offline ? "▼" : "►"}</span>
+              <span className="text-[12px] font-bold text-[#333]">Recent Chats</span>
+            </button>
+            {buddyGroups.offline && (
+              <div className="pb-1">
+                {messages.length > 0 ? (
+                  <div className="px-4 py-1.5 flex items-center gap-2 hover:bg-[#e8e8ff] cursor-pointer">
+                    <div className="w-2 h-2 rounded-full bg-[#44cc44]" />
+                    <span className="text-[11px] text-[#333] truncate flex-1">{messages[0]?.content.substring(0, 35)}...</span>
+                  </div>
+                ) : (
+                  <p className="px-4 py-1.5 text-[10px] text-[#999] italic">No recent conversations</p>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div className="bg-[#d4d0c8] border-t border-[#808080] px-2 py-1.5 flex items-center gap-1.5">
+          <div className="w-2.5 h-2.5 rounded-full bg-[#44cc44]" />
+          <span className="text-[10px] text-[#333] flex-1 truncate font-medium">{user.email}</span>
           <button
             data-testid="button-logout"
             onClick={logout}
-            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-white/[0.05] transition-colors text-sm text-white/50"
+            className="text-[10px] px-2 py-0.5 bg-[#d4d0c8] border border-[#808080] shadow-[inset_1px_1px_0_#fff,inset_-1px_-1px_0_#808080] hover:bg-[#c8c4bc] active:shadow-[inset_-1px_-1px_0_#fff,inset_1px_1px_0_#808080] text-[#333]"
           >
-            <div className="w-8 h-8 rounded-full bg-[#1A1A1A] border border-[#333] flex items-center justify-center text-[11px] font-bold text-[#999]">
-              {user.email.substring(0, 2).toUpperCase()}
-            </div>
-            <span className="flex-1 text-left truncate">{user.email}</span>
-            <LogOut className="w-4 h-4 text-white/30" />
+            Sign Off
           </button>
         </div>
       </aside>
