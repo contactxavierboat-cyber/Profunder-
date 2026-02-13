@@ -26,6 +26,11 @@ export const users = pgTable("users", {
   // Document Flags
   hasCreditReport: boolean("has_credit_report").default(false),
   hasBankStatement: boolean("has_bank_statement").default(false),
+
+  // AI Analysis Results
+  lastAnalysisDate: timestamp("last_analysis_date"),
+  analysisSummary: text("analysis_summary"),
+  analysisNextSteps: text("analysis_next_steps"),
 });
 
 export const messages = pgTable("messages", {

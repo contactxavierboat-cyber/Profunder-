@@ -3487,6 +3487,11 @@ export async function registerRoutes(
       else if (score >= 50) { minRange = 10000; maxRange = 40000; }
       else if (score >= 25) { minRange = 5000; maxRange = 15000; }
 
+      let nextSteps: string[] = [];
+      try {
+        if (user.analysisNextSteps) nextSteps = JSON.parse(user.analysisNextSteps);
+      } catch {}
+
       res.json({
         score,
         status,
@@ -3495,11 +3500,164 @@ export async function registerRoutes(
         alerts,
         actionPlan,
         progress: { current: score, target: 85 },
-        hasProfile: true
+        hasProfile: true,
+        analysisSummary: user.analysisSummary || null,
+        analysisNextSteps: nextSteps,
+        lastAnalysisDate: user.lastAnalysisDate || null,
+        hasCreditReport: hasCreditReport,
+        hasBankStatement: hasBankStatement,
       });
     } catch (error) {
       console.error("Funding readiness error:", error);
       res.status(500).json({ error: "Failed to calculate funding readiness" });
+    }
+  });
+
+  app.post("/api/analyze-document", requireAuth, async (req: any, res) => {
+    try {
+      const userId = req.session.userId;
+      const user = await storage.getUser(userId);
+      if (!user) return res.status(404).json({ error: "User not found" });
+
+      if (user.monthlyUsage >= user.maxUsage) {
+        return res.status(403).json({ error: "Monthly analysis limit reached. Please wait for reset." });
+      }
+
+      const bodySchema = z.object({
+        fileContent: z.string().min(1),
+        documentType: z.enum(["credit_report", "bank_statement"]),
+      });
+      const parsed = bodySchema.safeParse(req.body);
+      if (!parsed.success) {
+        return res.status(400).json({ error: "Invalid request. Provide fileContent and documentType." });
+      }
+
+      const { fileContent, documentType } = parsed.data;
+
+      let extractedText = "";
+      let extractionMethod = "";
+      let manualEntryNeeded = false;
+
+      try {
+        const isPdf = fileContent.length > 100 && !fileContent.includes("\n");
+        if (isPdf) {
+          const buffer = Buffer.from(fileContent, "base64");
+          const result = await processPdfBuffer(buffer);
+          extractedText = result.text;
+          extractionMethod = result.method;
+          manualEntryNeeded = result.method === "manual_entry_needed";
+        } else {
+          extractedText = fileContent.slice(0, EXTRACTION_MAX_CHARS);
+          extractionMethod = "raw_text";
+        }
+      } catch (err) {
+        console.error("Document extraction error:", err);
+        manualEntryNeeded = true;
+        extractionMethod = "manual_entry_needed";
+      }
+
+      if (manualEntryNeeded || !extractedText) {
+        return res.status(422).json({
+          error: "Could not extract text from this document. It may be a scanned image. Try a text-based PDF or enter your details manually in Settings.",
+          extractionMethod
+        });
+      }
+
+      const docLabel = documentType === "bank_statement" ? "bank statement" : "credit report";
+
+      const analysisPrompt = `You are a financial document analyst for MentXr®, a funding readiness platform.
+
+The user uploaded a ${docLabel}. Analyze the document text below and extract financial data.
+
+IMPORTANT: You MUST respond with ONLY valid JSON matching this exact structure (no markdown, no code blocks, no extra text):
+
+{
+  "creditScoreRange": "300-579" | "580-619" | "620-659" | "660-699" | "700-749" | "750-850" | null,
+  "totalRevolvingLimit": <number or null>,
+  "totalBalances": <number or null>,
+  "inquiries": <number or null>,
+  "derogatoryAccounts": <number or null>,
+  "summary": "<2-3 sentence summary of key findings from the document>",
+  "nextSteps": ["<step 1>", "<step 2>", "<step 3>", "<step 4>", "<step 5>"]
+}
+
+Rules:
+- For credit reports: Extract credit score range, revolving limits, balances, inquiries, derogatory accounts
+- For bank statements: Focus on cash flow patterns, extract what you can, set credit fields to null if not available
+- nextSteps should be 5 specific, actionable recommendations based on what you found in the document
+- summary should mention the most important findings that affect funding readiness
+- If a field cannot be determined from the document, use null for strings and null for numbers
+- Respond with ONLY the JSON object, nothing else
+
+--- START OF DOCUMENT ---
+${extractedText}
+--- END OF DOCUMENT ---`;
+
+      const response = await openai.chat.completions.create({
+        model: "gpt-4o",
+        messages: [
+          { role: "system", content: analysisPrompt }
+        ],
+        max_tokens: 2048,
+        temperature: 0.1,
+      });
+
+      const aiContent = response.choices[0]?.message?.content || "";
+
+      let analysisResult: any;
+      try {
+        const cleaned = aiContent.replace(/```json\s*/g, "").replace(/```\s*/g, "").trim();
+        analysisResult = JSON.parse(cleaned);
+      } catch (parseErr) {
+        console.error("Failed to parse AI analysis response:", aiContent);
+        return res.status(500).json({ error: "AI analysis returned invalid format. Please try again." });
+      }
+
+      const updateData: any = {
+        monthlyUsage: user.monthlyUsage + 1,
+        lastAnalysisDate: new Date(),
+        analysisSummary: analysisResult.summary || "Document analyzed successfully.",
+        analysisNextSteps: JSON.stringify(analysisResult.nextSteps || []),
+      };
+
+      if (documentType === "credit_report") {
+        updateData.hasCreditReport = true;
+        if (analysisResult.creditScoreRange) updateData.creditScoreRange = analysisResult.creditScoreRange;
+        if (analysisResult.totalRevolvingLimit !== null && analysisResult.totalRevolvingLimit !== undefined) updateData.totalRevolvingLimit = analysisResult.totalRevolvingLimit;
+        if (analysisResult.totalBalances !== null && analysisResult.totalBalances !== undefined) updateData.totalBalances = analysisResult.totalBalances;
+        if (analysisResult.inquiries !== null && analysisResult.inquiries !== undefined) updateData.inquiries = analysisResult.inquiries;
+        if (analysisResult.derogatoryAccounts !== null && analysisResult.derogatoryAccounts !== undefined) updateData.derogatoryAccounts = analysisResult.derogatoryAccounts;
+      } else {
+        updateData.hasBankStatement = true;
+      }
+
+      await storage.updateUser(userId, updateData);
+
+      await storage.createMessage({
+        userId,
+        role: "assistant",
+        content: `📊 **Document Analysis Complete**\n\n${analysisResult.summary}\n\n**Next Steps:**\n${(analysisResult.nextSteps || []).map((s: string, i: number) => `${i + 1}. ${s}`).join("\n")}`,
+        attachment: documentType,
+        mentor: null,
+      });
+
+      res.json({
+        success: true,
+        summary: analysisResult.summary,
+        nextSteps: analysisResult.nextSteps || [],
+        extractedFields: {
+          creditScoreRange: analysisResult.creditScoreRange,
+          totalRevolvingLimit: analysisResult.totalRevolvingLimit,
+          totalBalances: analysisResult.totalBalances,
+          inquiries: analysisResult.inquiries,
+          derogatoryAccounts: analysisResult.derogatoryAccounts,
+        },
+        extractionMethod,
+        documentType,
+      });
+    } catch (error: any) {
+      console.error("Analyze document error:", error);
+      res.status(500).json({ error: "Failed to analyze document. Please try again." });
     }
   });
 
