@@ -1,6 +1,6 @@
 import { users, messages, comments, posts, friendships, dashboardQuestions, type User, type InsertUser, type Message, type InsertMessage, type Comment, type InsertComment, type Post, type InsertPost, type Friendship, type DashboardQuestion, type InsertDashboardQuestion } from "@shared/schema";
 import { db } from "./db";
-import { eq, count, desc, or, and, ne, ilike } from "drizzle-orm";
+import { eq, count, desc, or, and, ne, ilike, isNull, sql } from "drizzle-orm";
 
 export interface IStorage {
   getUser(id: number): Promise<User | undefined>;
@@ -10,8 +10,10 @@ export interface IStorage {
   updateUser(id: number, data: Partial<User>): Promise<User>;
   
   getMessages(userId: number): Promise<Message[]>;
+  getAssistMessages(userId: number): Promise<Message[]>;
   createMessage(message: InsertMessage): Promise<Message>;
   clearMessages(userId: number): Promise<void>;
+  clearAssistMessages(userId: number): Promise<void>;
 
   getComments(messageId: number): Promise<Comment[]>;
   getCommentsByUser(userId: number): Promise<Comment[]>;
@@ -61,7 +63,11 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getMessages(userId: number): Promise<Message[]> {
-    return db.select().from(messages).where(eq(messages.userId, userId)).orderBy(messages.timestamp);
+    return db.select().from(messages).where(and(eq(messages.userId, userId), or(isNull(messages.mentor), ne(messages.mentor, '__assist__')))).orderBy(messages.timestamp);
+  }
+
+  async getAssistMessages(userId: number): Promise<Message[]> {
+    return db.select().from(messages).where(and(eq(messages.userId, userId), eq(messages.mentor, '__assist__'))).orderBy(messages.timestamp);
   }
 
   async createMessage(insertMessage: InsertMessage): Promise<Message> {
@@ -70,7 +76,11 @@ export class DatabaseStorage implements IStorage {
   }
 
   async clearMessages(userId: number): Promise<void> {
-    await db.delete(messages).where(eq(messages.userId, userId));
+    await db.delete(messages).where(and(eq(messages.userId, userId), or(isNull(messages.mentor), ne(messages.mentor, '__assist__'))));
+  }
+
+  async clearAssistMessages(userId: number): Promise<void> {
+    await db.delete(messages).where(and(eq(messages.userId, userId), eq(messages.mentor, '__assist__')));
   }
 
   async getComments(messageId: number): Promise<Comment[]> {

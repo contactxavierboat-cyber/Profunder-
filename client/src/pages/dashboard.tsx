@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from "react";
 import { useAuth } from "@/lib/store";
 import { useLocation } from "wouter";
-import { Send, Plus, Paperclip, Loader2, ArrowDown, FileText, X, Menu, MessageCircle, RefreshCw, TrendingUp, UserPlus, Check, UserX, Search, AlertTriangle, Shield, ChevronRight, Target, BarChart3, BookOpen, CheckCircle2, AlertCircle, Info, Zap, Activity, Upload, Sparkles, Eye, Lock, Cpu, ChevronDown } from "lucide-react";
+import { Send, Plus, Paperclip, Loader2, ArrowDown, FileText, X, Menu, MessageCircle, RefreshCw, TrendingUp, UserPlus, Check, UserX, Search, AlertTriangle, Shield, ChevronRight, Target, BarChart3, BookOpen, CheckCircle2, AlertCircle, Info, Zap, Activity, Upload, Sparkles, Eye, Lock, Cpu, ChevronDown, HelpCircle, Trash2, BrainCircuit } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -223,7 +223,7 @@ export default function DashboardPage() {
     offline: false,
   });
   const [expandedMessages, setExpandedMessages] = useState<Set<number>>(new Set());
-  const [activeTab, setActiveTab] = useState<"dashboard" | "chat">("dashboard");
+  const [activeTab, setActiveTab] = useState<"dashboard" | "chat" | "assist">("dashboard");
   const [friendsList, setFriendsList] = useState<any[]>([]);
   const [pendingRequests, setPendingRequests] = useState<any[]>([]);
   const [showAddFriend, setShowAddFriend] = useState(false);
@@ -249,6 +249,11 @@ export default function DashboardPage() {
   const [qaOpen, setQaOpen] = useState(false);
   const qaEndRef = useRef<HTMLDivElement>(null);
   const qaInputRef = useRef<HTMLTextAreaElement>(null);
+  const [assistMessages, setAssistMessages] = useState<any[]>([]);
+  const [assistInput, setAssistInput] = useState("");
+  const [assistLoading, setAssistLoading] = useState(false);
+  const assistEndRef = useRef<HTMLDivElement>(null);
+  const assistInputRef = useRef<HTMLTextAreaElement>(null);
 
   const TRUNCATE_LENGTH = 280;
 
@@ -354,6 +359,54 @@ export default function DashboardPage() {
     try {
       await fetch("/api/dashboard-qa", { method: "DELETE", credentials: "include" });
       setQaMessages([]);
+    } catch {}
+  };
+
+  const fetchAssistMessages = async () => {
+    try {
+      const res = await fetch("/api/assist", { credentials: "include" });
+      if (res.ok) {
+        const data = await res.json();
+        setAssistMessages(data);
+      }
+    } catch (err) {
+      console.error("Failed to fetch assist messages", err);
+    }
+  };
+
+  const sendAssistMessage = async () => {
+    const msg = assistInput.trim();
+    if (!msg || assistLoading) return;
+    setAssistInput("");
+    setAssistLoading(true);
+    setAssistMessages(prev => [...prev, { id: `temp-${Date.now()}`, role: "user", content: msg, timestamp: new Date().toISOString() }]);
+    setTimeout(() => assistEndRef.current?.scrollIntoView({ behavior: "smooth" }), 100);
+    try {
+      const res = await fetch("/api/assist", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ content: msg }),
+      });
+      if (res.ok) {
+        await fetchAssistMessages();
+        setTimeout(() => assistEndRef.current?.scrollIntoView({ behavior: "smooth" }), 100);
+      } else {
+        const err = await res.json();
+        toast({ title: "Error", description: err.error || "Failed to send message", variant: "destructive" });
+        await fetchAssistMessages();
+      }
+    } catch (err) {
+      toast({ title: "Error", description: "Failed to send message", variant: "destructive" });
+    } finally {
+      setAssistLoading(false);
+    }
+  };
+
+  const clearAssist = async () => {
+    try {
+      await fetch("/api/assist", { method: "DELETE", credentials: "include" });
+      setAssistMessages([]);
     } catch {}
   };
 
@@ -477,6 +530,7 @@ export default function DashboardPage() {
       fetchFundingReadiness();
       fetchRepairData();
       fetchQA();
+      fetchAssistMessages();
     }
   }, [user]);
 
@@ -843,6 +897,20 @@ export default function DashboardPage() {
                 Workspace
               </div>
               {activeTab === "chat" && <div className="absolute bottom-0 left-1/4 right-1/4 h-[2px] bg-white rounded-full" />}
+            </button>
+            <button
+              data-testid="tab-assist"
+              onClick={() => setActiveTab("assist")}
+              className={cn(
+                "flex-1 py-2.5 text-[13px] font-semibold text-center transition-colors relative",
+                activeTab === "assist" ? "text-white" : "text-white/30 hover:text-white/50"
+              )}
+            >
+              <div className="flex items-center justify-center gap-1.5">
+                <BrainCircuit className="w-3.5 h-3.5" />
+                Assist
+              </div>
+              {activeTab === "assist" && <div className="absolute bottom-0 left-1/4 right-1/4 h-[2px] bg-white rounded-full" />}
             </button>
           </div>
         </header>
@@ -1513,7 +1581,7 @@ export default function DashboardPage() {
                 </div>
               )}
             </div>
-          ) : (
+          ) : activeTab === "chat" ? (
             <div className="max-w-xl mx-auto w-full">
               {!hasMessages && (
                 <div className="flex flex-col items-center justify-center py-16 px-4">
@@ -1678,6 +1746,81 @@ export default function DashboardPage() {
 
               <div ref={messagesEndRef} className="h-4" />
             </div>
+          ) : (
+            <div className="flex flex-col h-full">
+              <div className="flex-1 overflow-y-auto px-4 py-6 max-w-2xl mx-auto w-full">
+                {assistMessages.length === 0 && !assistLoading && (
+                  <div className="flex flex-col items-center justify-center py-16 px-4">
+                    <div className="w-20 h-20 rounded-2xl mb-4 bg-gradient-to-br from-violet-500/20 to-cyan-500/20 border border-white/[0.08] flex items-center justify-center">
+                      <BrainCircuit className="w-10 h-10 text-white/50" />
+                    </div>
+                    <h2 className="text-xl font-bold mb-0.5 text-white">AI Assist</h2>
+                    <p className="text-white/30 text-sm text-center max-w-xs mb-8">Direct answers. No hedging. Ask anything.</p>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 max-w-md w-full">
+                      {[
+                        { text: "Help me write a business plan", icon: "📝" },
+                        { text: "Break down a complex concept", icon: "🧠" },
+                        { text: "Draft a professional email", icon: "✉️" },
+                        { text: "Create a step-by-step strategy", icon: "🎯" },
+                      ].map((prompt, i) => (
+                        <button
+                          key={i}
+                          data-testid={`button-assist-suggestion-${i}`}
+                          onClick={() => {
+                            setAssistInput(prompt.text);
+                            assistInputRef.current?.focus();
+                          }}
+                          className="text-left px-4 py-3 rounded-2xl border border-white/[0.06] bg-white/[0.02] hover:bg-white/[0.05] transition-all text-sm text-white/40 hover:text-white/60 flex items-center gap-3"
+                        >
+                          <span className="text-lg">{prompt.icon}</span>
+                          <span>{prompt.text}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                <div className="space-y-4">
+                  {assistMessages.map((msg: any) => (
+                    <div key={msg.id} className={cn("flex gap-3", msg.role === "user" ? "justify-end" : "justify-start")} data-testid={`assist-msg-${msg.id}`}>
+                      {msg.role === "assistant" && (
+                        <div className="shrink-0 w-8 h-8 rounded-full bg-gradient-to-br from-violet-500/30 to-cyan-500/30 border border-white/[0.08] flex items-center justify-center">
+                          <BrainCircuit className="w-4 h-4 text-white/60" />
+                        </div>
+                      )}
+                      <div className={cn(
+                        "max-w-[80%] rounded-2xl px-4 py-3 text-sm leading-relaxed",
+                        msg.role === "user"
+                          ? "bg-white/[0.08] text-white/80 border border-white/[0.06]"
+                          : "bg-white/[0.03] text-white/75 border border-white/[0.05]"
+                      )}>
+                        <div className="whitespace-pre-wrap">{msg.content}</div>
+                      </div>
+                      {msg.role === "user" && (
+                        <div className="shrink-0 w-8 h-8 rounded-full bg-white/[0.06] border border-white/[0.06] flex items-center justify-center text-[10px] font-bold text-white/35">
+                          {(user.displayName || user.email).substring(0, 2).toUpperCase()}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                  {assistLoading && (
+                    <div className="flex gap-3 justify-start">
+                      <div className="shrink-0 w-8 h-8 rounded-full bg-gradient-to-br from-violet-500/30 to-cyan-500/30 border border-white/[0.08] flex items-center justify-center">
+                        <BrainCircuit className="w-4 h-4 text-white/60" />
+                      </div>
+                      <div className="bg-white/[0.03] border border-white/[0.05] rounded-2xl px-4 py-3">
+                        <div className="flex gap-1.5">
+                          <span className="w-2 h-2 bg-white/20 rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
+                          <span className="w-2 h-2 bg-white/20 rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
+                          <span className="w-2 h-2 bg-white/20 rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                  <div ref={assistEndRef} />
+                </div>
+              </div>
+            </div>
           )}
         </div>
 
@@ -1692,7 +1835,9 @@ export default function DashboardPage() {
           </div>
         )}
 
+        {activeTab !== "dashboard" && (
         <div className="shrink-0 border-t border-white/[0.04] bg-[#080808]/80 backdrop-blur-xl px-3 sm:px-4 pb-3 sm:pb-4 pt-2 safe-area-pb">
+          {activeTab === "chat" ? (
           <div className="max-w-xl mx-auto">
             {activeMentor && hasMessages && (
               <div className="flex items-center gap-2 mb-2 px-1">
@@ -1774,7 +1919,57 @@ export default function DashboardPage() {
               </div>
             </div>
           </div>
+          ) : (
+          <div className="max-w-2xl mx-auto">
+            <div className="flex items-center gap-2 mb-2 px-1">
+              {assistMessages.length > 0 && (
+                <button onClick={clearAssist} className="text-white/15 hover:text-white/40 flex items-center gap-1 text-[11px]" data-testid="button-clear-assist">
+                  <Trash2 className="w-3 h-3" /> Clear
+                </button>
+              )}
+            </div>
+            <div className="flex items-end gap-2">
+              <div className="shrink-0">
+                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-violet-500/20 to-cyan-500/20 border border-white/[0.08] flex items-center justify-center">
+                  <BrainCircuit className="w-4 h-4 text-white/50" />
+                </div>
+              </div>
+              <div className="flex-1 relative flex items-end bg-white/[0.03] border border-white/[0.06] rounded-2xl px-4 py-2.5 focus-within:border-white/[0.1] focus-within:bg-white/[0.04] transition-all">
+                <textarea
+                  ref={assistInputRef}
+                  data-testid="input-assist"
+                  value={assistInput}
+                  onChange={(e) => setAssistInput(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && !e.shiftKey) {
+                      e.preventDefault();
+                      sendAssistMessage();
+                    }
+                  }}
+                  placeholder="Ask anything..."
+                  rows={1}
+                  className="flex-1 bg-transparent outline-none resize-none text-[14px] text-white/80 placeholder-white/20 max-h-[200px] leading-relaxed"
+                  style={{ scrollbarWidth: 'thin' }}
+                />
+                <button
+                  data-testid="button-send-assist"
+                  onClick={sendAssistMessage}
+                  disabled={!assistInput.trim() || assistLoading}
+                  className={cn(
+                    "w-8 h-8 flex items-center justify-center rounded-xl transition-all ml-2",
+                    assistInput.trim() && !assistLoading
+                      ? "bg-white text-black hover:bg-white/90"
+                      : "text-white/15"
+                  )}
+                >
+                  {assistLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+                </button>
+              </div>
+            </div>
+          </div>
+          )}
         </div>
+        )}
       </main>
 
       {showAddFriend && (
