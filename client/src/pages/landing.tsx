@@ -15,59 +15,68 @@ function TechBackground() {
     let particles: Array<{
       x: number; y: number; vx: number; vy: number;
       size: number; opacity: number; pulse: number; pulseSpeed: number;
+      type: 'dot' | 'node';
     }> = [];
 
     const resize = () => {
-      canvas.width = canvas.offsetWidth * window.devicePixelRatio;
-      canvas.height = canvas.offsetHeight * window.devicePixelRatio;
-      ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+      const parent = canvas.parentElement;
+      if (!parent) return;
+      const w = parent.scrollWidth;
+      const h = parent.scrollHeight;
+      canvas.style.width = w + 'px';
+      canvas.style.height = h + 'px';
+      canvas.width = w * window.devicePixelRatio;
+      canvas.height = h * window.devicePixelRatio;
+      ctx.setTransform(window.devicePixelRatio, 0, 0, window.devicePixelRatio, 0, 0);
     };
 
     const initParticles = () => {
-      const w = canvas.offsetWidth;
-      const h = canvas.offsetHeight;
-      const count = Math.floor((w * h) / 8000);
+      const w = parseInt(canvas.style.width) || canvas.offsetWidth;
+      const h = parseInt(canvas.style.height) || canvas.offsetHeight;
+      const count = Math.floor((w * h) / 5000);
       particles = [];
       for (let i = 0; i < count; i++) {
+        const isNode = Math.random() < 0.15;
         particles.push({
           x: Math.random() * w,
           y: Math.random() * h,
-          vx: (Math.random() - 0.5) * 0.3,
-          vy: (Math.random() - 0.5) * 0.3,
-          size: Math.random() * 1.5 + 0.5,
-          opacity: Math.random() * 0.5 + 0.1,
+          vx: (Math.random() - 0.5) * 0.4,
+          vy: (Math.random() - 0.5) * 0.4,
+          size: isNode ? Math.random() * 2.5 + 1.5 : Math.random() * 1.5 + 0.5,
+          opacity: isNode ? Math.random() * 0.4 + 0.4 : Math.random() * 0.5 + 0.15,
           pulse: Math.random() * Math.PI * 2,
-          pulseSpeed: Math.random() * 0.02 + 0.005,
+          pulseSpeed: Math.random() * 0.025 + 0.008,
+          type: isNode ? 'node' : 'dot',
         });
       }
     };
 
     const draw = () => {
-      const w = canvas.offsetWidth;
-      const h = canvas.offsetHeight;
+      const w = parseInt(canvas.style.width) || canvas.offsetWidth;
+      const h = parseInt(canvas.style.height) || canvas.offsetHeight;
       ctx.clearRect(0, 0, w, h);
 
       particles.forEach(p => {
         p.x += p.vx;
         p.y += p.vy;
         p.pulse += p.pulseSpeed;
-        if (p.x < 0) p.x = w;
-        if (p.x > w) p.x = 0;
-        if (p.y < 0) p.y = h;
-        if (p.y > h) p.y = 0;
+        if (p.x < -10) p.x = w + 10;
+        if (p.x > w + 10) p.x = -10;
+        if (p.y < -10) p.y = h + 10;
+        if (p.y > h + 10) p.y = -10;
       });
 
-      const connectionDist = 120;
+      const connectionDist = 160;
       for (let i = 0; i < particles.length; i++) {
         for (let j = i + 1; j < particles.length; j++) {
           const dx = particles[i].x - particles[j].x;
           const dy = particles[i].y - particles[j].y;
           const dist = Math.sqrt(dx * dx + dy * dy);
           if (dist < connectionDist) {
-            const alpha = (1 - dist / connectionDist) * 0.15;
+            const alpha = (1 - dist / connectionDist) * 0.25;
             ctx.beginPath();
             ctx.strokeStyle = `rgba(255, 255, 255, ${alpha})`;
-            ctx.lineWidth = 0.5;
+            ctx.lineWidth = 0.6;
             ctx.moveTo(particles[i].x, particles[i].y);
             ctx.lineTo(particles[j].x, particles[j].y);
             ctx.stroke();
@@ -76,20 +85,30 @@ function TechBackground() {
       }
 
       particles.forEach(p => {
-        const glow = Math.sin(p.pulse) * 0.3 + 0.7;
+        const glow = Math.sin(p.pulse) * 0.35 + 0.65;
         const alpha = p.opacity * glow;
+
         ctx.beginPath();
         ctx.fillStyle = `rgba(255, 255, 255, ${alpha})`;
         ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
         ctx.fill();
 
-        if (p.size > 1.2) {
+        if (p.type === 'node') {
           ctx.beginPath();
-          const grad = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.size * 4);
-          grad.addColorStop(0, `rgba(255, 255, 255, ${alpha * 0.3})`);
+          const grad = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.size * 6);
+          grad.addColorStop(0, `rgba(255, 255, 255, ${alpha * 0.4})`);
+          grad.addColorStop(0.5, `rgba(255, 255, 255, ${alpha * 0.1})`);
           grad.addColorStop(1, 'rgba(255, 255, 255, 0)');
           ctx.fillStyle = grad;
-          ctx.arc(p.x, p.y, p.size * 4, 0, Math.PI * 2);
+          ctx.arc(p.x, p.y, p.size * 6, 0, Math.PI * 2);
+          ctx.fill();
+        } else if (p.size > 1) {
+          ctx.beginPath();
+          const grad = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.size * 3);
+          grad.addColorStop(0, `rgba(255, 255, 255, ${alpha * 0.25})`);
+          grad.addColorStop(1, 'rgba(255, 255, 255, 0)');
+          ctx.fillStyle = grad;
+          ctx.arc(p.x, p.y, p.size * 3, 0, Math.PI * 2);
           ctx.fill();
         }
       });
@@ -101,17 +120,22 @@ function TechBackground() {
     initParticles();
     draw();
 
-    window.addEventListener('resize', () => { resize(); initParticles(); });
+    const resizeHandler = () => { resize(); initParticles(); };
+    window.addEventListener('resize', resizeHandler);
+    const resizeObserver = new ResizeObserver(() => { resize(); initParticles(); });
+    if (canvas.parentElement) resizeObserver.observe(canvas.parentElement);
+
     return () => {
       cancelAnimationFrame(animationId);
-      window.removeEventListener('resize', resize);
+      window.removeEventListener('resize', resizeHandler);
+      resizeObserver.disconnect();
     };
   }, []);
 
   return (
     <canvas
       ref={canvasRef}
-      className="absolute inset-0 w-full h-full pointer-events-none"
+      className="absolute top-0 left-0 pointer-events-none"
       style={{ zIndex: 1 }}
     />
   );
@@ -242,7 +266,8 @@ export default function LandingPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#080808] text-white" style={{ fontFamily: "'Inter', sans-serif" }}>
+    <div className="relative min-h-screen bg-[#080808] text-white overflow-x-hidden" style={{ fontFamily: "'Inter', sans-serif" }}>
+      <TechBackground />
 
       <div
         className="fixed bottom-6 left-6 z-50 flex items-center gap-2.5 px-4 py-2.5 rounded-xl bg-[#111]/90 border border-white/[0.06] shadow-lg shadow-black/60 backdrop-blur-sm"
@@ -269,7 +294,6 @@ export default function LandingPage() {
       </nav>
 
       <div className="relative bg-black overflow-hidden">
-        <TechBackground />
 
         <div className="relative z-10 flex flex-col min-h-[85vh] sm:min-h-[90vh] justify-center px-6 sm:px-12 md:px-20 lg:px-28">
 
@@ -387,7 +411,7 @@ export default function LandingPage() {
         </div>
       </div>
 
-      <div className="px-6 sm:px-12 md:px-20 py-16 sm:py-24 border-t border-white/[0.04]">
+      <div className="relative z-10 px-6 sm:px-12 md:px-20 py-16 sm:py-24 border-t border-white/[0.04]">
         <div className="max-w-[700px]">
           <p className="text-[11px] tracking-[0.15em] text-white/20 uppercase mb-6">About</p>
           <p className="text-[16px] sm:text-[18px] md:text-[20px] text-white/40 leading-[1.8] font-light">
@@ -396,7 +420,7 @@ export default function LandingPage() {
         </div>
       </div>
 
-      <div className="px-6 sm:px-12 md:px-20 py-12 sm:py-16 border-t border-white/[0.04]">
+      <div className="relative z-10 px-6 sm:px-12 md:px-20 py-12 sm:py-16 border-t border-white/[0.04]">
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6 sm:gap-12">
           <p className="text-[11px] tracking-[0.15em] text-white/20 uppercase">Countdown</p>
           <div className="flex items-center gap-3 sm:gap-4">
@@ -425,7 +449,7 @@ export default function LandingPage() {
         </div>
       </div>
 
-      <div className="px-6 sm:px-12 md:px-20 pb-16 sm:pb-24 pt-12 sm:pt-16 border-t border-white/[0.04]">
+      <div className="relative z-10 px-6 sm:px-12 md:px-20 pb-16 sm:pb-24 pt-12 sm:pt-16 border-t border-white/[0.04]">
         <div className="max-w-[600px]">
           <p className="text-[11px] tracking-[0.15em] text-white/20 uppercase mb-6">FAQ</p>
           <h2 className="text-[22px] sm:text-[28px] md:text-[32px] font-light mb-8 sm:mb-12 tracking-[-0.02em] text-white/60">Frequently asked questions</h2>
@@ -457,7 +481,7 @@ export default function LandingPage() {
         </div>
       </div>
 
-      <footer className="border-t border-white/[0.04] px-6 sm:px-12 md:px-20 py-8 sm:py-10 flex items-center justify-between">
+      <footer className="relative z-10 border-t border-white/[0.04] px-6 sm:px-12 md:px-20 py-8 sm:py-10 flex items-center justify-between">
         <p className="text-[11px] text-white/15">
           &copy; 2026 MentXr&reg; by <span className="text-white/25 font-medium">CMD Supply</span>
         </p>
