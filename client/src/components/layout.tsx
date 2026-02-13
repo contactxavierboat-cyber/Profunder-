@@ -71,10 +71,10 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
         <div className="p-3 sm:p-4 border-t border-sidebar-border">
           <div className="flex items-center gap-3 px-3 py-2 sm:py-3 mb-2">
             <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-muted flex items-center justify-center text-[10px] sm:text-xs font-mono">
-              {user.email.substring(0, 2).toUpperCase()}
+              {(user.displayName || user.email).substring(0, 2).toUpperCase()}
             </div>
             <div className="overflow-hidden">
-              <p className="text-sm font-medium truncate">{user.email}</p>
+              <p className="text-sm font-medium truncate">{user.displayName || user.email}</p>
               <p className="text-xs text-muted-foreground capitalize">{user.role}</p>
             </div>
           </div>

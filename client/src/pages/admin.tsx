@@ -72,7 +72,7 @@ export default function AdminPage() {
                   {allUsers.map((u) => (
                     <TableRow key={u.id} className="border-white/10 hover:bg-white/5">
                       <TableCell className="font-mono text-xs text-muted-foreground">{u.id}</TableCell>
-                      <TableCell className="font-medium">{u.email}</TableCell>
+                      <TableCell className="font-medium">{u.displayName || u.email}</TableCell>
                       <TableCell>
                         <Badge 
                           variant="outline" 
@@ -116,7 +116,7 @@ export default function AdminPage() {
               {allUsers.map((u) => (
                 <div key={u.id} className="bg-white/5 border border-white/10 rounded-lg p-3 space-y-2">
                   <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium truncate max-w-[180px]">{u.email}</span>
+                    <span className="text-sm font-medium truncate max-w-[180px]">{u.displayName || u.email}</span>
                     <Badge 
                       variant="outline" 
                       className={`text-[10px] px-1.5 py-0 ${u.subscriptionStatus === 'active' 

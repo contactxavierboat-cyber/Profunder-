@@ -386,12 +386,12 @@ export default function DashboardPage() {
         <div className="h-14 px-4 flex items-center gap-3 border-b border-white/[0.08] bg-[#0D0D0D]">
           <div className="relative shrink-0">
             <div className="w-9 h-9 rounded-lg bg-[#1A1A1A] border border-white/[0.1] flex items-center justify-center text-[11px] font-bold text-white/60">
-              {user.email.substring(0, 2).toUpperCase()}
+              {(user.displayName || user.email).substring(0, 2).toUpperCase()}
             </div>
             <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-green-500 border-2 border-[#0D0D0D]" />
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-[12px] font-semibold text-white/80 truncate">{user.email.split("@")[0]}</p>
+            <p className="text-[12px] font-semibold text-white/80 truncate">{user.displayName || user.email.split("@")[0]}</p>
             <p className="text-[10px] text-white/30 italic truncate">Mentorship On Demand</p>
           </div>
         </div>
@@ -541,7 +541,7 @@ export default function DashboardPage() {
 
         <div className="h-11 px-4 flex items-center gap-3 border-t border-white/[0.08] bg-[#111]">
           <div className="w-2.5 h-2.5 rounded-full bg-green-500 shrink-0" />
-          <span className="text-[10px] text-white/40 flex-1 truncate">{user.email}</span>
+          <span className="text-[10px] text-white/40 flex-1 truncate">{user.displayName || user.email}</span>
           <button
             data-testid="button-logout"
             onClick={logout}
@@ -941,7 +941,7 @@ export default function DashboardPage() {
                   const mentorData = m.role === 'assistant' && m.mentor ? MENTOR_INFO[m.mentor] : null;
                   const isUser = m.role === "user";
                   const posterName = isUser ? "You" : (mentorData ? mentorData.name : "MentXr® AI");
-                  const posterHandle = isUser ? `@${user.email.split("@")[0]}` : (mentorData ? `@${m.mentor}` : "@mentxr");
+                  const posterHandle = isUser ? `@${user.displayName || user.email.split("@")[0]}` : (mentorData ? `@${m.mentor}` : "@mentxr");
                   const posterAvatar = isUser ? null : (mentorData ? mentorData.avatar : null);
                   const posterSpecialty = !isUser && mentorData ? mentorData.specialty : (!isUser ? "AI Mentor" : null);
                   const isLiked = likedMessages.has(m.id);
@@ -953,7 +953,7 @@ export default function DashboardPage() {
                         <div className="shrink-0">
                           {isUser ? (
                             <div className="w-10 h-10 rounded-full bg-[#1A1A1A] border border-[#333] flex items-center justify-center text-[12px] font-bold text-[#999]">
-                              {user.email.substring(0, 2).toUpperCase()}
+                              {(user.displayName || user.email).substring(0, 2).toUpperCase()}
                             </div>
                           ) : posterAvatar ? (
                             <img src={posterAvatar} alt={posterName} className="w-10 h-10 rounded-full object-cover border border-white/10" />
@@ -1064,7 +1064,7 @@ export default function DashboardPage() {
                                     <div className="shrink-0">
                                       {cIsUser ? (
                                         <div className="w-7 h-7 rounded-full bg-[#1A1A1A] border border-[#333] flex items-center justify-center text-[9px] font-bold text-[#999]">
-                                          {user.email.substring(0, 2).toUpperCase()}
+                                          {(user.displayName || user.email).substring(0, 2).toUpperCase()}
                                         </div>
                                       ) : cMentor ? (
                                         <img src={cMentor.avatar} alt={cMentor.name} className="w-7 h-7 rounded-full object-cover border border-white/10" />
@@ -1099,7 +1099,7 @@ export default function DashboardPage() {
 
                               <div className="flex gap-2 items-center">
                                 <div className="w-7 h-7 rounded-full bg-[#1A1A1A] border border-[#333] flex items-center justify-center text-[9px] font-bold text-[#999] shrink-0">
-                                  {user.email.substring(0, 2).toUpperCase()}
+                                  {(user.displayName || user.email).substring(0, 2).toUpperCase()}
                                 </div>
                                 <div className="flex-1 flex items-center bg-white/[0.04] border border-white/[0.08] rounded-2xl px-3 py-1.5">
                                   <input
@@ -1208,7 +1208,7 @@ export default function DashboardPage() {
             <div className="flex items-end gap-2">
               <div className="shrink-0">
                 <div className="w-8 h-8 rounded-full bg-[#1A1A1A] border border-[#333] flex items-center justify-center text-[10px] font-bold text-[#999]">
-                  {user.email.substring(0, 2).toUpperCase()}
+                  {(user.displayName || user.email).substring(0, 2).toUpperCase()}
                 </div>
               </div>
               <div className="flex-1 relative flex items-end bg-white/[0.04] border border-white/[0.08] rounded-2xl px-4 py-2.5 focus-within:border-white/15 focus-within:bg-white/[0.06] transition-all">

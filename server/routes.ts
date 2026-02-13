@@ -18,6 +18,33 @@ import path from "path";
 
 const execFileAsync = promisify(execFile);
 
+function generateAnonName(): string {
+  const adjectives = [
+    "Shadow", "Cosmic", "Neon", "Stealth", "Phantom", "Lunar", "Solar", "Mystic",
+    "Crystal", "Thunder", "Iron", "Golden", "Silver", "Diamond", "Frost", "Storm",
+    "Blaze", "Venom", "Dark", "Bright", "Swift", "Bold", "Brave", "Noble",
+    "Royal", "Elite", "Prime", "Alpha", "Omega", "Titan", "Apex", "Zero",
+    "Turbo", "Hyper", "Ultra", "Mega", "Cyber", "Astro", "Quantum", "Vapor",
+    "Prism", "Onyx", "Jade", "Ruby", "Opal", "Coral", "Ember", "Echo",
+    "Pixel", "Rogue", "Ghost", "Ninja", "Rebel", "Ace", "Flux", "Zenith",
+    "Cipher", "Nexus", "Drift", "Pulse", "Vortex", "Surge", "Haze", "Glitch",
+  ];
+  const nouns = [
+    "Wolf", "Hawk", "Fox", "Lion", "Bear", "Eagle", "Tiger", "Panther",
+    "Falcon", "Raven", "Cobra", "Viper", "Phoenix", "Dragon", "Shark", "Owl",
+    "Lynx", "Jaguar", "Puma", "Stallion", "Mustang", "Raptor", "Griffin", "Titan",
+    "Knight", "Rider", "Runner", "Hunter", "Striker", "Walker", "Maverick", "Pilot",
+    "Chief", "Sage", "Prophet", "Oracle", "Mentor", "Scholar", "Pioneer", "Voyager",
+    "Captain", "Legend", "King", "Queen", "Prince", "Boss", "Wizard", "Monk",
+    "Archer", "Scout", "Ranger", "Guardian", "Sentinel", "Warden", "Seeker", "Drifter",
+    "Nomad", "Spark", "Blade", "Storm", "Shield", "Crown", "Star", "Nova",
+  ];
+  const adj = adjectives[Math.floor(Math.random() * adjectives.length)];
+  const noun = nouns[Math.floor(Math.random() * nouns.length)];
+  const num = Math.floor(Math.random() * 999) + 1;
+  return `${adj}${noun}${num}`;
+}
+
 const EXTRACTION_MIN_CHARS = 200;
 const EXTRACTION_MAX_CHARS = 30000;
 const TMP_DIR = "/tmp/pdf-processing";
@@ -653,6 +680,22 @@ export async function registerRoutes(
   app: Express
 ): Promise<Server> {
 
+  (async () => {
+    try {
+      const allUsers = await storage.getAllUsers();
+      let updated = 0;
+      for (const u of allUsers) {
+        if (!u.displayName) {
+          await storage.updateUser(u.id, { displayName: generateAnonName() });
+          updated++;
+        }
+      }
+      if (updated > 0) console.log(`Assigned anonymous names to ${updated} existing users`);
+    } catch (err) {
+      console.error("Failed to assign anonymous names:", err);
+    }
+  })();
+
   const SessionStore = MemoryStore(session);
 
   app.use(session({
@@ -688,6 +731,7 @@ export async function registerRoutes(
       user = await storage.createUser({
         email,
         password: "placeholder",
+        displayName: generateAnonName(),
         role: "user",
         subscriptionStatus: "active",
         monthlyUsage: 0,
@@ -700,6 +744,10 @@ export async function registerRoutes(
         hasCreditReport: false,
         hasBankStatement: false,
       });
+    }
+
+    if (!user.displayName) {
+      user = await storage.updateUser(user.id, { displayName: generateAnonName() });
     }
 
     req.session.userId = user.id;
