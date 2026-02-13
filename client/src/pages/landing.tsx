@@ -11,11 +11,32 @@ function TechBackground() {
     if (!ctx) return;
 
     let animationId: number;
-    let particles: Array<{
+    let time = 0;
+
+    interface Particle {
       x: number; y: number; vx: number; vy: number;
       size: number; opacity: number; pulse: number; pulseSpeed: number;
-      type: 'dot' | 'node';
-    }> = [];
+      type: 'dot' | 'node' | 'accent';
+      hue: number;
+    }
+
+    interface FloatingShape {
+      x: number; y: number; vx: number; vy: number;
+      size: number; rotation: number; rotSpeed: number;
+      opacity: number; sides: number; hue: number;
+      pulse: number; pulseSpeed: number;
+    }
+
+    interface GlowOrb {
+      x: number; y: number; radius: number;
+      vx: number; vy: number;
+      hue: number; saturation: number;
+      opacity: number; pulse: number; pulseSpeed: number;
+    }
+
+    let particles: Particle[] = [];
+    let shapes: FloatingShape[] = [];
+    let orbs: GlowOrb[] = [];
 
     const resize = () => {
       const parent = canvas.parentElement;
@@ -29,31 +50,126 @@ function TechBackground() {
       ctx.setTransform(window.devicePixelRatio, 0, 0, window.devicePixelRatio, 0, 0);
     };
 
-    const initParticles = () => {
+    const init = () => {
       const w = parseInt(canvas.style.width) || canvas.offsetWidth;
       const h = parseInt(canvas.style.height) || canvas.offsetHeight;
-      const count = Math.floor((w * h) / 7000);
+
+      const count = Math.floor((w * h) / 5500);
       particles = [];
       for (let i = 0; i < count; i++) {
-        const isNode = Math.random() < 0.1;
+        const r = Math.random();
+        const type = r < 0.08 ? 'accent' : r < 0.18 ? 'node' : 'dot';
         particles.push({
           x: Math.random() * w,
           y: Math.random() * h,
-          vx: (Math.random() - 0.5) * 0.3,
-          vy: (Math.random() - 0.5) * 0.3,
-          size: isNode ? Math.random() * 2 + 1 : Math.random() * 1.2 + 0.3,
-          opacity: isNode ? Math.random() * 0.2 + 0.15 : Math.random() * 0.15 + 0.05,
+          vx: (Math.random() - 0.5) * 0.35,
+          vy: (Math.random() - 0.5) * 0.35,
+          size: type === 'node' ? Math.random() * 2.2 + 1.2 : type === 'accent' ? Math.random() * 1.8 + 0.8 : Math.random() * 1.2 + 0.3,
+          opacity: type === 'node' ? Math.random() * 0.25 + 0.18 : type === 'accent' ? Math.random() * 0.3 + 0.15 : Math.random() * 0.15 + 0.05,
           pulse: Math.random() * Math.PI * 2,
-          pulseSpeed: Math.random() * 0.02 + 0.005,
-          type: isNode ? 'node' : 'dot',
+          pulseSpeed: Math.random() * 0.025 + 0.008,
+          type,
+          hue: type === 'accent' ? (Math.random() < 0.5 ? 210 + Math.random() * 30 : 260 + Math.random() * 30) : 0,
         });
       }
+
+      const shapeCount = Math.floor((w * h) / 200000) + 3;
+      shapes = [];
+      for (let i = 0; i < shapeCount; i++) {
+        shapes.push({
+          x: Math.random() * w,
+          y: Math.random() * h,
+          vx: (Math.random() - 0.5) * 0.15,
+          vy: (Math.random() - 0.5) * 0.15,
+          size: Math.random() * 30 + 15,
+          rotation: Math.random() * Math.PI * 2,
+          rotSpeed: (Math.random() - 0.5) * 0.003,
+          opacity: Math.random() * 0.04 + 0.015,
+          sides: Math.floor(Math.random() * 3) + 3,
+          hue: Math.random() < 0.5 ? 215 + Math.random() * 25 : 265 + Math.random() * 25,
+          pulse: Math.random() * Math.PI * 2,
+          pulseSpeed: Math.random() * 0.01 + 0.003,
+        });
+      }
+
+      const orbCount = Math.max(3, Math.floor((w * h) / 400000));
+      orbs = [];
+      for (let i = 0; i < orbCount; i++) {
+        orbs.push({
+          x: Math.random() * w,
+          y: Math.random() * h,
+          radius: Math.random() * 200 + 100,
+          vx: (Math.random() - 0.5) * 0.2,
+          vy: (Math.random() - 0.5) * 0.2,
+          hue: i % 3 === 0 ? 220 : i % 3 === 1 ? 270 : 190,
+          saturation: Math.random() * 30 + 50,
+          opacity: Math.random() * 0.035 + 0.015,
+          pulse: Math.random() * Math.PI * 2,
+          pulseSpeed: Math.random() * 0.008 + 0.002,
+        });
+      }
+    };
+
+    const drawPolygon = (cx: number, cy: number, r: number, sides: number, rotation: number) => {
+      ctx.beginPath();
+      for (let i = 0; i <= sides; i++) {
+        const angle = (i * 2 * Math.PI / sides) + rotation;
+        const px = cx + r * Math.cos(angle);
+        const py = cy + r * Math.sin(angle);
+        if (i === 0) ctx.moveTo(px, py);
+        else ctx.lineTo(px, py);
+      }
+      ctx.closePath();
     };
 
     const draw = () => {
       const w = parseInt(canvas.style.width) || canvas.offsetWidth;
       const h = parseInt(canvas.style.height) || canvas.offsetHeight;
       ctx.clearRect(0, 0, w, h);
+      time += 0.016;
+
+      orbs.forEach(o => {
+        o.x += o.vx;
+        o.y += o.vy;
+        o.pulse += o.pulseSpeed;
+        if (o.x < -o.radius) o.x = w + o.radius;
+        if (o.x > w + o.radius) o.x = -o.radius;
+        if (o.y < -o.radius) o.y = h + o.radius;
+        if (o.y > h + o.radius) o.y = -o.radius;
+
+        const glow = Math.sin(o.pulse) * 0.4 + 0.6;
+        const grad = ctx.createRadialGradient(o.x, o.y, 0, o.x, o.y, o.radius);
+        grad.addColorStop(0, `hsla(${o.hue}, ${o.saturation}%, 55%, ${o.opacity * glow})`);
+        grad.addColorStop(0.4, `hsla(${o.hue}, ${o.saturation}%, 40%, ${o.opacity * glow * 0.4})`);
+        grad.addColorStop(1, `hsla(${o.hue}, ${o.saturation}%, 30%, 0)`);
+        ctx.fillStyle = grad;
+        ctx.fillRect(o.x - o.radius, o.y - o.radius, o.radius * 2, o.radius * 2);
+      });
+
+      shapes.forEach(s => {
+        s.x += s.vx;
+        s.y += s.vy;
+        s.rotation += s.rotSpeed;
+        s.pulse += s.pulseSpeed;
+        if (s.x < -50) s.x = w + 50;
+        if (s.x > w + 50) s.x = -50;
+        if (s.y < -50) s.y = h + 50;
+        if (s.y > h + 50) s.y = -50;
+
+        const glow = Math.sin(s.pulse) * 0.4 + 0.6;
+        ctx.save();
+        drawPolygon(s.x, s.y, s.size, s.sides, s.rotation);
+        ctx.strokeStyle = `hsla(${s.hue}, 60%, 55%, ${s.opacity * glow})`;
+        ctx.lineWidth = 0.8;
+        ctx.stroke();
+
+        const shapeGrad = ctx.createRadialGradient(s.x, s.y, 0, s.x, s.y, s.size * 1.5);
+        shapeGrad.addColorStop(0, `hsla(${s.hue}, 60%, 50%, ${s.opacity * glow * 0.3})`);
+        shapeGrad.addColorStop(1, `hsla(${s.hue}, 60%, 40%, 0)`);
+        ctx.fillStyle = shapeGrad;
+        ctx.fill();
+        ctx.restore();
+      });
 
       particles.forEach(p => {
         p.x += p.vx;
@@ -65,16 +181,24 @@ function TechBackground() {
         if (p.y > h + 10) p.y = -10;
       });
 
-      const connectionDist = 140;
+      const connectionDist = 150;
       for (let i = 0; i < particles.length; i++) {
+        if (particles[i].type === 'dot' && Math.random() > 0.3) continue;
         for (let j = i + 1; j < particles.length; j++) {
+          if (particles[j].type === 'dot' && particles[i].type === 'dot') continue;
           const dx = particles[i].x - particles[j].x;
           const dy = particles[i].y - particles[j].y;
           const dist = Math.sqrt(dx * dx + dy * dy);
           if (dist < connectionDist) {
-            const alpha = (1 - dist / connectionDist) * 0.08;
+            const alpha = (1 - dist / connectionDist) * 0.1;
+            const hasAccent = particles[i].type === 'accent' || particles[j].type === 'accent';
             ctx.beginPath();
-            ctx.strokeStyle = `rgba(255, 255, 255, ${alpha})`;
+            if (hasAccent) {
+              const hue = particles[i].type === 'accent' ? particles[i].hue : particles[j].hue;
+              ctx.strokeStyle = `hsla(${hue}, 50%, 60%, ${alpha * 1.2})`;
+            } else {
+              ctx.strokeStyle = `rgba(255, 255, 255, ${alpha})`;
+            }
             ctx.lineWidth = 0.6;
             ctx.moveTo(particles[i].x, particles[i].y);
             ctx.lineTo(particles[j].x, particles[j].y);
@@ -88,18 +212,28 @@ function TechBackground() {
         const alpha = p.opacity * glow;
 
         ctx.beginPath();
-        ctx.fillStyle = `rgba(255, 255, 255, ${alpha})`;
+        if (p.type === 'accent') {
+          ctx.fillStyle = `hsla(${p.hue}, 60%, 65%, ${alpha})`;
+        } else {
+          ctx.fillStyle = `rgba(255, 255, 255, ${alpha})`;
+        }
         ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
         ctx.fill();
 
-        if (p.type === 'node') {
+        if (p.type === 'node' || p.type === 'accent') {
           ctx.beginPath();
-          const grad = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.size * 5);
-          grad.addColorStop(0, `rgba(255, 255, 255, ${alpha * 0.2})`);
-          grad.addColorStop(0.5, `rgba(255, 255, 255, ${alpha * 0.05})`);
-          grad.addColorStop(1, 'rgba(255, 255, 255, 0)');
+          const glowRadius = p.size * (p.type === 'accent' ? 7 : 5);
+          const grad = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, glowRadius);
+          if (p.type === 'accent') {
+            grad.addColorStop(0, `hsla(${p.hue}, 60%, 60%, ${alpha * 0.25})`);
+            grad.addColorStop(0.5, `hsla(${p.hue}, 60%, 50%, ${alpha * 0.08})`);
+          } else {
+            grad.addColorStop(0, `rgba(255, 255, 255, ${alpha * 0.2})`);
+            grad.addColorStop(0.5, `rgba(255, 255, 255, ${alpha * 0.05})`);
+          }
+          grad.addColorStop(1, 'rgba(0, 0, 0, 0)');
           ctx.fillStyle = grad;
-          ctx.arc(p.x, p.y, p.size * 5, 0, Math.PI * 2);
+          ctx.arc(p.x, p.y, glowRadius, 0, Math.PI * 2);
           ctx.fill();
         } else if (p.size > 0.8) {
           ctx.beginPath();
@@ -112,16 +246,24 @@ function TechBackground() {
         }
       });
 
+      const scanY = (time * 30) % (h + 100) - 50;
+      const scanGrad = ctx.createLinearGradient(0, scanY - 40, 0, scanY + 40);
+      scanGrad.addColorStop(0, 'rgba(100, 140, 255, 0)');
+      scanGrad.addColorStop(0.5, 'rgba(100, 140, 255, 0.012)');
+      scanGrad.addColorStop(1, 'rgba(100, 140, 255, 0)');
+      ctx.fillStyle = scanGrad;
+      ctx.fillRect(0, scanY - 40, w, 80);
+
       animationId = requestAnimationFrame(draw);
     };
 
     resize();
-    initParticles();
+    init();
     draw();
 
-    const resizeHandler = () => { resize(); initParticles(); };
+    const resizeHandler = () => { resize(); init(); };
     window.addEventListener('resize', resizeHandler);
-    const resizeObserver = new ResizeObserver(() => { resize(); initParticles(); });
+    const resizeObserver = new ResizeObserver(() => { resize(); init(); });
     if (canvas.parentElement) resizeObserver.observe(canvas.parentElement);
 
     return () => {
