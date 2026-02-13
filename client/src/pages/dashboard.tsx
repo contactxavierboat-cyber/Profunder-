@@ -136,7 +136,7 @@ export default function DashboardPage() {
 
   useEffect(() => {
     if (!user) return;
-    const interval = setInterval(() => fetchFeed(false), 3 * 60 * 1000);
+    const interval = setInterval(() => fetchFeed(false), 30 * 1000);
     return () => clearInterval(interval);
   }, [user]);
 
