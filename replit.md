@@ -4,6 +4,12 @@
 A free AI mentorship platform ("Mentorship On Demand") combining funding readiness analytics with AI-powered mentorship. Features a financial analytics dashboard (Funding Readiness Score, risk alerts, action plan, progress tracker), AI chat workspace with 7 bot mentors, PDF document upload with OCR, friends list, admin panel, and free membership access.
 
 ## Recent Changes
+- 2026-02-13: Added document upload on Dashboard with AI-powered analysis (credit report + bank statement)
+- 2026-02-13: AI extracts financial data from uploaded documents and auto-populates funding score fields
+- 2026-02-13: Added POST /api/analyze-document endpoint with PDF extraction pipeline + OpenAI analysis
+- 2026-02-13: Added Next Steps section to Dashboard showing AI-generated personalized recommendations after analysis
+- 2026-02-13: Added lastAnalysisDate, analysisSummary, analysisNextSteps fields to users table
+- 2026-02-13: Funding score auto-refreshes after document analysis completes
 - 2026-02-13: Replaced social feed with Funding Readiness Dashboard (score, qualification range, risk alerts, action plan, progress tracker, insights)
 - 2026-02-13: Added /api/funding-readiness endpoint calculating score from credit profile data
 - 2026-02-13: Dashboard tab replaces Feed tab - private banking/financial analytics terminal design

@@ -42,6 +42,11 @@ interface FundingReadiness {
   actionPlan: string[];
   progress: { current: number; target: number };
   hasProfile: boolean;
+  analysisSummary: string | null;
+  analysisNextSteps: string[];
+  lastAnalysisDate: string | null;
+  hasCreditReport: boolean;
+  hasBankStatement: boolean;
 }
 
 function timeAgo(date: Date | string): string {
@@ -80,6 +85,10 @@ export default function DashboardPage() {
   const [fundingData, setFundingData] = useState<FundingReadiness | null>(null);
   const [fundingLoading, setFundingLoading] = useState(false);
   const [expandedAlerts, setExpandedAlerts] = useState<Set<number>>(new Set());
+  const [docUploading, setDocUploading] = useState(false);
+  const [docUploadType, setDocUploadType] = useState<"credit_report" | "bank_statement" | null>(null);
+  const creditReportInputRef = useRef<HTMLInputElement>(null);
+  const bankStatementInputRef = useRef<HTMLInputElement>(null);
 
   const TRUNCATE_LENGTH = 280;
 
@@ -154,6 +163,51 @@ export default function DashboardPage() {
       console.error("Failed to fetch funding readiness", err);
     } finally {
       setFundingLoading(false);
+    }
+  };
+
+  const handleDocumentUpload = async (file: File, documentType: "credit_report" | "bank_statement") => {
+    setDocUploading(true);
+    setDocUploadType(documentType);
+    try {
+      const fileContent = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        const isPdf = file.name.toLowerCase().endsWith(".pdf");
+        reader.onload = () => {
+          if (isPdf) {
+            const base64 = (reader.result as string).split(",")[1];
+            resolve(base64);
+          } else {
+            resolve(reader.result as string);
+          }
+        };
+        reader.onerror = () => reject(new Error("Failed to read file"));
+        if (isPdf) {
+          reader.readAsDataURL(file);
+        } else {
+          reader.readAsText(file);
+        }
+      });
+
+      const res = await fetch("/api/analyze-document", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ fileContent, documentType }),
+      });
+
+      if (res.ok) {
+        toast({ title: "Analysis Complete", description: "Your document has been analyzed and your funding score has been updated." });
+        await fetchFundingReadiness();
+      } else {
+        const data = await res.json();
+        toast({ title: "Analysis Failed", description: data.error || "Could not analyze document.", variant: "destructive" });
+      }
+    } catch (err) {
+      toast({ title: "Upload Error", description: "Failed to upload document. Please try again.", variant: "destructive" });
+    } finally {
+      setDocUploading(false);
+      setDocUploadType(null);
     }
   };
 
@@ -622,6 +676,106 @@ export default function DashboardPage() {
                     </div>
                   )}
 
+                  <div className="rounded-2xl border border-white/[0.08] bg-[#0D0D0D] p-6" data-testid="document-upload-card">
+                    <div className="flex items-center gap-2 mb-4">
+                      <FileText className="w-4 h-4 text-white/40" />
+                      <p className="text-[11px] font-semibold tracking-[0.2em] text-white/40 uppercase">Document Analysis</p>
+                    </div>
+                    <p className="text-[12px] text-white/35 mb-4">Upload your credit report or bank statement for AI-powered analysis. Your funding score will be automatically updated.</p>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <input
+                        ref={creditReportInputRef}
+                        type="file"
+                        accept=".pdf,.doc,.docx,.txt,.csv"
+                        className="hidden"
+                        data-testid="input-credit-report-upload"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) handleDocumentUpload(file, "credit_report");
+                          e.target.value = "";
+                        }}
+                      />
+                      <input
+                        ref={bankStatementInputRef}
+                        type="file"
+                        accept=".pdf,.doc,.docx,.txt,.csv"
+                        className="hidden"
+                        data-testid="input-bank-statement-upload"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) handleDocumentUpload(file, "bank_statement");
+                          e.target.value = "";
+                        }}
+                      />
+                      <button
+                        onClick={() => creditReportInputRef.current?.click()}
+                        disabled={docUploading}
+                        className={cn(
+                          "flex flex-col items-center gap-2 p-4 rounded-xl border border-dashed transition-all",
+                          fundingData.hasCreditReport
+                            ? "border-green-500/30 bg-green-500/5"
+                            : "border-white/[0.12] bg-white/[0.02] hover:bg-white/[0.05] hover:border-white/[0.2]",
+                          docUploading && docUploadType === "credit_report" && "opacity-50 cursor-wait"
+                        )}
+                        data-testid="button-upload-credit-report"
+                      >
+                        {docUploading && docUploadType === "credit_report" ? (
+                          <Loader2 className="w-6 h-6 text-white/40 animate-spin" />
+                        ) : fundingData.hasCreditReport ? (
+                          <CheckCircle2 className="w-6 h-6 text-green-400" />
+                        ) : (
+                          <FileText className="w-6 h-6 text-white/30" />
+                        )}
+                        <span className="text-[12px] font-medium text-white/60">
+                          {fundingData.hasCreditReport ? "Credit Report Uploaded" : "Upload Credit Report"}
+                        </span>
+                        <span className="text-[10px] text-white/20">PDF, DOC, TXT</span>
+                      </button>
+                      <button
+                        onClick={() => bankStatementInputRef.current?.click()}
+                        disabled={docUploading}
+                        className={cn(
+                          "flex flex-col items-center gap-2 p-4 rounded-xl border border-dashed transition-all",
+                          fundingData.hasBankStatement
+                            ? "border-green-500/30 bg-green-500/5"
+                            : "border-white/[0.12] bg-white/[0.02] hover:bg-white/[0.05] hover:border-white/[0.2]",
+                          docUploading && docUploadType === "bank_statement" && "opacity-50 cursor-wait"
+                        )}
+                        data-testid="button-upload-bank-statement"
+                      >
+                        {docUploading && docUploadType === "bank_statement" ? (
+                          <Loader2 className="w-6 h-6 text-white/40 animate-spin" />
+                        ) : fundingData.hasBankStatement ? (
+                          <CheckCircle2 className="w-6 h-6 text-green-400" />
+                        ) : (
+                          <FileText className="w-6 h-6 text-white/30" />
+                        )}
+                        <span className="text-[12px] font-medium text-white/60">
+                          {fundingData.hasBankStatement ? "Bank Statement Uploaded" : "Upload Bank Statement"}
+                        </span>
+                        <span className="text-[10px] text-white/20">PDF, DOC, TXT</span>
+                      </button>
+                    </div>
+                    {docUploading && (
+                      <div className="mt-4 flex items-center gap-3 p-3 rounded-xl bg-white/[0.02] border border-white/[0.06]">
+                        <Loader2 className="w-4 h-4 text-white/40 animate-spin shrink-0" />
+                        <div>
+                          <p className="text-[12px] text-white/60 font-medium">Analyzing your document...</p>
+                          <p className="text-[10px] text-white/25">AI is extracting financial data and calculating your score</p>
+                        </div>
+                      </div>
+                    )}
+                    {fundingData.analysisSummary && (
+                      <div className="mt-4 p-3.5 rounded-xl bg-white/[0.03] border border-white/[0.06]">
+                        <p className="text-[11px] font-semibold text-white/50 mb-1.5">Latest Analysis</p>
+                        <p className="text-[12px] text-white/60 leading-relaxed">{fundingData.analysisSummary}</p>
+                        {fundingData.lastAnalysisDate && (
+                          <p className="text-[10px] text-white/20 mt-2">Analyzed {timeAgo(fundingData.lastAnalysisDate)} ago</p>
+                        )}
+                      </div>
+                    )}
+                  </div>
+
                   {fundingData.alerts.length > 0 && (
                     <div className="rounded-2xl border border-white/[0.08] bg-[#0D0D0D] p-6" data-testid="risk-alerts-card">
                       <div className="flex items-center gap-2 mb-4">
@@ -708,6 +862,26 @@ export default function DashboardPage() {
                       }
                     </p>
                   </div>
+
+                  {fundingData.analysisNextSteps && fundingData.analysisNextSteps.length > 0 && (
+                    <div className="rounded-2xl border border-green-500/[0.15] bg-[#0D0D0D] p-6" data-testid="next-steps-card">
+                      <div className="flex items-center gap-2 mb-4">
+                        <ChevronRight className="w-4 h-4 text-green-400/60" />
+                        <p className="text-[11px] font-semibold tracking-[0.2em] text-green-400/60 uppercase">Next Steps</p>
+                        <span className="text-[10px] text-white/20 ml-auto">AI-generated from your documents</span>
+                      </div>
+                      <div className="space-y-2">
+                        {fundingData.analysisNextSteps.map((step, idx) => (
+                          <div key={idx} className="flex items-start gap-3 p-3 rounded-xl bg-green-500/[0.03] border border-green-500/[0.08]" data-testid={`next-step-${idx}`}>
+                            <div className="w-6 h-6 rounded-full bg-green-500/10 border border-green-500/20 flex items-center justify-center text-[11px] font-mono text-green-400/70 shrink-0">
+                              {idx + 1}
+                            </div>
+                            <p className="text-[13px] text-white/70 leading-relaxed pt-0.5">{step}</p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
 
                   <div className="rounded-2xl border border-white/[0.08] bg-[#0D0D0D] p-6" data-testid="insights-card">
                     <div className="flex items-center gap-2 mb-4">

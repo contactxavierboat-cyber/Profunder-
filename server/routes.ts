@@ -3376,21 +3376,31 @@ export async function registerRoutes(
       const hasProfile = creditScore || revolvingLimit > 0 || balances > 0;
 
       if (!hasProfile) {
+        let incompleteNextSteps: string[] = [];
+        try {
+          if (user.analysisNextSteps) incompleteNextSteps = JSON.parse(user.analysisNextSteps);
+        } catch {}
+
         res.json({
           score: 0,
           status: "incomplete",
           statusLabel: "Profile Incomplete",
           estimatedRange: null,
           alerts: [
-            { severity: "gray" as const, title: "No financial profile submitted", explanation: "We need your credit information to calculate your funding readiness.", impact: "Cannot assess funding eligibility without data.", fix: "Upload your credit report or enter your financial details in the Workspace." }
+            { severity: "gray" as const, title: "No financial profile submitted", explanation: "We need your credit information to calculate your funding readiness.", impact: "Cannot assess funding eligibility without data.", fix: "Upload your credit report or bank statement using the Document Analysis section below." }
           ],
           actionPlan: [
-            "Upload your credit report PDF in the Workspace tab",
-            "Enter your basic financial details",
-            "Return to Dashboard to view your readiness score"
+            "Upload your credit report PDF using the Document Analysis section",
+            "Upload your bank statement for cash flow analysis",
+            "Review your updated funding readiness score"
           ],
           progress: { current: 0, target: 85 },
-          hasProfile: false
+          hasProfile: false,
+          analysisSummary: user.analysisSummary || null,
+          analysisNextSteps: incompleteNextSteps,
+          lastAnalysisDate: user.lastAnalysisDate || null,
+          hasCreditReport: hasCreditReport,
+          hasBankStatement: hasBankStatement,
         });
         return;
       }
