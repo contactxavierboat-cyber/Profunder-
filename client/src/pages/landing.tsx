@@ -297,7 +297,8 @@ export default function LandingPage() {
 
         <div className="relative z-10 flex flex-col min-h-[85vh] sm:min-h-[90vh] justify-center px-6 sm:px-12 md:px-20 lg:px-28">
 
-          <div className="mb-12 sm:mb-16 md:mb-20">
+          <div className="mb-12 sm:mb-16 md:mb-20 relative">
+            <div className="absolute -inset-8 sm:-inset-12 rounded-3xl" style={{ background: 'radial-gradient(ellipse at 30% 40%, rgba(8,8,8,0.85) 0%, rgba(8,8,8,0.6) 50%, transparent 80%)' }} />
             <div>
               <h1
                 className="text-[52px] sm:text-[80px] md:text-[110px] lg:text-[140px] xl:text-[160px] uppercase"
@@ -412,7 +413,8 @@ export default function LandingPage() {
       </div>
 
       <div className="relative z-10 px-6 sm:px-12 md:px-20 py-16 sm:py-24 border-t border-white/[0.04]">
-        <div className="max-w-[700px]">
+        <div className="absolute inset-0" style={{ background: 'linear-gradient(180deg, rgba(8,8,8,0.7) 0%, rgba(8,8,8,0.5) 60%, transparent 100%)' }} />
+        <div className="relative max-w-[700px]">
           <p className="text-[11px] tracking-[0.15em] text-white/20 uppercase mb-6">About</p>
           <p className="text-[16px] sm:text-[18px] md:text-[20px] text-white/40 leading-[1.8] font-light">
             We are an AI-powered mentorship platform that lets users converse with digital versions of the mentors they admire, delivering trusted guidance anytime, anywhere.
@@ -421,7 +423,8 @@ export default function LandingPage() {
       </div>
 
       <div className="relative z-10 px-6 sm:px-12 md:px-20 py-12 sm:py-16 border-t border-white/[0.04]">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6 sm:gap-12">
+        <div className="absolute inset-0" style={{ background: 'linear-gradient(180deg, rgba(8,8,8,0.65) 0%, rgba(8,8,8,0.5) 60%, transparent 100%)' }} />
+        <div className="relative flex flex-col sm:flex-row items-start sm:items-center gap-6 sm:gap-12">
           <p className="text-[11px] tracking-[0.15em] text-white/20 uppercase">Countdown</p>
           <div className="flex items-center gap-3 sm:gap-4">
             <div className="flex flex-col items-center">
@@ -450,7 +453,8 @@ export default function LandingPage() {
       </div>
 
       <div className="relative z-10 px-6 sm:px-12 md:px-20 pb-16 sm:pb-24 pt-12 sm:pt-16 border-t border-white/[0.04]">
-        <div className="max-w-[600px]">
+        <div className="absolute inset-0" style={{ background: 'linear-gradient(180deg, rgba(8,8,8,0.65) 0%, rgba(8,8,8,0.5) 60%, transparent 100%)' }} />
+        <div className="relative max-w-[600px]">
           <p className="text-[11px] tracking-[0.15em] text-white/20 uppercase mb-6">FAQ</p>
           <h2 className="text-[22px] sm:text-[28px] md:text-[32px] font-light mb-8 sm:mb-12 tracking-[-0.02em] text-white/60">Frequently asked questions</h2>
 
@@ -481,7 +485,9 @@ export default function LandingPage() {
         </div>
       </div>
 
-      <footer className="relative z-10 border-t border-white/[0.04] px-6 sm:px-12 md:px-20 py-8 sm:py-10 flex items-center justify-between">
+      <footer className="relative z-10 border-t border-white/[0.04] px-6 sm:px-12 md:px-20 py-8 sm:py-10">
+        <div className="absolute inset-0" style={{ background: 'rgba(8,8,8,0.6)' }} />
+        <div className="relative flex items-center justify-between">
         <p className="text-[11px] text-white/15">
           &copy; 2026 MentXr&reg; by <span className="text-white/25 font-medium">CMD Supply</span>
         </p>
@@ -489,6 +495,7 @@ export default function LandingPage() {
           <div className="w-5 h-5 rounded-full border border-white/10 flex items-center justify-center">
             <span className="w-1 h-1 rounded-full bg-white/30"></span>
           </div>
+        </div>
         </div>
       </footer>
     </div>
