@@ -55,6 +55,8 @@ export default function DashboardPage() {
   const feedBufferRef = useRef<any[]>([]);
   const feedIndexRef = useRef(0);
   const [liveFeedItems, setLiveFeedItems] = useState<any[]>([]);
+  const influencerBufferRef = useRef<any[]>([]);
+  const influencerIndexRef = useRef(0);
   const [platformStats, setPlatformStats] = useState<{ totalUsers: number; activeNow: number }>({ totalUsers: 0, activeNow: 0 });
   const [communityPosts, setCommunityPosts] = useState<any[]>([]);
   const [postLikes, setPostLikes] = useState<Set<number>>(new Set());
@@ -171,29 +173,75 @@ export default function DashboardPage() {
     }
   };
 
+  const fetchInfluencerPosts = async () => {
+    try {
+      const res = await fetch("/api/influencer-posts", { credentials: "include" });
+      if (res.ok) {
+        const data = await res.json();
+        const posts = (data.posts || []).map((p: any) => ({
+          id: p.id,
+          _liveId: `inf-${p.id}`,
+          title: p.content.substring(0, 80) + (p.content.length > 80 ? "..." : ""),
+          description: p.content,
+          link: "#",
+          image: p.image,
+          source: p.influencerName,
+          category: p.category,
+          contentType: p.contentType,
+          publishedAt: p.timestamp,
+          author: p.handle,
+          mentor: null,
+          isInfluencer: true,
+          verified: p.verified,
+          followers: p.followers,
+          handle: p.handle,
+        }));
+        influencerBufferRef.current = posts;
+      }
+    } catch (err) {
+      console.error("Failed to fetch influencer posts", err);
+    }
+  };
+
   useEffect(() => {
     if (user) {
       fetchFeed();
       fetchPosts();
+      fetchInfluencerPosts();
       fetch("/api/stats").then(r => r.json()).then(setPlatformStats).catch(() => {});
     }
   }, [user]);
 
   useEffect(() => {
     if (!user) return;
+    let dripToggle = 0;
     const dripInterval = setInterval(() => {
-      if (feedBufferRef.current.length === 0) return;
-      const idx = feedIndexRef.current % feedBufferRef.current.length;
-      const nextItem = { ...feedBufferRef.current[idx], _liveId: `live-${Date.now()}-${idx}` };
-      feedIndexRef.current = idx + 1;
-      setLiveFeedItems(prev => [nextItem, ...prev].slice(0, 50));
+      let nextItem: any = null;
+      if (dripToggle % 2 === 0 && influencerBufferRef.current.length > 0) {
+        const idx = influencerIndexRef.current % influencerBufferRef.current.length;
+        nextItem = { ...influencerBufferRef.current[idx], _liveId: `inf-${Date.now()}-${idx}` };
+        influencerIndexRef.current = idx + 1;
+      } else if (feedBufferRef.current.length > 0) {
+        const idx = feedIndexRef.current % feedBufferRef.current.length;
+        nextItem = { ...feedBufferRef.current[idx], _liveId: `live-${Date.now()}-${idx}` };
+        feedIndexRef.current = idx + 1;
+      } else if (influencerBufferRef.current.length > 0) {
+        const idx = influencerIndexRef.current % influencerBufferRef.current.length;
+        nextItem = { ...influencerBufferRef.current[idx], _liveId: `inf-${Date.now()}-${idx}` };
+        influencerIndexRef.current = idx + 1;
+      }
+      dripToggle++;
+      if (nextItem) {
+        setLiveFeedItems(prev => [nextItem, ...prev].slice(0, 50));
+      }
     }, 2000);
     const feedRefresh = setInterval(() => fetchFeed(false), 60 * 1000);
+    const influencerRefresh = setInterval(() => fetchInfluencerPosts(), 5 * 1000);
     const postsInterval = setInterval(() => fetchPosts(), 2 * 1000);
     const statsInterval = setInterval(() => {
       fetch("/api/stats").then(r => r.json()).then(setPlatformStats).catch(() => {});
     }, 10 * 1000);
-    return () => { clearInterval(dripInterval); clearInterval(feedRefresh); clearInterval(postsInterval); clearInterval(statsInterval); };
+    return () => { clearInterval(dripInterval); clearInterval(feedRefresh); clearInterval(influencerRefresh); clearInterval(postsInterval); clearInterval(statsInterval); };
   }, [user]);
 
   const lastMentorMsg = [...messages].reverse().find(m => m.role === 'assistant' && m.mentor);
@@ -497,15 +545,16 @@ export default function DashboardPage() {
                   ) : liveFeedItems.length > 0 ? (
                     <div className="space-y-2.5">
                       {liveFeedItems.map((item: any, idx: number) => (
-                        <a
+                        <div
                           key={item._liveId || item.id || idx}
-                          href={item.link}
-                          target="_blank"
-                          rel="noopener noreferrer"
+                          onClick={() => { if (item.link && item.link !== "#") window.open(item.link, "_blank"); }}
                           className={cn(
                             "block rounded-2xl border overflow-hidden group transition-all animate-[feedSlideIn_0.4s_ease-out]",
+                            item.link && item.link !== "#" ? "cursor-pointer" : "cursor-default",
                             item.mentor
                               ? "border-amber-500/20 bg-amber-500/[0.03] hover:bg-amber-500/[0.06]"
+                              : item.isInfluencer
+                              ? "border-purple-500/10 bg-white/[0.02] hover:bg-white/[0.04]"
                               : "border-white/[0.06] bg-white/[0.02] hover:bg-white/[0.05]"
                           )}
                           data-testid={`feed-item-${idx}`}
@@ -528,6 +577,25 @@ export default function DashboardPage() {
                             </div>
                           )}
                           <div className="p-3.5">
+                            {item.isInfluencer && (
+                              <div className="flex items-center gap-2 mb-2">
+                                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-[11px] font-bold text-white shrink-0">
+                                  {item.source?.split(" ").map((w: string) => w[0]).join("").substring(0, 2)}
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <div className="flex items-center gap-1">
+                                    <span className="text-[13px] font-semibold text-white/90 truncate">{item.source}</span>
+                                    {item.verified && <span className="text-blue-400 text-[11px]">✓</span>}
+                                  </div>
+                                  <div className="flex items-center gap-1.5">
+                                    <span className="text-[10px] text-white/30">{item.handle}</span>
+                                    <span className="text-white/10 text-[8px]">·</span>
+                                    <span className="text-[10px] text-white/25">{item.followers} followers</span>
+                                  </div>
+                                </div>
+                                <span className="text-[9px] text-white/20">{timeAgo(item.publishedAt)}</span>
+                              </div>
+                            )}
                             <div className="flex items-center gap-2 mb-1.5">
                               {item.mentor && (
                                 <span className="px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wide bg-gradient-to-r from-amber-500/25 to-orange-500/25 text-amber-400 border border-amber-500/20">
@@ -542,20 +610,33 @@ export default function DashboardPage() {
                               )}>
                                 {item.contentType === "video" ? "▶ video" : item.contentType === "photo" ? "📷 photo" : "text"}
                               </span>
-                              <span className="text-[10px] text-white/20">{item.source}</span>
-                              <span className="text-white/10 text-[10px]">·</span>
-                              <span className="text-[10px] text-white/20">{timeAgo(item.publishedAt)}</span>
+                              {!item.isInfluencer && (
+                                <>
+                                  <span className="text-[10px] text-white/20">{item.source}</span>
+                                  <span className="text-white/10 text-[10px]">·</span>
+                                  <span className="text-[10px] text-white/20">{timeAgo(item.publishedAt)}</span>
+                                </>
+                              )}
+                              <span className="px-1.5 py-0.5 rounded text-[8px] text-white/20 bg-white/[0.03]">{item.category}</span>
                             </div>
-                            <h3 className="text-[14px] font-semibold text-white/85 leading-snug mb-1 group-hover:text-white transition-colors">{item.title}</h3>
-                            {item.description && (
-                              <p className="text-[12px] text-white/40 leading-relaxed line-clamp-2">{item.description}</p>
+                            {item.isInfluencer ? (
+                              <p className="text-[13px] text-white/75 leading-relaxed">{item.description}</p>
+                            ) : (
+                              <>
+                                <h3 className="text-[14px] font-semibold text-white/85 leading-snug mb-1 group-hover:text-white transition-colors">{item.title}</h3>
+                                {item.description && (
+                                  <p className="text-[12px] text-white/40 leading-relaxed line-clamp-2">{item.description}</p>
+                                )}
+                              </>
                             )}
-                            <div className="flex items-center gap-1.5 mt-2 text-[10px] text-white/20">
-                              <ExternalLink className="w-2.5 h-2.5" />
-                              <span>{item.contentType === "video" ? "Watch video" : "Read full article"}</span>
-                            </div>
+                            {!item.isInfluencer && (
+                              <div className="flex items-center gap-1.5 mt-2 text-[10px] text-white/20">
+                                <ExternalLink className="w-2.5 h-2.5" />
+                                <span>{item.contentType === "video" ? "Watch video" : "Read full article"}</span>
+                              </div>
+                            )}
                           </div>
-                        </a>
+                        </div>
                       ))}
                     </div>
                   ) : null}
