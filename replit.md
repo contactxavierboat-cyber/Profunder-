@@ -4,9 +4,8 @@
 A free AI mentorship platform ("Mentorship On Demand") combining Capital Readiness analytics with AI-powered mentorship. Features a 6-component Capital Readiness evaluation system (Capital Strength, Credit Quality, Management & Structure, Earnings & Cash Flow, Liquidity & Leverage, Risk Signals), 2.5x exposure ceiling calculation, tier eligibility (Prime/Mid-Tier/Alternative), operating mode (Pre-Funding/Repair), denial simulation, AI chat workspace with 7 bot mentors, PDF document upload with OCR, friends list, admin panel, and free membership access.
 
 ## Recent Changes
-- 2026-02-13: Added AI Assist tab with assistance-first system prompt (direct answers, no hedging, separate from mentor chat)
-- 2026-02-13: Added /api/assist GET/POST/DELETE endpoints with separate message storage using __assist__ mentor tag
-- 2026-02-13: Assist messages stored separately from chat messages via mentor field filtering
+- 2026-02-13: Applied assistance-first system prompt to all Workspace chat (direct answers, no hedging, no refusal) via MASTER_SYSTEM_PROMPT
+- 2026-02-13: Removed separate AI Assist tab - assistance-first behavior now built into all mentor and general chat
 - 2026-02-13: Expanded AI document analysis to extract 14 data fields (exact score, revolving limits, balances, inquiries, derogatories, late payments, collections, open/closed accounts, account age, public records, utilization)
 - 2026-02-13: All financial profile fields force-reset on new report upload (no stale data persistence)
 - 2026-02-13: Added safeInt() type coercion for all AI-extracted numeric values
