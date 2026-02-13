@@ -370,71 +370,73 @@ export default function DashboardPage() {
         sidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0",
         "md:flex",
         !sidebarOpen && "hidden md:flex"
-      )} style={{ background: 'linear-gradient(180deg, #e8e6e0 0%, #d4d0c8 100%)' }}>
-        <div className="bg-gradient-to-r from-[#003399] to-[#0066cc] px-3 py-2 flex items-center justify-between shadow-md">
+      )} style={{ background: '#0D0D0D' }}>
+        <div className="bg-gradient-to-r from-[#1A1A1A] to-[#222] px-3 py-2.5 flex items-center justify-between border-b border-white/[0.08]">
           <div className="flex items-center gap-2">
-            <div className="w-5 h-5 rounded-sm bg-yellow-400 flex items-center justify-center">
-              <span className="text-[10px] font-black text-[#003399]">X</span>
+            <div className="w-6 h-6 rounded-lg bg-[#E0E0E0] flex items-center justify-center">
+              <span className="text-[10px] font-black text-[#0D0D0D]">X</span>
             </div>
-            <span className="text-[13px] font-bold text-white drop-shadow-sm tracking-tight">MentXr® Buddy List</span>
+            <div>
+              <span className="text-[13px] font-bold text-white/90 tracking-tight">MentXr® Buddy List</span>
+            </div>
           </div>
-          <button onClick={() => setSidebarOpen(false)} className="md:hidden text-white/80 hover:text-white">
+          <button onClick={() => setSidebarOpen(false)} className="md:hidden text-white/40 hover:text-white/70">
             <X className="w-4 h-4" />
           </button>
         </div>
 
-        <div className="bg-[#f0ede4] border-b border-[#a0a0a0] px-3 py-2 flex items-center gap-2">
+        <div className="bg-[#111] border-b border-white/[0.06] px-3 py-2.5 flex items-center gap-2.5">
           <div className="relative">
-            <div className="w-8 h-8 rounded-sm bg-[#d4d0c8] border border-[#808080] flex items-center justify-center text-[11px] font-bold text-[#333] shadow-[inset_1px_1px_0_#fff,inset_-1px_-1px_0_#808080]">
+            <div className="w-9 h-9 rounded-lg bg-[#1A1A1A] border border-white/[0.1] flex items-center justify-center text-[11px] font-bold text-white/60">
               {user.email.substring(0, 2).toUpperCase()}
             </div>
-            <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-[#44cc44] border-2 border-[#f0ede4]" />
+            <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-green-500 border-2 border-[#111]" />
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-[12px] font-bold text-[#333] truncate">{user.email.split("@")[0]}</p>
-            <p className="text-[10px] text-[#666] italic truncate">Mentorship On Demand</p>
+            <p className="text-[12px] font-semibold text-white/80 truncate">{user.email.split("@")[0]}</p>
+            <p className="text-[10px] text-white/30 italic truncate">Mentorship On Demand</p>
           </div>
         </div>
 
-        <div className="bg-[#f0ede4] border-b border-[#a0a0a0] px-2 py-1 flex items-center gap-1">
+        <div className="bg-[#0D0D0D] border-b border-white/[0.06] px-2.5 py-1.5 flex items-center gap-1.5">
           <button
             data-testid="button-new-chat"
             onClick={() => { clearChat(); setSelectedMentor(null); setMentorCleared(true); setSidebarOpen(false); setActiveTab("chat"); }}
-            className="flex-1 text-[11px] px-2 py-1 bg-[#d4d0c8] border border-[#808080] shadow-[inset_1px_1px_0_#fff,inset_-1px_-1px_0_#808080] hover:bg-[#c8c4bc] active:shadow-[inset_-1px_-1px_0_#fff,inset_1px_1px_0_#808080] text-[#333] font-medium"
+            className="flex-1 text-[11px] px-2.5 py-1.5 rounded-lg bg-white/[0.06] border border-white/[0.08] hover:bg-white/[0.1] active:bg-white/[0.04] text-white/60 font-medium transition-colors"
           >
             + New Chat
           </button>
           <button
             onClick={() => { fetchInfluencerPosts(); fetchFeed(); }}
-            className="text-[11px] px-2 py-1 bg-[#d4d0c8] border border-[#808080] shadow-[inset_1px_1px_0_#fff,inset_-1px_-1px_0_#808080] hover:bg-[#c8c4bc] active:shadow-[inset_-1px_-1px_0_#808080,inset_1px_1px_0_#fff] text-[#333]"
+            className="text-[11px] px-2 py-1.5 rounded-lg bg-white/[0.06] border border-white/[0.08] hover:bg-white/[0.1] active:bg-white/[0.04] text-white/40 transition-colors"
           >
             <RefreshCw className="w-3 h-3" />
           </button>
         </div>
 
-        <div className="flex-1 overflow-y-auto bg-white" style={{ scrollbarWidth: 'thin' }}>
-          <div className="border-b border-[#c0c0c0]">
+        <div className="flex-1 overflow-y-auto bg-[#0a0a0a]" style={{ scrollbarWidth: 'thin' }}>
+          <div className="border-b border-white/[0.05]">
             <button
               onClick={() => setBuddyGroups(prev => ({ ...prev, mentors: !prev.mentors }))}
-              className="w-full flex items-center gap-1.5 px-2 py-1.5 hover:bg-[#e8e8ff] text-left"
+              className="w-full flex items-center gap-1.5 px-3 py-2 hover:bg-white/[0.03] text-left transition-colors"
               data-testid="buddy-group-mentors"
             >
-              <span className="text-[11px] text-[#666] font-mono w-3">{buddyGroups.mentors ? "▼" : "►"}</span>
-              <span className="text-[12px] font-bold text-[#333]">Mentors</span>
-              <span className="text-[10px] text-[#999] ml-auto">(7/7)</span>
+              <span className="text-[10px] text-white/20 font-mono w-3">{buddyGroups.mentors ? "▾" : "▸"}</span>
+              <span className="text-[11px] font-bold text-white/50 uppercase tracking-widest">Mentors</span>
+              <span className="text-[10px] text-white/20 ml-auto">(7/7)</span>
             </button>
             {buddyGroups.mentors && (
               <div className="pb-1">
                 {Object.entries(MENTOR_INFO).map(([key, mentor]) => {
                   const isActive = activeMentorKey === key;
                   const statusMessages: Record<string, string> = {
-                    grant_cardone: "10X or nothing! Let's close deals 💰",
+                    grant_cardone: "10X or nothing! Let's close deals",
                     warren_buffett: "Reading annual reports...",
-                    gary_vee: "Creating content rn 🔥",
-                    oprah_winfrey: "Living my best life ✨",
+                    gary_vee: "Creating content rn",
+                    oprah_winfrey: "Living my best life",
                     sara_blakely: "Building the next big thing",
-                    nineteen_keys: "Knowledge is the key 🔑",
-                    charleston_white: "Speaking truth to power 💯",
+                    nineteen_keys: "Knowledge is the key",
+                    charleston_white: "Speaking truth to power",
                   };
                   return (
                     <button
@@ -447,30 +449,30 @@ export default function DashboardPage() {
                         setSidebarOpen(false);
                       }}
                       className={cn(
-                        "w-full flex items-center gap-2 px-4 py-1.5 text-left transition-colors",
+                        "w-full flex items-center gap-2.5 px-4 py-2 text-left transition-all",
                         isActive
-                          ? "bg-[#0066cc] text-white"
-                          : "hover:bg-[#e8e8ff]"
+                          ? "bg-white/[0.08] border-l-2 border-l-[#E0E0E0]"
+                          : "hover:bg-white/[0.04] border-l-2 border-l-transparent"
                       )}
                     >
                       <div className="relative shrink-0">
                         <img
                           src={mentor.avatar}
                           alt={mentor.name}
-                          className="w-7 h-7 rounded-sm border border-[#c0c0c0] object-cover"
+                          className="w-8 h-8 rounded-lg border border-white/[0.1] object-cover"
                         />
-                        <div className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-[#44cc44] border border-white" />
+                        <div className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-green-500 border-2 border-[#0a0a0a]" />
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className={cn(
-                          "text-[12px] font-bold truncate",
-                          isActive ? "text-white" : "text-[#333]"
+                          "text-[12px] font-semibold truncate",
+                          isActive ? "text-white" : "text-white/70"
                         )}>
                           {mentor.name}
                         </p>
                         <p className={cn(
-                          "text-[10px] truncate italic",
-                          isActive ? "text-white/70" : "text-[#888]"
+                          "text-[10px] truncate",
+                          isActive ? "text-white/40" : "text-white/25"
                         )}>
                           {statusMessages[key] || mentor.tagline}
                         </p>
@@ -482,68 +484,68 @@ export default function DashboardPage() {
             )}
           </div>
 
-          <div className="border-b border-[#c0c0c0]">
+          <div className="border-b border-white/[0.05]">
             <button
               onClick={() => setBuddyGroups(prev => ({ ...prev, community: !prev.community }))}
-              className="w-full flex items-center gap-1.5 px-2 py-1.5 hover:bg-[#e8e8ff] text-left"
+              className="w-full flex items-center gap-1.5 px-3 py-2 hover:bg-white/[0.03] text-left transition-colors"
               data-testid="buddy-group-community"
             >
-              <span className="text-[11px] text-[#666] font-mono w-3">{buddyGroups.community ? "▼" : "►"}</span>
-              <span className="text-[12px] font-bold text-[#333]">Community</span>
-              <span className="text-[10px] text-[#999] ml-auto">({platformStats.activeNow} online)</span>
+              <span className="text-[10px] text-white/20 font-mono w-3">{buddyGroups.community ? "▾" : "▸"}</span>
+              <span className="text-[11px] font-bold text-white/50 uppercase tracking-widest">Community</span>
+              <span className="text-[10px] text-white/20 ml-auto">({platformStats.activeNow})</span>
             </button>
             {buddyGroups.community && (
-              <div className="pb-1">
-                <div className="px-4 py-1.5 flex items-center gap-2">
-                  <div className="w-2 h-2 rounded-full bg-[#44cc44]" />
-                  <span className="text-[11px] text-[#333]">{platformStats.activeNow} members active now</span>
+              <div className="pb-1 px-4">
+                <div className="py-1.5 flex items-center gap-2">
+                  <div className="w-2 h-2 rounded-full bg-green-500" />
+                  <span className="text-[11px] text-white/50">{platformStats.activeNow} online</span>
                 </div>
-                <div className="px-4 py-1.5 flex items-center gap-2">
-                  <div className="w-2 h-2 rounded-full bg-[#cccc00]" />
-                  <span className="text-[11px] text-[#888]">{Math.floor(platformStats.totalUsers * 0.3)} idle</span>
+                <div className="py-1.5 flex items-center gap-2">
+                  <div className="w-2 h-2 rounded-full bg-yellow-500" />
+                  <span className="text-[11px] text-white/30">{Math.floor(platformStats.totalUsers * 0.3)} idle</span>
                 </div>
-                <div className="px-4 py-1.5 flex items-center gap-2">
-                  <div className="w-2 h-2 rounded-full bg-[#cc4444]" />
-                  <span className="text-[11px] text-[#aaa]">{platformStats.totalUsers - platformStats.activeNow - Math.floor(platformStats.totalUsers * 0.3)} offline</span>
+                <div className="py-1.5 flex items-center gap-2">
+                  <div className="w-2 h-2 rounded-full bg-white/20" />
+                  <span className="text-[11px] text-white/20">{platformStats.totalUsers - platformStats.activeNow - Math.floor(platformStats.totalUsers * 0.3)} offline</span>
                 </div>
-                <div className="px-4 py-1 text-[10px] text-[#999] italic">
+                <div className="py-1 text-[10px] text-white/15 italic">
                   {platformStats.totalUsers.toLocaleString()} total members
                 </div>
               </div>
             )}
           </div>
 
-          <div className="border-b border-[#c0c0c0]">
+          <div className="border-b border-white/[0.05]">
             <button
               onClick={() => setBuddyGroups(prev => ({ ...prev, offline: !prev.offline }))}
-              className="w-full flex items-center gap-1.5 px-2 py-1.5 hover:bg-[#e8e8ff] text-left"
+              className="w-full flex items-center gap-1.5 px-3 py-2 hover:bg-white/[0.03] text-left transition-colors"
               data-testid="buddy-group-offline"
             >
-              <span className="text-[11px] text-[#666] font-mono w-3">{buddyGroups.offline ? "▼" : "►"}</span>
-              <span className="text-[12px] font-bold text-[#333]">Recent Chats</span>
+              <span className="text-[10px] text-white/20 font-mono w-3">{buddyGroups.offline ? "▾" : "▸"}</span>
+              <span className="text-[11px] font-bold text-white/50 uppercase tracking-widest">Recent Chats</span>
             </button>
             {buddyGroups.offline && (
               <div className="pb-1">
                 {messages.length > 0 ? (
-                  <div className="px-4 py-1.5 flex items-center gap-2 hover:bg-[#e8e8ff] cursor-pointer">
-                    <div className="w-2 h-2 rounded-full bg-[#44cc44]" />
-                    <span className="text-[11px] text-[#333] truncate flex-1">{messages[0]?.content.substring(0, 35)}...</span>
+                  <div className="px-4 py-1.5 flex items-center gap-2 hover:bg-white/[0.04] cursor-pointer transition-colors">
+                    <div className="w-2 h-2 rounded-full bg-green-500" />
+                    <span className="text-[11px] text-white/40 truncate flex-1">{messages[0]?.content.substring(0, 35)}...</span>
                   </div>
                 ) : (
-                  <p className="px-4 py-1.5 text-[10px] text-[#999] italic">No recent conversations</p>
+                  <p className="px-4 py-1.5 text-[10px] text-white/15 italic">No recent conversations</p>
                 )}
               </div>
             )}
           </div>
         </div>
 
-        <div className="bg-[#d4d0c8] border-t border-[#808080] px-2 py-1.5 flex items-center gap-1.5">
-          <div className="w-2.5 h-2.5 rounded-full bg-[#44cc44]" />
-          <span className="text-[10px] text-[#333] flex-1 truncate font-medium">{user.email}</span>
+        <div className="bg-[#111] border-t border-white/[0.06] px-3 py-2 flex items-center gap-2">
+          <div className="w-2 h-2 rounded-full bg-green-500" />
+          <span className="text-[10px] text-white/40 flex-1 truncate">{user.email}</span>
           <button
             data-testid="button-logout"
             onClick={logout}
-            className="text-[10px] px-2 py-0.5 bg-[#d4d0c8] border border-[#808080] shadow-[inset_1px_1px_0_#fff,inset_-1px_-1px_0_#808080] hover:bg-[#c8c4bc] active:shadow-[inset_-1px_-1px_0_#fff,inset_1px_1px_0_#808080] text-[#333]"
+            className="text-[10px] px-2.5 py-1 rounded-lg bg-white/[0.06] border border-white/[0.08] hover:bg-white/[0.1] text-white/40 transition-colors"
           >
             Sign Off
           </button>
