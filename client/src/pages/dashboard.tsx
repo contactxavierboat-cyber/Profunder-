@@ -371,26 +371,24 @@ export default function DashboardPage() {
         "md:flex",
         !sidebarOpen && "hidden md:flex"
       )} style={{ background: '#0D0D0D' }}>
-        <div className="bg-gradient-to-r from-[#1A1A1A] to-[#222] px-3 py-2.5 flex items-center justify-between border-b border-white/[0.08]">
-          <div className="flex items-center gap-2">
+        <div className="h-11 px-4 flex items-center justify-between border-b border-white/[0.08] bg-[#111]">
+          <div className="flex items-center gap-2.5">
             <div className="w-6 h-6 rounded-lg bg-[#E0E0E0] flex items-center justify-center">
               <span className="text-[10px] font-black text-[#0D0D0D]">X</span>
             </div>
-            <div>
-              <span className="text-[13px] font-bold text-white/90 tracking-tight">MentXr® Buddy List</span>
-            </div>
+            <span className="text-[13px] font-bold text-white/90 tracking-tight">MentXr® Buddy List</span>
           </div>
           <button onClick={() => setSidebarOpen(false)} className="md:hidden text-white/40 hover:text-white/70">
             <X className="w-4 h-4" />
           </button>
         </div>
 
-        <div className="bg-[#111] border-b border-white/[0.06] px-3 py-2.5 flex items-center gap-2.5">
-          <div className="relative">
+        <div className="h-14 px-4 flex items-center gap-3 border-b border-white/[0.08] bg-[#0D0D0D]">
+          <div className="relative shrink-0">
             <div className="w-9 h-9 rounded-lg bg-[#1A1A1A] border border-white/[0.1] flex items-center justify-center text-[11px] font-bold text-white/60">
               {user.email.substring(0, 2).toUpperCase()}
             </div>
-            <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-green-500 border-2 border-[#111]" />
+            <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-green-500 border-2 border-[#0D0D0D]" />
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-[12px] font-semibold text-white/80 truncate">{user.email.split("@")[0]}</p>
@@ -398,27 +396,27 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        <div className="bg-[#0D0D0D] border-b border-white/[0.06] px-2.5 py-1.5 flex items-center gap-1.5">
+        <div className="h-10 px-4 flex items-center gap-2 border-b border-white/[0.08] bg-[#0D0D0D]">
           <button
             data-testid="button-new-chat"
             onClick={() => { clearChat(); setSelectedMentor(null); setMentorCleared(true); setSidebarOpen(false); setActiveTab("chat"); }}
-            className="flex-1 text-[11px] px-2.5 py-1.5 rounded-lg bg-white/[0.06] border border-white/[0.08] hover:bg-white/[0.1] active:bg-white/[0.04] text-white/60 font-medium transition-colors"
+            className="flex-1 h-7 text-[11px] rounded-lg bg-white/[0.06] border border-white/[0.08] hover:bg-white/[0.1] active:bg-white/[0.04] text-white/60 font-medium transition-colors"
           >
             + New Chat
           </button>
           <button
             onClick={() => { fetchInfluencerPosts(); fetchFeed(); }}
-            className="text-[11px] px-2 py-1.5 rounded-lg bg-white/[0.06] border border-white/[0.08] hover:bg-white/[0.1] active:bg-white/[0.04] text-white/40 transition-colors"
+            className="h-7 w-7 flex items-center justify-center rounded-lg bg-white/[0.06] border border-white/[0.08] hover:bg-white/[0.1] active:bg-white/[0.04] text-white/40 transition-colors"
           >
             <RefreshCw className="w-3 h-3" />
           </button>
         </div>
 
         <div className="flex-1 overflow-y-auto bg-[#0a0a0a]" style={{ scrollbarWidth: 'thin' }}>
-          <div className="border-b border-white/[0.05]">
+          <div className="border-b border-white/[0.06]">
             <button
               onClick={() => setBuddyGroups(prev => ({ ...prev, mentors: !prev.mentors }))}
-              className="w-full flex items-center gap-1.5 px-3 py-2 hover:bg-white/[0.03] text-left transition-colors"
+              className="w-full h-9 flex items-center gap-2 px-4 hover:bg-white/[0.03] text-left transition-colors"
               data-testid="buddy-group-mentors"
             >
               <span className="text-[10px] text-white/20 font-mono w-3">{buddyGroups.mentors ? "▾" : "▸"}</span>
@@ -449,7 +447,7 @@ export default function DashboardPage() {
                         setSidebarOpen(false);
                       }}
                       className={cn(
-                        "w-full flex items-center gap-2.5 px-4 py-2 text-left transition-all",
+                        "w-full h-11 flex items-center gap-3 px-4 text-left transition-all",
                         isActive
                           ? "bg-white/[0.08] border-l-2 border-l-[#E0E0E0]"
                           : "hover:bg-white/[0.04] border-l-2 border-l-transparent"
@@ -465,13 +463,13 @@ export default function DashboardPage() {
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className={cn(
-                          "text-[12px] font-semibold truncate",
+                          "text-[12px] font-semibold truncate leading-tight",
                           isActive ? "text-white" : "text-white/70"
                         )}>
                           {mentor.name}
                         </p>
                         <p className={cn(
-                          "text-[10px] truncate",
+                          "text-[10px] truncate leading-tight",
                           isActive ? "text-white/40" : "text-white/25"
                         )}>
                           {statusMessages[key] || mentor.tagline}
@@ -484,10 +482,10 @@ export default function DashboardPage() {
             )}
           </div>
 
-          <div className="border-b border-white/[0.05]">
+          <div className="border-b border-white/[0.06]">
             <button
               onClick={() => setBuddyGroups(prev => ({ ...prev, community: !prev.community }))}
-              className="w-full flex items-center gap-1.5 px-3 py-2 hover:bg-white/[0.03] text-left transition-colors"
+              className="w-full h-9 flex items-center gap-2 px-4 hover:bg-white/[0.03] text-left transition-colors"
               data-testid="buddy-group-community"
             >
               <span className="text-[10px] text-white/20 font-mono w-3">{buddyGroups.community ? "▾" : "▸"}</span>
@@ -495,30 +493,30 @@ export default function DashboardPage() {
               <span className="text-[10px] text-white/20 ml-auto">({platformStats.activeNow})</span>
             </button>
             {buddyGroups.community && (
-              <div className="pb-1 px-4">
-                <div className="py-1.5 flex items-center gap-2">
-                  <div className="w-2 h-2 rounded-full bg-green-500" />
+              <div className="pb-1">
+                <div className="h-9 flex items-center gap-3 px-4">
+                  <div className="w-2.5 h-2.5 rounded-full bg-green-500 shrink-0" />
                   <span className="text-[11px] text-white/50">{platformStats.activeNow} online</span>
                 </div>
-                <div className="py-1.5 flex items-center gap-2">
-                  <div className="w-2 h-2 rounded-full bg-yellow-500" />
+                <div className="h-9 flex items-center gap-3 px-4">
+                  <div className="w-2.5 h-2.5 rounded-full bg-yellow-500 shrink-0" />
                   <span className="text-[11px] text-white/30">{Math.floor(platformStats.totalUsers * 0.3)} idle</span>
                 </div>
-                <div className="py-1.5 flex items-center gap-2">
-                  <div className="w-2 h-2 rounded-full bg-white/20" />
+                <div className="h-9 flex items-center gap-3 px-4">
+                  <div className="w-2.5 h-2.5 rounded-full bg-white/20 shrink-0" />
                   <span className="text-[11px] text-white/20">{platformStats.totalUsers - platformStats.activeNow - Math.floor(platformStats.totalUsers * 0.3)} offline</span>
                 </div>
-                <div className="py-1 text-[10px] text-white/15 italic">
-                  {platformStats.totalUsers.toLocaleString()} total members
+                <div className="h-8 flex items-center px-4">
+                  <span className="text-[10px] text-white/15 italic">{platformStats.totalUsers.toLocaleString()} total members</span>
                 </div>
               </div>
             )}
           </div>
 
-          <div className="border-b border-white/[0.05]">
+          <div className="border-b border-white/[0.06]">
             <button
               onClick={() => setBuddyGroups(prev => ({ ...prev, offline: !prev.offline }))}
-              className="w-full flex items-center gap-1.5 px-3 py-2 hover:bg-white/[0.03] text-left transition-colors"
+              className="w-full h-9 flex items-center gap-2 px-4 hover:bg-white/[0.03] text-left transition-colors"
               data-testid="buddy-group-offline"
             >
               <span className="text-[10px] text-white/20 font-mono w-3">{buddyGroups.offline ? "▾" : "▸"}</span>
@@ -527,25 +525,27 @@ export default function DashboardPage() {
             {buddyGroups.offline && (
               <div className="pb-1">
                 {messages.length > 0 ? (
-                  <div className="px-4 py-1.5 flex items-center gap-2 hover:bg-white/[0.04] cursor-pointer transition-colors">
-                    <div className="w-2 h-2 rounded-full bg-green-500" />
+                  <div className="h-9 flex items-center gap-3 px-4 hover:bg-white/[0.04] cursor-pointer transition-colors">
+                    <div className="w-2.5 h-2.5 rounded-full bg-green-500 shrink-0" />
                     <span className="text-[11px] text-white/40 truncate flex-1">{messages[0]?.content.substring(0, 35)}...</span>
                   </div>
                 ) : (
-                  <p className="px-4 py-1.5 text-[10px] text-white/15 italic">No recent conversations</p>
+                  <div className="h-9 flex items-center px-4">
+                    <span className="text-[10px] text-white/15 italic">No recent conversations</span>
+                  </div>
                 )}
               </div>
             )}
           </div>
         </div>
 
-        <div className="bg-[#111] border-t border-white/[0.06] px-3 py-2 flex items-center gap-2">
-          <div className="w-2 h-2 rounded-full bg-green-500" />
+        <div className="h-11 px-4 flex items-center gap-3 border-t border-white/[0.08] bg-[#111]">
+          <div className="w-2.5 h-2.5 rounded-full bg-green-500 shrink-0" />
           <span className="text-[10px] text-white/40 flex-1 truncate">{user.email}</span>
           <button
             data-testid="button-logout"
             onClick={logout}
-            className="text-[10px] px-2.5 py-1 rounded-lg bg-white/[0.06] border border-white/[0.08] hover:bg-white/[0.1] text-white/40 transition-colors"
+            className="h-7 text-[10px] px-3 rounded-lg bg-white/[0.06] border border-white/[0.08] hover:bg-white/[0.1] text-white/40 transition-colors"
           >
             Sign Off
           </button>
