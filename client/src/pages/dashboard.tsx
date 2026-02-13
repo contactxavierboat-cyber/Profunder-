@@ -1435,12 +1435,16 @@ export default function DashboardPage() {
               {friendSearchResults.map((u: any) => {
                 const alreadyFriend = friendsList.some((f: any) => f.id === u.id);
                 const alreadyPending = pendingRequests.some((p: any) => p.id === u.id);
+                const hasDuplicate = friendSearchResults.filter((r: any) => r.displayName === u.displayName).length > 1;
                 return (
                   <div key={u.id} className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-white/[0.04] transition-colors">
                     <div className="w-9 h-9 rounded-lg bg-[#1A1A1A] border border-white/[0.1] flex items-center justify-center text-[10px] font-bold text-white/50">
                       {(u.displayName || "?").substring(0, 2).toUpperCase()}
                     </div>
-                    <span className="text-[13px] text-white/70 flex-1 truncate">{u.displayName}</span>
+                    <div className="flex-1 min-w-0">
+                      <span className="text-[13px] text-white/70 block truncate">{u.displayName}</span>
+                      {hasDuplicate && <span className="text-[10px] text-white/25 block truncate">#{u.id}</span>}
+                    </div>
                     {alreadyFriend ? (
                       <span className="text-[10px] text-green-400/60 px-2 py-1 rounded-lg bg-green-500/10">Friends</span>
                     ) : alreadyPending ? (

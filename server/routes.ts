@@ -1165,7 +1165,7 @@ export async function registerRoutes(
       const query = (req.query.q as string) || "";
       if (query.length < 2) return res.json([]);
       const results = await storage.searchUsers(query, userId);
-      res.json(results.map(u => ({ id: u.id, displayName: u.displayName || u.email })));
+      res.json(results.map(u => ({ id: u.id, displayName: u.displayName || u.email, email: u.email })));
     } catch (error: any) {
       res.status(500).json({ error: error.message });
     }
