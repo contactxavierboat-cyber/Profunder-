@@ -1080,6 +1080,94 @@ export async function registerRoutes(
     });
   });
 
+  app.get("/api/dashboard-qa", requireAuth, async (req, res) => {
+    try {
+      const questions = await storage.getDashboardQuestions(req.session.userId!);
+      res.json(questions);
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  app.post("/api/dashboard-qa", requireAuth, async (req, res) => {
+    const userId = req.session.userId!;
+    const body = z.object({ content: z.string().min(1).max(2000) }).safeParse(req.body);
+    if (!body.success) return res.status(400).json({ error: "Question is required (max 2000 characters)" });
+
+    const user = await storage.getUser(userId);
+    if (!user) return res.status(404).json({ error: "User not found" });
+
+    if (user.monthlyUsage >= user.maxUsage) {
+      return res.status(403).json({ error: "Monthly analysis limit reached. Please wait for reset." });
+    }
+
+    const userQuestion = await storage.createDashboardQuestion({ userId, role: "user", content: body.data.content.trim() });
+
+    let financialContext = "";
+
+    if (user.lastCreditReportText) {
+      financialContext += `\n\n--- USER'S CREDIT REPORT ---\n${user.lastCreditReportText.slice(0, 15000)}\n--- END CREDIT REPORT ---`;
+    }
+
+    if (user.analysisSummary) {
+      financialContext += `\n\n--- LATEST AI ANALYSIS SUMMARY ---\n${user.analysisSummary}\n--- END ANALYSIS ---`;
+    }
+
+    if (user.analysisNextSteps) {
+      try {
+        const steps = JSON.parse(user.analysisNextSteps);
+        financialContext += `\n\n--- RECOMMENDED NEXT STEPS ---\n${steps.map((s: string, i: number) => `${i + 1}. ${s}`).join("\n")}\n--- END NEXT STEPS ---`;
+      } catch {}
+    }
+
+    if (user.creditRepairData) {
+      try {
+        const repairData = JSON.parse(user.creditRepairData);
+        financialContext += `\n\n--- CREDIT REPAIR DATA ---\nMode: ${repairData.mode}\nMain Issues: ${repairData.summary?.mainIssues || "N/A"}\nPriority Action: ${repairData.summary?.priorityAction || "N/A"}\nDetected Issues: ${repairData.detectedIssues?.length || 0}\n--- END CREDIT REPAIR ---`;
+      } catch {}
+    }
+
+    const profileContext = `\n\n--- USER FINANCIAL PROFILE ---\nCredit Score Range: ${user.creditScoreRange || "Not set"}\nTotal Revolving Limit: $${user.totalRevolvingLimit?.toLocaleString() || "N/A"}\nTotal Balances: $${user.totalBalances?.toLocaleString() || "N/A"}\nInquiries (2yr): ${user.inquiries ?? "N/A"}\nDerogatory Accounts: ${user.derogatoryAccounts ?? "N/A"}\nHas Credit Report: ${user.hasCreditReport ? "Yes" : "No"}\nHas Bank Statement: ${user.hasBankStatement ? "Yes" : "No"}\n--- END PROFILE ---`;
+
+    financialContext += profileContext;
+
+    const existingQA = await storage.getDashboardQuestions(userId);
+    const recentQA = existingQA.slice(-10).map(q => ({
+      role: q.role as "user" | "assistant",
+      content: q.content,
+    }));
+
+    const systemPrompt = MASTER_SYSTEM_PROMPT + `\n\nYou are the MentXr® Dashboard AI Assistant. The user is asking a question directly from their financial dashboard. You have full access to their uploaded credit report, analysis data, and financial profile. Use this data to give specific, personalized answers — not generic advice. Reference actual numbers, accounts, and details from their report when relevant.
+
+Be concise but thorough. Use bullet points and formatting for readability. If the user asks about something not in their data, let them know what information you'd need.${financialContext}`;
+
+    try {
+      const response = await openai.chat.completions.create({
+        model: "gpt-4o",
+        messages: [
+          { role: "system", content: systemPrompt },
+          ...recentQA,
+        ],
+        max_tokens: 1500,
+      });
+
+      const aiContent = response.choices[0]?.message?.content || "I'm sorry, I couldn't generate a response right now.";
+      const aiAnswer = await storage.createDashboardQuestion({ userId, role: "assistant", content: aiContent });
+
+      await storage.updateUser(userId, { monthlyUsage: user.monthlyUsage + 1 });
+
+      res.json({ userQuestion, aiAnswer });
+    } catch (error: any) {
+      console.error("Dashboard QA AI Error:", error);
+      res.status(500).json({ error: "Error generating AI response. Please try again." });
+    }
+  });
+
+  app.delete("/api/dashboard-qa", requireAuth, async (req, res) => {
+    await storage.clearDashboardQuestions(req.session.userId!);
+    res.status(204).send();
+  });
+
   app.get("/api/friends", requireAuth, async (req, res) => {
     try {
       const userId = req.session.userId!;

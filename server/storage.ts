@@ -1,4 +1,4 @@
-import { users, messages, comments, posts, friendships, type User, type InsertUser, type Message, type InsertMessage, type Comment, type InsertComment, type Post, type InsertPost, type Friendship } from "@shared/schema";
+import { users, messages, comments, posts, friendships, dashboardQuestions, type User, type InsertUser, type Message, type InsertMessage, type Comment, type InsertComment, type Post, type InsertPost, type Friendship, type DashboardQuestion, type InsertDashboardQuestion } from "@shared/schema";
 import { db } from "./db";
 import { eq, count, desc, or, and, ne, ilike } from "drizzle-orm";
 
@@ -29,6 +29,10 @@ export interface IStorage {
   getPendingRequests(userId: number): Promise<{ friendship: Friendship; requester: User }[]>;
   getFriendship(userId1: number, userId2: number): Promise<Friendship | undefined>;
   searchUsers(query: string, currentUserId: number): Promise<User[]>;
+  
+  getDashboardQuestions(userId: number): Promise<DashboardQuestion[]>;
+  createDashboardQuestion(question: InsertDashboardQuestion): Promise<DashboardQuestion>;
+  clearDashboardQuestions(userId: number): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -140,6 +144,19 @@ export class DatabaseStorage implements IStorage {
 
   async searchUsers(query: string, currentUserId: number): Promise<User[]> {
     return db.select().from(users).where(and(ne(users.password, "bot_no_login"), or(ilike(users.displayName, `%${query}%`), ilike(users.email, `%${query}%`)))).limit(50);
+  }
+
+  async getDashboardQuestions(userId: number): Promise<DashboardQuestion[]> {
+    return db.select().from(dashboardQuestions).where(eq(dashboardQuestions.userId, userId)).orderBy(dashboardQuestions.timestamp);
+  }
+
+  async createDashboardQuestion(question: InsertDashboardQuestion): Promise<DashboardQuestion> {
+    const [q] = await db.insert(dashboardQuestions).values(question).returning();
+    return q;
+  }
+
+  async clearDashboardQuestions(userId: number): Promise<void> {
+    await db.delete(dashboardQuestions).where(eq(dashboardQuestions.userId, userId));
   }
 }
 
