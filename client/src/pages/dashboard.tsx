@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from "react";
 import { useAuth } from "@/lib/store";
 import { useLocation } from "wouter";
-import { Send, Plus, LogOut, Paperclip, Loader2, ArrowDown, FileText, X, Menu, Bot } from "lucide-react";
+import { Send, Plus, LogOut, Paperclip, Loader2, ArrowDown, FileText, X, Menu, Bot, Heart, MessageCircle, Share2, Bookmark, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -23,6 +23,16 @@ const MENTOR_INFO: Record<string, { name: string; avatar: string; tagline: strin
   charleston_white: { name: "Charleston White", avatar: charlestonWhiteAvatar, tagline: "Real Talk, Real Change", specialty: "Youth Advocacy & Transformation" },
 };
 
+function timeAgo(date: Date | string): string {
+  const now = new Date();
+  const then = new Date(date);
+  const diff = Math.floor((now.getTime() - then.getTime()) / 1000);
+  if (diff < 60) return "just now";
+  if (diff < 3600) return `${Math.floor(diff / 60)}m`;
+  if (diff < 86400) return `${Math.floor(diff / 3600)}h`;
+  return `${Math.floor(diff / 86400)}d`;
+}
+
 export default function DashboardPage() {
   const { user, messages, sendMessage, clearChat, logout } = useAuth();
   const [, setLocation] = useLocation();
@@ -33,6 +43,8 @@ export default function DashboardPage() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [selectedMentor, setSelectedMentor] = useState<string | null>(null);
   const [mentorCleared, setMentorCleared] = useState(false);
+  const [likedMessages, setLikedMessages] = useState<Set<number>>(new Set());
+  const [savedMessages, setSavedMessages] = useState<Set<number>>(new Set());
 
   const lastMentorMsg = [...messages].reverse().find(m => m.role === 'assistant' && m.mentor);
   const activeMentorKey = selectedMentor !== null ? selectedMentor : (mentorCleared ? null : (lastMentorMsg?.mentor || null));
@@ -41,6 +53,7 @@ export default function DashboardPage() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const storiesRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -117,12 +130,28 @@ export default function DashboardPage() {
     el.style.height = Math.min(el.scrollHeight, 200) + "px";
   };
 
+  const toggleLike = (id: number) => {
+    setLikedMessages(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  };
+
+  const toggleSave = (id: number) => {
+    setSavedMessages(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  };
+
   if (!user) return null;
 
   const hasMessages = messages.length > 0;
 
   return (
-    <div className="h-[100dvh] flex bg-[#0A0A0A] text-white">
+    <div className="h-[100dvh] flex bg-[#000000] text-white">
 
       {sidebarOpen && (
         <div
@@ -132,62 +161,69 @@ export default function DashboardPage() {
       )}
 
       <aside className={cn(
-        "w-[260px] bg-[#0F0F0F] flex flex-col border-r border-white/5 shrink-0 relative z-40",
+        "w-[260px] bg-[#000000] flex flex-col border-r border-white/[0.08] shrink-0 relative z-40",
         "fixed h-full md:static md:flex transition-transform duration-200 ease-out",
         sidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0",
         "md:flex",
         !sidebarOpen && "hidden md:flex"
       )}>
-        <div className="p-3">
+        <div className="p-4 pb-2">
+          <div className="flex items-center gap-2.5 mb-4">
+            <img src="/logo.png" alt="MentXr" className="w-8 h-8 rounded-xl" />
+            <span className="text-[17px] font-bold tracking-tight">MentXr®</span>
+          </div>
           <button
             data-testid="button-new-chat"
-            onClick={() => { clearChat(); setSidebarOpen(false); }}
-            className="w-full flex items-center gap-3 px-3 py-3 rounded-lg border border-white/10 hover:bg-white/5 transition-colors text-sm font-medium"
+            onClick={() => { clearChat(); setSelectedMentor(null); setMentorCleared(true); setSidebarOpen(false); }}
+            className="w-full flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl bg-white/[0.06] hover:bg-white/[0.1] border border-white/[0.08] transition-all text-sm font-medium"
           >
-            <img src="/logo.png" alt="X+" className="w-7 h-7 rounded-lg" />
-            <span className="flex-1 text-left">New chat</span>
-            <Plus className="w-4 h-4 text-white/40" />
+            <Plus className="w-4 h-4" />
+            New Conversation
           </button>
         </div>
 
         <div className="flex-1 overflow-y-auto px-3 py-2">
-          <p className="px-3 py-2 text-xs text-white/30 font-medium uppercase tracking-wider">Today</p>
+          <p className="px-2 py-2 text-[11px] text-white/25 font-semibold uppercase tracking-widest">Recent</p>
           {messages.length > 0 && (
-            <div className="px-3 py-2 rounded-lg bg-white/5 text-sm text-white/70 truncate">
+            <div className="px-3 py-2.5 rounded-xl bg-white/[0.04] text-sm text-white/50 truncate">
               {messages[0]?.content.substring(0, 40)}...
             </div>
           )}
         </div>
 
-        <div className="p-3 border-t border-white/5 space-y-1">
+        <div className="p-3 border-t border-white/[0.06]">
           <button
             data-testid="button-logout"
             onClick={logout}
-            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-white/5 transition-colors text-sm text-white/60"
+            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-white/[0.05] transition-colors text-sm text-white/50"
           >
-            <div className="w-6 h-6 rounded-full bg-[#1A1A1A] border border-[#333] flex items-center justify-center text-[10px] font-bold text-[#999]">
+            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500/30 to-blue-500/30 border border-white/10 flex items-center justify-center text-[11px] font-bold text-white/70">
               {user.email.substring(0, 2).toUpperCase()}
             </div>
             <span className="flex-1 text-left truncate">{user.email}</span>
-            <LogOut className="w-4 h-4" />
+            <LogOut className="w-4 h-4 text-white/30" />
           </button>
         </div>
       </aside>
 
-      <main className="flex-1 flex flex-col min-w-0 relative">
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff10_1px,transparent_1px),linear-gradient(to_bottom,#ffffff10_1px,transparent_1px)] bg-[size:40px_40px] pointer-events-none"></div>
+      <main className="flex-1 flex flex-col min-w-0 relative bg-[#000000]">
 
-        <header className="h-12 flex items-center justify-between px-3 sm:px-4 border-b border-white/5 shrink-0 md:hidden relative z-10">
-          <button
-            data-testid="button-menu"
-            onClick={() => setSidebarOpen(true)}
-            className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white/5 transition-colors"
-          >
-            <Menu className="w-5 h-5 text-white/60" />
-          </button>
-          <span className="text-sm font-semibold">MentXr®</span>
-          <button onClick={() => clearChat()} className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white/5 transition-colors">
-            <Plus className="w-5 h-5 text-white/40" />
+        <header className="h-14 flex items-center justify-between px-4 border-b border-white/[0.08] shrink-0 relative z-10 backdrop-blur-xl bg-black/80">
+          <div className="flex items-center gap-3">
+            <button
+              data-testid="button-menu"
+              onClick={() => setSidebarOpen(true)}
+              className="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-white/[0.06] transition-colors md:hidden"
+            >
+              <Menu className="w-5 h-5 text-white/60" />
+            </button>
+            <div className="flex items-center gap-2">
+              <Sparkles className="w-4 h-4 text-purple-400/70" />
+              <span className="text-[15px] font-bold tracking-tight">Feed</span>
+            </div>
+          </div>
+          <button data-testid="button-new-chat-header" onClick={() => { clearChat(); setSelectedMentor(null); setMentorCleared(true); }} className="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-white/[0.06] transition-colors">
+            <Plus className="w-5 h-5 text-white/50" />
           </button>
         </header>
 
@@ -197,134 +233,260 @@ export default function DashboardPage() {
           className="flex-1 overflow-y-auto"
         >
           {!hasMessages ? (
-            <div className="h-full flex flex-col items-center justify-center px-4">
-              {activeMentor ? (
-                <>
-                  <img src={activeMentor.avatar} alt={activeMentor.name} className="w-14 h-14 sm:w-16 sm:h-16 rounded-full object-cover border-2 border-white/10 mb-4 sm:mb-5 opacity-80" />
-                  <h2 className="text-xl sm:text-2xl font-semibold mb-1">{activeMentor.name}</h2>
-                  <p className="text-white/40 text-xs sm:text-sm">{activeMentor.tagline}</p>
-                  <p className="text-white/25 text-[10px] sm:text-xs mt-1">{activeMentor.specialty}</p>
-                </>
-              ) : (
-                <>
-                  <img src="/logo.png" alt="X+" className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl mb-4 sm:mb-6 opacity-80" />
-                  <h2 className="text-xl sm:text-2xl font-semibold mb-2">MentXr®</h2>
-                  <p className="text-white/40 text-xs sm:text-sm text-center max-w-sm px-2">
-                    Mentorship On Demand — choose a mentor or ask anything.
-                  </p>
-                </>
-              )}
-
-              <p className="text-[10px] uppercase tracking-widest text-white/20 mt-6 mb-3">Choose Your Mentor</p>
-              <div className="grid grid-cols-3 sm:grid-cols-6 gap-2 sm:gap-3 max-w-xl w-full px-2">
-                <button
-                  onClick={() => { setSelectedMentor(null); setMentorCleared(true); }}
-                  className={cn(
-                    "flex flex-col items-center gap-1.5 p-2.5 sm:p-3 rounded-xl border transition-all",
-                    !activeMentorKey ? "border-white/20 bg-white/5" : "border-white/5 hover:border-white/15 hover:bg-white/5"
-                  )}
-                  data-testid="button-mentor-default"
+            <div className="max-w-xl mx-auto w-full">
+              <div className="px-4 pt-5 pb-3">
+                <div
+                  ref={storiesRef}
+                  className="flex gap-3 overflow-x-auto pb-3 scrollbar-hide"
+                  style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
                 >
-                  <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[#1A1A1A] border border-white/10 flex items-center justify-center">
-                    <Bot className="w-4 h-4 sm:w-5 sm:h-5 text-white/40" />
-                  </div>
-                  <p className="text-[10px] sm:text-[11px] text-white/50 font-medium leading-tight">MentXr®</p>
-                </button>
-                {Object.entries(MENTOR_INFO).map(([key, mentor]) => (
                   <button
-                    key={key}
-                    onClick={() => { setSelectedMentor(key); setMentorCleared(false); }}
-                    className={cn(
-                      "flex flex-col items-center gap-1.5 p-2.5 sm:p-3 rounded-xl border transition-all",
-                      activeMentorKey === key ? "border-white/20 bg-white/5" : "border-white/5 hover:border-white/15 hover:bg-white/5"
-                    )}
-                    data-testid={`button-mentor-${key}`}
+                    onClick={() => { setSelectedMentor(null); setMentorCleared(true); }}
+                    className="flex flex-col items-center gap-1.5 shrink-0"
+                    data-testid="button-mentor-default"
                   >
-                    <img src={mentor.avatar} alt={mentor.name} className="w-9 h-9 sm:w-10 sm:h-10 rounded-full object-cover border border-white/10" />
-                    <p className="text-[10px] sm:text-[11px] text-white/50 font-medium leading-tight truncate max-w-full">{mentor.name.split(" ")[0]}</p>
+                    <div className={cn(
+                      "w-16 h-16 rounded-full p-[2px]",
+                      !activeMentorKey ? "bg-gradient-to-br from-purple-500 to-blue-500" : "bg-white/10"
+                    )}>
+                      <div className="w-full h-full rounded-full bg-[#000] flex items-center justify-center">
+                        <Bot className="w-6 h-6 text-white/50" />
+                      </div>
+                    </div>
+                    <p className="text-[11px] text-white/50 font-medium w-16 text-center truncate">MentXr®</p>
                   </button>
-                ))}
+
+                  {Object.entries(MENTOR_INFO).map(([key, mentor]) => (
+                    <button
+                      key={key}
+                      onClick={() => { setSelectedMentor(key); setMentorCleared(false); }}
+                      className="flex flex-col items-center gap-1.5 shrink-0"
+                      data-testid={`button-mentor-${key}`}
+                    >
+                      <div className={cn(
+                        "w-16 h-16 rounded-full p-[2px]",
+                        activeMentorKey === key ? "bg-gradient-to-br from-purple-500 to-pink-500" : "bg-white/10"
+                      )}>
+                        <img src={mentor.avatar} alt={mentor.name} className="w-full h-full rounded-full object-cover" />
+                      </div>
+                      <p className="text-[11px] text-white/50 font-medium w-16 text-center truncate">{mentor.name.split(" ")[0]}</p>
+                    </button>
+                  ))}
+                </div>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3 mt-6 sm:mt-8 max-w-lg w-full px-2">
-                {[
-                  "Help me build my business strategy",
-                  "How do I scale to 7 figures?",
-                  "Guide me on personal branding",
-                  "What should I invest in right now?",
-                ].map((prompt, i) => (
-                  <button
-                    key={i}
-                    data-testid={`button-suggestion-${i}`}
-                    onClick={() => {
-                      setInput(prompt);
-                      textareaRef.current?.focus();
-                    }}
-                    className="text-left px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl border border-white/10 bg-white/[0.02] hover:bg-white/5 transition-colors text-[13px] sm:text-sm text-white/60 hover:text-white/80"
-                  >
-                    {prompt}
-                  </button>
-                ))}
+              <div className="border-t border-white/[0.06]" />
+
+              <div className="px-4 py-8 flex flex-col items-center">
+                {activeMentor ? (
+                  <>
+                    <div className="w-20 h-20 rounded-full p-[2px] bg-gradient-to-br from-purple-500 to-pink-500 mb-4">
+                      <img src={activeMentor.avatar} alt={activeMentor.name} className="w-full h-full rounded-full object-cover" />
+                    </div>
+                    <h2 className="text-xl font-bold mb-0.5">{activeMentor.name}</h2>
+                    <p className="text-white/40 text-sm">{activeMentor.tagline}</p>
+                    <span className="text-[11px] text-white/25 mt-1 px-3 py-1 rounded-full bg-white/[0.04] border border-white/[0.06]">{activeMentor.specialty}</span>
+                  </>
+                ) : (
+                  <>
+                    <div className="w-20 h-20 rounded-2xl mb-4 overflow-hidden bg-gradient-to-br from-purple-500/20 to-blue-500/20 border border-white/10 flex items-center justify-center">
+                      <img src="/logo.png" alt="MentXr" className="w-12 h-12 rounded-xl" />
+                    </div>
+                    <h2 className="text-xl font-bold mb-0.5">MentXr®</h2>
+                    <p className="text-white/40 text-sm text-center max-w-xs">Mentorship On Demand</p>
+                  </>
+                )}
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 mt-8 max-w-md w-full">
+                  {[
+                    { text: "Help me build my business strategy", icon: "💡" },
+                    { text: "How do I scale to 7 figures?", icon: "📈" },
+                    { text: "Guide me on personal branding", icon: "🎯" },
+                    { text: "What should I invest in right now?", icon: "💰" },
+                  ].map((prompt, i) => (
+                    <button
+                      key={i}
+                      data-testid={`button-suggestion-${i}`}
+                      onClick={() => {
+                        setInput(prompt.text);
+                        textareaRef.current?.focus();
+                      }}
+                      className="text-left px-4 py-3 rounded-2xl border border-white/[0.08] bg-white/[0.02] hover:bg-white/[0.06] transition-all text-sm text-white/50 hover:text-white/70 flex items-center gap-3"
+                    >
+                      <span className="text-lg">{prompt.icon}</span>
+                      <span>{prompt.text}</span>
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
           ) : (
-            <div className="max-w-3xl mx-auto w-full px-3 sm:px-4 py-4 sm:py-6">
-              {messages.map((m) => {
-                const mentorData = m.role === 'assistant' && m.mentor ? MENTOR_INFO[m.mentor] : null;
-                return (
-                <div key={m.id} className="mb-6 sm:mb-8">
-                  <div className="flex gap-2.5 sm:gap-4">
-                    <div className="shrink-0 mt-0.5">
-                      {m.role === "user" ? (
-                        <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-[#1A1A1A] border border-[#333] flex items-center justify-center text-[10px] sm:text-[11px] font-bold text-[#999]">
-                          {user.email.substring(0, 2).toUpperCase()}
-                        </div>
-                      ) : mentorData ? (
-                        <img src={mentorData.avatar} alt={mentorData.name} className="w-7 h-7 sm:w-8 sm:h-8 rounded-full object-cover border border-white/20" />
-                      ) : (
-                        <img src="/logo.png" alt="X+" className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg" />
-                      )}
+            <div className="max-w-xl mx-auto w-full">
+              <div className="px-4 pt-4 pb-2">
+                <div
+                  ref={storiesRef}
+                  className="flex gap-3 overflow-x-auto pb-3 scrollbar-hide"
+                  style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+                >
+                  <button
+                    onClick={() => { setSelectedMentor(null); setMentorCleared(true); }}
+                    className="flex flex-col items-center gap-1.5 shrink-0"
+                    data-testid="button-mentor-default-active"
+                  >
+                    <div className={cn(
+                      "w-14 h-14 rounded-full p-[2px]",
+                      !activeMentorKey ? "bg-gradient-to-br from-purple-500 to-blue-500" : "bg-white/10"
+                    )}>
+                      <div className="w-full h-full rounded-full bg-[#000] flex items-center justify-center">
+                        <Bot className="w-5 h-5 text-white/50" />
+                      </div>
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-[13px] sm:text-sm font-semibold mb-1 text-white/90">
-                        {m.role === "user" ? "You" : (mentorData ? mentorData.name : "MentXr®")}
-                      </p>
-                      {m.attachment && (
-                        <div className="inline-flex items-center gap-2 mb-2 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg bg-white/5 border border-white/10 text-[11px] sm:text-xs text-white/50">
-                          <FileText className="w-3 h-3" />
-                          {m.attachment.replace("_", " ")}.pdf
+                    <p className="text-[10px] text-white/40 font-medium w-14 text-center truncate">MentXr®</p>
+                  </button>
+
+                  {Object.entries(MENTOR_INFO).map(([key, mentor]) => (
+                    <button
+                      key={key}
+                      onClick={() => { setSelectedMentor(key); setMentorCleared(false); }}
+                      className="flex flex-col items-center gap-1.5 shrink-0"
+                      data-testid={`button-mentor-active-${key}`}
+                    >
+                      <div className={cn(
+                        "w-14 h-14 rounded-full p-[2px]",
+                        activeMentorKey === key ? "bg-gradient-to-br from-purple-500 to-pink-500" : "bg-white/10"
+                      )}>
+                        <img src={mentor.avatar} alt={mentor.name} className="w-full h-full rounded-full object-cover" />
+                      </div>
+                      <p className="text-[10px] text-white/40 font-medium w-14 text-center truncate">{mentor.name.split(" ")[0]}</p>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="border-t border-white/[0.06]" />
+
+              <div className="divide-y divide-white/[0.06]">
+                {messages.map((m) => {
+                  const mentorData = m.role === 'assistant' && m.mentor ? MENTOR_INFO[m.mentor] : null;
+                  const isUser = m.role === "user";
+                  const posterName = isUser ? "You" : (mentorData ? mentorData.name : "MentXr® AI");
+                  const posterHandle = isUser ? `@${user.email.split("@")[0]}` : (mentorData ? `@${m.mentor}` : "@mentxr");
+                  const posterAvatar = isUser ? null : (mentorData ? mentorData.avatar : null);
+                  const posterSpecialty = !isUser && mentorData ? mentorData.specialty : (!isUser ? "AI Mentor" : null);
+                  const isLiked = likedMessages.has(m.id);
+                  const isSaved = savedMessages.has(m.id);
+
+                  return (
+                    <div key={m.id} className="px-4 py-4 hover:bg-white/[0.02] transition-colors" data-testid={`post-${m.id}`}>
+                      <div className="flex gap-3">
+                        <div className="shrink-0">
+                          {isUser ? (
+                            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500/30 to-blue-500/30 border border-white/10 flex items-center justify-center text-[12px] font-bold text-white/70">
+                              {user.email.substring(0, 2).toUpperCase()}
+                            </div>
+                          ) : posterAvatar ? (
+                            <img src={posterAvatar} alt={posterName} className="w-10 h-10 rounded-full object-cover border border-white/10" />
+                          ) : (
+                            <div className="w-10 h-10 rounded-xl overflow-hidden">
+                              <img src="/logo.png" alt="MentXr" className="w-full h-full" />
+                            </div>
+                          )}
                         </div>
-                      )}
-                      <div className="text-[13px] sm:text-[15px] leading-6 sm:leading-7 text-white/80 whitespace-pre-wrap break-words">
-                        {m.content}
+
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-1.5 mb-0.5">
+                            <span className="text-[14px] font-bold text-white/90 truncate">{posterName}</span>
+                            {!isUser && (
+                              <span className="shrink-0">
+                                <svg className="w-[14px] h-[14px] text-blue-400" viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg>
+                              </span>
+                            )}
+                            <span className="text-[13px] text-white/30 truncate">{posterHandle}</span>
+                            <span className="text-white/15 text-[13px]">·</span>
+                            <span className="text-[13px] text-white/30 shrink-0">{m.timestamp ? timeAgo(m.timestamp) : "now"}</span>
+                          </div>
+
+                          {posterSpecialty && (
+                            <p className="text-[11px] text-purple-400/60 mb-2">{posterSpecialty}</p>
+                          )}
+
+                          {m.attachment && (
+                            <div className="inline-flex items-center gap-2 mb-2.5 px-3 py-1.5 rounded-xl bg-white/[0.04] border border-white/[0.08] text-[12px] text-white/40">
+                              <FileText className="w-3.5 h-3.5" />
+                              {m.attachment.replace("_", " ")}.pdf
+                            </div>
+                          )}
+
+                          <div className="text-[14px] sm:text-[15px] leading-[1.6] text-white/80 whitespace-pre-wrap break-words">
+                            {m.content}
+                          </div>
+
+                          <div className="flex items-center gap-6 mt-3 -ml-2">
+                            <button
+                              onClick={() => toggleLike(m.id)}
+                              className={cn(
+                                "flex items-center gap-1.5 px-2 py-1.5 rounded-full transition-colors group",
+                                isLiked ? "text-pink-500" : "text-white/25 hover:text-pink-400/70"
+                              )}
+                              data-testid={`button-like-${m.id}`}
+                            >
+                              <Heart className={cn("w-[18px] h-[18px]", isLiked && "fill-current")} />
+                              {isLiked && <span className="text-[12px]">1</span>}
+                            </button>
+                            <button className="flex items-center gap-1.5 px-2 py-1.5 rounded-full text-white/25 hover:text-blue-400/70 transition-colors" data-testid={`button-reply-${m.id}`}>
+                              <MessageCircle className="w-[18px] h-[18px]" />
+                            </button>
+                            <button className="flex items-center gap-1.5 px-2 py-1.5 rounded-full text-white/25 hover:text-green-400/70 transition-colors" data-testid={`button-share-${m.id}`}>
+                              <Share2 className="w-[18px] h-[18px]" />
+                            </button>
+                            <button
+                              onClick={() => toggleSave(m.id)}
+                              className={cn(
+                                "flex items-center gap-1.5 px-2 py-1.5 rounded-full transition-colors ml-auto",
+                                isSaved ? "text-yellow-500" : "text-white/25 hover:text-yellow-400/70"
+                              )}
+                              data-testid={`button-save-${m.id}`}
+                            >
+                              <Bookmark className={cn("w-[18px] h-[18px]", isSaved && "fill-current")} />
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+
+                {isLoading && (
+                  <div className="px-4 py-4">
+                    <div className="flex gap-3">
+                      <div className="shrink-0">
+                        {activeMentor ? (
+                          <img src={activeMentor.avatar} alt={activeMentor.name} className="w-10 h-10 rounded-full object-cover border border-white/10" />
+                        ) : (
+                          <div className="w-10 h-10 rounded-xl overflow-hidden">
+                            <img src="/logo.png" alt="MentXr" className="w-full h-full" />
+                          </div>
+                        )}
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-center gap-1.5 mb-1">
+                          <span className="text-[14px] font-bold text-white/90">{activeMentor ? activeMentor.name : "MentXr® AI"}</span>
+                          <span className="shrink-0">
+                            <svg className="w-[14px] h-[14px] text-blue-400" viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg>
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-1.5 py-2">
+                          <span className="w-2 h-2 bg-purple-400/50 rounded-full animate-bounce"></span>
+                          <span className="w-2 h-2 bg-purple-400/50 rounded-full animate-bounce [animation-delay:0.15s]"></span>
+                          <span className="w-2 h-2 bg-purple-400/50 rounded-full animate-bounce [animation-delay:0.3s]"></span>
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              );
-              })}
+                )}
+              </div>
 
-              {isLoading && (
-                <div className="mb-6 sm:mb-8">
-                  <div className="flex gap-2.5 sm:gap-4">
-                    {activeMentor ? (
-                      <img src={activeMentor.avatar} alt={activeMentor.name} className="w-7 h-7 sm:w-8 sm:h-8 rounded-full object-cover border border-white/20 shrink-0 mt-0.5" />
-                    ) : (
-                      <img src="/logo.png" alt="X+" className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg shrink-0 mt-0.5" />
-                    )}
-                    <div className="flex-1">
-                      <p className="text-[13px] sm:text-sm font-semibold mb-1 text-white/90">{activeMentor ? activeMentor.name : "MentXr®"}</p>
-                      <div className="flex items-center gap-1.5 py-2">
-                        <span className="w-2 h-2 bg-[#555] rounded-full animate-bounce"></span>
-                        <span className="w-2 h-2 bg-[#555] rounded-full animate-bounce [animation-delay:0.15s]"></span>
-                        <span className="w-2 h-2 bg-[#555] rounded-full animate-bounce [animation-delay:0.3s]"></span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              <div ref={messagesEndRef} />
+              <div ref={messagesEndRef} className="h-4" />
             </div>
           )}
         </div>
@@ -333,29 +495,29 @@ export default function DashboardPage() {
           <div className="absolute bottom-28 sm:bottom-32 left-1/2 -translate-x-1/2 z-10 md:left-[calc(50%+130px)]">
             <button
               onClick={scrollToBottom}
-              className="w-8 h-8 rounded-full bg-white/10 border border-white/10 flex items-center justify-center hover:bg-white/20 transition-colors"
+              className="w-9 h-9 rounded-full bg-white/10 border border-white/[0.08] backdrop-blur-lg flex items-center justify-center hover:bg-white/20 transition-colors shadow-lg"
             >
               <ArrowDown className="w-4 h-4" />
             </button>
           </div>
         )}
 
-        <div className="shrink-0 px-2 sm:px-4 pb-2 sm:pb-4 pt-2 safe-area-pb">
-          <div className="max-w-3xl mx-auto">
+        <div className="shrink-0 border-t border-white/[0.06] bg-black/90 backdrop-blur-xl px-3 sm:px-4 pb-3 sm:pb-4 pt-2 safe-area-pb">
+          <div className="max-w-xl mx-auto">
             {activeMentor && hasMessages && (
               <div className="flex items-center gap-2 mb-2 px-1">
-                <img src={activeMentor.avatar} alt={activeMentor.name} className="w-4 h-4 rounded-full object-cover" />
-                <span className="text-[10px] sm:text-[11px] text-white/30">Chatting with <span className="text-white/50 font-medium">{activeMentor.name}</span></span>
+                <img src={activeMentor.avatar} alt={activeMentor.name} className="w-5 h-5 rounded-full object-cover border border-white/10" />
+                <span className="text-[11px] text-white/30">Replying to <span className="text-purple-400/60 font-medium">{activeMentor.name}</span></span>
                 <button onClick={() => { setSelectedMentor(null); setMentorCleared(true); }} className="text-white/20 hover:text-white/50 ml-auto" data-testid="button-clear-mentor">
-                  <X className="w-3 h-3" />
+                  <X className="w-3.5 h-3.5" />
                 </button>
               </div>
             )}
             {attachedFile && (
               <div className="flex items-center gap-2 mb-2 px-1">
-                <div className="flex items-center gap-2 bg-[#1A1A1A] border border-white/10 rounded-lg px-2.5 sm:px-3 py-1.5 text-[12px] sm:text-sm text-white/70">
-                  <FileText className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#888] shrink-0" />
-                  <span className="truncate max-w-[150px] sm:max-w-[200px]">{attachedFile.name}</span>
+                <div className="flex items-center gap-2 bg-white/[0.04] border border-white/[0.08] rounded-xl px-3 py-1.5 text-[12px] text-white/50">
+                  <FileText className="w-3.5 h-3.5 text-purple-400/50 shrink-0" />
+                  <span className="truncate max-w-[180px]">{attachedFile.name}</span>
                   <button
                     onClick={() => setAttachedFile(null)}
                     className="text-white/30 hover:text-white/60 ml-1"
@@ -366,65 +528,72 @@ export default function DashboardPage() {
                 </div>
               </div>
             )}
-            <div className="relative flex items-end bg-[#1A1A1A] border border-white/10 rounded-2xl px-3 sm:px-4 py-2.5 sm:py-3 focus-within:border-white/20 transition-colors">
-              <textarea
-                ref={textareaRef}
-                data-testid="input-chat"
-                placeholder={activeMentor ? `Message ${activeMentor.name}...` : "Message MentXr..."}
-                value={input}
-                onChange={handleTextareaInput}
-                onKeyDown={handleKeyDown}
-                rows={1}
-                disabled={isLoading}
-                className="flex-1 bg-transparent text-[14px] sm:text-[15px] text-white placeholder:text-white/30 resize-none outline-none max-h-[200px] leading-6 py-0.5"
-              />
-              <div className="flex items-center gap-1 ml-1.5 sm:ml-2 shrink-0">
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept=".pdf,.doc,.docx,.txt,.csv"
-                  className="hidden"
-                  data-testid="input-file-upload"
-                  onChange={(e) => {
-                    const file = e.target.files?.[0];
-                    if (file) {
-                      setAttachedFile(file);
-                    }
-                    e.target.value = "";
-                  }}
-                />
-                <Button
-                  size="icon"
-                  variant="ghost"
-                  className="w-8 h-8 rounded-full text-white/30 hover:text-white/60 hover:bg-white/5"
-                  onClick={() => fileInputRef.current?.click()}
-                  disabled={isLoading}
-                  title="Attach document"
-                  data-testid="button-attach"
-                >
-                  <Paperclip className="w-4 h-4" />
-                </Button>
-                <button
-                  data-testid="button-send"
-                  onClick={handleSend}
-                  disabled={isLoading || (!input.trim() && !attachedFile)}
-                  className={cn(
-                    "w-8 h-8 rounded-full flex items-center justify-center transition-colors",
-                    (input.trim() || attachedFile) && !isLoading
-                      ? "bg-[#E0E0E0] text-[#0D0D0D] hover:bg-white"
-                      : "bg-white/10 text-white/20 cursor-not-allowed"
-                  )}
-                >
-                  {isLoading ? (
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                  ) : (
-                    <ArrowDown className="w-4 h-4 rotate-180" />
-                  )}
-                </button>
+            <div className="flex items-end gap-2">
+              <div className="shrink-0">
+                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500/30 to-blue-500/30 border border-white/10 flex items-center justify-center text-[10px] font-bold text-white/60">
+                  {user.email.substring(0, 2).toUpperCase()}
+                </div>
               </div>
+              <div className="flex-1 relative flex items-end bg-white/[0.04] border border-white/[0.08] rounded-2xl px-4 py-2.5 focus-within:border-white/15 focus-within:bg-white/[0.06] transition-all">
+                <textarea
+                  ref={textareaRef}
+                  data-testid="input-chat"
+                  placeholder={activeMentor ? `Ask ${activeMentor.name} something...` : "What's on your mind?"}
+                  value={input}
+                  onChange={handleTextareaInput}
+                  onKeyDown={handleKeyDown}
+                  rows={1}
+                  disabled={isLoading}
+                  className="flex-1 bg-transparent text-[14px] text-white placeholder:text-white/25 resize-none outline-none max-h-[200px] leading-6 py-0.5"
+                />
+                <div className="flex items-center gap-1 ml-2 shrink-0">
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept=".pdf,.doc,.docx,.txt,.csv"
+                    className="hidden"
+                    data-testid="input-file-upload"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        setAttachedFile(file);
+                      }
+                      e.target.value = "";
+                    }}
+                  />
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    className="w-8 h-8 rounded-full text-white/25 hover:text-white/50 hover:bg-white/[0.06]"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={isLoading}
+                    title="Attach document"
+                    data-testid="button-attach"
+                  >
+                    <Paperclip className="w-4 h-4" />
+                  </Button>
+                </div>
+              </div>
+              <button
+                data-testid="button-send"
+                onClick={handleSend}
+                disabled={isLoading || (!input.trim() && !attachedFile)}
+                className={cn(
+                  "w-9 h-9 rounded-full flex items-center justify-center transition-all shrink-0",
+                  (input.trim() || attachedFile) && !isLoading
+                    ? "bg-gradient-to-r from-purple-500 to-blue-500 text-white hover:shadow-lg hover:shadow-purple-500/20 hover:scale-105"
+                    : "bg-white/[0.06] text-white/20 cursor-not-allowed"
+                )}
+              >
+                {isLoading ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <Send className="w-4 h-4" />
+                )}
+              </button>
             </div>
-            <p className="text-center text-[10px] sm:text-[11px] text-white/20 mt-1.5 sm:mt-2">
-              MentXr® AI can make mistakes. Verify important financial information.
+            <p className="text-center text-[10px] text-white/15 mt-2">
+              MentXr® AI can make mistakes. Verify important information.
             </p>
           </div>
         </div>
