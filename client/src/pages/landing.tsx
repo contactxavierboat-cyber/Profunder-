@@ -127,143 +127,200 @@ export default function LandingPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0D0D0D] text-white" style={{ fontFamily: "'Inter', sans-serif" }}>
+    <div className="min-h-screen bg-[#080808] text-white" style={{ fontFamily: "'Inter', sans-serif" }}>
 
       <div
-        className="fixed bottom-6 left-6 z-50 flex items-center gap-2.5 px-4 py-2.5 rounded-xl bg-[#1A1A1A] border border-[#2A2A2A] shadow-lg shadow-black/40"
+        className="fixed bottom-6 left-6 z-50 flex items-center gap-2.5 px-4 py-2.5 rounded-xl bg-[#111]/90 border border-white/[0.06] shadow-lg shadow-black/60 backdrop-blur-sm"
         style={{
           transition: "opacity 0.5s ease, transform 0.5s ease",
           opacity: proofVisible ? 1 : 0,
           transform: proofVisible ? "translateY(0)" : "translateY(8px)",
         }}
       >
-        <span className="w-2 h-2 rounded-full bg-[#E0E0E0] animate-pulse shrink-0"></span>
-        <span className="text-[12px] sm:text-[13px] text-[#ccc] font-medium whitespace-nowrap">{proofMessages[proofIndex]}</span>
+        <span className="w-2 h-2 rounded-full bg-white/60 animate-pulse shrink-0"></span>
+        <span className="text-[12px] sm:text-[13px] text-white/50 font-medium whitespace-nowrap">{proofMessages[proofIndex]}</span>
       </div>
 
+      <nav className="relative z-20 flex items-center justify-between px-6 sm:px-10 h-14 border-b border-white/[0.04]">
+        <div className="flex items-center gap-2.5">
+          <div className="w-6 h-6 rounded-full border-2 border-white/60 flex items-center justify-center">
+            <span className="w-1.5 h-1.5 rounded-full bg-white/80"></span>
+          </div>
+          <span className="text-[13px] font-bold tracking-[0.08em] text-white/80 uppercase">MentXr</span>
+        </div>
+        <div className="flex items-center gap-6">
+          <span className="text-[12px] tracking-[0.08em] text-white/30 uppercase hidden sm:block">Private Access</span>
+        </div>
+      </nav>
+
       <div className="relative overflow-hidden">
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff10_1px,transparent_1px),linear-gradient(to_bottom,#ffffff10_1px,transparent_1px)] bg-[size:40px_40px]"></div>
+        <div className="absolute inset-0 bg-gradient-to-b from-[#080808] via-[#0a0a0a] to-[#080808]"></div>
+        <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: 'repeating-linear-gradient(90deg, white 0px, white 1px, transparent 1px, transparent 200px), repeating-linear-gradient(0deg, white 0px, white 1px, transparent 1px, transparent 200px)' }}></div>
 
-        <div className="relative z-10 flex flex-col items-center px-4 sm:px-6 pt-12 sm:pt-20 pb-16 sm:pb-20">
+        <div className="relative z-10 flex flex-col min-h-[85vh] sm:min-h-[90vh] justify-center px-6 sm:px-12 md:px-20 lg:px-28">
 
-          <div className="w-[52px] h-[52px] sm:w-[64px] sm:h-[64px] rounded-[14px] sm:rounded-[16px] mb-6 sm:mb-8 bg-[#1A1A1A] border border-[#333] flex items-center justify-center relative">
-            <span className="absolute w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-[#E0E0E0]/12 animate-ping" />
-            <span className="relative w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-[#E0E0E0] shadow-[0_0_12px_rgba(224,224,224,0.4)]" />
-          </div>
-
-          <div className="flex items-center gap-2 sm:gap-2.5 px-4 sm:px-5 py-1.5 sm:py-2 rounded-full border border-[#333] bg-[#181818] mb-8 sm:mb-12">
-            <span className="text-[11px] sm:text-[13px] font-semibold tracking-[0.12em] text-white/90 uppercase">PRIVATE ACCESS</span>
-          </div>
-
-          <h1 className="text-[28px] sm:text-[36px] md:text-[46px] font-normal tracking-[-0.03em] text-center leading-[1.05] mb-4 sm:mb-6 text-[#e0e0e0] px-2">
-            Mentorship On Demand
-          </h1>
-
-          <p className="text-center text-[#777] text-[14px] sm:text-[16px] leading-[1.7] sm:leading-[1.8] max-w-[520px] mb-8 sm:mb-12 px-4 sm:px-2">
-            Engage with AI versions of influential mentors and gain their perspective in real time. Guidance, whenever you need it.
-          </p>
-
-          <form onSubmit={handleLogin} className="w-full max-w-[420px] mb-8 sm:mb-10 px-2 sm:px-0">
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center bg-[#1A1A1A] border border-[#2A2A2A] rounded-2xl sm:rounded-full sm:h-[52px] sm:pl-5 sm:pr-1.5 overflow-hidden">
-              <input
-                data-testid="input-email"
-                type="email"
-                placeholder="Email"
-                className="flex-1 bg-transparent text-[14px] text-white placeholder:text-[#555] outline-none px-4 py-3.5 sm:px-0 sm:py-0"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                disabled={isLoading}
-              />
-              <button
-                data-testid="button-join"
-                type="submit"
-                disabled={isLoading}
-                className="h-[44px] sm:h-[40px] px-5 sm:rounded-full bg-[#E0E0E0] text-black text-[14px] font-bold hover:bg-white transition-colors shrink-0 border-t border-[#2A2A2A] sm:border-t-0 sm:mx-0 mx-1.5 mb-1.5 sm:mb-0 rounded-xl sm:rounded-full"
+          <div className="mb-12 sm:mb-16 md:mb-20">
+            <div className="space-y-[-0.08em] sm:space-y-[-0.1em]">
+              <h1
+                className="text-[48px] sm:text-[72px] md:text-[100px] lg:text-[130px] xl:text-[150px] font-semibold uppercase leading-[0.9] tracking-[-0.02em]"
+                style={{
+                  background: 'linear-gradient(180deg, #ffffff 0%, #999999 40%, #555555 100%)',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  backgroundClip: 'text',
+                }}
+                data-testid="text-hero-line-1"
               >
-                {isLoading ? "..." : "Subscribe Now"}
-              </button>
+                MENTORSHIP
+              </h1>
+              <h1
+                className="text-[48px] sm:text-[72px] md:text-[100px] lg:text-[130px] xl:text-[150px] font-semibold uppercase leading-[0.9] tracking-[-0.02em] sm:pl-[10%] md:pl-[15%]"
+                style={{
+                  background: 'linear-gradient(180deg, #cccccc 0%, #888888 50%, #444444 100%)',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  backgroundClip: 'text',
+                }}
+                data-testid="text-hero-line-2"
+              >
+                ON
+              </h1>
+              <h1
+                className="text-[48px] sm:text-[72px] md:text-[100px] lg:text-[130px] xl:text-[150px] font-semibold uppercase leading-[0.9] tracking-[-0.02em] sm:pl-[5%] md:pl-[8%]"
+                style={{
+                  background: 'linear-gradient(180deg, #aaaaaa 0%, #666666 50%, #333333 100%)',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  backgroundClip: 'text',
+                }}
+                data-testid="text-hero-line-3"
+              >
+                DEMAND
+              </h1>
             </div>
-          </form>
 
-          <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-3 mb-10 sm:mb-14">
-            <div className="flex -space-x-3 sm:-space-x-4">
-              {["/avatars/face1.jpg", "/avatars/face2.jpg", "/avatars/face3.jpg", "/avatars/face4.jpg", "/avatars/face5.jpg"].map((src, i) => (
-                <img
-                  key={i}
-                  src={src}
-                  alt=""
-                  className="w-[28px] h-[28px] sm:w-[32px] sm:h-[32px] rounded-full border-[2px] border-[#0D0D0D] object-cover"
-                />
-              ))}
+            <div className="mt-10 sm:mt-14 flex flex-col sm:flex-row items-start sm:items-end gap-8 sm:gap-16">
+              <div className="max-w-[320px]">
+                <p className="text-[11px] sm:text-[12px] uppercase tracking-[0.15em] text-white/30 leading-[1.8]">
+                  MENTXR EMPOWERS YOU<br />
+                  TO ACCESS AI-POWERED<br />
+                  GUIDANCE EFFORTLESSLY.
+                </p>
+              </div>
+
+              <form onSubmit={handleLogin} className="w-full max-w-[420px]">
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center bg-white/[0.04] border border-white/[0.08] rounded-2xl sm:rounded-full sm:h-[52px] sm:pl-5 sm:pr-1.5 overflow-hidden">
+                  <input
+                    data-testid="input-email"
+                    type="email"
+                    placeholder="Email"
+                    className="flex-1 bg-transparent text-[14px] text-white/80 placeholder:text-white/20 outline-none px-4 py-3.5 sm:px-0 sm:py-0"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                    disabled={isLoading}
+                  />
+                  <button
+                    data-testid="button-join"
+                    type="submit"
+                    disabled={isLoading}
+                    className="h-[44px] sm:h-[40px] px-6 sm:rounded-full bg-white text-black text-[13px] font-bold hover:bg-white/90 transition-colors shrink-0 border-t border-white/[0.06] sm:border-t-0 sm:mx-0 mx-1.5 mb-1.5 sm:mb-0 rounded-xl sm:rounded-full tracking-wide"
+                  >
+                    {isLoading ? "..." : "GET ACCESS"}
+                  </button>
+                </div>
+              </form>
             </div>
-            <p className="text-[12px] sm:text-[13px] text-[#777] text-center">
-              Join 12,500+ founders already scaling with AI +
-            </p>
+
+            <div className="mt-8 sm:mt-10 flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-8">
+              <div className="flex -space-x-3">
+                {["/avatars/face1.jpg", "/avatars/face2.jpg", "/avatars/face3.jpg", "/avatars/face4.jpg", "/avatars/face5.jpg"].map((src, i) => (
+                  <img
+                    key={i}
+                    src={src}
+                    alt=""
+                    className="w-[28px] h-[28px] sm:w-[30px] sm:h-[30px] rounded-full border-[2px] border-[#080808] object-cover"
+                  />
+                ))}
+              </div>
+              <p className="text-[11px] sm:text-[12px] text-white/20 tracking-wide">
+                12,500+ founders scaling with AI mentorship
+              </p>
+            </div>
           </div>
 
-          <p className="text-center text-[#777] text-[13px] sm:text-[14px] leading-[1.7] max-w-[460px] mb-14 sm:mb-16 px-4 sm:px-2">
-            We are an AI-powered mentorship platform that lets users converse with digital versions of the mentors they admire, delivering trusted guidance anytime, anywhere.
-          </p>
-
-          <div className="flex flex-col items-center gap-2">
-            <div className="flex items-center gap-3 sm:gap-4">
-              <div className="flex flex-col items-center">
-                <div className="bg-[#1A1A1A] border border-[#2A2A2A] rounded-md w-[36px] h-[36px] sm:w-[42px] sm:h-[42px] flex items-center justify-center">
-                  <span className="font-mono text-[14px] sm:text-[17px] font-semibold text-white tabular-nums">{String(timeLeft.months).padStart(2, '0')}</span>
-                </div>
-                <span className="text-[7px] sm:text-[8px] text-[#555] tracking-[0.12em] uppercase mt-1">Months</span>
-              </div>
-              <span className="text-[#444] text-[14px] sm:text-[17px] font-mono -mt-3">:</span>
-              <div className="flex flex-col items-center">
-                <div className="bg-[#1A1A1A] border border-[#2A2A2A] rounded-md w-[36px] h-[36px] sm:w-[42px] sm:h-[42px] flex items-center justify-center">
-                  <span className="font-mono text-[14px] sm:text-[17px] font-semibold text-white tabular-nums">{String(timeLeft.hours).padStart(2, '0')}</span>
-                </div>
-                <span className="text-[7px] sm:text-[8px] text-[#555] tracking-[0.12em] uppercase mt-1">Hrs</span>
-              </div>
-              <span className="text-[#444] text-[14px] sm:text-[17px] font-mono -mt-3">:</span>
-              <div className="flex flex-col items-center">
-                <div className="bg-[#1A1A1A] border border-[#2A2A2A] rounded-md w-[36px] h-[36px] sm:w-[42px] sm:h-[42px] flex items-center justify-center">
-                  <span className="font-mono text-[14px] sm:text-[17px] font-semibold text-white tabular-nums">{String(timeLeft.minutes).padStart(2, '0')}</span>
-                </div>
-                <span className="text-[7px] sm:text-[8px] text-[#555] tracking-[0.12em] uppercase mt-1">Min</span>
-              </div>
+          <div className="absolute bottom-8 sm:bottom-12 right-6 sm:right-12 flex flex-col items-center gap-3">
+            <div className="w-10 h-10 rounded-full bg-white/[0.08] border border-white/[0.1] flex items-center justify-center backdrop-blur-sm">
+              <svg className="w-4 h-4 text-white/50" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+              </svg>
             </div>
-            <p className="text-[8px] sm:text-[9px] text-[#555] tracking-[0.15em] uppercase">Until Full Release</p>
           </div>
         </div>
       </div>
 
-      <div className="relative h-4 sm:h-6">
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff10_1px,transparent_1px),linear-gradient(to_bottom,#ffffff10_1px,transparent_1px)] bg-[size:40px_40px]" style={{ maskImage: "linear-gradient(to bottom, white 0%, transparent 100%)", WebkitMaskImage: "linear-gradient(to bottom, white 0%, transparent 100%)" }}></div>
+      <div className="px-6 sm:px-12 md:px-20 py-16 sm:py-24 border-t border-white/[0.04]">
+        <div className="max-w-[700px]">
+          <p className="text-[11px] tracking-[0.15em] text-white/20 uppercase mb-6">About</p>
+          <p className="text-[16px] sm:text-[18px] md:text-[20px] text-white/40 leading-[1.8] font-light">
+            We are an AI-powered mentorship platform that lets users converse with digital versions of the mentors they admire, delivering trusted guidance anytime, anywhere.
+          </p>
+        </div>
       </div>
 
-      <div className="px-4 sm:px-6 pb-16 sm:pb-24 pt-8 sm:pt-12">
-        <div className="max-w-[560px] mx-auto">
-          <h2 className="text-[26px] sm:text-[32px] md:text-[36px] font-normal text-center mb-3 tracking-[-0.03em] text-[#e0e0e0]">Frequently asked questions</h2>
-          <p className="text-center text-[#666] text-[13px] sm:text-[14px] mb-8 sm:mb-12 max-w-[420px] mx-auto leading-[1.6]">
-            Everything you need to know about MentXr. Find answers to the most common questions below.
-          </p>
+      <div className="px-6 sm:px-12 md:px-20 py-12 sm:py-16 border-t border-white/[0.04]">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6 sm:gap-12">
+          <p className="text-[11px] tracking-[0.15em] text-white/20 uppercase">Countdown</p>
+          <div className="flex items-center gap-3 sm:gap-4">
+            <div className="flex flex-col items-center">
+              <div className="bg-white/[0.03] border border-white/[0.06] rounded-lg w-[44px] h-[44px] sm:w-[52px] sm:h-[52px] flex items-center justify-center">
+                <span className="font-mono text-[16px] sm:text-[20px] font-semibold text-white/70 tabular-nums">{String(timeLeft.months).padStart(2, '0')}</span>
+              </div>
+              <span className="text-[8px] text-white/15 tracking-[0.12em] uppercase mt-1.5">Months</span>
+            </div>
+            <span className="text-white/15 text-[16px] font-mono -mt-4">:</span>
+            <div className="flex flex-col items-center">
+              <div className="bg-white/[0.03] border border-white/[0.06] rounded-lg w-[44px] h-[44px] sm:w-[52px] sm:h-[52px] flex items-center justify-center">
+                <span className="font-mono text-[16px] sm:text-[20px] font-semibold text-white/70 tabular-nums">{String(timeLeft.hours).padStart(2, '0')}</span>
+              </div>
+              <span className="text-[8px] text-white/15 tracking-[0.12em] uppercase mt-1.5">Hrs</span>
+            </div>
+            <span className="text-white/15 text-[16px] font-mono -mt-4">:</span>
+            <div className="flex flex-col items-center">
+              <div className="bg-white/[0.03] border border-white/[0.06] rounded-lg w-[44px] h-[44px] sm:w-[52px] sm:h-[52px] flex items-center justify-center">
+                <span className="font-mono text-[16px] sm:text-[20px] font-semibold text-white/70 tabular-nums">{String(timeLeft.minutes).padStart(2, '0')}</span>
+              </div>
+              <span className="text-[8px] text-white/15 tracking-[0.12em] uppercase mt-1.5">Min</span>
+            </div>
+          </div>
+          <p className="text-[9px] text-white/15 tracking-[0.15em] uppercase">Until Full Release</p>
+        </div>
+      </div>
 
-          <div className="space-y-2 sm:space-y-3">
+      <div className="px-6 sm:px-12 md:px-20 pb-16 sm:pb-24 pt-12 sm:pt-16 border-t border-white/[0.04]">
+        <div className="max-w-[600px]">
+          <p className="text-[11px] tracking-[0.15em] text-white/20 uppercase mb-6">FAQ</p>
+          <h2 className="text-[22px] sm:text-[28px] md:text-[32px] font-light mb-8 sm:mb-12 tracking-[-0.02em] text-white/60">Frequently asked questions</h2>
+
+          <div className="space-y-1">
             {faqItems.map((item, i) => (
               <div
                 key={i}
-                className="border border-[#1F1F1F] rounded-xl bg-[#111] overflow-hidden"
+                className="border-b border-white/[0.04] overflow-hidden"
               >
                 <button
                   data-testid={`button-faq-${i}`}
-                  className="w-full flex items-center justify-between px-4 sm:px-5 py-3.5 sm:py-4 text-left"
+                  className="w-full flex items-center justify-between py-4 sm:py-5 text-left group"
                   onClick={() => setOpenFaq(openFaq === i ? null : i)}
                 >
-                  <span className="text-[13px] sm:text-[14px] font-medium text-white/80">{item.q}</span>
-                  <span className="text-[18px] text-white/30 shrink-0 ml-3 sm:ml-4 leading-none">
-                    {openFaq === i ? "\u2212" : "+"}
+                  <span className="text-[14px] sm:text-[15px] font-medium text-white/50 group-hover:text-white/70 transition-colors">{item.q}</span>
+                  <span className="text-[18px] text-white/15 shrink-0 ml-4 leading-none transition-transform" style={{ transform: openFaq === i ? 'rotate(45deg)' : 'rotate(0deg)' }}>
+                    +
                   </span>
                 </button>
                 {openFaq === i && (
-                  <div className="px-4 sm:px-5 pb-3.5 sm:pb-4">
-                    <p className="text-[12px] sm:text-[13px] text-[#666] leading-[1.7]">{item.a}</p>
+                  <div className="pb-4 sm:pb-5">
+                    <p className="text-[13px] sm:text-[14px] text-white/25 leading-[1.8]">{item.a}</p>
                   </div>
                 )}
               </div>
@@ -272,10 +329,15 @@ export default function LandingPage() {
         </div>
       </div>
 
-      <footer className="border-t border-[#1A1A1A] px-4 sm:px-6 py-6 sm:py-8 text-center">
-        <p className="text-[11px] sm:text-[12px] text-[#444]">
-          &copy; 2026 MentXr&reg; by <span className="text-[#666] font-semibold">CMD Supply</span>
+      <footer className="border-t border-white/[0.04] px-6 sm:px-12 md:px-20 py-8 sm:py-10 flex items-center justify-between">
+        <p className="text-[11px] text-white/15">
+          &copy; 2026 MentXr&reg; by <span className="text-white/25 font-medium">CMD Supply</span>
         </p>
+        <div className="flex items-center gap-2">
+          <div className="w-5 h-5 rounded-full border border-white/10 flex items-center justify-center">
+            <span className="w-1 h-1 rounded-full bg-white/30"></span>
+          </div>
+        </div>
       </footer>
     </div>
   );
