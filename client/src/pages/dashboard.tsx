@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from "react";
 import { useAuth } from "@/lib/store";
 import { useLocation } from "wouter";
-import { Send, Plus, LogOut, Paperclip, Loader2, ArrowDown, FileText, X, Menu, Bot, Heart, MessageCircle, Share2, Bookmark, Globe, RefreshCw, ExternalLink, TrendingUp } from "lucide-react";
+import { Send, Plus, LogOut, Paperclip, Loader2, ArrowDown, FileText, X, Menu, Bot, Heart, MessageCircle, Share2, Bookmark, Globe, RefreshCw, ExternalLink, TrendingUp, UserPlus, Check, UserX, Search } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -47,6 +47,7 @@ export default function DashboardPage() {
   const [mentorCleared, setMentorCleared] = useState(false);
   const [buddyGroups, setBuddyGroups] = useState<Record<string, boolean>>({
     mentors: true,
+    friends: true,
     community: true,
     offline: false,
   });
@@ -70,6 +71,12 @@ export default function DashboardPage() {
   const [lastSeenPostId, setLastSeenPostId] = useState<number>(0);
   const [postCommentCounts] = useState<Map<number, number>>(new Map());
   const [activeTab, setActiveTab] = useState<"feed" | "chat">("feed");
+  const [friendsList, setFriendsList] = useState<any[]>([]);
+  const [pendingRequests, setPendingRequests] = useState<any[]>([]);
+  const [showAddFriend, setShowAddFriend] = useState(false);
+  const [friendSearch, setFriendSearch] = useState("");
+  const [friendSearchResults, setFriendSearchResults] = useState<any[]>([]);
+  const [friendSearchLoading, setFriendSearchLoading] = useState(false);
 
   const TRUNCATE_LENGTH = 280;
 
@@ -210,11 +217,63 @@ export default function DashboardPage() {
     }
   };
 
+  const fetchFriends = async () => {
+    try {
+      const res = await fetch("/api/friends", { credentials: "include" });
+      if (res.ok) {
+        const data = await res.json();
+        setFriendsList(data.friends || []);
+        setPendingRequests(data.pending || []);
+      }
+    } catch (err) { console.error("Failed to fetch friends", err); }
+  };
+
+  const searchFriends = async (q: string) => {
+    if (q.length < 2) { setFriendSearchResults([]); return; }
+    setFriendSearchLoading(true);
+    try {
+      const res = await fetch(`/api/users/search?q=${encodeURIComponent(q)}`, { credentials: "include" });
+      if (res.ok) { setFriendSearchResults(await res.json()); }
+    } catch (err) { console.error(err); } finally { setFriendSearchLoading(false); }
+  };
+
+  const sendFriendRequest = async (receiverId: number) => {
+    try {
+      const res = await fetch("/api/friends/request", { method: "POST", headers: { "Content-Type": "application/json" }, credentials: "include", body: JSON.stringify({ receiverId }) });
+      if (res.ok) { toast({ title: "Friend request sent!" }); fetchFriends(); setFriendSearchResults(prev => prev.filter(u => u.id !== receiverId)); }
+      else { const d = await res.json(); toast({ title: "Error", description: d.error, variant: "destructive" }); }
+    } catch (err) { toast({ title: "Error", description: "Failed to send request", variant: "destructive" }); }
+  };
+
+  const acceptFriend = async (friendshipId: number) => {
+    try {
+      await fetch("/api/friends/accept", { method: "POST", headers: { "Content-Type": "application/json" }, credentials: "include", body: JSON.stringify({ friendshipId }) });
+      fetchFriends();
+      toast({ title: "Friend request accepted!" });
+    } catch (err) { toast({ title: "Error", description: "Failed to accept", variant: "destructive" }); }
+  };
+
+  const rejectFriend = async (friendshipId: number) => {
+    try {
+      await fetch("/api/friends/reject", { method: "POST", headers: { "Content-Type": "application/json" }, credentials: "include", body: JSON.stringify({ friendshipId }) });
+      fetchFriends();
+    } catch (err) { toast({ title: "Error", description: "Failed to reject", variant: "destructive" }); }
+  };
+
+  const removeFriend = async (friendshipId: number) => {
+    try {
+      await fetch("/api/friends/remove", { method: "POST", headers: { "Content-Type": "application/json" }, credentials: "include", body: JSON.stringify({ friendshipId }) });
+      fetchFriends();
+      toast({ title: "Friend removed" });
+    } catch (err) { toast({ title: "Error", description: "Failed to remove", variant: "destructive" }); }
+  };
+
   useEffect(() => {
     if (user) {
       fetchFeed();
       fetchPosts();
       fetchInfluencerPosts();
+      fetchFriends();
       fetch("/api/stats").then(r => r.json()).then(setPlatformStats).catch(() => {});
     }
   }, [user]);
@@ -507,6 +566,72 @@ export default function DashboardPage() {
                 <div className="h-8 flex items-center px-4">
                   <span className="text-[10px] text-white/15 italic">{platformStats.totalUsers.toLocaleString()} total members</span>
                 </div>
+              </div>
+            )}
+          </div>
+
+          <div className="border-b border-white/[0.06]">
+            <button
+              onClick={() => setBuddyGroups(prev => ({ ...prev, friends: !prev.friends }))}
+              className="w-full h-9 flex items-center gap-2 px-4 hover:bg-white/[0.03] text-left transition-colors"
+              data-testid="buddy-group-friends"
+            >
+              <span className="text-[10px] text-white/20 font-mono w-3">{buddyGroups.friends ? "▾" : "▸"}</span>
+              <span className="text-[11px] font-bold text-white/50 uppercase tracking-widest">Friends</span>
+              <span className="text-[10px] text-white/20 ml-auto">({friendsList.length})</span>
+            </button>
+            {buddyGroups.friends && (
+              <div className="pb-1">
+                <button
+                  onClick={() => setShowAddFriend(true)}
+                  className="w-full h-9 flex items-center gap-3 px-4 hover:bg-white/[0.04] text-left transition-colors"
+                  data-testid="button-add-friend"
+                >
+                  <UserPlus className="w-3.5 h-3.5 text-green-400/60" />
+                  <span className="text-[11px] text-green-400/60 font-medium">Add Friend</span>
+                </button>
+                {pendingRequests.length > 0 && (
+                  <div className="px-4 py-1">
+                    <span className="text-[10px] text-amber-400/60 font-medium">{pendingRequests.length} pending request{pendingRequests.length > 1 ? "s" : ""}</span>
+                  </div>
+                )}
+                {pendingRequests.map((req: any) => (
+                  <div key={req.friendshipId} className="h-11 flex items-center gap-3 px-4 hover:bg-white/[0.04] transition-colors">
+                    <div className="w-7 h-7 rounded-lg bg-amber-500/20 border border-amber-500/30 flex items-center justify-center text-[9px] font-bold text-amber-400">
+                      {(req.displayName || "?").substring(0, 2).toUpperCase()}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-[11px] text-white/60 truncate">{req.displayName}</p>
+                    </div>
+                    <div className="flex gap-1">
+                      <button onClick={() => acceptFriend(req.friendshipId)} className="w-6 h-6 rounded-md bg-green-500/20 hover:bg-green-500/30 flex items-center justify-center" data-testid={`accept-friend-${req.id}`}>
+                        <Check className="w-3 h-3 text-green-400" />
+                      </button>
+                      <button onClick={() => rejectFriend(req.friendshipId)} className="w-6 h-6 rounded-md bg-red-500/20 hover:bg-red-500/30 flex items-center justify-center" data-testid={`reject-friend-${req.id}`}>
+                        <X className="w-3 h-3 text-red-400" />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+                {friendsList.map((f: any) => (
+                  <div key={f.friendshipId} className="group h-11 flex items-center gap-3 px-4 hover:bg-white/[0.04] transition-colors">
+                    <div className="relative shrink-0">
+                      <div className="w-7 h-7 rounded-lg bg-[#1A1A1A] border border-white/[0.1] flex items-center justify-center text-[9px] font-bold text-white/60">
+                        {(f.displayName || "?").substring(0, 2).toUpperCase()}
+                      </div>
+                      <div className="absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full bg-green-500 border-2 border-[#0a0a0a]" />
+                    </div>
+                    <p className="text-[11px] text-white/60 truncate flex-1">{f.displayName}</p>
+                    <button onClick={() => removeFriend(f.friendshipId)} className="hidden group-hover:flex w-5 h-5 rounded-md bg-red-500/10 hover:bg-red-500/20 items-center justify-center" data-testid={`remove-friend-${f.id}`}>
+                      <UserX className="w-3 h-3 text-red-400/60" />
+                    </button>
+                  </div>
+                ))}
+                {friendsList.length === 0 && pendingRequests.length === 0 && (
+                  <div className="h-9 flex items-center px-4">
+                    <span className="text-[10px] text-white/15 italic">No friends yet</span>
+                  </div>
+                )}
               </div>
             )}
           </div>
@@ -1274,6 +1399,72 @@ export default function DashboardPage() {
           </div>
         </div>
       </main>
+
+      {showAddFriend && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm" onClick={() => setShowAddFriend(false)}>
+          <div className="w-[360px] max-h-[500px] bg-[#111] border border-white/10 rounded-2xl shadow-2xl flex flex-col" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between px-4 py-3 border-b border-white/[0.08]">
+              <span className="text-sm font-semibold text-white/80">Add Friend</span>
+              <button onClick={() => { setShowAddFriend(false); setFriendSearch(""); setFriendSearchResults([]); }} className="text-white/30 hover:text-white/60" data-testid="close-add-friend">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            <div className="px-4 py-3">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" />
+                <input
+                  type="text"
+                  value={friendSearch}
+                  onChange={e => { setFriendSearch(e.target.value); searchFriends(e.target.value); }}
+                  placeholder="Search by name..."
+                  className="w-full h-10 pl-10 pr-4 rounded-xl bg-white/[0.06] border border-white/[0.08] text-sm text-white/80 placeholder:text-white/20 focus:outline-none focus:border-white/20"
+                  autoFocus
+                  data-testid="input-friend-search"
+                />
+              </div>
+            </div>
+            <div className="flex-1 overflow-y-auto px-2 pb-3 max-h-[350px]">
+              {friendSearchLoading && (
+                <div className="flex items-center justify-center py-4">
+                  <Loader2 className="w-5 h-5 text-white/30 animate-spin" />
+                </div>
+              )}
+              {!friendSearchLoading && friendSearch.length >= 2 && friendSearchResults.length === 0 && (
+                <p className="text-center text-[12px] text-white/20 py-4">No users found</p>
+              )}
+              {friendSearchResults.map((u: any) => {
+                const alreadyFriend = friendsList.some((f: any) => f.id === u.id);
+                const alreadyPending = pendingRequests.some((p: any) => p.id === u.id);
+                return (
+                  <div key={u.id} className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-white/[0.04] transition-colors">
+                    <div className="w-9 h-9 rounded-lg bg-[#1A1A1A] border border-white/[0.1] flex items-center justify-center text-[10px] font-bold text-white/50">
+                      {(u.displayName || "?").substring(0, 2).toUpperCase()}
+                    </div>
+                    <span className="text-[13px] text-white/70 flex-1 truncate">{u.displayName}</span>
+                    {alreadyFriend ? (
+                      <span className="text-[10px] text-green-400/60 px-2 py-1 rounded-lg bg-green-500/10">Friends</span>
+                    ) : alreadyPending ? (
+                      <span className="text-[10px] text-amber-400/60 px-2 py-1 rounded-lg bg-amber-500/10">Pending</span>
+                    ) : (
+                      <button
+                        onClick={() => sendFriendRequest(u.id)}
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/[0.08] hover:bg-white/[0.12] text-[11px] text-white/60 hover:text-white/80 transition-colors"
+                        data-testid={`send-request-${u.id}`}
+                      >
+                        <UserPlus className="w-3 h-3" />
+                        Add
+                      </button>
+                    )}
+                  </div>
+                );
+              })}
+              {friendSearch.length < 2 && (
+                <p className="text-center text-[11px] text-white/15 py-4">Type at least 2 characters to search</p>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

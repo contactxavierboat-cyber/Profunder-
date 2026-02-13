@@ -1080,6 +1080,97 @@ export async function registerRoutes(
     });
   });
 
+  app.get("/api/friends", requireAuth, async (req, res) => {
+    try {
+      const userId = req.session.userId!;
+      const friends = await storage.getFriends(userId);
+      const pending = await storage.getPendingRequests(userId);
+      res.json({
+        friends: friends.map(f => ({
+          friendshipId: f.friendship.id,
+          id: f.friend.id,
+          displayName: f.friend.displayName || f.friend.email,
+          email: f.friend.email,
+        })),
+        pending: pending.map(p => ({
+          friendshipId: p.friendship.id,
+          id: p.requester.id,
+          displayName: p.requester.displayName || p.requester.email,
+          email: p.requester.email,
+        })),
+      });
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  app.post("/api/friends/request", requireAuth, async (req, res) => {
+    try {
+      const userId = req.session.userId!;
+      const { receiverId } = req.body;
+      if (!receiverId || receiverId === userId) {
+        return res.status(400).json({ error: "Invalid user" });
+      }
+      const existing = await storage.getFriendship(userId, receiverId);
+      if (existing) {
+        return res.status(400).json({ error: "Friend request already exists" });
+      }
+      const friendship = await storage.sendFriendRequest(userId, receiverId);
+      res.json({ friendship });
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  app.post("/api/friends/accept", requireAuth, async (req, res) => {
+    try {
+      const userId = req.session.userId!;
+      const { friendshipId } = req.body;
+      if (!friendshipId) return res.status(400).json({ error: "Missing friendshipId" });
+      const friendship = await storage.acceptFriendRequest(friendshipId, userId);
+      if (!friendship) return res.status(404).json({ error: "Request not found" });
+      res.json({ friendship });
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  app.post("/api/friends/reject", requireAuth, async (req, res) => {
+    try {
+      const userId = req.session.userId!;
+      const { friendshipId } = req.body;
+      if (!friendshipId) return res.status(400).json({ error: "Missing friendshipId" });
+      await storage.rejectFriendRequest(friendshipId, userId);
+      res.json({ success: true });
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  app.post("/api/friends/remove", requireAuth, async (req, res) => {
+    try {
+      const userId = req.session.userId!;
+      const { friendshipId } = req.body;
+      if (!friendshipId) return res.status(400).json({ error: "Missing friendshipId" });
+      await storage.removeFriend(friendshipId, userId);
+      res.json({ success: true });
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  app.get("/api/users/search", requireAuth, async (req, res) => {
+    try {
+      const userId = req.session.userId!;
+      const query = (req.query.q as string) || "";
+      if (query.length < 2) return res.json([]);
+      const results = await storage.searchUsers(query, userId);
+      res.json(results.map(u => ({ id: u.id, displayName: u.displayName || u.email })));
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
   const rssParser = new Parser({
     timeout: 3000,
     headers: { 'User-Agent': 'Mozilla/5.0 (compatible; MentXr-Feed/1.0)' },

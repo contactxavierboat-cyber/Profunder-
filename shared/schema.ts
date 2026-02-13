@@ -58,8 +58,17 @@ export const posts = pgTable("posts", {
   timestamp: timestamp("timestamp").defaultNow().notNull(),
 });
 
+export const friendships = pgTable("friendships", {
+  id: serial("id").primaryKey(),
+  requesterId: integer("requester_id").notNull().references(() => users.id),
+  receiverId: integer("receiver_id").notNull().references(() => users.id),
+  status: text("status").notNull().default("pending"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
 export const insertCommentSchema = createInsertSchema(comments).omit({ id: true, timestamp: true });
 export const insertPostSchema = createInsertSchema(posts).omit({ id: true, timestamp: true });
+export const insertFriendshipSchema = createInsertSchema(friendships).omit({ id: true, createdAt: true });
 
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
@@ -69,3 +78,5 @@ export type Comment = typeof comments.$inferSelect;
 export type InsertComment = z.infer<typeof insertCommentSchema>;
 export type Post = typeof posts.$inferSelect;
 export type InsertPost = z.infer<typeof insertPostSchema>;
+export type Friendship = typeof friendships.$inferSelect;
+export type InsertFriendship = z.infer<typeof insertFriendshipSchema>;
