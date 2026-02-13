@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from "react";
 import { useAuth } from "@/lib/store";
 import { useLocation } from "wouter";
-import { Send, Plus, LogOut, Paperclip, Loader2, ArrowDown, FileText, X, Menu, Bot, Heart, MessageCircle, Share2, Bookmark, Globe, RefreshCw, ExternalLink, TrendingUp, UserPlus, Check, UserX, Search } from "lucide-react";
+import { Send, Plus, LogOut, Paperclip, Loader2, ArrowDown, FileText, X, Menu, Bot, Heart, MessageCircle, Share2, Bookmark, Globe, RefreshCw, ExternalLink, TrendingUp, UserPlus, Check, UserX, Search, Maximize2, Minimize2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -77,6 +77,42 @@ export default function DashboardPage() {
   const [friendSearch, setFriendSearch] = useState("");
   const [friendSearchResults, setFriendSearchResults] = useState<any[]>([]);
   const [friendSearchLoading, setFriendSearchLoading] = useState(false);
+  const [contentViewer, setContentViewer] = useState<{ type: "video" | "article"; videoId?: string; url?: string; title: string; source?: string } | null>(null);
+
+  const extractYouTubeId = (item: any): string | null => {
+    const tryExtract = (url: string): string | null => {
+      if (!url) return null;
+      let m;
+      m = url.match(/[?&]v=([a-zA-Z0-9_-]{11})/);
+      if (m) return m[1];
+      m = url.match(/youtu\.be\/([a-zA-Z0-9_-]{11})/);
+      if (m) return m[1];
+      m = url.match(/youtube\.com\/embed\/([a-zA-Z0-9_-]{11})/);
+      if (m) return m[1];
+      m = url.match(/youtube\.com\/shorts\/([a-zA-Z0-9_-]{11})/);
+      if (m) return m[1];
+      m = url.match(/img\.youtube\.com\/vi\/([a-zA-Z0-9_-]{11})/);
+      if (m) return m[1];
+      return null;
+    };
+    return tryExtract(item.link) || tryExtract(item.image) || null;
+  };
+
+  useEffect(() => {
+    if (!contentViewer) return;
+    const handleEsc = (e: KeyboardEvent) => { if (e.key === "Escape") setContentViewer(null); };
+    window.addEventListener("keydown", handleEsc);
+    return () => window.removeEventListener("keydown", handleEsc);
+  }, [contentViewer]);
+
+  const openContent = (item: any) => {
+    const videoId = extractYouTubeId(item);
+    if (videoId) {
+      setContentViewer({ type: "video", videoId, title: item.title || item.description || "", source: item.source });
+    } else if (item.link && item.link !== "#") {
+      setContentViewer({ type: "article", url: item.link, title: item.title || item.description || "", source: item.source });
+    }
+  };
 
   const TRUNCATE_LENGTH = 280;
 
@@ -192,12 +228,18 @@ export default function DashboardPage() {
       const res = await fetch("/api/influencer-posts", { credentials: "include" });
       if (res.ok) {
         const data = await res.json();
-        const posts = (data.posts || []).map((p: any) => ({
+        const posts = (data.posts || []).map((p: any) => {
+          let link = "#";
+          if (p.contentType === "video" && p.image && p.image.includes("img.youtube.com/vi/")) {
+            const vidMatch = p.image.match(/\/vi\/([^/]+)\//);
+            if (vidMatch) link = `https://www.youtube.com/watch?v=${vidMatch[1]}`;
+          }
+          return {
           id: p.id,
           _liveId: `inf-${p.id}`,
           title: p.content.substring(0, 80) + (p.content.length > 80 ? "..." : ""),
           description: p.content,
-          link: "#",
+          link,
           image: p.image,
           source: p.influencerName,
           category: p.category,
@@ -209,7 +251,7 @@ export default function DashboardPage() {
           verified: p.verified,
           followers: p.followers,
           handle: p.handle,
-        }));
+        };});
         influencerBufferRef.current = posts;
       }
     } catch (err) {
@@ -803,10 +845,10 @@ export default function DashboardPage() {
                       {liveFeedItems.map((item: any, idx: number) => (
                         <div
                           key={item._liveId || item.id || idx}
-                          onClick={() => { if (item.link && item.link !== "#") window.open(item.link, "_blank"); }}
+                          onClick={() => openContent(item)}
                           className={cn(
                             "block rounded-2xl border overflow-hidden group transition-all animate-[feedSlideIn_0.4s_ease-out]",
-                            item.link && item.link !== "#" ? "cursor-pointer" : "cursor-default",
+                            (item.contentType === "video" || (item.link && item.link !== "#")) ? "cursor-pointer" : "cursor-default",
                             item.mentor
                               ? "border-amber-500/20 bg-amber-500/[0.03] hover:bg-amber-500/[0.06]"
                               : item.isInfluencer
@@ -886,9 +928,20 @@ export default function DashboardPage() {
                               </>
                             )}
                             {!item.isInfluencer && (
-                              <div className="flex items-center gap-1.5 mt-2 text-[10px] text-white/20">
-                                <ExternalLink className="w-2.5 h-2.5" />
-                                <span>{item.contentType === "video" ? "Watch video" : "Read full article"}</span>
+                              <div className="flex items-center gap-1.5 mt-2 text-[10px] text-white/30 group-hover:text-white/50 transition-colors">
+                                {item.contentType === "video" ? (
+                                  <>
+                                    <div className="w-3 h-3 rounded-full bg-red-500/30 flex items-center justify-center">
+                                      <div className="w-0 h-0 border-t-[3px] border-t-transparent border-l-[5px] border-l-red-400 border-b-[3px] border-b-transparent ml-0.5" />
+                                    </div>
+                                    <span>Watch in MentXr</span>
+                                  </>
+                                ) : (
+                                  <>
+                                    <ExternalLink className="w-2.5 h-2.5" />
+                                    <span>Read in MentXr</span>
+                                  </>
+                                )}
                               </div>
                             )}
                           </div>
@@ -1465,6 +1518,72 @@ export default function DashboardPage() {
               {friendSearch.length < 2 && (
                 <p className="text-center text-[11px] text-white/15 py-4">Type at least 2 characters to search</p>
               )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {contentViewer && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/85 backdrop-blur-md" onClick={() => setContentViewer(null)} data-testid="content-viewer-overlay">
+          <div className="w-full max-w-4xl mx-4 flex flex-col max-h-[90vh]" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between px-4 py-3 bg-[#111] border border-white/10 rounded-t-2xl">
+              <div className="flex items-center gap-3 min-w-0 flex-1">
+                {contentViewer.type === "video" ? (
+                  <div className="w-7 h-7 rounded-full bg-red-500/20 flex items-center justify-center shrink-0">
+                    <div className="w-0 h-0 border-t-[4px] border-t-transparent border-l-[7px] border-l-red-400 border-b-[4px] border-b-transparent ml-0.5" />
+                  </div>
+                ) : (
+                  <Globe className="w-5 h-5 text-white/40 shrink-0" />
+                )}
+                <div className="min-w-0 flex-1">
+                  <p className="text-[13px] text-white/80 truncate font-medium">{contentViewer.title}</p>
+                  {contentViewer.source && <p className="text-[10px] text-white/30">{contentViewer.source}</p>}
+                </div>
+              </div>
+              <div className="flex items-center gap-2 shrink-0 ml-3">
+                {contentViewer.type === "article" && contentViewer.url && (
+                  <button onClick={() => window.open(contentViewer.url, "_blank")} className="p-2 rounded-lg hover:bg-white/10 text-white/30 hover:text-white/60 transition-colors" title="Open in new tab" data-testid="open-external">
+                    <ExternalLink className="w-4 h-4" />
+                  </button>
+                )}
+                {contentViewer.type === "video" && contentViewer.videoId && (
+                  <button onClick={() => window.open(`https://www.youtube.com/watch?v=${contentViewer.videoId}`, "_blank")} className="p-2 rounded-lg hover:bg-white/10 text-white/30 hover:text-white/60 transition-colors" title="Open on YouTube" data-testid="open-youtube">
+                    <ExternalLink className="w-4 h-4" />
+                  </button>
+                )}
+                <button onClick={() => setContentViewer(null)} className="p-2 rounded-lg hover:bg-white/10 text-white/30 hover:text-white/60 transition-colors" data-testid="close-content-viewer">
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+            <div className="bg-black border-x border-b border-white/10 rounded-b-2xl overflow-hidden">
+              {contentViewer.type === "video" && contentViewer.videoId ? (
+                <div className="relative w-full" style={{ paddingBottom: "56.25%" }}>
+                  <iframe
+                    src={`https://www.youtube.com/embed/${contentViewer.videoId}?autoplay=1&rel=0`}
+                    className="absolute inset-0 w-full h-full"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                    title={contentViewer.title}
+                    data-testid="video-player"
+                  />
+                </div>
+              ) : contentViewer.type === "article" && contentViewer.url ? (
+                <div className="w-full h-[70vh] relative">
+                  <iframe
+                    src={contentViewer.url}
+                    className="w-full h-full border-0"
+                    sandbox="allow-scripts allow-same-origin allow-popups"
+                    title={contentViewer.title}
+                    data-testid="article-viewer"
+                    onError={() => {
+                      window.open(contentViewer.url, "_blank");
+                      setContentViewer(null);
+                    }}
+                  />
+                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent h-12 pointer-events-none" />
+                </div>
+              ) : null}
             </div>
           </div>
         </div>
