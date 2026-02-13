@@ -1266,47 +1266,89 @@ Be concise but thorough. Use bullet points and formatting for readability. If th
     headers: { 'User-Agent': 'Mozilla/5.0 (compatible; MentXr-Feed/1.0)' },
   });
 
-  const RSS_FEEDS = [
-    // === BOT MENTOR YOUTUBE CHANNELS (Curated content feeds) ===
-    { url: "https://www.youtube.com/feeds/videos.xml?channel_id=UCdlNK1xcy-Sn8liq7feNxWw", source: "NovaSage247", category: "sales", contentType: "video", mentor: "nova_sage" },
-    { url: "https://www.youtube.com/feeds/videos.xml?channel_id=UCctXZhXmG-kf3tlIXgVZUlw", source: "BlazeEcho512", category: "entrepreneurship", contentType: "video", mentor: "blaze_echo" },
-    { url: "https://www.youtube.com/feeds/videos.xml?channel_id=UCsY17ZnXg_Gmt9bWz49HoWw", source: "ZenCipher108", category: "mindset", contentType: "video", mentor: "zen_cipher" },
-    { url: "https://www.youtube.com/feeds/videos.xml?channel_id=UCCKHPCkOQ4Bwi2EPkDu25SQ", source: "SteelWraith666", category: "advocacy", contentType: "video", mentor: "steel_wraith" },
-    { url: "https://www.youtube.com/feeds/videos.xml?channel_id=UCKBnlTTgEnhIXv_c4LvvyMQ", source: "LunarPeak303", category: "leadership", contentType: "video", mentor: "lunar_peak" },
-
-    // === INFLUENCER & BUSINESS YOUTUBE CHANNELS ===
-    { url: "https://www.youtube.com/feeds/videos.xml?channel_id=UCVHFbqXqoYvEWM1Ddxl0QDg", source: "Alex Hormozi", category: "business", contentType: "video", mentor: null },
+  const RSS_FEEDS: { url: string; source: string; category: string; contentType: string; mentor: string | null }[] = [
+    // === FINANCE & INVESTING YOUTUBE ===
     { url: "https://www.youtube.com/feeds/videos.xml?channel_id=UCV6KDgJskWaEckne5aPA0aQ", source: "Graham Stephan", category: "finance", contentType: "video", mentor: null },
-    { url: "https://www.youtube.com/feeds/videos.xml?channel_id=UCL_f53ZEJxp8TtlOkHwMV9Q", source: "Jordan Peterson", category: "mindset", contentType: "video", mentor: null },
     { url: "https://www.youtube.com/feeds/videos.xml?channel_id=UCRVsqvXIdgyPVS-a6fGa1lA", source: "Earn Your Leisure", category: "finance", contentType: "video", mentor: null },
-    { url: "https://www.youtube.com/feeds/videos.xml?channel_id=UCIHdDJ0tjn_3j-FS7s_X1kQ", source: "Patrick Bet-David", category: "business", contentType: "video", mentor: null },
-    { url: "https://www.youtube.com/feeds/videos.xml?channel_id=UChi08h4577eFsNXGd3sxYhw", source: "The Breakfast Club", category: "culture", contentType: "video", mentor: null },
-    { url: "https://www.youtube.com/feeds/videos.xml?channel_id=UC-lHJZR3Gqxm24_Vd_AJ5Yw", source: "Lex Fridman", category: "tech", contentType: "video", mentor: null },
-    { url: "https://www.youtube.com/feeds/videos.xml?channel_id=UCJLMboBYME_CLEfwsduI0wQ", source: "Tony Robbins", category: "motivation", contentType: "video", mentor: null },
-    { url: "https://www.youtube.com/feeds/videos.xml?channel_id=UCKsP3v2JeT2hWI_HzkxWiMA", source: "Lewis Howes", category: "motivation", contentType: "video", mentor: null },
     { url: "https://www.youtube.com/feeds/videos.xml?channel_id=UC7eBNeDW1GQf2NJQ6G6gAxw", source: "Dave Ramsey", category: "finance", contentType: "video", mentor: null },
     { url: "https://www.youtube.com/feeds/videos.xml?channel_id=UCuifm5ns5SRG8LZJ6gCfKyw", source: "Robert Kiyosaki", category: "finance", contentType: "video", mentor: null },
-    { url: "https://www.youtube.com/feeds/videos.xml?channel_id=UCX6OQ3DkcsbYNE6H8uQQuVA", source: "MrBeast", category: "entertainment", contentType: "video", mentor: null },
-    { url: "https://www.youtube.com/feeds/videos.xml?channel_id=UCIprGZAdzn3ZqgLmDuibYcw", source: "Ed Mylett", category: "motivation", contentType: "video", mentor: null },
-    { url: "https://www.youtube.com/feeds/videos.xml?channel_id=UCzQUP1qoWDoEbmsQxvdjxgQ", source: "Joe Rogan", category: "culture", contentType: "video", mentor: null },
-
-    // === PODCAST RSS FEEDS ===
-    { url: "https://rss.art19.com/how-i-built-this", source: "How I Built This", category: "entrepreneurship", contentType: "text", mentor: null },
-    { url: "https://rss.art19.com/the-great-creators", source: "The Great Creators", category: "business", contentType: "text", mentor: null },
-
-    // === NEWS & BUSINESS RSS FEEDS ===
-    { url: "https://feeds.bbci.co.uk/news/business/rss.xml", source: "BBC Business", category: "business", contentType: "text", mentor: null },
-    { url: "https://www.entrepreneur.com/latest.rss", source: "Entrepreneur", category: "entrepreneurship", contentType: "text", mentor: null },
-    { url: "https://www.forbes.com/innovation/feed2", source: "Forbes", category: "innovation", contentType: "text", mentor: null },
-    { url: "https://rss.nytimes.com/services/xml/rss/nyt/Business.xml", source: "NY Times Business", category: "business", contentType: "text", mentor: null },
-    { url: "https://feeds.nbcnews.com/nbcnews/public/business", source: "NBC Business", category: "business", contentType: "text", mentor: null },
-    { url: "https://search.cnbc.com/rs/search/combinedcms/view.xml?partnerId=wrss01&id=10001147", source: "CNBC", category: "finance", contentType: "text", mentor: null },
-    { url: "https://feeds.feedburner.com/TechCrunch/", source: "TechCrunch", category: "tech", contentType: "text", mentor: null },
-    { url: "https://www.wired.com/feed/rss", source: "Wired", category: "tech", contentType: "text", mentor: null },
-    { url: "https://feeds.arstechnica.com/arstechnica/index", source: "Ars Technica", category: "tech", contentType: "text", mentor: null },
-    { url: "https://rss.nytimes.com/services/xml/rss/nyt/Technology.xml", source: "NY Times Tech", category: "tech", contentType: "text", mentor: null },
-    { url: "https://feeds.bbci.co.uk/news/technology/rss.xml", source: "BBC Tech", category: "tech", contentType: "text", mentor: null },
-    { url: "https://www.theverge.com/rss/index.xml", source: "The Verge", category: "tech", contentType: "photo", mentor: null },
+    { url: "https://www.youtube.com/feeds/videos.xml?channel_id=UCGy7SkBjcIAgTiwkXEtPnYg", source: "Andrei Jikh", category: "finance", contentType: "video", mentor: null },
+    { url: "https://www.youtube.com/feeds/videos.xml?channel_id=UCnMn36GT_H0X-w5_ckLtlgQ", source: "Mark Tilbury", category: "finance", contentType: "video", mentor: null },
+    { url: "https://www.youtube.com/feeds/videos.xml?channel_id=UCFCEuCsyWP0YkP3CZ3Mr01Q", source: "The Plain Bagel", category: "finance", contentType: "video", mentor: null },
+    { url: "https://www.youtube.com/feeds/videos.xml?channel_id=UCbta2SCBa_2FNnodQ70sroA", source: "Minority Mindset", category: "finance", contentType: "video", mentor: null },
+    { url: "https://www.youtube.com/feeds/videos.xml?channel_id=UCWKfVPsQun6MDb7jluAJjBw", source: "Nate O Brien", category: "finance", contentType: "video", mentor: null },
+    { url: "https://www.youtube.com/feeds/videos.xml?channel_id=UCWB1em_BGOG4RbBz2hGqw0g", source: "Humphrey Yang", category: "finance", contentType: "video", mentor: null },
+    { url: "https://www.youtube.com/feeds/videos.xml?channel_id=UCL8w_A8p8P1HWI3k6PR5Z6w", source: "Two Cents", category: "finance", contentType: "video", mentor: null },
+    { url: "https://www.youtube.com/feeds/videos.xml?channel_id=UCqK_GSMbpiV8spgD3ZGloSw", source: "Meet Kevin", category: "finance", contentType: "video", mentor: null },
+    { url: "https://www.youtube.com/feeds/videos.xml?channel_id=UCbGRyJHrlpAqedfcJWrCD5A", source: "The Money Guy Show", category: "finance", contentType: "video", mentor: null },
+    { url: "https://www.youtube.com/feeds/videos.xml?channel_id=UCpvbLWBbKFI-V3UkyGcNleg", source: "Our Rich Journey", category: "finance", contentType: "video", mentor: null },
+    // === BUSINESS & ENTREPRENEURSHIP YOUTUBE ===
+    { url: "https://www.youtube.com/feeds/videos.xml?channel_id=UCVHFbqXqoYvEWM1Ddxl0QDg", source: "Alex Hormozi", category: "business", contentType: "video", mentor: null },
+    { url: "https://www.youtube.com/feeds/videos.xml?channel_id=UCIHdDJ0tjn_3j-FS7s_X1kQ", source: "Patrick Bet-David", category: "business", contentType: "video", mentor: null },
+    { url: "https://www.youtube.com/feeds/videos.xml?channel_id=UCIprGZAdzn3ZqgLmDuibYcw", source: "Ed Mylett", category: "business", contentType: "video", mentor: null },
+    { url: "https://www.youtube.com/feeds/videos.xml?channel_id=UCJLMboBYME_CLEfwsduI0wQ", source: "Tony Robbins", category: "business", contentType: "video", mentor: null },
+    { url: "https://www.youtube.com/feeds/videos.xml?channel_id=UCKsP3v2JeT2hWI_HzkxWiMA", source: "Lewis Howes", category: "business", contentType: "video", mentor: null },
+    { url: "https://www.youtube.com/feeds/videos.xml?channel_id=UCL_f53ZEJxp8TtlOkHwMV9Q", source: "Jordan Peterson", category: "business", contentType: "video", mentor: null },
+    { url: "https://www.youtube.com/feeds/videos.xml?channel_id=UC-lHJZR3Gqxm24_Vd_AJ5Yw", source: "Lex Fridman", category: "business", contentType: "video", mentor: null },
+    { url: "https://www.youtube.com/feeds/videos.xml?channel_id=UCzQUP1qoWDoEbmsQxvdjxgQ", source: "Joe Rogan", category: "business", contentType: "video", mentor: null },
+    { url: "https://www.youtube.com/feeds/videos.xml?channel_id=UChi08h4577eFsNXGd3sxYhw", source: "The Breakfast Club", category: "business", contentType: "video", mentor: null },
+    { url: "https://www.youtube.com/feeds/videos.xml?channel_id=UCX6OQ3DkcsbYNE6H8uQQuVA", source: "MrBeast", category: "business", contentType: "video", mentor: null },
+    { url: "https://www.youtube.com/feeds/videos.xml?channel_id=UCnQC_G5Xsjhp9fEJKuIcrSw", source: "Ben Shapiro", category: "business", contentType: "video", mentor: null },
+    { url: "https://www.youtube.com/feeds/videos.xml?channel_id=UCAzhpt9DmG6PnHXjmJTvRGQ", source: "Ali Abdaal", category: "business", contentType: "video", mentor: null },
+    { url: "https://www.youtube.com/feeds/videos.xml?channel_id=UC6VSusMRdHcFOCd_mFPLsyw", source: "Codie Sanchez", category: "business", contentType: "video", mentor: null },
+    { url: "https://www.youtube.com/feeds/videos.xml?channel_id=UCnUYZLuoy1rq1aVMwx4piYg", source: "Valuetainment", category: "business", contentType: "video", mentor: null },
+    { url: "https://www.youtube.com/feeds/videos.xml?channel_id=UC4xqhW2GxLnaVTe7W_KZSIg", source: "Iman Gadzhi", category: "business", contentType: "video", mentor: null },
+    { url: "https://www.youtube.com/feeds/videos.xml?channel_id=UCbmNph6atAoGfqLoCL_duAg", source: "Slidebean", category: "business", contentType: "video", mentor: null },
+    { url: "https://www.youtube.com/feeds/videos.xml?channel_id=UCWzSgIp_DYRQnScnKMfH6eQ", source: "Y Combinator", category: "business", contentType: "video", mentor: null },
+    { url: "https://www.youtube.com/feeds/videos.xml?channel_id=UCIvG9Aw_I45k5iiPESTqHFQ", source: "My First Million", category: "business", contentType: "video", mentor: null },
+    { url: "https://www.youtube.com/feeds/videos.xml?channel_id=UCl2mFZoRqjw_ELax4Yisf6w", source: "Louis Rossmann", category: "business", contentType: "video", mentor: null },
+    { url: "https://www.youtube.com/feeds/videos.xml?channel_id=UCqW54i1JYGo_2VUbQ2PnPnQ", source: "Business Insider", category: "business", contentType: "video", mentor: null },
+    // === REAL ESTATE YOUTUBE ===
+    { url: "https://www.youtube.com/feeds/videos.xml?channel_id=UCBkowEI8RaJk1pCfEBLGKaA", source: "BiggerPockets", category: "realestate", contentType: "video", mentor: null },
+    { url: "https://www.youtube.com/feeds/videos.xml?channel_id=UClKz3LJSZBmPb4G5RF7BQXQ", source: "Grant Cardone", category: "realestate", contentType: "video", mentor: null },
+    { url: "https://www.youtube.com/feeds/videos.xml?channel_id=UCHop-5JkVpbgSjIaJtLFkOQ", source: "Ryan Serhant", category: "realestate", contentType: "video", mentor: null },
+    { url: "https://www.youtube.com/feeds/videos.xml?channel_id=UC2jBFWEsGltD2VjzfTfKzaA", source: "Kris Krohn", category: "realestate", contentType: "video", mentor: null },
+    { url: "https://www.youtube.com/feeds/videos.xml?channel_id=UCR5ooqZhNEz7u7XeWzp2kZQ", source: "Ryan Pineda", category: "realestate", contentType: "video", mentor: null },
+    // === CREDIT & DEBT YOUTUBE ===
+    { url: "https://www.youtube.com/feeds/videos.xml?channel_id=UCVNYvDdVMCbz9aqCa-hgjVQ", source: "Naam Wynn", category: "credit", contentType: "video", mentor: null },
+    { url: "https://www.youtube.com/feeds/videos.xml?channel_id=UCJgXkz6TSrRdEhSNKfpIx1w", source: "ProudMoney", category: "credit", contentType: "video", mentor: null },
+    { url: "https://www.youtube.com/feeds/videos.xml?channel_id=UCpZqvSBsT2aeCEx85hNDGkQ", source: "Ask Sebby", category: "credit", contentType: "video", mentor: null },
+    // === STOCKS & TRADING YOUTUBE ===
+    { url: "https://www.youtube.com/feeds/videos.xml?channel_id=UCRCcrsQo0k31j70bhLaXjpQ", source: "Financial Education", category: "stocks", contentType: "video", mentor: null },
+    { url: "https://www.youtube.com/feeds/videos.xml?channel_id=UCHnyfMqiRRG1u-2MsSQLbXA", source: "Aswath Damodaran", category: "stocks", contentType: "video", mentor: null },
+    { url: "https://www.youtube.com/feeds/videos.xml?channel_id=UCbpMy0Fg74eXXkvxJrtEn3w", source: "ClearValue Tax", category: "stocks", contentType: "video", mentor: null },
+    // === CRYPTO YOUTUBE ===
+    { url: "https://www.youtube.com/feeds/videos.xml?channel_id=UCevXpeL8E1n2cfqQUEAm-jQ", source: "Coin Bureau", category: "crypto", contentType: "video", mentor: null },
+    // === TAX & ACCOUNTING YOUTUBE ===
+    { url: "https://www.youtube.com/feeds/videos.xml?channel_id=UCSVooo-A6yP0bmpq2OiZ5ZA", source: "Karlton Dennis", category: "tax", contentType: "video", mentor: null },
+    { url: "https://www.youtube.com/feeds/videos.xml?channel_id=UCPQFIVmCEd-b3bkLTBYSKvA", source: "Mark J Kohler", category: "tax", contentType: "video", mentor: null },
+    { url: "https://www.youtube.com/feeds/videos.xml?channel_id=UC4GcPnGNlosGhOLFbhgEJow", source: "Toby Mathis", category: "tax", contentType: "video", mentor: null },
+    // === MARKETING & BRANDING YOUTUBE ===
+    { url: "https://www.youtube.com/feeds/videos.xml?channel_id=UCxOSPePUJZiKt3YCy2LTx3g", source: "Gary Vee", category: "marketing", contentType: "video", mentor: null },
+    { url: "https://www.youtube.com/feeds/videos.xml?channel_id=UCEdkVPLtt2hg07YGjsT9sCg", source: "Noah Kagan", category: "marketing", contentType: "video", mentor: null },
+    { url: "https://www.youtube.com/feeds/videos.xml?channel_id=UC3DkFux8Iv-aYnTRWzwaiBA", source: "Chris Do", category: "marketing", contentType: "video", mentor: null },
+    { url: "https://www.youtube.com/feeds/videos.xml?channel_id=UCVMnSbNg7LJjBhFgBGddhiA", source: "Neil Patel", category: "marketing", contentType: "video", mentor: null },
+    // === ECONOMICS & MACRO YOUTUBE ===
+    { url: "https://www.youtube.com/feeds/videos.xml?channel_id=UCCXoCcu9Rp7NPbTzIvogpZg", source: "Economics Explained", category: "economics", contentType: "video", mentor: null },
+    { url: "https://www.youtube.com/feeds/videos.xml?channel_id=UCo8bcnLyZH8tBIH9V1mLgqQ", source: "Ray Dalio", category: "economics", contentType: "video", mentor: null },
+    { url: "https://www.youtube.com/feeds/videos.xml?channel_id=UCnYC6xivzf5gyCzqmQs1LPw", source: "Whiteboardfinance", category: "economics", contentType: "video", mentor: null },
+    { url: "https://www.youtube.com/feeds/videos.xml?channel_id=UCGmnsW623G1r-Chmo5RB4Yw", source: "New Money", category: "economics", contentType: "video", mentor: null },
+    // === MEDIA YOUTUBE ===
+    { url: "https://www.youtube.com/feeds/videos.xml?channel_id=UC3ScyryU9Oy9Wse3a8OAmYQ", source: "CNBC Make It", category: "media", contentType: "video", mentor: null },
+    { url: "https://www.youtube.com/feeds/videos.xml?channel_id=UCIALMKvObZNtJ68-sMEv_bg", source: "Bloomberg", category: "media", contentType: "video", mentor: null },
+    { url: "https://www.youtube.com/feeds/videos.xml?channel_id=UCrM7B7SL_g1edFOnmj-SDKg", source: "Wall Street Journal", category: "media", contentType: "video", mentor: null },
+    { url: "https://www.youtube.com/feeds/videos.xml?channel_id=UCDsElQAt_TdZ5Gbkyok92Ag", source: "MKBHD", category: "media", contentType: "video", mentor: null },
+    { url: "https://www.youtube.com/feeds/videos.xml?channel_id=UC4a-Gbdw7vOaccHmFo40b9g", source: "Khan Academy", category: "education", contentType: "video", mentor: null },
+    // === NEWS & BUSINESS RSS ===
+    { url: "https://feeds.bbci.co.uk/news/business/rss.xml", source: "BBC Business", category: "news", contentType: "text", mentor: null },
+    { url: "https://www.entrepreneur.com/latest.rss", source: "Entrepreneur", category: "news", contentType: "text", mentor: null },
+    { url: "https://www.forbes.com/innovation/feed2", source: "Forbes", category: "news", contentType: "text", mentor: null },
+    { url: "https://rss.nytimes.com/services/xml/rss/nyt/Business.xml", source: "NY Times Business", category: "news", contentType: "text", mentor: null },
+    { url: "https://feeds.nbcnews.com/nbcnews/public/business", source: "NBC Business", category: "news", contentType: "text", mentor: null },
+    { url: "https://search.cnbc.com/rs/search/combinedcms/view.xml?partnerId=wrss01&id=10001147", source: "CNBC", category: "news", contentType: "text", mentor: null },
+    { url: "https://feeds.feedburner.com/TechCrunch/", source: "TechCrunch", category: "news", contentType: "text", mentor: null },
+    { url: "https://www.theverge.com/rss/index.xml", source: "The Verge", category: "news", contentType: "text", mentor: null },
+    { url: "https://rss.art19.com/how-i-built-this", source: "How I Built This", category: "podcast", contentType: "text", mentor: null },
   ];
 
   interface FeedItem {
@@ -1326,7 +1368,7 @@ Be concise but thorough. Use bullet points and formatting for readability. If th
   let feedCache: FeedItem[] = [];
   let feedLastFetch = 0;
   let feedFetching = false;
-  const FEED_CACHE_MS = 3 * 1000;
+  const FEED_CACHE_MS = 30 * 1000;
 
   async function fetchAllFeeds(): Promise<FeedItem[]> {
     const now = Date.now();
@@ -1408,16 +1450,20 @@ Be concise but thorough. Use bullet points and formatting for readability. If th
 
   app.get("/api/feed", requireAuth, async (req, res) => {
     try {
-      const items = await fetchAllFeeds();
+      const allItems = await fetchAllFeeds();
+      const category = req.query.category as string | undefined;
+      const filtered = category && category !== "all"
+        ? allItems.filter(i => i.category === category || i.contentType === category)
+        : allItems;
       const page = parseInt(req.query.page as string) || 0;
-      const limit = parseInt(req.query.limit as string) || 20;
+      const limit = parseInt(req.query.limit as string) || 40;
       const offset = page * limit;
-      const paged = items.slice(offset, offset + limit);
+      const paged = filtered.slice(offset, offset + limit);
       res.json({
         items: paged,
-        total: items.length,
+        total: filtered.length,
         page,
-        hasMore: offset + limit < items.length,
+        hasMore: offset + limit < filtered.length,
         lastUpdated: feedLastFetch ? new Date(feedLastFetch).toISOString() : null,
       });
     } catch (error) {

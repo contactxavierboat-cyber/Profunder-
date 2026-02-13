@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from "react";
 import { useAuth } from "@/lib/store";
 import { useLocation } from "wouter";
-import { Send, Plus, Paperclip, Loader2, ArrowDown, FileText, X, Menu, MessageCircle, RefreshCw, TrendingUp, UserPlus, Check, UserX, Search, AlertTriangle, Shield, ChevronRight, Target, BarChart3, BookOpen, CheckCircle2, AlertCircle, Info, Zap, Activity, Upload, Sparkles, Eye, Lock, Cpu, ChevronDown } from "lucide-react";
+import { Send, Plus, Paperclip, Loader2, ArrowDown, FileText, X, Menu, MessageCircle, RefreshCw, TrendingUp, UserPlus, Check, UserX, Search, AlertTriangle, Shield, ChevronRight, Target, BarChart3, BookOpen, CheckCircle2, AlertCircle, Info, Zap, Activity, Upload, Sparkles, Eye, Lock, Cpu, ChevronDown, Radio, Play, ExternalLink, Clock, Filter } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -223,7 +223,7 @@ export default function DashboardPage() {
     offline: false,
   });
   const [expandedMessages, setExpandedMessages] = useState<Set<number>>(new Set());
-  const [activeTab, setActiveTab] = useState<"dashboard" | "chat">("dashboard");
+  const [activeTab, setActiveTab] = useState<"dashboard" | "feed" | "chat">("dashboard");
   const [friendsList, setFriendsList] = useState<any[]>([]);
   const [pendingRequests, setPendingRequests] = useState<any[]>([]);
   const [showAddFriend, setShowAddFriend] = useState(false);
@@ -249,6 +249,15 @@ export default function DashboardPage() {
   const [qaOpen, setQaOpen] = useState(false);
   const qaEndRef = useRef<HTMLDivElement>(null);
   const qaInputRef = useRef<HTMLTextAreaElement>(null);
+
+  const [feedItems, setFeedItems] = useState<any[]>([]);
+  const [feedLoading, setFeedLoading] = useState(false);
+  const [feedLastUpdated, setFeedLastUpdated] = useState<string | null>(null);
+  const [feedFilter, setFeedFilter] = useState<string>("all");
+  const [feedPage, setFeedPage] = useState(0);
+  const [feedHasMore, setFeedHasMore] = useState(false);
+  const [feedTotal, setFeedTotal] = useState(0);
+  const [playingVideo, setPlayingVideo] = useState<string | null>(null);
 
   const TRUNCATE_LENGTH = 280;
 
@@ -471,14 +480,43 @@ export default function DashboardPage() {
     });
   };
 
+  const fetchFeed = async (page = 0, filter = "all", append = false) => {
+    try {
+      if (!append) setFeedLoading(true);
+      const params = new URLSearchParams({ page: String(page), limit: "40" });
+      if (filter !== "all") params.set("category", filter);
+      const res = await fetch(`/api/feed?${params}`, { credentials: "include" });
+      if (res.ok) {
+        const data = await res.json();
+        if (append) {
+          setFeedItems(prev => [...prev, ...data.items]);
+        } else {
+          setFeedItems(data.items);
+        }
+        setFeedTotal(data.total);
+        setFeedHasMore(data.hasMore);
+        setFeedLastUpdated(data.lastUpdated);
+      }
+    } catch (err) { console.error("Feed error:", err); }
+    finally { setFeedLoading(false); }
+  };
+
   useEffect(() => {
     if (user) {
       fetchFriends();
       fetchFundingReadiness();
       fetchRepairData();
       fetchQA();
+      fetchFeed();
     }
   }, [user]);
+
+  useEffect(() => {
+    if (activeTab !== "feed") return;
+    if (feedPage > 0) return;
+    const interval = setInterval(() => { fetchFeed(0, feedFilter); }, 5000);
+    return () => clearInterval(interval);
+  }, [activeTab, feedFilter, feedPage]);
 
   const lastMentorMsg = [...messages].reverse().find(m => m.role === 'assistant' && m.mentor);
   const activeMentorKey = selectedMentor !== null ? selectedMentor : (mentorCleared ? null : (lastMentorMsg?.mentor || null));
@@ -829,6 +867,20 @@ export default function DashboardPage() {
                 Dashboard
               </div>
               {activeTab === "dashboard" && <div className="absolute bottom-0 left-1/4 right-1/4 h-[2px] bg-white rounded-full" />}
+            </button>
+            <button
+              data-testid="tab-feed"
+              onClick={() => { setActiveTab("feed"); if (feedItems.length === 0) fetchFeed(); }}
+              className={cn(
+                "flex-1 py-2.5 text-[13px] font-semibold text-center transition-colors relative",
+                activeTab === "feed" ? "text-white" : "text-white/30 hover:text-white/50"
+              )}
+            >
+              <div className="flex items-center justify-center gap-1.5">
+                <Radio className="w-3.5 h-3.5" />
+                Live Feed
+              </div>
+              {activeTab === "feed" && <div className="absolute bottom-0 left-1/4 right-1/4 h-[2px] bg-white rounded-full" />}
             </button>
             <button
               data-testid="tab-chat"
@@ -1511,6 +1563,179 @@ export default function DashboardPage() {
                     Try again
                   </button>
                 </div>
+              )}
+            </div>
+          ) : activeTab === "feed" ? (
+            <div className="w-full px-4 sm:px-6 py-6 max-w-[1400px] mx-auto">
+              <div className="flex items-center justify-between mb-6">
+                <div>
+                  <h1 className="text-2xl font-light text-white tracking-tight flex items-center gap-2" data-testid="text-feed-title">
+                    <Radio className="w-5 h-5 text-red-400" />
+                    Live Feed
+                    <span className="relative flex h-2.5 w-2.5 ml-1">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-500"></span>
+                    </span>
+                  </h1>
+                  <p className="text-xs text-white/30 mt-1">
+                    Top creators in finance, business & entrepreneurship
+                    {feedLastUpdated && <span className="ml-2 text-white/15">Updated {timeAgo(feedLastUpdated)}</span>}
+                    {feedTotal > 0 && <span className="ml-2 text-white/15">{feedTotal} posts</span>}
+                  </p>
+                </div>
+                <button onClick={() => fetchFeed(0, feedFilter)} className="p-2 rounded-lg hover:bg-white/[0.04] transition-colors" data-testid="button-refresh-feed">
+                  <RefreshCw className={cn("w-4 h-4 text-white/30", feedLoading && "animate-spin")} />
+                </button>
+              </div>
+
+              <div className="flex gap-2 mb-5 overflow-x-auto pb-2 scrollbar-hide" data-testid="feed-filters">
+                {[
+                  { key: "all", label: "All" },
+                  { key: "video", label: "Videos" },
+                  { key: "finance", label: "Finance" },
+                  { key: "business", label: "Business" },
+                  { key: "realestate", label: "Real Estate" },
+                  { key: "credit", label: "Credit" },
+                  { key: "stocks", label: "Stocks" },
+                  { key: "marketing", label: "Marketing" },
+                  { key: "tax", label: "Tax" },
+                  { key: "economics", label: "Economics" },
+                  { key: "news", label: "News" },
+                ].map(f => (
+                  <button
+                    key={f.key}
+                    data-testid={`filter-${f.key}`}
+                    onClick={() => { setFeedFilter(f.key); setFeedPage(0); fetchFeed(0, f.key); }}
+                    className={cn(
+                      "px-3 py-1.5 rounded-lg text-[11px] font-medium whitespace-nowrap transition-all border",
+                      feedFilter === f.key
+                        ? "bg-white/[0.08] text-white border-white/[0.12]"
+                        : "bg-white/[0.02] text-white/35 border-white/[0.04] hover:bg-white/[0.04] hover:text-white/50"
+                    )}
+                  >
+                    {f.label}
+                  </button>
+                ))}
+              </div>
+
+              {feedLoading && feedItems.length === 0 ? (
+                <div className="flex items-center justify-center py-20">
+                  <Loader2 className="w-8 h-8 animate-spin text-white/30" />
+                </div>
+              ) : feedItems.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-20">
+                  <Radio className="w-8 h-8 text-white/15 mb-3" />
+                  <p className="text-sm text-white/35">No content available yet</p>
+                  <button onClick={() => fetchFeed()} className="mt-3 text-xs text-white/25 hover:text-white/50 underline">Refresh</button>
+                </div>
+              ) : (
+                <>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {(feedFilter === "all" ? feedItems : feedItems.filter(item => item.category === feedFilter || item.contentType === feedFilter)).map((item: any) => {
+                      const videoId = item.contentType === "video" && item.link
+                        ? item.link.match(/[?&]v=([^&]+)/)?.[1] || null
+                        : null;
+                      const isPlaying = playingVideo === item.id;
+
+                      return (
+                        <div
+                          key={item.id}
+                          className="group bg-white/[0.02] border border-white/[0.05] rounded-xl overflow-hidden hover:bg-white/[0.04] hover:border-white/[0.08] transition-all"
+                          data-testid={`feed-item-${item.id}`}
+                        >
+                          {videoId && (
+                            <div className="relative aspect-video bg-black/40">
+                              {isPlaying ? (
+                                <iframe
+                                  src={`https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0`}
+                                  className="absolute inset-0 w-full h-full"
+                                  allow="autoplay; encrypted-media"
+                                  allowFullScreen
+                                  title={item.title}
+                                />
+                              ) : (
+                                <>
+                                  <img
+                                    src={item.image || `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`}
+                                    alt={item.title}
+                                    className="absolute inset-0 w-full h-full object-cover"
+                                    loading="lazy"
+                                  />
+                                  <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors" />
+                                  <button
+                                    onClick={() => setPlayingVideo(item.id)}
+                                    className="absolute inset-0 flex items-center justify-center"
+                                    data-testid={`play-${item.id}`}
+                                  >
+                                    <div className="w-14 h-14 rounded-full bg-white/90 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
+                                      <Play className="w-6 h-6 text-black ml-1" fill="black" />
+                                    </div>
+                                  </button>
+                                  <div className="absolute top-2 right-2 px-2 py-0.5 rounded bg-black/60 text-[9px] text-white/70 font-medium">
+                                    VIDEO
+                                  </div>
+                                </>
+                              )}
+                            </div>
+                          )}
+
+                          {!videoId && item.image && (
+                            <div className="relative aspect-[16/9] bg-black/20">
+                              <img src={item.image} alt={item.title} className="w-full h-full object-cover" loading="lazy" />
+                              <div className="absolute top-2 right-2 px-2 py-0.5 rounded bg-black/60 text-[9px] text-white/70 font-medium uppercase">
+                                {item.contentType}
+                              </div>
+                            </div>
+                          )}
+
+                          <div className="p-4">
+                            <div className="flex items-center gap-2 mb-2">
+                              <div className="w-6 h-6 rounded-full bg-gradient-to-br from-white/10 to-white/5 flex items-center justify-center text-[8px] font-bold text-white/50 border border-white/[0.06]">
+                                {item.source.charAt(0)}
+                              </div>
+                              <span className="text-[11px] font-medium text-white/50 truncate">{item.source}</span>
+                              <span className="text-[9px] text-white/20 ml-auto whitespace-nowrap flex items-center gap-1">
+                                <Clock className="w-2.5 h-2.5" />
+                                {timeAgo(item.publishedAt)}
+                              </span>
+                            </div>
+                            <h3 className="text-[13px] font-medium text-white/80 leading-snug mb-2 line-clamp-2">{item.title}</h3>
+                            {item.description && (
+                              <p className="text-[11px] text-white/30 leading-relaxed line-clamp-2">{item.description}</p>
+                            )}
+                            <div className="flex items-center gap-2 mt-3">
+                              <span className="text-[9px] px-2 py-0.5 rounded bg-white/[0.04] text-white/25 border border-white/[0.04] uppercase tracking-wider">
+                                {item.category}
+                              </span>
+                              <a
+                                href={item.link}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="ml-auto text-[10px] text-white/20 hover:text-white/50 flex items-center gap-1 transition-colors"
+                                data-testid={`link-${item.id}`}
+                              >
+                                <ExternalLink className="w-3 h-3" />
+                                Open
+                              </a>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  {feedHasMore && (
+                    <div className="flex justify-center mt-6">
+                      <button
+                        onClick={() => { const next = feedPage + 1; setFeedPage(next); fetchFeed(next, feedFilter, true); }}
+                        className="px-6 py-2.5 rounded-xl bg-white/[0.04] border border-white/[0.06] text-xs text-white/40 hover:bg-white/[0.06] hover:text-white/60 transition-all"
+                        data-testid="button-load-more"
+                      >
+                        Load More
+                      </button>
+                    </div>
+                  )}
+                </>
               )}
             </div>
           ) : (

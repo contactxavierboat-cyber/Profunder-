@@ -4,6 +4,10 @@
 A free AI mentorship platform ("Mentorship On Demand") combining Capital Readiness analytics with AI-powered mentorship. Features a 6-component Capital Readiness evaluation system (Capital Strength, Credit Quality, Management & Structure, Earnings & Cash Flow, Liquidity & Leverage, Risk Signals), 2.5x exposure ceiling calculation, tier eligibility (Prime/Mid-Tier/Alternative), operating mode (Pre-Funding/Repair), denial simulation, AI chat workspace with 7 bot mentors, PDF document upload with OCR, friends list, admin panel, and free membership access.
 
 ## Recent Changes
+- 2026-02-13: Added Live Feed tab with 72+ curated finance/business/entrepreneurship creators from YouTube, news RSS, and podcasts
+- 2026-02-13: Live Feed auto-refreshes every 5 seconds with real-time content from top creators
+- 2026-02-13: Feed includes embedded YouTube video players (click-to-play), category filters (Finance, Business, Real Estate, Credit, Stocks, Marketing, Tax, Economics, News), load-more pagination
+- 2026-02-13: Backend /api/feed endpoint with RSS caching (30s TTL), parallel feed fetching, and sorted by publish date
 - 2026-02-13: Applied assistance-first system prompt to all Workspace chat (direct answers, no hedging, no refusal) via MASTER_SYSTEM_PROMPT
 - 2026-02-13: Removed separate AI Assist tab - assistance-first behavior now built into all mentor and general chat
 - 2026-02-13: Expanded AI document analysis to extract 14 data fields (exact score, revolving limits, balances, inquiries, derogatories, late payments, collections, open/closed accounts, account age, public records, utilization)
