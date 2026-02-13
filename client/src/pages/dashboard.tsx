@@ -6,6 +6,130 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, RadialBarChart, RadialBar } from "recharts";
+
+function TechBackground() {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    let animationId: number;
+    let mouseX = -1000;
+    let mouseY = -1000;
+    interface Particle {
+      x: number; y: number; vx: number; vy: number;
+      size: number; opacity: number; pulse: number; pulseSpeed: number;
+      isNode: boolean;
+    }
+    let particles: Particle[] = [];
+    const resize = () => {
+      const w = window.innerWidth;
+      const h = window.innerHeight;
+      canvas.style.width = w + 'px';
+      canvas.style.height = h + 'px';
+      canvas.width = w * window.devicePixelRatio;
+      canvas.height = h * window.devicePixelRatio;
+      ctx.setTransform(window.devicePixelRatio, 0, 0, window.devicePixelRatio, 0, 0);
+    };
+    const init = () => {
+      const w = window.innerWidth;
+      const h = window.innerHeight;
+      const count = Math.min(Math.floor((w * h) / 4000), 380);
+      particles = [];
+      for (let i = 0; i < count; i++) {
+        const isNode = Math.random() < 0.2;
+        particles.push({
+          x: Math.random() * w, y: Math.random() * h,
+          vx: (Math.random() - 0.5) * 0.5, vy: (Math.random() - 0.5) * 0.5,
+          size: isNode ? Math.random() * 2.5 + 1.5 : Math.random() * 1.3 + 0.4,
+          opacity: isNode ? Math.random() * 0.4 + 0.3 : Math.random() * 0.25 + 0.1,
+          pulse: Math.random() * Math.PI * 2, pulseSpeed: Math.random() * 0.03 + 0.008,
+          isNode,
+        });
+      }
+    };
+    const onMouseMove = (e: MouseEvent) => { mouseX = e.clientX; mouseY = e.clientY; };
+    window.addEventListener('mousemove', onMouseMove);
+    const draw = () => {
+      const w = window.innerWidth;
+      const h = window.innerHeight;
+      ctx.clearRect(0, 0, w, h);
+      particles.forEach(p => {
+        p.x += p.vx; p.y += p.vy; p.pulse += p.pulseSpeed;
+        if (p.x < -10) p.x = w + 10; if (p.x > w + 10) p.x = -10;
+        if (p.y < -10) p.y = h + 10; if (p.y > h + 10) p.y = -10;
+        const dx = p.x - mouseX; const dy = p.y - mouseY;
+        const mouseDist = Math.sqrt(dx * dx + dy * dy);
+        if (mouseDist < 180 && mouseDist > 0) {
+          const force = (180 - mouseDist) / 180 * 0.02;
+          p.vx += (dx / mouseDist) * force; p.vy += (dy / mouseDist) * force;
+        }
+        const speed = Math.sqrt(p.vx * p.vx + p.vy * p.vy);
+        if (speed > 0.8) { p.vx = (p.vx / speed) * 0.8; p.vy = (p.vy / speed) * 0.8; }
+      });
+      const connectionDist = 160;
+      for (let i = 0; i < particles.length; i++) {
+        const pi = particles[i];
+        if (!pi.isNode) continue;
+        for (let j = i + 1; j < particles.length; j++) {
+          const pj = particles[j];
+          const dx = pi.x - pj.x; const dy = pi.y - pj.y;
+          if (Math.abs(dx) > connectionDist || Math.abs(dy) > connectionDist) continue;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          if (dist < connectionDist) {
+            const alpha = (1 - dist / connectionDist) * 0.18;
+            ctx.beginPath();
+            ctx.strokeStyle = `rgba(255, 255, 255, ${alpha})`;
+            ctx.lineWidth = 0.7;
+            ctx.moveTo(pi.x, pi.y); ctx.lineTo(pj.x, pj.y); ctx.stroke();
+          }
+        }
+      }
+      particles.forEach(p => {
+        const glow = Math.sin(p.pulse) * 0.4 + 0.6;
+        const mouseDist = Math.sqrt((p.x - mouseX) ** 2 + (p.y - mouseY) ** 2);
+        const mouseBoost = mouseDist < 180 ? 1 + (180 - mouseDist) / 180 * 1.5 : 1;
+        const alpha = Math.min(p.opacity * glow * mouseBoost, 0.85);
+        const drawSize = p.size * (mouseBoost > 1 ? mouseBoost * 0.5 + 0.5 : 1);
+        ctx.beginPath();
+        ctx.fillStyle = `rgba(255, 255, 255, ${alpha})`;
+        ctx.arc(p.x, p.y, drawSize, 0, Math.PI * 2); ctx.fill();
+        if (p.isNode || drawSize > 1.2) {
+          ctx.beginPath();
+          const glowRadius = drawSize * (p.isNode ? 6 : 3);
+          const grad = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, glowRadius);
+          grad.addColorStop(0, `rgba(255, 255, 255, ${alpha * 0.25})`);
+          grad.addColorStop(0.5, `rgba(255, 255, 255, ${alpha * 0.06})`);
+          grad.addColorStop(1, 'rgba(255, 255, 255, 0)');
+          ctx.fillStyle = grad;
+          ctx.arc(p.x, p.y, glowRadius, 0, Math.PI * 2); ctx.fill();
+        }
+      });
+      if (mouseX > 0 && mouseY > 0) {
+        const mGrad = ctx.createRadialGradient(mouseX, mouseY, 0, mouseX, mouseY, 200);
+        mGrad.addColorStop(0, 'rgba(255, 255, 255, 0.03)');
+        mGrad.addColorStop(0.5, 'rgba(255, 255, 255, 0.01)');
+        mGrad.addColorStop(1, 'rgba(255, 255, 255, 0)');
+        ctx.fillStyle = mGrad;
+        ctx.fillRect(mouseX - 200, mouseY - 200, 400, 400);
+      }
+      animationId = requestAnimationFrame(draw);
+    };
+    resize(); init(); draw();
+    const resizeHandler = () => { resize(); init(); };
+    window.addEventListener('resize', resizeHandler);
+    return () => {
+      cancelAnimationFrame(animationId);
+      window.removeEventListener('resize', resizeHandler);
+      window.removeEventListener('mousemove', onMouseMove);
+    };
+  }, []);
+  return (
+    <canvas ref={canvasRef} className="fixed top-0 left-0 pointer-events-none" style={{ zIndex: -1 }} />
+  );
+}
+
 const BOT_COLORS: Record<string, string> = {
   nova_sage: "bg-gradient-to-br from-orange-500 to-red-600",
   alpha_volt: "bg-gradient-to-br from-blue-500 to-cyan-600",
@@ -401,7 +525,8 @@ export default function DashboardPage() {
     : [];
 
   return (
-    <div className="h-[100dvh] flex bg-[#111111] text-white">
+    <div className="h-[100dvh] flex bg-[#080808] text-white">
+      <TechBackground />
 
       {sidebarOpen && (
         <div
@@ -411,13 +536,13 @@ export default function DashboardPage() {
       )}
 
       <aside className={cn(
-        "w-[260px] flex flex-col shrink-0 relative z-40",
+        "w-[260px] flex flex-col shrink-0 relative z-40 backdrop-blur-xl",
         "fixed h-full md:static md:flex transition-transform duration-200 ease-out",
         sidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0",
         "md:flex",
         !sidebarOpen && "hidden md:flex"
-      )} style={{ background: '#0D0D0D' }}>
-        <div className="h-11 px-4 flex items-center justify-between border-b border-white/[0.06] bg-[#0F0F0F]">
+      )} style={{ background: 'rgba(8,8,8,0.92)' }}>
+        <div className="h-11 px-4 flex items-center justify-between border-b border-white/[0.06] bg-white/[0.02]">
           <div className="flex items-center gap-2.5">
             <div className="w-6 h-6 rounded-lg bg-white flex items-center justify-center">
               <span className="text-[10px] font-black text-black">X</span>
@@ -429,9 +554,9 @@ export default function DashboardPage() {
           </button>
         </div>
 
-        <div className="h-14 px-4 flex items-center gap-3 border-b border-white/[0.06] bg-[#0D0D0D]">
+        <div className="h-14 px-4 flex items-center gap-3 border-b border-white/[0.06] bg-transparent">
           <div className="relative shrink-0">
-            <div className="w-9 h-9 rounded-lg bg-[#1A1A1A] border border-white/[0.08] flex items-center justify-center text-[11px] font-bold text-white/60">
+            <div className="w-9 h-9 rounded-lg bg-white/[0.06] border border-white/[0.08] flex items-center justify-center text-[11px] font-bold text-white/60">
               {(user.displayName || user.email).substring(0, 2).toUpperCase()}
             </div>
             <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-green-500 border-2 border-[#0D0D0D]" />
@@ -442,7 +567,7 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        <div className="h-10 px-4 flex items-center gap-2 border-b border-white/[0.06] bg-[#0D0D0D]">
+        <div className="h-10 px-4 flex items-center gap-2 border-b border-white/[0.06] bg-transparent">
           <button
             data-testid="button-new-chat"
             onClick={() => { clearChat(); setSelectedMentor(null); setMentorCleared(true); setSidebarOpen(false); setActiveTab("chat"); }}
@@ -452,7 +577,7 @@ export default function DashboardPage() {
           </button>
         </div>
 
-        <div className="flex-1 overflow-y-auto bg-[#0a0a0a]" style={{ scrollbarWidth: 'thin' }}>
+        <div className="flex-1 overflow-y-auto bg-transparent" style={{ scrollbarWidth: 'thin' }}>
           <div className="border-b border-white/[0.04]">
             <button
               onClick={() => setBuddyGroups(prev => ({ ...prev, mentors: !prev.mentors }))}
@@ -554,7 +679,7 @@ export default function DashboardPage() {
                 {friendsList.map((f: any) => (
                   <div key={f.friendshipId} className="group h-11 flex items-center gap-3 px-4 hover:bg-white/[0.03] transition-colors">
                     <div className="relative shrink-0">
-                      <div className="w-7 h-7 rounded-lg bg-[#1A1A1A] border border-white/[0.08] flex items-center justify-center text-[9px] font-bold text-white/50">
+                      <div className="w-7 h-7 rounded-lg bg-white/[0.06] border border-white/[0.08] flex items-center justify-center text-[9px] font-bold text-white/50">
                         {(f.displayName || "?").substring(0, 2).toUpperCase()}
                       </div>
                       <div className="absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full bg-green-500 border-2 border-[#0a0a0a]" />
@@ -600,7 +725,7 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        <div className="h-11 px-4 flex items-center gap-3 border-t border-white/[0.06] bg-[#0F0F0F]">
+        <div className="h-11 px-4 flex items-center gap-3 border-t border-white/[0.06] bg-white/[0.02]">
           <div className="w-2.5 h-2.5 rounded-full bg-green-500 shrink-0" />
           <span className="text-[10px] text-white/30 flex-1 truncate">{user.displayName || user.email}</span>
           <button
@@ -613,9 +738,9 @@ export default function DashboardPage() {
         </div>
       </aside>
 
-      <main className="flex-1 flex flex-col min-w-0 relative bg-[#111111]">
+      <main className="flex-1 flex flex-col min-w-0 relative z-10 bg-transparent">
 
-        <header className="shrink-0 relative z-10 bg-[#111111] border-b border-white/[0.06]">
+        <header className="shrink-0 relative z-10 bg-[#080808]/80 backdrop-blur-xl border-b border-white/[0.06]">
           <div className="h-14 flex items-center justify-between px-4">
             <div className="flex items-center gap-3">
               <button
@@ -682,7 +807,7 @@ export default function DashboardPage() {
                   </div>
 
                   <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 mb-4">
-                    <div className="lg:col-span-2 rounded-2xl bg-[#1A1A1A] border border-white/[0.06] p-6" data-testid="funding-score-card">
+                    <div className="lg:col-span-2 rounded-2xl bg-white/[0.03] backdrop-blur-md border border-white/[0.08] p-6" data-testid="funding-score-card">
                       <p className="text-xs text-white/40 mb-1">Capital Readiness Score</p>
                       <div className="flex items-end gap-1">
                         <span className="text-4xl sm:text-5xl font-bold text-white tracking-tight font-mono" data-testid="text-score">{fundingData.score}</span>
@@ -706,7 +831,7 @@ export default function DashboardPage() {
                       </div>
                     </div>
 
-                    <div className="lg:col-span-3 rounded-2xl bg-[#1A1A1A] border border-white/[0.06] p-6" data-testid="stats-row">
+                    <div className="lg:col-span-3 rounded-2xl bg-white/[0.03] backdrop-blur-md border border-white/[0.08] p-6" data-testid="stats-row">
                       <div className="grid grid-cols-3 h-full">
                         <div className="flex flex-col justify-center px-2">
                           <p className="text-xs text-white/35 mb-1">Tier</p>
@@ -737,7 +862,7 @@ export default function DashboardPage() {
 
                   <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 mb-4">
                     <div className="lg:col-span-2 space-y-4">
-                      <div className="rounded-2xl bg-[#1A1A1A] border border-white/[0.06] p-6" data-testid="savings-donut-card">
+                      <div className="rounded-2xl bg-white/[0.03] backdrop-blur-md border border-white/[0.08] p-6" data-testid="savings-donut-card">
                         <div className="flex items-center justify-between">
                           <div>
                             <p className="text-xs text-white/35 mb-1">Funding Range</p>
@@ -761,7 +886,7 @@ export default function DashboardPage() {
                         </div>
                       </div>
 
-                      <div className="rounded-2xl bg-[#1A1A1A] border border-white/[0.06] p-6" data-testid="document-upload-card">
+                      <div className="rounded-2xl bg-white/[0.03] backdrop-blur-md border border-white/[0.08] p-6" data-testid="document-upload-card">
                         <div className="flex items-center justify-between mb-4">
                           <p className="text-xs text-white/40">Document Analysis</p>
                           <span className="text-[9px] text-white/20 bg-white/[0.04] px-2 py-0.5 rounded-full">GPT-4o</span>
@@ -857,7 +982,7 @@ export default function DashboardPage() {
                       </div>
                     </div>
 
-                    <div className="lg:col-span-3 rounded-2xl bg-[#1A1A1A] border border-white/[0.06] p-6" data-testid="component-breakdown-card">
+                    <div className="lg:col-span-3 rounded-2xl bg-white/[0.03] backdrop-blur-md border border-white/[0.08] p-6" data-testid="component-breakdown-card">
                       <div className="flex items-center justify-between mb-5">
                         <p className="text-xs text-white/40">Component Breakdown</p>
                       </div>
@@ -907,7 +1032,7 @@ export default function DashboardPage() {
                   </div>
 
                   {fundingData.alerts.length > 0 && (
-                    <div className="rounded-2xl bg-[#1A1A1A] border border-white/[0.06] p-6 mb-4" data-testid="risk-alerts-card">
+                    <div className="rounded-2xl bg-white/[0.03] backdrop-blur-md border border-white/[0.08] p-6 mb-4" data-testid="risk-alerts-card">
                       <div className="flex items-center justify-between mb-4">
                         <p className="text-xs text-white/40">Risk Alerts</p>
                         <span className="text-[10px] text-white/20">{fundingData.alerts.length} alert{fundingData.alerts.length > 1 ? "s" : ""}</span>
@@ -950,7 +1075,7 @@ export default function DashboardPage() {
                   )}
 
                   {fundingData.denialSimulation && fundingData.denialSimulation.length > 0 && (
-                    <div className="rounded-2xl bg-[#1A1A1A] border border-red-500/10 p-6 mb-4" data-testid="denial-simulation-card">
+                    <div className="rounded-2xl bg-white/[0.03] backdrop-blur-md border border-red-500/10 p-6 mb-4" data-testid="denial-simulation-card">
                       <div className="flex items-center justify-between mb-4">
                         <p className="text-xs text-red-400/60">Denial Simulation</p>
                         <span className="text-[10px] text-white/15">{fundingData.denialSimulation.length} trigger{fundingData.denialSimulation.length > 1 ? "s" : ""}</span>
@@ -992,7 +1117,7 @@ export default function DashboardPage() {
                   )}
 
                   {fundingData.actionPlan.length > 0 && (
-                    <div className="rounded-2xl bg-[#1A1A1A] border border-white/[0.06] p-6 mb-4" data-testid="action-plan-card">
+                    <div className="rounded-2xl bg-white/[0.03] backdrop-blur-md border border-white/[0.08] p-6 mb-4" data-testid="action-plan-card">
                       <p className="text-xs text-white/40 mb-4">Action Plan</p>
                       <div className="space-y-2">
                         {fundingData.actionPlan.map((step, idx) => (
@@ -1008,7 +1133,7 @@ export default function DashboardPage() {
                   )}
 
                   {fundingData.analysisNextSteps && fundingData.analysisNextSteps.length > 0 && (
-                    <div className="rounded-2xl bg-[#1A1A1A] border border-white/[0.06] p-6 mb-4" data-testid="next-steps-card">
+                    <div className="rounded-2xl bg-white/[0.03] backdrop-blur-md border border-white/[0.08] p-6 mb-4" data-testid="next-steps-card">
                       <div className="flex items-center justify-between mb-4">
                         <p className="text-xs text-white/40">Next Steps</p>
                         <span className="text-[9px] text-white/15 bg-white/[0.04] px-2 py-0.5 rounded-full">AI Generated</span>
@@ -1024,7 +1149,7 @@ export default function DashboardPage() {
                     </div>
                   )}
 
-                  <div className="rounded-2xl bg-[#1A1A1A] border border-orange-500/10 p-6 mb-4" data-testid="credit-repair-card">
+                  <div className="rounded-2xl bg-white/[0.03] backdrop-blur-md border border-orange-500/10 p-6 mb-4" data-testid="credit-repair-card">
                     <div className="flex items-center justify-between mb-4">
                       <p className="text-xs text-orange-400/60">Credit Repair System</p>
                       <span className="text-[9px] text-white/15 bg-white/[0.04] px-2 py-0.5 rounded-full">GPT-4o</span>
@@ -1161,7 +1286,7 @@ export default function DashboardPage() {
                                           {copiedLetter === idx ? "Copied!" : "Copy Letter"}
                                         </button>
                                       </div>
-                                      <div className="mt-2 p-4 rounded-xl bg-[#111] border border-white/[0.04] font-mono text-[10px] text-white/45 leading-relaxed whitespace-pre-wrap max-h-96 overflow-y-auto" style={{ scrollbarWidth: 'thin' }}>
+                                      <div className="mt-2 p-4 rounded-xl bg-black/40 border border-white/[0.04] font-mono text-[10px] text-white/45 leading-relaxed whitespace-pre-wrap max-h-96 overflow-y-auto" style={{ scrollbarWidth: 'thin' }}>
                                         {letter.body}
                                       </div>
                                     </div>
@@ -1179,7 +1304,7 @@ export default function DashboardPage() {
                     )}
                   </div>
 
-                  <div className="rounded-2xl bg-[#1A1A1A] border border-white/[0.06] p-6 mb-4" data-testid="insights-card">
+                  <div className="rounded-2xl bg-white/[0.03] backdrop-blur-md border border-white/[0.08] p-6 mb-4" data-testid="insights-card">
                     <p className="text-xs text-white/40 mb-4">Insights</p>
                     <div className="space-y-2">
                       {INSIGHTS.map((insight, idx) => (
@@ -1215,7 +1340,7 @@ export default function DashboardPage() {
                     </>
                   ) : (
                     <>
-                      <div className="w-20 h-20 rounded-2xl mb-4 bg-[#1A1A1A] border border-white/[0.06] flex items-center justify-center relative">
+                      <div className="w-20 h-20 rounded-2xl mb-4 bg-white/[0.06] border border-white/[0.06] flex items-center justify-center relative">
                         <span className="absolute w-10 h-10 rounded-full bg-white/[0.06] animate-ping" />
                         <span className="relative w-5 h-5 rounded-full bg-white shadow-[0_0_12px_rgba(255,255,255,0.2)]" />
                       </div>
@@ -1263,13 +1388,13 @@ export default function DashboardPage() {
                       <div className="flex gap-3">
                         <div className="shrink-0">
                           {isUser ? (
-                            <div className="w-10 h-10 rounded-full bg-[#1A1A1A] border border-white/[0.06] flex items-center justify-center text-[12px] font-bold text-white/40">
+                            <div className="w-10 h-10 rounded-full bg-white/[0.06] border border-white/[0.06] flex items-center justify-center text-[12px] font-bold text-white/40">
                               {(user.displayName || user.email).substring(0, 2).toUpperCase()}
                             </div>
                           ) : posterInitials && posterMentorKey ? (
                             <div className={cn("w-10 h-10 rounded-full flex items-center justify-center text-white text-sm font-bold border border-white/10", BOT_COLORS[posterMentorKey])}>{posterInitials}</div>
                           ) : (
-                            <div className="w-10 h-10 rounded-xl flex items-center justify-center relative bg-[#1A1A1A]">
+                            <div className="w-10 h-10 rounded-xl flex items-center justify-center relative bg-white/[0.06]">
                               <span className="absolute w-5 h-5 rounded-full bg-white/[0.08] animate-ping" />
                               <span className="relative w-2.5 h-2.5 rounded-full bg-white shadow-[0_0_8px_rgba(255,255,255,0.2)]" />
                             </div>
@@ -1340,7 +1465,7 @@ export default function DashboardPage() {
                         {activeMentor ? (
                           <div className={cn("w-10 h-10 rounded-full flex items-center justify-center text-white text-sm font-bold border border-white/10", activeMentorKey ? BOT_COLORS[activeMentorKey] : "")}>{activeMentor.initials}</div>
                         ) : (
-                          <div className="w-10 h-10 rounded-xl flex items-center justify-center relative bg-[#1A1A1A]">
+                          <div className="w-10 h-10 rounded-xl flex items-center justify-center relative bg-white/[0.06]">
                             <span className="absolute w-5 h-5 rounded-full bg-white/[0.08] animate-ping" />
                             <span className="relative w-2.5 h-2.5 rounded-full bg-white shadow-[0_0_8px_rgba(255,255,255,0.2)]" />
                           </div>
@@ -1380,7 +1505,7 @@ export default function DashboardPage() {
           </div>
         )}
 
-        <div className="shrink-0 border-t border-white/[0.04] bg-[#111111] px-3 sm:px-4 pb-3 sm:pb-4 pt-2 safe-area-pb">
+        <div className="shrink-0 border-t border-white/[0.04] bg-[#080808]/80 backdrop-blur-xl px-3 sm:px-4 pb-3 sm:pb-4 pt-2 safe-area-pb">
           <div className="max-w-xl mx-auto">
             {activeMentor && hasMessages && (
               <div className="flex items-center gap-2 mb-2 px-1">
@@ -1408,7 +1533,7 @@ export default function DashboardPage() {
             )}
             <div className="flex items-end gap-2">
               <div className="shrink-0">
-                <div className="w-8 h-8 rounded-full bg-[#1A1A1A] border border-white/[0.06] flex items-center justify-center text-[10px] font-bold text-white/35">
+                <div className="w-8 h-8 rounded-full bg-white/[0.06] border border-white/[0.06] flex items-center justify-center text-[10px] font-bold text-white/35">
                   {(user.displayName || user.email).substring(0, 2).toUpperCase()}
                 </div>
               </div>
@@ -1467,7 +1592,7 @@ export default function DashboardPage() {
 
       {showAddFriend && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm" onClick={() => setShowAddFriend(false)}>
-          <div className="w-[340px] bg-[#1A1A1A] border border-white/[0.06] rounded-2xl p-5 shadow-2xl" onClick={e => e.stopPropagation()}>
+          <div className="w-[340px] bg-[#111]/95 backdrop-blur-xl border border-white/[0.06] rounded-2xl p-5 shadow-2xl" onClick={e => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-4">
               <p className="text-sm font-semibold text-white/70">Add Friend</p>
               <button onClick={() => setShowAddFriend(false)} className="text-white/25 hover:text-white/50">
