@@ -3369,9 +3369,9 @@ export async function registerRoutes(
       const hasCreditReport = user.hasCreditReport || false;
       const hasBankStatement = user.hasBankStatement || false;
 
-      let score = 0;
       const alerts: { severity: "red" | "yellow" | "gray"; title: string; explanation: string; impact: string; fix: string }[] = [];
       const actionPlan: string[] = [];
+      const denialSimulation: { trigger: string; riskLevel: "High" | "Moderate" | "Low"; explanation: string; fix: string }[] = [];
 
       const hasProfile = creditScore || revolvingLimit > 0 || balances > 0;
 
@@ -3386,8 +3386,13 @@ export async function registerRoutes(
           status: "incomplete",
           statusLabel: "Profile Incomplete",
           estimatedRange: null,
+          exposureCeiling: null,
+          operatingMode: null,
+          tierEligibility: null,
+          componentBreakdown: null,
+          denialSimulation: [],
           alerts: [
-            { severity: "gray" as const, title: "No financial profile submitted", explanation: "We need your credit information to calculate your funding readiness.", impact: "Cannot assess funding eligibility without data.", fix: "Upload your credit report or bank statement using the Document Analysis section below." }
+            { severity: "gray" as const, title: "No financial profile submitted", explanation: "We need your credit information to calculate your funding readiness.", impact: "Cannot assess funding eligibility without data.", fix: "Upload your credit report or bank statement using the Document Analysis section." }
           ],
           actionPlan: [
             "Upload your credit report PDF using the Document Analysis section",
@@ -3399,8 +3404,8 @@ export async function registerRoutes(
           analysisSummary: user.analysisSummary || null,
           analysisNextSteps: incompleteNextSteps,
           lastAnalysisDate: user.lastAnalysisDate || null,
-          hasCreditReport: hasCreditReport,
-          hasBankStatement: hasBankStatement,
+          hasCreditReport,
+          hasBankStatement,
         });
         return;
       }
@@ -3408,82 +3413,105 @@ export async function registerRoutes(
       let creditScoreNum = 0;
       if (creditScore) {
         const ranges: Record<string, number> = {
-          "300-579": 400, "580-619": 600, "620-659": 640,
+          "300-579": 440, "580-619": 600, "620-659": 640,
           "660-699": 680, "700-749": 725, "750-850": 800
         };
         creditScoreNum = ranges[creditScore] || 650;
       }
 
-      if (creditScoreNum >= 750) score += 30;
-      else if (creditScoreNum >= 700) score += 25;
-      else if (creditScoreNum >= 660) score += 20;
-      else if (creditScoreNum >= 620) score += 12;
-      else if (creditScoreNum >= 580) score += 5;
-      else score += 0;
+      const utilization = revolvingLimit > 0 ? (balances / revolvingLimit) * 100 : (balances > 0 ? 100 : 0);
 
-      const utilization = revolvingLimit > 0 ? (balances / revolvingLimit) * 100 : 100;
-      if (utilization <= 10) score += 25;
-      else if (utilization <= 30) score += 20;
-      else if (utilization <= 45) score += 12;
-      else if (utilization <= 60) score += 5;
-      else score += 0;
+      // --- COMPONENT 1: Capital Strength (0-20) ---
+      let capitalStrength = 0;
+      if (creditScoreNum >= 750) capitalStrength = 20;
+      else if (creditScoreNum >= 700) capitalStrength = 17;
+      else if (creditScoreNum >= 660) capitalStrength = 13;
+      else if (creditScoreNum >= 620) capitalStrength = 8;
+      else if (creditScoreNum >= 580) capitalStrength = 4;
 
-      if (inquiries === 0) score += 15;
-      else if (inquiries <= 2) score += 12;
-      else if (inquiries <= 4) score += 6;
-      else score += 0;
+      if (revolvingLimit >= 50000) capitalStrength = Math.min(20, capitalStrength + 3);
+      else if (revolvingLimit >= 20000) capitalStrength = Math.min(20, capitalStrength + 2);
+      else if (revolvingLimit >= 10000) capitalStrength = Math.min(20, capitalStrength + 1);
 
-      if (derogatoryAccounts === 0) score += 15;
-      else if (derogatoryAccounts <= 1) score += 5;
-      else score += 0;
+      // --- COMPONENT 2: Credit Quality (0-20) ---
+      let creditQuality = 15;
+      if (derogatoryAccounts > 0) creditQuality -= Math.min(15, derogatoryAccounts * 6);
+      creditQuality = Math.max(0, creditQuality);
+      if (hasCreditReport) creditQuality = Math.min(20, creditQuality + 5);
 
-      if (hasCreditReport) score += 8;
-      if (hasBankStatement) score += 7;
+      // --- COMPONENT 3: Management & Structure (0-15) ---
+      let managementScore = 5;
+      if (hasCreditReport && hasBankStatement) managementScore = 15;
+      else if (hasCreditReport || hasBankStatement) managementScore = 10;
 
-      score = Math.min(100, Math.max(0, score));
+      // --- COMPONENT 4: Earnings & Cash Flow (0-15) ---
+      let cashFlowScore = 5;
+      if (hasBankStatement) cashFlowScore = 12;
+      if (hasBankStatement && revolvingLimit >= 10000) cashFlowScore = 15;
 
-      if (utilization > 45) {
-        alerts.push({ severity: "red", title: `Credit utilization at ${Math.round(utilization)}%`, explanation: "Your revolving credit usage is high relative to your limits.", impact: "Lenders see high utilization as a sign of financial strain, reducing approval odds.", fix: "Pay down balances to bring utilization below 30%." });
-      } else if (utilization > 30) {
-        alerts.push({ severity: "yellow", title: `Credit utilization at ${Math.round(utilization)}%`, explanation: "Your utilization is moderate but could be improved.", impact: "Keeping utilization below 30% signals strong credit management.", fix: "Reduce balances or request credit limit increases." });
+      // --- COMPONENT 5: Liquidity & Leverage (0-15) ---
+      let liquidityScore = 0;
+      if (utilization <= 10) liquidityScore = 15;
+      else if (utilization <= 20) liquidityScore = 13;
+      else if (utilization <= 30) liquidityScore = 10;
+      else if (utilization <= 45) liquidityScore = 6;
+      else if (utilization <= 60) liquidityScore = 3;
+      else liquidityScore = 0;
+
+      if (inquiries === 0) liquidityScore = Math.min(15, liquidityScore + 2);
+      else if (inquiries > 5) liquidityScore = Math.max(0, liquidityScore - 4);
+      else if (inquiries > 3) liquidityScore = Math.max(0, liquidityScore - 2);
+
+      // --- COMPONENT 6: Risk Signals (0-15) ---
+      let riskScore = 15;
+      if (inquiries > 5) riskScore -= 6;
+      else if (inquiries > 3) riskScore -= 3;
+      if (utilization > 60) riskScore -= 5;
+      else if (utilization > 45) riskScore -= 3;
+      if (derogatoryAccounts > 1) riskScore -= 5;
+      else if (derogatoryAccounts === 1) riskScore -= 3;
+      if (revolvingLimit > 0 && revolvingLimit < 5000) riskScore -= 2;
+      riskScore = Math.max(0, riskScore);
+
+      // --- COMPOSITE SCORE (weighted, high-risk weaknesses penalized) ---
+      let rawScore = capitalStrength + creditQuality + managementScore + cashFlowScore + liquidityScore + riskScore;
+      // Weight high-risk weaknesses more heavily
+      if (derogatoryAccounts > 0) rawScore = Math.max(0, rawScore - (derogatoryAccounts * 3));
+      if (utilization > 60) rawScore = Math.max(0, rawScore - 5);
+      if (creditScoreNum < 620 && creditScoreNum > 0) rawScore = Math.max(0, rawScore - 5);
+
+      const score = Math.min(100, Math.max(0, rawScore));
+
+      // --- 2.5X EXPOSURE LOGIC ---
+      const totalExposure = revolvingLimit;
+      let multiplier = 2.5;
+      if (utilization > 40) multiplier = Math.min(multiplier, 1.8);
+      if (inquiries > 5) multiplier = Math.min(multiplier, 1.5);
+      if (derogatoryAccounts > 0) multiplier = Math.min(multiplier, 1.25);
+      if (creditScoreNum < 660 && creditScoreNum > 0) multiplier = Math.min(multiplier, 1.5);
+      if (creditScoreNum >= 750 && utilization <= 20 && derogatoryAccounts === 0 && inquiries <= 2) multiplier = 3.0;
+
+      const exposureCeiling = Math.round(totalExposure * multiplier);
+
+      // --- TIER ELIGIBILITY ---
+      let tierEligibility: { tier: number; label: string; description: string };
+      if (creditScoreNum >= 700 && utilization <= 30 && derogatoryAccounts === 0) {
+        tierEligibility = { tier: 1, label: "Tier 1 — Prime Institutions", description: "Eligible for prime bank products with lowest rates and highest limits." };
+      } else if (creditScoreNum >= 660 && utilization <= 50 && derogatoryAccounts <= 1) {
+        tierEligibility = { tier: 2, label: "Tier 2 — Mid-Tier Capital", description: "Eligible for mid-tier lenders. Revenue strength may offset minor blemishes." };
+      } else {
+        tierEligibility = { tier: 3, label: "Tier 3 — Alternative Capital", description: "Revenue-based underwriting. Higher cost products. Stabilize profile before applying to higher tiers." };
       }
 
-      if (inquiries > 4) {
-        alerts.push({ severity: "red", title: `${inquiries} recent hard inquiries detected`, explanation: "Multiple credit applications in a short period lower your score.", impact: "Lenders may view frequent applications as credit-seeking behavior.", fix: "Avoid new credit applications for at least 45 days." });
-      } else if (inquiries > 2) {
-        alerts.push({ severity: "yellow", title: `${inquiries} recent hard inquiries`, explanation: "A few recent inquiries are on your record.", impact: "Each hard inquiry can lower your score temporarily.", fix: "Hold off on new applications to let inquiries age." });
+      // --- OPERATING MODE ---
+      let operatingMode: { mode: string; label: string; description: string };
+      if (score >= 70 && derogatoryAccounts === 0) {
+        operatingMode = { mode: "pre_funding", label: "Pre-Funding Mode", description: "You are close. Focus on optimization, sequencing, and application timing before applying." };
+      } else {
+        operatingMode = { mode: "repair", label: "Repair Mode", description: "Stabilize first. Focus on balance reduction, time-based rebuilding, and credit depth expansion. Apply later." };
       }
 
-      if (derogatoryAccounts > 0) {
-        alerts.push({ severity: "red", title: `${derogatoryAccounts} derogatory account${derogatoryAccounts > 1 ? "s" : ""} found`, explanation: "Negative marks such as collections, charge-offs, or late payments appear on your report.", impact: "Derogatory marks significantly reduce approval probability.", fix: "Dispute inaccurate items and negotiate pay-for-delete agreements." });
-      }
-
-      if (creditScoreNum < 620) {
-        alerts.push({ severity: "red", title: "Credit score below funding threshold", explanation: "Most lenders require a minimum score in the 620-650 range.", impact: "Applications with this score range face high denial rates.", fix: "Focus on paying bills on time and reducing outstanding debt." });
-      } else if (creditScoreNum < 680) {
-        alerts.push({ severity: "yellow", title: "Credit score in moderate range", explanation: "Your score qualifies for some products but limits premium options.", impact: "You may face higher rates or lower approval amounts.", fix: "Continue consistent payments and reduce utilization to improve score." });
-      }
-
-      if (revolvingLimit < 5000 && revolvingLimit > 0) {
-        alerts.push({ severity: "yellow", title: "Limited revolving credit depth", explanation: "Your total credit limits are relatively low.", impact: "Thin credit files can make it harder to qualify for larger funding.", fix: "Consider opening a secured card or requesting limit increases." });
-      }
-
-      if (!hasCreditReport) {
-        alerts.push({ severity: "gray", title: "Credit report not uploaded", explanation: "Uploading your report allows for deeper analysis.", impact: "We can provide more accurate scoring with your full report.", fix: "Upload your credit report PDF in the Workspace tab." });
-      }
-      if (!hasBankStatement) {
-        alerts.push({ severity: "gray", title: "Bank statement not uploaded", explanation: "Bank statements help verify revenue and cash flow.", impact: "Lenders often require bank statements as part of underwriting.", fix: "Upload your recent bank statement in the Workspace tab." });
-      }
-
-      if (utilization > 30) actionPlan.push("Reduce credit utilization below 30%");
-      if (inquiries > 2) actionPlan.push("Avoid new credit applications for 45 days");
-      if (revolvingLimit < 10000 && revolvingLimit > 0) actionPlan.push("Increase primary revolving credit depth");
-      if (derogatoryAccounts > 0) actionPlan.push("Dispute or resolve derogatory accounts");
-      if (!hasCreditReport) actionPlan.push("Upload credit report for detailed analysis");
-      if (!hasBankStatement) actionPlan.push("Upload bank statement to verify cash flow");
-      actionPlan.push("Separate business and personal expenses");
-      actionPlan.push("Re-evaluate readiness score in 30 days");
-
+      // --- STATUS ---
       let status: string;
       let statusLabel: string;
       if (score >= 85) { status = "ready"; statusLabel = "Ready"; }
@@ -3491,22 +3519,112 @@ export async function registerRoutes(
       else if (score >= 50) { status = "needs_improvement"; statusLabel = "Needs Improvement"; }
       else { status = "high_risk"; statusLabel = "High Risk"; }
 
+      // --- FUNDING RANGE ESTIMATION ---
       let minRange = 0, maxRange = 0;
-      if (score >= 85) { minRange = 75000; maxRange = 250000; }
-      else if (score >= 70) { minRange = 35000; maxRange = 90000; }
-      else if (score >= 50) { minRange = 10000; maxRange = 40000; }
-      else if (score >= 25) { minRange = 5000; maxRange = 15000; }
+      if (exposureCeiling > 0) {
+        if (score >= 85) { minRange = Math.round(exposureCeiling * 0.5); maxRange = exposureCeiling; }
+        else if (score >= 70) { minRange = Math.round(exposureCeiling * 0.25); maxRange = Math.round(exposureCeiling * 0.6); }
+        else if (score >= 50) { minRange = Math.round(exposureCeiling * 0.1); maxRange = Math.round(exposureCeiling * 0.3); }
+        else if (score >= 25) { minRange = Math.round(exposureCeiling * 0.05); maxRange = Math.round(exposureCeiling * 0.15); }
+      }
+      if (minRange === 0 && score >= 25) { minRange = 5000; maxRange = 15000; }
+
+      // --- RISK ALERTS ---
+      if (utilization > 45) {
+        alerts.push({ severity: "red", title: `Utilization at ${Math.round(utilization)}%`, explanation: "Revolving credit usage is high relative to limits.", impact: "Lenders interpret high utilization as financial strain. Reduces approval odds significantly.", fix: "Pay down balances to bring utilization below 30%." });
+      } else if (utilization > 30) {
+        alerts.push({ severity: "yellow", title: `Utilization at ${Math.round(utilization)}%`, explanation: "Utilization is moderate. Below 30% is the benchmark.", impact: "Keeping utilization low signals responsible credit management to lenders.", fix: "Reduce balances or request credit limit increases." });
+      }
+
+      if (inquiries > 5) {
+        alerts.push({ severity: "red", title: `${inquiries} hard inquiries detected`, explanation: "Excessive credit applications in a short window.", impact: "Signals credit-seeking behavior. Lenders may view this as desperation.", fix: "Cease all new credit applications for a minimum of 45 days." });
+      } else if (inquiries > 2) {
+        alerts.push({ severity: "yellow", title: `${inquiries} recent inquiries`, explanation: "Multiple recent credit pulls on your record.", impact: "Each inquiry can lower your score 3-5 points temporarily.", fix: "Hold off on new applications. Let existing inquiries age." });
+      }
+
+      if (derogatoryAccounts > 0) {
+        alerts.push({ severity: "red", title: `${derogatoryAccounts} derogatory account${derogatoryAccounts > 1 ? "s" : ""}`, explanation: "Negative marks such as collections, charge-offs, or late payments on your report.", impact: "Derogatory marks are the most damaging factor in lender evaluation. High denial probability.", fix: "Dispute inaccurate items. Negotiate pay-for-delete agreements on valid debts." });
+      }
+
+      if (creditScoreNum > 0 && creditScoreNum < 620) {
+        alerts.push({ severity: "red", title: "Score below minimum funding threshold", explanation: "Most lenders require a minimum score of 620-650 for consideration.", impact: "Applications at this score level face high denial rates across all tiers.", fix: "Focus on on-time payments and debt reduction. Avoid new applications." });
+      } else if (creditScoreNum >= 620 && creditScoreNum < 680) {
+        alerts.push({ severity: "yellow", title: "Score in moderate range", explanation: `Current estimated score: ${creditScoreNum}. Qualifies for some products but limits premium options.`, impact: "May face higher rates or lower approval amounts.", fix: "Continue consistent payments and reduce utilization to push score higher." });
+      }
+
+      if (revolvingLimit > 0 && revolvingLimit < 5000) {
+        alerts.push({ severity: "yellow", title: "Thin revolving credit depth", explanation: "Total credit limits are below $5,000.", impact: "Thin files make it harder to qualify for larger funding. Lenders prefer established credit depth.", fix: "Open a secured card or request limit increases on existing accounts." });
+      }
+
+      if (!hasCreditReport) {
+        alerts.push({ severity: "gray", title: "Credit report not uploaded", explanation: "Full credit report enables deeper component analysis.", impact: "Score is estimated without complete data. Upload for accurate evaluation.", fix: "Upload your credit report PDF in the Document Analysis section." });
+      }
+      if (!hasBankStatement) {
+        alerts.push({ severity: "gray", title: "Bank statement not uploaded", explanation: "Bank statements verify revenue and cash flow patterns.", impact: "Lenders require bank statements as part of underwriting. Missing data limits evaluation.", fix: "Upload your recent bank statement for cash flow analysis." });
+      }
+
+      // --- DENIAL SIMULATION ---
+      if (utilization > 45) {
+        denialSimulation.push({ trigger: "High Utilization", riskLevel: "High", explanation: "Utilization above 45% triggers automatic risk flags in most lender systems.", fix: "Reduce balances below 30% of total limits before applying." });
+      } else if (utilization > 30) {
+        denialSimulation.push({ trigger: "Moderate Utilization", riskLevel: "Moderate", explanation: "Utilization between 30-45% may cause some lenders to reduce approval amounts.", fix: "Target utilization below 20% for optimal positioning." });
+      }
+
+      if (revolvingLimit > 0 && revolvingLimit < 10000) {
+        denialSimulation.push({ trigger: "Thin Revolving Depth", riskLevel: revolvingLimit < 5000 ? "High" : "Moderate", explanation: "Limited credit depth signals inexperience or limited creditworthiness to lenders.", fix: "Build revolving depth through limit increases or new secured accounts." });
+      }
+
+      if (inquiries > 3) {
+        denialSimulation.push({ trigger: "Inquiry Clustering", riskLevel: inquiries > 5 ? "High" : "Moderate", explanation: "Multiple recent inquiries suggest rapid application behavior. Lenders interpret this negatively.", fix: "Wait 45-90 days before next application to let inquiries age." });
+      }
+
+      if (derogatoryAccounts > 0) {
+        denialSimulation.push({ trigger: "Active Derogatories", riskLevel: "High", explanation: "Collections, charge-offs, or late payments are the primary denial trigger for most lenders.", fix: "Resolve or dispute all derogatory items before applying." });
+      }
+
+      if (creditScoreNum > 0 && creditScoreNum < 660) {
+        denialSimulation.push({ trigger: "Low Credit Score", riskLevel: creditScoreNum < 620 ? "High" : "Moderate", explanation: "Score below lender minimums will trigger automatic denial in most systems.", fix: "Improve score through consistent payments and utilization reduction." });
+      }
+
+      // --- ACTION PLAN ---
+      if (utilization > 30) actionPlan.push("Reduce credit utilization below 30% across all revolving accounts");
+      if (inquiries > 2) actionPlan.push("Avoid new credit applications for at least 45 days");
+      if (derogatoryAccounts > 0) actionPlan.push("Dispute inaccurate derogatory items or negotiate pay-for-delete");
+      if (revolvingLimit > 0 && revolvingLimit < 10000) actionPlan.push("Strengthen revolving credit depth — request limit increases or add secured cards");
+      if (!hasCreditReport) actionPlan.push("Upload credit report for complete profile analysis");
+      if (!hasBankStatement) actionPlan.push("Upload bank statement to verify cash flow and revenue");
+      actionPlan.push("Separate business and personal expenses across all accounts");
+      if (operatingMode.mode === "repair") {
+        actionPlan.push("Focus on stabilization before applying for any new capital");
+      } else {
+        actionPlan.push("Optimize application timing — apply when all metrics are at peak");
+      }
+      actionPlan.push("Re-evaluate readiness score in 30 days");
 
       let nextSteps: string[] = [];
       try {
         if (user.analysisNextSteps) nextSteps = JSON.parse(user.analysisNextSteps);
       } catch {}
 
+      const componentBreakdown = {
+        capitalStrength: { score: capitalStrength, max: 20, label: "Capital Strength" },
+        creditQuality: { score: creditQuality, max: 20, label: "Credit Quality" },
+        management: { score: managementScore, max: 15, label: "Management & Structure" },
+        cashFlow: { score: cashFlowScore, max: 15, label: "Earnings & Cash Flow" },
+        liquidity: { score: liquidityScore, max: 15, label: "Liquidity & Leverage" },
+        riskSignals: { score: riskScore, max: 15, label: "Risk Signals" },
+      };
+
       res.json({
         score,
         status,
         statusLabel,
         estimatedRange: score >= 25 ? { min: minRange, max: maxRange } : null,
+        exposureCeiling: totalExposure > 0 ? { totalExposure, multiplier, ceiling: exposureCeiling } : null,
+        operatingMode,
+        tierEligibility,
+        componentBreakdown,
+        denialSimulation,
         alerts,
         actionPlan,
         progress: { current: score, target: 85 },
@@ -3514,8 +3632,8 @@ export async function registerRoutes(
         analysisSummary: user.analysisSummary || null,
         analysisNextSteps: nextSteps,
         lastAnalysisDate: user.lastAnalysisDate || null,
-        hasCreditReport: hasCreditReport,
-        hasBankStatement: hasBankStatement,
+        hasCreditReport,
+        hasBankStatement,
       });
     } catch (error) {
       console.error("Funding readiness error:", error);
@@ -3575,9 +3693,21 @@ export async function registerRoutes(
 
       const docLabel = documentType === "bank_statement" ? "bank statement" : "credit report";
 
-      const analysisPrompt = `You are a financial document analyst for MentXr®, a funding readiness platform.
+      const analysisPrompt = `You are a Capital Readiness and Funding Strategy Evaluation System for MentXr®.
 
-The user uploaded a ${docLabel}. Analyze the document text below and extract financial data.
+Your purpose is to analyze uploaded financial documents and help business owners understand how lenders see their profile.
+
+You do not motivate. You do not hype. You do not guarantee approvals.
+You evaluate risk. You assess readiness. You provide structured corrective guidance.
+Your tone must feel like a private capital analyst reviewing a file.
+
+The user uploaded a ${docLabel}. Analyze the document and evaluate across six components:
+1. Capital Strength — Credit score, revolving limits, balances, available liquidity
+2. Credit Quality — Payment history, derogatories, collections, charge-offs, late payments
+3. Management & Structure — Business/personal separation, account age, documentation quality
+4. Earnings & Cash Flow — Revenue, consistency, profitability, debt-to-income
+5. Liquidity & Leverage — Utilization levels, exposure relative to income, recent inquiries
+6. Risk Signals — Rapid application behavior, thin profile, high utilization, balance spikes
 
 IMPORTANT: You MUST respond with ONLY valid JSON matching this exact structure (no markdown, no code blocks, no extra text):
 
@@ -3587,16 +3717,19 @@ IMPORTANT: You MUST respond with ONLY valid JSON matching this exact structure (
   "totalBalances": <number or null>,
   "inquiries": <number or null>,
   "derogatoryAccounts": <number or null>,
-  "summary": "<2-3 sentence summary of key findings from the document>",
+  "summary": "<2-3 sentence analytical summary written like a capital analyst reviewing a file. Mention the most critical risk factors and strengths. Do not use hype language.>",
   "nextSteps": ["<step 1>", "<step 2>", "<step 3>", "<step 4>", "<step 5>"]
 }
 
 Rules:
 - For credit reports: Extract credit score range, revolving limits, balances, inquiries, derogatory accounts
-- For bank statements: Focus on cash flow patterns, extract what you can, set credit fields to null if not available
-- nextSteps should be 5 specific, actionable recommendations based on what you found in the document
-- summary should mention the most important findings that affect funding readiness
-- If a field cannot be determined from the document, use null for strings and null for numbers
+- For bank statements: Focus on cash flow patterns, revenue consistency, and stability indicators. Set credit fields to null if not available
+- nextSteps must be 5 sequential, specific corrective actions that would improve the user's funding readiness score. Each step should improve a specific component
+- Steps must be actionable and include timing guidance where relevant (e.g., "within 30 days", "for 45 days")
+- Do NOT suggest manipulation of underwriting or misrepresentation
+- summary must mention specific numbers and findings — not vague statements
+- If a field cannot be determined, use null
+- Use clear, direct, plain business language. No hype, no emotional persuasion
 - Respond with ONLY the JSON object, nothing else
 
 --- START OF DOCUMENT ---

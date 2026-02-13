@@ -38,6 +38,11 @@ interface FundingReadiness {
   status: string;
   statusLabel: string;
   estimatedRange: { min: number; max: number } | null;
+  exposureCeiling: { totalExposure: number; multiplier: number; ceiling: number } | null;
+  operatingMode: { mode: string; label: string; description: string } | null;
+  tierEligibility: { tier: number; label: string; description: string } | null;
+  componentBreakdown: Record<string, { score: number; max: number; label: string }> | null;
+  denialSimulation: { trigger: string; riskLevel: "High" | "Moderate" | "Low"; explanation: string; fix: string }[];
   alerts: { severity: "red" | "yellow" | "gray"; title: string; explanation: string; impact: string; fix: string }[];
   actionPlan: string[];
   progress: { current: number; target: number };
@@ -646,7 +651,7 @@ export default function DashboardPage() {
 
                   <div className="rounded-2xl border border-[#2A2A2A] bg-[#141414] p-6 sm:p-8" data-testid="funding-score-card">
                     <div className="flex flex-col items-center text-center">
-                      <p className="text-xs font-semibold tracking-widest text-white/50 uppercase mb-6">Funding Readiness Score</p>
+                      <p className="text-xs font-semibold tracking-widest text-white/50 uppercase mb-6">Capital Readiness Score</p>
                       <div className="relative w-40 h-40 mb-6">
                         <svg className="w-full h-full -rotate-90" viewBox="0 0 120 120">
                           <circle cx="60" cy="60" r="52" fill="none" stroke="#222" strokeWidth="8" />
@@ -691,7 +696,98 @@ export default function DashboardPage() {
                       <p className="text-2xl sm:text-3xl font-bold font-mono text-white" data-testid="text-range">
                         ${fundingData.estimatedRange.min.toLocaleString()} – ${fundingData.estimatedRange.max.toLocaleString()}
                       </p>
-                      <p className="text-xs text-white/30 mt-2">Based on current credit and risk profile. Not a guarantee.</p>
+                      <p className="text-xs text-white/30 mt-2">Estimated range based on current profile strength and common lender criteria.</p>
+                    </div>
+                  )}
+
+                  {fundingData.exposureCeiling && (
+                    <div className="rounded-2xl border border-[#2A2A2A] bg-[#141414] p-6" data-testid="exposure-ceiling-card">
+                      <div className="flex items-center gap-2 mb-4">
+                        <Activity className="w-4 h-4 text-cyan-400" />
+                        <p className="text-xs font-semibold tracking-widest text-white/50 uppercase">Projected Exposure Ceiling</p>
+                      </div>
+                      <div className="grid grid-cols-3 gap-3 mb-4">
+                        <div className="p-3 rounded-xl bg-[#1A1A1A] text-center">
+                          <p className="text-[10px] text-white/40 uppercase tracking-wide mb-1">Current Exposure</p>
+                          <p className="text-lg font-bold font-mono text-white">${fundingData.exposureCeiling.totalExposure.toLocaleString()}</p>
+                        </div>
+                        <div className="p-3 rounded-xl bg-[#1A1A1A] text-center">
+                          <p className="text-[10px] text-white/40 uppercase tracking-wide mb-1">Multiplier</p>
+                          <p className="text-lg font-bold font-mono text-cyan-400">{fundingData.exposureCeiling.multiplier}x</p>
+                        </div>
+                        <div className="p-3 rounded-xl bg-[#1A1A1A] text-center">
+                          <p className="text-[10px] text-white/40 uppercase tracking-wide mb-1">Ceiling</p>
+                          <p className="text-lg font-bold font-mono text-emerald-400">${fundingData.exposureCeiling.ceiling.toLocaleString()}</p>
+                        </div>
+                      </div>
+                      <p className="text-[11px] text-white/30">Projected exposure ceiling based on current profile strength. Not a guarantee of approval.</p>
+                    </div>
+                  )}
+
+                  {fundingData.componentBreakdown && (
+                    <div className="rounded-2xl border border-[#2A2A2A] bg-[#141414] p-6" data-testid="component-breakdown-card">
+                      <div className="flex items-center gap-2 mb-4">
+                        <BarChart3 className="w-4 h-4 text-violet-400" />
+                        <p className="text-xs font-semibold tracking-widest text-white/50 uppercase">Component Breakdown</p>
+                      </div>
+                      <div className="space-y-3">
+                        {Object.entries(fundingData.componentBreakdown).map(([key, comp]) => {
+                          const pct = (comp.score / comp.max) * 100;
+                          const barColor = pct >= 80 ? "#22c55e" : pct >= 50 ? "#eab308" : pct >= 30 ? "#f59e0b" : "#ef4444";
+                          return (
+                            <div key={key} data-testid={`component-${key}`}>
+                              <div className="flex items-center justify-between mb-1">
+                                <span className="text-xs text-white/70">{comp.label}</span>
+                                <span className="text-xs font-mono text-white/50">{comp.score}/{comp.max}</span>
+                              </div>
+                              <div className="w-full h-2 rounded-full bg-[#222] overflow-hidden">
+                                <div className="h-full rounded-full transition-all duration-700" style={{ width: `${pct}%`, backgroundColor: barColor }} />
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+
+                  {(fundingData.tierEligibility || fundingData.operatingMode) && (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      {fundingData.tierEligibility && (
+                        <div className={cn(
+                          "rounded-2xl border p-5",
+                          fundingData.tierEligibility.tier === 1 ? "border-emerald-500/30 bg-emerald-500/5" :
+                          fundingData.tierEligibility.tier === 2 ? "border-yellow-500/30 bg-yellow-500/5" :
+                          "border-red-500/30 bg-red-500/5"
+                        )} data-testid="tier-eligibility-card">
+                          <div className="flex items-center gap-2 mb-2">
+                            <Shield className="w-4 h-4 text-white/50" />
+                            <p className="text-[10px] font-semibold tracking-widest text-white/40 uppercase">Tier Eligibility</p>
+                          </div>
+                          <p className={cn(
+                            "text-sm font-bold mb-1",
+                            fundingData.tierEligibility.tier === 1 ? "text-emerald-400" :
+                            fundingData.tierEligibility.tier === 2 ? "text-yellow-400" :
+                            "text-red-400"
+                          )}>{fundingData.tierEligibility.label}</p>
+                          <p className="text-[11px] text-white/45 leading-relaxed">{fundingData.tierEligibility.description}</p>
+                        </div>
+                      )}
+                      {fundingData.operatingMode && (
+                        <div className={cn(
+                          "rounded-2xl border p-5",
+                          fundingData.operatingMode.mode === "pre_funding" ? "border-blue-500/30 bg-blue-500/5" : "border-amber-500/30 bg-amber-500/5"
+                        )} data-testid="operating-mode-card">
+                          <div className="flex items-center gap-2 mb-2">
+                            <Cpu className="w-4 h-4 text-white/50" />
+                            <p className="text-[10px] font-semibold tracking-widest text-white/40 uppercase">Operating Mode</p>
+                          </div>
+                          <p className={cn(
+                            "text-sm font-bold mb-1",
+                            fundingData.operatingMode.mode === "pre_funding" ? "text-blue-400" : "text-amber-400"
+                          )}>{fundingData.operatingMode.label}</p>
+                          <p className="text-[11px] text-white/45 leading-relaxed">{fundingData.operatingMode.description}</p>
+                        </div>
+                      )}
                     </div>
                   )}
 
@@ -833,6 +929,33 @@ export default function DashboardPage() {
                               <ChevronRight className={cn("w-4 h-4 text-white/25 shrink-0 transition-transform", expandedAlerts.has(idx) && "rotate-90")} />
                             </div>
                           </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {fundingData.denialSimulation && fundingData.denialSimulation.length > 0 && (
+                    <div className="rounded-2xl border border-red-500/20 bg-[#141414] p-6" data-testid="denial-simulation-card">
+                      <div className="flex items-center gap-2 mb-4">
+                        <AlertCircle className="w-4 h-4 text-red-400" />
+                        <p className="text-xs font-semibold tracking-widest text-red-400/70 uppercase">Denial Simulation</p>
+                        <span className="text-[10px] text-white/30 ml-auto">Potential lender rejection triggers</span>
+                      </div>
+                      <div className="space-y-2">
+                        {fundingData.denialSimulation.map((item, idx) => (
+                          <div key={idx} className="p-3.5 rounded-xl bg-[#1A1A1A] border border-[#2A2A2A]" data-testid={`denial-trigger-${idx}`}>
+                            <div className="flex items-center gap-2 mb-1.5">
+                              <span className={cn(
+                                "text-[10px] font-bold uppercase px-2 py-0.5 rounded",
+                                item.riskLevel === "High" ? "bg-red-500/20 text-red-400" :
+                                item.riskLevel === "Moderate" ? "bg-yellow-500/20 text-yellow-400" :
+                                "bg-green-500/20 text-green-400"
+                              )}>{item.riskLevel}</span>
+                              <span className="text-sm font-medium text-white/80">{item.trigger}</span>
+                            </div>
+                            <p className="text-xs text-white/45 mb-1.5">{item.explanation}</p>
+                            <p className="text-xs text-emerald-400/70"><span className="font-medium text-emerald-400">Fix:</span> {item.fix}</p>
+                          </div>
                         ))}
                       </div>
                     </div>

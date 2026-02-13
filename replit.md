@@ -1,9 +1,17 @@
 # MentXr®
 
 ## Overview
-A free AI mentorship platform ("Mentorship On Demand") combining funding readiness analytics with AI-powered mentorship. Features a financial analytics dashboard (Funding Readiness Score, risk alerts, action plan, progress tracker), AI chat workspace with 7 bot mentors, PDF document upload with OCR, friends list, admin panel, and free membership access.
+A free AI mentorship platform ("Mentorship On Demand") combining Capital Readiness analytics with AI-powered mentorship. Features a 6-component Capital Readiness evaluation system (Capital Strength, Credit Quality, Management & Structure, Earnings & Cash Flow, Liquidity & Leverage, Risk Signals), 2.5x exposure ceiling calculation, tier eligibility (Prime/Mid-Tier/Alternative), operating mode (Pre-Funding/Repair), denial simulation, AI chat workspace with 7 bot mentors, PDF document upload with OCR, friends list, admin panel, and free membership access.
 
 ## Recent Changes
+- 2026-02-13: Integrated Master Capital Readiness System Prompt into funding engine and document analysis
+- 2026-02-13: Added 6-component scoring: Capital Strength (0-20), Credit Quality (0-20), Management (0-15), Cash Flow (0-15), Liquidity (0-15), Risk Signals (0-15)
+- 2026-02-13: Added 2.5x exposure ceiling logic with dynamic multiplier adjustments
+- 2026-02-13: Added tier eligibility (Tier 1 Prime, Tier 2 Mid-Tier, Tier 3 Alternative Capital)
+- 2026-02-13: Added operating mode engine (Pre-Funding Mode vs Repair Mode)
+- 2026-02-13: Added denial simulation with triggers, risk levels, and corrective recommendations
+- 2026-02-13: Dashboard UI updated with component breakdown bars, exposure ceiling card, tier/mode cards, denial simulation card
+- 2026-02-13: Document analysis AI prompt updated to Capital Readiness analyst tone
 - 2026-02-13: Added document upload on Dashboard with AI-powered analysis (credit report + bank statement)
 - 2026-02-13: AI extracts financial data from uploaded documents and auto-populates funding score fields
 - 2026-02-13: Added POST /api/analyze-document endpoint with PDF extraction pipeline + OpenAI analysis
