@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from "react";
 import { useAuth } from "@/lib/store";
 import { useLocation } from "wouter";
-import { Send, Plus, LogOut, Paperclip, Loader2, ArrowDown, FileText, X, Menu, Bot, Heart, MessageCircle, Share2, Bookmark, Sparkles } from "lucide-react";
+import { Send, Plus, LogOut, Paperclip, Loader2, ArrowDown, FileText, X, Menu, Bot, Heart, MessageCircle, Share2, Bookmark } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -197,7 +197,7 @@ export default function DashboardPage() {
             onClick={logout}
             className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-white/[0.05] transition-colors text-sm text-white/50"
           >
-            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500/30 to-blue-500/30 border border-white/10 flex items-center justify-center text-[11px] font-bold text-white/70">
+            <div className="w-8 h-8 rounded-full bg-[#1A1A1A] border border-[#333] flex items-center justify-center text-[11px] font-bold text-[#999]">
               {user.email.substring(0, 2).toUpperCase()}
             </div>
             <span className="flex-1 text-left truncate">{user.email}</span>
@@ -218,7 +218,7 @@ export default function DashboardPage() {
               <Menu className="w-5 h-5 text-white/60" />
             </button>
             <div className="flex items-center gap-2">
-              <Sparkles className="w-4 h-4 text-purple-400/70" />
+              <img src="/logo.png" alt="MentXr" className="w-5 h-5 rounded-md md:hidden" />
               <span className="text-[15px] font-bold tracking-tight">Feed</span>
             </div>
           </div>
@@ -247,10 +247,10 @@ export default function DashboardPage() {
                   >
                     <div className={cn(
                       "w-16 h-16 rounded-full p-[2px]",
-                      !activeMentorKey ? "bg-gradient-to-br from-purple-500 to-blue-500" : "bg-white/10"
+                      !activeMentorKey ? "bg-[#E0E0E0]" : "bg-white/10"
                     )}>
-                      <div className="w-full h-full rounded-full bg-[#000] flex items-center justify-center">
-                        <Bot className="w-6 h-6 text-white/50" />
+                      <div className="w-full h-full rounded-full bg-[#0D0D0D] flex items-center justify-center">
+                        <Bot className="w-6 h-6 text-[#E0E0E0]/60" />
                       </div>
                     </div>
                     <p className="text-[11px] text-white/50 font-medium w-16 text-center truncate">MentXr®</p>
@@ -265,7 +265,7 @@ export default function DashboardPage() {
                     >
                       <div className={cn(
                         "w-16 h-16 rounded-full p-[2px]",
-                        activeMentorKey === key ? "bg-gradient-to-br from-purple-500 to-pink-500" : "bg-white/10"
+                        activeMentorKey === key ? "bg-[#E0E0E0]" : "bg-white/10"
                       )}>
                         <img src={mentor.avatar} alt={mentor.name} className="w-full h-full rounded-full object-cover" />
                       </div>
@@ -280,7 +280,7 @@ export default function DashboardPage() {
               <div className="px-4 py-8 flex flex-col items-center">
                 {activeMentor ? (
                   <>
-                    <div className="w-20 h-20 rounded-full p-[2px] bg-gradient-to-br from-purple-500 to-pink-500 mb-4">
+                    <div className="w-20 h-20 rounded-full p-[2px] bg-[#E0E0E0] mb-4">
                       <img src={activeMentor.avatar} alt={activeMentor.name} className="w-full h-full rounded-full object-cover" />
                     </div>
                     <h2 className="text-xl font-bold mb-0.5">{activeMentor.name}</h2>
@@ -289,7 +289,7 @@ export default function DashboardPage() {
                   </>
                 ) : (
                   <>
-                    <div className="w-20 h-20 rounded-2xl mb-4 overflow-hidden bg-gradient-to-br from-purple-500/20 to-blue-500/20 border border-white/10 flex items-center justify-center">
+                    <div className="w-20 h-20 rounded-2xl mb-4 overflow-hidden bg-[#1A1A1A] border border-[#333] flex items-center justify-center">
                       <img src="/logo.png" alt="MentXr" className="w-12 h-12 rounded-xl" />
                     </div>
                     <h2 className="text-xl font-bold mb-0.5">MentXr®</h2>
@@ -335,10 +335,10 @@ export default function DashboardPage() {
                   >
                     <div className={cn(
                       "w-14 h-14 rounded-full p-[2px]",
-                      !activeMentorKey ? "bg-gradient-to-br from-purple-500 to-blue-500" : "bg-white/10"
+                      !activeMentorKey ? "bg-[#E0E0E0]" : "bg-white/10"
                     )}>
-                      <div className="w-full h-full rounded-full bg-[#000] flex items-center justify-center">
-                        <Bot className="w-5 h-5 text-white/50" />
+                      <div className="w-full h-full rounded-full bg-[#0D0D0D] flex items-center justify-center">
+                        <Bot className="w-5 h-5 text-[#E0E0E0]/60" />
                       </div>
                     </div>
                     <p className="text-[10px] text-white/40 font-medium w-14 text-center truncate">MentXr®</p>
@@ -353,7 +353,7 @@ export default function DashboardPage() {
                     >
                       <div className={cn(
                         "w-14 h-14 rounded-full p-[2px]",
-                        activeMentorKey === key ? "bg-gradient-to-br from-purple-500 to-pink-500" : "bg-white/10"
+                        activeMentorKey === key ? "bg-[#E0E0E0]" : "bg-white/10"
                       )}>
                         <img src={mentor.avatar} alt={mentor.name} className="w-full h-full rounded-full object-cover" />
                       </div>
@@ -381,7 +381,7 @@ export default function DashboardPage() {
                       <div className="flex gap-3">
                         <div className="shrink-0">
                           {isUser ? (
-                            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500/30 to-blue-500/30 border border-white/10 flex items-center justify-center text-[12px] font-bold text-white/70">
+                            <div className="w-10 h-10 rounded-full bg-[#1A1A1A] border border-[#333] flex items-center justify-center text-[12px] font-bold text-[#999]">
                               {user.email.substring(0, 2).toUpperCase()}
                             </div>
                           ) : posterAvatar ? (
@@ -398,7 +398,7 @@ export default function DashboardPage() {
                             <span className="text-[14px] font-bold text-white/90 truncate">{posterName}</span>
                             {!isUser && (
                               <span className="shrink-0">
-                                <svg className="w-[14px] h-[14px] text-blue-400" viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg>
+                                <svg className="w-[14px] h-[14px] text-[#E0E0E0]" viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg>
                               </span>
                             )}
                             <span className="text-[13px] text-white/30 truncate">{posterHandle}</span>
@@ -407,7 +407,7 @@ export default function DashboardPage() {
                           </div>
 
                           {posterSpecialty && (
-                            <p className="text-[11px] text-purple-400/60 mb-2">{posterSpecialty}</p>
+                            <p className="text-[11px] text-[#E0E0E0]/40 mb-2">{posterSpecialty}</p>
                           )}
 
                           {m.attachment && (
@@ -426,24 +426,24 @@ export default function DashboardPage() {
                               onClick={() => toggleLike(m.id)}
                               className={cn(
                                 "flex items-center gap-1.5 px-2 py-1.5 rounded-full transition-colors group",
-                                isLiked ? "text-pink-500" : "text-white/25 hover:text-pink-400/70"
+                                isLiked ? "text-[#E0E0E0]" : "text-white/25 hover:text-[#E0E0E0]/60"
                               )}
                               data-testid={`button-like-${m.id}`}
                             >
                               <Heart className={cn("w-[18px] h-[18px]", isLiked && "fill-current")} />
                               {isLiked && <span className="text-[12px]">1</span>}
                             </button>
-                            <button className="flex items-center gap-1.5 px-2 py-1.5 rounded-full text-white/25 hover:text-blue-400/70 transition-colors" data-testid={`button-reply-${m.id}`}>
+                            <button className="flex items-center gap-1.5 px-2 py-1.5 rounded-full text-white/25 hover:text-[#E0E0E0]/60 transition-colors" data-testid={`button-reply-${m.id}`}>
                               <MessageCircle className="w-[18px] h-[18px]" />
                             </button>
-                            <button className="flex items-center gap-1.5 px-2 py-1.5 rounded-full text-white/25 hover:text-green-400/70 transition-colors" data-testid={`button-share-${m.id}`}>
+                            <button className="flex items-center gap-1.5 px-2 py-1.5 rounded-full text-white/25 hover:text-[#E0E0E0]/60 transition-colors" data-testid={`button-share-${m.id}`}>
                               <Share2 className="w-[18px] h-[18px]" />
                             </button>
                             <button
                               onClick={() => toggleSave(m.id)}
                               className={cn(
                                 "flex items-center gap-1.5 px-2 py-1.5 rounded-full transition-colors ml-auto",
-                                isSaved ? "text-yellow-500" : "text-white/25 hover:text-yellow-400/70"
+                                isSaved ? "text-[#E0E0E0]" : "text-white/25 hover:text-[#E0E0E0]/60"
                               )}
                               data-testid={`button-save-${m.id}`}
                             >
@@ -476,9 +476,9 @@ export default function DashboardPage() {
                           </span>
                         </div>
                         <div className="flex items-center gap-1.5 py-2">
-                          <span className="w-2 h-2 bg-purple-400/50 rounded-full animate-bounce"></span>
-                          <span className="w-2 h-2 bg-purple-400/50 rounded-full animate-bounce [animation-delay:0.15s]"></span>
-                          <span className="w-2 h-2 bg-purple-400/50 rounded-full animate-bounce [animation-delay:0.3s]"></span>
+                          <span className="w-2 h-2 bg-[#555] rounded-full animate-bounce"></span>
+                          <span className="w-2 h-2 bg-[#555] rounded-full animate-bounce [animation-delay:0.15s]"></span>
+                          <span className="w-2 h-2 bg-[#555] rounded-full animate-bounce [animation-delay:0.3s]"></span>
                         </div>
                       </div>
                     </div>
@@ -507,7 +507,7 @@ export default function DashboardPage() {
             {activeMentor && hasMessages && (
               <div className="flex items-center gap-2 mb-2 px-1">
                 <img src={activeMentor.avatar} alt={activeMentor.name} className="w-5 h-5 rounded-full object-cover border border-white/10" />
-                <span className="text-[11px] text-white/30">Replying to <span className="text-purple-400/60 font-medium">{activeMentor.name}</span></span>
+                <span className="text-[11px] text-white/30">Replying to <span className="text-[#E0E0E0]/60 font-medium">{activeMentor.name}</span></span>
                 <button onClick={() => { setSelectedMentor(null); setMentorCleared(true); }} className="text-white/20 hover:text-white/50 ml-auto" data-testid="button-clear-mentor">
                   <X className="w-3.5 h-3.5" />
                 </button>
@@ -516,7 +516,7 @@ export default function DashboardPage() {
             {attachedFile && (
               <div className="flex items-center gap-2 mb-2 px-1">
                 <div className="flex items-center gap-2 bg-white/[0.04] border border-white/[0.08] rounded-xl px-3 py-1.5 text-[12px] text-white/50">
-                  <FileText className="w-3.5 h-3.5 text-purple-400/50 shrink-0" />
+                  <FileText className="w-3.5 h-3.5 text-[#888] shrink-0" />
                   <span className="truncate max-w-[180px]">{attachedFile.name}</span>
                   <button
                     onClick={() => setAttachedFile(null)}
@@ -530,7 +530,7 @@ export default function DashboardPage() {
             )}
             <div className="flex items-end gap-2">
               <div className="shrink-0">
-                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500/30 to-blue-500/30 border border-white/10 flex items-center justify-center text-[10px] font-bold text-white/60">
+                <div className="w-8 h-8 rounded-full bg-[#1A1A1A] border border-[#333] flex items-center justify-center text-[10px] font-bold text-[#999]">
                   {user.email.substring(0, 2).toUpperCase()}
                 </div>
               </div>
@@ -581,7 +581,7 @@ export default function DashboardPage() {
                 className={cn(
                   "w-9 h-9 rounded-full flex items-center justify-center transition-all shrink-0",
                   (input.trim() || attachedFile) && !isLoading
-                    ? "bg-gradient-to-r from-purple-500 to-blue-500 text-white hover:shadow-lg hover:shadow-purple-500/20 hover:scale-105"
+                    ? "bg-[#E0E0E0] text-[#0D0D0D] hover:bg-white hover:scale-105"
                     : "bg-white/[0.06] text-white/20 cursor-not-allowed"
                 )}
               >
