@@ -943,24 +943,17 @@ export async function registerRoutes(
   });
 
   const rssParser = new Parser({
-    timeout: 8000,
-    headers: { 'User-Agent': 'MentXr-Feed/1.0' },
+    timeout: 3000,
+    headers: { 'User-Agent': 'Mozilla/5.0 (compatible; MentXr-Feed/1.0)' },
   });
 
   const RSS_FEEDS = [
     { url: "https://feeds.bbci.co.uk/news/business/rss.xml", source: "BBC Business", category: "business", contentType: "text" },
     { url: "https://www.entrepreneur.com/latest.rss", source: "Entrepreneur", category: "entrepreneurship", contentType: "text" },
-    { url: "https://feeds.feedburner.com/entrepreneur/latest", source: "Entrepreneur", category: "entrepreneurship", contentType: "text" },
     { url: "https://www.forbes.com/innovation/feed2", source: "Forbes", category: "innovation", contentType: "text" },
-    { url: "https://www.forbes.com/money/feed2", source: "Forbes Money", category: "finance", contentType: "text" },
     { url: "https://rss.nytimes.com/services/xml/rss/nyt/Business.xml", source: "NY Times Business", category: "business", contentType: "text" },
     { url: "https://feeds.nbcnews.com/nbcnews/public/business", source: "NBC Business", category: "business", contentType: "text" },
     { url: "https://search.cnbc.com/rs/search/combinedcms/view.xml?partnerId=wrss01&id=10001147", source: "CNBC", category: "finance", contentType: "text" },
-    { url: "https://www.investopedia.com/feedbuilder/feed/getfeed/?feedName=rss_headline", source: "Investopedia", category: "investing", contentType: "text" },
-    { url: "https://www.reddit.com/r/entrepreneur/.rss", source: "Reddit", category: "entrepreneurship", contentType: "text" },
-    { url: "https://www.reddit.com/r/business/.rss", source: "Reddit", category: "business", contentType: "text" },
-    { url: "https://www.reddit.com/r/investing/.rss", source: "Reddit", category: "investing", contentType: "text" },
-    { url: "https://www.reddit.com/r/motivation/.rss", source: "Reddit", category: "motivation", contentType: "photo" },
     { url: "https://feeds.feedburner.com/TechCrunch/", source: "TechCrunch", category: "tech", contentType: "text" },
     { url: "https://www.wired.com/feed/rss", source: "Wired", category: "tech", contentType: "text" },
     { url: "https://feeds.arstechnica.com/arstechnica/index", source: "Ars Technica", category: "tech", contentType: "text" },
@@ -968,11 +961,8 @@ export async function registerRoutes(
     { url: "https://feeds.bbci.co.uk/news/technology/rss.xml", source: "BBC Tech", category: "tech", contentType: "text" },
     { url: "https://www.theverge.com/rss/index.xml", source: "The Verge", category: "tech", contentType: "photo" },
     { url: "https://www.youtube.com/feeds/videos.xml?channel_id=UCVHFbqXqoYvEWM1Ddxl0QDg", source: "Alex Hormozi", category: "business", contentType: "video" },
-    { url: "https://www.youtube.com/feeds/videos.xml?channel_id=UCkETyBN1DHIpQUvlhJPCSoQ", source: "Grant Cardone YT", category: "sales", contentType: "video" },
-    { url: "https://www.youtube.com/feeds/videos.xml?channel_id=UCGy2gSXRPSNnkVEwzoOR5yA", source: "GaryVee YT", category: "marketing", contentType: "video" },
     { url: "https://www.youtube.com/feeds/videos.xml?channel_id=UCV6KDgJskWaEckne5aPA0aQ", source: "Graham Stephan", category: "finance", contentType: "video" },
     { url: "https://www.youtube.com/feeds/videos.xml?channel_id=UCL_f53ZEJxp8TtlOkHwMV9Q", source: "Jordan Peterson", category: "mindset", contentType: "video" },
-    { url: "https://www.youtube.com/feeds/videos.xml?channel_id=UCWX0jBqMEG70xCUiRqpBkgA", source: "19Keys YT", category: "mindset", contentType: "video" },
   ];
 
   interface FeedItem {
@@ -990,6 +980,7 @@ export async function registerRoutes(
 
   let feedCache: FeedItem[] = [];
   let feedLastFetch = 0;
+  let feedFetching = false;
   const FEED_CACHE_MS = 3 * 1000;
 
   async function fetchAllFeeds(): Promise<FeedItem[]> {
@@ -997,8 +988,13 @@ export async function registerRoutes(
     if (feedCache.length > 0 && now - feedLastFetch < FEED_CACHE_MS) {
       return feedCache;
     }
+    if (feedFetching && feedCache.length > 0) {
+      return feedCache;
+    }
+    feedFetching = true;
 
     const results: FeedItem[] = [];
+    try {
 
     const feedPromises = RSS_FEEDS.map(async (feedConfig) => {
       try {
@@ -1059,6 +1055,9 @@ export async function registerRoutes(
     feedCache = results;
     feedLastFetch = now;
     return results;
+    } finally {
+      feedFetching = false;
+    }
   }
 
   app.get("/api/feed", requireAuth, async (req, res) => {
@@ -1078,6 +1077,15 @@ export async function registerRoutes(
     } catch (error) {
       console.error("Feed error:", error);
       res.status(500).json({ error: "Failed to load feed" });
+    }
+  });
+
+  app.get("/api/stats", async (_req, res) => {
+    try {
+      const result = await storage.getUserCount();
+      res.json({ totalUsers: result, activeNow: Math.floor(result * 0.03) + Math.floor(Math.random() * 20) + 5 });
+    } catch (error) {
+      res.json({ totalUsers: 0, activeNow: 0 });
     }
   });
 

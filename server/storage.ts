@@ -1,6 +1,6 @@
 import { users, messages, comments, type User, type InsertUser, type Message, type InsertMessage, type Comment, type InsertComment } from "@shared/schema";
 import { db } from "./db";
-import { eq } from "drizzle-orm";
+import { eq, count } from "drizzle-orm";
 
 export interface IStorage {
   getUser(id: number): Promise<User | undefined>;
@@ -16,6 +16,7 @@ export interface IStorage {
   getComments(messageId: number): Promise<Comment[]>;
   getCommentsByUser(userId: number): Promise<Comment[]>;
   createComment(comment: InsertComment): Promise<Comment>;
+  getUserCount(): Promise<number>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -67,6 +68,11 @@ export class DatabaseStorage implements IStorage {
   async createComment(insertComment: InsertComment): Promise<Comment> {
     const [comment] = await db.insert(comments).values(insertComment).returning();
     return comment;
+  }
+
+  async getUserCount(): Promise<number> {
+    const [result] = await db.select({ value: count() }).from(users);
+    return result?.value || 0;
   }
 }
 
