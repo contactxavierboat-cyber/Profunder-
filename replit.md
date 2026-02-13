@@ -18,8 +18,9 @@ A free AI mentorship platform ("Mentorship On Demand") that provides personalize
 - 2026-02-13: Reset all memberships (monthly usage reset to 0 for all users)
 - 2026-02-12: Made memberships free for all users (no subscription required, all users default to active)
 - 2026-02-12: Added 19Keys (Jibrial Muhammad) as 6th mentor - Mindset & Financial Literacy
-- 2026-02-12: Added mentor selection panel with 7 mentors (Grant Cardone, Warren Buffett, Gary Vaynerchuk, Oprah Winfrey, Sara Blakely, 19Keys, Charleston White)
-- 2026-02-12: Each mentor has unique avatar, system prompt, specialty, tagline, and keyword detection
+- 2026-02-13: Replaced all 7 real mentors with anonymous bot profiles (NovaSage247, AlphaVolt889, BlazeEcho512, LunarPeak303, IronFlux771, ZenCipher108, SteelWraith666)
+- 2026-02-13: Bot mentors use color-gradient avatars with initials instead of real celebrity photos
+- 2026-02-12: Each mentor has unique system prompt, specialty, tagline, and keyword detection
 - 2026-02-12: Users can explicitly select/switch/clear mentors via UI panel or type mentor name
 - 2026-02-12: Added /api/mentors endpoint for listing available mentors
 - 2026-02-12: Graduated from visual prototype to full-stack working app with PostgreSQL + Drizzle ORM
@@ -62,9 +63,9 @@ A free AI mentorship platform ("Mentorship On Demand") that provides personalize
 - Users: email, password, role, subscriptionStatus, monthlyUsage, maxUsage, credit profile fields, document flags
 - Messages: userId, role (user/assistant), content, attachment type, mentor (nullable), timestamp
 
-### Mentor System
-- 7 mentors: Grant Cardone, Warren Buffett, Gary Vaynerchuk, Oprah Winfrey, Sara Blakely, 19Keys, Charleston White
-- Each has: unique avatar (PNG in client/src/assets/), system prompt, specialty, tagline, keyword detection
+### Bot Mentor System
+- 7 anonymous bots: NovaSage247 (Sales), AlphaVolt889 (Investing), BlazeEcho512 (Marketing), LunarPeak303 (Leadership), IronFlux771 (Entrepreneurship), ZenCipher108 (Mindset), SteelWraith666 (Youth Advocacy)
+- Each has: color-gradient avatar with initials, system prompt, specialty, tagline, keyword detection
 - Backend: MENTOR_PROFILES in server/routes.ts, /api/mentors endpoint
-- Frontend: MENTOR_INFO in chat-interface.tsx, mentor selection panel with grid UI
+- Frontend: MENTOR_INFO + BOT_COLORS in chat-interface.tsx & dashboard.tsx, mentor selection panel with grid UI
 - Priority: explicit UI selection > keyword detection > conversation persistence > default MentXr® AI

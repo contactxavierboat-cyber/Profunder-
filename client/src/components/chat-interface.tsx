@@ -7,57 +7,24 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Send, User, Bot, Paperclip, Trash2, Download, FileText, Loader2, Users, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
-import grantCardoneAvatar from "@/assets/mentor-grant-cardone.png";
-import warrenBuffettAvatar from "@/assets/mentor-warren.png";
-import garyVeeAvatar from "@/assets/mentor-gary.png";
-import oprahWinfreyAvatar from "@/assets/mentor-oprah.png";
-import saraBlakelyAvatar from "@/assets/mentor-sara.png";
-import nineteenKeysAvatar from "@/assets/mentor-19keys.png";
-import charlestonWhiteAvatar from "@/assets/mentor-charleston-white.png";
+const BOT_COLORS: Record<string, string> = {
+  nova_sage: "bg-gradient-to-br from-orange-500 to-red-600",
+  alpha_volt: "bg-gradient-to-br from-blue-500 to-cyan-600",
+  blaze_echo: "bg-gradient-to-br from-yellow-500 to-amber-600",
+  lunar_peak: "bg-gradient-to-br from-purple-500 to-pink-600",
+  iron_flux: "bg-gradient-to-br from-emerald-500 to-teal-600",
+  zen_cipher: "bg-gradient-to-br from-indigo-500 to-violet-600",
+  steel_wraith: "bg-gradient-to-br from-slate-500 to-zinc-600",
+};
 
-const MENTOR_INFO: Record<string, { name: string; avatar: string; tagline: string; specialty: string }> = {
-  grant_cardone: {
-    name: "Grant Cardone",
-    avatar: grantCardoneAvatar,
-    tagline: "10X Everything",
-    specialty: "Sales & Real Estate",
-  },
-  warren_buffett: {
-    name: "Warren Buffett",
-    avatar: warrenBuffettAvatar,
-    tagline: "The Oracle of Omaha",
-    specialty: "Investing & Value",
-  },
-  gary_vee: {
-    name: "Gary Vaynerchuk",
-    avatar: garyVeeAvatar,
-    tagline: "Hustle & Heart",
-    specialty: "Marketing & Social Media",
-  },
-  oprah_winfrey: {
-    name: "Oprah Winfrey",
-    avatar: oprahWinfreyAvatar,
-    tagline: "Live Your Best Life",
-    specialty: "Leadership & Growth",
-  },
-  sara_blakely: {
-    name: "Sara Blakely",
-    avatar: saraBlakelyAvatar,
-    tagline: "Fearless Innovation",
-    specialty: "Entrepreneurship & Product",
-  },
-  nineteen_keys: {
-    name: "19Keys",
-    avatar: nineteenKeysAvatar,
-    tagline: "Unlock Your Potential",
-    specialty: "Mindset & Financial Literacy",
-  },
-  charleston_white: {
-    name: "Charleston White",
-    avatar: charlestonWhiteAvatar,
-    tagline: "Real Talk, Real Change",
-    specialty: "Youth Advocacy & Transformation",
-  },
+const MENTOR_INFO: Record<string, { name: string; initials: string; tagline: string; specialty: string }> = {
+  nova_sage: { name: "NovaSage247", initials: "NS", tagline: "Scale Everything", specialty: "Sales & Business Growth" },
+  alpha_volt: { name: "AlphaVolt889", initials: "AV", tagline: "Patient Capital", specialty: "Investing & Value" },
+  blaze_echo: { name: "BlazeEcho512", initials: "BE", tagline: "Hustle & Heart", specialty: "Marketing & Social Media" },
+  lunar_peak: { name: "LunarPeak303", initials: "LP", tagline: "Live Your Best Life", specialty: "Leadership & Growth" },
+  iron_flux: { name: "IronFlux771", initials: "IF", tagline: "Fearless Innovation", specialty: "Entrepreneurship & Product" },
+  zen_cipher: { name: "ZenCipher108", initials: "ZC", tagline: "Unlock Your Potential", specialty: "Mindset & Financial Literacy" },
+  steel_wraith: { name: "SteelWraith666", initials: "SW", tagline: "Real Talk, Real Change", specialty: "Youth Advocacy & Transformation" },
 };
 
 function cleanContent(text: string): string {
@@ -187,11 +154,7 @@ export function ChatInterface() {
         <div className="flex items-center gap-2">
           {activeMentor ? (
             <button onClick={() => setShowMentorPanel(!showMentorPanel)} className="relative group" data-testid="button-mentor-avatar">
-              <img
-                src={activeMentor.avatar}
-                alt={activeMentor.name}
-                className="w-8 h-8 rounded-full object-cover border-2 border-[#555] group-hover:border-white transition-colors"
-              />
+              <div className={cn("w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold border-2 border-[#555] group-hover:border-white transition-colors", activeMentorKey ? BOT_COLORS[activeMentorKey] : "")}>{activeMentor.initials}</div>
               <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-[#111] border border-[#333] flex items-center justify-center">
                 <Users className="w-2 h-2 text-[#999]" />
               </div>
@@ -259,11 +222,7 @@ export function ChatInterface() {
                 )}
                 data-testid={`button-mentor-${key}`}
               >
-                <img
-                  src={mentor.avatar}
-                  alt={mentor.name}
-                  className="w-10 h-10 rounded-full object-cover border-2 border-[#444]"
-                />
+                <div className={cn("w-full h-full rounded-full flex items-center justify-center text-white text-sm font-bold", BOT_COLORS[key])}>{mentor.initials}</div>
                 <p className="text-[11px] font-semibold text-[#ccc] leading-tight">{mentor.name}</p>
                 <p className="text-[9px] text-[#555] leading-tight">{mentor.specialty}</p>
               </button>
@@ -278,7 +237,7 @@ export function ChatInterface() {
             <div className="flex flex-col items-center justify-center h-[400px] text-center">
               {activeMentor ? (
                 <>
-                  <img src={activeMentor.avatar} alt={activeMentor.name} className="w-20 h-20 rounded-full object-cover border-2 border-[#333] mb-4 opacity-60" />
+                  <div className={cn("w-20 h-20 rounded-full flex items-center justify-center text-white text-2xl font-bold border-2 border-[#333] mb-4 opacity-60", activeMentorKey ? BOT_COLORS[activeMentorKey] : "")}>{activeMentor.initials}</div>
                   <p className="text-sm font-medium text-[#777]">{activeMentor.name}</p>
                   <p className="text-xs text-[#555] mt-1">{activeMentor.tagline}</p>
                   <p className="text-[10px] text-[#444] mt-3 max-w-[250px]">Start typing to begin your mentorship session</p>
@@ -301,11 +260,7 @@ export function ChatInterface() {
                     <User className="w-4 h-4 text-[#999]" />
                   </div>
                 ) : mentorData ? (
-                  <img
-                    src={mentorData.avatar}
-                    alt={mentorData.name}
-                    className="w-10 h-10 min-w-[40px] min-h-[40px] rounded-full object-cover shrink-0 border-2 border-[#555] mt-0.5"
-                  />
+                  <div className={cn("w-10 h-10 min-w-[40px] min-h-[40px] rounded-full flex items-center justify-center text-white text-sm font-bold shrink-0 border-2 border-[#555] mt-0.5", m.mentor ? BOT_COLORS[m.mentor] : "")}>{mentorData.initials}</div>
                 ) : (
                   <div className="w-8 h-8 rounded-full flex items-center justify-center shrink-0 border bg-[#1A1A1A] border-[#333]">
                     <Bot className="w-4 h-4 text-[#999]" />
@@ -358,7 +313,7 @@ export function ChatInterface() {
       <div className="border-t border-[#222] bg-[#0D0D0D]">
         {activeMentor && (
           <div className="px-4 pt-2 flex items-center gap-2">
-            <img src={activeMentor.avatar} alt={activeMentor.name} className="w-4 h-4 rounded-full object-cover" />
+            <div className={cn("w-4 h-4 rounded-full flex items-center justify-center text-white text-[6px] font-bold", activeMentorKey ? BOT_COLORS[activeMentorKey] : "")}>{activeMentor.initials}</div>
             <span className="text-[10px] text-[#666]">Chatting with <span className="text-[#aaa] font-medium">{activeMentor.name}</span></span>
             <button onClick={handleClearMentor} className="text-[#555] hover:text-white ml-auto" data-testid="button-clear-mentor">
               <X className="w-3 h-3" />

@@ -5,22 +5,24 @@ import { Send, Plus, LogOut, Paperclip, Loader2, ArrowDown, FileText, X, Menu, B
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import grantCardoneAvatar from "@/assets/mentor-grant-cardone.png";
-import warrenBuffettAvatar from "@/assets/mentor-warren.png";
-import garyVeeAvatar from "@/assets/mentor-gary.png";
-import oprahWinfreyAvatar from "@/assets/mentor-oprah.png";
-import saraBlakelyAvatar from "@/assets/mentor-sara.png";
-import nineteenKeysAvatar from "@/assets/mentor-19keys.png";
-import charlestonWhiteAvatar from "@/assets/mentor-charleston-white.png";
+const BOT_COLORS: Record<string, string> = {
+  nova_sage: "bg-gradient-to-br from-orange-500 to-red-600",
+  alpha_volt: "bg-gradient-to-br from-blue-500 to-cyan-600",
+  blaze_echo: "bg-gradient-to-br from-yellow-500 to-amber-600",
+  lunar_peak: "bg-gradient-to-br from-purple-500 to-pink-600",
+  iron_flux: "bg-gradient-to-br from-emerald-500 to-teal-600",
+  zen_cipher: "bg-gradient-to-br from-indigo-500 to-violet-600",
+  steel_wraith: "bg-gradient-to-br from-slate-500 to-zinc-600",
+};
 
-const MENTOR_INFO: Record<string, { name: string; avatar: string; tagline: string; specialty: string }> = {
-  grant_cardone: { name: "Grant Cardone", avatar: grantCardoneAvatar, tagline: "10X Everything", specialty: "Sales & Real Estate" },
-  warren_buffett: { name: "Warren Buffett", avatar: warrenBuffettAvatar, tagline: "The Oracle of Omaha", specialty: "Investing & Value" },
-  gary_vee: { name: "Gary Vaynerchuk", avatar: garyVeeAvatar, tagline: "Hustle & Heart", specialty: "Marketing & Social Media" },
-  oprah_winfrey: { name: "Oprah Winfrey", avatar: oprahWinfreyAvatar, tagline: "Live Your Best Life", specialty: "Leadership & Growth" },
-  sara_blakely: { name: "Sara Blakely", avatar: saraBlakelyAvatar, tagline: "Fearless Innovation", specialty: "Entrepreneurship & Product" },
-  nineteen_keys: { name: "19Keys", avatar: nineteenKeysAvatar, tagline: "Unlock Your Potential", specialty: "Mindset & Financial Literacy" },
-  charleston_white: { name: "Charleston White", avatar: charlestonWhiteAvatar, tagline: "Real Talk, Real Change", specialty: "Youth Advocacy & Transformation" },
+const MENTOR_INFO: Record<string, { name: string; initials: string; tagline: string; specialty: string }> = {
+  nova_sage: { name: "NovaSage247", initials: "NS", tagline: "Scale Everything", specialty: "Sales & Business Growth" },
+  alpha_volt: { name: "AlphaVolt889", initials: "AV", tagline: "Patient Capital", specialty: "Investing & Value" },
+  blaze_echo: { name: "BlazeEcho512", initials: "BE", tagline: "Hustle & Heart", specialty: "Marketing & Social Media" },
+  lunar_peak: { name: "LunarPeak303", initials: "LP", tagline: "Live Your Best Life", specialty: "Leadership & Growth" },
+  iron_flux: { name: "IronFlux771", initials: "IF", tagline: "Fearless Innovation", specialty: "Entrepreneurship & Product" },
+  zen_cipher: { name: "ZenCipher108", initials: "ZC", tagline: "Unlock Your Potential", specialty: "Mindset & Financial Literacy" },
+  steel_wraith: { name: "SteelWraith666", initials: "SW", tagline: "Real Talk, Real Change", specialty: "Youth Advocacy & Transformation" },
 };
 
 function timeAgo(date: Date | string): string {
@@ -428,13 +430,13 @@ export default function DashboardPage() {
                 {Object.entries(MENTOR_INFO).map(([key, mentor]) => {
                   const isActive = activeMentorKey === key;
                   const statusMessages: Record<string, string> = {
-                    grant_cardone: "10X or nothing! Let's close deals",
-                    warren_buffett: "Reading annual reports...",
-                    gary_vee: "Creating content rn",
-                    oprah_winfrey: "Living my best life",
-                    sara_blakely: "Building the next big thing",
-                    nineteen_keys: "Knowledge is the key",
-                    charleston_white: "Speaking truth to power",
+                    nova_sage: "Scaling up! Let's close deals 🔥",
+                    alpha_volt: "Analyzing market trends...",
+                    blaze_echo: "Creating content rn",
+                    lunar_peak: "Living my best life",
+                    iron_flux: "Building the next big thing",
+                    zen_cipher: "Unlocking potential...",
+                    steel_wraith: "Speaking truth to power",
                   };
                   return (
                     <button
@@ -454,11 +456,7 @@ export default function DashboardPage() {
                       )}
                     >
                       <div className="relative shrink-0">
-                        <img
-                          src={mentor.avatar}
-                          alt={mentor.name}
-                          className="w-8 h-8 rounded-lg border border-white/[0.1] object-cover"
-                        />
+                        <div className={cn("w-8 h-8 rounded-lg border border-white/[0.1] flex items-center justify-center text-white text-[10px] font-bold", BOT_COLORS[key])}>{mentor.initials}</div>
                         <div className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-green-500 border-2 border-[#0a0a0a]" />
                       </div>
                       <div className="flex-1 min-w-0">
@@ -648,7 +646,7 @@ export default function DashboardPage() {
                         "w-16 h-16 rounded-full p-[2px]",
                         activeMentorKey === key ? "bg-[#E0E0E0]" : "bg-white/10"
                       )}>
-                        <img src={mentor.avatar} alt={mentor.name} className="w-full h-full rounded-full object-cover" />
+                        <div className={cn("w-full h-full rounded-full flex items-center justify-center text-white text-sm font-bold", BOT_COLORS[key])}>{mentor.initials}</div>
                       </div>
                       <p className="text-[11px] text-white/50 font-medium w-16 text-center truncate">{mentor.name.split(" ")[0]}</p>
                     </button>
@@ -881,7 +879,7 @@ export default function DashboardPage() {
                         "w-14 h-14 rounded-full p-[2px]",
                         activeMentorKey === key ? "bg-[#E0E0E0]" : "bg-white/10"
                       )}>
-                        <img src={mentor.avatar} alt={mentor.name} className="w-full h-full rounded-full object-cover" />
+                        <div className={cn("w-full h-full rounded-full flex items-center justify-center text-white text-xs font-bold", BOT_COLORS[key])}>{mentor.initials}</div>
                       </div>
                       <p className="text-[10px] text-white/40 font-medium w-14 text-center truncate">{mentor.name.split(" ")[0]}</p>
                     </button>
@@ -896,7 +894,7 @@ export default function DashboardPage() {
                   {activeMentor ? (
                     <>
                       <div className="w-20 h-20 rounded-full p-[2px] bg-[#E0E0E0] mb-4">
-                        <img src={activeMentor.avatar} alt={activeMentor.name} className="w-full h-full rounded-full object-cover" />
+                        <div className={cn("w-full h-full rounded-full flex items-center justify-center text-white text-xl font-bold", activeMentorKey ? BOT_COLORS[activeMentorKey] : "")}>{activeMentor.initials}</div>
                       </div>
                       <h2 className="text-xl font-bold mb-0.5">{activeMentor.name}</h2>
                       <p className="text-white/40 text-sm">{activeMentor.tagline}</p>
@@ -942,7 +940,8 @@ export default function DashboardPage() {
                   const isUser = m.role === "user";
                   const posterName = isUser ? "You" : (mentorData ? mentorData.name : "MentXr® AI");
                   const posterHandle = isUser ? `@${user.displayName || user.email.split("@")[0]}` : (mentorData ? `@${m.mentor}` : "@mentxr");
-                  const posterAvatar = isUser ? null : (mentorData ? mentorData.avatar : null);
+                  const posterInitials = isUser ? null : (mentorData ? mentorData.initials : null);
+                  const posterMentorKey = isUser ? null : (m.mentor || null);
                   const posterSpecialty = !isUser && mentorData ? mentorData.specialty : (!isUser ? "AI Mentor" : null);
                   const isLiked = likedMessages.has(m.id);
                   const isSaved = savedMessages.has(m.id);
@@ -955,8 +954,8 @@ export default function DashboardPage() {
                             <div className="w-10 h-10 rounded-full bg-[#1A1A1A] border border-[#333] flex items-center justify-center text-[12px] font-bold text-[#999]">
                               {(user.displayName || user.email).substring(0, 2).toUpperCase()}
                             </div>
-                          ) : posterAvatar ? (
-                            <img src={posterAvatar} alt={posterName} className="w-10 h-10 rounded-full object-cover border border-white/10" />
+                          ) : posterInitials && posterMentorKey ? (
+                            <div className={cn("w-10 h-10 rounded-full flex items-center justify-center text-white text-sm font-bold border border-white/10", BOT_COLORS[posterMentorKey])}>{posterInitials}</div>
                           ) : (
                             <div className="w-10 h-10 rounded-xl overflow-hidden">
                               <img src="/logo.png" alt="MentXr" className="w-full h-full" />
@@ -1067,7 +1066,7 @@ export default function DashboardPage() {
                                           {(user.displayName || user.email).substring(0, 2).toUpperCase()}
                                         </div>
                                       ) : cMentor ? (
-                                        <img src={cMentor.avatar} alt={cMentor.name} className="w-7 h-7 rounded-full object-cover border border-white/10" />
+                                        <div className={cn("w-7 h-7 rounded-full flex items-center justify-center text-white text-[8px] font-bold border border-white/10", c.mentor ? BOT_COLORS[c.mentor] : "")}>{cMentor.initials}</div>
                                       ) : (
                                         <div className="w-7 h-7 rounded-xl overflow-hidden">
                                           <img src="/logo.png" alt="MentXr" className="w-full h-full" />
@@ -1138,7 +1137,7 @@ export default function DashboardPage() {
                     <div className="flex gap-3">
                       <div className="shrink-0">
                         {activeMentor ? (
-                          <img src={activeMentor.avatar} alt={activeMentor.name} className="w-10 h-10 rounded-full object-cover border border-white/10" />
+                          <div className={cn("w-10 h-10 rounded-full flex items-center justify-center text-white text-sm font-bold border border-white/10", activeMentorKey ? BOT_COLORS[activeMentorKey] : "")}>{activeMentor.initials}</div>
                         ) : (
                           <div className="w-10 h-10 rounded-xl overflow-hidden">
                             <img src="/logo.png" alt="MentXr" className="w-full h-full" />
@@ -1183,7 +1182,7 @@ export default function DashboardPage() {
           <div className="max-w-xl mx-auto">
             {activeMentor && hasMessages && (
               <div className="flex items-center gap-2 mb-2 px-1">
-                <img src={activeMentor.avatar} alt={activeMentor.name} className="w-5 h-5 rounded-full object-cover border border-white/10" />
+                <div className={cn("w-5 h-5 rounded-full flex items-center justify-center text-white text-[8px] font-bold border border-white/10", activeMentorKey ? BOT_COLORS[activeMentorKey] : "")}>{activeMentor.initials}</div>
                 <span className="text-[11px] text-white/30">Replying to <span className="text-[#E0E0E0]/60 font-medium">{activeMentor.name}</span></span>
                 <button onClick={() => { setSelectedMentor(null); setMentorCleared(true); }} className="text-white/20 hover:text-white/50 ml-auto" data-testid="button-clear-mentor">
                   <X className="w-3.5 h-3.5" />
