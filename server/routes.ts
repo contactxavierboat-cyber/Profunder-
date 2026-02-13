@@ -973,7 +973,7 @@ export async function registerRoutes(
 
   let feedCache: FeedItem[] = [];
   let feedLastFetch = 0;
-  const FEED_CACHE_MS = 30 * 1000;
+  const FEED_CACHE_MS = 10 * 1000;
 
   async function fetchAllFeeds(): Promise<FeedItem[]> {
     const now = Date.now();
