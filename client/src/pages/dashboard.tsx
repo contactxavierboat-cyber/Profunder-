@@ -641,11 +641,12 @@ export default function DashboardPage() {
         !sidebarOpen && "hidden md:flex"
       )} style={{ background: 'rgba(8,8,8,0.92)' }}>
         <div className="h-11 px-4 flex items-center justify-between border-b border-white/[0.06] bg-white/[0.02]">
-          <div className="flex items-center gap-2.5">
-            <div className="w-6 h-6 rounded-lg bg-white flex items-center justify-center">
-              <span className="text-[10px] font-black text-black">X</span>
-            </div>
-            <span className="text-[13px] font-bold text-white/90 tracking-tight">MentXr® Buddy List</span>
+          <div className="flex items-center gap-2">
+            <span className="relative w-7 h-7 flex items-center justify-center">
+              <span className="absolute inset-0 rounded-full bg-[#E0E0E0]/15 animate-ping" />
+              <span className="relative w-3 h-3 rounded-full bg-[#E0E0E0] shadow-[0_0_8px_rgba(224,224,224,0.4)]" />
+            </span>
+            <span className="text-[13px] font-bold text-white/90 tracking-tight">MentXr®</span>
           </div>
           <button onClick={() => setSidebarOpen(false)} className="md:hidden text-white/40 hover:text-white/70" data-testid="button-close-sidebar">
             <X className="w-4 h-4" />
