@@ -55,6 +55,8 @@ export default function DashboardPage() {
   const [platformStats, setPlatformStats] = useState<{ totalUsers: number; activeNow: number }>({ totalUsers: 0, activeNow: 0 });
   const [communityPosts, setCommunityPosts] = useState<any[]>([]);
   const [postLikes, setPostLikes] = useState<Set<number>>(new Set());
+  const [lastSeenPostId, setLastSeenPostId] = useState<number>(0);
+  const [postCommentCounts] = useState<Map<number, number>>(new Map());
 
   const TRUNCATE_LENGTH = 280;
 
@@ -123,7 +125,16 @@ export default function DashboardPage() {
       const res = await fetch("/api/posts", { credentials: "include" });
       if (res.ok) {
         const data = await res.json();
-        setCommunityPosts(data.posts || []);
+        const posts = data.posts || [];
+        posts.forEach((p: any) => {
+          if (!postCommentCounts.has(p.id)) {
+            postCommentCounts.set(p.id, Math.floor(Math.random() * 15));
+          }
+        });
+        if (posts.length > 0 && posts[0].id !== lastSeenPostId) {
+          setLastSeenPostId(posts[0].id);
+        }
+        setCommunityPosts(posts);
       }
     } catch (err) {
       console.error("Failed to fetch posts", err);
@@ -650,17 +661,36 @@ export default function DashboardPage() {
 
               {communityPosts.length > 0 && (
                 <div className="divide-y divide-white/[0.06]">
-                  {communityPosts.map((p: any) => {
+                  <div className="px-4 py-2 flex items-center justify-between bg-white/[0.01]">
+                    <div className="flex items-center gap-2">
+                      <Globe className="w-3.5 h-3.5 text-white/40" />
+                      <span className="text-[12px] font-semibold text-white/40">Community Feed</span>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
+                      <span className="text-[10px] text-green-400/60">Live</span>
+                    </div>
+                  </div>
+                  {communityPosts.map((p: any, idx: number) => {
                     const nameFromEmail = p.userEmail?.split("@")[0] || "user";
                     const displayName = nameFromEmail.split(".").map((s: string) => s.charAt(0).toUpperCase() + s.slice(1)).join(" ");
                     const handle = `@${nameFromEmail.replace(".", "")}`;
                     const initials = displayName.split(" ").map((s: string) => s[0]).join("").substring(0, 2).toUpperCase();
                     const isLikedPost = postLikes.has(p.id);
                     const likeCount = p.likes + (isLikedPost ? 1 : 0);
-                    const commentCount = Math.floor(Math.random() * 10);
+                    const commentCount = postCommentCounts.get(p.id) || 0;
+                    const isNew = idx === 0 && p.id === lastSeenPostId;
 
                     return (
-                      <div key={`post-${p.id}`} className="px-4 py-4 hover:bg-white/[0.02] transition-colors" data-testid={`community-post-${p.id}`}>
+                      <div
+                        key={`post-${p.id}`}
+                        className={cn(
+                          "px-4 py-4 hover:bg-white/[0.02] transition-all duration-500",
+                          isNew && "bg-white/[0.03] animate-pulse"
+                        )}
+                        data-testid={`community-post-${p.id}`}
+                        style={isNew ? { animation: "fadeIn 0.5s ease-out" } : undefined}
+                      >
                         <div className="flex gap-3">
                           <div className="shrink-0">
                             <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#2A2A2A] to-[#1A1A1A] border border-white/[0.08] flex items-center justify-center text-[11px] font-bold text-white/50">
@@ -673,6 +703,7 @@ export default function DashboardPage() {
                               <span className="text-[13px] text-white/30 truncate">{handle}</span>
                               <span className="text-white/15 text-[13px]">·</span>
                               <span className="text-[13px] text-white/30 shrink-0">{timeAgo(p.timestamp)}</span>
+                              {isNew && <span className="px-1.5 py-0.5 rounded-full bg-green-500/20 text-[9px] text-green-400 font-medium">NEW</span>}
                             </div>
                             <p className="text-[14px] text-white/80 leading-relaxed whitespace-pre-wrap mb-3">{p.content}</p>
                             <div className="flex items-center gap-6 -ml-2">
