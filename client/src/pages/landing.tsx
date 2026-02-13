@@ -47,10 +47,8 @@ function TechBackground() {
     let auroras: AuroraWave[] = [];
 
     const resize = () => {
-      const parent = canvas.parentElement;
-      if (!parent) return;
-      const w = parent.scrollWidth;
-      const h = parent.scrollHeight;
+      const w = window.innerWidth;
+      const h = window.innerHeight;
       canvas.style.width = w + 'px';
       canvas.style.height = h + 'px';
       canvas.width = w * window.devicePixelRatio;
@@ -59,10 +57,10 @@ function TechBackground() {
     };
 
     const init = () => {
-      const w = parseInt(canvas.style.width) || canvas.offsetWidth;
-      const h = parseInt(canvas.style.height) || canvas.offsetHeight;
+      const w = window.innerWidth;
+      const h = window.innerHeight;
 
-      const count = Math.floor((w * h) / 3800);
+      const count = Math.min(Math.floor((w * h) / 4500), 350);
       particles = [];
       for (let i = 0; i < count; i++) {
         const r = Math.random();
@@ -145,15 +143,14 @@ function TechBackground() {
     };
 
     const onMouseMove = (e: MouseEvent) => {
-      const rect = canvas.getBoundingClientRect();
-      mouseX = e.clientX - rect.left;
-      mouseY = e.clientY - rect.top + (window.scrollY || document.documentElement.scrollTop);
+      mouseX = e.clientX;
+      mouseY = e.clientY;
     };
     window.addEventListener('mousemove', onMouseMove);
 
     const draw = () => {
-      const w = parseInt(canvas.style.width) || canvas.offsetWidth;
-      const h = parseInt(canvas.style.height) || canvas.offsetHeight;
+      const w = window.innerWidth;
+      const h = window.innerHeight;
       ctx.clearRect(0, 0, w, h);
       time += 0.016;
 
@@ -346,21 +343,18 @@ function TechBackground() {
 
     const resizeHandler = () => { resize(); init(); };
     window.addEventListener('resize', resizeHandler);
-    const resizeObserver = new ResizeObserver(() => { resize(); init(); });
-    if (canvas.parentElement) resizeObserver.observe(canvas.parentElement);
 
     return () => {
       cancelAnimationFrame(animationId);
       window.removeEventListener('resize', resizeHandler);
       window.removeEventListener('mousemove', onMouseMove);
-      resizeObserver.disconnect();
     };
   }, []);
 
   return (
     <canvas
       ref={canvasRef}
-      className="absolute top-0 left-0 pointer-events-none"
+      className="fixed top-0 left-0 pointer-events-none"
       style={{ zIndex: 1 }}
     />
   );
