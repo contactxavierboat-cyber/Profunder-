@@ -544,6 +544,78 @@ export default function DashboardPage() {
                     </div>
                   ) : null}
                 </div>
+
+                {communityPosts.length > 0 && (
+                  <div className="divide-y divide-white/[0.06] border-t border-white/[0.06] mt-4">
+                    <div className="px-4 py-2.5 flex items-center justify-between bg-white/[0.02]">
+                      <div className="flex items-center gap-2">
+                        <Globe className="w-3.5 h-3.5 text-white/40" />
+                        <span className="text-[12px] font-semibold text-white/50">Community Feed</span>
+                        <span className="text-[10px] text-white/20">({communityPosts.length} posts)</span>
+                      </div>
+                      <div className="flex items-center gap-1.5">
+                        <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
+                        <span className="text-[10px] text-green-400/60">Live · refreshing every 2s</span>
+                      </div>
+                    </div>
+                    {communityPosts.map((p: any, idx: number) => {
+                      const nameFromEmail = p.userEmail?.split("@")[0] || "user";
+                      const displayName = nameFromEmail.split(".").map((s: string) => s.charAt(0).toUpperCase() + s.slice(1)).join(" ");
+                      const handle = `@${nameFromEmail.replace(".", "")}`;
+                      const initials = displayName.split(" ").map((s: string) => s[0]).join("").substring(0, 2).toUpperCase();
+                      const isLikedPost = postLikes.has(p.id);
+                      const likeCount = p.likes + (isLikedPost ? 1 : 0);
+                      const commentCount = postCommentCounts.get(p.id) || 0;
+                      const isNew = idx === 0 && p.id === lastSeenPostId;
+
+                      return (
+                        <div
+                          key={`post-${p.id}`}
+                          className={cn(
+                            "px-4 py-4 hover:bg-white/[0.02] transition-all duration-500",
+                            isNew && "bg-white/[0.04]"
+                          )}
+                          data-testid={`community-post-welcome-${p.id}`}
+                          style={isNew ? { animation: "fadeIn 0.5s ease-out" } : undefined}
+                        >
+                          <div className="flex gap-3">
+                            <div className="shrink-0">
+                              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#2A2A2A] to-[#1A1A1A] border border-white/[0.08] flex items-center justify-center text-[11px] font-bold text-white/50">
+                                {initials}
+                              </div>
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-1.5 mb-0.5">
+                                <span className="text-[14px] font-bold text-white/90 truncate">{displayName}</span>
+                                <span className="text-[13px] text-white/30 truncate">{handle}</span>
+                                <span className="text-white/15 text-[13px]">·</span>
+                                <span className="text-[13px] text-white/30 shrink-0">{timeAgo(p.timestamp)}</span>
+                                {isNew && <span className="px-1.5 py-0.5 rounded-full bg-green-500/20 text-[9px] text-green-400 font-medium animate-pulse">NEW</span>}
+                              </div>
+                              <p className="text-[14px] text-white/80 leading-relaxed whitespace-pre-wrap mb-3">{p.content}</p>
+                              <div className="flex items-center gap-6 -ml-2">
+                                <button
+                                  onClick={() => setPostLikes(prev => { const next = new Set(prev); if (next.has(p.id)) next.delete(p.id); else next.add(p.id); return next; })}
+                                  className={cn("flex items-center gap-1.5 px-2 py-1.5 rounded-full text-[13px] transition-colors", isLikedPost ? "text-red-400 hover:text-red-300" : "text-white/30 hover:text-red-400/70 hover:bg-red-500/5")}
+                                >
+                                  <Heart className={cn("w-4 h-4", isLikedPost && "fill-current")} />
+                                  <span>{likeCount}</span>
+                                </button>
+                                <div className="flex items-center gap-1.5 px-2 py-1.5 rounded-full text-[13px] text-white/30">
+                                  <MessageCircle className="w-4 h-4" />
+                                  <span>{commentCount}</span>
+                                </div>
+                                <button className="flex items-center gap-1.5 px-2 py-1.5 rounded-full text-[13px] text-white/30 hover:text-blue-400/70 hover:bg-blue-500/5 transition-colors">
+                                  <Share2 className="w-4 h-4" />
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
             </div>
           ) : (
@@ -656,77 +728,6 @@ export default function DashboardPage() {
                       </a>
                     ))}
                   </div>
-                </div>
-              )}
-
-              {communityPosts.length > 0 && (
-                <div className="divide-y divide-white/[0.06]">
-                  <div className="px-4 py-2 flex items-center justify-between bg-white/[0.01]">
-                    <div className="flex items-center gap-2">
-                      <Globe className="w-3.5 h-3.5 text-white/40" />
-                      <span className="text-[12px] font-semibold text-white/40">Community Feed</span>
-                    </div>
-                    <div className="flex items-center gap-1.5">
-                      <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
-                      <span className="text-[10px] text-green-400/60">Live</span>
-                    </div>
-                  </div>
-                  {communityPosts.map((p: any, idx: number) => {
-                    const nameFromEmail = p.userEmail?.split("@")[0] || "user";
-                    const displayName = nameFromEmail.split(".").map((s: string) => s.charAt(0).toUpperCase() + s.slice(1)).join(" ");
-                    const handle = `@${nameFromEmail.replace(".", "")}`;
-                    const initials = displayName.split(" ").map((s: string) => s[0]).join("").substring(0, 2).toUpperCase();
-                    const isLikedPost = postLikes.has(p.id);
-                    const likeCount = p.likes + (isLikedPost ? 1 : 0);
-                    const commentCount = postCommentCounts.get(p.id) || 0;
-                    const isNew = idx === 0 && p.id === lastSeenPostId;
-
-                    return (
-                      <div
-                        key={`post-${p.id}`}
-                        className={cn(
-                          "px-4 py-4 hover:bg-white/[0.02] transition-all duration-500",
-                          isNew && "bg-white/[0.03] animate-pulse"
-                        )}
-                        data-testid={`community-post-${p.id}`}
-                        style={isNew ? { animation: "fadeIn 0.5s ease-out" } : undefined}
-                      >
-                        <div className="flex gap-3">
-                          <div className="shrink-0">
-                            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#2A2A2A] to-[#1A1A1A] border border-white/[0.08] flex items-center justify-center text-[11px] font-bold text-white/50">
-                              {initials}
-                            </div>
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-1.5 mb-0.5">
-                              <span className="text-[14px] font-bold text-white/90 truncate">{displayName}</span>
-                              <span className="text-[13px] text-white/30 truncate">{handle}</span>
-                              <span className="text-white/15 text-[13px]">·</span>
-                              <span className="text-[13px] text-white/30 shrink-0">{timeAgo(p.timestamp)}</span>
-                              {isNew && <span className="px-1.5 py-0.5 rounded-full bg-green-500/20 text-[9px] text-green-400 font-medium">NEW</span>}
-                            </div>
-                            <p className="text-[14px] text-white/80 leading-relaxed whitespace-pre-wrap mb-3">{p.content}</p>
-                            <div className="flex items-center gap-6 -ml-2">
-                              <button
-                                onClick={() => setPostLikes(prev => { const next = new Set(prev); if (next.has(p.id)) next.delete(p.id); else next.add(p.id); return next; })}
-                                className={cn("flex items-center gap-1.5 px-2 py-1.5 rounded-full text-[13px] transition-colors", isLikedPost ? "text-red-400 hover:text-red-300" : "text-white/30 hover:text-red-400/70 hover:bg-red-500/5")}
-                              >
-                                <Heart className={cn("w-4 h-4", isLikedPost && "fill-current")} />
-                                <span>{likeCount}</span>
-                              </button>
-                              <div className="flex items-center gap-1.5 px-2 py-1.5 rounded-full text-[13px] text-white/30">
-                                <MessageCircle className="w-4 h-4" />
-                                <span>{commentCount}</span>
-                              </div>
-                              <button className="flex items-center gap-1.5 px-2 py-1.5 rounded-full text-[13px] text-white/30 hover:text-blue-400/70 hover:bg-blue-500/5 transition-colors">
-                                <Share2 className="w-4 h-4" />
-                              </button>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })}
                 </div>
               )}
 
@@ -956,6 +957,78 @@ export default function DashboardPage() {
                   </div>
                 )}
               </div>
+
+              {communityPosts.length > 0 && (
+                <div className="divide-y divide-white/[0.06] border-t border-white/[0.06]">
+                  <div className="px-4 py-2.5 flex items-center justify-between bg-white/[0.02] sticky top-0 z-10">
+                    <div className="flex items-center gap-2">
+                      <Globe className="w-3.5 h-3.5 text-white/40" />
+                      <span className="text-[12px] font-semibold text-white/50">Community Feed</span>
+                      <span className="text-[10px] text-white/20">({communityPosts.length} posts)</span>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
+                      <span className="text-[10px] text-green-400/60">Live · refreshing every 2s</span>
+                    </div>
+                  </div>
+                  {communityPosts.map((p: any, idx: number) => {
+                    const nameFromEmail = p.userEmail?.split("@")[0] || "user";
+                    const displayName = nameFromEmail.split(".").map((s: string) => s.charAt(0).toUpperCase() + s.slice(1)).join(" ");
+                    const handle = `@${nameFromEmail.replace(".", "")}`;
+                    const initials = displayName.split(" ").map((s: string) => s[0]).join("").substring(0, 2).toUpperCase();
+                    const isLikedPost = postLikes.has(p.id);
+                    const likeCount = p.likes + (isLikedPost ? 1 : 0);
+                    const commentCount = postCommentCounts.get(p.id) || 0;
+                    const isNew = idx === 0 && p.id === lastSeenPostId;
+
+                    return (
+                      <div
+                        key={`post-${p.id}`}
+                        className={cn(
+                          "px-4 py-4 hover:bg-white/[0.02] transition-all duration-500",
+                          isNew && "bg-white/[0.04]"
+                        )}
+                        data-testid={`community-post-${p.id}`}
+                        style={isNew ? { animation: "fadeIn 0.5s ease-out" } : undefined}
+                      >
+                        <div className="flex gap-3">
+                          <div className="shrink-0">
+                            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#2A2A2A] to-[#1A1A1A] border border-white/[0.08] flex items-center justify-center text-[11px] font-bold text-white/50">
+                              {initials}
+                            </div>
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-1.5 mb-0.5">
+                              <span className="text-[14px] font-bold text-white/90 truncate">{displayName}</span>
+                              <span className="text-[13px] text-white/30 truncate">{handle}</span>
+                              <span className="text-white/15 text-[13px]">·</span>
+                              <span className="text-[13px] text-white/30 shrink-0">{timeAgo(p.timestamp)}</span>
+                              {isNew && <span className="px-1.5 py-0.5 rounded-full bg-green-500/20 text-[9px] text-green-400 font-medium animate-pulse">NEW</span>}
+                            </div>
+                            <p className="text-[14px] text-white/80 leading-relaxed whitespace-pre-wrap mb-3">{p.content}</p>
+                            <div className="flex items-center gap-6 -ml-2">
+                              <button
+                                onClick={() => setPostLikes(prev => { const next = new Set(prev); if (next.has(p.id)) next.delete(p.id); else next.add(p.id); return next; })}
+                                className={cn("flex items-center gap-1.5 px-2 py-1.5 rounded-full text-[13px] transition-colors", isLikedPost ? "text-red-400 hover:text-red-300" : "text-white/30 hover:text-red-400/70 hover:bg-red-500/5")}
+                              >
+                                <Heart className={cn("w-4 h-4", isLikedPost && "fill-current")} />
+                                <span>{likeCount}</span>
+                              </button>
+                              <div className="flex items-center gap-1.5 px-2 py-1.5 rounded-full text-[13px] text-white/30">
+                                <MessageCircle className="w-4 h-4" />
+                                <span>{commentCount}</span>
+                              </div>
+                              <button className="flex items-center gap-1.5 px-2 py-1.5 rounded-full text-[13px] text-white/30 hover:text-blue-400/70 hover:bg-blue-500/5 transition-colors">
+                                <Share2 className="w-4 h-4" />
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
 
               <div ref={messagesEndRef} className="h-4" />
             </div>
