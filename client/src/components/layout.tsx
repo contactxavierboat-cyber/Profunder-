@@ -41,7 +41,10 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
         <div className="p-4 sm:p-6 border-b border-sidebar-border flex items-center justify-between">
           <div>
             <h1 className="font-sans font-bold text-lg sm:text-xl tracking-tighter flex items-center gap-2">
-              <span className="w-7 h-7 sm:w-8 sm:h-8 bg-[#E0E0E0] rounded-md flex items-center justify-center text-[#0D0D0D] font-mono text-sm sm:text-base">X</span>
+              <span className="relative w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center">
+                <span className="absolute inset-0 rounded-full bg-green-500/20 animate-ping" />
+                <span className="relative w-3 h-3 sm:w-3.5 sm:h-3.5 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]" />
+              </span>
               MentXr®
             </h1>
             <p className="text-[10px] sm:text-xs text-muted-foreground mt-1">Mentorship, On Demand</p>

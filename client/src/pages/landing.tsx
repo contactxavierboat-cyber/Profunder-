@@ -146,11 +146,10 @@ export default function LandingPage() {
 
         <div className="relative z-10 flex flex-col items-center px-4 sm:px-6 pt-12 sm:pt-20 pb-16 sm:pb-20">
 
-          <img
-            src="/logo.png"
-            alt="X+"
-            className="w-[52px] h-[52px] sm:w-[64px] sm:h-[64px] rounded-[14px] sm:rounded-[16px] mb-6 sm:mb-8"
-          />
+          <div className="w-[52px] h-[52px] sm:w-[64px] sm:h-[64px] rounded-[14px] sm:rounded-[16px] mb-6 sm:mb-8 bg-[#1A1A1A] border border-[#333] flex items-center justify-center relative">
+            <span className="absolute w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-green-500/15 animate-ping" />
+            <span className="relative w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-green-500 shadow-[0_0_12px_rgba(34,197,94,0.6)]" />
+          </div>
 
           <div className="flex items-center gap-2 sm:gap-2.5 px-4 sm:px-5 py-1.5 sm:py-2 rounded-full border border-[#333] bg-[#181818] mb-8 sm:mb-12">
             <span className="w-[7px] h-[7px] sm:w-[8px] sm:h-[8px] rounded-full bg-[#888] animate-ping"></span>
