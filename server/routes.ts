@@ -948,15 +948,31 @@ export async function registerRoutes(
   });
 
   const RSS_FEEDS = [
-    { url: "https://feeds.bbci.co.uk/news/business/rss.xml", source: "BBC Business", category: "business" },
-    { url: "https://www.entrepreneur.com/latest.rss", source: "Entrepreneur", category: "entrepreneurship" },
-    { url: "https://feeds.feedburner.com/entrepreneur/latest", source: "Entrepreneur", category: "entrepreneurship" },
-    { url: "https://www.forbes.com/innovation/feed2", source: "Forbes", category: "innovation" },
-    { url: "https://www.forbes.com/money/feed2", source: "Forbes Money", category: "finance" },
-    { url: "https://rss.nytimes.com/services/xml/rss/nyt/Business.xml", source: "NY Times Business", category: "business" },
-    { url: "https://feeds.nbcnews.com/nbcnews/public/business", source: "NBC Business", category: "business" },
-    { url: "https://search.cnbc.com/rs/search/combinedcms/view.xml?partnerId=wrss01&id=10001147", source: "CNBC", category: "finance" },
-    { url: "https://www.investopedia.com/feedbuilder/feed/getfeed/?feedName=rss_headline", source: "Investopedia", category: "investing" },
+    { url: "https://feeds.bbci.co.uk/news/business/rss.xml", source: "BBC Business", category: "business", contentType: "text" },
+    { url: "https://www.entrepreneur.com/latest.rss", source: "Entrepreneur", category: "entrepreneurship", contentType: "text" },
+    { url: "https://feeds.feedburner.com/entrepreneur/latest", source: "Entrepreneur", category: "entrepreneurship", contentType: "text" },
+    { url: "https://www.forbes.com/innovation/feed2", source: "Forbes", category: "innovation", contentType: "text" },
+    { url: "https://www.forbes.com/money/feed2", source: "Forbes Money", category: "finance", contentType: "text" },
+    { url: "https://rss.nytimes.com/services/xml/rss/nyt/Business.xml", source: "NY Times Business", category: "business", contentType: "text" },
+    { url: "https://feeds.nbcnews.com/nbcnews/public/business", source: "NBC Business", category: "business", contentType: "text" },
+    { url: "https://search.cnbc.com/rs/search/combinedcms/view.xml?partnerId=wrss01&id=10001147", source: "CNBC", category: "finance", contentType: "text" },
+    { url: "https://www.investopedia.com/feedbuilder/feed/getfeed/?feedName=rss_headline", source: "Investopedia", category: "investing", contentType: "text" },
+    { url: "https://www.reddit.com/r/entrepreneur/.rss", source: "Reddit", category: "entrepreneurship", contentType: "text" },
+    { url: "https://www.reddit.com/r/business/.rss", source: "Reddit", category: "business", contentType: "text" },
+    { url: "https://www.reddit.com/r/investing/.rss", source: "Reddit", category: "investing", contentType: "text" },
+    { url: "https://www.reddit.com/r/motivation/.rss", source: "Reddit", category: "motivation", contentType: "photo" },
+    { url: "https://feeds.feedburner.com/TechCrunch/", source: "TechCrunch", category: "tech", contentType: "text" },
+    { url: "https://www.wired.com/feed/rss", source: "Wired", category: "tech", contentType: "text" },
+    { url: "https://feeds.arstechnica.com/arstechnica/index", source: "Ars Technica", category: "tech", contentType: "text" },
+    { url: "https://rss.nytimes.com/services/xml/rss/nyt/Technology.xml", source: "NY Times Tech", category: "tech", contentType: "text" },
+    { url: "https://feeds.bbci.co.uk/news/technology/rss.xml", source: "BBC Tech", category: "tech", contentType: "text" },
+    { url: "https://www.theverge.com/rss/index.xml", source: "The Verge", category: "tech", contentType: "photo" },
+    { url: "https://www.youtube.com/feeds/videos.xml?channel_id=UCVHFbqXqoYvEWM1Ddxl0QDg", source: "Alex Hormozi", category: "business", contentType: "video" },
+    { url: "https://www.youtube.com/feeds/videos.xml?channel_id=UCkETyBN1DHIpQUvlhJPCSoQ", source: "Grant Cardone YT", category: "sales", contentType: "video" },
+    { url: "https://www.youtube.com/feeds/videos.xml?channel_id=UCGy2gSXRPSNnkVEwzoOR5yA", source: "GaryVee YT", category: "marketing", contentType: "video" },
+    { url: "https://www.youtube.com/feeds/videos.xml?channel_id=UCV6KDgJskWaEckne5aPA0aQ", source: "Graham Stephan", category: "finance", contentType: "video" },
+    { url: "https://www.youtube.com/feeds/videos.xml?channel_id=UCL_f53ZEJxp8TtlOkHwMV9Q", source: "Jordan Peterson", category: "mindset", contentType: "video" },
+    { url: "https://www.youtube.com/feeds/videos.xml?channel_id=UCWX0jBqMEG70xCUiRqpBkgA", source: "19Keys YT", category: "mindset", contentType: "video" },
   ];
 
   interface FeedItem {
@@ -967,13 +983,14 @@ export async function registerRoutes(
     image: string | null;
     source: string;
     category: string;
+    contentType: string;
     publishedAt: string;
     author: string | null;
   }
 
   let feedCache: FeedItem[] = [];
   let feedLastFetch = 0;
-  const FEED_CACHE_MS = 10 * 1000;
+  const FEED_CACHE_MS = 3 * 1000;
 
   async function fetchAllFeeds(): Promise<FeedItem[]> {
     const now = Date.now();
@@ -989,7 +1006,12 @@ export async function registerRoutes(
         const items = (feed.items || []).slice(0, 8);
         for (const item of items) {
           let image: string | null = null;
-          if (item.enclosure?.url) {
+          const videoId = feedConfig.contentType === "video" && item.id
+            ? item.id.replace("yt:video:", "")
+            : null;
+          if (videoId) {
+            image = `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
+          } else if (item.enclosure?.url) {
             image = item.enclosure.url;
           } else if (item['media:content']?.$.url) {
             image = item['media:content'].$.url;
@@ -1000,19 +1022,27 @@ export async function registerRoutes(
             if (imgMatch) image = imgMatch[1];
           }
 
+          let cType = feedConfig.contentType;
+          if (cType === "text" && image) cType = "photo";
+
           const desc = (item.contentSnippet || item.content || item.summary || "")
             .replace(/<[^>]*>/g, "")
             .substring(0, 200)
             .trim();
 
+          const link = videoId
+            ? `https://www.youtube.com/watch?v=${videoId}`
+            : (item.link || "");
+
           results.push({
             id: `${feedConfig.source}-${item.guid || item.link || item.title}`,
             title: item.title || "Untitled",
             description: desc || "",
-            link: item.link || "",
+            link,
             image,
             source: feedConfig.source,
             category: feedConfig.category,
+            contentType: cType,
             publishedAt: item.isoDate || item.pubDate || new Date().toISOString(),
             author: item.creator || item.author || null,
           });

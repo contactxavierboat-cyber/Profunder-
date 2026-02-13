@@ -136,7 +136,7 @@ export default function DashboardPage() {
 
   useEffect(() => {
     if (!user) return;
-    const interval = setInterval(() => fetchFeed(false), 10 * 1000);
+    const interval = setInterval(() => fetchFeed(false), 3 * 1000);
     return () => clearInterval(interval);
   }, [user]);
 
@@ -446,18 +446,32 @@ export default function DashboardPage() {
                           data-testid={`feed-item-${idx}`}
                         >
                           {item.image && (
-                            <div className="w-full h-36 bg-[#111] overflow-hidden">
+                            <div className="relative w-full h-36 bg-[#111] overflow-hidden">
                               <img
                                 src={item.image}
                                 alt={item.title}
                                 className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-300"
                                 onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
                               />
+                              {item.contentType === "video" && (
+                                <div className="absolute inset-0 flex items-center justify-center bg-black/30 group-hover:bg-black/20 transition-colors">
+                                  <div className="w-10 h-10 rounded-full bg-white/90 flex items-center justify-center">
+                                    <div className="w-0 h-0 border-t-[6px] border-t-transparent border-l-[10px] border-l-black border-b-[6px] border-b-transparent ml-0.5" />
+                                  </div>
+                                </div>
+                              )}
                             </div>
                           )}
                           <div className="p-3.5">
                             <div className="flex items-center gap-2 mb-1.5">
-                              <span className="px-2 py-0.5 rounded-full bg-white/[0.06] text-[9px] font-medium text-white/35 uppercase tracking-wide">{item.category}</span>
+                              <span className={cn(
+                                "px-2 py-0.5 rounded-full text-[9px] font-medium uppercase tracking-wide",
+                                item.contentType === "video" ? "bg-red-500/20 text-red-400" :
+                                item.contentType === "photo" ? "bg-blue-500/20 text-blue-400" :
+                                "bg-white/[0.06] text-white/35"
+                              )}>
+                                {item.contentType === "video" ? "▶ video" : item.contentType === "photo" ? "📷 photo" : "text"}
+                              </span>
                               <span className="text-[10px] text-white/20">{item.source}</span>
                               <span className="text-white/10 text-[10px]">·</span>
                               <span className="text-[10px] text-white/20">{timeAgo(item.publishedAt)}</span>
@@ -468,7 +482,7 @@ export default function DashboardPage() {
                             )}
                             <div className="flex items-center gap-1.5 mt-2 text-[10px] text-white/20">
                               <ExternalLink className="w-2.5 h-2.5" />
-                              <span>Read full article</span>
+                              <span>{item.contentType === "video" ? "Watch video" : "Read full article"}</span>
                             </div>
                           </div>
                         </a>
@@ -544,7 +558,7 @@ export default function DashboardPage() {
                     className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide"
                     style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
                   >
-                    {feedItems.slice(0, 12).map((item: any, idx: number) => (
+                    {feedItems.slice(0, 15).map((item: any, idx: number) => (
                       <a
                         key={item.id || idx}
                         href={item.link}
@@ -554,19 +568,33 @@ export default function DashboardPage() {
                         data-testid={`feed-card-${idx}`}
                       >
                         {item.image && (
-                          <div className="w-full h-24 bg-[#111] overflow-hidden">
+                          <div className="relative w-full h-24 bg-[#111] overflow-hidden">
                             <img
                               src={item.image}
                               alt={item.title}
                               className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-300"
                               onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
                             />
+                            {item.contentType === "video" && (
+                              <div className="absolute inset-0 flex items-center justify-center bg-black/30 group-hover:bg-black/20 transition-colors">
+                                <div className="w-8 h-8 rounded-full bg-white/90 flex items-center justify-center">
+                                  <div className="w-0 h-0 border-t-[5px] border-t-transparent border-l-[9px] border-l-black border-b-[5px] border-b-transparent ml-0.5" />
+                                </div>
+                              </div>
+                            )}
                           </div>
                         )}
                         <div className="p-2.5">
                           <div className="flex items-center gap-1.5 mb-1">
-                            <span className="px-1.5 py-0.5 rounded-full bg-white/[0.06] text-[8px] font-medium text-white/35 uppercase tracking-wide">{item.category}</span>
-                            <span className="text-[9px] text-white/20">{item.source}</span>
+                            <span className={cn(
+                              "px-1.5 py-0.5 rounded-full text-[8px] font-medium uppercase tracking-wide",
+                              item.contentType === "video" ? "bg-red-500/20 text-red-400" :
+                              item.contentType === "photo" ? "bg-blue-500/20 text-blue-400" :
+                              "bg-white/[0.06] text-white/35"
+                            )}>
+                              {item.contentType === "video" ? "▶ video" : item.contentType === "photo" ? "📷 photo" : "text"}
+                            </span>
+                            <span className="text-[9px] text-white/20 truncate">{item.source}</span>
                           </div>
                           <h3 className="text-[12px] font-semibold text-white/80 leading-snug line-clamp-2 group-hover:text-white transition-colors">{item.title}</h3>
                           <span className="text-[9px] text-white/20 mt-1 block">{timeAgo(item.publishedAt)}</span>
