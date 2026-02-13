@@ -724,7 +724,7 @@ export default function DashboardPage() {
                         </div>
                         <p className="text-[10px] font-mono font-semibold tracking-[0.25em] text-white/30 uppercase">Estimated Funding Range</p>
                       </div>
-                      <p className="text-3xl sm:text-4xl font-black font-mono text-gradient" data-testid="text-range">
+                      <p className="text-3xl sm:text-4xl font-black font-mono text-white/90" data-testid="text-range">
                         ${fundingData.estimatedRange.min.toLocaleString()} <span className="text-white/20">-</span> ${fundingData.estimatedRange.max.toLocaleString()}
                       </p>
                       <div className="neon-line mt-4 mb-3" />
