@@ -139,7 +139,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async searchUsers(query: string, currentUserId: number): Promise<User[]> {
-    return db.select().from(users).where(and(ne(users.id, currentUserId), ne(users.password, "bot_no_login"), or(ilike(users.displayName, `%${query}%`), ilike(users.email, `%${query}%`)))).limit(50);
+    return db.select().from(users).where(and(ne(users.password, "bot_no_login"), or(ilike(users.displayName, `%${query}%`), ilike(users.email, `%${query}%`)))).limit(50);
   }
 }
 
