@@ -3318,6 +3318,23 @@ export async function registerRoutes(
 
   setTimeout(() => startBotPostingEngine(), 3000);
 
+  app.post("/api/posts", requireAuth, async (req, res) => {
+    try {
+      const userId = req.session.userId!;
+      const { content } = req.body;
+      if (!content || typeof content !== "string" || content.trim().length === 0) {
+        return res.status(400).json({ error: "Post content is required" });
+      }
+      if (content.length > 500) {
+        return res.status(400).json({ error: "Post content too long (max 500 chars)" });
+      }
+      const post = await storage.createPost({ userId, content: content.trim(), likes: 0 });
+      res.json({ post });
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
   app.get("/api/posts", requireAuth, async (_req, res) => {
     try {
       const recentPosts = await storage.getRecentPosts(50);

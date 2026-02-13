@@ -430,6 +430,20 @@ export default function DashboardPage() {
     }
   };
 
+  const postToFeed = async (content: string) => {
+    try {
+      const res = await fetch("/api/posts", { method: "POST", headers: { "Content-Type": "application/json" }, credentials: "include", body: JSON.stringify({ content: content.substring(0, 500) }) });
+      if (res.ok) {
+        toast({ title: "Posted to feed!" });
+      } else {
+        const d = await res.json();
+        toast({ title: "Error", description: d.error, variant: "destructive" });
+      }
+    } catch {
+      toast({ title: "Error", description: "Failed to post", variant: "destructive" });
+    }
+  };
+
   const handleTextareaInput = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setInput(e.target.value);
     const el = e.target;
@@ -1221,8 +1235,14 @@ export default function DashboardPage() {
                               <MessageCircle className={cn("w-[18px] h-[18px]", openComments.has(m.id) && "fill-current")} />
                               {(commentsData[m.id]?.length || 0) > 0 && <span className="text-[12px]">{commentsData[m.id].length}</span>}
                             </button>
-                            <button className="flex items-center gap-1.5 px-2 py-1.5 rounded-full text-white/25 hover:text-[#E0E0E0]/60 transition-colors" data-testid={`button-share-${m.id}`}>
+                            <button
+                              onClick={() => postToFeed(m.content)}
+                              className="flex items-center gap-1.5 px-2 py-1.5 rounded-full text-white/25 hover:text-[#E0E0E0]/60 transition-colors"
+                              title="Post to feed"
+                              data-testid={`button-post-feed-${m.id}`}
+                            >
                               <Share2 className="w-[18px] h-[18px]" />
+                              <span className="text-[11px]">Post</span>
                             </button>
                             <button
                               onClick={() => toggleSave(m.id)}
