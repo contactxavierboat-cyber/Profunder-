@@ -126,7 +126,7 @@ function TechBackground() {
     };
   }, []);
   return (
-    <canvas ref={canvasRef} className="fixed top-0 left-0 pointer-events-none" style={{ zIndex: -1 }} />
+    <canvas ref={canvasRef} className="fixed top-0 left-0 pointer-events-none" style={{ zIndex: 1 }} />
   );
 }
 
@@ -525,7 +525,7 @@ export default function DashboardPage() {
     : [];
 
   return (
-    <div className="h-[100dvh] flex bg-[#080808] text-white">
+    <div className="h-[100dvh] flex text-white relative">
       <TechBackground />
 
       {sidebarOpen && (
