@@ -154,34 +154,88 @@ export default function LandingPage() {
       </nav>
 
       <div className="relative bg-black" style={{ overflow: 'clip' }}>
+        <svg className="absolute w-0 h-0">
+          <defs>
+            <filter id="fog-turbulence">
+              <feTurbulence type="fractalNoise" baseFrequency="0.012" numOctaves="4" seed="2" stitchTiles="stitch">
+                <animate attributeName="baseFrequency" values="0.012;0.015;0.012" dur="30s" repeatCount="indefinite" />
+              </feTurbulence>
+              <feColorMatrix type="saturate" values="0" />
+              <feComponentTransfer>
+                <feFuncA type="table" tableValues="0 0 0.2 0.5 0.7 0.6 0.3 0" />
+              </feComponentTransfer>
+              <feGaussianBlur stdDeviation="8" />
+            </filter>
+            <filter id="fog-turbulence-2">
+              <feTurbulence type="fractalNoise" baseFrequency="0.009" numOctaves="5" seed="8" stitchTiles="stitch">
+                <animate attributeName="baseFrequency" values="0.009;0.013;0.009" dur="40s" repeatCount="indefinite" />
+              </feTurbulence>
+              <feColorMatrix type="saturate" values="0" />
+              <feComponentTransfer>
+                <feFuncA type="table" tableValues="0 0 0.15 0.4 0.6 0.5 0.25 0" />
+              </feComponentTransfer>
+              <feGaussianBlur stdDeviation="6" />
+            </filter>
+          </defs>
+        </svg>
+
         <div
           className="absolute pointer-events-none"
           style={{
-            width: '1200px',
-            height: '1200px',
-            top: '-300px',
-            left: '-200px',
-            background: 'radial-gradient(circle at center, rgba(255,255,255,0.55) 0%, rgba(255,255,255,0.35) 30%, rgba(255,255,255,0.15) 60%, rgba(255,255,255,0.05) 75%, rgba(255,255,255,0) 85%)',
-            filter: 'blur(320px)',
-            opacity: 0.6,
+            inset: '-100px',
+            filter: 'url(#fog-turbulence)',
+            opacity: 0.7,
             mixBlendMode: 'screen',
             zIndex: 1,
+            animation: 'fogSlide1 25s ease-in-out infinite',
+            background: 'radial-gradient(ellipse at 25% 30%, rgba(255,255,255,0.9) 0%, rgba(200,200,200,0.4) 30%, transparent 60%)',
           }}
         />
         <div
           className="absolute pointer-events-none"
           style={{
-            width: '1000px',
-            height: '1000px',
-            bottom: '-250px',
-            right: '-150px',
-            background: 'radial-gradient(circle at center, rgba(255,255,255,0.45) 0%, rgba(255,255,255,0.25) 35%, rgba(255,255,255,0.1) 65%, rgba(255,255,255,0) 85%)',
-            filter: 'blur(280px)',
-            opacity: 0.5,
+            inset: '-80px',
+            filter: 'url(#fog-turbulence-2)',
+            opacity: 0.55,
             mixBlendMode: 'screen',
             zIndex: 1,
+            animation: 'fogSlide2 35s ease-in-out infinite',
+            background: 'radial-gradient(ellipse at 70% 65%, rgba(255,255,255,0.85) 0%, rgba(190,190,190,0.35) 35%, transparent 60%)',
           }}
         />
+        <div
+          className="absolute pointer-events-none"
+          style={{
+            inset: '-120px',
+            filter: 'url(#fog-turbulence) blur(4px)',
+            opacity: 0.4,
+            mixBlendMode: 'screen',
+            zIndex: 1,
+            animation: 'fogSlide3 30s ease-in-out infinite',
+            background: 'radial-gradient(ellipse at 50% 50%, rgba(255,255,255,0.7) 0%, rgba(180,180,180,0.25) 40%, transparent 65%)',
+          }}
+        />
+
+        <style>{`
+          @keyframes fogSlide1 {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            25% { transform: translate(60px, 30px) scale(1.05); }
+            50% { transform: translate(30px, 60px) scale(0.98); }
+            75% { transform: translate(-40px, 20px) scale(1.03); }
+          }
+          @keyframes fogSlide2 {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            33% { transform: translate(-50px, -40px) scale(1.08); }
+            66% { transform: translate(40px, -20px) scale(0.95); }
+          }
+          @keyframes fogSlide3 {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            20% { transform: translate(40px, -30px) scale(1.06); }
+            40% { transform: translate(80px, 20px) scale(0.97); }
+            60% { transform: translate(20px, 50px) scale(1.04); }
+            80% { transform: translate(-30px, 10px) scale(1.01); }
+          }
+        `}</style>
 
         <div className="relative z-10 flex flex-col min-h-[85vh] sm:min-h-[90vh] justify-center px-6 sm:px-12 md:px-20 lg:px-28">
 
