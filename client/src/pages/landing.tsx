@@ -154,86 +154,75 @@ export default function LandingPage() {
       </nav>
 
       <div className="relative bg-black" style={{ overflow: 'clip' }}>
-        <svg className="absolute w-0 h-0">
-          <defs>
-            <filter id="fog-turbulence">
-              <feTurbulence type="fractalNoise" baseFrequency="0.012" numOctaves="4" seed="2" stitchTiles="stitch">
-                <animate attributeName="baseFrequency" values="0.012;0.015;0.012" dur="30s" repeatCount="indefinite" />
-              </feTurbulence>
-              <feColorMatrix type="saturate" values="0" />
-              <feComponentTransfer>
-                <feFuncA type="table" tableValues="0 0 0.2 0.5 0.7 0.6 0.3 0" />
-              </feComponentTransfer>
-              <feGaussianBlur stdDeviation="8" />
-            </filter>
-            <filter id="fog-turbulence-2">
-              <feTurbulence type="fractalNoise" baseFrequency="0.009" numOctaves="5" seed="8" stitchTiles="stitch">
-                <animate attributeName="baseFrequency" values="0.009;0.013;0.009" dur="40s" repeatCount="indefinite" />
-              </feTurbulence>
-              <feColorMatrix type="saturate" values="0" />
-              <feComponentTransfer>
-                <feFuncA type="table" tableValues="0 0 0.15 0.4 0.6 0.5 0.25 0" />
-              </feComponentTransfer>
-              <feGaussianBlur stdDeviation="6" />
-            </filter>
-          </defs>
-        </svg>
-
         <div
           className="absolute pointer-events-none"
           style={{
-            inset: '-100px',
-            filter: 'url(#fog-turbulence)',
+            width: '130%',
+            height: '130%',
+            top: '-15%',
+            left: '-15%',
+            backgroundImage: 'url(/images/smoke-1.png)',
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            opacity: 0.85,
+            mixBlendMode: 'screen',
+            zIndex: 1,
+            animation: 'smokeDrift1 30s ease-in-out infinite',
+          }}
+        />
+        <div
+          className="absolute pointer-events-none"
+          style={{
+            width: '140%',
+            height: '140%',
+            bottom: '-20%',
+            right: '-20%',
+            backgroundImage: 'url(/images/smoke-2.png)',
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
             opacity: 0.7,
             mixBlendMode: 'screen',
             zIndex: 1,
-            animation: 'fogSlide1 25s ease-in-out infinite',
-            background: 'radial-gradient(ellipse at 25% 30%, rgba(255,255,255,0.9) 0%, rgba(200,200,200,0.4) 30%, transparent 60%)',
+            animation: 'smokeDrift2 40s ease-in-out infinite',
+            transform: 'scaleX(-1)',
           }}
         />
         <div
           className="absolute pointer-events-none"
           style={{
-            inset: '-80px',
-            filter: 'url(#fog-turbulence-2)',
-            opacity: 0.55,
+            width: '120%',
+            height: '120%',
+            top: '-10%',
+            right: '-10%',
+            backgroundImage: 'url(/images/smoke-1.png)',
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            opacity: 0.5,
             mixBlendMode: 'screen',
             zIndex: 1,
-            animation: 'fogSlide2 35s ease-in-out infinite',
-            background: 'radial-gradient(ellipse at 70% 65%, rgba(255,255,255,0.85) 0%, rgba(190,190,190,0.35) 35%, transparent 60%)',
-          }}
-        />
-        <div
-          className="absolute pointer-events-none"
-          style={{
-            inset: '-120px',
-            filter: 'url(#fog-turbulence) blur(4px)',
-            opacity: 0.4,
-            mixBlendMode: 'screen',
-            zIndex: 1,
-            animation: 'fogSlide3 30s ease-in-out infinite',
-            background: 'radial-gradient(ellipse at 50% 50%, rgba(255,255,255,0.7) 0%, rgba(180,180,180,0.25) 40%, transparent 65%)',
+            animation: 'smokeDrift3 35s ease-in-out infinite',
+            transform: 'rotate(180deg)',
           }}
         />
 
         <style>{`
-          @keyframes fogSlide1 {
+          @keyframes smokeDrift1 {
             0%, 100% { transform: translate(0, 0) scale(1); }
-            25% { transform: translate(60px, 30px) scale(1.05); }
-            50% { transform: translate(30px, 60px) scale(0.98); }
-            75% { transform: translate(-40px, 20px) scale(1.03); }
+            25% { transform: translate(40px, 20px) scale(1.05); }
+            50% { transform: translate(20px, 40px) scale(1.02); }
+            75% { transform: translate(-30px, 15px) scale(1.04); }
           }
-          @keyframes fogSlide2 {
-            0%, 100% { transform: translate(0, 0) scale(1); }
-            33% { transform: translate(-50px, -40px) scale(1.08); }
-            66% { transform: translate(40px, -20px) scale(0.95); }
+          @keyframes smokeDrift2 {
+            0%, 100% { transform: scaleX(-1) translate(0, 0) scale(1); }
+            33% { transform: scaleX(-1) translate(-50px, -30px) scale(1.06); }
+            66% { transform: scaleX(-1) translate(30px, -20px) scale(1.03); }
           }
-          @keyframes fogSlide3 {
-            0%, 100% { transform: translate(0, 0) scale(1); }
-            20% { transform: translate(40px, -30px) scale(1.06); }
-            40% { transform: translate(80px, 20px) scale(0.97); }
-            60% { transform: translate(20px, 50px) scale(1.04); }
-            80% { transform: translate(-30px, 10px) scale(1.01); }
+          @keyframes smokeDrift3 {
+            0%, 100% { transform: rotate(180deg) translate(0, 0) scale(1); }
+            20% { transform: rotate(180deg) translate(30px, -25px) scale(1.04); }
+            40% { transform: rotate(180deg) translate(60px, 15px) scale(1.02); }
+            60% { transform: rotate(180deg) translate(20px, 40px) scale(1.06); }
+            80% { transform: rotate(180deg) translate(-20px, 10px) scale(1.03); }
           }
         `}</style>
 
