@@ -4,9 +4,11 @@
 A free AI mentorship platform ("Mentorship On Demand") that provides personalized conversations with digital versions of influential mentors. Features ChatGPT-style dark theme interface, session-based authentication, OpenAI GPT-4o powered conversations, PDF document upload, admin panel, and free membership access for all users.
 
 ## Recent Changes
+- 2026-02-13: Added Charleston White as 7th mentor - Youth Advocacy & Transformation
+- 2026-02-13: Reset all memberships (monthly usage reset to 0 for all users)
 - 2026-02-12: Made memberships free for all users (no subscription required, all users default to active)
 - 2026-02-12: Added 19Keys (Jibrial Muhammad) as 6th mentor - Mindset & Financial Literacy
-- 2026-02-12: Added mentor selection panel with 6 mentors (Grant Cardone, Warren Buffett, Gary Vaynerchuk, Oprah Winfrey, Sara Blakely, 19Keys)
+- 2026-02-12: Added mentor selection panel with 7 mentors (Grant Cardone, Warren Buffett, Gary Vaynerchuk, Oprah Winfrey, Sara Blakely, 19Keys, Charleston White)
 - 2026-02-12: Each mentor has unique avatar, system prompt, specialty, tagline, and keyword detection
 - 2026-02-12: Users can explicitly select/switch/clear mentors via UI panel or type mentor name
 - 2026-02-12: Added /api/mentors endpoint for listing available mentors
@@ -51,7 +53,7 @@ A free AI mentorship platform ("Mentorship On Demand") that provides personalize
 - Messages: userId, role (user/assistant), content, attachment type, mentor (nullable), timestamp
 
 ### Mentor System
-- 6 mentors: Grant Cardone, Warren Buffett, Gary Vaynerchuk, Oprah Winfrey, Sara Blakely, 19Keys
+- 7 mentors: Grant Cardone, Warren Buffett, Gary Vaynerchuk, Oprah Winfrey, Sara Blakely, 19Keys, Charleston White
 - Each has: unique avatar (PNG in client/src/assets/), system prompt, specialty, tagline, keyword detection
 - Backend: MENTOR_PROFILES in server/routes.ts, /api/mentors endpoint
 - Frontend: MENTOR_INFO in chat-interface.tsx, mentor selection panel with grid UI

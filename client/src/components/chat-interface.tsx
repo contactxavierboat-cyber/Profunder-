@@ -13,6 +13,7 @@ import garyVeeAvatar from "@/assets/mentor-gary.png";
 import oprahWinfreyAvatar from "@/assets/mentor-oprah.png";
 import saraBlakelyAvatar from "@/assets/mentor-sara.png";
 import nineteenKeysAvatar from "@/assets/mentor-19keys.png";
+import charlestonWhiteAvatar from "@/assets/mentor-charleston-white.png";
 
 const MENTOR_INFO: Record<string, { name: string; avatar: string; tagline: string; specialty: string }> = {
   grant_cardone: {
@@ -50,6 +51,12 @@ const MENTOR_INFO: Record<string, { name: string; avatar: string; tagline: strin
     avatar: nineteenKeysAvatar,
     tagline: "Unlock Your Potential",
     specialty: "Mindset & Financial Literacy",
+  },
+  charleston_white: {
+    name: "Charleston White",
+    avatar: charlestonWhiteAvatar,
+    tagline: "Real Talk, Real Change",
+    specialty: "Youth Advocacy & Transformation",
   },
 };
 
