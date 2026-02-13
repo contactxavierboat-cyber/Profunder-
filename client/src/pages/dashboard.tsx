@@ -46,6 +46,10 @@ export default function DashboardPage() {
   const [likedMessages, setLikedMessages] = useState<Set<number>>(new Set());
   const [savedMessages, setSavedMessages] = useState<Set<number>>(new Set());
   const [expandedMessages, setExpandedMessages] = useState<Set<number>>(new Set());
+  const [openComments, setOpenComments] = useState<Set<number>>(new Set());
+  const [commentsData, setCommentsData] = useState<Record<number, any[]>>({});
+  const [commentInputs, setCommentInputs] = useState<Record<number, string>>({});
+  const [commentLoading, setCommentLoading] = useState<Set<number>>(new Set());
 
   const TRUNCATE_LENGTH = 280;
 
@@ -55,6 +59,58 @@ export default function DashboardPage() {
       if (next.has(id)) next.delete(id); else next.add(id);
       return next;
     });
+  };
+
+  const toggleComments = async (messageId: number) => {
+    const next = new Set(openComments);
+    if (next.has(messageId)) {
+      next.delete(messageId);
+    } else {
+      next.add(messageId);
+      if (!commentsData[messageId]) {
+        try {
+          const res = await fetch(`/api/comments/${messageId}`, { credentials: "include" });
+          if (res.ok) {
+            const data = await res.json();
+            setCommentsData(prev => ({ ...prev, [messageId]: data }));
+          }
+        } catch (err) {
+          console.error("Failed to load comments", err);
+        }
+      }
+    }
+    setOpenComments(next);
+  };
+
+  const submitComment = async (messageId: number) => {
+    const text = (commentInputs[messageId] || "").trim();
+    if (!text) return;
+
+    setCommentLoading(prev => { const next = new Set(prev); next.add(messageId); return next; });
+    setCommentInputs(prev => ({ ...prev, [messageId]: "" }));
+
+    try {
+      const res = await fetch(`/api/comments/${messageId}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ content: text }),
+      });
+      if (res.ok) {
+        const { userComment, aiReply } = await res.json();
+        setCommentsData(prev => {
+          const existing = prev[messageId] || [];
+          const updated = [...existing, userComment];
+          if (aiReply) updated.push(aiReply);
+          return { ...prev, [messageId]: updated };
+        });
+      }
+    } catch (err) {
+      console.error("Failed to post comment", err);
+      toast({ title: "Error", description: "Failed to post comment", variant: "destructive" });
+    } finally {
+      setCommentLoading(prev => { const next = new Set(prev); next.delete(messageId); return next; });
+    }
   };
 
   const lastMentorMsg = [...messages].reverse().find(m => m.role === 'assistant' && m.mentor);
@@ -468,8 +524,16 @@ export default function DashboardPage() {
                               <Heart className={cn("w-[18px] h-[18px]", isLiked && "fill-current")} />
                               {isLiked && <span className="text-[12px]">1</span>}
                             </button>
-                            <button className="flex items-center gap-1.5 px-2 py-1.5 rounded-full text-white/25 hover:text-[#E0E0E0]/60 transition-colors" data-testid={`button-reply-${m.id}`}>
-                              <MessageCircle className="w-[18px] h-[18px]" />
+                            <button
+                              onClick={() => toggleComments(m.id)}
+                              className={cn(
+                                "flex items-center gap-1.5 px-2 py-1.5 rounded-full transition-colors",
+                                openComments.has(m.id) ? "text-[#E0E0E0]" : "text-white/25 hover:text-[#E0E0E0]/60"
+                              )}
+                              data-testid={`button-reply-${m.id}`}
+                            >
+                              <MessageCircle className={cn("w-[18px] h-[18px]", openComments.has(m.id) && "fill-current")} />
+                              {(commentsData[m.id]?.length || 0) > 0 && <span className="text-[12px]">{commentsData[m.id].length}</span>}
                             </button>
                             <button className="flex items-center gap-1.5 px-2 py-1.5 rounded-full text-white/25 hover:text-[#E0E0E0]/60 transition-colors" data-testid={`button-share-${m.id}`}>
                               <Share2 className="w-[18px] h-[18px]" />
@@ -485,6 +549,80 @@ export default function DashboardPage() {
                               <Bookmark className={cn("w-[18px] h-[18px]", isSaved && "fill-current")} />
                             </button>
                           </div>
+
+                          {openComments.has(m.id) && (
+                            <div className="mt-3 pt-3 border-t border-white/[0.06]" data-testid={`comments-section-${m.id}`}>
+                              {(commentsData[m.id] || []).map((c: any) => {
+                                const cMentor = c.role === "assistant" && c.mentor ? MENTOR_INFO[c.mentor] : null;
+                                const cIsUser = c.role === "user";
+                                return (
+                                  <div key={c.id} className="flex gap-2.5 mb-3" data-testid={`comment-${c.id}`}>
+                                    <div className="shrink-0">
+                                      {cIsUser ? (
+                                        <div className="w-7 h-7 rounded-full bg-[#1A1A1A] border border-[#333] flex items-center justify-center text-[9px] font-bold text-[#999]">
+                                          {user.email.substring(0, 2).toUpperCase()}
+                                        </div>
+                                      ) : cMentor ? (
+                                        <img src={cMentor.avatar} alt={cMentor.name} className="w-7 h-7 rounded-full object-cover border border-white/10" />
+                                      ) : (
+                                        <div className="w-7 h-7 rounded-xl overflow-hidden">
+                                          <img src="/logo.png" alt="MentXr" className="w-full h-full" />
+                                        </div>
+                                      )}
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                      <div className="flex items-center gap-1.5">
+                                        <span className="text-[12px] font-bold text-white/80">
+                                          {cIsUser ? "You" : (cMentor ? cMentor.name : "MentXr® AI")}
+                                        </span>
+                                        {!cIsUser && (
+                                          <svg className="w-3 h-3 text-[#E0E0E0]" viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg>
+                                        )}
+                                        <span className="text-[11px] text-white/25">{c.timestamp ? timeAgo(c.timestamp) : "now"}</span>
+                                      </div>
+                                      <p className="text-[13px] text-white/70 leading-[1.5] mt-0.5 whitespace-pre-wrap break-words">{c.content}</p>
+                                    </div>
+                                  </div>
+                                );
+                              })}
+
+                              {commentLoading.has(m.id) && (
+                                <div className="flex items-center gap-2 mb-3 pl-9">
+                                  <Loader2 className="w-3.5 h-3.5 animate-spin text-white/30" />
+                                  <span className="text-[12px] text-white/30">AI is replying...</span>
+                                </div>
+                              )}
+
+                              <div className="flex gap-2 items-center">
+                                <div className="w-7 h-7 rounded-full bg-[#1A1A1A] border border-[#333] flex items-center justify-center text-[9px] font-bold text-[#999] shrink-0">
+                                  {user.email.substring(0, 2).toUpperCase()}
+                                </div>
+                                <div className="flex-1 flex items-center bg-white/[0.04] border border-white/[0.08] rounded-2xl px-3 py-1.5">
+                                  <input
+                                    type="text"
+                                    placeholder="Add a comment..."
+                                    value={commentInputs[m.id] || ""}
+                                    onChange={(e) => setCommentInputs(prev => ({ ...prev, [m.id]: e.target.value }))}
+                                    onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); submitComment(m.id); } }}
+                                    disabled={commentLoading.has(m.id)}
+                                    className="flex-1 bg-transparent text-[13px] text-white placeholder:text-white/20 outline-none"
+                                    data-testid={`input-comment-${m.id}`}
+                                  />
+                                  <button
+                                    onClick={() => submitComment(m.id)}
+                                    disabled={!(commentInputs[m.id] || "").trim() || commentLoading.has(m.id)}
+                                    className={cn(
+                                      "text-[12px] font-semibold ml-2 transition-colors",
+                                      (commentInputs[m.id] || "").trim() ? "text-[#E0E0E0] hover:text-white" : "text-white/15"
+                                    )}
+                                    data-testid={`button-comment-submit-${m.id}`}
+                                  >
+                                    Post
+                                  </button>
+                                </div>
+                              </div>
+                            </div>
+                          )}
                         </div>
                       </div>
                     </div>

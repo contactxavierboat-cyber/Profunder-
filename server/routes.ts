@@ -861,5 +861,84 @@ export async function registerRoutes(
     res.status(204).send();
   });
 
+  app.get("/api/comments/:messageId", requireAuth, async (req, res) => {
+    const messageId = parseInt(req.params.messageId);
+    if (isNaN(messageId)) return res.status(400).json({ error: "Invalid message ID" });
+    const userId = req.session.userId!;
+    const msgs = await storage.getMessages(userId);
+    const ownsMessage = msgs.some(m => m.id === messageId);
+    if (!ownsMessage) return res.status(403).json({ error: "Access denied" });
+    const commentsList = await storage.getComments(messageId);
+    res.json(commentsList);
+  });
+
+  app.post("/api/comments/:messageId", requireAuth, async (req, res) => {
+    const userId = req.session.userId!;
+    const messageId = parseInt(req.params.messageId);
+    if (isNaN(messageId)) return res.status(400).json({ error: "Invalid message ID" });
+
+    const commentBody = z.object({ content: z.string().min(1).max(2000) }).safeParse(req.body);
+    if (!commentBody.success) {
+      return res.status(400).json({ error: "Comment content is required (max 2000 characters)" });
+    }
+    const { content } = commentBody.data;
+
+    const msgs = await storage.getMessages(userId);
+    const parentMessage = msgs.find(m => m.id === messageId);
+    if (!parentMessage) return res.status(404).json({ error: "Message not found" });
+
+    const mentor = parentMessage.mentor || null;
+
+    const userComment = await storage.createComment({
+      messageId,
+      userId,
+      role: "user",
+      content: content.trim(),
+      mentor: null,
+    });
+
+    let aiReplyComment: any = null;
+    try {
+      let systemPrompt: string;
+      if (mentor && MENTOR_PROFILES[mentor]) {
+        systemPrompt = MENTOR_PROFILES[mentor].systemPrompt + "\n\nYou are replying to a user's comment on one of your previous responses. Keep your reply concise, conversational, and helpful — like a social media reply. 2-4 sentences max.";
+      } else {
+        systemPrompt = MENTXR_SYSTEM_PROMPT + "\n\nYou are replying to a user's comment on a previous AI response. Keep your reply concise, conversational, and helpful — like a social media reply. 2-4 sentences max.";
+      }
+
+      const existingComments = await storage.getComments(messageId);
+      const commentContext = existingComments.map(c => ({
+        role: c.role as "user" | "assistant",
+        content: c.content,
+      }));
+
+      const response = await openai.chat.completions.create({
+        model: "gpt-4o",
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "assistant", content: parentMessage.content },
+          ...commentContext,
+        ],
+        max_tokens: 512,
+      });
+
+      const aiContent = response.choices[0]?.message?.content || "Thanks for your comment!";
+      aiReplyComment = await storage.createComment({
+        messageId,
+        userId,
+        role: "assistant",
+        content: aiContent,
+        mentor,
+      });
+    } catch (error: any) {
+      console.error("Comment AI reply error:", error);
+    }
+
+    res.json({
+      userComment,
+      aiReply: aiReplyComment,
+    });
+  });
+
   return httpServer;
 }

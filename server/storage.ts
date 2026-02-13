@@ -1,4 +1,4 @@
-import { users, messages, type User, type InsertUser, type Message, type InsertMessage } from "@shared/schema";
+import { users, messages, comments, type User, type InsertUser, type Message, type InsertMessage, type Comment, type InsertComment } from "@shared/schema";
 import { db } from "./db";
 import { eq } from "drizzle-orm";
 
@@ -12,6 +12,10 @@ export interface IStorage {
   getMessages(userId: number): Promise<Message[]>;
   createMessage(message: InsertMessage): Promise<Message>;
   clearMessages(userId: number): Promise<void>;
+
+  getComments(messageId: number): Promise<Comment[]>;
+  getCommentsByUser(userId: number): Promise<Comment[]>;
+  createComment(comment: InsertComment): Promise<Comment>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -50,6 +54,19 @@ export class DatabaseStorage implements IStorage {
 
   async clearMessages(userId: number): Promise<void> {
     await db.delete(messages).where(eq(messages.userId, userId));
+  }
+
+  async getComments(messageId: number): Promise<Comment[]> {
+    return db.select().from(comments).where(eq(comments.messageId, messageId)).orderBy(comments.timestamp);
+  }
+
+  async getCommentsByUser(userId: number): Promise<Comment[]> {
+    return db.select().from(comments).where(eq(comments.userId, userId)).orderBy(comments.timestamp);
+  }
+
+  async createComment(insertComment: InsertComment): Promise<Comment> {
+    const [comment] = await db.insert(comments).values(insertComment).returning();
+    return comment;
   }
 }
 
