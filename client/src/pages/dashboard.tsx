@@ -57,6 +57,7 @@ export default function DashboardPage() {
   const [postLikes, setPostLikes] = useState<Set<number>>(new Set());
   const [lastSeenPostId, setLastSeenPostId] = useState<number>(0);
   const [postCommentCounts] = useState<Map<number, number>>(new Map());
+  const [activeTab, setActiveTab] = useState<"feed" | "chat">("feed");
 
   const TRUNCATE_LENGTH = 280;
 
@@ -215,6 +216,7 @@ export default function DashboardPage() {
     setAttachedFile(null);
     if (textareaRef.current) textareaRef.current.style.height = "auto";
     setIsLoading(true);
+    setActiveTab("chat");
     try {
       let fileContent: string | undefined;
       if (file) {
@@ -350,29 +352,58 @@ export default function DashboardPage() {
 
       <main className="flex-1 flex flex-col min-w-0 relative bg-[#000000]">
 
-        <header className="h-14 flex items-center justify-between px-4 border-b border-white/[0.08] shrink-0 relative z-10 backdrop-blur-xl bg-black/80">
-          <div className="flex items-center gap-3">
-            <button
-              data-testid="button-menu"
-              onClick={() => setSidebarOpen(true)}
-              className="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-white/[0.06] transition-colors md:hidden"
-            >
-              <Menu className="w-5 h-5 text-white/60" />
-            </button>
-            <div className="flex items-center gap-2">
+        <header className="shrink-0 relative z-10 backdrop-blur-xl bg-black/80 border-b border-white/[0.08]">
+          <div className="h-14 flex items-center justify-between px-4">
+            <div className="flex items-center gap-3">
+              <button
+                data-testid="button-menu"
+                onClick={() => setSidebarOpen(true)}
+                className="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-white/[0.06] transition-colors md:hidden"
+              >
+                <Menu className="w-5 h-5 text-white/60" />
+              </button>
               <img src="/logo.png" alt="MentXr" className="w-5 h-5 rounded-md md:hidden" />
-              <span className="text-[15px] font-bold tracking-tight">Feed</span>
+              {platformStats.activeNow > 0 && (
+                <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-green-500/10 border border-green-500/20">
+                  <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
+                  <span className="text-[11px] text-green-400/80 font-medium">{platformStats.activeNow} active</span>
+                </div>
+              )}
             </div>
-            {platformStats.activeNow > 0 && (
-              <div className="flex items-center gap-1.5 ml-3 px-2.5 py-1 rounded-full bg-green-500/10 border border-green-500/20">
-                <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
-                <span className="text-[11px] text-green-400/80 font-medium">{platformStats.activeNow} active</span>
-              </div>
-            )}
+            <button data-testid="button-new-chat-header" onClick={() => { clearChat(); setSelectedMentor(null); setMentorCleared(true); setActiveTab("chat"); }} className="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-white/[0.06] transition-colors">
+              <Plus className="w-5 h-5 text-white/50" />
+            </button>
           </div>
-          <button data-testid="button-new-chat-header" onClick={() => { clearChat(); setSelectedMentor(null); setMentorCleared(true); }} className="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-white/[0.06] transition-colors">
-            <Plus className="w-5 h-5 text-white/50" />
-          </button>
+          <div className="flex px-4">
+            <button
+              data-testid="tab-feed"
+              onClick={() => setActiveTab("feed")}
+              className={cn(
+                "flex-1 py-2.5 text-[13px] font-semibold text-center transition-colors relative",
+                activeTab === "feed" ? "text-white" : "text-white/40 hover:text-white/60"
+              )}
+            >
+              <div className="flex items-center justify-center gap-1.5">
+                <Globe className="w-3.5 h-3.5" />
+                Feed
+              </div>
+              {activeTab === "feed" && <div className="absolute bottom-0 left-1/4 right-1/4 h-[2px] bg-white rounded-full" />}
+            </button>
+            <button
+              data-testid="tab-chat"
+              onClick={() => setActiveTab("chat")}
+              className={cn(
+                "flex-1 py-2.5 text-[13px] font-semibold text-center transition-colors relative",
+                activeTab === "chat" ? "text-white" : "text-white/40 hover:text-white/60"
+              )}
+            >
+              <div className="flex items-center justify-center gap-1.5">
+                <MessageCircle className="w-3.5 h-3.5" />
+                Chat
+              </div>
+              {activeTab === "chat" && <div className="absolute bottom-0 left-1/4 right-1/4 h-[2px] bg-white rounded-full" />}
+            </button>
+          </div>
         </header>
 
         <div
@@ -380,7 +411,7 @@ export default function DashboardPage() {
           onScroll={handleScroll}
           className="flex-1 overflow-y-auto"
         >
-          {!hasMessages ? (
+          {activeTab === "feed" ? (
             <div className="max-w-xl mx-auto w-full">
               <div className="px-4 pt-5 pb-3">
                 <div
@@ -389,7 +420,7 @@ export default function DashboardPage() {
                   style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
                 >
                   <button
-                    onClick={() => { setSelectedMentor(null); setMentorCleared(true); }}
+                    onClick={() => { setSelectedMentor(null); setMentorCleared(true); setActiveTab("chat"); }}
                     className="flex flex-col items-center gap-1.5 shrink-0"
                     data-testid="button-mentor-default"
                   >
@@ -407,7 +438,7 @@ export default function DashboardPage() {
                   {Object.entries(MENTOR_INFO).map(([key, mentor]) => (
                     <button
                       key={key}
-                      onClick={() => { setSelectedMentor(key); setMentorCleared(false); }}
+                      onClick={() => { setSelectedMentor(key); setMentorCleared(false); setActiveTab("chat"); }}
                       className="flex flex-col items-center gap-1.5 shrink-0"
                       data-testid={`button-mentor-${key}`}
                     >
@@ -425,49 +456,7 @@ export default function DashboardPage() {
 
               <div className="border-t border-white/[0.06]" />
 
-              <div className="px-4 py-8 flex flex-col items-center">
-                {activeMentor ? (
-                  <>
-                    <div className="w-20 h-20 rounded-full p-[2px] bg-[#E0E0E0] mb-4">
-                      <img src={activeMentor.avatar} alt={activeMentor.name} className="w-full h-full rounded-full object-cover" />
-                    </div>
-                    <h2 className="text-xl font-bold mb-0.5">{activeMentor.name}</h2>
-                    <p className="text-white/40 text-sm">{activeMentor.tagline}</p>
-                    <span className="text-[11px] text-white/25 mt-1 px-3 py-1 rounded-full bg-white/[0.04] border border-white/[0.06]">{activeMentor.specialty}</span>
-                  </>
-                ) : (
-                  <>
-                    <div className="w-20 h-20 rounded-2xl mb-4 overflow-hidden bg-[#1A1A1A] border border-[#333] flex items-center justify-center">
-                      <img src="/logo.png" alt="MentXr" className="w-12 h-12 rounded-xl" />
-                    </div>
-                    <h2 className="text-xl font-bold mb-0.5">MentXr®</h2>
-                    <p className="text-white/40 text-sm text-center max-w-xs">Mentorship On Demand</p>
-                  </>
-                )}
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 mt-8 max-w-md w-full">
-                  {[
-                    { text: "Help me build my business strategy", icon: "💡" },
-                    { text: "How do I scale to 7 figures?", icon: "📈" },
-                    { text: "Guide me on personal branding", icon: "🎯" },
-                    { text: "What should I invest in right now?", icon: "💰" },
-                  ].map((prompt, i) => (
-                    <button
-                      key={i}
-                      data-testid={`button-suggestion-${i}`}
-                      onClick={() => {
-                        setInput(prompt.text);
-                        textareaRef.current?.focus();
-                      }}
-                      className="text-left px-4 py-3 rounded-2xl border border-white/[0.08] bg-white/[0.02] hover:bg-white/[0.06] transition-all text-sm text-white/50 hover:text-white/70 flex items-center gap-3"
-                    >
-                      <span className="text-lg">{prompt.icon}</span>
-                      <span>{prompt.text}</span>
-                    </button>
-                  ))}
-                </div>
-
-                <div className="mt-8 w-full max-w-md">
+              <div className="px-4 mt-4">
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-2">
                       <TrendingUp className="w-3.5 h-3.5 text-[#E0E0E0]/50" />
@@ -543,7 +532,6 @@ export default function DashboardPage() {
                       ))}
                     </div>
                   ) : null}
-                </div>
 
                 {communityPosts.length > 0 && (
                   <div className="divide-y divide-white/[0.06] border-t border-white/[0.06] mt-4">
@@ -622,14 +610,13 @@ export default function DashboardPage() {
             <div className="max-w-xl mx-auto w-full">
               <div className="px-4 pt-4 pb-2">
                 <div
-                  ref={storiesRef}
                   className="flex gap-3 overflow-x-auto pb-3 scrollbar-hide"
                   style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
                 >
                   <button
                     onClick={() => { setSelectedMentor(null); setMentorCleared(true); }}
                     className="flex flex-col items-center gap-1.5 shrink-0"
-                    data-testid="button-mentor-default-active"
+                    data-testid="button-mentor-default-chat"
                   >
                     <div className={cn(
                       "w-14 h-14 rounded-full p-[2px]",
@@ -647,7 +634,7 @@ export default function DashboardPage() {
                       key={key}
                       onClick={() => { setSelectedMentor(key); setMentorCleared(false); }}
                       className="flex flex-col items-center gap-1.5 shrink-0"
-                      data-testid={`button-mentor-active-${key}`}
+                      data-testid={`button-mentor-chat-${key}`}
                     >
                       <div className={cn(
                         "w-14 h-14 rounded-full p-[2px]",
@@ -663,69 +650,46 @@ export default function DashboardPage() {
 
               <div className="border-t border-white/[0.06]" />
 
-              {feedItems.length > 0 && (
-                <div className="px-4 py-3 border-b border-white/[0.06]">
-                  <div className="flex items-center justify-between mb-2.5">
-                    <div className="flex items-center gap-2">
-                      <TrendingUp className="w-3.5 h-3.5 text-[#E0E0E0]/50" />
-                      <span className="text-[12px] font-semibold text-white/50">Trending</span>
-                    </div>
-                    <button
-                      onClick={() => fetchFeed(true)}
-                      disabled={feedLoading}
-                      className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-white/[0.04] border border-white/[0.06] text-[10px] text-white/30 hover:text-white/50 hover:bg-white/[0.06] transition-colors"
-                      data-testid="button-refresh-feed-inline"
-                    >
-                      <RefreshCw className={cn("w-2.5 h-2.5", feedLoading && "animate-spin")} />
-                      Refresh
-                    </button>
-                  </div>
-                  <div
-                    className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide"
-                    style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
-                  >
-                    {feedItems.slice(0, 15).map((item: any, idx: number) => (
-                      <a
-                        key={item.id || idx}
-                        href={item.link}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="shrink-0 w-[200px] rounded-xl border border-white/[0.06] bg-white/[0.02] hover:bg-white/[0.05] transition-all overflow-hidden group"
-                        data-testid={`feed-card-${idx}`}
+              {!hasMessages && (
+                <div className="px-4 py-8 flex flex-col items-center">
+                  {activeMentor ? (
+                    <>
+                      <div className="w-20 h-20 rounded-full p-[2px] bg-[#E0E0E0] mb-4">
+                        <img src={activeMentor.avatar} alt={activeMentor.name} className="w-full h-full rounded-full object-cover" />
+                      </div>
+                      <h2 className="text-xl font-bold mb-0.5">{activeMentor.name}</h2>
+                      <p className="text-white/40 text-sm">{activeMentor.tagline}</p>
+                      <span className="text-[11px] text-white/25 mt-1 px-3 py-1 rounded-full bg-white/[0.04] border border-white/[0.06]">{activeMentor.specialty}</span>
+                    </>
+                  ) : (
+                    <>
+                      <div className="w-20 h-20 rounded-2xl mb-4 overflow-hidden bg-[#1A1A1A] border border-[#333] flex items-center justify-center">
+                        <img src="/logo.png" alt="MentXr" className="w-12 h-12 rounded-xl" />
+                      </div>
+                      <h2 className="text-xl font-bold mb-0.5">MentXr®</h2>
+                      <p className="text-white/40 text-sm text-center max-w-xs">Mentorship On Demand</p>
+                    </>
+                  )}
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 mt-8 max-w-md w-full">
+                    {[
+                      { text: "Help me build my business strategy", icon: "💡" },
+                      { text: "How do I scale to 7 figures?", icon: "📈" },
+                      { text: "Guide me on personal branding", icon: "🎯" },
+                      { text: "What should I invest in right now?", icon: "💰" },
+                    ].map((prompt, i) => (
+                      <button
+                        key={i}
+                        data-testid={`button-chat-suggestion-${i}`}
+                        onClick={() => {
+                          setInput(prompt.text);
+                          textareaRef.current?.focus();
+                        }}
+                        className="text-left px-4 py-3 rounded-2xl border border-white/[0.08] bg-white/[0.02] hover:bg-white/[0.06] transition-all text-sm text-white/50 hover:text-white/70 flex items-center gap-3"
                       >
-                        {item.image && (
-                          <div className="relative w-full h-24 bg-[#111] overflow-hidden">
-                            <img
-                              src={item.image}
-                              alt={item.title}
-                              className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-300"
-                              onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
-                            />
-                            {item.contentType === "video" && (
-                              <div className="absolute inset-0 flex items-center justify-center bg-black/30 group-hover:bg-black/20 transition-colors">
-                                <div className="w-8 h-8 rounded-full bg-white/90 flex items-center justify-center">
-                                  <div className="w-0 h-0 border-t-[5px] border-t-transparent border-l-[9px] border-l-black border-b-[5px] border-b-transparent ml-0.5" />
-                                </div>
-                              </div>
-                            )}
-                          </div>
-                        )}
-                        <div className="p-2.5">
-                          <div className="flex items-center gap-1.5 mb-1">
-                            <span className={cn(
-                              "px-1.5 py-0.5 rounded-full text-[8px] font-medium uppercase tracking-wide",
-                              item.contentType === "video" ? "bg-red-500/20 text-red-400" :
-                              item.contentType === "photo" ? "bg-blue-500/20 text-blue-400" :
-                              "bg-white/[0.06] text-white/35"
-                            )}>
-                              {item.contentType === "video" ? "▶ video" : item.contentType === "photo" ? "📷 photo" : "text"}
-                            </span>
-                            <span className="text-[9px] text-white/20 truncate">{item.source}</span>
-                          </div>
-                          <h3 className="text-[12px] font-semibold text-white/80 leading-snug line-clamp-2 group-hover:text-white transition-colors">{item.title}</h3>
-                          <span className="text-[9px] text-white/20 mt-1 block">{timeAgo(item.publishedAt)}</span>
-                        </div>
-                      </a>
+                        <span className="text-lg">{prompt.icon}</span>
+                        <span>{prompt.text}</span>
+                      </button>
                     ))}
                   </div>
                 </div>
@@ -957,78 +921,6 @@ export default function DashboardPage() {
                   </div>
                 )}
               </div>
-
-              {communityPosts.length > 0 && (
-                <div className="divide-y divide-white/[0.06] border-t border-white/[0.06]">
-                  <div className="px-4 py-2.5 flex items-center justify-between bg-white/[0.02] sticky top-0 z-10">
-                    <div className="flex items-center gap-2">
-                      <Globe className="w-3.5 h-3.5 text-white/40" />
-                      <span className="text-[12px] font-semibold text-white/50">Community Feed</span>
-                      <span className="text-[10px] text-white/20">({communityPosts.length} posts)</span>
-                    </div>
-                    <div className="flex items-center gap-1.5">
-                      <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
-                      <span className="text-[10px] text-green-400/60">Live · refreshing every 2s</span>
-                    </div>
-                  </div>
-                  {communityPosts.map((p: any, idx: number) => {
-                    const nameFromEmail = p.userEmail?.split("@")[0] || "user";
-                    const displayName = nameFromEmail.split(".").map((s: string) => s.charAt(0).toUpperCase() + s.slice(1)).join(" ");
-                    const handle = `@${nameFromEmail.replace(".", "")}`;
-                    const initials = displayName.split(" ").map((s: string) => s[0]).join("").substring(0, 2).toUpperCase();
-                    const isLikedPost = postLikes.has(p.id);
-                    const likeCount = p.likes + (isLikedPost ? 1 : 0);
-                    const commentCount = postCommentCounts.get(p.id) || 0;
-                    const isNew = idx === 0 && p.id === lastSeenPostId;
-
-                    return (
-                      <div
-                        key={`post-${p.id}`}
-                        className={cn(
-                          "px-4 py-4 hover:bg-white/[0.02] transition-all duration-500",
-                          isNew && "bg-white/[0.04]"
-                        )}
-                        data-testid={`community-post-${p.id}`}
-                        style={isNew ? { animation: "fadeIn 0.5s ease-out" } : undefined}
-                      >
-                        <div className="flex gap-3">
-                          <div className="shrink-0">
-                            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#2A2A2A] to-[#1A1A1A] border border-white/[0.08] flex items-center justify-center text-[11px] font-bold text-white/50">
-                              {initials}
-                            </div>
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-1.5 mb-0.5">
-                              <span className="text-[14px] font-bold text-white/90 truncate">{displayName}</span>
-                              <span className="text-[13px] text-white/30 truncate">{handle}</span>
-                              <span className="text-white/15 text-[13px]">·</span>
-                              <span className="text-[13px] text-white/30 shrink-0">{timeAgo(p.timestamp)}</span>
-                              {isNew && <span className="px-1.5 py-0.5 rounded-full bg-green-500/20 text-[9px] text-green-400 font-medium animate-pulse">NEW</span>}
-                            </div>
-                            <p className="text-[14px] text-white/80 leading-relaxed whitespace-pre-wrap mb-3">{p.content}</p>
-                            <div className="flex items-center gap-6 -ml-2">
-                              <button
-                                onClick={() => setPostLikes(prev => { const next = new Set(prev); if (next.has(p.id)) next.delete(p.id); else next.add(p.id); return next; })}
-                                className={cn("flex items-center gap-1.5 px-2 py-1.5 rounded-full text-[13px] transition-colors", isLikedPost ? "text-red-400 hover:text-red-300" : "text-white/30 hover:text-red-400/70 hover:bg-red-500/5")}
-                              >
-                                <Heart className={cn("w-4 h-4", isLikedPost && "fill-current")} />
-                                <span>{likeCount}</span>
-                              </button>
-                              <div className="flex items-center gap-1.5 px-2 py-1.5 rounded-full text-[13px] text-white/30">
-                                <MessageCircle className="w-4 h-4" />
-                                <span>{commentCount}</span>
-                              </div>
-                              <button className="flex items-center gap-1.5 px-2 py-1.5 rounded-full text-[13px] text-white/30 hover:text-blue-400/70 hover:bg-blue-500/5 transition-colors">
-                                <Share2 className="w-4 h-4" />
-                              </button>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
 
               <div ref={messagesEndRef} className="h-4" />
             </div>
