@@ -154,32 +154,32 @@ export default function LandingPage() {
       </nav>
 
       <div className="relative bg-black" style={{ overflow: 'clip' }}>
-        <div
-          className="absolute pointer-events-none"
+        <img
+          src="/images/smoke-1.png"
+          alt=""
+          className="absolute pointer-events-none select-none"
           style={{
             width: '130%',
             height: '130%',
             top: '-15%',
             left: '-15%',
-            backgroundImage: 'url(/images/smoke-1.png)',
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
+            objectFit: 'cover',
             opacity: 0.85,
             mixBlendMode: 'screen',
             zIndex: 1,
             animation: 'smokeDrift1 30s ease-in-out infinite',
           }}
         />
-        <div
-          className="absolute pointer-events-none"
+        <img
+          src="/images/smoke-2.png"
+          alt=""
+          className="absolute pointer-events-none select-none"
           style={{
             width: '140%',
             height: '140%',
             bottom: '-20%',
             right: '-20%',
-            backgroundImage: 'url(/images/smoke-2.png)',
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
+            objectFit: 'cover',
             opacity: 0.7,
             mixBlendMode: 'screen',
             zIndex: 1,
@@ -187,16 +187,16 @@ export default function LandingPage() {
             transform: 'scaleX(-1)',
           }}
         />
-        <div
-          className="absolute pointer-events-none"
+        <img
+          src="/images/smoke-1.png"
+          alt=""
+          className="absolute pointer-events-none select-none"
           style={{
             width: '120%',
             height: '120%',
             top: '-10%',
             right: '-10%',
-            backgroundImage: 'url(/images/smoke-1.png)',
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
+            objectFit: 'cover',
             opacity: 0.5,
             mixBlendMode: 'screen',
             zIndex: 1,
