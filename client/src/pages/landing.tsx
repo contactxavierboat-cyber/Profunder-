@@ -154,8 +154,91 @@ export default function LandingPage() {
       </nav>
 
       <div className="relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-b from-[#080808] via-[#0a0a0a] to-[#080808]"></div>
-        <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: 'repeating-linear-gradient(90deg, white 0px, white 1px, transparent 1px, transparent 200px), repeating-linear-gradient(0deg, white 0px, white 1px, transparent 1px, transparent 200px)' }}></div>
+        <div className="absolute inset-0 bg-[#080808]"></div>
+
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div
+            className="absolute w-[800px] h-[800px] rounded-full opacity-[0.07]"
+            style={{
+              background: 'radial-gradient(circle, rgba(180,180,180,0.8) 0%, rgba(120,120,120,0.3) 30%, transparent 70%)',
+              top: '-10%',
+              left: '-10%',
+              animation: 'fogDrift1 25s ease-in-out infinite',
+              filter: 'blur(80px)',
+            }}
+          />
+          <div
+            className="absolute w-[900px] h-[700px] rounded-full opacity-[0.05]"
+            style={{
+              background: 'radial-gradient(circle, rgba(200,200,200,0.7) 0%, rgba(140,140,140,0.2) 35%, transparent 70%)',
+              top: '20%',
+              right: '-15%',
+              animation: 'fogDrift2 30s ease-in-out infinite',
+              filter: 'blur(100px)',
+            }}
+          />
+          <div
+            className="absolute w-[600px] h-[600px] rounded-full opacity-[0.06]"
+            style={{
+              background: 'radial-gradient(circle, rgba(160,160,160,0.6) 0%, rgba(100,100,100,0.2) 40%, transparent 70%)',
+              bottom: '5%',
+              left: '20%',
+              animation: 'fogDrift3 20s ease-in-out infinite',
+              filter: 'blur(90px)',
+            }}
+          />
+          <div
+            className="absolute w-[1000px] h-[500px] rounded-full opacity-[0.04]"
+            style={{
+              background: 'radial-gradient(ellipse, rgba(190,190,190,0.5) 0%, rgba(130,130,130,0.15) 40%, transparent 70%)',
+              top: '40%',
+              left: '-5%',
+              animation: 'fogDrift4 35s ease-in-out infinite',
+              filter: 'blur(120px)',
+            }}
+          />
+          <div
+            className="absolute w-[700px] h-[700px] rounded-full opacity-[0.05]"
+            style={{
+              background: 'radial-gradient(circle, rgba(170,170,170,0.6) 0%, rgba(110,110,110,0.2) 35%, transparent 65%)',
+              top: '-5%',
+              right: '10%',
+              animation: 'fogDrift5 28s ease-in-out infinite',
+              filter: 'blur(95px)',
+            }}
+          />
+        </div>
+
+        <style>{`
+          @keyframes fogDrift1 {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            25% { transform: translate(80px, 40px) scale(1.1); }
+            50% { transform: translate(40px, 80px) scale(0.95); }
+            75% { transform: translate(-30px, 30px) scale(1.05); }
+          }
+          @keyframes fogDrift2 {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            25% { transform: translate(-60px, 50px) scale(1.08); }
+            50% { transform: translate(-100px, -20px) scale(1.15); }
+            75% { transform: translate(-40px, -60px) scale(0.95); }
+          }
+          @keyframes fogDrift3 {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            33% { transform: translate(70px, -40px) scale(1.12); }
+            66% { transform: translate(-50px, -70px) scale(0.9); }
+          }
+          @keyframes fogDrift4 {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            25% { transform: translate(100px, -30px) scale(1.05); }
+            50% { transform: translate(60px, 50px) scale(1.1); }
+            75% { transform: translate(-40px, 20px) scale(0.98); }
+          }
+          @keyframes fogDrift5 {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            30% { transform: translate(-70px, 60px) scale(1.1); }
+            60% { transform: translate(50px, 30px) scale(0.92); }
+          }
+        `}</style>
 
         <div className="relative z-10 flex flex-col min-h-[85vh] sm:min-h-[90vh] justify-center px-6 sm:px-12 md:px-20 lg:px-28">
 
