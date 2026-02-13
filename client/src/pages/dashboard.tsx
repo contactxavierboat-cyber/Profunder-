@@ -1,10 +1,11 @@
 import { useEffect, useState, useRef } from "react";
 import { useAuth } from "@/lib/store";
 import { useLocation } from "wouter";
-import { Send, Plus, Paperclip, Loader2, ArrowDown, FileText, X, Menu, MessageCircle, RefreshCw, TrendingUp, UserPlus, Check, UserX, Search, AlertTriangle, Shield, ChevronRight, Target, BarChart3, BookOpen, CheckCircle2, AlertCircle, Info, Zap, Activity, Upload, Sparkles, Eye, Lock, Cpu } from "lucide-react";
+import { Send, Plus, Paperclip, Loader2, ArrowDown, FileText, X, Menu, MessageCircle, RefreshCw, TrendingUp, UserPlus, Check, UserX, Search, AlertTriangle, Shield, ChevronRight, Target, BarChart3, BookOpen, CheckCircle2, AlertCircle, Info, Zap, Activity, Upload, Sparkles, Eye, Lock, Cpu, ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
+import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, RadialBarChart, RadialBar } from "recharts";
 const BOT_COLORS: Record<string, string> = {
   nova_sage: "bg-gradient-to-br from-orange-500 to-red-600",
   alpha_volt: "bg-gradient-to-br from-blue-500 to-cyan-600",
@@ -64,6 +65,24 @@ function timeAgo(date: Date | string): string {
   return `${Math.floor(diff / 86400)}d`;
 }
 
+function DonutChart({ value, max, size = 120, strokeWidth = 10, color = "#fff" }: { value: number; max: number; size?: number; strokeWidth?: number; color?: string }) {
+  const radius = (size - strokeWidth) / 2;
+  const circumference = 2 * Math.PI * radius;
+  const pct = Math.min(value / max, 1);
+  const offset = circumference - pct * circumference;
+  return (
+    <svg width={size} height={size} className="-rotate-90">
+      <circle cx={size / 2} cy={size / 2} r={radius} fill="none" stroke="#1F1F1F" strokeWidth={strokeWidth} />
+      <circle
+        cx={size / 2} cy={size / 2} r={radius} fill="none"
+        stroke={color} strokeWidth={strokeWidth} strokeLinecap="round"
+        strokeDasharray={circumference} strokeDashoffset={offset}
+        style={{ transition: "stroke-dashoffset 1s ease", filter: `drop-shadow(0 0 4px ${color}40)` }}
+      />
+    </svg>
+  );
+}
+
 export default function DashboardPage() {
   const { user, messages, sendMessage, clearChat, logout } = useAuth();
   const [, setLocation] = useLocation();
@@ -99,6 +118,7 @@ export default function DashboardPage() {
   const [repairAnalyzing, setRepairAnalyzing] = useState(false);
   const [expandedLetters, setExpandedLetters] = useState<Set<number>>(new Set());
   const [copiedLetter, setCopiedLetter] = useState<number | null>(null);
+  const [expandedDenials, setExpandedDenials] = useState<Set<number>>(new Set());
 
   const TRUNCATE_LENGTH = 280;
 
@@ -365,40 +385,23 @@ export default function DashboardPage() {
   const hasMessages = messages.length > 0;
 
   const getScoreColor = (score: number) => {
-    if (score >= 85) return "text-green-400";
-    if (score >= 70) return "text-yellow-400";
-    if (score >= 50) return "text-amber-500";
-    return "text-red-400";
-  };
-
-  const getScoreRingColor = (score: number) => {
     if (score >= 85) return "#22c55e";
     if (score >= 70) return "#eab308";
     if (score >= 50) return "#f59e0b";
     return "#ef4444";
   };
 
-  const getStatusBg = (status: string) => {
-    if (status === "ready") return "bg-green-500/10 border-green-500/20 text-green-400";
-    if (status === "almost") return "bg-yellow-500/10 border-yellow-500/20 text-yellow-400";
-    if (status === "needs_improvement") return "bg-amber-500/10 border-amber-500/20 text-amber-500";
-    return "bg-red-500/10 border-red-500/20 text-red-400";
-  };
-
-  const getSeverityIcon = (severity: string) => {
-    if (severity === "red") return <AlertCircle className="w-4 h-4 text-red-400 shrink-0" />;
-    if (severity === "yellow") return <AlertTriangle className="w-4 h-4 text-yellow-400 shrink-0" />;
-    return <Info className="w-4 h-4 text-white/30 shrink-0" />;
-  };
-
-  const getSeverityBorder = (severity: string) => {
-    if (severity === "red") return "border-l-red-500";
-    if (severity === "yellow") return "border-l-yellow-500";
-    return "border-l-white/10";
-  };
+  const componentChartData = fundingData?.componentBreakdown
+    ? Object.entries(fundingData.componentBreakdown).map(([key, comp]) => ({
+        name: comp.label.split(" ")[0],
+        score: comp.score,
+        max: comp.max,
+        pct: Math.round((comp.score / comp.max) * 100),
+      }))
+    : [];
 
   return (
-    <div className="h-[100dvh] flex bg-[#000000] text-white">
+    <div className="h-[100dvh] flex bg-[#111111] text-white">
 
       {sidebarOpen && (
         <div
@@ -414,51 +417,51 @@ export default function DashboardPage() {
         "md:flex",
         !sidebarOpen && "hidden md:flex"
       )} style={{ background: '#0D0D0D' }}>
-        <div className="h-11 px-4 flex items-center justify-between border-b border-white/[0.08] bg-[#111]">
+        <div className="h-11 px-4 flex items-center justify-between border-b border-white/[0.06] bg-[#0F0F0F]">
           <div className="flex items-center gap-2.5">
-            <div className="w-6 h-6 rounded-lg bg-[#E0E0E0] flex items-center justify-center">
-              <span className="text-[10px] font-black text-[#0D0D0D]">X</span>
+            <div className="w-6 h-6 rounded-lg bg-white flex items-center justify-center">
+              <span className="text-[10px] font-black text-black">X</span>
             </div>
             <span className="text-[13px] font-bold text-white/90 tracking-tight">MentXr® Buddy List</span>
           </div>
-          <button onClick={() => setSidebarOpen(false)} className="md:hidden text-white/40 hover:text-white/70">
+          <button onClick={() => setSidebarOpen(false)} className="md:hidden text-white/40 hover:text-white/70" data-testid="button-close-sidebar">
             <X className="w-4 h-4" />
           </button>
         </div>
 
-        <div className="h-14 px-4 flex items-center gap-3 border-b border-white/[0.08] bg-[#0D0D0D]">
+        <div className="h-14 px-4 flex items-center gap-3 border-b border-white/[0.06] bg-[#0D0D0D]">
           <div className="relative shrink-0">
-            <div className="w-9 h-9 rounded-lg bg-[#1A1A1A] border border-white/[0.1] flex items-center justify-center text-[11px] font-bold text-white/60">
+            <div className="w-9 h-9 rounded-lg bg-[#1A1A1A] border border-white/[0.08] flex items-center justify-center text-[11px] font-bold text-white/60">
               {(user.displayName || user.email).substring(0, 2).toUpperCase()}
             </div>
             <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-green-500 border-2 border-[#0D0D0D]" />
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-[12px] font-semibold text-white/80 truncate">{user.displayName || user.email.split("@")[0]}</p>
-            <p className="text-[10px] text-white/30 italic truncate">Mentorship On Demand</p>
+            <p className="text-[10px] text-white/25 italic truncate">Mentorship On Demand</p>
           </div>
         </div>
 
-        <div className="h-10 px-4 flex items-center gap-2 border-b border-white/[0.08] bg-[#0D0D0D]">
+        <div className="h-10 px-4 flex items-center gap-2 border-b border-white/[0.06] bg-[#0D0D0D]">
           <button
             data-testid="button-new-chat"
             onClick={() => { clearChat(); setSelectedMentor(null); setMentorCleared(true); setSidebarOpen(false); setActiveTab("chat"); }}
-            className="flex-1 h-7 text-[11px] rounded-lg bg-white/[0.06] border border-white/[0.08] hover:bg-white/[0.1] active:bg-white/[0.04] text-white/60 font-medium transition-colors"
+            className="flex-1 h-7 text-[11px] rounded-lg bg-white/[0.04] border border-white/[0.06] hover:bg-white/[0.08] active:bg-white/[0.03] text-white/60 font-medium transition-colors"
           >
             + New Chat
           </button>
         </div>
 
         <div className="flex-1 overflow-y-auto bg-[#0a0a0a]" style={{ scrollbarWidth: 'thin' }}>
-          <div className="border-b border-white/[0.06]">
+          <div className="border-b border-white/[0.04]">
             <button
               onClick={() => setBuddyGroups(prev => ({ ...prev, mentors: !prev.mentors }))}
-              className="w-full h-9 flex items-center gap-2 px-4 hover:bg-white/[0.03] text-left transition-colors"
+              className="w-full h-9 flex items-center gap-2 px-4 hover:bg-white/[0.02] text-left transition-colors"
               data-testid="buddy-group-mentors"
             >
-              <span className="text-[10px] text-white/20 font-mono w-3">{buddyGroups.mentors ? "▾" : "▸"}</span>
-              <span className="text-[11px] font-bold text-white/50 uppercase tracking-widest">Mentors</span>
-              <span className="text-[10px] text-white/20 ml-auto">(7/7)</span>
+              <span className="text-[10px] text-white/15 font-mono w-3">{buddyGroups.mentors ? "▾" : "▸"}</span>
+              <span className="text-[11px] font-bold text-white/40 uppercase tracking-widest">Mentors</span>
+              <span className="text-[10px] text-white/15 ml-auto">(7/7)</span>
             </button>
             {buddyGroups.mentors && (
               <div className="pb-1">
@@ -486,27 +489,17 @@ export default function DashboardPage() {
                       className={cn(
                         "w-full h-11 flex items-center gap-3 px-4 text-left transition-all",
                         isActive
-                          ? "bg-white/[0.08] border-l-2 border-l-[#E0E0E0]"
-                          : "hover:bg-white/[0.04] border-l-2 border-l-transparent"
+                          ? "bg-white/[0.06] border-l-2 border-l-white/60"
+                          : "hover:bg-white/[0.03] border-l-2 border-l-transparent"
                       )}
                     >
                       <div className="relative shrink-0">
-                        <div className={cn("w-8 h-8 rounded-lg border border-white/[0.1] flex items-center justify-center text-white text-[10px] font-bold", BOT_COLORS[key])}>{mentor.initials}</div>
+                        <div className={cn("w-8 h-8 rounded-lg border border-white/[0.08] flex items-center justify-center text-white text-[10px] font-bold", BOT_COLORS[key])}>{mentor.initials}</div>
                         <div className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-green-500 border-2 border-[#0a0a0a]" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className={cn(
-                          "text-[12px] font-semibold truncate leading-tight",
-                          isActive ? "text-white" : "text-white/70"
-                        )}>
-                          {mentor.name}
-                        </p>
-                        <p className={cn(
-                          "text-[10px] truncate leading-tight",
-                          isActive ? "text-white/40" : "text-white/25"
-                        )}>
-                          {statusMessages[key] || mentor.tagline}
-                        </p>
+                        <p className={cn("text-[12px] font-semibold truncate leading-tight", isActive ? "text-white" : "text-white/60")}>{mentor.name}</p>
+                        <p className={cn("text-[10px] truncate leading-tight", isActive ? "text-white/35" : "text-white/20")}>{statusMessages[key] || mentor.tagline}</p>
                       </div>
                     </button>
                   );
@@ -515,58 +508,58 @@ export default function DashboardPage() {
             )}
           </div>
 
-          <div className="border-b border-white/[0.06]">
+          <div className="border-b border-white/[0.04]">
             <button
               onClick={() => setBuddyGroups(prev => ({ ...prev, friends: !prev.friends }))}
-              className="w-full h-9 flex items-center gap-2 px-4 hover:bg-white/[0.03] text-left transition-colors"
+              className="w-full h-9 flex items-center gap-2 px-4 hover:bg-white/[0.02] text-left transition-colors"
               data-testid="buddy-group-friends"
             >
-              <span className="text-[10px] text-white/20 font-mono w-3">{buddyGroups.friends ? "▾" : "▸"}</span>
-              <span className="text-[11px] font-bold text-white/50 uppercase tracking-widest">Friends</span>
-              <span className="text-[10px] text-white/20 ml-auto">({friendsList.length})</span>
+              <span className="text-[10px] text-white/15 font-mono w-3">{buddyGroups.friends ? "▾" : "▸"}</span>
+              <span className="text-[11px] font-bold text-white/40 uppercase tracking-widest">Friends</span>
+              <span className="text-[10px] text-white/15 ml-auto">({friendsList.length})</span>
             </button>
             {buddyGroups.friends && (
               <div className="pb-1">
                 <button
                   onClick={() => setShowAddFriend(true)}
-                  className="w-full h-9 flex items-center gap-3 px-4 hover:bg-white/[0.04] text-left transition-colors"
+                  className="w-full h-9 flex items-center gap-3 px-4 hover:bg-white/[0.03] text-left transition-colors"
                   data-testid="button-add-friend"
                 >
-                  <UserPlus className="w-3.5 h-3.5 text-green-400/60" />
-                  <span className="text-[11px] text-green-400/60 font-medium">Add Friend</span>
+                  <UserPlus className="w-3.5 h-3.5 text-green-400/50" />
+                  <span className="text-[11px] text-green-400/50 font-medium">Add Friend</span>
                 </button>
                 {pendingRequests.length > 0 && (
                   <div className="px-4 py-1">
-                    <span className="text-[10px] text-amber-400/60 font-medium">{pendingRequests.length} pending request{pendingRequests.length > 1 ? "s" : ""}</span>
+                    <span className="text-[10px] text-amber-400/50 font-medium">{pendingRequests.length} pending request{pendingRequests.length > 1 ? "s" : ""}</span>
                   </div>
                 )}
                 {pendingRequests.map((req: any) => (
-                  <div key={req.friendshipId} className="h-11 flex items-center gap-3 px-4 hover:bg-white/[0.04] transition-colors">
-                    <div className="w-7 h-7 rounded-lg bg-amber-500/20 border border-amber-500/30 flex items-center justify-center text-[9px] font-bold text-amber-400">
+                  <div key={req.friendshipId} className="h-11 flex items-center gap-3 px-4 hover:bg-white/[0.03] transition-colors">
+                    <div className="w-7 h-7 rounded-lg bg-amber-500/15 border border-amber-500/20 flex items-center justify-center text-[9px] font-bold text-amber-400">
                       {(req.displayName || "?").substring(0, 2).toUpperCase()}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-[11px] text-white/60 truncate">{req.displayName}</p>
+                      <p className="text-[11px] text-white/50 truncate">{req.displayName}</p>
                     </div>
                     <div className="flex gap-1">
-                      <button onClick={() => acceptFriend(req.friendshipId)} className="w-6 h-6 rounded-md bg-green-500/20 hover:bg-green-500/30 flex items-center justify-center" data-testid={`accept-friend-${req.id}`}>
+                      <button onClick={() => acceptFriend(req.friendshipId)} className="w-6 h-6 rounded-md bg-green-500/15 hover:bg-green-500/25 flex items-center justify-center" data-testid={`accept-friend-${req.id}`}>
                         <Check className="w-3 h-3 text-green-400" />
                       </button>
-                      <button onClick={() => rejectFriend(req.friendshipId)} className="w-6 h-6 rounded-md bg-red-500/20 hover:bg-red-500/30 flex items-center justify-center" data-testid={`reject-friend-${req.id}`}>
+                      <button onClick={() => rejectFriend(req.friendshipId)} className="w-6 h-6 rounded-md bg-red-500/15 hover:bg-red-500/25 flex items-center justify-center" data-testid={`reject-friend-${req.id}`}>
                         <X className="w-3 h-3 text-red-400" />
                       </button>
                     </div>
                   </div>
                 ))}
                 {friendsList.map((f: any) => (
-                  <div key={f.friendshipId} className="group h-11 flex items-center gap-3 px-4 hover:bg-white/[0.04] transition-colors">
+                  <div key={f.friendshipId} className="group h-11 flex items-center gap-3 px-4 hover:bg-white/[0.03] transition-colors">
                     <div className="relative shrink-0">
-                      <div className="w-7 h-7 rounded-lg bg-[#1A1A1A] border border-white/[0.1] flex items-center justify-center text-[9px] font-bold text-white/60">
+                      <div className="w-7 h-7 rounded-lg bg-[#1A1A1A] border border-white/[0.08] flex items-center justify-center text-[9px] font-bold text-white/50">
                         {(f.displayName || "?").substring(0, 2).toUpperCase()}
                       </div>
                       <div className="absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full bg-green-500 border-2 border-[#0a0a0a]" />
                     </div>
-                    <p className="text-[11px] text-white/60 truncate flex-1">{f.displayName}</p>
+                    <p className="text-[11px] text-white/50 truncate flex-1">{f.displayName}</p>
                     <button onClick={() => removeFriend(f.friendshipId)} className="hidden group-hover:flex w-5 h-5 rounded-md bg-red-500/10 hover:bg-red-500/20 items-center justify-center" data-testid={`remove-friend-${f.id}`}>
                       <UserX className="w-3 h-3 text-red-400/60" />
                     </button>
@@ -574,32 +567,32 @@ export default function DashboardPage() {
                 ))}
                 {friendsList.length === 0 && pendingRequests.length === 0 && (
                   <div className="h-9 flex items-center px-4">
-                    <span className="text-[10px] text-white/15 italic">No friends yet</span>
+                    <span className="text-[10px] text-white/10 italic">No friends yet</span>
                   </div>
                 )}
               </div>
             )}
           </div>
 
-          <div className="border-b border-white/[0.06]">
+          <div className="border-b border-white/[0.04]">
             <button
               onClick={() => setBuddyGroups(prev => ({ ...prev, offline: !prev.offline }))}
-              className="w-full h-9 flex items-center gap-2 px-4 hover:bg-white/[0.03] text-left transition-colors"
+              className="w-full h-9 flex items-center gap-2 px-4 hover:bg-white/[0.02] text-left transition-colors"
               data-testid="buddy-group-offline"
             >
-              <span className="text-[10px] text-white/20 font-mono w-3">{buddyGroups.offline ? "▾" : "▸"}</span>
-              <span className="text-[11px] font-bold text-white/50 uppercase tracking-widest">Recent Chats</span>
+              <span className="text-[10px] text-white/15 font-mono w-3">{buddyGroups.offline ? "▾" : "▸"}</span>
+              <span className="text-[11px] font-bold text-white/40 uppercase tracking-widest">Recent Chats</span>
             </button>
             {buddyGroups.offline && (
               <div className="pb-1">
                 {messages.length > 0 ? (
-                  <div className="h-9 flex items-center gap-3 px-4 hover:bg-white/[0.04] cursor-pointer transition-colors">
+                  <div className="h-9 flex items-center gap-3 px-4 hover:bg-white/[0.03] cursor-pointer transition-colors">
                     <div className="w-2.5 h-2.5 rounded-full bg-green-500 shrink-0" />
-                    <span className="text-[11px] text-white/40 truncate flex-1">{messages[0]?.content.substring(0, 35)}...</span>
+                    <span className="text-[11px] text-white/30 truncate flex-1">{messages[0]?.content.substring(0, 35)}...</span>
                   </div>
                 ) : (
                   <div className="h-9 flex items-center px-4">
-                    <span className="text-[10px] text-white/15 italic">No recent conversations</span>
+                    <span className="text-[10px] text-white/10 italic">No recent conversations</span>
                   </div>
                 )}
               </div>
@@ -607,38 +600,34 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        <div className="h-11 px-4 flex items-center gap-3 border-t border-white/[0.08] bg-[#111]">
+        <div className="h-11 px-4 flex items-center gap-3 border-t border-white/[0.06] bg-[#0F0F0F]">
           <div className="w-2.5 h-2.5 rounded-full bg-green-500 shrink-0" />
-          <span className="text-[10px] text-white/40 flex-1 truncate">{user.displayName || user.email}</span>
+          <span className="text-[10px] text-white/30 flex-1 truncate">{user.displayName || user.email}</span>
           <button
             data-testid="button-logout"
             onClick={logout}
-            className="h-7 text-[10px] px-3 rounded-lg bg-white/[0.06] border border-white/[0.08] hover:bg-white/[0.1] text-white/40 transition-colors"
+            className="h-7 text-[10px] px-3 rounded-lg bg-white/[0.04] border border-white/[0.06] hover:bg-white/[0.08] text-white/30 transition-colors"
           >
             Sign Off
           </button>
         </div>
       </aside>
 
-      <main className="flex-1 flex flex-col min-w-0 relative bg-[#0D0D0D]">
+      <main className="flex-1 flex flex-col min-w-0 relative bg-[#111111]">
 
-        <header className="shrink-0 relative z-10 backdrop-blur-xl bg-[#0D0D0D]/95 border-b border-[#2A2A2A]">
+        <header className="shrink-0 relative z-10 bg-[#111111] border-b border-white/[0.06]">
           <div className="h-14 flex items-center justify-between px-4">
             <div className="flex items-center gap-3">
               <button
                 data-testid="button-menu"
                 onClick={() => setSidebarOpen(true)}
-                className="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-white/[0.06] transition-colors md:hidden"
+                className="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-white/[0.04] transition-colors md:hidden"
               >
-                <Menu className="w-5 h-5 text-white/60" />
+                <Menu className="w-5 h-5 text-white/50" />
               </button>
-              <span className="relative w-5 h-5 flex items-center justify-center md:hidden">
-                <span className="absolute inset-0 rounded-full bg-[#E0E0E0]/15 animate-ping" />
-                <span className="relative w-2.5 h-2.5 rounded-full bg-[#E0E0E0] shadow-[0_0_6px_rgba(224,224,224,0.4)]" />
-              </span>
             </div>
-            <button data-testid="button-new-chat-header" onClick={() => { clearChat(); setSelectedMentor(null); setMentorCleared(true); setActiveTab("chat"); }} className="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-white/[0.06] transition-colors">
-              <Plus className="w-5 h-5 text-white/50" />
+            <button data-testid="button-new-chat-header" onClick={() => { clearChat(); setSelectedMentor(null); setMentorCleared(true); setActiveTab("chat"); }} className="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-white/[0.04] transition-colors">
+              <Plus className="w-5 h-5 text-white/40" />
             </button>
           </div>
           <div className="flex px-4">
@@ -647,7 +636,7 @@ export default function DashboardPage() {
               onClick={() => setActiveTab("dashboard")}
               className={cn(
                 "flex-1 py-2.5 text-[13px] font-semibold text-center transition-colors relative",
-                activeTab === "dashboard" ? "text-white" : "text-white/40 hover:text-white/60"
+                activeTab === "dashboard" ? "text-white" : "text-white/30 hover:text-white/50"
               )}
             >
               <div className="flex items-center justify-center gap-1.5">
@@ -661,7 +650,7 @@ export default function DashboardPage() {
               onClick={() => setActiveTab("chat")}
               className={cn(
                 "flex-1 py-2.5 text-[13px] font-semibold text-center transition-colors relative",
-                activeTab === "chat" ? "text-white" : "text-white/40 hover:text-white/60"
+                activeTab === "chat" ? "text-white" : "text-white/30 hover:text-white/50"
               )}
             >
               <div className="flex items-center justify-center gap-1.5">
@@ -679,278 +668,249 @@ export default function DashboardPage() {
           className="flex-1 overflow-y-auto"
         >
           {activeTab === "dashboard" ? (
-            <div className="max-w-2xl mx-auto w-full px-4 py-6 space-y-4">
+            <div className="w-full px-5 sm:px-8 py-8 max-w-[1200px] mx-auto">
 
               {fundingLoading ? (
                 <div className="flex items-center justify-center py-20">
-                  <Loader2 className="w-8 h-8 animate-spin text-white/40" />
+                  <Loader2 className="w-8 h-8 animate-spin text-white/30" />
                 </div>
               ) : fundingData ? (
                 <>
-                  <div className="flex items-center justify-between px-1">
-                    <div className="flex items-center gap-2">
-                      <div className="w-2 h-2 rounded-full bg-emerald-400" />
-                      <span className="text-xs text-white/50 font-medium">Live</span>
-                    </div>
-                    <button
-                      onClick={fetchFundingReadiness}
-                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#1A1A1A] border border-[#333] hover:border-[#444] text-xs text-white/60 hover:text-white/80 transition-all"
-                      data-testid="button-refresh-score"
-                    >
-                      <RefreshCw className="w-3.5 h-3.5" />
-                      Refresh
-                    </button>
+                  <div className="mb-8">
+                    <h1 className="text-2xl sm:text-3xl font-light text-white tracking-tight" style={{ fontFamily: "'Inter', sans-serif" }} data-testid="text-overview-title">Overview</h1>
+                    <p className="text-sm text-white/35 mt-1">Welcome back, {user.displayName || user.email.split("@")[0]}!</p>
                   </div>
 
-                  <div className="rounded-2xl border border-[#2A2A2A] bg-[#141414] p-6 sm:p-8" data-testid="funding-score-card">
-                    <div className="flex flex-col items-center text-center">
-                      <p className="text-xs font-semibold tracking-widest text-white/50 uppercase mb-6">Capital Readiness Score</p>
-                      <div className="relative w-40 h-40 mb-6">
-                        <svg className="w-full h-full -rotate-90" viewBox="0 0 120 120">
-                          <circle cx="60" cy="60" r="52" fill="none" stroke="#222" strokeWidth="8" />
-                          <circle
-                            cx="60" cy="60" r="52" fill="none"
-                            stroke={getScoreRingColor(fundingData.score)}
-                            strokeWidth="8"
-                            strokeLinecap="round"
-                            strokeDasharray={`${(fundingData.score / 100) * 327} 327`}
-                            style={{ filter: `drop-shadow(0 0 6px ${getScoreRingColor(fundingData.score)}50)` }}
-                          />
-                        </svg>
-                        <div className="absolute inset-0 flex flex-col items-center justify-center">
-                          <span className={cn("text-5xl font-bold font-mono", getScoreColor(fundingData.score))} data-testid="text-score">
-                            {fundingData.score}
-                          </span>
-                          <span className="text-xs text-white/40 mt-1">/ 100</span>
+                  <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 mb-4">
+                    <div className="lg:col-span-2 rounded-2xl bg-[#1A1A1A] border border-white/[0.06] p-6" data-testid="funding-score-card">
+                      <p className="text-xs text-white/40 mb-1">Capital Readiness Score</p>
+                      <div className="flex items-end gap-1">
+                        <span className="text-4xl sm:text-5xl font-bold text-white tracking-tight font-mono" data-testid="text-score">{fundingData.score}</span>
+                        <span className="text-lg text-white/25 font-light mb-1">/ 100</span>
+                      </div>
+                      <div className="flex gap-2 mt-5">
+                        <button
+                          onClick={fetchFundingReadiness}
+                          className="flex-1 h-10 rounded-xl bg-white/[0.06] border border-white/[0.08] hover:bg-white/[0.1] text-xs font-medium text-white/70 transition-colors flex items-center justify-center gap-2"
+                          data-testid="button-refresh-score"
+                        >
+                          <RefreshCw className="w-3.5 h-3.5" /> REFRESH
+                        </button>
+                        <button
+                          onClick={() => setActiveTab("chat")}
+                          className="flex-1 h-10 rounded-xl bg-white/[0.06] border border-white/[0.08] hover:bg-white/[0.1] text-xs font-medium text-white/70 transition-colors flex items-center justify-center gap-2"
+                          data-testid="button-go-chat"
+                        >
+                          <MessageCircle className="w-3.5 h-3.5" /> ANALYZE
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="lg:col-span-3 rounded-2xl bg-[#1A1A1A] border border-white/[0.06] p-6" data-testid="stats-row">
+                      <div className="grid grid-cols-3 h-full">
+                        <div className="flex flex-col justify-center px-2">
+                          <p className="text-xs text-white/35 mb-1">Tier</p>
+                          <p className="text-xl sm:text-2xl font-bold text-white" data-testid="text-tier">
+                            {fundingData.tierEligibility ? `Tier ${fundingData.tierEligibility.tier}` : "—"}
+                          </p>
+                          <p className="text-[10px] text-white/25 mt-0.5 truncate">{fundingData.tierEligibility?.label || "No data"}</p>
                         </div>
-                      </div>
-                      <div className={cn("inline-flex items-center gap-2 px-4 py-1.5 rounded-full border text-xs font-semibold", getStatusBg(fundingData.status))} data-testid="text-status">
-                        {fundingData.status === "ready" && <CheckCircle2 className="w-3.5 h-3.5" />}
-                        {fundingData.status === "almost" && <Target className="w-3.5 h-3.5" />}
-                        {fundingData.status === "needs_improvement" && <AlertTriangle className="w-3.5 h-3.5" />}
-                        {(fundingData.status === "high_risk" || fundingData.status === "incomplete") && <AlertCircle className="w-3.5 h-3.5" />}
-                        {fundingData.statusLabel}
-                      </div>
-                      <div className="flex items-center gap-4 mt-4 text-[11px] text-white/40">
-                        <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-green-500" /> 85+ Ready</span>
-                        <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-yellow-500" /> 70-84</span>
-                        <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-amber-500" /> 50-69</span>
-                        <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-red-500" /> &lt;50</span>
+                        <div className="flex flex-col justify-center px-2 border-l border-white/[0.06]">
+                          <p className="text-xs text-white/35 mb-1">Mode</p>
+                          <p className="text-xl sm:text-2xl font-bold text-white" data-testid="text-mode">
+                            {fundingData.operatingMode ? (fundingData.operatingMode.mode === "pre_funding" ? "Pre-Fund" : "Repair") : "—"}
+                          </p>
+                          <p className="text-[10px] text-white/25 mt-0.5 truncate">{fundingData.operatingMode?.label || "No data"}</p>
+                        </div>
+                        <div className="flex flex-col justify-center px-2 border-l border-white/[0.06]">
+                          <p className="text-xs text-white/35 mb-1">Exposure</p>
+                          <p className="text-xl sm:text-2xl font-bold text-white" data-testid="text-exposure">
+                            {fundingData.exposureCeiling ? `$${(fundingData.exposureCeiling.ceiling / 1000).toFixed(0)}K` : "—"}
+                          </p>
+                          <p className="text-[10px] text-white/25 mt-0.5">
+                            {fundingData.exposureCeiling ? `${fundingData.exposureCeiling.multiplier}x ceiling` : "No data"}
+                          </p>
+                        </div>
                       </div>
                     </div>
                   </div>
 
-                  {fundingData.estimatedRange && (
-                    <div className="rounded-2xl border border-[#2A2A2A] bg-[#141414] p-6" data-testid="funding-range-card">
-                      <div className="flex items-center gap-2 mb-3">
-                        <TrendingUp className="w-4 h-4 text-emerald-400" />
-                        <p className="text-xs font-semibold tracking-widest text-white/50 uppercase">Estimated Funding Range</p>
+                  <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 mb-4">
+                    <div className="lg:col-span-2 space-y-4">
+                      <div className="rounded-2xl bg-[#1A1A1A] border border-white/[0.06] p-6" data-testid="savings-donut-card">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="text-xs text-white/35 mb-1">Funding Range</p>
+                            {fundingData.estimatedRange ? (
+                              <>
+                                <p className="text-2xl font-bold text-white font-mono" data-testid="text-range">
+                                  ${fundingData.estimatedRange.min.toLocaleString()}
+                                </p>
+                                <p className="text-xs text-white/25 mt-0.5">/ ${fundingData.estimatedRange.max.toLocaleString()}</p>
+                              </>
+                            ) : (
+                              <p className="text-2xl font-bold text-white/30 font-mono">—</p>
+                            )}
+                          </div>
+                          <div className="relative">
+                            <DonutChart value={fundingData.score} max={100} size={80} strokeWidth={8} color={getScoreColor(fundingData.score)} />
+                            <div className="absolute inset-0 flex items-center justify-center">
+                              <span className="text-sm font-bold text-white">{fundingData.score}%</span>
+                            </div>
+                          </div>
+                        </div>
                       </div>
-                      <p className="text-2xl sm:text-3xl font-bold font-mono text-white" data-testid="text-range">
-                        ${fundingData.estimatedRange.min.toLocaleString()} – ${fundingData.estimatedRange.max.toLocaleString()}
-                      </p>
-                      <p className="text-xs text-white/30 mt-2">Estimated range based on current profile strength and common lender criteria.</p>
-                    </div>
-                  )}
 
-                  {fundingData.exposureCeiling && (
-                    <div className="rounded-2xl border border-[#2A2A2A] bg-[#141414] p-6" data-testid="exposure-ceiling-card">
-                      <div className="flex items-center gap-2 mb-4">
-                        <Activity className="w-4 h-4 text-cyan-400" />
-                        <p className="text-xs font-semibold tracking-widest text-white/50 uppercase">Projected Exposure Ceiling</p>
+                      <div className="rounded-2xl bg-[#1A1A1A] border border-white/[0.06] p-6" data-testid="document-upload-card">
+                        <div className="flex items-center justify-between mb-4">
+                          <p className="text-xs text-white/40">Document Analysis</p>
+                          <span className="text-[9px] text-white/20 bg-white/[0.04] px-2 py-0.5 rounded-full">GPT-4o</span>
+                        </div>
+                        <input
+                          ref={creditReportInputRef}
+                          type="file"
+                          accept=".pdf,.doc,.docx,.txt,.csv"
+                          className="hidden"
+                          data-testid="input-credit-report-upload"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) handleDocumentUpload(file, "credit_report");
+                            e.target.value = "";
+                          }}
+                        />
+                        <input
+                          ref={bankStatementInputRef}
+                          type="file"
+                          accept=".pdf,.doc,.docx,.txt,.csv"
+                          className="hidden"
+                          data-testid="input-bank-statement-upload"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) handleDocumentUpload(file, "bank_statement");
+                            e.target.value = "";
+                          }}
+                        />
+                        <div className="space-y-2">
+                          <button
+                            onClick={() => creditReportInputRef.current?.click()}
+                            disabled={docUploading}
+                            className={cn(
+                              "w-full flex items-center gap-3 p-3 rounded-xl border transition-all text-left",
+                              fundingData.hasCreditReport
+                                ? "border-green-500/20 bg-green-500/[0.04]"
+                                : "border-white/[0.06] bg-white/[0.02] hover:bg-white/[0.04]",
+                              docUploading && docUploadType === "credit_report" && "opacity-50"
+                            )}
+                            data-testid="button-upload-credit-report"
+                          >
+                            {docUploading && docUploadType === "credit_report" ? (
+                              <Loader2 className="w-5 h-5 text-white/40 animate-spin shrink-0" />
+                            ) : fundingData.hasCreditReport ? (
+                              <CheckCircle2 className="w-5 h-5 text-green-400 shrink-0" />
+                            ) : (
+                              <Upload className="w-5 h-5 text-white/30 shrink-0" />
+                            )}
+                            <div>
+                              <p className="text-xs font-medium text-white/60">{fundingData.hasCreditReport ? "Credit Report Uploaded" : "Upload Credit Report"}</p>
+                              <p className="text-[10px] text-white/20">PDF, DOC, TXT</p>
+                            </div>
+                          </button>
+                          <button
+                            onClick={() => bankStatementInputRef.current?.click()}
+                            disabled={docUploading}
+                            className={cn(
+                              "w-full flex items-center gap-3 p-3 rounded-xl border transition-all text-left",
+                              fundingData.hasBankStatement
+                                ? "border-green-500/20 bg-green-500/[0.04]"
+                                : "border-white/[0.06] bg-white/[0.02] hover:bg-white/[0.04]",
+                              docUploading && docUploadType === "bank_statement" && "opacity-50"
+                            )}
+                            data-testid="button-upload-bank-statement"
+                          >
+                            {docUploading && docUploadType === "bank_statement" ? (
+                              <Loader2 className="w-5 h-5 text-white/40 animate-spin shrink-0" />
+                            ) : fundingData.hasBankStatement ? (
+                              <CheckCircle2 className="w-5 h-5 text-green-400 shrink-0" />
+                            ) : (
+                              <Upload className="w-5 h-5 text-white/30 shrink-0" />
+                            )}
+                            <div>
+                              <p className="text-xs font-medium text-white/60">{fundingData.hasBankStatement ? "Bank Statement Uploaded" : "Upload Bank Statement"}</p>
+                              <p className="text-[10px] text-white/20">PDF, DOC, TXT</p>
+                            </div>
+                          </button>
+                        </div>
+                        {docUploading && (
+                          <div className="mt-3 flex items-center gap-3 p-3 rounded-xl bg-white/[0.02] border border-white/[0.04]">
+                            <Loader2 className="w-4 h-4 text-white/40 animate-spin shrink-0" />
+                            <p className="text-[10px] text-white/40">Analyzing document...</p>
+                          </div>
+                        )}
+                        {fundingData.analysisSummary && (
+                          <div className="mt-3 p-3 rounded-xl bg-white/[0.02] border border-white/[0.04]">
+                            <p className="text-[10px] text-white/50 leading-relaxed">{fundingData.analysisSummary}</p>
+                            {fundingData.lastAnalysisDate && (
+                              <p className="text-[9px] text-white/20 mt-1.5">{timeAgo(fundingData.lastAnalysisDate)} ago</p>
+                            )}
+                          </div>
+                        )}
                       </div>
-                      <div className="grid grid-cols-3 gap-3 mb-4">
-                        <div className="p-3 rounded-xl bg-[#1A1A1A] text-center">
-                          <p className="text-[10px] text-white/40 uppercase tracking-wide mb-1">Current Exposure</p>
-                          <p className="text-lg font-bold font-mono text-white">${fundingData.exposureCeiling.totalExposure.toLocaleString()}</p>
-                        </div>
-                        <div className="p-3 rounded-xl bg-[#1A1A1A] text-center">
-                          <p className="text-[10px] text-white/40 uppercase tracking-wide mb-1">Multiplier</p>
-                          <p className="text-lg font-bold font-mono text-cyan-400">{fundingData.exposureCeiling.multiplier}x</p>
-                        </div>
-                        <div className="p-3 rounded-xl bg-[#1A1A1A] text-center">
-                          <p className="text-[10px] text-white/40 uppercase tracking-wide mb-1">Ceiling</p>
-                          <p className="text-lg font-bold font-mono text-emerald-400">${fundingData.exposureCeiling.ceiling.toLocaleString()}</p>
-                        </div>
-                      </div>
-                      <p className="text-[11px] text-white/30">Projected exposure ceiling based on current profile strength. Not a guarantee of approval.</p>
                     </div>
-                  )}
 
-                  {fundingData.componentBreakdown && (
-                    <div className="rounded-2xl border border-[#2A2A2A] bg-[#141414] p-6" data-testid="component-breakdown-card">
-                      <div className="flex items-center gap-2 mb-4">
-                        <BarChart3 className="w-4 h-4 text-violet-400" />
-                        <p className="text-xs font-semibold tracking-widest text-white/50 uppercase">Component Breakdown</p>
+                    <div className="lg:col-span-3 rounded-2xl bg-[#1A1A1A] border border-white/[0.06] p-6" data-testid="component-breakdown-card">
+                      <div className="flex items-center justify-between mb-5">
+                        <p className="text-xs text-white/40">Component Breakdown</p>
                       </div>
-                      <div className="space-y-3">
-                        {Object.entries(fundingData.componentBreakdown).map(([key, comp]) => {
+                      {componentChartData.length > 0 ? (
+                        <div className="h-[200px] mb-4">
+                          <ResponsiveContainer width="100%" height="100%">
+                            <AreaChart data={componentChartData} margin={{ top: 5, right: 10, left: -20, bottom: 0 }}>
+                              <defs>
+                                <linearGradient id="scoreGrad" x1="0" y1="0" x2="0" y2="1">
+                                  <stop offset="5%" stopColor="#ffffff" stopOpacity={0.15} />
+                                  <stop offset="95%" stopColor="#ffffff" stopOpacity={0} />
+                                </linearGradient>
+                                <linearGradient id="maxGrad" x1="0" y1="0" x2="0" y2="1">
+                                  <stop offset="5%" stopColor="#555555" stopOpacity={0.1} />
+                                  <stop offset="95%" stopColor="#555555" stopOpacity={0} />
+                                </linearGradient>
+                              </defs>
+                              <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: 'rgba(255,255,255,0.25)', fontSize: 10 }} />
+                              <YAxis axisLine={false} tickLine={false} tick={{ fill: 'rgba(255,255,255,0.15)', fontSize: 10 }} domain={[0, 20]} />
+                              <Tooltip
+                                contentStyle={{ background: '#222', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '12px', fontSize: '11px', color: '#ccc' }}
+                                labelStyle={{ color: 'rgba(255,255,255,0.5)' }}
+                              />
+                              <Area type="monotone" dataKey="max" stroke="rgba(255,255,255,0.08)" fill="url(#maxGrad)" strokeWidth={1} dot={false} />
+                              <Area type="monotone" dataKey="score" stroke="rgba(255,255,255,0.6)" fill="url(#scoreGrad)" strokeWidth={2} dot={{ fill: '#fff', r: 3, strokeWidth: 0 }} activeDot={{ r: 5, fill: '#fff' }} />
+                            </AreaChart>
+                          </ResponsiveContainer>
+                        </div>
+                      ) : null}
+                      <div className="space-y-2.5">
+                        {fundingData.componentBreakdown && Object.entries(fundingData.componentBreakdown).map(([key, comp]) => {
                           const pct = (comp.score / comp.max) * 100;
-                          const barColor = pct >= 80 ? "#22c55e" : pct >= 50 ? "#eab308" : pct >= 30 ? "#f59e0b" : "#ef4444";
                           return (
                             <div key={key} data-testid={`component-${key}`}>
                               <div className="flex items-center justify-between mb-1">
-                                <span className="text-xs text-white/70">{comp.label}</span>
-                                <span className="text-xs font-mono text-white/50">{comp.score}/{comp.max}</span>
+                                <span className="text-[11px] text-white/50">{comp.label}</span>
+                                <span className="text-[11px] font-mono text-white/35">{comp.score}/{comp.max}</span>
                               </div>
-                              <div className="w-full h-2 rounded-full bg-[#222] overflow-hidden">
-                                <div className="h-full rounded-full transition-all duration-700" style={{ width: `${pct}%`, backgroundColor: barColor }} />
+                              <div className="w-full h-1.5 rounded-full bg-white/[0.04] overflow-hidden">
+                                <div className="h-full rounded-full transition-all duration-700 bg-white/40" style={{ width: `${pct}%` }} />
                               </div>
                             </div>
                           );
                         })}
                       </div>
                     </div>
-                  )}
-
-                  {(fundingData.tierEligibility || fundingData.operatingMode) && (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      {fundingData.tierEligibility && (
-                        <div className={cn(
-                          "rounded-2xl border p-5",
-                          fundingData.tierEligibility.tier === 1 ? "border-emerald-500/30 bg-emerald-500/5" :
-                          fundingData.tierEligibility.tier === 2 ? "border-yellow-500/30 bg-yellow-500/5" :
-                          "border-red-500/30 bg-red-500/5"
-                        )} data-testid="tier-eligibility-card">
-                          <div className="flex items-center gap-2 mb-2">
-                            <Shield className="w-4 h-4 text-white/50" />
-                            <p className="text-[10px] font-semibold tracking-widest text-white/40 uppercase">Tier Eligibility</p>
-                          </div>
-                          <p className={cn(
-                            "text-sm font-bold mb-1",
-                            fundingData.tierEligibility.tier === 1 ? "text-emerald-400" :
-                            fundingData.tierEligibility.tier === 2 ? "text-yellow-400" :
-                            "text-red-400"
-                          )}>{fundingData.tierEligibility.label}</p>
-                          <p className="text-[11px] text-white/45 leading-relaxed">{fundingData.tierEligibility.description}</p>
-                        </div>
-                      )}
-                      {fundingData.operatingMode && (
-                        <div className={cn(
-                          "rounded-2xl border p-5",
-                          fundingData.operatingMode.mode === "pre_funding" ? "border-blue-500/30 bg-blue-500/5" : "border-amber-500/30 bg-amber-500/5"
-                        )} data-testid="operating-mode-card">
-                          <div className="flex items-center gap-2 mb-2">
-                            <Cpu className="w-4 h-4 text-white/50" />
-                            <p className="text-[10px] font-semibold tracking-widest text-white/40 uppercase">Operating Mode</p>
-                          </div>
-                          <p className={cn(
-                            "text-sm font-bold mb-1",
-                            fundingData.operatingMode.mode === "pre_funding" ? "text-blue-400" : "text-amber-400"
-                          )}>{fundingData.operatingMode.label}</p>
-                          <p className="text-[11px] text-white/45 leading-relaxed">{fundingData.operatingMode.description}</p>
-                        </div>
-                      )}
-                    </div>
-                  )}
-
-                  <div className="rounded-2xl border border-[#2A2A2A] bg-[#141414] p-6" data-testid="document-upload-card">
-                    <div className="flex items-center gap-2 mb-1">
-                      <FileText className="w-4 h-4 text-cyan-400" />
-                      <p className="text-xs font-semibold tracking-widest text-white/50 uppercase">Document Analysis</p>
-                      <span className="ml-auto text-[10px] text-cyan-400/70 bg-cyan-400/10 px-2 py-0.5 rounded-full font-medium">GPT-4o</span>
-                    </div>
-                    <p className="text-xs text-white/40 mb-4">Upload your credit report or bank statement for AI-powered analysis.</p>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                      <input
-                        ref={creditReportInputRef}
-                        type="file"
-                        accept=".pdf,.doc,.docx,.txt,.csv"
-                        className="hidden"
-                        data-testid="input-credit-report-upload"
-                        onChange={(e) => {
-                          const file = e.target.files?.[0];
-                          if (file) handleDocumentUpload(file, "credit_report");
-                          e.target.value = "";
-                        }}
-                      />
-                      <input
-                        ref={bankStatementInputRef}
-                        type="file"
-                        accept=".pdf,.doc,.docx,.txt,.csv"
-                        className="hidden"
-                        data-testid="input-bank-statement-upload"
-                        onChange={(e) => {
-                          const file = e.target.files?.[0];
-                          if (file) handleDocumentUpload(file, "bank_statement");
-                          e.target.value = "";
-                        }}
-                      />
-                      <button
-                        onClick={() => creditReportInputRef.current?.click()}
-                        disabled={docUploading}
-                        className={cn(
-                          "flex flex-col items-center gap-2 p-4 rounded-xl border border-dashed transition-all",
-                          fundingData.hasCreditReport
-                            ? "border-green-500/40 bg-green-500/5"
-                            : "border-[#333] bg-[#1A1A1A] hover:bg-[#222] hover:border-[#444]",
-                          docUploading && docUploadType === "credit_report" && "opacity-50 cursor-wait"
-                        )}
-                        data-testid="button-upload-credit-report"
-                      >
-                        {docUploading && docUploadType === "credit_report" ? (
-                          <Loader2 className="w-6 h-6 text-white/50 animate-spin" />
-                        ) : fundingData.hasCreditReport ? (
-                          <CheckCircle2 className="w-6 h-6 text-green-400" />
-                        ) : (
-                          <FileText className="w-6 h-6 text-white/40" />
-                        )}
-                        <span className="text-xs font-medium text-white/70">
-                          {fundingData.hasCreditReport ? "Credit Report Uploaded" : "Upload Credit Report"}
-                        </span>
-                        <span className="text-[10px] text-white/30">PDF, DOC, TXT</span>
-                      </button>
-                      <button
-                        onClick={() => bankStatementInputRef.current?.click()}
-                        disabled={docUploading}
-                        className={cn(
-                          "flex flex-col items-center gap-2 p-4 rounded-xl border border-dashed transition-all",
-                          fundingData.hasBankStatement
-                            ? "border-green-500/40 bg-green-500/5"
-                            : "border-[#333] bg-[#1A1A1A] hover:bg-[#222] hover:border-[#444]",
-                          docUploading && docUploadType === "bank_statement" && "opacity-50 cursor-wait"
-                        )}
-                        data-testid="button-upload-bank-statement"
-                      >
-                        {docUploading && docUploadType === "bank_statement" ? (
-                          <Loader2 className="w-6 h-6 text-white/50 animate-spin" />
-                        ) : fundingData.hasBankStatement ? (
-                          <CheckCircle2 className="w-6 h-6 text-green-400" />
-                        ) : (
-                          <FileText className="w-6 h-6 text-white/40" />
-                        )}
-                        <span className="text-xs font-medium text-white/70">
-                          {fundingData.hasBankStatement ? "Bank Statement Uploaded" : "Upload Bank Statement"}
-                        </span>
-                        <span className="text-[10px] text-white/30">PDF, DOC, TXT</span>
-                      </button>
-                    </div>
-                    {docUploading && (
-                      <div className="mt-4 flex items-center gap-3 p-3 rounded-xl bg-[#1A1A1A] border border-[#2A2A2A]">
-                        <Loader2 className="w-4 h-4 text-cyan-400 animate-spin shrink-0" />
-                        <div>
-                          <p className="text-xs text-white/70 font-medium">Analyzing your document...</p>
-                          <p className="text-[10px] text-white/35">AI is extracting financial data and calculating your score</p>
-                        </div>
-                      </div>
-                    )}
-                    {fundingData.analysisSummary && (
-                      <div className="mt-4 p-4 rounded-xl bg-[#1A1A1A] border border-[#2A2A2A]">
-                        <p className="text-xs font-semibold text-white/60 mb-1.5">Latest Analysis</p>
-                        <p className="text-xs text-white/70 leading-relaxed">{fundingData.analysisSummary}</p>
-                        {fundingData.lastAnalysisDate && (
-                          <p className="text-[10px] text-white/30 mt-2">{timeAgo(fundingData.lastAnalysisDate)} ago</p>
-                        )}
-                      </div>
-                    )}
                   </div>
 
                   {fundingData.alerts.length > 0 && (
-                    <div className="rounded-2xl border border-[#2A2A2A] bg-[#141414] p-6" data-testid="risk-alerts-card">
-                      <div className="flex items-center gap-2 mb-4">
-                        <Shield className="w-4 h-4 text-red-400" />
-                        <p className="text-xs font-semibold tracking-widest text-white/50 uppercase">Risk Alerts</p>
-                        <span className="text-[10px] text-white/30 ml-auto">{fundingData.alerts.length} alert{fundingData.alerts.length > 1 ? "s" : ""}</span>
+                    <div className="rounded-2xl bg-[#1A1A1A] border border-white/[0.06] p-6 mb-4" data-testid="risk-alerts-card">
+                      <div className="flex items-center justify-between mb-4">
+                        <p className="text-xs text-white/40">Risk Alerts</p>
+                        <span className="text-[10px] text-white/20">{fundingData.alerts.length} alert{fundingData.alerts.length > 1 ? "s" : ""}</span>
                       </div>
                       <div className="space-y-2">
                         {fundingData.alerts.map((alert, idx) => (
@@ -962,24 +922,26 @@ export default function DashboardPage() {
                               return next;
                             })}
                             className={cn(
-                              "w-full text-left rounded-xl border-l-[3px] bg-[#1A1A1A] hover:bg-[#1E1E1E] transition-all p-3.5",
-                              getSeverityBorder(alert.severity)
+                              "w-full text-left rounded-xl border-l-[3px] bg-white/[0.02] hover:bg-white/[0.04] transition-all p-3.5",
+                              alert.severity === "red" ? "border-l-red-500/60" : alert.severity === "yellow" ? "border-l-yellow-500/60" : "border-l-white/10"
                             )}
                             data-testid={`alert-${idx}`}
                           >
                             <div className="flex items-start gap-3">
-                              {getSeverityIcon(alert.severity)}
+                              {alert.severity === "red" ? <AlertCircle className="w-4 h-4 text-red-400/70 shrink-0 mt-0.5" /> :
+                               alert.severity === "yellow" ? <AlertTriangle className="w-4 h-4 text-yellow-400/70 shrink-0 mt-0.5" /> :
+                               <Info className="w-4 h-4 text-white/20 shrink-0 mt-0.5" />}
                               <div className="flex-1 min-w-0">
-                                <p className="text-sm font-medium text-white/85">{alert.title}</p>
+                                <p className="text-sm text-white/70">{alert.title}</p>
                                 {expandedAlerts.has(idx) && (
                                   <div className="mt-2 space-y-1.5 text-xs">
-                                    <p className="text-white/55">{alert.explanation}</p>
-                                    <p className="text-white/45"><span className="text-white/60 font-medium">Impact:</span> {alert.impact}</p>
-                                    <p className="text-green-400/80"><span className="text-green-400 font-medium">Fix:</span> {alert.fix}</p>
+                                    <p className="text-white/40">{alert.explanation}</p>
+                                    <p className="text-white/30"><span className="text-white/45 font-medium">Impact:</span> {alert.impact}</p>
+                                    <p className="text-green-400/60"><span className="text-green-400/70 font-medium">Fix:</span> {alert.fix}</p>
                                   </div>
                                 )}
                               </div>
-                              <ChevronRight className={cn("w-4 h-4 text-white/25 shrink-0 transition-transform", expandedAlerts.has(idx) && "rotate-90")} />
+                              <ChevronRight className={cn("w-4 h-4 text-white/15 shrink-0 transition-transform mt-0.5", expandedAlerts.has(idx) && "rotate-90")} />
                             </div>
                           </button>
                         ))}
@@ -988,117 +950,99 @@ export default function DashboardPage() {
                   )}
 
                   {fundingData.denialSimulation && fundingData.denialSimulation.length > 0 && (
-                    <div className="rounded-2xl border border-red-500/20 bg-[#141414] p-6" data-testid="denial-simulation-card">
-                      <div className="flex items-center gap-2 mb-4">
-                        <AlertCircle className="w-4 h-4 text-red-400" />
-                        <p className="text-xs font-semibold tracking-widest text-red-400/70 uppercase">Denial Simulation</p>
-                        <span className="text-[10px] text-white/30 ml-auto">Potential lender rejection triggers</span>
+                    <div className="rounded-2xl bg-[#1A1A1A] border border-red-500/10 p-6 mb-4" data-testid="denial-simulation-card">
+                      <div className="flex items-center justify-between mb-4">
+                        <p className="text-xs text-red-400/60">Denial Simulation</p>
+                        <span className="text-[10px] text-white/15">{fundingData.denialSimulation.length} trigger{fundingData.denialSimulation.length > 1 ? "s" : ""}</span>
                       </div>
                       <div className="space-y-2">
-                        {fundingData.denialSimulation.map((item, idx) => (
-                          <div key={idx} className="p-3.5 rounded-xl bg-[#1A1A1A] border border-[#2A2A2A]" data-testid={`denial-trigger-${idx}`}>
-                            <div className="flex items-center gap-2 mb-1.5">
+                        {fundingData.denialSimulation.map((denial, idx) => (
+                          <button
+                            key={idx}
+                            onClick={() => setExpandedDenials(prev => {
+                              const next = new Set(prev);
+                              if (next.has(idx)) next.delete(idx); else next.add(idx);
+                              return next;
+                            })}
+                            className="w-full text-left rounded-xl bg-white/[0.02] hover:bg-white/[0.04] transition-all p-3.5"
+                            data-testid={`denial-${idx}`}
+                          >
+                            <div className="flex items-start gap-3">
                               <span className={cn(
-                                "text-[10px] font-bold uppercase px-2 py-0.5 rounded",
-                                item.riskLevel === "High" ? "bg-red-500/20 text-red-400" :
-                                item.riskLevel === "Moderate" ? "bg-yellow-500/20 text-yellow-400" :
-                                "bg-green-500/20 text-green-400"
-                              )}>{item.riskLevel}</span>
-                              <span className="text-sm font-medium text-white/80">{item.trigger}</span>
+                                "text-[9px] font-bold uppercase px-2 py-0.5 rounded mt-0.5 shrink-0",
+                                denial.riskLevel === "High" ? "bg-red-500/15 text-red-400/80" :
+                                denial.riskLevel === "Moderate" ? "bg-yellow-500/15 text-yellow-400/80" :
+                                "bg-green-500/15 text-green-400/80"
+                              )}>{denial.riskLevel}</span>
+                              <div className="flex-1 min-w-0">
+                                <p className="text-sm text-white/60">{denial.trigger}</p>
+                                {expandedDenials.has(idx) && (
+                                  <div className="mt-2 space-y-1.5 text-xs">
+                                    <p className="text-white/35">{denial.explanation}</p>
+                                    <p className="text-green-400/50"><span className="text-green-400/60 font-medium">Fix:</span> {denial.fix}</p>
+                                  </div>
+                                )}
+                              </div>
+                              <ChevronRight className={cn("w-4 h-4 text-white/10 shrink-0 transition-transform mt-0.5", expandedDenials.has(idx) && "rotate-90")} />
                             </div>
-                            <p className="text-xs text-white/45 mb-1.5">{item.explanation}</p>
-                            <p className="text-xs text-emerald-400/70"><span className="font-medium text-emerald-400">Fix:</span> {item.fix}</p>
-                          </div>
+                          </button>
                         ))}
                       </div>
                     </div>
                   )}
 
                   {fundingData.actionPlan.length > 0 && (
-                    <div className="rounded-2xl border border-[#2A2A2A] bg-[#141414] p-6" data-testid="action-plan-card">
-                      <div className="flex items-center gap-2 mb-4">
-                        <Target className="w-4 h-4 text-violet-400" />
-                        <p className="text-xs font-semibold tracking-widest text-white/50 uppercase">Action Plan</p>
-                      </div>
+                    <div className="rounded-2xl bg-[#1A1A1A] border border-white/[0.06] p-6 mb-4" data-testid="action-plan-card">
+                      <p className="text-xs text-white/40 mb-4">Action Plan</p>
                       <div className="space-y-2">
                         {fundingData.actionPlan.map((step, idx) => (
-                          <div key={idx} className="flex items-start gap-3 p-3 rounded-xl bg-[#1A1A1A]" data-testid={`action-step-${idx}`}>
-                            <div className="w-6 h-6 rounded-full bg-violet-500/15 border border-violet-500/25 flex items-center justify-center text-xs font-mono text-violet-400 shrink-0">
+                          <div key={idx} className="flex items-start gap-3 p-3 rounded-xl bg-white/[0.02]" data-testid={`action-step-${idx}`}>
+                            <div className="w-6 h-6 rounded-full bg-white/[0.06] flex items-center justify-center text-[10px] font-mono text-white/40 shrink-0">
                               {idx + 1}
                             </div>
-                            <p className="text-sm text-white/75 leading-relaxed pt-0.5">{step}</p>
+                            <p className="text-sm text-white/55 leading-relaxed">{step}</p>
                           </div>
                         ))}
                       </div>
                     </div>
                   )}
 
-                  <div className="rounded-2xl border border-[#2A2A2A] bg-[#141414] p-6" data-testid="progress-tracker-card">
-                    <div className="flex items-center gap-2 mb-4">
-                      <TrendingUp className="w-4 h-4 text-blue-400" />
-                      <p className="text-xs font-semibold tracking-widest text-white/50 uppercase">Funding Strength Progress</p>
-                    </div>
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-xs text-white/60">Current: <span className={cn("font-mono font-bold", getScoreColor(fundingData.score))}>{fundingData.score}</span></span>
-                      <span className="text-xs text-white/60">Target: <span className="font-mono font-bold text-green-400">{fundingData.progress.target}+</span></span>
-                    </div>
-                    <div className="w-full h-3 rounded-full bg-[#222] overflow-hidden">
-                      <div
-                        className="h-full rounded-full transition-all duration-1000 ease-out"
-                        style={{
-                          width: `${Math.min(100, (fundingData.score / fundingData.progress.target) * 100)}%`,
-                          background: `linear-gradient(90deg, ${getScoreRingColor(fundingData.score)}, ${getScoreRingColor(fundingData.score)}aa)`
-                        }}
-                      />
-                    </div>
-                    <p className="text-[11px] text-white/35 mt-2">
-                      {fundingData.score >= 85
-                        ? "Your profile meets funding readiness criteria."
-                        : `${fundingData.progress.target - fundingData.score} points needed to reach target.`
-                      }
-                    </p>
-                  </div>
-
                   {fundingData.analysisNextSteps && fundingData.analysisNextSteps.length > 0 && (
-                    <div className="rounded-2xl border border-green-500/20 bg-[#141414] p-6" data-testid="next-steps-card">
-                      <div className="flex items-center gap-2 mb-4">
-                        <ChevronRight className="w-4 h-4 text-green-400" />
-                        <p className="text-xs font-semibold tracking-widest text-green-400/80 uppercase">Next Steps</p>
-                        <span className="text-[10px] text-white/30 ml-auto">AI-generated from your documents</span>
+                    <div className="rounded-2xl bg-[#1A1A1A] border border-white/[0.06] p-6 mb-4" data-testid="next-steps-card">
+                      <div className="flex items-center justify-between mb-4">
+                        <p className="text-xs text-white/40">Next Steps</p>
+                        <span className="text-[9px] text-white/15 bg-white/[0.04] px-2 py-0.5 rounded-full">AI Generated</span>
                       </div>
                       <div className="space-y-2">
                         {fundingData.analysisNextSteps.map((step, idx) => (
-                          <div key={idx} className="flex items-start gap-3 p-3 rounded-xl bg-green-500/5 border border-green-500/10" data-testid={`next-step-${idx}`}>
-                            <div className="w-6 h-6 rounded-full bg-green-500/15 border border-green-500/25 flex items-center justify-center text-xs font-mono text-green-400 shrink-0">
-                              {idx + 1}
-                            </div>
-                            <p className="text-sm text-white/75 leading-relaxed pt-0.5">{step}</p>
+                          <div key={idx} className="flex items-start gap-3 p-3 rounded-xl bg-white/[0.02]" data-testid={`next-step-${idx}`}>
+                            <Sparkles className="w-4 h-4 text-white/20 shrink-0 mt-0.5" />
+                            <p className="text-sm text-white/50 leading-relaxed">{step}</p>
                           </div>
                         ))}
                       </div>
                     </div>
                   )}
 
-                  <div className="rounded-2xl border border-orange-500/20 bg-[#141414] p-6" data-testid="credit-repair-card">
-                    <div className="flex items-center gap-2 mb-4">
-                      <Shield className="w-4 h-4 text-orange-400" />
-                      <p className="text-xs font-semibold tracking-widest text-orange-400/80 uppercase">Credit Repair System</p>
-                      <span className="ml-auto text-[10px] text-orange-400/60 bg-orange-400/10 px-2 py-0.5 rounded-full font-medium">GPT-4o</span>
+                  <div className="rounded-2xl bg-[#1A1A1A] border border-orange-500/10 p-6 mb-4" data-testid="credit-repair-card">
+                    <div className="flex items-center justify-between mb-4">
+                      <p className="text-xs text-orange-400/60">Credit Repair System</p>
+                      <span className="text-[9px] text-white/15 bg-white/[0.04] px-2 py-0.5 rounded-full">GPT-4o</span>
                     </div>
 
                     {!fundingData?.hasCreditReport ? (
-                      <div className="text-center py-6">
-                        <FileText className="w-8 h-8 text-white/20 mx-auto mb-3" />
-                        <p className="text-sm text-white/50 mb-1">Upload a credit report first</p>
-                        <p className="text-xs text-white/30">The repair system needs your credit report to detect issues and generate dispute letters.</p>
+                      <div className="text-center py-8">
+                        <FileText className="w-8 h-8 text-white/10 mx-auto mb-3" />
+                        <p className="text-sm text-white/35 mb-1">Upload a credit report first</p>
+                        <p className="text-[10px] text-white/20">The repair system needs your credit report to detect issues and generate dispute letters.</p>
                       </div>
                     ) : !repairData ? (
-                      <div className="text-center py-6">
-                        <p className="text-sm text-white/60 mb-3">Credit report uploaded. Run the repair analysis to detect issues and generate dispute letters.</p>
+                      <div className="text-center py-8">
+                        <p className="text-sm text-white/40 mb-4">Credit report uploaded. Run the repair analysis to detect issues.</p>
                         <button
                           onClick={runRepairAnalysis}
                           disabled={repairAnalyzing}
-                          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-orange-500/15 border border-orange-500/30 hover:bg-orange-500/25 text-orange-400 text-sm font-medium transition-all disabled:opacity-50"
+                          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white/[0.06] border border-white/[0.08] hover:bg-white/[0.1] text-white/60 text-sm font-medium transition-all disabled:opacity-50"
                           data-testid="button-run-repair"
                         >
                           {repairAnalyzing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Zap className="w-4 h-4" />}
@@ -1107,15 +1051,15 @@ export default function DashboardPage() {
                       </div>
                     ) : (
                       <div className="space-y-4">
-                        <div className="flex items-center gap-2 mb-2">
+                        <div className="flex items-center gap-2">
                           <span className={cn(
-                            "text-[10px] font-bold uppercase px-2.5 py-1 rounded",
-                            repairData.mode === "repair" ? "bg-amber-500/20 text-amber-400" : "bg-emerald-500/20 text-emerald-400"
+                            "text-[9px] font-bold uppercase px-2.5 py-1 rounded",
+                            repairData.mode === "repair" ? "bg-amber-500/10 text-amber-400/70" : "bg-emerald-500/10 text-emerald-400/70"
                           )}>{repairData.mode === "repair" ? "Repair Mode" : "Pre-Funding Mode"}</span>
                           <button
                             onClick={runRepairAnalysis}
                             disabled={repairAnalyzing}
-                            className="ml-auto flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#1A1A1A] border border-[#333] hover:border-[#444] text-xs text-white/60 hover:text-white/80 transition-all disabled:opacity-50"
+                            className="ml-auto flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/[0.04] border border-white/[0.06] hover:bg-white/[0.08] text-[10px] text-white/35 hover:text-white/50 transition-all disabled:opacity-50"
                             data-testid="button-rerun-repair"
                           >
                             {repairAnalyzing ? <Loader2 className="w-3 h-3 animate-spin" /> : <RefreshCw className="w-3 h-3" />}
@@ -1124,36 +1068,36 @@ export default function DashboardPage() {
                         </div>
 
                         {repairData.summary && (
-                          <div className="p-4 rounded-xl bg-[#1A1A1A] border border-[#2A2A2A]">
-                            <p className="text-xs font-semibold text-white/60 mb-1.5">What's Hurting Your Profile</p>
-                            <p className="text-sm text-white/75 leading-relaxed mb-2">{repairData.summary.mainIssues}</p>
-                            <p className="text-xs font-semibold text-orange-400/80 mb-1">Priority Action</p>
-                            <p className="text-sm text-white/65 leading-relaxed">{repairData.summary.priorityAction}</p>
+                          <div className="p-4 rounded-xl bg-white/[0.02] border border-white/[0.04]">
+                            <p className="text-[10px] text-white/30 mb-1.5">What's Hurting Your Profile</p>
+                            <p className="text-sm text-white/55 leading-relaxed mb-2">{repairData.summary.mainIssues}</p>
+                            <p className="text-[10px] text-orange-400/50 mb-1">Priority Action</p>
+                            <p className="text-sm text-white/45 leading-relaxed">{repairData.summary.priorityAction}</p>
                           </div>
                         )}
 
                         {repairData.detectedIssues && repairData.detectedIssues.length > 0 && (
                           <div>
-                            <p className="text-xs font-semibold tracking-widest text-white/40 uppercase mb-3">Detected Issues ({repairData.detectedIssues.length})</p>
+                            <p className="text-[10px] text-white/25 uppercase tracking-widest mb-3">Detected Issues ({repairData.detectedIssues.length})</p>
                             <div className="space-y-2">
                               {repairData.detectedIssues.map((issue: any, idx: number) => (
-                                <div key={idx} className="p-3.5 rounded-xl bg-[#1A1A1A] border border-[#2A2A2A]" data-testid={`repair-issue-${idx}`}>
+                                <div key={idx} className="p-3.5 rounded-xl bg-white/[0.02] border border-white/[0.04]" data-testid={`repair-issue-${idx}`}>
                                   <div className="flex items-center gap-2 mb-1.5 flex-wrap">
                                     <span className={cn(
-                                      "text-[10px] font-bold uppercase px-2 py-0.5 rounded",
-                                      issue.severity === "High" ? "bg-red-500/20 text-red-400" :
-                                      issue.severity === "Medium" ? "bg-yellow-500/20 text-yellow-400" :
-                                      "bg-green-500/20 text-green-400"
+                                      "text-[9px] font-bold uppercase px-2 py-0.5 rounded",
+                                      issue.severity === "High" ? "bg-red-500/10 text-red-400/70" :
+                                      issue.severity === "Medium" ? "bg-yellow-500/10 text-yellow-400/70" :
+                                      "bg-green-500/10 text-green-400/70"
                                     )}>{issue.severity}</span>
-                                    <span className="text-xs text-white/40">{issue.bureau}</span>
-                                    <span className="text-xs text-white/30">·</span>
-                                    <span className="text-xs text-white/50 font-medium">{issue.issueType}</span>
+                                    <span className="text-[10px] text-white/25">{issue.bureau}</span>
+                                    <span className="text-[10px] text-white/15">·</span>
+                                    <span className="text-[10px] text-white/35">{issue.issueType}</span>
                                   </div>
-                                  <p className="text-sm text-white/80 font-medium">{issue.creditor} {issue.accountLast4 !== "N/A" ? `(****${issue.accountLast4})` : ""}</p>
+                                  <p className="text-sm text-white/60">{issue.creditor} {issue.accountLast4 !== "N/A" ? `(****${issue.accountLast4})` : ""}</p>
                                   {issue.monthsAffected !== "N/A" && (
-                                    <p className="text-xs text-white/40 mt-1">Months: {issue.monthsAffected}</p>
+                                    <p className="text-[10px] text-white/25 mt-1">Months: {issue.monthsAffected}</p>
                                   )}
-                                  <p className="text-xs text-cyan-400/70 mt-1.5">Attach: {issue.proofToAttach}</p>
+                                  <p className="text-[10px] text-white/30 mt-1.5">Attach: {issue.proofToAttach}</p>
                                 </div>
                               ))}
                             </div>
@@ -1162,18 +1106,18 @@ export default function DashboardPage() {
 
                         {repairData.actionPlan && repairData.actionPlan.length > 0 && (
                           <div>
-                            <p className="text-xs font-semibold tracking-widest text-white/40 uppercase mb-3">Repair Action Plan</p>
+                            <p className="text-[10px] text-white/25 uppercase tracking-widest mb-3">Repair Action Plan</p>
                             <div className="space-y-2">
                               {repairData.actionPlan.map((step: any, idx: number) => (
-                                <div key={idx} className="flex items-start gap-3 p-3 rounded-xl bg-[#1A1A1A]" data-testid={`repair-step-${idx}`}>
-                                  <div className="w-6 h-6 rounded-full bg-orange-500/15 border border-orange-500/25 flex items-center justify-center text-xs font-mono text-orange-400 shrink-0">
+                                <div key={idx} className="flex items-start gap-3 p-3 rounded-xl bg-white/[0.02]" data-testid={`repair-step-${idx}`}>
+                                  <div className="w-6 h-6 rounded-full bg-white/[0.04] flex items-center justify-center text-[10px] font-mono text-white/30 shrink-0">
                                     {step.step || idx + 1}
                                   </div>
                                   <div className="flex-1 min-w-0">
-                                    <p className="text-sm text-white/80 font-medium">{step.action}</p>
+                                    <p className="text-sm text-white/55">{step.action}</p>
                                     <div className="flex items-center gap-3 mt-1">
-                                      <span className="text-[10px] text-orange-400/70 font-mono">{step.timing}</span>
-                                      {step.details && <span className="text-xs text-white/40">{step.details}</span>}
+                                      <span className="text-[10px] text-orange-400/40 font-mono">{step.timing}</span>
+                                      {step.details && <span className="text-[10px] text-white/25">{step.details}</span>}
                                     </div>
                                   </div>
                                 </div>
@@ -1184,39 +1128,40 @@ export default function DashboardPage() {
 
                         {repairData.letters && repairData.letters.length > 0 && (
                           <div>
-                            <p className="text-xs font-semibold tracking-widest text-white/40 uppercase mb-3">Generated Dispute Letters ({repairData.letters.length})</p>
+                            <p className="text-[10px] text-white/25 uppercase tracking-widest mb-3">Generated Dispute Letters ({repairData.letters.length})</p>
                             <div className="space-y-2">
                               {repairData.letters.map((letter: any, idx: number) => (
-                                <div key={idx} className="rounded-xl bg-[#1A1A1A] border border-[#2A2A2A] overflow-hidden" data-testid={`letter-${idx}`}>
+                                <div key={idx} className="rounded-xl bg-white/[0.02] border border-white/[0.04] overflow-hidden" data-testid={`letter-${idx}`}>
                                   <button
                                     onClick={() => setExpandedLetters(prev => {
                                       const next = new Set(prev);
                                       if (next.has(idx)) next.delete(idx); else next.add(idx);
                                       return next;
                                     })}
-                                    className="w-full text-left p-3.5 flex items-center gap-3 hover:bg-[#1E1E1E] transition-colors"
+                                    className="w-full text-left p-3.5 flex items-center gap-3 hover:bg-white/[0.02] transition-colors"
+                                    data-testid={`button-expand-letter-${idx}`}
                                   >
-                                    <FileText className="w-4 h-4 text-orange-400/70 shrink-0" />
+                                    <FileText className="w-4 h-4 text-orange-400/40 shrink-0" />
                                     <div className="flex-1 min-w-0">
-                                      <p className="text-sm text-white/80 font-medium truncate">{letter.subject || `${letter.type === "bureau_dispute" ? "Bureau" : letter.type === "creditor_dispute" ? "Creditor" : "Info Correction"} Letter`}</p>
-                                      <p className="text-xs text-white/40 truncate">To: {letter.recipientName}</p>
+                                      <p className="text-sm text-white/55 truncate">{letter.subject || `${letter.type === "bureau_dispute" ? "Bureau" : letter.type === "creditor_dispute" ? "Creditor" : "Info Correction"} Letter`}</p>
+                                      <p className="text-[10px] text-white/25 truncate">To: {letter.recipientName}</p>
                                     </div>
-                                    <ChevronRight className={cn("w-4 h-4 text-white/25 shrink-0 transition-transform", expandedLetters.has(idx) && "rotate-90")} />
+                                    <ChevronRight className={cn("w-4 h-4 text-white/10 shrink-0 transition-transform", expandedLetters.has(idx) && "rotate-90")} />
                                   </button>
                                   {expandedLetters.has(idx) && (
-                                    <div className="px-3.5 pb-3.5 border-t border-[#222]">
+                                    <div className="px-3.5 pb-3.5 border-t border-white/[0.04]">
                                       <div className="flex items-center gap-2 py-2">
-                                        <span className="text-[10px] text-white/30">To: {letter.recipientAddress}</span>
+                                        <span className="text-[9px] text-white/20">To: {letter.recipientAddress}</span>
                                         <button
                                           onClick={() => copyLetterToClipboard(letter.body, idx)}
-                                          className="ml-auto flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-orange-500/10 border border-orange-500/20 hover:bg-orange-500/20 text-xs text-orange-400 font-medium transition-all"
+                                          className="ml-auto flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/[0.04] border border-white/[0.06] hover:bg-white/[0.08] text-[10px] text-white/40 font-medium transition-all"
                                           data-testid={`button-copy-letter-${idx}`}
                                         >
                                           {copiedLetter === idx ? <CheckCircle2 className="w-3 h-3" /> : <Eye className="w-3 h-3" />}
                                           {copiedLetter === idx ? "Copied!" : "Copy Letter"}
                                         </button>
                                       </div>
-                                      <div className="mt-2 p-4 rounded-xl bg-[#0D0D0D] border border-[#222] font-mono text-xs text-white/70 leading-relaxed whitespace-pre-wrap max-h-96 overflow-y-auto" style={{ scrollbarWidth: 'thin' }}>
+                                      <div className="mt-2 p-4 rounded-xl bg-[#111] border border-white/[0.04] font-mono text-[10px] text-white/45 leading-relaxed whitespace-pre-wrap max-h-96 overflow-y-auto" style={{ scrollbarWidth: 'thin' }}>
                                         {letter.body}
                                       </div>
                                     </div>
@@ -1228,22 +1173,19 @@ export default function DashboardPage() {
                         )}
 
                         {repairData.disclaimer && (
-                          <p className="text-[10px] text-white/25 italic mt-2 px-1">{repairData.disclaimer}</p>
+                          <p className="text-[9px] text-white/15 italic mt-2 px-1">{repairData.disclaimer}</p>
                         )}
                       </div>
                     )}
                   </div>
 
-                  <div className="rounded-2xl border border-[#2A2A2A] bg-[#141414] p-6" data-testid="insights-card">
-                    <div className="flex items-center gap-2 mb-4">
-                      <BookOpen className="w-4 h-4 text-amber-400" />
-                      <p className="text-xs font-semibold tracking-widest text-white/50 uppercase">Insights</p>
-                    </div>
-                    <div className="space-y-3">
+                  <div className="rounded-2xl bg-[#1A1A1A] border border-white/[0.06] p-6 mb-4" data-testid="insights-card">
+                    <p className="text-xs text-white/40 mb-4">Insights</p>
+                    <div className="space-y-2">
                       {INSIGHTS.map((insight, idx) => (
-                        <div key={idx} className="p-3.5 rounded-xl bg-[#1A1A1A] border border-[#2A2A2A]" data-testid={`insight-${idx}`}>
-                          <p className="text-sm font-medium text-white/80 mb-1">{insight.title}</p>
-                          <p className="text-xs text-white/45 leading-relaxed">{insight.summary}</p>
+                        <div key={idx} className="p-3.5 rounded-xl bg-white/[0.02] border border-white/[0.04]" data-testid={`insight-${idx}`}>
+                          <p className="text-sm text-white/55 mb-1">{insight.title}</p>
+                          <p className="text-[11px] text-white/30 leading-relaxed">{insight.summary}</p>
                         </div>
                       ))}
                     </div>
@@ -1251,9 +1193,9 @@ export default function DashboardPage() {
                 </>
               ) : (
                 <div className="flex flex-col items-center justify-center py-20">
-                  <AlertCircle className="w-8 h-8 text-white/30 mb-3" />
-                  <p className="text-sm text-white/50">Unable to load dashboard</p>
-                  <button onClick={fetchFundingReadiness} className="mt-3 text-xs text-white/40 hover:text-white/60 underline">
+                  <AlertCircle className="w-8 h-8 text-white/15 mb-3" />
+                  <p className="text-sm text-white/35">Unable to load dashboard</p>
+                  <button onClick={fetchFundingReadiness} className="mt-3 text-xs text-white/25 hover:text-white/50 underline">
                     Try again
                   </button>
                 </div>
@@ -1269,16 +1211,16 @@ export default function DashboardPage() {
                         {activeMentor.initials}
                       </div>
                       <h2 className="text-xl font-bold mb-0.5">{activeMentor.name}</h2>
-                      <p className="text-white/40 text-sm text-center max-w-xs">{activeMentor.specialty} · {activeMentor.tagline}</p>
+                      <p className="text-white/30 text-sm text-center max-w-xs">{activeMentor.specialty} · {activeMentor.tagline}</p>
                     </>
                   ) : (
                     <>
-                      <div className="w-20 h-20 rounded-2xl mb-4 bg-[#1A1A1A] border border-[#333] flex items-center justify-center relative">
-                        <span className="absolute w-10 h-10 rounded-full bg-[#E0E0E0]/12 animate-ping" />
-                        <span className="relative w-5 h-5 rounded-full bg-[#E0E0E0] shadow-[0_0_12px_rgba(224,224,224,0.4)]" />
+                      <div className="w-20 h-20 rounded-2xl mb-4 bg-[#1A1A1A] border border-white/[0.06] flex items-center justify-center relative">
+                        <span className="absolute w-10 h-10 rounded-full bg-white/[0.06] animate-ping" />
+                        <span className="relative w-5 h-5 rounded-full bg-white shadow-[0_0_12px_rgba(255,255,255,0.2)]" />
                       </div>
                       <h2 className="text-xl font-bold mb-0.5">MentXr®</h2>
-                      <p className="text-white/40 text-sm text-center max-w-xs">Mentorship On Demand</p>
+                      <p className="text-white/30 text-sm text-center max-w-xs">Mentorship On Demand</p>
                     </>
                   )}
 
@@ -1296,7 +1238,7 @@ export default function DashboardPage() {
                           setInput(prompt.text);
                           textareaRef.current?.focus();
                         }}
-                        className="text-left px-4 py-3 rounded-2xl border border-white/[0.08] bg-white/[0.02] hover:bg-white/[0.06] transition-all text-sm text-white/50 hover:text-white/70 flex items-center gap-3"
+                        className="text-left px-4 py-3 rounded-2xl border border-white/[0.06] bg-white/[0.02] hover:bg-white/[0.05] transition-all text-sm text-white/40 hover:text-white/60 flex items-center gap-3"
                       >
                         <span className="text-lg">{prompt.icon}</span>
                         <span>{prompt.text}</span>
@@ -1306,7 +1248,7 @@ export default function DashboardPage() {
                 </div>
               )}
 
-              <div className="divide-y divide-white/[0.06]">
+              <div className="divide-y divide-white/[0.04]">
                 {messages.map((m) => {
                   const mentorData = m.role === 'assistant' && m.mentor ? MENTOR_INFO[m.mentor] : null;
                   const isUser = m.role === "user";
@@ -1317,54 +1259,54 @@ export default function DashboardPage() {
                   const posterSpecialty = !isUser && mentorData ? mentorData.specialty : (!isUser ? "AI Mentor" : null);
 
                   return (
-                    <div key={m.id} className="px-4 py-4 hover:bg-white/[0.02] transition-colors" data-testid={`post-${m.id}`}>
+                    <div key={m.id} className="px-4 py-4 hover:bg-white/[0.01] transition-colors" data-testid={`post-${m.id}`}>
                       <div className="flex gap-3">
                         <div className="shrink-0">
                           {isUser ? (
-                            <div className="w-10 h-10 rounded-full bg-[#1A1A1A] border border-[#333] flex items-center justify-center text-[12px] font-bold text-[#999]">
+                            <div className="w-10 h-10 rounded-full bg-[#1A1A1A] border border-white/[0.06] flex items-center justify-center text-[12px] font-bold text-white/40">
                               {(user.displayName || user.email).substring(0, 2).toUpperCase()}
                             </div>
                           ) : posterInitials && posterMentorKey ? (
                             <div className={cn("w-10 h-10 rounded-full flex items-center justify-center text-white text-sm font-bold border border-white/10", BOT_COLORS[posterMentorKey])}>{posterInitials}</div>
                           ) : (
                             <div className="w-10 h-10 rounded-xl flex items-center justify-center relative bg-[#1A1A1A]">
-                              <span className="absolute w-5 h-5 rounded-full bg-[#E0E0E0]/15 animate-ping" />
-                              <span className="relative w-2.5 h-2.5 rounded-full bg-[#E0E0E0] shadow-[0_0_8px_rgba(224,224,224,0.4)]" />
+                              <span className="absolute w-5 h-5 rounded-full bg-white/[0.08] animate-ping" />
+                              <span className="relative w-2.5 h-2.5 rounded-full bg-white shadow-[0_0_8px_rgba(255,255,255,0.2)]" />
                             </div>
                           )}
                         </div>
 
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-1.5 mb-0.5">
-                            <span className="text-[14px] font-bold text-white/90 truncate">{posterName}</span>
+                            <span className="text-[14px] font-bold text-white/80 truncate">{posterName}</span>
                             {!isUser && (
                               <span className="shrink-0">
-                                <svg className="w-[14px] h-[14px] text-[#E0E0E0]" viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg>
+                                <svg className="w-[14px] h-[14px] text-white/50" viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg>
                               </span>
                             )}
-                            <span className="text-[13px] text-white/30 truncate">{posterHandle}</span>
-                            <span className="text-white/15 text-[13px]">·</span>
-                            <span className="text-[13px] text-white/30 shrink-0">{m.timestamp ? timeAgo(m.timestamp) : "now"}</span>
+                            <span className="text-[13px] text-white/20 truncate">{posterHandle}</span>
+                            <span className="text-white/10 text-[13px]">·</span>
+                            <span className="text-[13px] text-white/20 shrink-0">{m.timestamp ? timeAgo(m.timestamp) : "now"}</span>
                           </div>
 
                           {posterSpecialty && (
-                            <p className="text-[11px] text-[#E0E0E0]/40 mb-2">{posterSpecialty}</p>
+                            <p className="text-[11px] text-white/25 mb-2">{posterSpecialty}</p>
                           )}
 
                           {m.attachment && (
-                            <div className="inline-flex items-center gap-2 mb-2.5 px-3 py-1.5 rounded-xl bg-white/[0.04] border border-white/[0.08] text-[12px] text-white/40">
+                            <div className="inline-flex items-center gap-2 mb-2.5 px-3 py-1.5 rounded-xl bg-white/[0.03] border border-white/[0.06] text-[12px] text-white/30">
                               <FileText className="w-3.5 h-3.5" />
                               {m.attachment.replace("_", " ")}.pdf
                             </div>
                           )}
 
-                          <div className="text-[14px] sm:text-[15px] leading-[1.6] text-white/80 whitespace-pre-wrap break-words">
+                          <div className="text-[14px] sm:text-[15px] leading-[1.6] text-white/65 whitespace-pre-wrap break-words">
                             {m.content.length > TRUNCATE_LENGTH && !expandedMessages.has(m.id) ? (
                               <>
                                 {m.content.substring(0, TRUNCATE_LENGTH).trimEnd()}...
                                 <button
                                   onClick={() => toggleExpand(m.id)}
-                                  className="text-[#E0E0E0]/60 hover:text-[#E0E0E0] ml-1 text-[13px] font-medium"
+                                  className="text-white/40 hover:text-white/60 ml-1 text-[13px] font-medium"
                                   data-testid={`button-readmore-${m.id}`}
                                 >
                                   Read more
@@ -1376,7 +1318,7 @@ export default function DashboardPage() {
                                 {m.content.length > TRUNCATE_LENGTH && (
                                   <button
                                     onClick={() => toggleExpand(m.id)}
-                                    className="block text-[#E0E0E0]/40 hover:text-[#E0E0E0]/60 mt-1 text-[13px] font-medium"
+                                    className="block text-white/25 hover:text-white/40 mt-1 text-[13px] font-medium"
                                     data-testid={`button-showless-${m.id}`}
                                   >
                                     Show less
@@ -1399,22 +1341,22 @@ export default function DashboardPage() {
                           <div className={cn("w-10 h-10 rounded-full flex items-center justify-center text-white text-sm font-bold border border-white/10", activeMentorKey ? BOT_COLORS[activeMentorKey] : "")}>{activeMentor.initials}</div>
                         ) : (
                           <div className="w-10 h-10 rounded-xl flex items-center justify-center relative bg-[#1A1A1A]">
-                            <span className="absolute w-5 h-5 rounded-full bg-[#E0E0E0]/15 animate-ping" />
-                            <span className="relative w-2.5 h-2.5 rounded-full bg-[#E0E0E0] shadow-[0_0_8px_rgba(224,224,224,0.4)]" />
+                            <span className="absolute w-5 h-5 rounded-full bg-white/[0.08] animate-ping" />
+                            <span className="relative w-2.5 h-2.5 rounded-full bg-white shadow-[0_0_8px_rgba(255,255,255,0.2)]" />
                           </div>
                         )}
                       </div>
                       <div className="flex-1">
                         <div className="flex items-center gap-1.5 mb-1">
-                          <span className="text-[14px] font-bold text-white/90">{activeMentor ? activeMentor.name : "MentXr® AI"}</span>
+                          <span className="text-[14px] font-bold text-white/80">{activeMentor ? activeMentor.name : "MentXr® AI"}</span>
                           <span className="shrink-0">
-                            <svg className="w-[14px] h-[14px] text-[#E0E0E0]" viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg>
+                            <svg className="w-[14px] h-[14px] text-white/50" viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg>
                           </span>
                         </div>
                         <div className="flex items-center gap-1.5 py-2">
-                          <span className="w-2 h-2 bg-[#555] rounded-full animate-bounce"></span>
-                          <span className="w-2 h-2 bg-[#555] rounded-full animate-bounce [animation-delay:0.15s]"></span>
-                          <span className="w-2 h-2 bg-[#555] rounded-full animate-bounce [animation-delay:0.3s]"></span>
+                          <span className="w-2 h-2 bg-white/20 rounded-full animate-bounce"></span>
+                          <span className="w-2 h-2 bg-white/20 rounded-full animate-bounce [animation-delay:0.15s]"></span>
+                          <span className="w-2 h-2 bg-white/20 rounded-full animate-bounce [animation-delay:0.3s]"></span>
                         </div>
                       </div>
                     </div>
@@ -1431,32 +1373,32 @@ export default function DashboardPage() {
           <div className="absolute bottom-28 sm:bottom-32 left-1/2 -translate-x-1/2 z-10 md:left-[calc(50%+130px)]">
             <button
               onClick={scrollToBottom}
-              className="w-9 h-9 rounded-full bg-white/10 border border-white/[0.08] backdrop-blur-lg flex items-center justify-center hover:bg-white/20 transition-colors shadow-lg"
+              className="w-9 h-9 rounded-full bg-white/[0.06] border border-white/[0.06] backdrop-blur-lg flex items-center justify-center hover:bg-white/[0.1] transition-colors shadow-lg"
             >
               <ArrowDown className="w-4 h-4" />
             </button>
           </div>
         )}
 
-        <div className="shrink-0 border-t border-white/[0.06] bg-black/90 backdrop-blur-xl px-3 sm:px-4 pb-3 sm:pb-4 pt-2 safe-area-pb">
+        <div className="shrink-0 border-t border-white/[0.04] bg-[#111111] px-3 sm:px-4 pb-3 sm:pb-4 pt-2 safe-area-pb">
           <div className="max-w-xl mx-auto">
             {activeMentor && hasMessages && (
               <div className="flex items-center gap-2 mb-2 px-1">
                 <div className={cn("w-5 h-5 rounded-full flex items-center justify-center text-white text-[8px] font-bold border border-white/10", activeMentorKey ? BOT_COLORS[activeMentorKey] : "")}>{activeMentor.initials}</div>
-                <span className="text-[11px] text-white/30">Replying to <span className="text-[#E0E0E0]/60 font-medium">{activeMentor.name}</span></span>
-                <button onClick={() => { setSelectedMentor(null); setMentorCleared(true); }} className="text-white/20 hover:text-white/50 ml-auto" data-testid="button-clear-mentor">
+                <span className="text-[11px] text-white/20">Replying to <span className="text-white/40 font-medium">{activeMentor.name}</span></span>
+                <button onClick={() => { setSelectedMentor(null); setMentorCleared(true); }} className="text-white/15 hover:text-white/40 ml-auto" data-testid="button-clear-mentor">
                   <X className="w-3.5 h-3.5" />
                 </button>
               </div>
             )}
             {attachedFile && (
               <div className="flex items-center gap-2 mb-2 px-1">
-                <div className="flex items-center gap-2 bg-white/[0.04] border border-white/[0.08] rounded-xl px-3 py-1.5 text-[12px] text-white/50">
-                  <FileText className="w-3.5 h-3.5 text-[#888] shrink-0" />
+                <div className="flex items-center gap-2 bg-white/[0.03] border border-white/[0.06] rounded-xl px-3 py-1.5 text-[12px] text-white/40">
+                  <FileText className="w-3.5 h-3.5 text-white/25 shrink-0" />
                   <span className="truncate max-w-[180px]">{attachedFile.name}</span>
                   <button
                     onClick={() => setAttachedFile(null)}
-                    className="text-white/30 hover:text-white/60 ml-1"
+                    className="text-white/20 hover:text-white/50 ml-1"
                     data-testid="button-remove-file"
                   >
                     <X className="w-3.5 h-3.5" />
@@ -1466,139 +1408,98 @@ export default function DashboardPage() {
             )}
             <div className="flex items-end gap-2">
               <div className="shrink-0">
-                <div className="w-8 h-8 rounded-full bg-[#1A1A1A] border border-[#333] flex items-center justify-center text-[10px] font-bold text-[#999]">
+                <div className="w-8 h-8 rounded-full bg-[#1A1A1A] border border-white/[0.06] flex items-center justify-center text-[10px] font-bold text-white/35">
                   {(user.displayName || user.email).substring(0, 2).toUpperCase()}
                 </div>
               </div>
-              <div className="flex-1 relative flex items-end bg-white/[0.04] border border-white/[0.08] rounded-2xl px-4 py-2.5 focus-within:border-white/15 focus-within:bg-white/[0.06] transition-all">
+              <div className="flex-1 relative flex items-end bg-white/[0.03] border border-white/[0.06] rounded-2xl px-4 py-2.5 focus-within:border-white/[0.1] focus-within:bg-white/[0.04] transition-all">
                 <textarea
                   ref={textareaRef}
-                  data-testid="input-chat"
-                  placeholder={activeMentor ? `Ask ${activeMentor.name} something...` : "What's on your mind?"}
+                  data-testid="input-message"
                   value={input}
                   onChange={handleTextareaInput}
                   onKeyDown={handleKeyDown}
+                  placeholder="Message MentXr..."
                   rows={1}
-                  disabled={isLoading}
-                  className="flex-1 bg-transparent text-[14px] text-white placeholder:text-white/25 resize-none outline-none max-h-[200px] leading-6 py-0.5"
+                  className="flex-1 bg-transparent outline-none resize-none text-[14px] text-white/80 placeholder-white/20 max-h-[200px] leading-relaxed"
+                  style={{ scrollbarWidth: 'thin' }}
                 />
-                <div className="flex items-center gap-1 ml-2 shrink-0">
+                <div className="flex items-center gap-1 ml-2">
                   <input
                     ref={fileInputRef}
                     type="file"
                     accept=".pdf,.doc,.docx,.txt,.csv"
                     className="hidden"
-                    data-testid="input-file-upload"
+                    data-testid="input-file"
                     onChange={(e) => {
-                      const file = e.target.files?.[0];
-                      if (file) {
-                        setAttachedFile(file);
+                      if (e.target.files?.[0]) {
+                        setAttachedFile(e.target.files[0]);
                       }
                       e.target.value = "";
                     }}
                   />
-                  <Button
-                    size="icon"
-                    variant="ghost"
-                    className="w-8 h-8 rounded-full text-white/25 hover:text-white/50 hover:bg-white/[0.06]"
-                    onClick={() => fileInputRef.current?.click()}
-                    disabled={isLoading}
-                    title="Attach document"
+                  <button
                     data-testid="button-attach"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="w-8 h-8 flex items-center justify-center rounded-xl hover:bg-white/[0.06] transition-colors text-white/25 hover:text-white/50"
                   >
                     <Paperclip className="w-4 h-4" />
-                  </Button>
+                  </button>
+                  <button
+                    data-testid="button-send"
+                    onClick={handleSend}
+                    disabled={!input.trim() && !attachedFile || isLoading}
+                    className={cn(
+                      "w-8 h-8 flex items-center justify-center rounded-xl transition-all",
+                      (input.trim() || attachedFile) && !isLoading
+                        ? "bg-white text-black hover:bg-white/90"
+                        : "text-white/15"
+                    )}
+                  >
+                    {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+                  </button>
                 </div>
               </div>
-              <button
-                data-testid="button-send"
-                onClick={handleSend}
-                disabled={isLoading || (!input.trim() && !attachedFile)}
-                className={cn(
-                  "w-9 h-9 rounded-full flex items-center justify-center transition-all shrink-0",
-                  (input.trim() || attachedFile) && !isLoading
-                    ? "bg-[#E0E0E0] text-[#0D0D0D] hover:bg-white hover:scale-105"
-                    : "bg-white/[0.06] text-white/20 cursor-not-allowed"
-                )}
-              >
-                {isLoading ? (
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                ) : (
-                  <Send className="w-4 h-4" />
-                )}
-              </button>
             </div>
-            <p className="text-center text-[10px] text-white/15 mt-2">
-              MentXr® AI can make mistakes. Verify important information.
-            </p>
           </div>
         </div>
       </main>
 
       {showAddFriend && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm" onClick={() => setShowAddFriend(false)}>
-          <div className="w-[360px] max-h-[500px] bg-[#111] border border-white/10 rounded-2xl shadow-2xl flex flex-col" onClick={e => e.stopPropagation()}>
-            <div className="flex items-center justify-between px-4 py-3 border-b border-white/[0.08]">
-              <span className="text-sm font-semibold text-white/80">Add Friend</span>
-              <button onClick={() => { setShowAddFriend(false); setFriendSearch(""); setFriendSearchResults([]); }} className="text-white/30 hover:text-white/60" data-testid="close-add-friend">
+          <div className="w-[340px] bg-[#1A1A1A] border border-white/[0.06] rounded-2xl p-5 shadow-2xl" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-4">
+              <p className="text-sm font-semibold text-white/70">Add Friend</p>
+              <button onClick={() => setShowAddFriend(false)} className="text-white/25 hover:text-white/50">
                 <X className="w-4 h-4" />
               </button>
             </div>
-            <div className="px-4 py-3">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" />
-                <input
-                  type="text"
-                  value={friendSearch}
-                  onChange={e => { setFriendSearch(e.target.value); searchFriends(e.target.value); }}
-                  placeholder="Search by name..."
-                  className="w-full h-10 pl-10 pr-4 rounded-xl bg-white/[0.06] border border-white/[0.08] text-sm text-white/80 placeholder:text-white/20 focus:outline-none focus:border-white/20"
-                  autoFocus
-                  data-testid="input-friend-search"
-                />
-              </div>
+            <div className="relative mb-3">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/20" />
+              <input
+                data-testid="input-friend-search"
+                type="text"
+                value={friendSearch}
+                onChange={e => { setFriendSearch(e.target.value); searchFriends(e.target.value); }}
+                placeholder="Search by name..."
+                className="w-full h-10 pl-10 pr-4 rounded-xl bg-white/[0.04] border border-white/[0.06] text-sm text-white/70 placeholder-white/20 outline-none focus:border-white/[0.12]"
+              />
             </div>
-            <div className="flex-1 overflow-y-auto px-2 pb-3 max-h-[350px]">
-              {friendSearchLoading && (
-                <div className="flex items-center justify-center py-4">
-                  <Loader2 className="w-5 h-5 text-white/30 animate-spin" />
-                </div>
-              )}
-              {!friendSearchLoading && friendSearch.length >= 2 && friendSearchResults.length === 0 && (
-                <p className="text-center text-[12px] text-white/20 py-4">No users found</p>
-              )}
-              {friendSearchResults.map((u: any) => {
-                const alreadyFriend = friendsList.some((f: any) => f.id === u.id);
-                const alreadyPending = pendingRequests.some((p: any) => p.id === u.id);
-                const hasDuplicate = friendSearchResults.filter((r: any) => r.displayName === u.displayName).length > 1;
-                return (
-                  <div key={u.id} className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-white/[0.04] transition-colors">
-                    <div className="w-9 h-9 rounded-lg bg-[#1A1A1A] border border-white/[0.1] flex items-center justify-center text-[10px] font-bold text-white/50">
-                      {(u.displayName || "?").substring(0, 2).toUpperCase()}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <span className="text-[13px] text-white/70 block truncate">{u.displayName}</span>
-                      {hasDuplicate && <span className="text-[10px] text-white/25 block truncate">#{u.id}</span>}
-                    </div>
-                    {alreadyFriend ? (
-                      <span className="text-[10px] text-green-400/60 px-2 py-1 rounded-lg bg-green-500/10">Friends</span>
-                    ) : alreadyPending ? (
-                      <span className="text-[10px] text-amber-400/60 px-2 py-1 rounded-lg bg-amber-500/10">Pending</span>
-                    ) : (
-                      <button
-                        onClick={() => sendFriendRequest(u.id)}
-                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/[0.08] hover:bg-white/[0.12] text-[11px] text-white/60 hover:text-white/80 transition-colors"
-                        data-testid={`send-request-${u.id}`}
-                      >
-                        <UserPlus className="w-3 h-3" />
-                        Add
-                      </button>
-                    )}
+            {friendSearchLoading && <p className="text-[10px] text-white/25 text-center py-2">Searching...</p>}
+            <div className="space-y-1 max-h-48 overflow-y-auto">
+              {friendSearchResults.map((u: any) => (
+                <div key={u.id} className="flex items-center gap-3 p-2 rounded-xl hover:bg-white/[0.03] transition-colors">
+                  <div className="w-8 h-8 rounded-lg bg-white/[0.04] border border-white/[0.06] flex items-center justify-center text-[10px] font-bold text-white/35">
+                    {(u.displayName || u.email || "?").substring(0, 2).toUpperCase()}
                   </div>
-                );
-              })}
-              {friendSearch.length < 2 && (
-                <p className="text-center text-[11px] text-white/15 py-4">Type at least 2 characters to search</p>
+                  <p className="text-sm text-white/50 flex-1 truncate">{u.displayName || u.email}</p>
+                  <button onClick={() => sendFriendRequest(u.id)} className="h-7 px-3 rounded-lg bg-white/[0.06] hover:bg-white/[0.1] text-[10px] text-white/50 font-medium transition-colors" data-testid={`add-friend-${u.id}`}>
+                    Add
+                  </button>
+                </div>
+              ))}
+              {friendSearch.length >= 2 && !friendSearchLoading && friendSearchResults.length === 0 && (
+                <p className="text-[10px] text-white/20 text-center py-3">No users found</p>
               )}
             </div>
           </div>
