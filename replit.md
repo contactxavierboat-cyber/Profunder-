@@ -1,29 +1,18 @@
 # MentXr®
 
 ## Overview
-A free AI mentorship platform ("Mentorship On Demand") that provides personalized conversations with digital versions of influential mentors. Features ChatGPT-style dark theme interface, session-based authentication, OpenAI GPT-4o powered conversations, PDF document upload, admin panel, and free membership access for all users.
+A free AI mentorship platform ("Mentorship On Demand") combining funding readiness analytics with AI-powered mentorship. Features a financial analytics dashboard (Funding Readiness Score, risk alerts, action plan, progress tracker), AI chat workspace with 7 bot mentors, PDF document upload with OCR, friends list, admin panel, and free membership access.
 
 ## Recent Changes
+- 2026-02-13: Replaced social feed with Funding Readiness Dashboard (score, qualification range, risk alerts, action plan, progress tracker, insights)
+- 2026-02-13: Added /api/funding-readiness endpoint calculating score from credit profile data
+- 2026-02-13: Dashboard tab replaces Feed tab - private banking/financial analytics terminal design
+- 2026-02-13: Removed social elements (live feed, community posts, influencer posts, likes, comments on feed)
+- 2026-02-13: Kept friends list sidebar with add/accept/reject/remove friend functionality
 - 2026-02-13: Added friend feature - send/accept/reject friend requests, search users, friends list in AOL buddy list sidebar
-- 2026-02-13: Integrated real mentor YouTube channels into feed (Grant Cardone, Gary Vee, 19Keys, Charleston White, OWN/Oprah) with mentor badge highlighting
-- 2026-02-13: Added 14+ influencer YouTube channels (Alex Hormozi, Patrick Bet-David, Earn Your Leisure, Lex Fridman, The Breakfast Club, etc.) + podcast RSS feeds
-- 2026-02-13: Feed now pulls 200+ real-time items from 28+ sources (mentor YT, influencer YT, podcasts, news)
-- 2026-02-13: Mentor-tagged feed posts get gold border + "Mentor" badge for visual distinction
-- 2026-02-13: Added Feed/Chat tab system - Feed tab shows trending news + community posts, Chat tab provides clean direct mentor conversation without feed interference
-- 2026-02-13: Tapping a mentor avatar on Feed tab auto-switches to Chat tab for direct conversation
-- 2026-02-13: Sending a message auto-switches to Chat tab
-- 2026-02-13: Added real-time Discover feed pulling live news from RSS sources (BBC, Forbes, CNBC, Entrepreneur, etc.)
-- 2026-02-13: Dashboard now has Chat/Discover tabs with auto-refreshing content feed
-- 2026-02-13: Added comment system with AI auto-replies (comments table, API endpoints, inline UI)
-- 2026-02-13: Added Charleston White as 7th mentor - Youth Advocacy & Transformation
-- 2026-02-13: Reset all memberships (monthly usage reset to 0 for all users)
-- 2026-02-12: Made memberships free for all users (no subscription required, all users default to active)
-- 2026-02-12: Added 19Keys (Jibrial Muhammad) as 6th mentor - Mindset & Financial Literacy
 - 2026-02-13: Replaced all 7 real mentors with anonymous bot profiles (NovaSage247, AlphaVolt889, BlazeEcho512, LunarPeak303, IronFlux771, ZenCipher108, SteelWraith666)
 - 2026-02-13: Bot mentors use color-gradient avatars with initials instead of real celebrity photos
 - 2026-02-12: Each mentor has unique system prompt, specialty, tagline, and keyword detection
-- 2026-02-12: Users can explicitly select/switch/clear mentors via UI panel or type mentor name
-- 2026-02-12: Added /api/mentors endpoint for listing available mentors
 - 2026-02-12: Graduated from visual prototype to full-stack working app with PostgreSQL + Drizzle ORM
 - 2026-02-12: Implemented OpenAI AI chat integration via Replit AI Integrations (server-side only)
 - 2026-02-12: Added admin panel with user management (toggle subscriptions, reset usage)

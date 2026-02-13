@@ -3355,6 +3355,154 @@ export async function registerRoutes(
     }
   });
 
+  app.get("/api/funding-readiness", requireAuth, async (req: any, res) => {
+    try {
+      const userId = req.session.userId;
+      const user = await storage.getUser(userId);
+      if (!user) return res.status(404).json({ error: "User not found" });
+
+      const creditScore = user.creditScoreRange || null;
+      const revolvingLimit = user.totalRevolvingLimit || 0;
+      const balances = user.totalBalances || 0;
+      const inquiries = user.inquiries || 0;
+      const derogatoryAccounts = user.derogatoryAccounts || 0;
+      const hasCreditReport = user.hasCreditReport || false;
+      const hasBankStatement = user.hasBankStatement || false;
+
+      let score = 0;
+      const alerts: { severity: "red" | "yellow" | "gray"; title: string; explanation: string; impact: string; fix: string }[] = [];
+      const actionPlan: string[] = [];
+
+      const hasProfile = creditScore || revolvingLimit > 0 || balances > 0;
+
+      if (!hasProfile) {
+        res.json({
+          score: 0,
+          status: "incomplete",
+          statusLabel: "Profile Incomplete",
+          estimatedRange: null,
+          alerts: [
+            { severity: "gray" as const, title: "No financial profile submitted", explanation: "We need your credit information to calculate your funding readiness.", impact: "Cannot assess funding eligibility without data.", fix: "Upload your credit report or enter your financial details in the Workspace." }
+          ],
+          actionPlan: [
+            "Upload your credit report PDF in the Workspace tab",
+            "Enter your basic financial details",
+            "Return to Dashboard to view your readiness score"
+          ],
+          progress: { current: 0, target: 85 },
+          hasProfile: false
+        });
+        return;
+      }
+
+      let creditScoreNum = 0;
+      if (creditScore) {
+        const ranges: Record<string, number> = {
+          "300-579": 400, "580-619": 600, "620-659": 640,
+          "660-699": 680, "700-749": 725, "750-850": 800
+        };
+        creditScoreNum = ranges[creditScore] || 650;
+      }
+
+      if (creditScoreNum >= 750) score += 30;
+      else if (creditScoreNum >= 700) score += 25;
+      else if (creditScoreNum >= 660) score += 20;
+      else if (creditScoreNum >= 620) score += 12;
+      else if (creditScoreNum >= 580) score += 5;
+      else score += 0;
+
+      const utilization = revolvingLimit > 0 ? (balances / revolvingLimit) * 100 : 100;
+      if (utilization <= 10) score += 25;
+      else if (utilization <= 30) score += 20;
+      else if (utilization <= 45) score += 12;
+      else if (utilization <= 60) score += 5;
+      else score += 0;
+
+      if (inquiries === 0) score += 15;
+      else if (inquiries <= 2) score += 12;
+      else if (inquiries <= 4) score += 6;
+      else score += 0;
+
+      if (derogatoryAccounts === 0) score += 15;
+      else if (derogatoryAccounts <= 1) score += 5;
+      else score += 0;
+
+      if (hasCreditReport) score += 8;
+      if (hasBankStatement) score += 7;
+
+      score = Math.min(100, Math.max(0, score));
+
+      if (utilization > 45) {
+        alerts.push({ severity: "red", title: `Credit utilization at ${Math.round(utilization)}%`, explanation: "Your revolving credit usage is high relative to your limits.", impact: "Lenders see high utilization as a sign of financial strain, reducing approval odds.", fix: "Pay down balances to bring utilization below 30%." });
+      } else if (utilization > 30) {
+        alerts.push({ severity: "yellow", title: `Credit utilization at ${Math.round(utilization)}%`, explanation: "Your utilization is moderate but could be improved.", impact: "Keeping utilization below 30% signals strong credit management.", fix: "Reduce balances or request credit limit increases." });
+      }
+
+      if (inquiries > 4) {
+        alerts.push({ severity: "red", title: `${inquiries} recent hard inquiries detected`, explanation: "Multiple credit applications in a short period lower your score.", impact: "Lenders may view frequent applications as credit-seeking behavior.", fix: "Avoid new credit applications for at least 45 days." });
+      } else if (inquiries > 2) {
+        alerts.push({ severity: "yellow", title: `${inquiries} recent hard inquiries`, explanation: "A few recent inquiries are on your record.", impact: "Each hard inquiry can lower your score temporarily.", fix: "Hold off on new applications to let inquiries age." });
+      }
+
+      if (derogatoryAccounts > 0) {
+        alerts.push({ severity: "red", title: `${derogatoryAccounts} derogatory account${derogatoryAccounts > 1 ? "s" : ""} found`, explanation: "Negative marks such as collections, charge-offs, or late payments appear on your report.", impact: "Derogatory marks significantly reduce approval probability.", fix: "Dispute inaccurate items and negotiate pay-for-delete agreements." });
+      }
+
+      if (creditScoreNum < 620) {
+        alerts.push({ severity: "red", title: "Credit score below funding threshold", explanation: "Most lenders require a minimum score in the 620-650 range.", impact: "Applications with this score range face high denial rates.", fix: "Focus on paying bills on time and reducing outstanding debt." });
+      } else if (creditScoreNum < 680) {
+        alerts.push({ severity: "yellow", title: "Credit score in moderate range", explanation: "Your score qualifies for some products but limits premium options.", impact: "You may face higher rates or lower approval amounts.", fix: "Continue consistent payments and reduce utilization to improve score." });
+      }
+
+      if (revolvingLimit < 5000 && revolvingLimit > 0) {
+        alerts.push({ severity: "yellow", title: "Limited revolving credit depth", explanation: "Your total credit limits are relatively low.", impact: "Thin credit files can make it harder to qualify for larger funding.", fix: "Consider opening a secured card or requesting limit increases." });
+      }
+
+      if (!hasCreditReport) {
+        alerts.push({ severity: "gray", title: "Credit report not uploaded", explanation: "Uploading your report allows for deeper analysis.", impact: "We can provide more accurate scoring with your full report.", fix: "Upload your credit report PDF in the Workspace tab." });
+      }
+      if (!hasBankStatement) {
+        alerts.push({ severity: "gray", title: "Bank statement not uploaded", explanation: "Bank statements help verify revenue and cash flow.", impact: "Lenders often require bank statements as part of underwriting.", fix: "Upload your recent bank statement in the Workspace tab." });
+      }
+
+      if (utilization > 30) actionPlan.push("Reduce credit utilization below 30%");
+      if (inquiries > 2) actionPlan.push("Avoid new credit applications for 45 days");
+      if (revolvingLimit < 10000 && revolvingLimit > 0) actionPlan.push("Increase primary revolving credit depth");
+      if (derogatoryAccounts > 0) actionPlan.push("Dispute or resolve derogatory accounts");
+      if (!hasCreditReport) actionPlan.push("Upload credit report for detailed analysis");
+      if (!hasBankStatement) actionPlan.push("Upload bank statement to verify cash flow");
+      actionPlan.push("Separate business and personal expenses");
+      actionPlan.push("Re-evaluate readiness score in 30 days");
+
+      let status: string;
+      let statusLabel: string;
+      if (score >= 85) { status = "ready"; statusLabel = "Ready"; }
+      else if (score >= 70) { status = "almost"; statusLabel = "Almost Ready"; }
+      else if (score >= 50) { status = "needs_improvement"; statusLabel = "Needs Improvement"; }
+      else { status = "high_risk"; statusLabel = "High Risk"; }
+
+      let minRange = 0, maxRange = 0;
+      if (score >= 85) { minRange = 75000; maxRange = 250000; }
+      else if (score >= 70) { minRange = 35000; maxRange = 90000; }
+      else if (score >= 50) { minRange = 10000; maxRange = 40000; }
+      else if (score >= 25) { minRange = 5000; maxRange = 15000; }
+
+      res.json({
+        score,
+        status,
+        statusLabel,
+        estimatedRange: score >= 25 ? { min: minRange, max: maxRange } : null,
+        alerts,
+        actionPlan,
+        progress: { current: score, target: 85 },
+        hasProfile: true
+      });
+    } catch (error) {
+      console.error("Funding readiness error:", error);
+      res.status(500).json({ error: "Failed to calculate funding readiness" });
+    }
+  });
+
   app.get("/api/stats", async (_req, res) => {
     try {
       const result = await storage.getUserCount();

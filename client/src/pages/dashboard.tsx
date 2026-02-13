@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from "react";
 import { useAuth } from "@/lib/store";
 import { useLocation } from "wouter";
-import { Send, Plus, LogOut, Paperclip, Loader2, ArrowDown, FileText, X, Menu, Bot, Heart, MessageCircle, Share2, Bookmark, Globe, RefreshCw, ExternalLink, TrendingUp, UserPlus, Check, UserX, Search, Maximize2, Minimize2 } from "lucide-react";
+import { Send, Plus, Paperclip, Loader2, ArrowDown, FileText, X, Menu, MessageCircle, RefreshCw, TrendingUp, UserPlus, Check, UserX, Search, AlertTriangle, Shield, ChevronRight, Target, BarChart3, BookOpen, CheckCircle2, AlertCircle, Info } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -24,6 +24,25 @@ const MENTOR_INFO: Record<string, { name: string; initials: string; tagline: str
   zen_cipher: { name: "ZenCipher108", initials: "ZC", tagline: "Unlock Your Potential", specialty: "Mindset & Financial Literacy" },
   steel_wraith: { name: "SteelWraith666", initials: "SW", tagline: "Real Talk, Real Change", specialty: "Youth Advocacy & Transformation" },
 };
+
+const INSIGHTS = [
+  { title: "What Lenders Look for in Strong Profiles", summary: "Consistent payment history, low utilization, established credit age, and minimal inquiries are the top factors lenders evaluate." },
+  { title: "How to Avoid Common Denials", summary: "Most denials come from high utilization, too many recent inquiries, or unresolved derogatory marks. Address these before applying." },
+  { title: "Timing Your Applications Correctly", summary: "Apply when your utilization is lowest (after paying statements) and when you have zero recent inquiries for the best approval odds." },
+  { title: "Separating Business and Personal Credit", summary: "Lenders prefer clean separation. Use an EIN, open business accounts, and keep personal credit reserved for personal use." },
+  { title: "The 30-Day Optimization Window", summary: "Most credit improvements take 30-45 days to reflect. Plan your application timeline around statement closing dates." },
+];
+
+interface FundingReadiness {
+  score: number;
+  status: string;
+  statusLabel: string;
+  estimatedRange: { min: number; max: number } | null;
+  alerts: { severity: "red" | "yellow" | "gray"; title: string; explanation: string; impact: string; fix: string }[];
+  actionPlan: string[];
+  progress: { current: number; target: number };
+  hasProfile: boolean;
+}
 
 function timeAgo(date: Date | string): string {
   const now = new Date();
@@ -48,71 +67,19 @@ export default function DashboardPage() {
   const [buddyGroups, setBuddyGroups] = useState<Record<string, boolean>>({
     mentors: true,
     friends: true,
-    community: true,
     offline: false,
   });
-  const [likedMessages, setLikedMessages] = useState<Set<number>>(new Set());
-  const [savedMessages, setSavedMessages] = useState<Set<number>>(new Set());
   const [expandedMessages, setExpandedMessages] = useState<Set<number>>(new Set());
-  const [openComments, setOpenComments] = useState<Set<number>>(new Set());
-  const [commentsData, setCommentsData] = useState<Record<number, any[]>>({});
-  const [commentInputs, setCommentInputs] = useState<Record<number, string>>({});
-  const [commentLoading, setCommentLoading] = useState<Set<number>>(new Set());
-  const [feedItems, setFeedItems] = useState<any[]>([]);
-  const [feedLoading, setFeedLoading] = useState(false);
-  const feedBufferRef = useRef<any[]>([]);
-  const feedIndexRef = useRef(0);
-  const [liveFeedItems, setLiveFeedItems] = useState<any[]>([]);
-  const influencerBufferRef = useRef<any[]>([]);
-  const influencerIndexRef = useRef(0);
-  const [platformStats, setPlatformStats] = useState<{ totalUsers: number; activeNow: number }>({ totalUsers: 0, activeNow: 0 });
-  const [communityPosts, setCommunityPosts] = useState<any[]>([]);
-  const [postLikes, setPostLikes] = useState<Set<number>>(new Set());
-  const [lastSeenPostId, setLastSeenPostId] = useState<number>(0);
-  const [postCommentCounts] = useState<Map<number, number>>(new Map());
-  const [activeTab, setActiveTab] = useState<"feed" | "chat">("feed");
+  const [activeTab, setActiveTab] = useState<"dashboard" | "chat">("dashboard");
   const [friendsList, setFriendsList] = useState<any[]>([]);
   const [pendingRequests, setPendingRequests] = useState<any[]>([]);
   const [showAddFriend, setShowAddFriend] = useState(false);
   const [friendSearch, setFriendSearch] = useState("");
   const [friendSearchResults, setFriendSearchResults] = useState<any[]>([]);
   const [friendSearchLoading, setFriendSearchLoading] = useState(false);
-  const [contentViewer, setContentViewer] = useState<{ type: "video" | "article"; videoId?: string; url?: string; title: string; source?: string } | null>(null);
-
-  const extractYouTubeId = (item: any): string | null => {
-    const tryExtract = (url: string): string | null => {
-      if (!url) return null;
-      let m;
-      m = url.match(/[?&]v=([a-zA-Z0-9_-]{11})/);
-      if (m) return m[1];
-      m = url.match(/youtu\.be\/([a-zA-Z0-9_-]{11})/);
-      if (m) return m[1];
-      m = url.match(/youtube\.com\/embed\/([a-zA-Z0-9_-]{11})/);
-      if (m) return m[1];
-      m = url.match(/youtube\.com\/shorts\/([a-zA-Z0-9_-]{11})/);
-      if (m) return m[1];
-      m = url.match(/img\.youtube\.com\/vi\/([a-zA-Z0-9_-]{11})/);
-      if (m) return m[1];
-      return null;
-    };
-    return tryExtract(item.link) || tryExtract(item.image) || null;
-  };
-
-  useEffect(() => {
-    if (!contentViewer) return;
-    const handleEsc = (e: KeyboardEvent) => { if (e.key === "Escape") setContentViewer(null); };
-    window.addEventListener("keydown", handleEsc);
-    return () => window.removeEventListener("keydown", handleEsc);
-  }, [contentViewer]);
-
-  const openContent = (item: any) => {
-    const videoId = extractYouTubeId(item);
-    if (videoId) {
-      setContentViewer({ type: "video", videoId, title: item.title || item.description || "", source: item.source });
-    } else if (item.link && item.link !== "#") {
-      setContentViewer({ type: "article", url: item.link, title: item.title || item.description || "", source: item.source });
-    }
-  };
+  const [fundingData, setFundingData] = useState<FundingReadiness | null>(null);
+  const [fundingLoading, setFundingLoading] = useState(false);
+  const [expandedAlerts, setExpandedAlerts] = useState<Set<number>>(new Set());
 
   const TRUNCATE_LENGTH = 280;
 
@@ -122,141 +89,6 @@ export default function DashboardPage() {
       if (next.has(id)) next.delete(id); else next.add(id);
       return next;
     });
-  };
-
-  const toggleComments = async (messageId: number) => {
-    const next = new Set(openComments);
-    if (next.has(messageId)) {
-      next.delete(messageId);
-    } else {
-      next.add(messageId);
-      if (!commentsData[messageId]) {
-        try {
-          const res = await fetch(`/api/comments/${messageId}`, { credentials: "include" });
-          if (res.ok) {
-            const data = await res.json();
-            setCommentsData(prev => ({ ...prev, [messageId]: data }));
-          }
-        } catch (err) {
-          console.error("Failed to load comments", err);
-        }
-      }
-    }
-    setOpenComments(next);
-  };
-
-  const submitComment = async (messageId: number) => {
-    const text = (commentInputs[messageId] || "").trim();
-    if (!text) return;
-
-    setCommentLoading(prev => { const next = new Set(prev); next.add(messageId); return next; });
-    setCommentInputs(prev => ({ ...prev, [messageId]: "" }));
-
-    try {
-      const res = await fetch(`/api/comments/${messageId}`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ content: text }),
-      });
-      if (res.ok) {
-        const { userComment, aiReply } = await res.json();
-        setCommentsData(prev => {
-          const existing = prev[messageId] || [];
-          const updated = [...existing, userComment];
-          if (aiReply) updated.push(aiReply);
-          return { ...prev, [messageId]: updated };
-        });
-      }
-    } catch (err) {
-      console.error("Failed to post comment", err);
-      toast({ title: "Error", description: "Failed to post comment", variant: "destructive" });
-    } finally {
-      setCommentLoading(prev => { const next = new Set(prev); next.delete(messageId); return next; });
-    }
-  };
-
-  const fetchPosts = async () => {
-    try {
-      const res = await fetch("/api/posts", { credentials: "include" });
-      if (res.ok) {
-        const data = await res.json();
-        const posts = data.posts || [];
-        posts.forEach((p: any) => {
-          if (!postCommentCounts.has(p.id)) {
-            postCommentCounts.set(p.id, Math.floor(Math.random() * 15));
-          }
-        });
-        if (posts.length > 0 && posts[0].id !== lastSeenPostId) {
-          setLastSeenPostId(posts[0].id);
-        }
-        setCommunityPosts(posts);
-      }
-    } catch (err) {
-      console.error("Failed to fetch posts", err);
-    }
-  };
-
-  const fetchFeed = async (showLoading = true) => {
-    if (showLoading) setFeedLoading(true);
-    try {
-      const res = await fetch("/api/feed?limit=200", { credentials: "include" });
-      if (res.ok) {
-        const data = await res.json();
-        const items = data.items || [];
-        setFeedItems(items);
-        if (feedBufferRef.current.length === 0 && items.length > 0) {
-          const shuffled = [...items].sort(() => Math.random() - 0.5);
-          feedBufferRef.current = shuffled;
-          feedIndexRef.current = 0;
-          setLiveFeedItems(shuffled.slice(0, 3).map((item: any, i: number) => ({ ...item, _liveId: `live-${Date.now()}-${i}` })));
-          feedIndexRef.current = 3;
-        } else if (items.length > 0) {
-          const shuffled = [...items].sort(() => Math.random() - 0.5);
-          feedBufferRef.current = shuffled;
-        }
-      }
-    } catch (err) {
-      console.error("Failed to fetch feed", err);
-    } finally {
-      setFeedLoading(false);
-    }
-  };
-
-  const fetchInfluencerPosts = async () => {
-    try {
-      const res = await fetch("/api/influencer-posts", { credentials: "include" });
-      if (res.ok) {
-        const data = await res.json();
-        const posts = (data.posts || []).map((p: any) => {
-          let link = "#";
-          if (p.contentType === "video" && p.image && p.image.includes("img.youtube.com/vi/")) {
-            const vidMatch = p.image.match(/\/vi\/([^/]+)\//);
-            if (vidMatch) link = `https://www.youtube.com/watch?v=${vidMatch[1]}`;
-          }
-          return {
-          id: p.id,
-          _liveId: `inf-${p.id}`,
-          title: p.content.substring(0, 80) + (p.content.length > 80 ? "..." : ""),
-          description: p.content,
-          link,
-          image: p.image,
-          source: p.influencerName,
-          category: p.category,
-          contentType: p.contentType,
-          publishedAt: p.timestamp,
-          author: p.handle,
-          mentor: null,
-          isInfluencer: true,
-          verified: p.verified,
-          followers: p.followers,
-          handle: p.handle,
-        };});
-        influencerBufferRef.current = posts;
-      }
-    } catch (err) {
-      console.error("Failed to fetch influencer posts", err);
-    }
   };
 
   const fetchFriends = async () => {
@@ -310,46 +142,26 @@ export default function DashboardPage() {
     } catch (err) { toast({ title: "Error", description: "Failed to remove", variant: "destructive" }); }
   };
 
-  useEffect(() => {
-    if (user) {
-      fetchFeed();
-      fetchPosts();
-      fetchInfluencerPosts();
-      fetchFriends();
-      fetch("/api/stats").then(r => r.json()).then(setPlatformStats).catch(() => {});
+  const fetchFundingReadiness = async () => {
+    setFundingLoading(true);
+    try {
+      const res = await fetch("/api/funding-readiness", { credentials: "include" });
+      if (res.ok) {
+        const data = await res.json();
+        setFundingData(data);
+      }
+    } catch (err) {
+      console.error("Failed to fetch funding readiness", err);
+    } finally {
+      setFundingLoading(false);
     }
-  }, [user]);
+  };
 
   useEffect(() => {
-    if (!user) return;
-    let dripToggle = 0;
-    const dripInterval = setInterval(() => {
-      let nextItem: any = null;
-      if (dripToggle % 2 === 0 && influencerBufferRef.current.length > 0) {
-        const idx = influencerIndexRef.current % influencerBufferRef.current.length;
-        nextItem = { ...influencerBufferRef.current[idx], _liveId: `inf-${Date.now()}-${idx}` };
-        influencerIndexRef.current = idx + 1;
-      } else if (feedBufferRef.current.length > 0) {
-        const idx = feedIndexRef.current % feedBufferRef.current.length;
-        nextItem = { ...feedBufferRef.current[idx], _liveId: `live-${Date.now()}-${idx}` };
-        feedIndexRef.current = idx + 1;
-      } else if (influencerBufferRef.current.length > 0) {
-        const idx = influencerIndexRef.current % influencerBufferRef.current.length;
-        nextItem = { ...influencerBufferRef.current[idx], _liveId: `inf-${Date.now()}-${idx}` };
-        influencerIndexRef.current = idx + 1;
-      }
-      dripToggle++;
-      if (nextItem) {
-        setLiveFeedItems(prev => [nextItem, ...prev].slice(0, 50));
-      }
-    }, 2000);
-    const feedRefresh = setInterval(() => fetchFeed(false), 60 * 1000);
-    const influencerRefresh = setInterval(() => fetchInfluencerPosts(), 5 * 1000);
-    const postsInterval = setInterval(() => fetchPosts(), 2 * 1000);
-    const statsInterval = setInterval(() => {
-      fetch("/api/stats").then(r => r.json()).then(setPlatformStats).catch(() => {});
-    }, 10 * 1000);
-    return () => { clearInterval(dripInterval); clearInterval(feedRefresh); clearInterval(influencerRefresh); clearInterval(postsInterval); clearInterval(statsInterval); };
+    if (user) {
+      fetchFriends();
+      fetchFundingReadiness();
+    }
   }, [user]);
 
   const lastMentorMsg = [...messages].reverse().find(m => m.role === 'assistant' && m.mentor);
@@ -359,7 +171,6 @@ export default function DashboardPage() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const storiesRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -430,20 +241,6 @@ export default function DashboardPage() {
     }
   };
 
-  const postToFeed = async (content: string) => {
-    try {
-      const res = await fetch("/api/posts", { method: "POST", headers: { "Content-Type": "application/json" }, credentials: "include", body: JSON.stringify({ content: content.substring(0, 500) }) });
-      if (res.ok) {
-        toast({ title: "Posted to feed!" });
-      } else {
-        const d = await res.json();
-        toast({ title: "Error", description: d.error, variant: "destructive" });
-      }
-    } catch {
-      toast({ title: "Error", description: "Failed to post", variant: "destructive" });
-    }
-  };
-
   const handleTextareaInput = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setInput(e.target.value);
     const el = e.target;
@@ -451,25 +248,42 @@ export default function DashboardPage() {
     el.style.height = Math.min(el.scrollHeight, 200) + "px";
   };
 
-  const toggleLike = (id: number) => {
-    setLikedMessages(prev => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id); else next.add(id);
-      return next;
-    });
-  };
-
-  const toggleSave = (id: number) => {
-    setSavedMessages(prev => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id); else next.add(id);
-      return next;
-    });
-  };
-
   if (!user) return null;
 
   const hasMessages = messages.length > 0;
+
+  const getScoreColor = (score: number) => {
+    if (score >= 85) return "text-green-400";
+    if (score >= 70) return "text-yellow-400";
+    if (score >= 50) return "text-amber-500";
+    return "text-red-400";
+  };
+
+  const getScoreRingColor = (score: number) => {
+    if (score >= 85) return "#22c55e";
+    if (score >= 70) return "#eab308";
+    if (score >= 50) return "#f59e0b";
+    return "#ef4444";
+  };
+
+  const getStatusBg = (status: string) => {
+    if (status === "ready") return "bg-green-500/10 border-green-500/20 text-green-400";
+    if (status === "almost") return "bg-yellow-500/10 border-yellow-500/20 text-yellow-400";
+    if (status === "needs_improvement") return "bg-amber-500/10 border-amber-500/20 text-amber-500";
+    return "bg-red-500/10 border-red-500/20 text-red-400";
+  };
+
+  const getSeverityIcon = (severity: string) => {
+    if (severity === "red") return <AlertCircle className="w-4 h-4 text-red-400 shrink-0" />;
+    if (severity === "yellow") return <AlertTriangle className="w-4 h-4 text-yellow-400 shrink-0" />;
+    return <Info className="w-4 h-4 text-white/30 shrink-0" />;
+  };
+
+  const getSeverityBorder = (severity: string) => {
+    if (severity === "red") return "border-l-red-500";
+    if (severity === "yellow") return "border-l-yellow-500";
+    return "border-l-white/10";
+  };
 
   return (
     <div className="h-[100dvh] flex bg-[#000000] text-white">
@@ -521,12 +335,6 @@ export default function DashboardPage() {
           >
             + New Chat
           </button>
-          <button
-            onClick={() => { fetchInfluencerPosts(); fetchFeed(); }}
-            className="h-7 w-7 flex items-center justify-center rounded-lg bg-white/[0.06] border border-white/[0.08] hover:bg-white/[0.1] active:bg-white/[0.04] text-white/40 transition-colors"
-          >
-            <RefreshCw className="w-3 h-3" />
-          </button>
         </div>
 
         <div className="flex-1 overflow-y-auto bg-[#0a0a0a]" style={{ scrollbarWidth: 'thin' }}>
@@ -545,7 +353,7 @@ export default function DashboardPage() {
                 {Object.entries(MENTOR_INFO).map(([key, mentor]) => {
                   const isActive = activeMentorKey === key;
                   const statusMessages: Record<string, string> = {
-                    nova_sage: "Scaling up! Let's close deals 🔥",
+                    nova_sage: "Scaling up! Let's close deals",
                     alpha_volt: "Analyzing market trends...",
                     blaze_echo: "Creating content rn",
                     lunar_peak: "Living my best life",
@@ -591,37 +399,6 @@ export default function DashboardPage() {
                     </button>
                   );
                 })}
-              </div>
-            )}
-          </div>
-
-          <div className="border-b border-white/[0.06]">
-            <button
-              onClick={() => setBuddyGroups(prev => ({ ...prev, community: !prev.community }))}
-              className="w-full h-9 flex items-center gap-2 px-4 hover:bg-white/[0.03] text-left transition-colors"
-              data-testid="buddy-group-community"
-            >
-              <span className="text-[10px] text-white/20 font-mono w-3">{buddyGroups.community ? "▾" : "▸"}</span>
-              <span className="text-[11px] font-bold text-white/50 uppercase tracking-widest">Community</span>
-              <span className="text-[10px] text-white/20 ml-auto">({platformStats.activeNow})</span>
-            </button>
-            {buddyGroups.community && (
-              <div className="pb-1">
-                <div className="h-9 flex items-center gap-3 px-4">
-                  <div className="w-2.5 h-2.5 rounded-full bg-green-500 shrink-0" />
-                  <span className="text-[11px] text-white/50">{platformStats.activeNow} online</span>
-                </div>
-                <div className="h-9 flex items-center gap-3 px-4">
-                  <div className="w-2.5 h-2.5 rounded-full bg-yellow-500 shrink-0" />
-                  <span className="text-[11px] text-white/30">{Math.floor(platformStats.totalUsers * 0.3)} idle</span>
-                </div>
-                <div className="h-9 flex items-center gap-3 px-4">
-                  <div className="w-2.5 h-2.5 rounded-full bg-white/20 shrink-0" />
-                  <span className="text-[11px] text-white/20">{platformStats.totalUsers - platformStats.activeNow - Math.floor(platformStats.totalUsers * 0.3)} offline</span>
-                </div>
-                <div className="h-8 flex items-center px-4">
-                  <span className="text-[10px] text-white/15 italic">{platformStats.totalUsers.toLocaleString()} total members</span>
-                </div>
               </div>
             )}
           </div>
@@ -747,12 +524,6 @@ export default function DashboardPage() {
                 <span className="absolute inset-0 rounded-full bg-[#E0E0E0]/15 animate-ping" />
                 <span className="relative w-2.5 h-2.5 rounded-full bg-[#E0E0E0] shadow-[0_0_6px_rgba(224,224,224,0.4)]" />
               </span>
-              {platformStats.activeNow > 0 && (
-                <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-green-500/10 border border-green-500/20">
-                  <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
-                  <span className="text-[11px] text-green-400/80 font-medium">{platformStats.activeNow} active</span>
-                </div>
-              )}
             </div>
             <button data-testid="button-new-chat-header" onClick={() => { clearChat(); setSelectedMentor(null); setMentorCleared(true); setActiveTab("chat"); }} className="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-white/[0.06] transition-colors">
               <Plus className="w-5 h-5 text-white/50" />
@@ -760,18 +531,18 @@ export default function DashboardPage() {
           </div>
           <div className="flex px-4">
             <button
-              data-testid="tab-feed"
-              onClick={() => setActiveTab("feed")}
+              data-testid="tab-dashboard"
+              onClick={() => setActiveTab("dashboard")}
               className={cn(
                 "flex-1 py-2.5 text-[13px] font-semibold text-center transition-colors relative",
-                activeTab === "feed" ? "text-white" : "text-white/40 hover:text-white/60"
+                activeTab === "dashboard" ? "text-white" : "text-white/40 hover:text-white/60"
               )}
             >
               <div className="flex items-center justify-center gap-1.5">
-                <Globe className="w-3.5 h-3.5" />
-                Feed
+                <BarChart3 className="w-3.5 h-3.5" />
+                Dashboard
               </div>
-              {activeTab === "feed" && <div className="absolute bottom-0 left-1/4 right-1/4 h-[2px] bg-white rounded-full" />}
+              {activeTab === "dashboard" && <div className="absolute bottom-0 left-1/4 right-1/4 h-[2px] bg-white rounded-full" />}
             </button>
             <button
               data-testid="tab-chat"
@@ -795,305 +566,196 @@ export default function DashboardPage() {
           onScroll={handleScroll}
           className="flex-1 overflow-y-auto"
         >
-          {activeTab === "feed" ? (
-            <div className="max-w-xl mx-auto w-full">
-              <div className="px-4 pt-5 pb-3">
-                <div
-                  ref={storiesRef}
-                  className="flex gap-3 overflow-x-auto pb-3 scrollbar-hide"
-                  style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
-                >
-                  <button
-                    onClick={() => { setSelectedMentor(null); setMentorCleared(true); setActiveTab("chat"); }}
-                    className="flex flex-col items-center gap-1.5 shrink-0"
-                    data-testid="button-mentor-default"
-                  >
-                    <div className={cn(
-                      "w-16 h-16 rounded-full p-[2px]",
-                      !activeMentorKey ? "bg-[#E0E0E0]" : "bg-white/10"
-                    )}>
-                      <div className="w-full h-full rounded-full bg-[#0D0D0D] flex items-center justify-center">
-                        <Bot className="w-6 h-6 text-[#E0E0E0]/60" />
-                      </div>
-                    </div>
-                    <p className="text-[11px] text-white/50 font-medium w-16 text-center truncate">MentXr®</p>
-                  </button>
+          {activeTab === "dashboard" ? (
+            <div className="max-w-2xl mx-auto w-full px-4 py-6 space-y-6">
 
-                  {Object.entries(MENTOR_INFO).map(([key, mentor]) => (
-                    <button
-                      key={key}
-                      onClick={() => { setSelectedMentor(key); setMentorCleared(false); setActiveTab("chat"); }}
-                      className="flex flex-col items-center gap-1.5 shrink-0"
-                      data-testid={`button-mentor-${key}`}
-                    >
-                      <div className={cn(
-                        "w-16 h-16 rounded-full p-[2px]",
-                        activeMentorKey === key ? "bg-[#E0E0E0]" : "bg-white/10"
-                      )}>
-                        <div className={cn("w-full h-full rounded-full flex items-center justify-center text-white text-sm font-bold", BOT_COLORS[key])}>{mentor.initials}</div>
-                      </div>
-                      <p className="text-[11px] text-white/50 font-medium w-16 text-center truncate">{mentor.name.split(" ")[0]}</p>
-                    </button>
-                  ))}
+              {fundingLoading ? (
+                <div className="flex items-center justify-center py-20">
+                  <Loader2 className="w-8 h-8 animate-spin text-white/20" />
                 </div>
-              </div>
-
-              <div className="border-t border-white/[0.06]" />
-
-              <div className="px-4 mt-4">
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="flex items-center gap-2">
-                      <TrendingUp className="w-3.5 h-3.5 text-[#E0E0E0]/50" />
-                      <span className="text-[13px] font-semibold text-white/60">Live Feed</span>
-                      <div className="flex items-center gap-1.5 ml-1">
-                        <div className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
-                        <span className="text-[10px] text-red-400/60">LIVE</span>
+              ) : fundingData ? (
+                <>
+                  <div className="rounded-2xl border border-white/[0.08] bg-[#0D0D0D] p-6 sm:p-8" data-testid="funding-score-card">
+                    <div className="flex flex-col items-center text-center">
+                      <p className="text-[11px] font-semibold tracking-[0.2em] text-white/40 uppercase mb-6">Funding Readiness Score</p>
+                      <div className="relative w-40 h-40 mb-6">
+                        <svg className="w-full h-full -rotate-90" viewBox="0 0 120 120">
+                          <circle cx="60" cy="60" r="52" fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="8" />
+                          <circle
+                            cx="60" cy="60" r="52" fill="none"
+                            stroke={getScoreRingColor(fundingData.score)}
+                            strokeWidth="8"
+                            strokeLinecap="round"
+                            strokeDasharray={`${(fundingData.score / 100) * 327} 327`}
+                          />
+                        </svg>
+                        <div className="absolute inset-0 flex flex-col items-center justify-center">
+                          <span className={cn("text-4xl font-bold font-mono", getScoreColor(fundingData.score))} data-testid="text-score">
+                            {fundingData.score}
+                          </span>
+                          <span className="text-[11px] text-white/30">/ 100</span>
+                        </div>
+                      </div>
+                      <div className={cn("inline-flex items-center gap-2 px-4 py-1.5 rounded-full border text-[12px] font-semibold", getStatusBg(fundingData.status))} data-testid="text-status">
+                        {fundingData.status === "ready" && <CheckCircle2 className="w-3.5 h-3.5" />}
+                        {fundingData.status === "almost" && <Target className="w-3.5 h-3.5" />}
+                        {fundingData.status === "needs_improvement" && <AlertTriangle className="w-3.5 h-3.5" />}
+                        {(fundingData.status === "high_risk" || fundingData.status === "incomplete") && <AlertCircle className="w-3.5 h-3.5" />}
+                        {fundingData.statusLabel}
+                      </div>
+                      <div className="flex items-center gap-4 mt-4 text-[10px] text-white/25">
+                        <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-green-500" /> 85+ Ready</span>
+                        <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-yellow-500" /> 70-84 Almost</span>
+                        <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-amber-500" /> 50-69 Needs Work</span>
+                        <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-red-500" /> Below 50 High Risk</span>
                       </div>
                     </div>
-                    <span className="text-[10px] text-white/20">{liveFeedItems.length} posts · refreshing every 2s</span>
                   </div>
 
-                  {feedLoading && liveFeedItems.length === 0 ? (
-                    <div className="flex items-center justify-center py-8">
-                      <Loader2 className="w-5 h-5 animate-spin text-white/15" />
+                  {fundingData.estimatedRange && (
+                    <div className="rounded-2xl border border-white/[0.08] bg-[#0D0D0D] p-6" data-testid="funding-range-card">
+                      <p className="text-[11px] font-semibold tracking-[0.2em] text-white/40 uppercase mb-3">Estimated Funding Range</p>
+                      <p className="text-2xl sm:text-3xl font-bold font-mono text-white/90" data-testid="text-range">
+                        ${fundingData.estimatedRange.min.toLocaleString()} – ${fundingData.estimatedRange.max.toLocaleString()}
+                      </p>
+                      <p className="text-[11px] text-white/25 mt-2">Based on current credit and risk profile. No guarantees.</p>
                     </div>
-                  ) : liveFeedItems.length > 0 ? (
-                    <div className="space-y-2.5">
-                      {liveFeedItems.map((item: any, idx: number) => (
-                        <div
-                          key={item._liveId || item.id || idx}
-                          onClick={() => openContent(item)}
-                          className={cn(
-                            "block rounded-2xl border overflow-hidden group transition-all animate-[feedSlideIn_0.4s_ease-out]",
-                            (item.contentType === "video" || (item.link && item.link !== "#")) ? "cursor-pointer" : "cursor-default",
-                            item.mentor
-                              ? "border-amber-500/20 bg-amber-500/[0.03] hover:bg-amber-500/[0.06]"
-                              : item.isInfluencer
-                              ? "border-purple-500/10 bg-white/[0.02] hover:bg-white/[0.04]"
-                              : "border-white/[0.06] bg-white/[0.02] hover:bg-white/[0.05]"
-                          )}
-                          data-testid={`feed-item-${idx}`}
-                        >
-                          {item.image && (
-                            <div className="relative w-full h-36 bg-[#111] overflow-hidden">
-                              <img
-                                src={item.image}
-                                alt={item.title}
-                                className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-300"
-                                onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
-                              />
-                              {item.contentType === "video" && (
-                                <div className="absolute inset-0 flex items-center justify-center bg-black/30 group-hover:bg-black/20 transition-colors">
-                                  <div className="w-10 h-10 rounded-full bg-white/90 flex items-center justify-center">
-                                    <div className="w-0 h-0 border-t-[6px] border-t-transparent border-l-[10px] border-l-black border-b-[6px] border-b-transparent ml-0.5" />
-                                  </div>
-                                </div>
-                              )}
-                            </div>
-                          )}
-                          <div className="p-3.5">
-                            {item.isInfluencer && (
-                              <div className="flex items-center gap-2 mb-2">
-                                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-[11px] font-bold text-white shrink-0">
-                                  {item.source?.split(" ").map((w: string) => w[0]).join("").substring(0, 2)}
-                                </div>
-                                <div className="flex-1 min-w-0">
-                                  <div className="flex items-center gap-1">
-                                    <span className="text-[13px] font-semibold text-white/90 truncate">{item.source}</span>
-                                    {item.verified && <span className="text-blue-400 text-[11px]">✓</span>}
-                                  </div>
-                                  <div className="flex items-center gap-1.5">
-                                    <span className="text-[10px] text-white/30">{item.handle}</span>
-                                    <span className="text-white/10 text-[8px]">·</span>
-                                    <span className="text-[10px] text-white/25">{item.followers} followers</span>
-                                  </div>
-                                </div>
-                                <span className="text-[9px] text-white/20">{timeAgo(item.publishedAt)}</span>
-                              </div>
+                  )}
+
+                  {fundingData.alerts.length > 0 && (
+                    <div className="rounded-2xl border border-white/[0.08] bg-[#0D0D0D] p-6" data-testid="risk-alerts-card">
+                      <div className="flex items-center gap-2 mb-4">
+                        <Shield className="w-4 h-4 text-white/40" />
+                        <p className="text-[11px] font-semibold tracking-[0.2em] text-white/40 uppercase">Risk Alerts</p>
+                        <span className="text-[10px] text-white/20 ml-auto">{fundingData.alerts.length} alert{fundingData.alerts.length > 1 ? "s" : ""}</span>
+                      </div>
+                      <div className="space-y-2">
+                        {fundingData.alerts.map((alert, idx) => (
+                          <button
+                            key={idx}
+                            onClick={() => setExpandedAlerts(prev => {
+                              const next = new Set(prev);
+                              if (next.has(idx)) next.delete(idx); else next.add(idx);
+                              return next;
+                            })}
+                            className={cn(
+                              "w-full text-left rounded-xl border-l-[3px] bg-white/[0.02] hover:bg-white/[0.04] transition-all p-3.5",
+                              getSeverityBorder(alert.severity)
                             )}
-                            <div className="flex items-center gap-2 mb-1.5">
-                              {item.mentor && (
-                                <span className="px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wide bg-gradient-to-r from-amber-500/25 to-orange-500/25 text-amber-400 border border-amber-500/20">
-                                  ✦ Mentor
-                                </span>
-                              )}
-                              <span className={cn(
-                                "px-2 py-0.5 rounded-full text-[9px] font-medium uppercase tracking-wide",
-                                item.contentType === "video" ? "bg-red-500/20 text-red-400" :
-                                item.contentType === "photo" ? "bg-blue-500/20 text-blue-400" :
-                                "bg-white/[0.06] text-white/35"
-                              )}>
-                                {item.contentType === "video" ? "▶ video" : item.contentType === "photo" ? "📷 photo" : "text"}
-                              </span>
-                              {!item.isInfluencer && (
-                                <>
-                                  <span className="text-[10px] text-white/20">{item.source}</span>
-                                  <span className="text-white/10 text-[10px]">·</span>
-                                  <span className="text-[10px] text-white/20">{timeAgo(item.publishedAt)}</span>
-                                </>
-                              )}
-                              <span className="px-1.5 py-0.5 rounded text-[8px] text-white/20 bg-white/[0.03]">{item.category}</span>
-                            </div>
-                            {item.isInfluencer ? (
-                              <p className="text-[13px] text-white/75 leading-relaxed">{item.description}</p>
-                            ) : (
-                              <>
-                                <h3 className="text-[14px] font-semibold text-white/85 leading-snug mb-1 group-hover:text-white transition-colors">{item.title}</h3>
-                                {item.description && (
-                                  <p className="text-[12px] text-white/40 leading-relaxed line-clamp-2">{item.description}</p>
-                                )}
-                              </>
-                            )}
-                            {!item.isInfluencer && (
-                              <div className="flex items-center gap-1.5 mt-2 text-[10px] text-white/30 group-hover:text-white/50 transition-colors">
-                                {item.contentType === "video" ? (
-                                  <>
-                                    <div className="w-3 h-3 rounded-full bg-red-500/30 flex items-center justify-center">
-                                      <div className="w-0 h-0 border-t-[3px] border-t-transparent border-l-[5px] border-l-red-400 border-b-[3px] border-b-transparent ml-0.5" />
-                                    </div>
-                                    <span>Watch in MentXr</span>
-                                  </>
-                                ) : (
-                                  <>
-                                    <ExternalLink className="w-2.5 h-2.5" />
-                                    <span>Read in MentXr</span>
-                                  </>
+                            data-testid={`alert-${idx}`}
+                          >
+                            <div className="flex items-start gap-3">
+                              {getSeverityIcon(alert.severity)}
+                              <div className="flex-1 min-w-0">
+                                <p className="text-[13px] font-medium text-white/80">{alert.title}</p>
+                                {expandedAlerts.has(idx) && (
+                                  <div className="mt-2 space-y-1.5 text-[12px]">
+                                    <p className="text-white/50">{alert.explanation}</p>
+                                    <p className="text-white/35"><span className="text-white/50 font-medium">Impact:</span> {alert.impact}</p>
+                                    <p className="text-green-400/70"><span className="text-green-400/90 font-medium">Fix:</span> {alert.fix}</p>
+                                  </div>
                                 )}
                               </div>
-                            )}
+                              <ChevronRight className={cn("w-3.5 h-3.5 text-white/20 shrink-0 transition-transform", expandedAlerts.has(idx) && "rotate-90")} />
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {fundingData.actionPlan.length > 0 && (
+                    <div className="rounded-2xl border border-white/[0.08] bg-[#0D0D0D] p-6" data-testid="action-plan-card">
+                      <div className="flex items-center gap-2 mb-4">
+                        <Target className="w-4 h-4 text-white/40" />
+                        <p className="text-[11px] font-semibold tracking-[0.2em] text-white/40 uppercase">Action Plan</p>
+                      </div>
+                      <div className="space-y-2">
+                        {fundingData.actionPlan.map((step, idx) => (
+                          <div key={idx} className="flex items-start gap-3 p-3 rounded-xl bg-white/[0.02]" data-testid={`action-step-${idx}`}>
+                            <div className="w-6 h-6 rounded-full bg-white/[0.06] border border-white/[0.1] flex items-center justify-center text-[11px] font-mono text-white/40 shrink-0">
+                              {idx + 1}
+                            </div>
+                            <p className="text-[13px] text-white/70 leading-relaxed pt-0.5">{step}</p>
                           </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="rounded-2xl border border-white/[0.08] bg-[#0D0D0D] p-6" data-testid="progress-tracker-card">
+                    <div className="flex items-center gap-2 mb-4">
+                      <TrendingUp className="w-4 h-4 text-white/40" />
+                      <p className="text-[11px] font-semibold tracking-[0.2em] text-white/40 uppercase">Funding Strength Progress</p>
+                    </div>
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-[12px] text-white/50">Current: <span className={cn("font-mono font-bold", getScoreColor(fundingData.score))}>{fundingData.score}</span></span>
+                      <span className="text-[12px] text-white/50">Target: <span className="font-mono font-bold text-green-400">{fundingData.progress.target}+</span></span>
+                    </div>
+                    <div className="w-full h-3 rounded-full bg-white/[0.06] overflow-hidden">
+                      <div
+                        className="h-full rounded-full transition-all duration-1000 ease-out"
+                        style={{
+                          width: `${Math.min(100, (fundingData.score / fundingData.progress.target) * 100)}%`,
+                          background: `linear-gradient(90deg, ${getScoreRingColor(fundingData.score)}, ${getScoreRingColor(fundingData.score)}88)`
+                        }}
+                      />
+                    </div>
+                    <p className="text-[10px] text-white/20 mt-2">
+                      {fundingData.score >= 85
+                        ? "Your profile meets funding readiness criteria."
+                        : `${fundingData.progress.target - fundingData.score} points needed to reach target.`
+                      }
+                    </p>
+                  </div>
+
+                  <div className="rounded-2xl border border-white/[0.08] bg-[#0D0D0D] p-6" data-testid="insights-card">
+                    <div className="flex items-center gap-2 mb-4">
+                      <BookOpen className="w-4 h-4 text-white/40" />
+                      <p className="text-[11px] font-semibold tracking-[0.2em] text-white/40 uppercase">Insights</p>
+                    </div>
+                    <div className="space-y-3">
+                      {INSIGHTS.map((insight, idx) => (
+                        <div key={idx} className="p-3.5 rounded-xl bg-white/[0.02] border border-white/[0.04]" data-testid={`insight-${idx}`}>
+                          <p className="text-[13px] font-medium text-white/70 mb-1">{insight.title}</p>
+                          <p className="text-[12px] text-white/35 leading-relaxed">{insight.summary}</p>
                         </div>
                       ))}
                     </div>
-                  ) : null}
-
-                {communityPosts.length > 0 && (
-                  <div className="divide-y divide-white/[0.06] border-t border-white/[0.06] mt-4">
-                    <div className="px-4 py-2.5 flex items-center justify-between bg-white/[0.02]">
-                      <div className="flex items-center gap-2">
-                        <Globe className="w-3.5 h-3.5 text-white/40" />
-                        <span className="text-[12px] font-semibold text-white/50">Community Feed</span>
-                        <span className="text-[10px] text-white/20">({communityPosts.length} posts)</span>
-                      </div>
-                      <div className="flex items-center gap-1.5">
-                        <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
-                        <span className="text-[10px] text-green-400/60">Live · refreshing every 2s</span>
-                      </div>
-                    </div>
-                    {communityPosts.map((p: any, idx: number) => {
-                      const nameFromEmail = p.userEmail?.split("@")[0] || "user";
-                      const displayName = nameFromEmail.split(".").map((s: string) => s.charAt(0).toUpperCase() + s.slice(1)).join(" ");
-                      const handle = `@${nameFromEmail.replace(".", "")}`;
-                      const initials = displayName.split(" ").map((s: string) => s[0]).join("").substring(0, 2).toUpperCase();
-                      const isLikedPost = postLikes.has(p.id);
-                      const likeCount = p.likes + (isLikedPost ? 1 : 0);
-                      const commentCount = postCommentCounts.get(p.id) || 0;
-                      const isNew = idx === 0 && p.id === lastSeenPostId;
-
-                      return (
-                        <div
-                          key={`post-${p.id}`}
-                          className={cn(
-                            "px-4 py-4 hover:bg-white/[0.02] transition-all duration-500",
-                            isNew && "bg-white/[0.04]"
-                          )}
-                          data-testid={`community-post-welcome-${p.id}`}
-                          style={isNew ? { animation: "fadeIn 0.5s ease-out" } : undefined}
-                        >
-                          <div className="flex gap-3">
-                            <div className="shrink-0">
-                              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#2A2A2A] to-[#1A1A1A] border border-white/[0.08] flex items-center justify-center text-[11px] font-bold text-white/50">
-                                {initials}
-                              </div>
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <div className="flex items-center gap-1.5 mb-0.5">
-                                <span className="text-[14px] font-bold text-white/90 truncate">{displayName}</span>
-                                <span className="text-[13px] text-white/30 truncate">{handle}</span>
-                                <span className="text-white/15 text-[13px]">·</span>
-                                <span className="text-[13px] text-white/30 shrink-0">{timeAgo(p.timestamp)}</span>
-                                {isNew && <span className="px-1.5 py-0.5 rounded-full bg-green-500/20 text-[9px] text-green-400 font-medium animate-pulse">NEW</span>}
-                              </div>
-                              <p className="text-[14px] text-white/80 leading-relaxed whitespace-pre-wrap mb-3">{p.content}</p>
-                              <div className="flex items-center gap-6 -ml-2">
-                                <button
-                                  onClick={() => setPostLikes(prev => { const next = new Set(prev); if (next.has(p.id)) next.delete(p.id); else next.add(p.id); return next; })}
-                                  className={cn("flex items-center gap-1.5 px-2 py-1.5 rounded-full text-[13px] transition-colors", isLikedPost ? "text-red-400 hover:text-red-300" : "text-white/30 hover:text-red-400/70 hover:bg-red-500/5")}
-                                >
-                                  <Heart className={cn("w-4 h-4", isLikedPost && "fill-current")} />
-                                  <span>{likeCount}</span>
-                                </button>
-                                <div className="flex items-center gap-1.5 px-2 py-1.5 rounded-full text-[13px] text-white/30">
-                                  <MessageCircle className="w-4 h-4" />
-                                  <span>{commentCount}</span>
-                                </div>
-                                <button className="flex items-center gap-1.5 px-2 py-1.5 rounded-full text-[13px] text-white/30 hover:text-blue-400/70 hover:bg-blue-500/5 transition-colors">
-                                  <Share2 className="w-4 h-4" />
-                                </button>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      );
-                    })}
                   </div>
-                )}
-              </div>
+
+                  <div className="flex justify-center pb-4">
+                    <button
+                      onClick={fetchFundingReadiness}
+                      className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/[0.04] border border-white/[0.08] hover:bg-white/[0.08] text-[12px] text-white/40 hover:text-white/60 transition-colors"
+                      data-testid="button-refresh-score"
+                    >
+                      <RefreshCw className="w-3.5 h-3.5" />
+                      Refresh Score
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <div className="flex flex-col items-center justify-center py-20">
+                  <AlertCircle className="w-8 h-8 text-white/20 mb-3" />
+                  <p className="text-[14px] text-white/40">Unable to load dashboard</p>
+                  <button onClick={fetchFundingReadiness} className="mt-3 text-[12px] text-white/30 hover:text-white/50 underline">
+                    Try again
+                  </button>
+                </div>
+              )}
             </div>
           ) : (
             <div className="max-w-xl mx-auto w-full">
-              <div className="px-4 pt-4 pb-2">
-                <div
-                  className="flex gap-3 overflow-x-auto pb-3 scrollbar-hide"
-                  style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
-                >
-                  <button
-                    onClick={() => { setSelectedMentor(null); setMentorCleared(true); }}
-                    className="flex flex-col items-center gap-1.5 shrink-0"
-                    data-testid="button-mentor-default-chat"
-                  >
-                    <div className={cn(
-                      "w-14 h-14 rounded-full p-[2px]",
-                      !activeMentorKey ? "bg-[#E0E0E0]" : "bg-white/10"
-                    )}>
-                      <div className="w-full h-full rounded-full bg-[#0D0D0D] flex items-center justify-center">
-                        <Bot className="w-5 h-5 text-[#E0E0E0]/60" />
-                      </div>
-                    </div>
-                    <p className="text-[10px] text-white/40 font-medium w-14 text-center truncate">MentXr®</p>
-                  </button>
-
-                  {Object.entries(MENTOR_INFO).map(([key, mentor]) => (
-                    <button
-                      key={key}
-                      onClick={() => { setSelectedMentor(key); setMentorCleared(false); }}
-                      className="flex flex-col items-center gap-1.5 shrink-0"
-                      data-testid={`button-mentor-chat-${key}`}
-                    >
-                      <div className={cn(
-                        "w-14 h-14 rounded-full p-[2px]",
-                        activeMentorKey === key ? "bg-[#E0E0E0]" : "bg-white/10"
-                      )}>
-                        <div className={cn("w-full h-full rounded-full flex items-center justify-center text-white text-xs font-bold", BOT_COLORS[key])}>{mentor.initials}</div>
-                      </div>
-                      <p className="text-[10px] text-white/40 font-medium w-14 text-center truncate">{mentor.name.split(" ")[0]}</p>
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div className="border-t border-white/[0.06]" />
-
               {!hasMessages && (
-                <div className="px-4 py-8 flex flex-col items-center">
+                <div className="flex flex-col items-center justify-center py-16 px-4">
                   {activeMentor ? (
                     <>
-                      <div className="w-20 h-20 rounded-full p-[2px] bg-[#E0E0E0] mb-4">
-                        <div className={cn("w-full h-full rounded-full flex items-center justify-center text-white text-xl font-bold", activeMentorKey ? BOT_COLORS[activeMentorKey] : "")}>{activeMentor.initials}</div>
+                      <div className={cn("w-20 h-20 rounded-2xl flex items-center justify-center text-white text-xl font-bold border border-white/10 mb-4", activeMentorKey ? BOT_COLORS[activeMentorKey] : "")}>
+                        {activeMentor.initials}
                       </div>
                       <h2 className="text-xl font-bold mb-0.5">{activeMentor.name}</h2>
-                      <p className="text-white/40 text-sm">{activeMentor.tagline}</p>
-                      <span className="text-[11px] text-white/25 mt-1 px-3 py-1 rounded-full bg-white/[0.04] border border-white/[0.06]">{activeMentor.specialty}</span>
+                      <p className="text-white/40 text-sm text-center max-w-xs">{activeMentor.specialty} · {activeMentor.tagline}</p>
                     </>
                   ) : (
                     <>
@@ -1108,10 +770,10 @@ export default function DashboardPage() {
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 mt-8 max-w-md w-full">
                     {[
-                      { text: "Help me build my business strategy", icon: "💡" },
-                      { text: "How do I scale to 7 figures?", icon: "📈" },
-                      { text: "Guide me on personal branding", icon: "🎯" },
-                      { text: "What should I invest in right now?", icon: "💰" },
+                      { text: "Analyze my credit report", icon: "📊" },
+                      { text: "How do I improve my funding score?", icon: "📈" },
+                      { text: "What do lenders look for?", icon: "🎯" },
+                      { text: "Help me build a funding strategy", icon: "💡" },
                     ].map((prompt, i) => (
                       <button
                         key={i}
@@ -1139,8 +801,6 @@ export default function DashboardPage() {
                   const posterInitials = isUser ? null : (mentorData ? mentorData.initials : null);
                   const posterMentorKey = isUser ? null : (m.mentor || null);
                   const posterSpecialty = !isUser && mentorData ? mentorData.specialty : (!isUser ? "AI Mentor" : null);
-                  const isLiked = likedMessages.has(m.id);
-                  const isSaved = savedMessages.has(m.id);
 
                   return (
                     <div key={m.id} className="px-4 py-4 hover:bg-white/[0.02] transition-colors" data-testid={`post-${m.id}`}>
@@ -1211,125 +871,6 @@ export default function DashboardPage() {
                               </>
                             )}
                           </div>
-
-                          <div className="flex items-center gap-6 mt-3 -ml-2">
-                            <button
-                              onClick={() => toggleLike(m.id)}
-                              className={cn(
-                                "flex items-center gap-1.5 px-2 py-1.5 rounded-full transition-colors group",
-                                isLiked ? "text-[#E0E0E0]" : "text-white/25 hover:text-[#E0E0E0]/60"
-                              )}
-                              data-testid={`button-like-${m.id}`}
-                            >
-                              <Heart className={cn("w-[18px] h-[18px]", isLiked && "fill-current")} />
-                              {isLiked && <span className="text-[12px]">1</span>}
-                            </button>
-                            <button
-                              onClick={() => toggleComments(m.id)}
-                              className={cn(
-                                "flex items-center gap-1.5 px-2 py-1.5 rounded-full transition-colors",
-                                openComments.has(m.id) ? "text-[#E0E0E0]" : "text-white/25 hover:text-[#E0E0E0]/60"
-                              )}
-                              data-testid={`button-reply-${m.id}`}
-                            >
-                              <MessageCircle className={cn("w-[18px] h-[18px]", openComments.has(m.id) && "fill-current")} />
-                              {(commentsData[m.id]?.length || 0) > 0 && <span className="text-[12px]">{commentsData[m.id].length}</span>}
-                            </button>
-                            <button
-                              onClick={() => postToFeed(m.content)}
-                              className="flex items-center gap-1.5 px-2 py-1.5 rounded-full text-white/25 hover:text-[#E0E0E0]/60 transition-colors"
-                              title="Post to feed"
-                              data-testid={`button-post-feed-${m.id}`}
-                            >
-                              <Share2 className="w-[18px] h-[18px]" />
-                              <span className="text-[11px]">Post</span>
-                            </button>
-                            <button
-                              onClick={() => toggleSave(m.id)}
-                              className={cn(
-                                "flex items-center gap-1.5 px-2 py-1.5 rounded-full transition-colors ml-auto",
-                                isSaved ? "text-[#E0E0E0]" : "text-white/25 hover:text-[#E0E0E0]/60"
-                              )}
-                              data-testid={`button-save-${m.id}`}
-                            >
-                              <Bookmark className={cn("w-[18px] h-[18px]", isSaved && "fill-current")} />
-                            </button>
-                          </div>
-
-                          {openComments.has(m.id) && (
-                            <div className="mt-3 pt-3 border-t border-white/[0.06]" data-testid={`comments-section-${m.id}`}>
-                              {(commentsData[m.id] || []).map((c: any) => {
-                                const cMentor = c.role === "assistant" && c.mentor ? MENTOR_INFO[c.mentor] : null;
-                                const cIsUser = c.role === "user";
-                                return (
-                                  <div key={c.id} className="flex gap-2.5 mb-3" data-testid={`comment-${c.id}`}>
-                                    <div className="shrink-0">
-                                      {cIsUser ? (
-                                        <div className="w-7 h-7 rounded-full bg-[#1A1A1A] border border-[#333] flex items-center justify-center text-[9px] font-bold text-[#999]">
-                                          {(user.displayName || user.email).substring(0, 2).toUpperCase()}
-                                        </div>
-                                      ) : cMentor ? (
-                                        <div className={cn("w-7 h-7 rounded-full flex items-center justify-center text-white text-[8px] font-bold border border-white/10", c.mentor ? BOT_COLORS[c.mentor] : "")}>{cMentor.initials}</div>
-                                      ) : (
-                                        <div className="w-7 h-7 rounded-xl flex items-center justify-center relative bg-[#1A1A1A]">
-                                          <span className="absolute w-4 h-4 rounded-full bg-[#E0E0E0]/15 animate-ping" />
-                                          <span className="relative w-2 h-2 rounded-full bg-[#E0E0E0] shadow-[0_0_6px_rgba(224,224,224,0.4)]" />
-                                        </div>
-                                      )}
-                                    </div>
-                                    <div className="flex-1 min-w-0">
-                                      <div className="flex items-center gap-1.5">
-                                        <span className="text-[12px] font-bold text-white/80">
-                                          {cIsUser ? "You" : (cMentor ? cMentor.name : "MentXr® AI")}
-                                        </span>
-                                        {!cIsUser && (
-                                          <svg className="w-3 h-3 text-[#E0E0E0]" viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg>
-                                        )}
-                                        <span className="text-[11px] text-white/25">{c.timestamp ? timeAgo(c.timestamp) : "now"}</span>
-                                      </div>
-                                      <p className="text-[13px] text-white/70 leading-[1.5] mt-0.5 whitespace-pre-wrap break-words">{c.content}</p>
-                                    </div>
-                                  </div>
-                                );
-                              })}
-
-                              {commentLoading.has(m.id) && (
-                                <div className="flex items-center gap-2 mb-3 pl-9">
-                                  <Loader2 className="w-3.5 h-3.5 animate-spin text-white/30" />
-                                  <span className="text-[12px] text-white/30">AI is replying...</span>
-                                </div>
-                              )}
-
-                              <div className="flex gap-2 items-center">
-                                <div className="w-7 h-7 rounded-full bg-[#1A1A1A] border border-[#333] flex items-center justify-center text-[9px] font-bold text-[#999] shrink-0">
-                                  {(user.displayName || user.email).substring(0, 2).toUpperCase()}
-                                </div>
-                                <div className="flex-1 flex items-center bg-white/[0.04] border border-white/[0.08] rounded-2xl px-3 py-1.5">
-                                  <input
-                                    type="text"
-                                    placeholder="Add a comment..."
-                                    value={commentInputs[m.id] || ""}
-                                    onChange={(e) => setCommentInputs(prev => ({ ...prev, [m.id]: e.target.value }))}
-                                    onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); submitComment(m.id); } }}
-                                    disabled={commentLoading.has(m.id)}
-                                    className="flex-1 bg-transparent text-[13px] text-white placeholder:text-white/20 outline-none"
-                                    data-testid={`input-comment-${m.id}`}
-                                  />
-                                  <button
-                                    onClick={() => submitComment(m.id)}
-                                    disabled={!(commentInputs[m.id] || "").trim() || commentLoading.has(m.id)}
-                                    className={cn(
-                                      "text-[12px] font-semibold ml-2 transition-colors",
-                                      (commentInputs[m.id] || "").trim() ? "text-[#E0E0E0] hover:text-white" : "text-white/15"
-                                    )}
-                                    data-testid={`button-comment-submit-${m.id}`}
-                                  >
-                                    Post
-                                  </button>
-                                </div>
-                              </div>
-                            </div>
-                          )}
                         </div>
                       </div>
                     </div>
@@ -1545,72 +1086,6 @@ export default function DashboardPage() {
               {friendSearch.length < 2 && (
                 <p className="text-center text-[11px] text-white/15 py-4">Type at least 2 characters to search</p>
               )}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {contentViewer && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/85 backdrop-blur-md" onClick={() => setContentViewer(null)} data-testid="content-viewer-overlay">
-          <div className="w-full max-w-4xl mx-4 flex flex-col max-h-[90vh]" onClick={e => e.stopPropagation()}>
-            <div className="flex items-center justify-between px-4 py-3 bg-[#111] border border-white/10 rounded-t-2xl">
-              <div className="flex items-center gap-3 min-w-0 flex-1">
-                {contentViewer.type === "video" ? (
-                  <div className="w-7 h-7 rounded-full bg-red-500/20 flex items-center justify-center shrink-0">
-                    <div className="w-0 h-0 border-t-[4px] border-t-transparent border-l-[7px] border-l-red-400 border-b-[4px] border-b-transparent ml-0.5" />
-                  </div>
-                ) : (
-                  <Globe className="w-5 h-5 text-white/40 shrink-0" />
-                )}
-                <div className="min-w-0 flex-1">
-                  <p className="text-[13px] text-white/80 truncate font-medium">{contentViewer.title}</p>
-                  {contentViewer.source && <p className="text-[10px] text-white/30">{contentViewer.source}</p>}
-                </div>
-              </div>
-              <div className="flex items-center gap-2 shrink-0 ml-3">
-                {contentViewer.type === "article" && contentViewer.url && (
-                  <button onClick={() => window.open(contentViewer.url, "_blank")} className="p-2 rounded-lg hover:bg-white/10 text-white/30 hover:text-white/60 transition-colors" title="Open in new tab" data-testid="open-external">
-                    <ExternalLink className="w-4 h-4" />
-                  </button>
-                )}
-                {contentViewer.type === "video" && contentViewer.videoId && (
-                  <button onClick={() => window.open(`https://www.youtube.com/watch?v=${contentViewer.videoId}`, "_blank")} className="p-2 rounded-lg hover:bg-white/10 text-white/30 hover:text-white/60 transition-colors" title="Open on YouTube" data-testid="open-youtube">
-                    <ExternalLink className="w-4 h-4" />
-                  </button>
-                )}
-                <button onClick={() => setContentViewer(null)} className="p-2 rounded-lg hover:bg-white/10 text-white/30 hover:text-white/60 transition-colors" data-testid="close-content-viewer">
-                  <X className="w-4 h-4" />
-                </button>
-              </div>
-            </div>
-            <div className="bg-black border-x border-b border-white/10 rounded-b-2xl overflow-hidden">
-              {contentViewer.type === "video" && contentViewer.videoId ? (
-                <div className="relative w-full" style={{ paddingBottom: "56.25%" }}>
-                  <iframe
-                    src={`https://www.youtube.com/embed/${contentViewer.videoId}?autoplay=1&rel=0`}
-                    className="absolute inset-0 w-full h-full"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowFullScreen
-                    title={contentViewer.title}
-                    data-testid="video-player"
-                  />
-                </div>
-              ) : contentViewer.type === "article" && contentViewer.url ? (
-                <div className="w-full h-[70vh] relative">
-                  <iframe
-                    src={contentViewer.url}
-                    className="w-full h-full border-0"
-                    sandbox="allow-scripts allow-same-origin allow-popups"
-                    title={contentViewer.title}
-                    data-testid="article-viewer"
-                    onError={() => {
-                      window.open(contentViewer.url, "_blank");
-                      setContentViewer(null);
-                    }}
-                  />
-                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent h-12 pointer-events-none" />
-                </div>
-              ) : null}
             </div>
           </div>
         </div>

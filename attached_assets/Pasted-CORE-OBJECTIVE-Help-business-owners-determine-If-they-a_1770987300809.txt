@@ -1,0 +1,173 @@
+CORE OBJECTIVE
+
+Help business owners determine:
+
+If they are ready for funding
+
+How much they may qualify for
+
+What steps increase approval probability
+
+The platform must reduce blind applications and prevent unnecessary denials.
+
+DASHBOARD STRUCTURE
+1. Funding Readiness Score (Top Section – Most Prominent)
+
+Large, centered, highly visible.
+
+Example layout:
+
+Funding Readiness Score
+72 / 100
+
+Status Indicator:
+• 85+ = Ready
+• 70–84 = Almost Ready
+• 50–69 = Needs Improvement
+• Below 50 = High Risk
+
+This must be the first thing users see.
+
+2. Estimated Qualification Range
+
+Displayed directly under the score.
+
+Example:
+
+Estimated Funding Range
+$35,000 – $90,000
+
+Small supporting text:
+Based on current credit and risk profile.
+
+No hype language. No guarantees.
+
+3. Risk Alerts Section
+
+Structured list with severity indicators.
+
+Color coding:
+• Red = High Risk
+• Yellow = Moderate Risk
+• Gray = Informational
+
+Examples:
+• Credit utilization above 45%
+• Recent hard inquiries detected
+• Limited revolving credit depth
+• Thin business credit history
+• Short account age
+
+Each alert must include:
+• Short explanation
+• Why it matters
+• Suggested fix
+
+No technical banking jargon.
+
+4. Action Plan (Step-by-Step)
+
+This is critical.
+
+Numbered steps. Clear. Direct.
+
+Example:
+
+Action Plan
+
+Reduce utilization below 30%
+
+Avoid new applications for 45 days
+
+Increase primary revolving depth
+
+Separate business and personal expenses
+
+Re-evaluate in 30 days
+
+Each step must:
+• Be actionable
+• Be specific
+• Improve the readiness score when completed
+
+5. Progress Tracker
+
+Visual improvement indicator.
+
+Example:
+
+Funding Strength Progress
+Current: 72
+Target: 85+
+
+Progress bar showing movement over time.
+
+Users must be able to see improvement.
+
+6. Insights Section (Optional, Not Social)
+
+This is NOT a live feed.
+
+This is curated, static intelligence content.
+
+Examples:
+
+• What lenders look for in strong profiles
+• How to avoid common denials
+• Case study: $120K approved after optimization
+• Timing your applications correctly
+
+No user-generated posts.
+No scrolling social feed.
+No comments.
+No likes.
+
+This section should feel educational, not social.
+
+USER FLOW
+
+User creates account
+
+User uploads credit profile and basic business info
+
+System evaluates data
+
+User receives dashboard
+
+User follows action plan
+
+User improves score
+
+User applies strategically
+
+The platform must reinforce intelligent application timing.
+
+DESIGN DIRECTION
+
+The platform must feel like:
+
+• A private banking interface
+• A financial analytics terminal
+• A risk assessment dashboard
+
+Not like:
+
+• Instagram
+• A startup landing page
+• A crypto trading app
+• A gamified social app
+
+Visual guidance:
+
+• Clean layout
+• Minimal colors
+• Dark mode preferred
+• Green = ready
+• Red = risk
+• Yellow = warning
+• No bright distracting elements
+• No constant notifications
+
+The tone should feel:
+
+Serious. Controlled. Analytical.
