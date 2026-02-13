@@ -160,11 +160,12 @@ export default function LandingPage() {
         <div className="relative z-10 flex flex-col min-h-[85vh] sm:min-h-[90vh] justify-center px-6 sm:px-12 md:px-20 lg:px-28">
 
           <div className="mb-12 sm:mb-16 md:mb-20">
-            <div className="space-y-[-0.08em] sm:space-y-[-0.1em]">
+            <div style={{ lineHeight: 0.85 }}>
               <h1
-                className="text-[48px] sm:text-[72px] md:text-[100px] lg:text-[130px] xl:text-[150px] font-normal uppercase leading-[0.9] tracking-[-0.02em]"
+                className="text-[52px] sm:text-[80px] md:text-[110px] lg:text-[140px] xl:text-[160px] font-normal uppercase tracking-[-0.03em]"
                 style={{
-                  background: 'linear-gradient(180deg, #ffffff 0%, #999999 40%, #555555 100%)',
+                  lineHeight: 0.85,
+                  background: 'linear-gradient(180deg, #ffffff 0%, #b0b0b0 50%, #666666 100%)',
                   WebkitBackgroundClip: 'text',
                   WebkitTextFillColor: 'transparent',
                   backgroundClip: 'text',
@@ -174,8 +175,10 @@ export default function LandingPage() {
                 MENTORSHIP
               </h1>
               <h1
-                className="text-[48px] sm:text-[72px] md:text-[100px] lg:text-[130px] xl:text-[150px] font-normal uppercase leading-[0.9] tracking-[-0.02em] sm:pl-[10%] md:pl-[15%]"
+                className="text-[52px] sm:text-[80px] md:text-[110px] lg:text-[140px] xl:text-[160px] font-normal uppercase tracking-[-0.03em]"
                 style={{
+                  lineHeight: 0.85,
+                  marginLeft: '35%',
                   background: 'linear-gradient(180deg, #cccccc 0%, #888888 50%, #444444 100%)',
                   WebkitBackgroundClip: 'text',
                   WebkitTextFillColor: 'transparent',
@@ -186,8 +189,10 @@ export default function LandingPage() {
                 ON
               </h1>
               <h1
-                className="text-[48px] sm:text-[72px] md:text-[100px] lg:text-[130px] xl:text-[150px] font-normal uppercase leading-[0.9] tracking-[-0.02em] sm:pl-[5%] md:pl-[8%]"
+                className="text-[52px] sm:text-[80px] md:text-[110px] lg:text-[140px] xl:text-[160px] font-normal uppercase tracking-[-0.03em]"
                 style={{
+                  lineHeight: 0.85,
+                  marginLeft: '10%',
                   background: 'linear-gradient(180deg, #aaaaaa 0%, #666666 50%, #333333 100%)',
                   WebkitBackgroundClip: 'text',
                   WebkitTextFillColor: 'transparent',
