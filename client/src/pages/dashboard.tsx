@@ -403,8 +403,15 @@ export default function DashboardPage() {
       });
 
       if (res.ok) {
+        const data = await res.json();
         toast({ title: "Analysis Complete", description: "Your document has been analyzed and your funding score has been updated." });
         await fetchFundingReadiness();
+        if (data.repairResult) {
+          setRepairData(data.repairResult);
+          toast({ title: "Credit Repair Updated", description: `${data.repairResult.detectedIssues?.length || 0} issues detected. ${data.repairResult.letters?.length || 0} letters generated.` });
+        } else {
+          await fetchRepairData();
+        }
       } else {
         const data = await res.json();
         toast({ title: "Analysis Failed", description: data.error || "Could not analyze document.", variant: "destructive" });

@@ -3873,6 +3873,30 @@ ${extractedText}
         mentor: null,
       });
 
+      let repairResult = null;
+      if (documentType === "credit_report" && extractedText.length >= 100) {
+        try {
+          const protocol = req.protocol || "http";
+          const host = req.get("host") || "localhost:5000";
+          const internalRepairRes = await fetch(`${protocol}://${host}/api/credit-repair-analysis`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "Cookie": req.headers.cookie || "",
+            },
+            body: JSON.stringify({ reportText: extractedText.slice(0, 25000) }),
+          });
+          if (internalRepairRes.ok) {
+            const repairJson = await internalRepairRes.json();
+            if (repairJson.success) {
+              repairResult = repairJson;
+            }
+          }
+        } catch (repairErr) {
+          console.error("Auto credit repair analysis failed:", repairErr);
+        }
+      }
+
       res.json({
         success: true,
         summary: analysisResult.summary,
@@ -3886,6 +3910,7 @@ ${extractedText}
         },
         extractionMethod,
         documentType,
+        repairResult,
       });
     } catch (error: any) {
       console.error("Analyze document error:", error);
