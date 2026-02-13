@@ -162,10 +162,12 @@ export default function LandingPage() {
           <div className="mb-12 sm:mb-16 md:mb-20">
             <div style={{ lineHeight: 0.85 }}>
               <h1
-                className="text-[52px] sm:text-[80px] md:text-[110px] lg:text-[140px] xl:text-[160px] font-normal uppercase"
+                className="text-[52px] sm:text-[80px] md:text-[110px] lg:text-[140px] xl:text-[160px] uppercase"
                 style={{
-                  lineHeight: 0.85,
-                  letterSpacing: '-0.06em',
+                  fontFamily: "'Satoshi', sans-serif",
+                  fontWeight: 600,
+                  lineHeight: 0.95,
+                  letterSpacing: '0.05em',
                   background: 'linear-gradient(180deg, #ffffff 0%, #b0b0b0 50%, #666666 100%)',
                   WebkitBackgroundClip: 'text',
                   WebkitTextFillColor: 'transparent',
@@ -176,10 +178,12 @@ export default function LandingPage() {
                 MENTORSHIP
               </h1>
               <h1
-                className="text-[52px] sm:text-[80px] md:text-[110px] lg:text-[140px] xl:text-[160px] font-normal uppercase"
+                className="text-[52px] sm:text-[80px] md:text-[110px] lg:text-[140px] xl:text-[160px] uppercase"
                 style={{
-                  lineHeight: 0.85,
-                  letterSpacing: '-0.06em',
+                  fontFamily: "'Satoshi', sans-serif",
+                  fontWeight: 600,
+                  lineHeight: 0.95,
+                  letterSpacing: '0.05em',
                   marginLeft: '35%',
                   background: 'linear-gradient(180deg, #cccccc 0%, #888888 50%, #444444 100%)',
                   WebkitBackgroundClip: 'text',
