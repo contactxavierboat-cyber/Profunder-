@@ -33,19 +33,19 @@ function TechBackground() {
     const initParticles = () => {
       const w = parseInt(canvas.style.width) || canvas.offsetWidth;
       const h = parseInt(canvas.style.height) || canvas.offsetHeight;
-      const count = Math.floor((w * h) / 5000);
+      const count = Math.floor((w * h) / 7000);
       particles = [];
       for (let i = 0; i < count; i++) {
-        const isNode = Math.random() < 0.15;
+        const isNode = Math.random() < 0.1;
         particles.push({
           x: Math.random() * w,
           y: Math.random() * h,
-          vx: (Math.random() - 0.5) * 0.4,
-          vy: (Math.random() - 0.5) * 0.4,
-          size: isNode ? Math.random() * 2.5 + 1.5 : Math.random() * 1.5 + 0.5,
-          opacity: isNode ? Math.random() * 0.4 + 0.4 : Math.random() * 0.5 + 0.15,
+          vx: (Math.random() - 0.5) * 0.3,
+          vy: (Math.random() - 0.5) * 0.3,
+          size: isNode ? Math.random() * 2 + 1 : Math.random() * 1.2 + 0.3,
+          opacity: isNode ? Math.random() * 0.2 + 0.15 : Math.random() * 0.15 + 0.05,
           pulse: Math.random() * Math.PI * 2,
-          pulseSpeed: Math.random() * 0.025 + 0.008,
+          pulseSpeed: Math.random() * 0.02 + 0.005,
           type: isNode ? 'node' : 'dot',
         });
       }
@@ -66,14 +66,14 @@ function TechBackground() {
         if (p.y > h + 10) p.y = -10;
       });
 
-      const connectionDist = 160;
+      const connectionDist = 140;
       for (let i = 0; i < particles.length; i++) {
         for (let j = i + 1; j < particles.length; j++) {
           const dx = particles[i].x - particles[j].x;
           const dy = particles[i].y - particles[j].y;
           const dist = Math.sqrt(dx * dx + dy * dy);
           if (dist < connectionDist) {
-            const alpha = (1 - dist / connectionDist) * 0.25;
+            const alpha = (1 - dist / connectionDist) * 0.08;
             ctx.beginPath();
             ctx.strokeStyle = `rgba(255, 255, 255, ${alpha})`;
             ctx.lineWidth = 0.6;
@@ -95,20 +95,20 @@ function TechBackground() {
 
         if (p.type === 'node') {
           ctx.beginPath();
-          const grad = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.size * 6);
-          grad.addColorStop(0, `rgba(255, 255, 255, ${alpha * 0.4})`);
-          grad.addColorStop(0.5, `rgba(255, 255, 255, ${alpha * 0.1})`);
+          const grad = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.size * 5);
+          grad.addColorStop(0, `rgba(255, 255, 255, ${alpha * 0.2})`);
+          grad.addColorStop(0.5, `rgba(255, 255, 255, ${alpha * 0.05})`);
           grad.addColorStop(1, 'rgba(255, 255, 255, 0)');
           ctx.fillStyle = grad;
-          ctx.arc(p.x, p.y, p.size * 6, 0, Math.PI * 2);
+          ctx.arc(p.x, p.y, p.size * 5, 0, Math.PI * 2);
           ctx.fill();
-        } else if (p.size > 1) {
+        } else if (p.size > 0.8) {
           ctx.beginPath();
-          const grad = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.size * 3);
-          grad.addColorStop(0, `rgba(255, 255, 255, ${alpha * 0.25})`);
+          const grad = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.size * 2.5);
+          grad.addColorStop(0, `rgba(255, 255, 255, ${alpha * 0.1})`);
           grad.addColorStop(1, 'rgba(255, 255, 255, 0)');
           ctx.fillStyle = grad;
-          ctx.arc(p.x, p.y, p.size * 3, 0, Math.PI * 2);
+          ctx.arc(p.x, p.y, p.size * 2.5, 0, Math.PI * 2);
           ctx.fill();
         }
       });
@@ -298,7 +298,7 @@ export default function LandingPage() {
         <div className="relative z-10 flex flex-col min-h-[85vh] sm:min-h-[90vh] justify-center px-6 sm:px-12 md:px-20 lg:px-28">
 
           <div className="mb-12 sm:mb-16 md:mb-20 relative">
-            <div className="absolute -inset-8 sm:-inset-12 rounded-3xl" style={{ background: 'radial-gradient(ellipse at 30% 40%, rgba(8,8,8,0.85) 0%, rgba(8,8,8,0.6) 50%, transparent 80%)' }} />
+            <div className="absolute -inset-12 sm:-inset-16 rounded-3xl" style={{ background: 'radial-gradient(ellipse 80% 70% at 35% 45%, rgba(8,8,8,0.92) 0%, rgba(8,8,8,0.75) 45%, rgba(8,8,8,0.4) 70%, transparent 100%)' }} />
             <div>
               <h1
                 className="text-[52px] sm:text-[80px] md:text-[110px] lg:text-[140px] xl:text-[160px] uppercase"
@@ -307,7 +307,7 @@ export default function LandingPage() {
                   fontWeight: 400,
                   lineHeight: 0.95,
                   letterSpacing: '-0.07em',
-                  background: 'linear-gradient(180deg, #ffffff 0%, #f0f0f0 40%, #d0d0d0 100%)',
+                  background: 'linear-gradient(180deg, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.55) 60%, rgba(255,255,255,0.2) 100%)',
                   WebkitBackgroundClip: 'text',
                   WebkitTextFillColor: 'transparent',
                   backgroundClip: 'text',
@@ -324,7 +324,7 @@ export default function LandingPage() {
                   lineHeight: 0.95,
                   letterSpacing: '-0.07em',
                   marginLeft: '35%',
-                  background: 'linear-gradient(180deg, #ffffff 0%, #e8e8e8 40%, #c0c0c0 100%)',
+                  background: 'linear-gradient(180deg, rgba(255,255,255,0.75) 0%, rgba(255,255,255,0.4) 60%, rgba(255,255,255,0.15) 100%)',
                   WebkitBackgroundClip: 'text',
                   WebkitTextFillColor: 'transparent',
                   backgroundClip: 'text',
@@ -341,7 +341,7 @@ export default function LandingPage() {
                   lineHeight: 0.95,
                   letterSpacing: '-0.07em',
                   marginLeft: '10%',
-                  background: 'linear-gradient(180deg, #ffffff 0%, #e0e0e0 40%, #b8b8b8 100%)',
+                  background: 'linear-gradient(180deg, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0.45) 60%, rgba(255,255,255,0.15) 100%)',
                   WebkitBackgroundClip: 'text',
                   WebkitTextFillColor: 'transparent',
                   backgroundClip: 'text',
@@ -354,7 +354,7 @@ export default function LandingPage() {
 
             <div className="mt-10 sm:mt-14 flex flex-col sm:flex-row items-start sm:items-end gap-8 sm:gap-16">
               <div className="max-w-[320px]">
-                <p className="text-[11px] sm:text-[12px] uppercase tracking-[0.15em] text-white/30 leading-[1.8]">
+                <p className="text-[11px] sm:text-[12px] uppercase tracking-[0.15em] text-white/15 leading-[1.8]">
                   MENTXR EMPOWERS YOU<br />
                   TO ACCESS AI-POWERED<br />
                   GUIDANCE EFFORTLESSLY.
@@ -396,7 +396,7 @@ export default function LandingPage() {
                   />
                 ))}
               </div>
-              <p className="text-[11px] sm:text-[12px] text-white/20 tracking-wide">
+              <p className="text-[11px] sm:text-[12px] text-white/12 tracking-wide">
                 12,500+ founders scaling with AI mentorship
               </p>
             </div>
@@ -413,50 +413,50 @@ export default function LandingPage() {
       </div>
 
       <div className="relative z-10 px-6 sm:px-12 md:px-20 py-16 sm:py-24 border-t border-white/[0.04]">
-        <div className="absolute inset-0" style={{ background: 'linear-gradient(180deg, rgba(8,8,8,0.7) 0%, rgba(8,8,8,0.5) 60%, transparent 100%)' }} />
+        <div className="absolute inset-0" style={{ background: 'linear-gradient(180deg, rgba(8,8,8,0.85) 0%, rgba(8,8,8,0.7) 60%, rgba(8,8,8,0.4) 100%)' }} />
         <div className="relative max-w-[700px]">
-          <p className="text-[11px] tracking-[0.15em] text-white/20 uppercase mb-6">About</p>
-          <p className="text-[16px] sm:text-[18px] md:text-[20px] text-white/40 leading-[1.8] font-light">
+          <p className="text-[11px] tracking-[0.15em] uppercase mb-6" style={{ background: 'linear-gradient(90deg, rgba(255,255,255,0.25) 0%, rgba(255,255,255,0.1) 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>About</p>
+          <p className="text-[16px] sm:text-[18px] md:text-[20px] leading-[1.8] font-light" style={{ background: 'linear-gradient(180deg, rgba(255,255,255,0.45) 0%, rgba(255,255,255,0.2) 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
             We are an AI-powered mentorship platform that lets users converse with digital versions of the mentors they admire, delivering trusted guidance anytime, anywhere.
           </p>
         </div>
       </div>
 
       <div className="relative z-10 px-6 sm:px-12 md:px-20 py-12 sm:py-16 border-t border-white/[0.04]">
-        <div className="absolute inset-0" style={{ background: 'linear-gradient(180deg, rgba(8,8,8,0.65) 0%, rgba(8,8,8,0.5) 60%, transparent 100%)' }} />
+        <div className="absolute inset-0" style={{ background: 'linear-gradient(180deg, rgba(8,8,8,0.85) 0%, rgba(8,8,8,0.7) 60%, rgba(8,8,8,0.4) 100%)' }} />
         <div className="relative flex flex-col sm:flex-row items-start sm:items-center gap-6 sm:gap-12">
-          <p className="text-[11px] tracking-[0.15em] text-white/20 uppercase">Countdown</p>
+          <p className="text-[11px] tracking-[0.15em] uppercase" style={{ background: 'linear-gradient(90deg, rgba(255,255,255,0.25) 0%, rgba(255,255,255,0.1) 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>Countdown</p>
           <div className="flex items-center gap-3 sm:gap-4">
             <div className="flex flex-col items-center">
               <div className="bg-white/[0.03] border border-white/[0.06] rounded-lg w-[44px] h-[44px] sm:w-[52px] sm:h-[52px] flex items-center justify-center">
-                <span className="font-mono text-[16px] sm:text-[20px] font-semibold text-white/70 tabular-nums">{String(timeLeft.months).padStart(2, '0')}</span>
+                <span className="font-mono text-[16px] sm:text-[20px] font-semibold text-white/40 tabular-nums">{String(timeLeft.months).padStart(2, '0')}</span>
               </div>
-              <span className="text-[8px] text-white/15 tracking-[0.12em] uppercase mt-1.5">Months</span>
+              <span className="text-[8px] text-white/10 tracking-[0.12em] uppercase mt-1.5">Months</span>
             </div>
-            <span className="text-white/15 text-[16px] font-mono -mt-4">:</span>
+            <span className="text-white/10 text-[16px] font-mono -mt-4">:</span>
             <div className="flex flex-col items-center">
-              <div className="bg-white/[0.03] border border-white/[0.06] rounded-lg w-[44px] h-[44px] sm:w-[52px] sm:h-[52px] flex items-center justify-center">
-                <span className="font-mono text-[16px] sm:text-[20px] font-semibold text-white/70 tabular-nums">{String(timeLeft.hours).padStart(2, '0')}</span>
+              <div className="bg-white/[0.02] border border-white/[0.04] rounded-lg w-[44px] h-[44px] sm:w-[52px] sm:h-[52px] flex items-center justify-center">
+                <span className="font-mono text-[16px] sm:text-[20px] font-semibold text-white/40 tabular-nums">{String(timeLeft.hours).padStart(2, '0')}</span>
               </div>
-              <span className="text-[8px] text-white/15 tracking-[0.12em] uppercase mt-1.5">Hrs</span>
+              <span className="text-[8px] text-white/10 tracking-[0.12em] uppercase mt-1.5">Hrs</span>
             </div>
-            <span className="text-white/15 text-[16px] font-mono -mt-4">:</span>
+            <span className="text-white/10 text-[16px] font-mono -mt-4">:</span>
             <div className="flex flex-col items-center">
-              <div className="bg-white/[0.03] border border-white/[0.06] rounded-lg w-[44px] h-[44px] sm:w-[52px] sm:h-[52px] flex items-center justify-center">
-                <span className="font-mono text-[16px] sm:text-[20px] font-semibold text-white/70 tabular-nums">{String(timeLeft.minutes).padStart(2, '0')}</span>
+              <div className="bg-white/[0.02] border border-white/[0.04] rounded-lg w-[44px] h-[44px] sm:w-[52px] sm:h-[52px] flex items-center justify-center">
+                <span className="font-mono text-[16px] sm:text-[20px] font-semibold text-white/40 tabular-nums">{String(timeLeft.minutes).padStart(2, '0')}</span>
               </div>
-              <span className="text-[8px] text-white/15 tracking-[0.12em] uppercase mt-1.5">Min</span>
+              <span className="text-[8px] text-white/10 tracking-[0.12em] uppercase mt-1.5">Min</span>
             </div>
           </div>
-          <p className="text-[9px] text-white/15 tracking-[0.15em] uppercase">Until Full Release</p>
+          <p className="text-[9px] text-white/10 tracking-[0.15em] uppercase">Until Full Release</p>
         </div>
       </div>
 
       <div className="relative z-10 px-6 sm:px-12 md:px-20 pb-16 sm:pb-24 pt-12 sm:pt-16 border-t border-white/[0.04]">
-        <div className="absolute inset-0" style={{ background: 'linear-gradient(180deg, rgba(8,8,8,0.65) 0%, rgba(8,8,8,0.5) 60%, transparent 100%)' }} />
+        <div className="absolute inset-0" style={{ background: 'linear-gradient(180deg, rgba(8,8,8,0.85) 0%, rgba(8,8,8,0.7) 60%, rgba(8,8,8,0.4) 100%)' }} />
         <div className="relative max-w-[600px]">
-          <p className="text-[11px] tracking-[0.15em] text-white/20 uppercase mb-6">FAQ</p>
-          <h2 className="text-[22px] sm:text-[28px] md:text-[32px] font-light mb-8 sm:mb-12 tracking-[-0.02em] text-white/60">Frequently asked questions</h2>
+          <p className="text-[11px] tracking-[0.15em] uppercase mb-6" style={{ background: 'linear-gradient(90deg, rgba(255,255,255,0.25) 0%, rgba(255,255,255,0.1) 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>FAQ</p>
+          <h2 className="text-[22px] sm:text-[28px] md:text-[32px] font-light mb-8 sm:mb-12 tracking-[-0.02em]" style={{ background: 'linear-gradient(180deg, rgba(255,255,255,0.5) 0%, rgba(255,255,255,0.2) 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>Frequently asked questions</h2>
 
           <div className="space-y-1">
             {faqItems.map((item, i) => (
@@ -469,14 +469,14 @@ export default function LandingPage() {
                   className="w-full flex items-center justify-between py-4 sm:py-5 text-left group"
                   onClick={() => setOpenFaq(openFaq === i ? null : i)}
                 >
-                  <span className="text-[14px] sm:text-[15px] font-medium text-white/50 group-hover:text-white/70 transition-colors">{item.q}</span>
-                  <span className="text-[18px] text-white/15 shrink-0 ml-4 leading-none transition-transform" style={{ transform: openFaq === i ? 'rotate(45deg)' : 'rotate(0deg)' }}>
+                  <span className="text-[14px] sm:text-[15px] font-medium text-white/35 group-hover:text-white/50 transition-colors">{item.q}</span>
+                  <span className="text-[18px] text-white/10 shrink-0 ml-4 leading-none transition-transform" style={{ transform: openFaq === i ? 'rotate(45deg)' : 'rotate(0deg)' }}>
                     +
                   </span>
                 </button>
                 {openFaq === i && (
                   <div className="pb-4 sm:pb-5">
-                    <p className="text-[13px] sm:text-[14px] text-white/25 leading-[1.8]">{item.a}</p>
+                    <p className="text-[13px] sm:text-[14px] text-white/18 leading-[1.8]">{item.a}</p>
                   </div>
                 )}
               </div>
@@ -486,10 +486,10 @@ export default function LandingPage() {
       </div>
 
       <footer className="relative z-10 border-t border-white/[0.04] px-6 sm:px-12 md:px-20 py-8 sm:py-10">
-        <div className="absolute inset-0" style={{ background: 'rgba(8,8,8,0.6)' }} />
+        <div className="absolute inset-0" style={{ background: 'rgba(8,8,8,0.8)' }} />
         <div className="relative flex items-center justify-between">
-        <p className="text-[11px] text-white/15">
-          &copy; 2026 MentXr&reg; by <span className="text-white/25 font-medium">CMD Supply</span>
+        <p className="text-[11px] text-white/10">
+          &copy; 2026 MentXr&reg; by <span className="text-white/15 font-medium">CMD Supply</span>
         </p>
         <div className="flex items-center gap-2">
           <div className="w-5 h-5 rounded-full border border-white/10 flex items-center justify-center">
