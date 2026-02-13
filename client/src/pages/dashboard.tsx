@@ -52,6 +52,9 @@ export default function DashboardPage() {
   const [commentLoading, setCommentLoading] = useState<Set<number>>(new Set());
   const [feedItems, setFeedItems] = useState<any[]>([]);
   const [feedLoading, setFeedLoading] = useState(false);
+  const feedBufferRef = useRef<any[]>([]);
+  const feedIndexRef = useRef(0);
+  const [liveFeedItems, setLiveFeedItems] = useState<any[]>([]);
   const [platformStats, setPlatformStats] = useState<{ totalUsers: number; activeNow: number }>({ totalUsers: 0, activeNow: 0 });
   const [communityPosts, setCommunityPosts] = useState<any[]>([]);
   const [postLikes, setPostLikes] = useState<Set<number>>(new Set());
@@ -145,10 +148,21 @@ export default function DashboardPage() {
   const fetchFeed = async (showLoading = true) => {
     if (showLoading) setFeedLoading(true);
     try {
-      const res = await fetch("/api/feed?limit=20", { credentials: "include" });
+      const res = await fetch("/api/feed?limit=200", { credentials: "include" });
       if (res.ok) {
         const data = await res.json();
-        setFeedItems(data.items || []);
+        const items = data.items || [];
+        setFeedItems(items);
+        if (feedBufferRef.current.length === 0 && items.length > 0) {
+          const shuffled = [...items].sort(() => Math.random() - 0.5);
+          feedBufferRef.current = shuffled;
+          feedIndexRef.current = 0;
+          setLiveFeedItems(shuffled.slice(0, 3).map((item: any, i: number) => ({ ...item, _liveId: `live-${Date.now()}-${i}` })));
+          feedIndexRef.current = 3;
+        } else if (items.length > 0) {
+          const shuffled = [...items].sort(() => Math.random() - 0.5);
+          feedBufferRef.current = shuffled;
+        }
       }
     } catch (err) {
       console.error("Failed to fetch feed", err);
@@ -167,12 +181,19 @@ export default function DashboardPage() {
 
   useEffect(() => {
     if (!user) return;
-    const feedInterval = setInterval(() => fetchFeed(false), 3 * 1000);
+    const dripInterval = setInterval(() => {
+      if (feedBufferRef.current.length === 0) return;
+      const idx = feedIndexRef.current % feedBufferRef.current.length;
+      const nextItem = { ...feedBufferRef.current[idx], _liveId: `live-${Date.now()}-${idx}` };
+      feedIndexRef.current = idx + 1;
+      setLiveFeedItems(prev => [nextItem, ...prev].slice(0, 50));
+    }, 2000);
+    const feedRefresh = setInterval(() => fetchFeed(false), 60 * 1000);
     const postsInterval = setInterval(() => fetchPosts(), 2 * 1000);
     const statsInterval = setInterval(() => {
       fetch("/api/stats").then(r => r.json()).then(setPlatformStats).catch(() => {});
     }, 10 * 1000);
-    return () => { clearInterval(feedInterval); clearInterval(postsInterval); clearInterval(statsInterval); };
+    return () => { clearInterval(dripInterval); clearInterval(feedRefresh); clearInterval(postsInterval); clearInterval(statsInterval); };
   }, [user]);
 
   const lastMentorMsg = [...messages].reverse().find(m => m.role === 'assistant' && m.mentor);
@@ -460,33 +481,29 @@ export default function DashboardPage() {
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-2">
                       <TrendingUp className="w-3.5 h-3.5 text-[#E0E0E0]/50" />
-                      <span className="text-[13px] font-semibold text-white/60">Trending Now</span>
+                      <span className="text-[13px] font-semibold text-white/60">Live Feed</span>
+                      <div className="flex items-center gap-1.5 ml-1">
+                        <div className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
+                        <span className="text-[10px] text-red-400/60">LIVE</span>
+                      </div>
                     </div>
-                    <button
-                      onClick={() => fetchFeed(true)}
-                      disabled={feedLoading}
-                      className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/[0.04] border border-white/[0.06] text-[10px] text-white/30 hover:text-white/50 hover:bg-white/[0.06] transition-colors"
-                      data-testid="button-refresh-feed"
-                    >
-                      <RefreshCw className={cn("w-2.5 h-2.5", feedLoading && "animate-spin")} />
-                      Refresh
-                    </button>
+                    <span className="text-[10px] text-white/20">{liveFeedItems.length} posts · refreshing every 2s</span>
                   </div>
 
-                  {feedLoading && feedItems.length === 0 ? (
+                  {feedLoading && liveFeedItems.length === 0 ? (
                     <div className="flex items-center justify-center py-8">
                       <Loader2 className="w-5 h-5 animate-spin text-white/15" />
                     </div>
-                  ) : feedItems.length > 0 ? (
+                  ) : liveFeedItems.length > 0 ? (
                     <div className="space-y-2.5">
-                      {feedItems.slice(0, 20).map((item: any, idx: number) => (
+                      {liveFeedItems.map((item: any, idx: number) => (
                         <a
-                          key={item.id || idx}
+                          key={item._liveId || item.id || idx}
                           href={item.link}
                           target="_blank"
                           rel="noopener noreferrer"
                           className={cn(
-                            "block rounded-2xl border overflow-hidden group transition-all",
+                            "block rounded-2xl border overflow-hidden group transition-all animate-[feedSlideIn_0.4s_ease-out]",
                             item.mentor
                               ? "border-amber-500/20 bg-amber-500/[0.03] hover:bg-amber-500/[0.06]"
                               : "border-white/[0.06] bg-white/[0.02] hover:bg-white/[0.05]"
