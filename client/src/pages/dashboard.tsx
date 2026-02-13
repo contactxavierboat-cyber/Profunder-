@@ -562,11 +562,10 @@ export default function DashboardPage() {
         </div>
       </aside>
 
-      <main className="flex-1 flex flex-col min-w-0 relative bg-[#000000]">
+      <main className="flex-1 flex flex-col min-w-0 relative bg-[#0D0D0D]">
 
-        <header className="shrink-0 relative z-10 backdrop-blur-2xl bg-black/90 border-b border-white/[0.06]">
-          <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/[0.02] via-transparent to-purple-500/[0.02]" />
-          <div className="h-14 flex items-center justify-between px-4 relative">
+        <header className="shrink-0 relative z-10 backdrop-blur-xl bg-[#0D0D0D]/95 border-b border-[#2A2A2A]">
+          <div className="h-14 flex items-center justify-between px-4">
             <div className="flex items-center gap-3">
               <button
                 data-testid="button-menu"
@@ -575,53 +574,43 @@ export default function DashboardPage() {
               >
                 <Menu className="w-5 h-5 text-white/60" />
               </button>
-              <div className="hidden md:flex items-center gap-2">
-                <div className="w-7 h-7 rounded-lg bg-white/[0.04] border border-white/[0.08] flex items-center justify-center">
-                  <span className="text-[9px] font-black text-white/60">X</span>
-                </div>
-                <span className="text-[13px] font-bold text-white/70 tracking-tight">MentXr<span className="text-white/30">|</span><span className="text-[10px] font-mono text-white/25 tracking-wider ml-0.5">ANALYTICS</span></span>
-              </div>
               <span className="relative w-5 h-5 flex items-center justify-center md:hidden">
                 <span className="absolute inset-0 rounded-full bg-[#E0E0E0]/15 animate-ping" />
                 <span className="relative w-2.5 h-2.5 rounded-full bg-[#E0E0E0] shadow-[0_0_6px_rgba(224,224,224,0.4)]" />
               </span>
             </div>
-            <button data-testid="button-new-chat-header" onClick={() => { clearChat(); setSelectedMentor(null); setMentorCleared(true); setActiveTab("chat"); }} className="w-9 h-9 flex items-center justify-center rounded-xl bg-white/[0.03] border border-white/[0.06] hover:bg-white/[0.08] transition-all">
-              <Plus className="w-5 h-5 text-white/40" />
+            <button data-testid="button-new-chat-header" onClick={() => { clearChat(); setSelectedMentor(null); setMentorCleared(true); setActiveTab("chat"); }} className="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-white/[0.06] transition-colors">
+              <Plus className="w-5 h-5 text-white/50" />
             </button>
           </div>
-          <div className="flex px-4 relative">
+          <div className="flex px-4">
             <button
               data-testid="tab-dashboard"
               onClick={() => setActiveTab("dashboard")}
               className={cn(
-                "flex-1 py-2.5 text-[12px] font-semibold text-center transition-all duration-300 relative tracking-wide",
-                activeTab === "dashboard" ? "text-white" : "text-white/30 hover:text-white/50"
+                "flex-1 py-2.5 text-[13px] font-semibold text-center transition-colors relative",
+                activeTab === "dashboard" ? "text-white" : "text-white/40 hover:text-white/60"
               )}
             >
               <div className="flex items-center justify-center gap-1.5">
                 <BarChart3 className="w-3.5 h-3.5" />
                 Dashboard
               </div>
-              {activeTab === "dashboard" && (
-                <div className="absolute bottom-0 left-1/4 right-1/4 h-[2px] rounded-full" style={{ background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.8), transparent)', boxShadow: '0 0 8px rgba(255,255,255,0.2)' }} />
-              )}
+              {activeTab === "dashboard" && <div className="absolute bottom-0 left-1/4 right-1/4 h-[2px] bg-white rounded-full" />}
             </button>
             <button
               data-testid="tab-chat"
               onClick={() => setActiveTab("chat")}
               className={cn(
-                "flex-1 py-2.5 text-[12px] font-semibold text-center transition-all duration-300 relative tracking-wide",
-                activeTab === "chat" ? "text-white" : "text-white/30 hover:text-white/50"
+                "flex-1 py-2.5 text-[13px] font-semibold text-center transition-colors relative",
+                activeTab === "chat" ? "text-white" : "text-white/40 hover:text-white/60"
               )}
             >
               <div className="flex items-center justify-center gap-1.5">
                 <MessageCircle className="w-3.5 h-3.5" />
                 Workspace
               </div>
-              {activeTab === "chat" && (
-                <div className="absolute bottom-0 left-1/4 right-1/4 h-[2px] rounded-full" style={{ background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.8), transparent)', boxShadow: '0 0 8px rgba(255,255,255,0.2)' }} />
-              )}
+              {activeTab === "chat" && <div className="absolute bottom-0 left-1/4 right-1/4 h-[2px] bg-white rounded-full" />}
             </button>
           </div>
         </header>
@@ -632,121 +621,87 @@ export default function DashboardPage() {
           className="flex-1 overflow-y-auto"
         >
           {activeTab === "dashboard" ? (
-            <div className="max-w-2xl mx-auto w-full px-4 py-6 space-y-5 tech-grid-bg">
+            <div className="max-w-2xl mx-auto w-full px-4 py-6 space-y-4">
 
               {fundingLoading ? (
-                <div className="flex flex-col items-center justify-center py-20 gap-4">
-                  <div className="relative">
-                    <div className="w-16 h-16 rounded-2xl bg-white/[0.03] border border-white/[0.06] flex items-center justify-center">
-                      <Cpu className="w-7 h-7 text-white/20 animate-pulse" />
-                    </div>
-                    <div className="absolute -inset-1 rounded-2xl bg-gradient-to-r from-cyan-500/10 via-transparent to-purple-500/10 animate-gradient-shift" style={{ zIndex: -1 }} />
-                  </div>
-                  <p className="text-[12px] text-white/30 font-mono tracking-wider">LOADING ANALYTICS...</p>
+                <div className="flex items-center justify-center py-20">
+                  <Loader2 className="w-8 h-8 animate-spin text-white/40" />
                 </div>
               ) : fundingData ? (
                 <>
-                  <div className="flex items-center justify-between mb-1 animate-fade-in-up" style={{ animationDelay: '0s' }}>
+                  <div className="flex items-center justify-between px-1">
                     <div className="flex items-center gap-2">
-                      <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-[0_0_6px_rgba(52,211,153,0.6)]" />
-                      <span className="text-[10px] font-mono text-white/25 tracking-widest uppercase">System Online</span>
+                      <div className="w-2 h-2 rounded-full bg-emerald-400" />
+                      <span className="text-xs text-white/50 font-medium">Live</span>
                     </div>
-                    <div className="flex items-center gap-3">
-                      <span className="text-[10px] font-mono text-white/15">{new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
-                      <button
-                        onClick={fetchFundingReadiness}
-                        className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white/[0.03] border border-white/[0.06] hover:bg-white/[0.06] hover:border-white/[0.1] text-[10px] text-white/30 hover:text-white/50 transition-all font-mono"
-                        data-testid="button-refresh-score"
-                      >
-                        <RefreshCw className="w-3 h-3" />
-                        SYNC
-                      </button>
-                    </div>
+                    <button
+                      onClick={fetchFundingReadiness}
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#1A1A1A] border border-[#333] hover:border-[#444] text-xs text-white/60 hover:text-white/80 transition-all"
+                      data-testid="button-refresh-score"
+                    >
+                      <RefreshCw className="w-3.5 h-3.5" />
+                      Refresh
+                    </button>
                   </div>
 
-                  <div className="card-glow card-shimmer rounded-2xl border border-white/[0.06] bg-gradient-to-b from-[#0f0f0f] to-[#0a0a0a] p-6 sm:p-8 animate-fade-in-up hover-lift" style={{ animationDelay: '0.05s' }} data-testid="funding-score-card">
+                  <div className="rounded-2xl border border-[#2A2A2A] bg-[#141414] p-6 sm:p-8" data-testid="funding-score-card">
                     <div className="flex flex-col items-center text-center">
-                      <div className="flex items-center gap-2 mb-6">
-                        <Activity className="w-3.5 h-3.5 text-white/20" />
-                        <p className="text-[10px] font-mono font-semibold tracking-[0.25em] text-white/30 uppercase">Funding Readiness Score</p>
-                      </div>
-                      <div className="relative w-44 h-44 mb-6">
-                        <div className="absolute inset-0 rounded-full" style={{ background: `radial-gradient(circle, ${getScoreRingColor(fundingData.score)}08 0%, transparent 70%)` }} />
-                        <svg className="w-full h-full -rotate-90 score-ring-glow" viewBox="0 0 120 120" style={{ '--ring-color': `${getScoreRingColor(fundingData.score)}40` } as any}>
-                          <circle cx="60" cy="60" r="54" fill="none" stroke="rgba(255,255,255,0.03)" strokeWidth="6" />
-                          <circle cx="60" cy="60" r="54" fill="none" stroke="rgba(255,255,255,0.03)" strokeWidth="6" strokeDasharray="2 8" />
-                          <circle cx="60" cy="60" r="48" fill="none" stroke="rgba(255,255,255,0.04)" strokeWidth="1" />
+                      <p className="text-xs font-semibold tracking-widest text-white/50 uppercase mb-6">Funding Readiness Score</p>
+                      <div className="relative w-40 h-40 mb-6">
+                        <svg className="w-full h-full -rotate-90" viewBox="0 0 120 120">
+                          <circle cx="60" cy="60" r="52" fill="none" stroke="#222" strokeWidth="8" />
                           <circle
-                            cx="60" cy="60" r="54" fill="none"
+                            cx="60" cy="60" r="52" fill="none"
                             stroke={getScoreRingColor(fundingData.score)}
-                            strokeWidth="6"
+                            strokeWidth="8"
                             strokeLinecap="round"
-                            strokeDasharray={`${(fundingData.score / 100) * 339} 339`}
-                            style={{ filter: `drop-shadow(0 0 8px ${getScoreRingColor(fundingData.score)}60)` }}
+                            strokeDasharray={`${(fundingData.score / 100) * 327} 327`}
+                            style={{ filter: `drop-shadow(0 0 6px ${getScoreRingColor(fundingData.score)}50)` }}
                           />
                         </svg>
                         <div className="absolute inset-0 flex flex-col items-center justify-center">
-                          <span className={cn("text-5xl font-black font-mono tracking-tight", getScoreColor(fundingData.score))} data-testid="text-score" style={{ textShadow: `0 0 30px ${getScoreRingColor(fundingData.score)}30` }}>
+                          <span className={cn("text-5xl font-bold font-mono", getScoreColor(fundingData.score))} data-testid="text-score">
                             {fundingData.score}
                           </span>
-                          <div className="neon-line w-8 my-1.5" />
-                          <span className="text-[10px] font-mono text-white/25 tracking-wider">OF 100</span>
+                          <span className="text-xs text-white/40 mt-1">/ 100</span>
                         </div>
                       </div>
-                      <div className={cn("inline-flex items-center gap-2 px-5 py-2 rounded-full border text-[11px] font-bold tracking-wide uppercase", getStatusBg(fundingData.status))} data-testid="text-status">
-                        {fundingData.status === "ready" && <Zap className="w-3.5 h-3.5" />}
+                      <div className={cn("inline-flex items-center gap-2 px-4 py-1.5 rounded-full border text-xs font-semibold", getStatusBg(fundingData.status))} data-testid="text-status">
+                        {fundingData.status === "ready" && <CheckCircle2 className="w-3.5 h-3.5" />}
                         {fundingData.status === "almost" && <Target className="w-3.5 h-3.5" />}
                         {fundingData.status === "needs_improvement" && <AlertTriangle className="w-3.5 h-3.5" />}
                         {(fundingData.status === "high_risk" || fundingData.status === "incomplete") && <AlertCircle className="w-3.5 h-3.5" />}
                         {fundingData.statusLabel}
                       </div>
-                      <div className="flex items-center gap-1 mt-5">
-                        {[
-                          { color: "bg-emerald-400", glow: "shadow-[0_0_4px_rgba(52,211,153,0.4)]", label: "85+" },
-                          { color: "bg-yellow-400", glow: "shadow-[0_0_4px_rgba(250,204,21,0.4)]", label: "70-84" },
-                          { color: "bg-amber-500", glow: "shadow-[0_0_4px_rgba(245,158,11,0.4)]", label: "50-69" },
-                          { color: "bg-red-400", glow: "shadow-[0_0_4px_rgba(248,113,113,0.4)]", label: "<50" },
-                        ].map((item, i) => (
-                          <span key={i} className="flex items-center gap-1 px-2 py-0.5 rounded-md bg-white/[0.02]">
-                            <span className={cn("w-1.5 h-1.5 rounded-full", item.color, item.glow)} />
-                            <span className="text-[9px] font-mono text-white/20">{item.label}</span>
-                          </span>
-                        ))}
+                      <div className="flex items-center gap-4 mt-4 text-[11px] text-white/40">
+                        <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-green-500" /> 85+ Ready</span>
+                        <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-yellow-500" /> 70-84</span>
+                        <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-amber-500" /> 50-69</span>
+                        <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-red-500" /> &lt;50</span>
                       </div>
                     </div>
                   </div>
 
                   {fundingData.estimatedRange && (
-                    <div className="card-glow rounded-2xl border border-white/[0.06] bg-gradient-to-br from-[#0f0f0f] to-[#080808] p-6 animate-fade-in-up hover-lift" style={{ animationDelay: '0.1s' }} data-testid="funding-range-card">
+                    <div className="rounded-2xl border border-[#2A2A2A] bg-[#141414] p-6" data-testid="funding-range-card">
                       <div className="flex items-center gap-2 mb-3">
-                        <div className="w-6 h-6 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center">
-                          <TrendingUp className="w-3.5 h-3.5 text-emerald-400/70" />
-                        </div>
-                        <p className="text-[10px] font-mono font-semibold tracking-[0.25em] text-white/30 uppercase">Estimated Funding Range</p>
+                        <TrendingUp className="w-4 h-4 text-emerald-400" />
+                        <p className="text-xs font-semibold tracking-widest text-white/50 uppercase">Estimated Funding Range</p>
                       </div>
-                      <p className="text-3xl sm:text-4xl font-black font-mono text-white/90" data-testid="text-range">
-                        ${fundingData.estimatedRange.min.toLocaleString()} <span className="text-white/20">-</span> ${fundingData.estimatedRange.max.toLocaleString()}
+                      <p className="text-2xl sm:text-3xl font-bold font-mono text-white" data-testid="text-range">
+                        ${fundingData.estimatedRange.min.toLocaleString()} – ${fundingData.estimatedRange.max.toLocaleString()}
                       </p>
-                      <div className="neon-line mt-4 mb-3" />
-                      <p className="text-[10px] text-white/20 font-mono flex items-center gap-1.5">
-                        <Lock className="w-3 h-3" />
-                        Based on current credit and risk profile. Not a guarantee.
-                      </p>
+                      <p className="text-xs text-white/30 mt-2">Based on current credit and risk profile. Not a guarantee.</p>
                     </div>
                   )}
 
-                  <div className="card-glow rounded-2xl border border-white/[0.06] bg-gradient-to-b from-[#0f0f0f] to-[#0a0a0a] p-6 animate-fade-in-up hover-lift" style={{ animationDelay: '0.15s' }} data-testid="document-upload-card">
+                  <div className="rounded-2xl border border-[#2A2A2A] bg-[#141414] p-6" data-testid="document-upload-card">
                     <div className="flex items-center gap-2 mb-1">
-                      <div className="w-6 h-6 rounded-lg bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center">
-                        <Cpu className="w-3.5 h-3.5 text-cyan-400/70" />
-                      </div>
-                      <p className="text-[10px] font-mono font-semibold tracking-[0.25em] text-white/30 uppercase">AI Document Analysis</p>
-                      <span className="ml-auto flex items-center gap-1 px-2 py-0.5 rounded-full bg-cyan-500/10 border border-cyan-500/15">
-                        <Sparkles className="w-2.5 h-2.5 text-cyan-400/60" />
-                        <span className="text-[9px] font-mono text-cyan-400/50">GPT-4o</span>
-                      </span>
+                      <FileText className="w-4 h-4 text-cyan-400" />
+                      <p className="text-xs font-semibold tracking-widest text-white/50 uppercase">Document Analysis</p>
+                      <span className="ml-auto text-[10px] text-cyan-400/70 bg-cyan-400/10 px-2 py-0.5 rounded-full font-medium">GPT-4o</span>
                     </div>
-                    <p className="text-[11px] text-white/25 mb-5 ml-8">Upload documents for instant AI-powered financial analysis</p>
+                    <p className="text-xs text-white/40 mb-4">Upload your credit report or bank statement for AI-powered analysis.</p>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       <input
                         ref={creditReportInputRef}
@@ -776,110 +731,77 @@ export default function DashboardPage() {
                         onClick={() => creditReportInputRef.current?.click()}
                         disabled={docUploading}
                         className={cn(
-                          "group relative flex flex-col items-center gap-3 p-5 rounded-xl border transition-all duration-300",
+                          "flex flex-col items-center gap-2 p-4 rounded-xl border border-dashed transition-all",
                           fundingData.hasCreditReport
-                            ? "border-emerald-500/20 bg-emerald-500/[0.03]"
-                            : "border-white/[0.06] bg-white/[0.02] hover:bg-white/[0.04] hover:border-white/[0.12]",
+                            ? "border-green-500/40 bg-green-500/5"
+                            : "border-[#333] bg-[#1A1A1A] hover:bg-[#222] hover:border-[#444]",
                           docUploading && docUploadType === "credit_report" && "opacity-50 cursor-wait"
                         )}
                         data-testid="button-upload-credit-report"
                       >
-                        <div className={cn(
-                          "w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-300",
-                          fundingData.hasCreditReport
-                            ? "bg-emerald-500/15 border border-emerald-500/20"
-                            : "bg-white/[0.04] border border-white/[0.08] group-hover:border-white/[0.15] group-hover:bg-white/[0.06]"
-                        )}>
-                          {docUploading && docUploadType === "credit_report" ? (
-                            <Loader2 className="w-5 h-5 text-white/40 animate-spin" />
-                          ) : fundingData.hasCreditReport ? (
-                            <CheckCircle2 className="w-5 h-5 text-emerald-400" />
-                          ) : (
-                            <Upload className="w-5 h-5 text-white/25 group-hover:text-white/40 transition-colors" />
-                          )}
-                        </div>
-                        <div className="text-center">
-                          <span className="text-[12px] font-semibold text-white/60 block">
-                            {fundingData.hasCreditReport ? "Credit Report" : "Credit Report"}
-                          </span>
-                          <span className="text-[9px] font-mono text-white/15 tracking-wider">
-                            {fundingData.hasCreditReport ? "UPLOADED" : "PDF / DOC / TXT"}
-                          </span>
-                        </div>
+                        {docUploading && docUploadType === "credit_report" ? (
+                          <Loader2 className="w-6 h-6 text-white/50 animate-spin" />
+                        ) : fundingData.hasCreditReport ? (
+                          <CheckCircle2 className="w-6 h-6 text-green-400" />
+                        ) : (
+                          <FileText className="w-6 h-6 text-white/40" />
+                        )}
+                        <span className="text-xs font-medium text-white/70">
+                          {fundingData.hasCreditReport ? "Credit Report Uploaded" : "Upload Credit Report"}
+                        </span>
+                        <span className="text-[10px] text-white/30">PDF, DOC, TXT</span>
                       </button>
                       <button
                         onClick={() => bankStatementInputRef.current?.click()}
                         disabled={docUploading}
                         className={cn(
-                          "group relative flex flex-col items-center gap-3 p-5 rounded-xl border transition-all duration-300",
+                          "flex flex-col items-center gap-2 p-4 rounded-xl border border-dashed transition-all",
                           fundingData.hasBankStatement
-                            ? "border-emerald-500/20 bg-emerald-500/[0.03]"
-                            : "border-white/[0.06] bg-white/[0.02] hover:bg-white/[0.04] hover:border-white/[0.12]",
+                            ? "border-green-500/40 bg-green-500/5"
+                            : "border-[#333] bg-[#1A1A1A] hover:bg-[#222] hover:border-[#444]",
                           docUploading && docUploadType === "bank_statement" && "opacity-50 cursor-wait"
                         )}
                         data-testid="button-upload-bank-statement"
                       >
-                        <div className={cn(
-                          "w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-300",
-                          fundingData.hasBankStatement
-                            ? "bg-emerald-500/15 border border-emerald-500/20"
-                            : "bg-white/[0.04] border border-white/[0.08] group-hover:border-white/[0.15] group-hover:bg-white/[0.06]"
-                        )}>
-                          {docUploading && docUploadType === "bank_statement" ? (
-                            <Loader2 className="w-5 h-5 text-white/40 animate-spin" />
-                          ) : fundingData.hasBankStatement ? (
-                            <CheckCircle2 className="w-5 h-5 text-emerald-400" />
-                          ) : (
-                            <Upload className="w-5 h-5 text-white/25 group-hover:text-white/40 transition-colors" />
-                          )}
-                        </div>
-                        <div className="text-center">
-                          <span className="text-[12px] font-semibold text-white/60 block">
-                            {fundingData.hasBankStatement ? "Bank Statement" : "Bank Statement"}
-                          </span>
-                          <span className="text-[9px] font-mono text-white/15 tracking-wider">
-                            {fundingData.hasBankStatement ? "UPLOADED" : "PDF / DOC / TXT"}
-                          </span>
-                        </div>
+                        {docUploading && docUploadType === "bank_statement" ? (
+                          <Loader2 className="w-6 h-6 text-white/50 animate-spin" />
+                        ) : fundingData.hasBankStatement ? (
+                          <CheckCircle2 className="w-6 h-6 text-green-400" />
+                        ) : (
+                          <FileText className="w-6 h-6 text-white/40" />
+                        )}
+                        <span className="text-xs font-medium text-white/70">
+                          {fundingData.hasBankStatement ? "Bank Statement Uploaded" : "Upload Bank Statement"}
+                        </span>
+                        <span className="text-[10px] text-white/30">PDF, DOC, TXT</span>
                       </button>
                     </div>
                     {docUploading && (
-                      <div className="mt-4 flex items-center gap-3 p-4 rounded-xl bg-cyan-500/[0.03] border border-cyan-500/[0.08]">
-                        <div className="relative">
-                          <Loader2 className="w-5 h-5 text-cyan-400/60 animate-spin" />
-                          <div className="absolute inset-0 w-5 h-5 rounded-full bg-cyan-400/10 animate-ping" />
-                        </div>
+                      <div className="mt-4 flex items-center gap-3 p-3 rounded-xl bg-[#1A1A1A] border border-[#2A2A2A]">
+                        <Loader2 className="w-4 h-4 text-cyan-400 animate-spin shrink-0" />
                         <div>
-                          <p className="text-[12px] text-cyan-300/70 font-semibold">Processing Document...</p>
-                          <p className="text-[10px] text-white/25 font-mono">AI extracting financial data</p>
+                          <p className="text-xs text-white/70 font-medium">Analyzing your document...</p>
+                          <p className="text-[10px] text-white/35">AI is extracting financial data and calculating your score</p>
                         </div>
                       </div>
                     )}
                     {fundingData.analysisSummary && (
-                      <div className="mt-4 p-4 rounded-xl bg-white/[0.02] border border-white/[0.05]">
-                        <div className="flex items-center gap-2 mb-2">
-                          <Eye className="w-3 h-3 text-white/25" />
-                          <p className="text-[10px] font-mono font-semibold text-white/35 tracking-wider uppercase">Latest Analysis</p>
-                        </div>
-                        <p className="text-[12px] text-white/55 leading-relaxed">{fundingData.analysisSummary}</p>
+                      <div className="mt-4 p-4 rounded-xl bg-[#1A1A1A] border border-[#2A2A2A]">
+                        <p className="text-xs font-semibold text-white/60 mb-1.5">Latest Analysis</p>
+                        <p className="text-xs text-white/70 leading-relaxed">{fundingData.analysisSummary}</p>
                         {fundingData.lastAnalysisDate && (
-                          <p className="text-[9px] text-white/15 mt-2 font-mono">{timeAgo(fundingData.lastAnalysisDate)} ago</p>
+                          <p className="text-[10px] text-white/30 mt-2">{timeAgo(fundingData.lastAnalysisDate)} ago</p>
                         )}
                       </div>
                     )}
                   </div>
 
                   {fundingData.alerts.length > 0 && (
-                    <div className="card-glow rounded-2xl border border-white/[0.06] bg-gradient-to-b from-[#0f0f0f] to-[#0a0a0a] p-6 animate-fade-in-up hover-lift" style={{ animationDelay: '0.2s' }} data-testid="risk-alerts-card">
+                    <div className="rounded-2xl border border-[#2A2A2A] bg-[#141414] p-6" data-testid="risk-alerts-card">
                       <div className="flex items-center gap-2 mb-4">
-                        <div className="w-6 h-6 rounded-lg bg-red-500/10 border border-red-500/20 flex items-center justify-center">
-                          <Shield className="w-3.5 h-3.5 text-red-400/70" />
-                        </div>
-                        <p className="text-[10px] font-mono font-semibold tracking-[0.25em] text-white/30 uppercase">Risk Alerts</p>
-                        <span className="ml-auto flex items-center gap-1 px-2 py-0.5 rounded-full bg-red-500/10 border border-red-500/15">
-                          <span className="w-1.5 h-1.5 rounded-full bg-red-400 animate-pulse" />
-                          <span className="text-[9px] font-mono text-red-400/60">{fundingData.alerts.length}</span>
-                        </span>
+                        <Shield className="w-4 h-4 text-red-400" />
+                        <p className="text-xs font-semibold tracking-widest text-white/50 uppercase">Risk Alerts</p>
+                        <span className="text-[10px] text-white/30 ml-auto">{fundingData.alerts.length} alert{fundingData.alerts.length > 1 ? "s" : ""}</span>
                       </div>
                       <div className="space-y-2">
                         {fundingData.alerts.map((alert, idx) => (
@@ -891,7 +813,7 @@ export default function DashboardPage() {
                               return next;
                             })}
                             className={cn(
-                              "w-full text-left rounded-xl border-l-[2px] bg-white/[0.015] hover:bg-white/[0.03] transition-all duration-300 p-4",
+                              "w-full text-left rounded-xl border-l-[3px] bg-[#1A1A1A] hover:bg-[#1E1E1E] transition-all p-3.5",
                               getSeverityBorder(alert.severity)
                             )}
                             data-testid={`alert-${idx}`}
@@ -899,22 +821,16 @@ export default function DashboardPage() {
                             <div className="flex items-start gap-3">
                               {getSeverityIcon(alert.severity)}
                               <div className="flex-1 min-w-0">
-                                <p className="text-[13px] font-semibold text-white/75">{alert.title}</p>
+                                <p className="text-sm font-medium text-white/85">{alert.title}</p>
                                 {expandedAlerts.has(idx) && (
-                                  <div className="mt-3 space-y-2 text-[12px]">
-                                    <p className="text-white/45 leading-relaxed">{alert.explanation}</p>
-                                    <div className="flex items-start gap-2 p-2.5 rounded-lg bg-white/[0.02]">
-                                      <AlertTriangle className="w-3 h-3 text-amber-400/50 shrink-0 mt-0.5" />
-                                      <p className="text-white/35"><span className="text-amber-400/60 font-medium">Impact:</span> {alert.impact}</p>
-                                    </div>
-                                    <div className="flex items-start gap-2 p-2.5 rounded-lg bg-emerald-500/[0.03]">
-                                      <Zap className="w-3 h-3 text-emerald-400/50 shrink-0 mt-0.5" />
-                                      <p className="text-white/35"><span className="text-emerald-400/60 font-medium">Fix:</span> {alert.fix}</p>
-                                    </div>
+                                  <div className="mt-2 space-y-1.5 text-xs">
+                                    <p className="text-white/55">{alert.explanation}</p>
+                                    <p className="text-white/45"><span className="text-white/60 font-medium">Impact:</span> {alert.impact}</p>
+                                    <p className="text-green-400/80"><span className="text-green-400 font-medium">Fix:</span> {alert.fix}</p>
                                   </div>
                                 )}
                               </div>
-                              <ChevronRight className={cn("w-3.5 h-3.5 text-white/15 shrink-0 transition-transform duration-300", expandedAlerts.has(idx) && "rotate-90")} />
+                              <ChevronRight className={cn("w-4 h-4 text-white/25 shrink-0 transition-transform", expandedAlerts.has(idx) && "rotate-90")} />
                             </div>
                           </button>
                         ))}
@@ -923,124 +839,91 @@ export default function DashboardPage() {
                   )}
 
                   {fundingData.actionPlan.length > 0 && (
-                    <div className="card-glow rounded-2xl border border-white/[0.06] bg-gradient-to-b from-[#0f0f0f] to-[#0a0a0a] p-6 animate-fade-in-up hover-lift" style={{ animationDelay: '0.25s' }} data-testid="action-plan-card">
+                    <div className="rounded-2xl border border-[#2A2A2A] bg-[#141414] p-6" data-testid="action-plan-card">
                       <div className="flex items-center gap-2 mb-4">
-                        <div className="w-6 h-6 rounded-lg bg-violet-500/10 border border-violet-500/20 flex items-center justify-center">
-                          <Target className="w-3.5 h-3.5 text-violet-400/70" />
-                        </div>
-                        <p className="text-[10px] font-mono font-semibold tracking-[0.25em] text-white/30 uppercase">Action Plan</p>
+                        <Target className="w-4 h-4 text-violet-400" />
+                        <p className="text-xs font-semibold tracking-widest text-white/50 uppercase">Action Plan</p>
                       </div>
                       <div className="space-y-2">
                         {fundingData.actionPlan.map((step, idx) => (
-                          <div key={idx} className="flex items-start gap-3 p-3.5 rounded-xl bg-white/[0.015] border border-white/[0.04] hover:bg-white/[0.025] transition-all duration-300" data-testid={`action-step-${idx}`}>
-                            <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-violet-500/15 to-purple-500/10 border border-violet-500/15 flex items-center justify-center text-[11px] font-mono font-bold text-violet-400/60 shrink-0">
+                          <div key={idx} className="flex items-start gap-3 p-3 rounded-xl bg-[#1A1A1A]" data-testid={`action-step-${idx}`}>
+                            <div className="w-6 h-6 rounded-full bg-violet-500/15 border border-violet-500/25 flex items-center justify-center text-xs font-mono text-violet-400 shrink-0">
                               {idx + 1}
                             </div>
-                            <p className="text-[13px] text-white/65 leading-relaxed pt-1">{step}</p>
+                            <p className="text-sm text-white/75 leading-relaxed pt-0.5">{step}</p>
                           </div>
                         ))}
                       </div>
                     </div>
                   )}
 
-                  <div className="card-glow rounded-2xl border border-white/[0.06] bg-gradient-to-b from-[#0f0f0f] to-[#0a0a0a] p-6 animate-fade-in-up hover-lift" style={{ animationDelay: '0.3s' }} data-testid="progress-tracker-card">
-                    <div className="flex items-center gap-2 mb-5">
-                      <div className="w-6 h-6 rounded-lg bg-blue-500/10 border border-blue-500/20 flex items-center justify-center">
-                        <Activity className="w-3.5 h-3.5 text-blue-400/70" />
-                      </div>
-                      <p className="text-[10px] font-mono font-semibold tracking-[0.25em] text-white/30 uppercase">Funding Strength</p>
+                  <div className="rounded-2xl border border-[#2A2A2A] bg-[#141414] p-6" data-testid="progress-tracker-card">
+                    <div className="flex items-center gap-2 mb-4">
+                      <TrendingUp className="w-4 h-4 text-blue-400" />
+                      <p className="text-xs font-semibold tracking-widest text-white/50 uppercase">Funding Strength Progress</p>
                     </div>
-                    <div className="flex items-center justify-between mb-3">
-                      <div className="flex items-center gap-2">
-                        <span className="text-[11px] font-mono text-white/30">CURRENT</span>
-                        <span className={cn("text-lg font-black font-mono", getScoreColor(fundingData.score))} style={{ textShadow: `0 0 15px ${getScoreRingColor(fundingData.score)}25` }}>{fundingData.score}</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <span className="text-[11px] font-mono text-white/30">TARGET</span>
-                        <span className="text-lg font-black font-mono text-emerald-400" style={{ textShadow: '0 0 15px rgba(52,211,153,0.25)' }}>{fundingData.progress.target}</span>
-                      </div>
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-xs text-white/60">Current: <span className={cn("font-mono font-bold", getScoreColor(fundingData.score))}>{fundingData.score}</span></span>
+                      <span className="text-xs text-white/60">Target: <span className="font-mono font-bold text-green-400">{fundingData.progress.target}+</span></span>
                     </div>
-                    <div className="relative w-full h-2.5 rounded-full bg-white/[0.04] overflow-hidden">
-                      <div className="absolute inset-0 rounded-full" style={{ background: 'repeating-linear-gradient(90deg, transparent, transparent 10%, rgba(255,255,255,0.02) 10%, rgba(255,255,255,0.02) 10.5%)' }} />
+                    <div className="w-full h-3 rounded-full bg-[#222] overflow-hidden">
                       <div
-                        className="h-full rounded-full transition-all duration-1000 ease-out relative"
+                        className="h-full rounded-full transition-all duration-1000 ease-out"
                         style={{
                           width: `${Math.min(100, (fundingData.score / fundingData.progress.target) * 100)}%`,
-                          background: `linear-gradient(90deg, ${getScoreRingColor(fundingData.score)}, ${getScoreRingColor(fundingData.score)}cc)`,
-                          boxShadow: `0 0 12px ${getScoreRingColor(fundingData.score)}30`
+                          background: `linear-gradient(90deg, ${getScoreRingColor(fundingData.score)}, ${getScoreRingColor(fundingData.score)}aa)`
                         }}
                       />
                     </div>
-                    <p className="text-[10px] text-white/15 mt-3 font-mono">
+                    <p className="text-[11px] text-white/35 mt-2">
                       {fundingData.score >= 85
-                        ? "CRITERIA MET - FUNDING READY"
-                        : `${fundingData.progress.target - fundingData.score} POINTS TO TARGET`
+                        ? "Your profile meets funding readiness criteria."
+                        : `${fundingData.progress.target - fundingData.score} points needed to reach target.`
                       }
                     </p>
                   </div>
 
                   {fundingData.analysisNextSteps && fundingData.analysisNextSteps.length > 0 && (
-                    <div className="card-glow rounded-2xl border border-emerald-500/[0.1] bg-gradient-to-b from-emerald-950/20 to-[#0a0a0a] p-6 animate-fade-in-up hover-lift" style={{ animationDelay: '0.35s' }} data-testid="next-steps-card">
+                    <div className="rounded-2xl border border-green-500/20 bg-[#141414] p-6" data-testid="next-steps-card">
                       <div className="flex items-center gap-2 mb-4">
-                        <div className="w-6 h-6 rounded-lg bg-emerald-500/15 border border-emerald-500/20 flex items-center justify-center">
-                          <Sparkles className="w-3.5 h-3.5 text-emerald-400/70" />
-                        </div>
-                        <p className="text-[10px] font-mono font-semibold tracking-[0.25em] text-emerald-400/50 uppercase">AI Next Steps</p>
-                        <span className="ml-auto flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/15">
-                          <span className="text-[9px] font-mono text-emerald-400/40">from documents</span>
-                        </span>
+                        <ChevronRight className="w-4 h-4 text-green-400" />
+                        <p className="text-xs font-semibold tracking-widest text-green-400/80 uppercase">Next Steps</p>
+                        <span className="text-[10px] text-white/30 ml-auto">AI-generated from your documents</span>
                       </div>
                       <div className="space-y-2">
                         {fundingData.analysisNextSteps.map((step, idx) => (
-                          <div key={idx} className="flex items-start gap-3 p-3.5 rounded-xl bg-emerald-500/[0.02] border border-emerald-500/[0.06] hover:bg-emerald-500/[0.04] transition-all duration-300" data-testid={`next-step-${idx}`}>
-                            <div className="w-7 h-7 rounded-lg bg-emerald-500/10 border border-emerald-500/15 flex items-center justify-center text-[11px] font-mono font-bold text-emerald-400/60 shrink-0">
+                          <div key={idx} className="flex items-start gap-3 p-3 rounded-xl bg-green-500/5 border border-green-500/10" data-testid={`next-step-${idx}`}>
+                            <div className="w-6 h-6 rounded-full bg-green-500/15 border border-green-500/25 flex items-center justify-center text-xs font-mono text-green-400 shrink-0">
                               {idx + 1}
                             </div>
-                            <p className="text-[13px] text-white/65 leading-relaxed pt-1">{step}</p>
+                            <p className="text-sm text-white/75 leading-relaxed pt-0.5">{step}</p>
                           </div>
                         ))}
                       </div>
                     </div>
                   )}
 
-                  <div className="card-glow rounded-2xl border border-white/[0.06] bg-gradient-to-b from-[#0f0f0f] to-[#0a0a0a] p-6 animate-fade-in-up hover-lift" style={{ animationDelay: '0.4s' }} data-testid="insights-card">
+                  <div className="rounded-2xl border border-[#2A2A2A] bg-[#141414] p-6" data-testid="insights-card">
                     <div className="flex items-center gap-2 mb-4">
-                      <div className="w-6 h-6 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-center justify-center">
-                        <BookOpen className="w-3.5 h-3.5 text-amber-400/70" />
-                      </div>
-                      <p className="text-[10px] font-mono font-semibold tracking-[0.25em] text-white/30 uppercase">Intel Briefing</p>
+                      <BookOpen className="w-4 h-4 text-amber-400" />
+                      <p className="text-xs font-semibold tracking-widest text-white/50 uppercase">Insights</p>
                     </div>
-                    <div className="space-y-2">
+                    <div className="space-y-3">
                       {INSIGHTS.map((insight, idx) => (
-                        <div key={idx} className="p-4 rounded-xl bg-white/[0.015] border border-white/[0.04] hover:bg-white/[0.025] transition-all duration-300" data-testid={`insight-${idx}`}>
-                          <p className="text-[13px] font-semibold text-white/65 mb-1.5 flex items-center gap-2">
-                            <span className="w-1 h-1 rounded-full bg-amber-400/40" />
-                            {insight.title}
-                          </p>
-                          <p className="text-[12px] text-white/30 leading-relaxed ml-3">{insight.summary}</p>
+                        <div key={idx} className="p-3.5 rounded-xl bg-[#1A1A1A] border border-[#2A2A2A]" data-testid={`insight-${idx}`}>
+                          <p className="text-sm font-medium text-white/80 mb-1">{insight.title}</p>
+                          <p className="text-xs text-white/45 leading-relaxed">{insight.summary}</p>
                         </div>
                       ))}
                     </div>
                   </div>
-
-                  <div className="neon-line" />
-
-                  <div className="flex items-center justify-center gap-4 pb-6 pt-1">
-                    <span className="text-[9px] font-mono text-white/10 tracking-wider">MENTXR ANALYTICS v2.0</span>
-                    <span className="w-1 h-1 rounded-full bg-white/10" />
-                    <span className="text-[9px] font-mono text-white/10 tracking-wider">ENCRYPTED</span>
-                    <span className="w-1 h-1 rounded-full bg-white/10" />
-                    <span className="text-[9px] font-mono text-white/10 tracking-wider">SECURE</span>
-                  </div>
                 </>
               ) : (
-                <div className="flex flex-col items-center justify-center py-20 gap-3">
-                  <div className="w-14 h-14 rounded-2xl bg-white/[0.03] border border-white/[0.06] flex items-center justify-center">
-                    <AlertCircle className="w-6 h-6 text-white/15" />
-                  </div>
-                  <p className="text-[13px] text-white/30 font-mono">SYSTEM OFFLINE</p>
-                  <button onClick={fetchFundingReadiness} className="mt-2 px-4 py-1.5 rounded-lg bg-white/[0.04] border border-white/[0.08] text-[11px] text-white/30 hover:text-white/50 hover:bg-white/[0.06] transition-all font-mono">
-                    RECONNECT
+                <div className="flex flex-col items-center justify-center py-20">
+                  <AlertCircle className="w-8 h-8 text-white/30 mb-3" />
+                  <p className="text-sm text-white/50">Unable to load dashboard</p>
+                  <button onClick={fetchFundingReadiness} className="mt-3 text-xs text-white/40 hover:text-white/60 underline">
+                    Try again
                   </button>
                 </div>
               )}
