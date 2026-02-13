@@ -1071,21 +1071,39 @@ export async function registerRoutes(
   });
 
   const RSS_FEEDS = [
-    { url: "https://feeds.bbci.co.uk/news/business/rss.xml", source: "BBC Business", category: "business", contentType: "text" },
-    { url: "https://www.entrepreneur.com/latest.rss", source: "Entrepreneur", category: "entrepreneurship", contentType: "text" },
-    { url: "https://www.forbes.com/innovation/feed2", source: "Forbes", category: "innovation", contentType: "text" },
-    { url: "https://rss.nytimes.com/services/xml/rss/nyt/Business.xml", source: "NY Times Business", category: "business", contentType: "text" },
-    { url: "https://feeds.nbcnews.com/nbcnews/public/business", source: "NBC Business", category: "business", contentType: "text" },
-    { url: "https://search.cnbc.com/rs/search/combinedcms/view.xml?partnerId=wrss01&id=10001147", source: "CNBC", category: "finance", contentType: "text" },
-    { url: "https://feeds.feedburner.com/TechCrunch/", source: "TechCrunch", category: "tech", contentType: "text" },
-    { url: "https://www.wired.com/feed/rss", source: "Wired", category: "tech", contentType: "text" },
-    { url: "https://feeds.arstechnica.com/arstechnica/index", source: "Ars Technica", category: "tech", contentType: "text" },
-    { url: "https://rss.nytimes.com/services/xml/rss/nyt/Technology.xml", source: "NY Times Tech", category: "tech", contentType: "text" },
-    { url: "https://feeds.bbci.co.uk/news/technology/rss.xml", source: "BBC Tech", category: "tech", contentType: "text" },
-    { url: "https://www.theverge.com/rss/index.xml", source: "The Verge", category: "tech", contentType: "photo" },
-    { url: "https://www.youtube.com/feeds/videos.xml?channel_id=UCVHFbqXqoYvEWM1Ddxl0QDg", source: "Alex Hormozi", category: "business", contentType: "video" },
-    { url: "https://www.youtube.com/feeds/videos.xml?channel_id=UCV6KDgJskWaEckne5aPA0aQ", source: "Graham Stephan", category: "finance", contentType: "video" },
-    { url: "https://www.youtube.com/feeds/videos.xml?channel_id=UCL_f53ZEJxp8TtlOkHwMV9Q", source: "Jordan Peterson", category: "mindset", contentType: "video" },
+    // === MENTOR YOUTUBE CHANNELS (Real content from actual mentors) ===
+    { url: "https://www.youtube.com/feeds/videos.xml?channel_id=UCdlNK1xcy-Sn8liq7feNxWw", source: "Grant Cardone", category: "sales", contentType: "video", mentor: "grant_cardone" },
+    { url: "https://www.youtube.com/feeds/videos.xml?channel_id=UCctXZhXmG-kf3tlIXgVZUlw", source: "Gary Vaynerchuk", category: "entrepreneurship", contentType: "video", mentor: "gary_vee" },
+    { url: "https://www.youtube.com/feeds/videos.xml?channel_id=UCsY17ZnXg_Gmt9bWz49HoWw", source: "19Keys", category: "mindset", contentType: "video", mentor: "19keys" },
+    { url: "https://www.youtube.com/feeds/videos.xml?channel_id=UCCKHPCkOQ4Bwi2EPkDu25SQ", source: "Charleston White", category: "advocacy", contentType: "video", mentor: "charleston_white" },
+    { url: "https://www.youtube.com/feeds/videos.xml?channel_id=UCKBnlTTgEnhIXv_c4LvvyMQ", source: "OWN (Oprah)", category: "leadership", contentType: "video", mentor: "oprah" },
+
+    // === INFLUENCER & BUSINESS YOUTUBE CHANNELS ===
+    { url: "https://www.youtube.com/feeds/videos.xml?channel_id=UCVHFbqXqoYvEWM1Ddxl0QDg", source: "Alex Hormozi", category: "business", contentType: "video", mentor: null },
+    { url: "https://www.youtube.com/feeds/videos.xml?channel_id=UCV6KDgJskWaEckne5aPA0aQ", source: "Graham Stephan", category: "finance", contentType: "video", mentor: null },
+    { url: "https://www.youtube.com/feeds/videos.xml?channel_id=UCL_f53ZEJxp8TtlOkHwMV9Q", source: "Jordan Peterson", category: "mindset", contentType: "video", mentor: null },
+    { url: "https://www.youtube.com/feeds/videos.xml?channel_id=UCRVsqvXIdgyPVS-a6fGa1lA", source: "Earn Your Leisure", category: "finance", contentType: "video", mentor: null },
+    { url: "https://www.youtube.com/feeds/videos.xml?channel_id=UCIHdDJ0tjn_3j-FS7s_X1kQ", source: "Patrick Bet-David", category: "business", contentType: "video", mentor: null },
+    { url: "https://www.youtube.com/feeds/videos.xml?channel_id=UChi08h4577eFsNXGd3sxYhw", source: "The Breakfast Club", category: "culture", contentType: "video", mentor: null },
+    { url: "https://www.youtube.com/feeds/videos.xml?channel_id=UC-lHJZR3Gqxm24_Vd_AJ5Yw", source: "Lex Fridman", category: "tech", contentType: "video", mentor: null },
+
+    // === PODCAST RSS FEEDS ===
+    { url: "https://rss.art19.com/how-i-built-this", source: "How I Built This", category: "entrepreneurship", contentType: "text", mentor: null },
+    { url: "https://rss.art19.com/the-great-creators", source: "The Great Creators", category: "business", contentType: "text", mentor: null },
+
+    // === NEWS & BUSINESS RSS FEEDS ===
+    { url: "https://feeds.bbci.co.uk/news/business/rss.xml", source: "BBC Business", category: "business", contentType: "text", mentor: null },
+    { url: "https://www.entrepreneur.com/latest.rss", source: "Entrepreneur", category: "entrepreneurship", contentType: "text", mentor: null },
+    { url: "https://www.forbes.com/innovation/feed2", source: "Forbes", category: "innovation", contentType: "text", mentor: null },
+    { url: "https://rss.nytimes.com/services/xml/rss/nyt/Business.xml", source: "NY Times Business", category: "business", contentType: "text", mentor: null },
+    { url: "https://feeds.nbcnews.com/nbcnews/public/business", source: "NBC Business", category: "business", contentType: "text", mentor: null },
+    { url: "https://search.cnbc.com/rs/search/combinedcms/view.xml?partnerId=wrss01&id=10001147", source: "CNBC", category: "finance", contentType: "text", mentor: null },
+    { url: "https://feeds.feedburner.com/TechCrunch/", source: "TechCrunch", category: "tech", contentType: "text", mentor: null },
+    { url: "https://www.wired.com/feed/rss", source: "Wired", category: "tech", contentType: "text", mentor: null },
+    { url: "https://feeds.arstechnica.com/arstechnica/index", source: "Ars Technica", category: "tech", contentType: "text", mentor: null },
+    { url: "https://rss.nytimes.com/services/xml/rss/nyt/Technology.xml", source: "NY Times Tech", category: "tech", contentType: "text", mentor: null },
+    { url: "https://feeds.bbci.co.uk/news/technology/rss.xml", source: "BBC Tech", category: "tech", contentType: "text", mentor: null },
+    { url: "https://www.theverge.com/rss/index.xml", source: "The Verge", category: "tech", contentType: "photo", mentor: null },
   ];
 
   interface FeedItem {
@@ -1099,6 +1117,7 @@ export async function registerRoutes(
     contentType: string;
     publishedAt: string;
     author: string | null;
+    mentor: string | null;
   }
 
   let feedCache: FeedItem[] = [];
@@ -1164,6 +1183,7 @@ export async function registerRoutes(
             contentType: cType,
             publishedAt: item.isoDate || item.pubDate || new Date().toISOString(),
             author: item.creator || item.author || null,
+            mentor: feedConfig.mentor || null,
           });
         }
       } catch (err) {

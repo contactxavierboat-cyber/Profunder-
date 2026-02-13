@@ -479,13 +479,18 @@ export default function DashboardPage() {
                     </div>
                   ) : feedItems.length > 0 ? (
                     <div className="space-y-2.5">
-                      {feedItems.slice(0, 10).map((item: any, idx: number) => (
+                      {feedItems.slice(0, 20).map((item: any, idx: number) => (
                         <a
                           key={item.id || idx}
                           href={item.link}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="block rounded-2xl border border-white/[0.06] bg-white/[0.02] hover:bg-white/[0.05] transition-all overflow-hidden group"
+                          className={cn(
+                            "block rounded-2xl border overflow-hidden group transition-all",
+                            item.mentor
+                              ? "border-amber-500/20 bg-amber-500/[0.03] hover:bg-amber-500/[0.06]"
+                              : "border-white/[0.06] bg-white/[0.02] hover:bg-white/[0.05]"
+                          )}
                           data-testid={`feed-item-${idx}`}
                         >
                           {item.image && (
@@ -507,6 +512,11 @@ export default function DashboardPage() {
                           )}
                           <div className="p-3.5">
                             <div className="flex items-center gap-2 mb-1.5">
+                              {item.mentor && (
+                                <span className="px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wide bg-gradient-to-r from-amber-500/25 to-orange-500/25 text-amber-400 border border-amber-500/20">
+                                  ✦ Mentor
+                                </span>
+                              )}
                               <span className={cn(
                                 "px-2 py-0.5 rounded-full text-[9px] font-medium uppercase tracking-wide",
                                 item.contentType === "video" ? "bg-red-500/20 text-red-400" :
