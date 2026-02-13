@@ -15,10 +15,19 @@ export const users = pgTable("users", {
   
   // Financial Profile
   creditScoreRange: text("credit_score_range"),
+  creditScoreExact: integer("credit_score_exact"),
   totalRevolvingLimit: integer("total_revolving_limit"),
   totalBalances: integer("total_balances"),
   inquiries: integer("inquiries"),
   derogatoryAccounts: integer("derogatory_accounts"),
+  latePayments: integer("late_payments"),
+  collections: integer("collections"),
+  openAccounts: integer("open_accounts"),
+  closedAccounts: integer("closed_accounts"),
+  oldestAccountYears: integer("oldest_account_years"),
+  avgAccountAgeYears: integer("avg_account_age_years"),
+  publicRecords: integer("public_records"),
+  utilizationPercent: integer("utilization_percent"),
   
   // Stripe
   stripeCustomerId: text("stripe_customer_id"),

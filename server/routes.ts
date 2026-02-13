@@ -3450,10 +3450,17 @@ Be concise but thorough. Use bullet points and formatting for readability. If th
       if (!user) return res.status(404).json({ error: "User not found" });
 
       const creditScore = user.creditScoreRange || null;
+      const creditScoreExact = user.creditScoreExact || null;
       const revolvingLimit = user.totalRevolvingLimit || 0;
       const balances = user.totalBalances || 0;
       const inquiries = user.inquiries || 0;
       const derogatoryAccounts = user.derogatoryAccounts || 0;
+      const latePayments = user.latePayments || 0;
+      const collections = user.collections || 0;
+      const openAccounts = user.openAccounts || 0;
+      const oldestAccountYears = user.oldestAccountYears || 0;
+      const avgAccountAgeYears = user.avgAccountAgeYears || 0;
+      const publicRecords = user.publicRecords || 0;
       const hasCreditReport = user.hasCreditReport || false;
       const hasBankStatement = user.hasBankStatement || false;
 
@@ -3461,7 +3468,7 @@ Be concise but thorough. Use bullet points and formatting for readability. If th
       const actionPlan: string[] = [];
       const denialSimulation: { trigger: string; riskLevel: "High" | "Moderate" | "Low"; explanation: string; fix: string }[] = [];
 
-      const hasProfile = creditScore || revolvingLimit > 0 || balances > 0;
+      const hasProfile = creditScore || creditScoreExact || revolvingLimit > 0 || balances > 0;
 
       if (!hasProfile) {
         let incompleteNextSteps: string[] = [];
@@ -3499,7 +3506,9 @@ Be concise but thorough. Use bullet points and formatting for readability. If th
       }
 
       let creditScoreNum = 0;
-      if (creditScore) {
+      if (creditScoreExact && creditScoreExact >= 300 && creditScoreExact <= 850) {
+        creditScoreNum = creditScoreExact;
+      } else if (creditScore) {
         const ranges: Record<string, number> = {
           "300-579": 440, "580-619": 600, "620-659": 640,
           "660-699": 680, "700-749": 725, "750-850": 800
@@ -3523,14 +3532,21 @@ Be concise but thorough. Use bullet points and formatting for readability. If th
 
       // --- COMPONENT 2: Credit Quality (0-20) ---
       let creditQuality = 15;
-      if (derogatoryAccounts > 0) creditQuality -= Math.min(15, derogatoryAccounts * 6);
+      if (derogatoryAccounts > 0) creditQuality -= Math.min(10, derogatoryAccounts * 5);
+      if (latePayments > 0) creditQuality -= Math.min(8, latePayments * 2);
+      if (collections > 0) creditQuality -= Math.min(8, collections * 4);
+      if (publicRecords > 0) creditQuality -= Math.min(10, publicRecords * 5);
       creditQuality = Math.max(0, creditQuality);
       if (hasCreditReport) creditQuality = Math.min(20, creditQuality + 5);
 
       // --- COMPONENT 3: Management & Structure (0-15) ---
       let managementScore = 5;
-      if (hasCreditReport && hasBankStatement) managementScore = 15;
-      else if (hasCreditReport || hasBankStatement) managementScore = 10;
+      if (hasCreditReport && hasBankStatement) managementScore = 12;
+      else if (hasCreditReport || hasBankStatement) managementScore = 8;
+      if (avgAccountAgeYears >= 5) managementScore = Math.min(15, managementScore + 3);
+      else if (avgAccountAgeYears >= 3) managementScore = Math.min(15, managementScore + 2);
+      else if (avgAccountAgeYears >= 1) managementScore = Math.min(15, managementScore + 1);
+      if (openAccounts >= 3) managementScore = Math.min(15, managementScore + 1);
 
       // --- COMPONENT 4: Earnings & Cash Flow (0-15) ---
       let cashFlowScore = 5;
@@ -3558,6 +3574,10 @@ Be concise but thorough. Use bullet points and formatting for readability. If th
       else if (utilization > 45) riskScore -= 3;
       if (derogatoryAccounts > 1) riskScore -= 5;
       else if (derogatoryAccounts === 1) riskScore -= 3;
+      if (latePayments > 3) riskScore -= 4;
+      else if (latePayments > 0) riskScore -= 2;
+      if (collections > 0) riskScore -= 3;
+      if (publicRecords > 0) riskScore -= 5;
       if (revolvingLimit > 0 && revolvingLimit < 5000) riskScore -= 2;
       riskScore = Math.max(0, riskScore);
 
@@ -3634,6 +3654,18 @@ Be concise but thorough. Use bullet points and formatting for readability. If th
         alerts.push({ severity: "red", title: `${derogatoryAccounts} derogatory account${derogatoryAccounts > 1 ? "s" : ""}`, explanation: "Negative marks such as collections, charge-offs, or late payments on your report.", impact: "Derogatory marks are the most damaging factor in lender evaluation. High denial probability.", fix: "Dispute inaccurate items. Negotiate pay-for-delete agreements on valid debts." });
       }
 
+      if (latePayments > 0) {
+        alerts.push({ severity: latePayments > 3 ? "red" : "yellow", title: `${latePayments} late payment${latePayments > 1 ? "s" : ""} detected`, explanation: "Late payments (30/60/90+ days) are recorded on your credit report.", impact: "Payment history is the largest scoring factor (~35%). Each late payment reduces your score and signals risk to lenders.", fix: "Bring all accounts current. Dispute any late payments you believe are inaccurate. Request goodwill removals from creditors." });
+      }
+
+      if (collections > 0) {
+        alerts.push({ severity: "red", title: `${collections} collection${collections > 1 ? "s" : ""} on report`, explanation: "One or more accounts have been sent to collections.", impact: "Collections are severe negative marks. Most prime lenders will deny applications with active collections.", fix: "Negotiate pay-for-delete agreements. Dispute any collection you believe is inaccurate or unverifiable." });
+      }
+
+      if (publicRecords > 0) {
+        alerts.push({ severity: "red", title: `${publicRecords} public record${publicRecords > 1 ? "s" : ""} found`, explanation: "Bankruptcies, judgments, or liens appear on your report.", impact: "Public records are the most damaging items. They can remain for 7-10 years and severely limit funding options.", fix: "Consult a credit professional. Some public records can be vacated or disputed if reporting is inaccurate." });
+      }
+
       if (creditScoreNum > 0 && creditScoreNum < 620) {
         alerts.push({ severity: "red", title: "Score below minimum funding threshold", explanation: "Most lenders require a minimum score of 620-650 for consideration.", impact: "Applications at this score level face high denial rates across all tiers.", fix: "Focus on on-time payments and debt reduction. Avoid new applications." });
       } else if (creditScoreNum >= 620 && creditScoreNum < 680) {
@@ -3670,12 +3702,24 @@ Be concise but thorough. Use bullet points and formatting for readability. If th
         denialSimulation.push({ trigger: "Active Derogatories", riskLevel: "High", explanation: "Collections, charge-offs, or late payments are the primary denial trigger for most lenders.", fix: "Resolve or dispute all derogatory items before applying." });
       }
 
+      if (latePayments > 3) {
+        denialSimulation.push({ trigger: "Excessive Late Payments", riskLevel: "High", explanation: `${latePayments} late payment instances signal inconsistent repayment behavior to lenders.`, fix: "Bring all accounts current. Request goodwill removals for paid-off late payments." });
+      } else if (latePayments > 0) {
+        denialSimulation.push({ trigger: "Late Payment History", riskLevel: "Moderate", explanation: `${latePayments} late payment${latePayments > 1 ? "s" : ""} on record may raise flags during underwriting.`, fix: "Maintain on-time payments for at least 12 consecutive months." });
+      }
+
+      if (collections > 0) {
+        denialSimulation.push({ trigger: "Active Collections", riskLevel: "High", explanation: `${collections} account${collections > 1 ? "s" : ""} in collections. Most lenders require zero active collections.`, fix: "Negotiate settlements or pay-for-delete agreements before applying." });
+      }
+
       if (creditScoreNum > 0 && creditScoreNum < 660) {
         denialSimulation.push({ trigger: "Low Credit Score", riskLevel: creditScoreNum < 620 ? "High" : "Moderate", explanation: "Score below lender minimums will trigger automatic denial in most systems.", fix: "Improve score through consistent payments and utilization reduction." });
       }
 
       // --- ACTION PLAN ---
       if (utilization > 30) actionPlan.push("Reduce credit utilization below 30% across all revolving accounts");
+      if (latePayments > 0) actionPlan.push(`Address ${latePayments} late payment${latePayments > 1 ? "s" : ""} — dispute inaccurate entries or request goodwill removals`);
+      if (collections > 0) actionPlan.push(`Resolve ${collections} collection${collections > 1 ? "s" : ""} — negotiate pay-for-delete or dispute unverifiable debts`);
       if (inquiries > 2) actionPlan.push("Avoid new credit applications for at least 45 days");
       if (derogatoryAccounts > 0) actionPlan.push("Dispute inaccurate derogatory items or negotiate pay-for-delete");
       if (revolvingLimit > 0 && revolvingLimit < 10000) actionPlan.push("Strengthen revolving credit depth — request limit increases or add secured cards");
@@ -3717,6 +3761,21 @@ Be concise but thorough. Use bullet points and formatting for readability. If th
         actionPlan,
         progress: { current: score, target: 85 },
         hasProfile: true,
+        creditScoreExact: creditScoreExact,
+        creditScoreNum,
+        profileData: {
+          latePayments,
+          collections,
+          openAccounts,
+          oldestAccountYears,
+          avgAccountAgeYears,
+          publicRecords,
+          utilizationActual: revolvingLimit > 0 ? Math.round((balances / revolvingLimit) * 100) : null,
+          revolvingLimit,
+          balances,
+          inquiries,
+          derogatoryAccounts,
+        },
         analysisSummary: user.analysisSummary || null,
         analysisNextSteps: nextSteps,
         lastAnalysisDate: user.lastAnalysisDate || null,
@@ -3783,41 +3842,48 @@ Be concise but thorough. Use bullet points and formatting for readability. If th
 
       const analysisPrompt = `You are a Capital Readiness and Funding Strategy Evaluation System for MentXr®.
 
-Your purpose is to analyze uploaded financial documents and help business owners understand how lenders see their profile.
+Your purpose is to analyze uploaded financial documents and extract EVERY piece of data available.
 
 You do not motivate. You do not hype. You do not guarantee approvals.
 You evaluate risk. You assess readiness. You provide structured corrective guidance.
 Your tone must feel like a private capital analyst reviewing a file.
 
-The user uploaded a ${docLabel}. Analyze the document and evaluate across six components:
-1. Capital Strength — Credit score, revolving limits, balances, available liquidity
-2. Credit Quality — Payment history, derogatories, collections, charge-offs, late payments
-3. Management & Structure — Business/personal separation, account age, documentation quality
-4. Earnings & Cash Flow — Revenue, consistency, profitability, debt-to-income
-5. Liquidity & Leverage — Utilization levels, exposure relative to income, recent inquiries
-6. Risk Signals — Rapid application behavior, thin profile, high utilization, balance spikes
+The user uploaded a ${docLabel}. READ THE ENTIRE DOCUMENT CAREFULLY. Extract ALL data points.
 
 IMPORTANT: You MUST respond with ONLY valid JSON matching this exact structure (no markdown, no code blocks, no extra text):
 
 {
+  "creditScoreExact": <exact FICO/credit score number if shown, e.g. 733, 602, 510. MUST be a number, not a range. null if not found>,
   "creditScoreRange": "300-579" | "580-619" | "620-659" | "660-699" | "700-749" | "750-850" | null,
-  "totalRevolvingLimit": <number or null>,
-  "totalBalances": <number or null>,
-  "inquiries": <number or null>,
-  "derogatoryAccounts": <number or null>,
-  "summary": "<2-3 sentence analytical summary written like a capital analyst reviewing a file. Mention the most critical risk factors and strengths. Do not use hype language.>",
+  "totalRevolvingLimit": <total credit limit across ALL revolving accounts in dollars as integer, e.g. 12000. Sum ALL account limits>,
+  "totalBalances": <total current balances across ALL accounts in dollars as integer, e.g. 5200. Sum ALL balances>,
+  "inquiries": <number of hard inquiries in last 2 years as integer, e.g. 3. 0 if none found>,
+  "derogatoryAccounts": <number of derogatory/negative accounts as integer. Count ALL: collections, charge-offs, accounts in bad standing. 0 if none>,
+  "latePayments": <total number of late payments (30/60/90+ day) across ALL accounts as integer. Count each late payment instance. 0 if none found>,
+  "collections": <number of accounts in collections as integer. 0 if none>,
+  "openAccounts": <number of currently open/active accounts as integer>,
+  "closedAccounts": <number of closed accounts as integer. 0 if not shown>,
+  "oldestAccountYears": <age of oldest account in years as integer, rounded down. e.g. if "13 years 4 months" = 13>,
+  "avgAccountAgeYears": <average account age in years as integer, rounded down. e.g. if "4 years 11 months" = 4>,
+  "publicRecords": <number of public records (bankruptcies, judgments, liens) as integer. 0 if none>,
+  "utilizationPercent": <credit utilization percentage as integer, e.g. 45 for 45%. Calculate from balances/limits if not stated directly>,
+  "summary": "<3-4 sentence analytical summary. Reference SPECIFIC numbers from the report: exact score, exact balances, exact limits, number of accounts, late payments, collections. Example: 'FICO score of 733 with 4 open accounts. Total revolving limit of $12,000 against $20 in balances yields 0.17% utilization. No derogatory marks or late payments detected. One account flagged as in dispute under FCBA.' Do NOT be vague.>",
   "nextSteps": ["<step 1>", "<step 2>", "<step 3>", "<step 4>", "<step 5>"]
 }
 
-Rules:
-- For credit reports: Extract credit score range, revolving limits, balances, inquiries, derogatory accounts
-- For bank statements: Focus on cash flow patterns, revenue consistency, and stability indicators. Set credit fields to null if not available
-- nextSteps must be 5 sequential, specific corrective actions that would improve the user's funding readiness score. Each step should improve a specific component
-- Steps must be actionable and include timing guidance where relevant (e.g., "within 30 days", "for 45 days")
-- Do NOT suggest manipulation of underwriting or misrepresentation
-- summary must mention specific numbers and findings — not vague statements
-- If a field cannot be determined, use null
-- Use clear, direct, plain business language. No hype, no emotional persuasion
+CRITICAL EXTRACTION RULES:
+- READ EVERY LINE of the document. Do not stop at the first page.
+- Count EVERY account listed — open, closed, authorized user, individual, joint
+- Sum ALL credit limits and ALL balances separately across every account
+- Count ALL late payment instances across all accounts (30-day, 60-day, 90-day each count separately)
+- Count ALL collections, charge-offs, and derogatory items
+- Extract the EXACT credit score number, not just a range
+- If utilization is not stated, CALCULATE IT: (totalBalances / totalRevolvingLimit) × 100
+- ALL numeric fields MUST be integers (whole numbers), never strings or decimals
+- If a field truly cannot be determined from the document, use 0 for counts and null only for scores/limits that aren't mentioned at all
+- For bank statements: Set credit-specific fields to null. Focus on cash flow data in summary.
+- nextSteps must be 5 specific corrective actions with timing guidance
+- summary must cite specific dollar amounts and counts from the document
 - Respond with ONLY the JSON object, nothing else
 
 --- START OF DOCUMENT ---
@@ -3851,14 +3917,29 @@ ${extractedText}
         analysisNextSteps: JSON.stringify(analysisResult.nextSteps || []),
       };
 
+      const safeInt = (val: any): number | null => {
+        if (val === null || val === undefined) return null;
+        const n = typeof val === "string" ? parseInt(val, 10) : Math.round(Number(val));
+        return isNaN(n) ? null : n;
+      };
+
       if (documentType === "credit_report") {
         updateData.hasCreditReport = true;
         updateData.lastCreditReportText = extractedText.slice(0, 30000);
-        if (analysisResult.creditScoreRange) updateData.creditScoreRange = analysisResult.creditScoreRange;
-        if (analysisResult.totalRevolvingLimit !== null && analysisResult.totalRevolvingLimit !== undefined) updateData.totalRevolvingLimit = analysisResult.totalRevolvingLimit;
-        if (analysisResult.totalBalances !== null && analysisResult.totalBalances !== undefined) updateData.totalBalances = analysisResult.totalBalances;
-        if (analysisResult.inquiries !== null && analysisResult.inquiries !== undefined) updateData.inquiries = analysisResult.inquiries;
-        if (analysisResult.derogatoryAccounts !== null && analysisResult.derogatoryAccounts !== undefined) updateData.derogatoryAccounts = analysisResult.derogatoryAccounts;
+        updateData.creditScoreRange = analysisResult.creditScoreRange || null;
+        updateData.creditScoreExact = safeInt(analysisResult.creditScoreExact);
+        updateData.totalRevolvingLimit = safeInt(analysisResult.totalRevolvingLimit) ?? 0;
+        updateData.totalBalances = safeInt(analysisResult.totalBalances) ?? 0;
+        updateData.inquiries = safeInt(analysisResult.inquiries) ?? 0;
+        updateData.derogatoryAccounts = safeInt(analysisResult.derogatoryAccounts) ?? 0;
+        updateData.latePayments = safeInt(analysisResult.latePayments) ?? 0;
+        updateData.collections = safeInt(analysisResult.collections) ?? 0;
+        updateData.openAccounts = safeInt(analysisResult.openAccounts);
+        updateData.closedAccounts = safeInt(analysisResult.closedAccounts);
+        updateData.oldestAccountYears = safeInt(analysisResult.oldestAccountYears);
+        updateData.avgAccountAgeYears = safeInt(analysisResult.avgAccountAgeYears);
+        updateData.publicRecords = safeInt(analysisResult.publicRecords) ?? 0;
+        updateData.utilizationPercent = safeInt(analysisResult.utilizationPercent);
       } else {
         updateData.hasBankStatement = true;
       }
@@ -3902,11 +3983,20 @@ ${extractedText}
         summary: analysisResult.summary,
         nextSteps: analysisResult.nextSteps || [],
         extractedFields: {
+          creditScoreExact: safeInt(analysisResult.creditScoreExact),
           creditScoreRange: analysisResult.creditScoreRange,
-          totalRevolvingLimit: analysisResult.totalRevolvingLimit,
-          totalBalances: analysisResult.totalBalances,
-          inquiries: analysisResult.inquiries,
-          derogatoryAccounts: analysisResult.derogatoryAccounts,
+          totalRevolvingLimit: safeInt(analysisResult.totalRevolvingLimit),
+          totalBalances: safeInt(analysisResult.totalBalances),
+          inquiries: safeInt(analysisResult.inquiries),
+          derogatoryAccounts: safeInt(analysisResult.derogatoryAccounts),
+          latePayments: safeInt(analysisResult.latePayments),
+          collections: safeInt(analysisResult.collections),
+          openAccounts: safeInt(analysisResult.openAccounts),
+          closedAccounts: safeInt(analysisResult.closedAccounts),
+          oldestAccountYears: safeInt(analysisResult.oldestAccountYears),
+          avgAccountAgeYears: safeInt(analysisResult.avgAccountAgeYears),
+          publicRecords: safeInt(analysisResult.publicRecords),
+          utilizationPercent: safeInt(analysisResult.utilizationPercent),
         },
         extractionMethod,
         documentType,

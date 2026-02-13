@@ -4,6 +4,13 @@
 A free AI mentorship platform ("Mentorship On Demand") combining Capital Readiness analytics with AI-powered mentorship. Features a 6-component Capital Readiness evaluation system (Capital Strength, Credit Quality, Management & Structure, Earnings & Cash Flow, Liquidity & Leverage, Risk Signals), 2.5x exposure ceiling calculation, tier eligibility (Prime/Mid-Tier/Alternative), operating mode (Pre-Funding/Repair), denial simulation, AI chat workspace with 7 bot mentors, PDF document upload with OCR, friends list, admin panel, and free membership access.
 
 ## Recent Changes
+- 2026-02-13: Expanded AI document analysis to extract 14 data fields (exact score, revolving limits, balances, inquiries, derogatories, late payments, collections, open/closed accounts, account age, public records, utilization)
+- 2026-02-13: All financial profile fields force-reset on new report upload (no stale data persistence)
+- 2026-02-13: Added safeInt() type coercion for all AI-extracted numeric values
+- 2026-02-13: Expanded schema with: creditScoreExact, latePayments, collections, openAccounts, closedAccounts, oldestAccountYears, avgAccountAgeYears, publicRecords, utilizationPercent
+- 2026-02-13: Updated scoring engine to use expanded data (late payments, collections, account age, public records affect component scores)
+- 2026-02-13: Auto-triggers credit repair analysis after new credit report upload (reuses existing endpoint via internal HTTP call)
+- 2026-02-13: Added alerts/denial simulation triggers for late payments, collections, public records
 - 2026-02-13: Added Credit Repair System with AI-powered report parsing, issue detection, repair plan, and auto-generated dispute letters
 - 2026-02-13: Added /api/credit-repair-analysis endpoint with GPT-4o parsing of credit report text
 - 2026-02-13: Added /api/credit-repair-data endpoint for retrieving stored repair results
