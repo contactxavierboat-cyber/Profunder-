@@ -1080,6 +1080,108 @@ export async function registerRoutes(
     }
   });
 
+  // Bot posting engine - generates a new community post every 2 seconds
+  const BOT_POST_TEMPLATES = [
+    "Just finished reading 'Think and Grow Rich' for the 5th time. Every read reveals something new. Never stop learning 📚",
+    "The difference between a dreamer and a doer is action. What did you DO today to get closer to your goals?",
+    "Closed my first real estate deal today! MentXr® helped me build the confidence. Grateful for this community 🏠",
+    "Stop waiting for the perfect moment. Start now, adjust later. Progress > perfection.",
+    "Had an amazing session with the AI mentors today. The advice on scaling my business was exactly what I needed.",
+    "Your network is your net worth. Who are you surrounding yourself with?",
+    "Revenue hit $10K/month for the first time! Started from zero 8 months ago. Keep grinding 💪",
+    "Reminder: Your 9-5 is funding your 5-9. Use those hours wisely.",
+    "Just uploaded my credit report and got actionable insights in seconds. This platform is incredible.",
+    "The best investment you can make is in yourself. Period.",
+    "Failed 3 times before getting it right. Failure isn't the opposite of success—it's part of it.",
+    "Morning routine: Wake up, gratitude journal, MentXr® session, then attack the day. What's yours?",
+    "If you're the smartest person in the room, you're in the wrong room.",
+    "Started my LLC today! One step closer to financial freedom 🎯",
+    "Cash flow > salary. Learn the difference and change your life.",
+    "Don't tell people your plans. Show them your results.",
+    "Investing in index funds since 2023. Compound interest is real magic ✨",
+    "The market doesn't care about your feelings. Learn to be data-driven.",
+    "Hired my first employee today. Scaling is real when you delegate.",
+    "Your habits determine your future. What habit are you building this month?",
+    "Grant Cardone's advice on this app hit different. 10X is a mindset, not just a number.",
+    "Passive income update: $2,400/month from rental properties. Started with one unit.",
+    "Stop scrolling, start building. Your future self will thank you.",
+    "Negotiated a 30% raise today using tips from the Oprah mentor session. Know your worth!",
+    "Building generational wealth isn't optional—it's a responsibility.",
+    "Credit score went from 580 to 740 in 14 months. Education + discipline = results.",
+    "Read 52 books this year. Knowledge compounds faster than money.",
+    "Side hustle turned main hustle. Quit my job last month. Scary but worth it 🚀",
+    "The Gary Vee sessions on social media marketing are gold. Grew my following 300% this quarter.",
+    "Debt-free as of today! Took 3 years of discipline but we made it 🎉",
+    "Your mindset is your most powerful asset. Protect it daily.",
+    "Just got approved for my first business loan. Let's go! 🏦",
+    "Warren Buffett's compound interest lesson on here changed my perspective forever.",
+    "Accountability partners > motivation. Find someone who won't let you slack.",
+    "Launched my e-commerce store. First sale within 48 hours!",
+    "Financial literacy should be taught in every school. Spreading the word through MentXr®",
+    "Woke up to $500 in passive income. Systems over effort.",
+    "Sara Blakely's session on overcoming fear of failure was exactly what I needed today.",
+    "Don't save what's left after spending. Spend what's left after saving.",
+    "Closed a $50K deal using negotiation tactics I learned here. This community is the real deal.",
+    "Your credit score is your financial GPA. Treat it accordingly.",
+    "Year 1: survived. Year 2: stabilized. Year 3: scaled. Keep going.",
+    "The 19Keys session on financial literacy opened my eyes. Knowledge truly is the key 🔑",
+    "Stop trading time for money. Build systems that work while you sleep.",
+    "Invested in Bitcoin at $30K. Patience is a superpower in investing.",
+    "Just hit 100 sessions on MentXr®. The growth has been insane.",
+    "Real estate, stocks, crypto, business—diversify your income streams.",
+    "Charleston White's real talk session was the wake-up call I needed. No more excuses.",
+    "Budgeting isn't restricting. It's telling your money where to go instead of wondering where it went.",
+    "First $1M in revenue this year. It started with a single conversation on this app.",
+  ];
+
+  let botUserIds: number[] = [];
+
+  async function startBotPostingEngine() {
+    try {
+      botUserIds = await storage.getRandomBotUserIds(200);
+      if (botUserIds.length === 0) {
+        console.log("No bot users found, skipping bot posting engine");
+        return;
+      }
+      console.log(`Bot posting engine started with ${botUserIds.length} bot users`);
+
+      setInterval(async () => {
+        try {
+          const randomUserId = botUserIds[Math.floor(Math.random() * botUserIds.length)];
+          const randomContent = BOT_POST_TEMPLATES[Math.floor(Math.random() * BOT_POST_TEMPLATES.length)];
+          const randomLikes = Math.floor(Math.random() * 150) + 1;
+          await storage.createPost({ userId: randomUserId, content: randomContent, likes: randomLikes });
+        } catch (err) {
+          console.error("Bot post error:", err);
+        }
+      }, 2000);
+    } catch (err) {
+      console.error("Failed to start bot posting engine:", err);
+    }
+  }
+
+  setTimeout(() => startBotPostingEngine(), 3000);
+
+  app.get("/api/posts", requireAuth, async (_req, res) => {
+    try {
+      const recentPosts = await storage.getRecentPosts(50);
+      const userIds = [...new Set(recentPosts.map(p => p.userId))];
+      const userMap: Record<number, { email: string }> = {};
+      for (const uid of userIds) {
+        const u = await storage.getUser(uid);
+        if (u) userMap[uid] = { email: u.email };
+      }
+      const postsWithUsers = recentPosts.map(p => ({
+        ...p,
+        userEmail: userMap[p.userId]?.email || "anonymous@mentxr.com",
+      }));
+      res.json({ posts: postsWithUsers });
+    } catch (error) {
+      console.error("Posts error:", error);
+      res.status(500).json({ error: "Failed to load posts" });
+    }
+  });
+
   app.get("/api/stats", async (_req, res) => {
     try {
       const result = await storage.getUserCount();

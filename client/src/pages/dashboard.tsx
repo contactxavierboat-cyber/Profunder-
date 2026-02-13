@@ -53,6 +53,8 @@ export default function DashboardPage() {
   const [feedItems, setFeedItems] = useState<any[]>([]);
   const [feedLoading, setFeedLoading] = useState(false);
   const [platformStats, setPlatformStats] = useState<{ totalUsers: number; activeNow: number }>({ totalUsers: 0, activeNow: 0 });
+  const [communityPosts, setCommunityPosts] = useState<any[]>([]);
+  const [postLikes, setPostLikes] = useState<Set<number>>(new Set());
 
   const TRUNCATE_LENGTH = 280;
 
@@ -116,6 +118,18 @@ export default function DashboardPage() {
     }
   };
 
+  const fetchPosts = async () => {
+    try {
+      const res = await fetch("/api/posts", { credentials: "include" });
+      if (res.ok) {
+        const data = await res.json();
+        setCommunityPosts(data.posts || []);
+      }
+    } catch (err) {
+      console.error("Failed to fetch posts", err);
+    }
+  };
+
   const fetchFeed = async (showLoading = true) => {
     if (showLoading) setFeedLoading(true);
     try {
@@ -134,6 +148,7 @@ export default function DashboardPage() {
   useEffect(() => {
     if (user) {
       fetchFeed();
+      fetchPosts();
       fetch("/api/stats").then(r => r.json()).then(setPlatformStats).catch(() => {});
     }
   }, [user]);
@@ -141,10 +156,11 @@ export default function DashboardPage() {
   useEffect(() => {
     if (!user) return;
     const feedInterval = setInterval(() => fetchFeed(false), 3 * 1000);
+    const postsInterval = setInterval(() => fetchPosts(), 2 * 1000);
     const statsInterval = setInterval(() => {
       fetch("/api/stats").then(r => r.json()).then(setPlatformStats).catch(() => {});
     }, 10 * 1000);
-    return () => { clearInterval(feedInterval); clearInterval(statsInterval); };
+    return () => { clearInterval(feedInterval); clearInterval(postsInterval); clearInterval(statsInterval); };
   }, [user]);
 
   const lastMentorMsg = [...messages].reverse().find(m => m.role === 'assistant' && m.mentor);
@@ -629,6 +645,57 @@ export default function DashboardPage() {
                       </a>
                     ))}
                   </div>
+                </div>
+              )}
+
+              {communityPosts.length > 0 && (
+                <div className="divide-y divide-white/[0.06]">
+                  {communityPosts.map((p: any) => {
+                    const nameFromEmail = p.userEmail?.split("@")[0] || "user";
+                    const displayName = nameFromEmail.split(".").map((s: string) => s.charAt(0).toUpperCase() + s.slice(1)).join(" ");
+                    const handle = `@${nameFromEmail.replace(".", "")}`;
+                    const initials = displayName.split(" ").map((s: string) => s[0]).join("").substring(0, 2).toUpperCase();
+                    const isLikedPost = postLikes.has(p.id);
+                    const likeCount = p.likes + (isLikedPost ? 1 : 0);
+                    const commentCount = Math.floor(Math.random() * 10);
+
+                    return (
+                      <div key={`post-${p.id}`} className="px-4 py-4 hover:bg-white/[0.02] transition-colors" data-testid={`community-post-${p.id}`}>
+                        <div className="flex gap-3">
+                          <div className="shrink-0">
+                            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#2A2A2A] to-[#1A1A1A] border border-white/[0.08] flex items-center justify-center text-[11px] font-bold text-white/50">
+                              {initials}
+                            </div>
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-1.5 mb-0.5">
+                              <span className="text-[14px] font-bold text-white/90 truncate">{displayName}</span>
+                              <span className="text-[13px] text-white/30 truncate">{handle}</span>
+                              <span className="text-white/15 text-[13px]">·</span>
+                              <span className="text-[13px] text-white/30 shrink-0">{timeAgo(p.timestamp)}</span>
+                            </div>
+                            <p className="text-[14px] text-white/80 leading-relaxed whitespace-pre-wrap mb-3">{p.content}</p>
+                            <div className="flex items-center gap-6 -ml-2">
+                              <button
+                                onClick={() => setPostLikes(prev => { const next = new Set(prev); if (next.has(p.id)) next.delete(p.id); else next.add(p.id); return next; })}
+                                className={cn("flex items-center gap-1.5 px-2 py-1.5 rounded-full text-[13px] transition-colors", isLikedPost ? "text-red-400 hover:text-red-300" : "text-white/30 hover:text-red-400/70 hover:bg-red-500/5")}
+                              >
+                                <Heart className={cn("w-4 h-4", isLikedPost && "fill-current")} />
+                                <span>{likeCount}</span>
+                              </button>
+                              <div className="flex items-center gap-1.5 px-2 py-1.5 rounded-full text-[13px] text-white/30">
+                                <MessageCircle className="w-4 h-4" />
+                                <span>{commentCount}</span>
+                              </div>
+                              <button className="flex items-center gap-1.5 px-2 py-1.5 rounded-full text-[13px] text-white/30 hover:text-blue-400/70 hover:bg-blue-500/5 transition-colors">
+                                <Share2 className="w-4 h-4" />
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
               )}
 

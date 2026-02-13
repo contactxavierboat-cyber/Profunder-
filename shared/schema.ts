@@ -49,7 +49,16 @@ export const comments = pgTable("comments", {
 
 export const insertUserSchema = createInsertSchema(users).omit({ id: true, createdAt: true });
 export const insertMessageSchema = createInsertSchema(messages).omit({ id: true, timestamp: true });
+export const posts = pgTable("posts", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull().references(() => users.id),
+  content: text("content").notNull(),
+  likes: integer("likes").notNull().default(0),
+  timestamp: timestamp("timestamp").defaultNow().notNull(),
+});
+
 export const insertCommentSchema = createInsertSchema(comments).omit({ id: true, timestamp: true });
+export const insertPostSchema = createInsertSchema(posts).omit({ id: true, timestamp: true });
 
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
@@ -57,3 +66,5 @@ export type Message = typeof messages.$inferSelect;
 export type InsertMessage = z.infer<typeof insertMessageSchema>;
 export type Comment = typeof comments.$inferSelect;
 export type InsertComment = z.infer<typeof insertCommentSchema>;
+export type Post = typeof posts.$inferSelect;
+export type InsertPost = z.infer<typeof insertPostSchema>;

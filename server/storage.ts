@@ -1,6 +1,6 @@
-import { users, messages, comments, type User, type InsertUser, type Message, type InsertMessage, type Comment, type InsertComment } from "@shared/schema";
+import { users, messages, comments, posts, type User, type InsertUser, type Message, type InsertMessage, type Comment, type InsertComment, type Post, type InsertPost } from "@shared/schema";
 import { db } from "./db";
-import { eq, count } from "drizzle-orm";
+import { eq, count, desc } from "drizzle-orm";
 
 export interface IStorage {
   getUser(id: number): Promise<User | undefined>;
@@ -17,6 +17,9 @@ export interface IStorage {
   getCommentsByUser(userId: number): Promise<Comment[]>;
   createComment(comment: InsertComment): Promise<Comment>;
   getUserCount(): Promise<number>;
+  getRecentPosts(limit: number): Promise<Post[]>;
+  createPost(post: InsertPost): Promise<Post>;
+  getRandomBotUserIds(count: number): Promise<number[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -73,6 +76,20 @@ export class DatabaseStorage implements IStorage {
   async getUserCount(): Promise<number> {
     const [result] = await db.select({ value: count() }).from(users);
     return result?.value || 0;
+  }
+
+  async getRecentPosts(limit: number): Promise<Post[]> {
+    return db.select().from(posts).orderBy(desc(posts.timestamp)).limit(limit);
+  }
+
+  async createPost(insertPost: InsertPost): Promise<Post> {
+    const [post] = await db.insert(posts).values(insertPost).returning();
+    return post;
+  }
+
+  async getRandomBotUserIds(count: number): Promise<number[]> {
+    const result = await db.select({ id: users.id }).from(users).where(eq(users.password, "bot_no_login")).limit(count);
+    return result.map(r => r.id);
   }
 }
 
