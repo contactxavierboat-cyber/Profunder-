@@ -153,9 +153,7 @@ export default function LandingPage() {
         </div>
       </nav>
 
-      <div className="relative overflow-hidden">
-        <div className="absolute inset-0 bg-[#080808]"></div>
-
+      <div className="relative bg-black" style={{ overflow: 'clip' }}>
         <div
           className="absolute pointer-events-none"
           style={{
