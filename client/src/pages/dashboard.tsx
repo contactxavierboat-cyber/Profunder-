@@ -523,6 +523,60 @@ export default function DashboardPage() {
 
               <div className="border-t border-white/[0.06]" />
 
+              {feedItems.length > 0 && (
+                <div className="px-4 py-3 border-b border-white/[0.06]">
+                  <div className="flex items-center justify-between mb-2.5">
+                    <div className="flex items-center gap-2">
+                      <TrendingUp className="w-3.5 h-3.5 text-[#E0E0E0]/50" />
+                      <span className="text-[12px] font-semibold text-white/50">Trending</span>
+                    </div>
+                    <button
+                      onClick={() => fetchFeed(true)}
+                      disabled={feedLoading}
+                      className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-white/[0.04] border border-white/[0.06] text-[10px] text-white/30 hover:text-white/50 hover:bg-white/[0.06] transition-colors"
+                      data-testid="button-refresh-feed-inline"
+                    >
+                      <RefreshCw className={cn("w-2.5 h-2.5", feedLoading && "animate-spin")} />
+                      Refresh
+                    </button>
+                  </div>
+                  <div
+                    className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide"
+                    style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+                  >
+                    {feedItems.slice(0, 12).map((item: any, idx: number) => (
+                      <a
+                        key={item.id || idx}
+                        href={item.link}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="shrink-0 w-[200px] rounded-xl border border-white/[0.06] bg-white/[0.02] hover:bg-white/[0.05] transition-all overflow-hidden group"
+                        data-testid={`feed-card-${idx}`}
+                      >
+                        {item.image && (
+                          <div className="w-full h-24 bg-[#111] overflow-hidden">
+                            <img
+                              src={item.image}
+                              alt={item.title}
+                              className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-300"
+                              onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                            />
+                          </div>
+                        )}
+                        <div className="p-2.5">
+                          <div className="flex items-center gap-1.5 mb-1">
+                            <span className="px-1.5 py-0.5 rounded-full bg-white/[0.06] text-[8px] font-medium text-white/35 uppercase tracking-wide">{item.category}</span>
+                            <span className="text-[9px] text-white/20">{item.source}</span>
+                          </div>
+                          <h3 className="text-[12px] font-semibold text-white/80 leading-snug line-clamp-2 group-hover:text-white transition-colors">{item.title}</h3>
+                          <span className="text-[9px] text-white/20 mt-1 block">{timeAgo(item.publishedAt)}</span>
+                        </div>
+                      </a>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               <div className="divide-y divide-white/[0.06]">
                 {messages.map((m) => {
                   const mentorData = m.role === 'assistant' && m.mentor ? MENTOR_INFO[m.mentor] : null;
