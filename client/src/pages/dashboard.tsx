@@ -243,6 +243,12 @@ export default function DashboardPage() {
   const [expandedLetters, setExpandedLetters] = useState<Set<number>>(new Set());
   const [copiedLetter, setCopiedLetter] = useState<number | null>(null);
   const [expandedDenials, setExpandedDenials] = useState<Set<number>>(new Set());
+  const [qaMessages, setQaMessages] = useState<any[]>([]);
+  const [qaInput, setQaInput] = useState("");
+  const [qaLoading, setQaLoading] = useState(false);
+  const [qaOpen, setQaOpen] = useState(false);
+  const qaEndRef = useRef<HTMLDivElement>(null);
+  const qaInputRef = useRef<HTMLTextAreaElement>(null);
 
   const TRUNCATE_LENGTH = 280;
 
@@ -303,6 +309,52 @@ export default function DashboardPage() {
       fetchFriends();
       toast({ title: "Friend removed" });
     } catch (err) { toast({ title: "Error", description: "Failed to remove", variant: "destructive" }); }
+  };
+
+  const fetchQA = async () => {
+    try {
+      const res = await fetch("/api/dashboard-qa", { credentials: "include" });
+      if (res.ok) {
+        const data = await res.json();
+        setQaMessages(data);
+      }
+    } catch (err) {
+      console.error("Failed to fetch Q&A", err);
+    }
+  };
+
+  const sendQA = async () => {
+    const q = qaInput.trim();
+    if (!q || qaLoading) return;
+    setQaInput("");
+    setQaLoading(true);
+    try {
+      const res = await fetch("/api/dashboard-qa", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ content: q }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setQaMessages(prev => [...prev, data.userQuestion, data.aiAnswer]);
+        setTimeout(() => qaEndRef.current?.scrollIntoView({ behavior: "smooth" }), 100);
+      } else {
+        const err = await res.json();
+        toast({ title: "Error", description: err.error || "Failed to send question", variant: "destructive" });
+      }
+    } catch (err) {
+      toast({ title: "Error", description: "Failed to send question", variant: "destructive" });
+    } finally {
+      setQaLoading(false);
+    }
+  };
+
+  const clearQA = async () => {
+    try {
+      await fetch("/api/dashboard-qa", { method: "DELETE", credentials: "include" });
+      setQaMessages([]);
+    } catch {}
   };
 
   const fetchFundingReadiness = async () => {
@@ -417,6 +469,7 @@ export default function DashboardPage() {
       fetchFriends();
       fetchFundingReadiness();
       fetchRepairData();
+      fetchQA();
     }
   }, [user]);
 
@@ -1314,6 +1367,133 @@ export default function DashboardPage() {
                         </div>
                       ))}
                     </div>
+                  </div>
+
+                  <div className="rounded-2xl bg-white/[0.03] backdrop-blur-md border border-white/[0.08] overflow-hidden mb-4" data-testid="dashboard-qa-card">
+                    <button
+                      onClick={() => setQaOpen(!qaOpen)}
+                      className="w-full px-6 py-4 flex items-center justify-between hover:bg-white/[0.02] transition-colors"
+                      data-testid="button-toggle-qa"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-xl bg-white/[0.04] border border-white/[0.06] flex items-center justify-center">
+                          <MessageCircle className="w-4 h-4 text-white/40" />
+                        </div>
+                        <div className="text-left">
+                          <p className="text-sm font-medium text-white/70">Ask AI About Your Report</p>
+                          <p className="text-[10px] text-white/25">Get personalized answers based on your uploaded financial data</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        {qaMessages.length > 0 && (
+                          <span className="text-[9px] text-white/20 bg-white/[0.04] px-2 py-0.5 rounded-full">{Math.floor(qaMessages.length / 2)} Q&A</span>
+                        )}
+                        <ChevronDown className={cn("w-4 h-4 text-white/20 transition-transform", qaOpen && "rotate-180")} />
+                      </div>
+                    </button>
+
+                    {qaOpen && (
+                      <div className="border-t border-white/[0.06]">
+                        <div className="max-h-[400px] overflow-y-auto px-4 py-3 space-y-3" style={{ scrollbarWidth: 'thin' }}>
+                          {qaMessages.length === 0 && !qaLoading && (
+                            <div className="flex flex-col items-center justify-center py-8">
+                              <Sparkles className="w-6 h-6 text-white/10 mb-2" />
+                              <p className="text-xs text-white/25 text-center">Ask anything about your credit report, funding readiness, or financial profile</p>
+                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-4 w-full max-w-md">
+                                {[
+                                  "What's hurting my credit score?",
+                                  "Am I ready for funding?",
+                                  "How can I lower my balances?",
+                                  "What accounts should I dispute?",
+                                ].map((suggestion, i) => (
+                                  <button
+                                    key={i}
+                                    data-testid={`button-qa-suggestion-${i}`}
+                                    onClick={() => { setQaInput(suggestion); qaInputRef.current?.focus(); }}
+                                    className="text-left px-3 py-2.5 rounded-xl border border-white/[0.06] bg-white/[0.02] hover:bg-white/[0.05] transition-all text-[11px] text-white/35 hover:text-white/55"
+                                  >
+                                    {suggestion}
+                                  </button>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+
+                          {qaMessages.map((msg: any) => (
+                            <div key={msg.id} className={cn("flex gap-2.5", msg.role === "user" ? "justify-end" : "justify-start")} data-testid={`qa-msg-${msg.id}`}>
+                              {msg.role === "assistant" && (
+                                <div className="w-7 h-7 rounded-lg bg-white/[0.04] border border-white/[0.06] flex items-center justify-center shrink-0 mt-0.5">
+                                  <Cpu className="w-3.5 h-3.5 text-white/30" />
+                                </div>
+                              )}
+                              <div className={cn(
+                                "max-w-[80%] rounded-2xl px-4 py-3",
+                                msg.role === "user"
+                                  ? "bg-white/[0.08] border border-white/[0.1]"
+                                  : "bg-white/[0.02] border border-white/[0.04]"
+                              )}>
+                                <p className="text-[12px] text-white/55 leading-relaxed whitespace-pre-wrap">{msg.content}</p>
+                                <p className="text-[9px] text-white/15 mt-1.5">
+                                  {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                </p>
+                              </div>
+                            </div>
+                          ))}
+
+                          {qaLoading && (
+                            <div className="flex gap-2.5 justify-start">
+                              <div className="w-7 h-7 rounded-lg bg-white/[0.04] border border-white/[0.06] flex items-center justify-center shrink-0">
+                                <Cpu className="w-3.5 h-3.5 text-white/30" />
+                              </div>
+                              <div className="bg-white/[0.02] border border-white/[0.04] rounded-2xl px-4 py-3">
+                                <div className="flex items-center gap-2">
+                                  <Loader2 className="w-3.5 h-3.5 animate-spin text-white/25" />
+                                  <span className="text-[11px] text-white/25">Analyzing your data...</span>
+                                </div>
+                              </div>
+                            </div>
+                          )}
+                          <div ref={qaEndRef} />
+                        </div>
+
+                        <div className="px-4 pb-4 pt-2 border-t border-white/[0.04]">
+                          <div className="flex gap-2">
+                            <textarea
+                              ref={qaInputRef}
+                              data-testid="input-qa"
+                              value={qaInput}
+                              onChange={(e) => setQaInput(e.target.value)}
+                              onKeyDown={(e) => {
+                                if (e.key === "Enter" && !e.shiftKey) {
+                                  e.preventDefault();
+                                  sendQA();
+                                }
+                              }}
+                              placeholder="Ask about your report..."
+                              className="flex-1 bg-white/[0.03] border border-white/[0.06] rounded-xl px-3.5 py-2.5 text-sm text-white/70 placeholder:text-white/20 resize-none focus:outline-none focus:border-white/[0.12] transition-colors"
+                              rows={1}
+                            />
+                            <button
+                              data-testid="button-send-qa"
+                              onClick={sendQA}
+                              disabled={!qaInput.trim() || qaLoading}
+                              className="w-10 h-10 rounded-xl bg-white/[0.06] border border-white/[0.08] hover:bg-white/[0.1] disabled:opacity-30 flex items-center justify-center transition-colors shrink-0"
+                            >
+                              <Send className="w-4 h-4 text-white/50" />
+                            </button>
+                          </div>
+                          {qaMessages.length > 0 && (
+                            <button
+                              data-testid="button-clear-qa"
+                              onClick={clearQA}
+                              className="mt-2 text-[10px] text-white/15 hover:text-white/30 transition-colors"
+                            >
+                              Clear conversation
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </>
               ) : (
