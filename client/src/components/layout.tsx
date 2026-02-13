@@ -42,8 +42,8 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
           <div>
             <h1 className="font-sans font-bold text-lg sm:text-xl tracking-tighter flex items-center gap-2">
               <span className="relative w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center">
-                <span className="absolute inset-0 rounded-full bg-green-500/20 animate-ping" />
-                <span className="relative w-3 h-3 sm:w-3.5 sm:h-3.5 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]" />
+                <span className="absolute inset-0 rounded-full bg-[#E0E0E0]/15 animate-ping" />
+                <span className="relative w-3 h-3 sm:w-3.5 sm:h-3.5 rounded-full bg-[#E0E0E0] shadow-[0_0_8px_rgba(224,224,224,0.4)]" />
               </span>
               MentXr®
             </h1>

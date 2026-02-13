@@ -730,8 +730,8 @@ export default function DashboardPage() {
                 <Menu className="w-5 h-5 text-white/60" />
               </button>
               <span className="relative w-5 h-5 flex items-center justify-center md:hidden">
-                <span className="absolute inset-0 rounded-full bg-green-500/20 animate-ping" />
-                <span className="relative w-2.5 h-2.5 rounded-full bg-green-500 shadow-[0_0_6px_rgba(34,197,94,0.6)]" />
+                <span className="absolute inset-0 rounded-full bg-[#E0E0E0]/15 animate-ping" />
+                <span className="relative w-2.5 h-2.5 rounded-full bg-[#E0E0E0] shadow-[0_0_6px_rgba(224,224,224,0.4)]" />
               </span>
               {platformStats.activeNow > 0 && (
                 <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-green-500/10 border border-green-500/20">
@@ -1084,8 +1084,8 @@ export default function DashboardPage() {
                   ) : (
                     <>
                       <div className="w-20 h-20 rounded-2xl mb-4 bg-[#1A1A1A] border border-[#333] flex items-center justify-center relative">
-                        <span className="absolute w-10 h-10 rounded-full bg-green-500/15 animate-ping" />
-                        <span className="relative w-5 h-5 rounded-full bg-green-500 shadow-[0_0_12px_rgba(34,197,94,0.6)]" />
+                        <span className="absolute w-10 h-10 rounded-full bg-[#E0E0E0]/12 animate-ping" />
+                        <span className="relative w-5 h-5 rounded-full bg-[#E0E0E0] shadow-[0_0_12px_rgba(224,224,224,0.4)]" />
                       </div>
                       <h2 className="text-xl font-bold mb-0.5">MentXr®</h2>
                       <p className="text-white/40 text-sm text-center max-w-xs">Mentorship On Demand</p>
@@ -1140,8 +1140,8 @@ export default function DashboardPage() {
                             <div className={cn("w-10 h-10 rounded-full flex items-center justify-center text-white text-sm font-bold border border-white/10", BOT_COLORS[posterMentorKey])}>{posterInitials}</div>
                           ) : (
                             <div className="w-10 h-10 rounded-xl flex items-center justify-center relative bg-[#1A1A1A]">
-                              <span className="absolute w-5 h-5 rounded-full bg-green-500/20 animate-ping" />
-                              <span className="relative w-2.5 h-2.5 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]" />
+                              <span className="absolute w-5 h-5 rounded-full bg-[#E0E0E0]/15 animate-ping" />
+                              <span className="relative w-2.5 h-2.5 rounded-full bg-[#E0E0E0] shadow-[0_0_8px_rgba(224,224,224,0.4)]" />
                             </div>
                           )}
                         </div>
@@ -1252,8 +1252,8 @@ export default function DashboardPage() {
                                         <div className={cn("w-7 h-7 rounded-full flex items-center justify-center text-white text-[8px] font-bold border border-white/10", c.mentor ? BOT_COLORS[c.mentor] : "")}>{cMentor.initials}</div>
                                       ) : (
                                         <div className="w-7 h-7 rounded-xl flex items-center justify-center relative bg-[#1A1A1A]">
-                                          <span className="absolute w-4 h-4 rounded-full bg-green-500/20 animate-ping" />
-                                          <span className="relative w-2 h-2 rounded-full bg-green-500 shadow-[0_0_6px_rgba(34,197,94,0.6)]" />
+                                          <span className="absolute w-4 h-4 rounded-full bg-[#E0E0E0]/15 animate-ping" />
+                                          <span className="relative w-2 h-2 rounded-full bg-[#E0E0E0] shadow-[0_0_6px_rgba(224,224,224,0.4)]" />
                                         </div>
                                       )}
                                     </div>
@@ -1324,8 +1324,8 @@ export default function DashboardPage() {
                           <div className={cn("w-10 h-10 rounded-full flex items-center justify-center text-white text-sm font-bold border border-white/10", activeMentorKey ? BOT_COLORS[activeMentorKey] : "")}>{activeMentor.initials}</div>
                         ) : (
                           <div className="w-10 h-10 rounded-xl flex items-center justify-center relative bg-[#1A1A1A]">
-                            <span className="absolute w-5 h-5 rounded-full bg-green-500/20 animate-ping" />
-                            <span className="relative w-2.5 h-2.5 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]" />
+                            <span className="absolute w-5 h-5 rounded-full bg-[#E0E0E0]/15 animate-ping" />
+                            <span className="relative w-2.5 h-2.5 rounded-full bg-[#E0E0E0] shadow-[0_0_8px_rgba(224,224,224,0.4)]" />
                           </div>
                         )}
                       </div>

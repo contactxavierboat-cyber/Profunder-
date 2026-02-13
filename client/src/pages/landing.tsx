@@ -147,8 +147,8 @@ export default function LandingPage() {
         <div className="relative z-10 flex flex-col items-center px-4 sm:px-6 pt-12 sm:pt-20 pb-16 sm:pb-20">
 
           <div className="w-[52px] h-[52px] sm:w-[64px] sm:h-[64px] rounded-[14px] sm:rounded-[16px] mb-6 sm:mb-8 bg-[#1A1A1A] border border-[#333] flex items-center justify-center relative">
-            <span className="absolute w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-green-500/15 animate-ping" />
-            <span className="relative w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-green-500 shadow-[0_0_12px_rgba(34,197,94,0.6)]" />
+            <span className="absolute w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-[#E0E0E0]/12 animate-ping" />
+            <span className="relative w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-[#E0E0E0] shadow-[0_0_12px_rgba(224,224,224,0.4)]" />
           </div>
 
           <div className="flex items-center gap-2 sm:gap-2.5 px-4 sm:px-5 py-1.5 sm:py-2 rounded-full border border-[#333] bg-[#181818] mb-8 sm:mb-12">
