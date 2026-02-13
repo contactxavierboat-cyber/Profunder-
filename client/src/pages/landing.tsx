@@ -157,58 +157,58 @@ export default function LandingPage() {
         <div className="absolute inset-0 bg-[#080808]"></div>
 
         <div className="absolute inset-0 z-[1] overflow-hidden pointer-events-none">
-          <div className="absolute" style={{ width: '60vw', height: '50vh', top: '-5%', left: '5%', animation: 'smokeA 22s ease-in-out infinite', filter: 'blur(60px)', background: 'radial-gradient(ellipse at 30% 50%, rgba(255,255,255,0.18) 0%, rgba(200,200,200,0.08) 25%, transparent 55%)' }} />
-          <div className="absolute" style={{ width: '50vw', height: '60vh', top: '15%', right: '-5%', animation: 'smokeB 28s ease-in-out infinite', filter: 'blur(50px)', background: 'radial-gradient(ellipse at 70% 40%, rgba(255,255,255,0.15) 0%, rgba(180,180,180,0.06) 30%, transparent 55%)' }} />
-          <div className="absolute" style={{ width: '45vw', height: '45vh', bottom: '0%', left: '15%', animation: 'smokeC 18s ease-in-out infinite', filter: 'blur(55px)', background: 'radial-gradient(ellipse at 40% 60%, rgba(240,240,240,0.14) 0%, rgba(160,160,160,0.05) 30%, transparent 50%)' }} />
-          <div className="absolute" style={{ width: '70vw', height: '35vh', top: '40%', left: '-10%', animation: 'smokeD 32s ease-in-out infinite', filter: 'blur(45px)', background: 'radial-gradient(ellipse at 50% 50%, rgba(255,255,255,0.12) 0%, rgba(200,200,200,0.04) 35%, transparent 55%)' }} />
-          <div className="absolute" style={{ width: '40vw', height: '55vh', top: '5%', right: '10%', animation: 'smokeE 24s ease-in-out infinite', filter: 'blur(40px)', background: 'radial-gradient(ellipse at 60% 30%, rgba(255,255,255,0.2) 0%, rgba(220,220,220,0.08) 20%, transparent 50%)' }} />
-          <div className="absolute" style={{ width: '55vw', height: '40vh', bottom: '10%', right: '0%', animation: 'smokeF 26s ease-in-out infinite', filter: 'blur(70px)', background: 'radial-gradient(ellipse at 50% 50%, rgba(255,255,255,0.1) 0%, rgba(180,180,180,0.04) 30%, transparent 50%)' }} />
-          <div className="absolute" style={{ width: '35vw', height: '70vh', top: '10%', left: '30%', animation: 'smokeG 20s ease-in-out infinite', filter: 'blur(35px)', background: 'radial-gradient(ellipse at 45% 45%, rgba(255,255,255,0.16) 0%, rgba(200,200,200,0.06) 25%, transparent 45%)' }} />
+          <div className="absolute" style={{ width: '80vw', height: '70vh', top: '-15%', left: '-10%', animation: 'smokeA 30s ease-in-out infinite', filter: 'blur(40px)', background: 'radial-gradient(ellipse at 30% 50%, rgba(255,255,255,0.45) 0%, rgba(220,220,220,0.25) 20%, rgba(180,180,180,0.1) 40%, transparent 60%)' }} />
+          <div className="absolute" style={{ width: '70vw', height: '80vh', top: '5%', right: '-15%', animation: 'smokeB 35s ease-in-out infinite', filter: 'blur(35px)', background: 'radial-gradient(ellipse at 65% 40%, rgba(255,255,255,0.4) 0%, rgba(200,200,200,0.2) 25%, rgba(160,160,160,0.08) 45%, transparent 60%)' }} />
+          <div className="absolute" style={{ width: '90vw', height: '50vh', bottom: '-5%', left: '5%', animation: 'smokeC 25s ease-in-out infinite', filter: 'blur(45px)', background: 'radial-gradient(ellipse at 40% 55%, rgba(255,255,255,0.5) 0%, rgba(230,230,230,0.3) 15%, rgba(180,180,180,0.12) 35%, transparent 55%)' }} />
+          <div className="absolute" style={{ width: '100vw', height: '60vh', top: '25%', left: '-20%', animation: 'smokeD 40s ease-in-out infinite', filter: 'blur(50px)', background: 'radial-gradient(ellipse at 50% 50%, rgba(255,255,255,0.35) 0%, rgba(210,210,210,0.18) 25%, rgba(160,160,160,0.06) 45%, transparent 60%)' }} />
+          <div className="absolute" style={{ width: '60vw', height: '90vh', top: '-10%', right: '5%', animation: 'smokeE 28s ease-in-out infinite', filter: 'blur(30px)', background: 'radial-gradient(ellipse at 55% 35%, rgba(255,255,255,0.5) 0%, rgba(240,240,240,0.28) 18%, rgba(200,200,200,0.1) 38%, transparent 55%)' }} />
+          <div className="absolute" style={{ width: '75vw', height: '55vh', bottom: '5%', right: '-10%', animation: 'smokeF 33s ease-in-out infinite', filter: 'blur(38px)', background: 'radial-gradient(ellipse at 60% 50%, rgba(255,255,255,0.42) 0%, rgba(220,220,220,0.22) 22%, rgba(170,170,170,0.08) 42%, transparent 58%)' }} />
+          <div className="absolute" style={{ width: '50vw', height: '85vh', top: '0%', left: '25%', animation: 'smokeG 22s ease-in-out infinite', filter: 'blur(32px)', background: 'radial-gradient(ellipse at 45% 45%, rgba(255,255,255,0.48) 0%, rgba(235,235,235,0.26) 16%, rgba(190,190,190,0.1) 36%, transparent 52%)' }} />
         </div>
 
         <style>{`
           @keyframes smokeA {
-            0%, 100% { transform: translate(0, 0) scale(1) rotate(0deg); opacity: 0.9; }
-            20% { transform: translate(60px, 30px) scale(1.2) rotate(5deg); opacity: 1; }
-            40% { transform: translate(30px, 70px) scale(0.85) rotate(-3deg); opacity: 0.7; }
-            60% { transform: translate(-40px, 50px) scale(1.1) rotate(8deg); opacity: 0.95; }
-            80% { transform: translate(-20px, 10px) scale(0.95) rotate(-2deg); opacity: 0.8; }
+            0%, 100% { transform: translate(0, 0) scale(1) rotate(0deg); }
+            20% { transform: translate(80px, 50px) scale(1.25) rotate(6deg); }
+            40% { transform: translate(40px, 100px) scale(0.9) rotate(-4deg); }
+            60% { transform: translate(-60px, 70px) scale(1.15) rotate(10deg); }
+            80% { transform: translate(-30px, 20px) scale(1.05) rotate(-3deg); }
           }
           @keyframes smokeB {
-            0%, 100% { transform: translate(0, 0) scale(1) rotate(0deg); opacity: 0.85; }
-            25% { transform: translate(-80px, 40px) scale(1.15) rotate(-6deg); opacity: 1; }
-            50% { transform: translate(-50px, -30px) scale(1.3) rotate(4deg); opacity: 0.6; }
-            75% { transform: translate(30px, -50px) scale(0.9) rotate(-3deg); opacity: 0.9; }
+            0%, 100% { transform: translate(0, 0) scale(1) rotate(0deg); }
+            25% { transform: translate(-100px, 60px) scale(1.2) rotate(-8deg); }
+            50% { transform: translate(-70px, -40px) scale(1.35) rotate(5deg); }
+            75% { transform: translate(40px, -70px) scale(0.95) rotate(-4deg); }
           }
           @keyframes smokeC {
-            0%, 100% { transform: translate(0, 0) scale(1) rotate(0deg); opacity: 1; }
-            30% { transform: translate(50px, -50px) scale(1.25) rotate(7deg); opacity: 0.7; }
-            60% { transform: translate(-30px, -80px) scale(0.8) rotate(-5deg); opacity: 1; }
+            0%, 100% { transform: translate(0, 0) scale(1) rotate(0deg); }
+            30% { transform: translate(70px, -60px) scale(1.3) rotate(8deg); }
+            60% { transform: translate(-40px, -100px) scale(0.85) rotate(-6deg); }
           }
           @keyframes smokeD {
-            0%, 100% { transform: translate(0, 0) scale(1) rotate(0deg); opacity: 0.8; }
-            20% { transform: translate(100px, -20px) scale(1.1) rotate(3deg); opacity: 1; }
-            40% { transform: translate(70px, 40px) scale(1.25) rotate(-4deg); opacity: 0.65; }
-            60% { transform: translate(-20px, 30px) scale(0.9) rotate(6deg); opacity: 0.95; }
-            80% { transform: translate(-60px, -10px) scale(1.05) rotate(-2deg); opacity: 0.75; }
+            0%, 100% { transform: translate(0, 0) scale(1) rotate(0deg); }
+            20% { transform: translate(130px, -30px) scale(1.15) rotate(4deg); }
+            40% { transform: translate(90px, 60px) scale(1.3) rotate(-5deg); }
+            60% { transform: translate(-30px, 40px) scale(0.95) rotate(7deg); }
+            80% { transform: translate(-80px, -15px) scale(1.1) rotate(-3deg); }
           }
           @keyframes smokeE {
-            0%, 100% { transform: translate(0, 0) scale(1) rotate(0deg); opacity: 1; }
-            25% { transform: translate(-40px, 60px) scale(1.2) rotate(-8deg); opacity: 0.75; }
-            50% { transform: translate(20px, 40px) scale(0.85) rotate(5deg); opacity: 1; }
-            75% { transform: translate(50px, -20px) scale(1.15) rotate(-3deg); opacity: 0.8; }
+            0%, 100% { transform: translate(0, 0) scale(1) rotate(0deg); }
+            25% { transform: translate(-50px, 80px) scale(1.25) rotate(-10deg); }
+            50% { transform: translate(30px, 50px) scale(0.9) rotate(6deg); }
+            75% { transform: translate(70px, -30px) scale(1.2) rotate(-4deg); }
           }
           @keyframes smokeF {
-            0%, 100% { transform: translate(0, 0) scale(1) rotate(0deg); opacity: 0.7; }
-            33% { transform: translate(-70px, -40px) scale(1.3) rotate(6deg); opacity: 1; }
-            66% { transform: translate(40px, -60px) scale(0.9) rotate(-4deg); opacity: 0.8; }
+            0%, 100% { transform: translate(0, 0) scale(1) rotate(0deg); }
+            33% { transform: translate(-90px, -50px) scale(1.35) rotate(7deg); }
+            66% { transform: translate(50px, -80px) scale(0.95) rotate(-5deg); }
           }
           @keyframes smokeG {
-            0%, 100% { transform: translate(0, 0) scale(1) rotate(0deg); opacity: 0.85; }
-            20% { transform: translate(30px, 50px) scale(1.15) rotate(-5deg); opacity: 1; }
-            40% { transform: translate(-50px, 30px) scale(1.3) rotate(7deg); opacity: 0.65; }
-            60% { transform: translate(-20px, -40px) scale(0.85) rotate(-3deg); opacity: 0.95; }
-            80% { transform: translate(40px, -20px) scale(1.1) rotate(4deg); opacity: 0.75; }
+            0%, 100% { transform: translate(0, 0) scale(1) rotate(0deg); }
+            20% { transform: translate(40px, 70px) scale(1.2) rotate(-6deg); }
+            40% { transform: translate(-70px, 40px) scale(1.4) rotate(9deg); }
+            60% { transform: translate(-30px, -50px) scale(0.9) rotate(-4deg); }
+            80% { transform: translate(50px, -30px) scale(1.15) rotate(5deg); }
           }
         `}</style>
 
