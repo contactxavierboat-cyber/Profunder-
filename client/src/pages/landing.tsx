@@ -1,6 +1,121 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useAuth } from "@/lib/store";
 import { CalendarDays } from "lucide-react";
+
+function TechBackground() {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    let animationId: number;
+    let particles: Array<{
+      x: number; y: number; vx: number; vy: number;
+      size: number; opacity: number; pulse: number; pulseSpeed: number;
+    }> = [];
+
+    const resize = () => {
+      canvas.width = canvas.offsetWidth * window.devicePixelRatio;
+      canvas.height = canvas.offsetHeight * window.devicePixelRatio;
+      ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+    };
+
+    const initParticles = () => {
+      const w = canvas.offsetWidth;
+      const h = canvas.offsetHeight;
+      const count = Math.floor((w * h) / 8000);
+      particles = [];
+      for (let i = 0; i < count; i++) {
+        particles.push({
+          x: Math.random() * w,
+          y: Math.random() * h,
+          vx: (Math.random() - 0.5) * 0.3,
+          vy: (Math.random() - 0.5) * 0.3,
+          size: Math.random() * 1.5 + 0.5,
+          opacity: Math.random() * 0.5 + 0.1,
+          pulse: Math.random() * Math.PI * 2,
+          pulseSpeed: Math.random() * 0.02 + 0.005,
+        });
+      }
+    };
+
+    const draw = () => {
+      const w = canvas.offsetWidth;
+      const h = canvas.offsetHeight;
+      ctx.clearRect(0, 0, w, h);
+
+      particles.forEach(p => {
+        p.x += p.vx;
+        p.y += p.vy;
+        p.pulse += p.pulseSpeed;
+        if (p.x < 0) p.x = w;
+        if (p.x > w) p.x = 0;
+        if (p.y < 0) p.y = h;
+        if (p.y > h) p.y = 0;
+      });
+
+      const connectionDist = 120;
+      for (let i = 0; i < particles.length; i++) {
+        for (let j = i + 1; j < particles.length; j++) {
+          const dx = particles[i].x - particles[j].x;
+          const dy = particles[i].y - particles[j].y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          if (dist < connectionDist) {
+            const alpha = (1 - dist / connectionDist) * 0.15;
+            ctx.beginPath();
+            ctx.strokeStyle = `rgba(255, 255, 255, ${alpha})`;
+            ctx.lineWidth = 0.5;
+            ctx.moveTo(particles[i].x, particles[i].y);
+            ctx.lineTo(particles[j].x, particles[j].y);
+            ctx.stroke();
+          }
+        }
+      }
+
+      particles.forEach(p => {
+        const glow = Math.sin(p.pulse) * 0.3 + 0.7;
+        const alpha = p.opacity * glow;
+        ctx.beginPath();
+        ctx.fillStyle = `rgba(255, 255, 255, ${alpha})`;
+        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+        ctx.fill();
+
+        if (p.size > 1.2) {
+          ctx.beginPath();
+          const grad = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.size * 4);
+          grad.addColorStop(0, `rgba(255, 255, 255, ${alpha * 0.3})`);
+          grad.addColorStop(1, 'rgba(255, 255, 255, 0)');
+          ctx.fillStyle = grad;
+          ctx.arc(p.x, p.y, p.size * 4, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      });
+
+      animationId = requestAnimationFrame(draw);
+    };
+
+    resize();
+    initParticles();
+    draw();
+
+    window.addEventListener('resize', () => { resize(); initParticles(); });
+    return () => {
+      cancelAnimationFrame(animationId);
+      window.removeEventListener('resize', resize);
+    };
+  }, []);
+
+  return (
+    <canvas
+      ref={canvasRef}
+      className="absolute inset-0 w-full h-full pointer-events-none"
+      style={{ zIndex: 1 }}
+    />
+  );
+}
 
 const faqItems = [
   {
@@ -153,78 +268,8 @@ export default function LandingPage() {
         </div>
       </nav>
 
-      <div className="relative bg-black" style={{ overflow: 'clip' }}>
-        <img
-          src="/images/smoke-1.png"
-          alt=""
-          className="absolute pointer-events-none select-none"
-          style={{
-            width: '130%',
-            height: '130%',
-            top: '-15%',
-            left: '-15%',
-            objectFit: 'cover',
-            opacity: 0.85,
-            mixBlendMode: 'screen',
-            zIndex: 1,
-            animation: 'smokeDrift1 30s ease-in-out infinite',
-          }}
-        />
-        <img
-          src="/images/smoke-2.png"
-          alt=""
-          className="absolute pointer-events-none select-none"
-          style={{
-            width: '140%',
-            height: '140%',
-            bottom: '-20%',
-            right: '-20%',
-            objectFit: 'cover',
-            opacity: 0.7,
-            mixBlendMode: 'screen',
-            zIndex: 1,
-            animation: 'smokeDrift2 40s ease-in-out infinite',
-            transform: 'scaleX(-1)',
-          }}
-        />
-        <img
-          src="/images/smoke-1.png"
-          alt=""
-          className="absolute pointer-events-none select-none"
-          style={{
-            width: '120%',
-            height: '120%',
-            top: '-10%',
-            right: '-10%',
-            objectFit: 'cover',
-            opacity: 0.5,
-            mixBlendMode: 'screen',
-            zIndex: 1,
-            animation: 'smokeDrift3 35s ease-in-out infinite',
-            transform: 'rotate(180deg)',
-          }}
-        />
-
-        <style>{`
-          @keyframes smokeDrift1 {
-            0%, 100% { transform: translate(0, 0) scale(1); }
-            25% { transform: translate(40px, 20px) scale(1.05); }
-            50% { transform: translate(20px, 40px) scale(1.02); }
-            75% { transform: translate(-30px, 15px) scale(1.04); }
-          }
-          @keyframes smokeDrift2 {
-            0%, 100% { transform: scaleX(-1) translate(0, 0) scale(1); }
-            33% { transform: scaleX(-1) translate(-50px, -30px) scale(1.06); }
-            66% { transform: scaleX(-1) translate(30px, -20px) scale(1.03); }
-          }
-          @keyframes smokeDrift3 {
-            0%, 100% { transform: rotate(180deg) translate(0, 0) scale(1); }
-            20% { transform: rotate(180deg) translate(30px, -25px) scale(1.04); }
-            40% { transform: rotate(180deg) translate(60px, 15px) scale(1.02); }
-            60% { transform: rotate(180deg) translate(20px, 40px) scale(1.06); }
-            80% { transform: rotate(180deg) translate(-20px, 10px) scale(1.03); }
-          }
-        `}</style>
+      <div className="relative bg-black overflow-hidden">
+        <TechBackground />
 
         <div className="relative z-10 flex flex-col min-h-[85vh] sm:min-h-[90vh] justify-center px-6 sm:px-12 md:px-20 lg:px-28">
 
