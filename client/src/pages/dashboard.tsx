@@ -223,7 +223,7 @@ export default function DashboardPage() {
     offline: false,
   });
   const [expandedMessages, setExpandedMessages] = useState<Set<number>>(new Set());
-  const [activeTab, setActiveTab] = useState<"dashboard" | "feed" | "chat">("dashboard");
+  const [activeTab, setActiveTab] = useState<"dashboard" | "feed" | "chat" | "creatorai">("dashboard");
   const [friendsList, setFriendsList] = useState<any[]>([]);
   const [pendingRequests, setPendingRequests] = useState<any[]>([]);
   const [showAddFriend, setShowAddFriend] = useState(false);
@@ -260,10 +260,10 @@ export default function DashboardPage() {
   const [playingVideo, setPlayingVideo] = useState<string | null>(null);
   const [currentShortIndex, setCurrentShortIndex] = useState(0);
   const [shortsAutoplay, setShortsAutoplay] = useState(true);
-  const [creatorAiOpen, setCreatorAiOpen] = useState(false);
   const [creatorAiInput, setCreatorAiInput] = useState("");
   const [creatorAiLoading, setCreatorAiLoading] = useState(false);
-  const [creatorAiAnswer, setCreatorAiAnswer] = useState<string | null>(null);
+  const [creatorAiMessages, setCreatorAiMessages] = useState<{role: "user" | "assistant"; content: string}[]>([]);
+  const [creatorAiUploading, setCreatorAiUploading] = useState(false);
   const shortsContainerRef = useRef<HTMLDivElement>(null);
 
   const TRUNCATE_LENGTH = 280;
@@ -889,6 +889,20 @@ export default function DashboardPage() {
                 Live Feed
               </div>
               {activeTab === "feed" && <div className="absolute bottom-0 left-1/4 right-1/4 h-[2px] bg-white rounded-full" />}
+            </button>
+            <button
+              data-testid="tab-creatorai"
+              onClick={() => setActiveTab("creatorai")}
+              className={cn(
+                "flex-1 py-2.5 text-[13px] font-semibold text-center transition-colors relative",
+                activeTab === "creatorai" ? "text-white" : "text-white/30 hover:text-white/50"
+              )}
+            >
+              <div className="flex items-center justify-center gap-1.5">
+                <Sparkles className="w-3.5 h-3.5" />
+                Creator AI
+              </div>
+              {activeTab === "creatorai" && <div className="absolute bottom-0 left-1/4 right-1/4 h-[2px] bg-purple-400 rounded-full" />}
             </button>
             <button
               data-testid="tab-chat"
@@ -1709,16 +1723,6 @@ export default function DashboardPage() {
                               </div>
                               <span className="text-[9px] text-white/50">Share</span>
                             </button>
-                            <button
-                              className="flex flex-col items-center gap-1 group"
-                              onClick={() => { setCreatorAiOpen(true); setCreatorAiAnswer(null); setCreatorAiInput(""); }}
-                              data-testid={`ask-ai-${item.id}`}
-                            >
-                              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500/30 to-blue-500/30 backdrop-blur-sm flex items-center justify-center border border-purple-400/30 group-hover:from-purple-500/50 group-hover:to-blue-500/50 transition-all">
-                                <Sparkles className="w-4 h-4 text-purple-300" />
-                              </div>
-                              <span className="text-[9px] text-purple-300/70">Ask AI</span>
-                            </button>
                           </div>
 
                           <div className="absolute top-4 left-4 right-4 z-20 flex items-center justify-between">
@@ -1766,114 +1770,210 @@ export default function DashboardPage() {
                 );
               })()}
 
-              {creatorAiOpen && (() => {
-                const videoItems = feedItems.filter((item: any) => item.contentType === "video" && item.link?.match(/[?&]v=([^&]+)/)?.[1]);
-                const currentItem = videoItems[currentShortIndex];
-                const creatorName = currentItem?.source || "Creator";
-                const videoTitle = currentItem?.title || "";
-                const category = currentItem?.category || "";
-
-                const handleCreatorAsk = async () => {
-                  if (!creatorAiInput.trim() || creatorAiLoading) return;
-                  setCreatorAiLoading(true);
-                  setCreatorAiAnswer(null);
-                  try {
-                    const resp = await fetch("/api/creator-insight", {
-                      method: "POST",
-                      headers: { "Content-Type": "application/json" },
-                      credentials: "include",
-                      body: JSON.stringify({ question: creatorAiInput.trim(), creatorName, videoTitle, category }),
-                    });
-                    const data = await resp.json();
-                    if (!resp.ok) throw new Error(data.error || "Failed");
-                    setCreatorAiAnswer(data.answer);
-                  } catch (err: any) {
-                    setCreatorAiAnswer("Error: " + (err.message || "Could not get insight."));
-                  } finally {
-                    setCreatorAiLoading(false);
-                  }
-                };
-
-                return (
-                  <div className="absolute inset-0 z-30 flex flex-col" style={{ background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(12px)' }}>
-                    <div className="flex items-center justify-between px-4 py-3 border-b border-white/10">
-                      <div className="flex items-center gap-2">
-                        <Sparkles className="w-4 h-4 text-purple-400" />
-                        <span className="text-sm font-semibold text-white">Creator-Informed Analysis</span>
-                      </div>
-                      <button onClick={() => setCreatorAiOpen(false)} className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 transition-colors" data-testid="close-creator-ai">
-                        <X className="w-4 h-4 text-white/60" />
-                      </button>
-                    </div>
-
-                    <div className="px-4 py-3 border-b border-white/5">
-                      <div className="flex items-center gap-2.5">
-                        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-red-500 via-pink-500 to-purple-500 flex items-center justify-center text-[10px] font-bold text-white border border-white/20">
-                          {creatorName.charAt(0)}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-xs font-medium text-white truncate">@{creatorName}</p>
-                          <p className="text-[10px] text-white/40 truncate">{videoTitle}</p>
-                        </div>
-                        <span className="text-[9px] px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-300 border border-purple-400/20">{category}</span>
-                      </div>
-                    </div>
-
-                    <div className="flex-1 overflow-y-auto px-4 py-4">
-                      {!creatorAiAnswer && !creatorAiLoading && (
-                        <div className="flex flex-col items-center justify-center h-full text-center px-4">
-                          <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-purple-500/20 to-blue-500/20 flex items-center justify-center mb-3 border border-purple-400/20">
-                            <Sparkles className="w-6 h-6 text-purple-400" />
-                          </div>
-                          <p className="text-sm text-white/60 mb-1">Ask about @{creatorName}'s insights</p>
-                          <p className="text-[11px] text-white/30 max-w-xs">Get AI analysis that synthesizes this creator's publicly known frameworks with your financial profile</p>
-                        </div>
-                      )}
-
-                      {creatorAiLoading && (
-                        <div className="flex flex-col items-center justify-center h-full">
-                          <Loader2 className="w-6 h-6 animate-spin text-purple-400 mb-2" />
-                          <p className="text-xs text-white/40">Analyzing with @{creatorName}'s frameworks...</p>
-                        </div>
-                      )}
-
-                      {creatorAiAnswer && (
-                        <div className="space-y-3">
-                          <div className="text-[11px] text-purple-300/60 flex items-center gap-1.5 mb-2">
-                            <Sparkles className="w-3 h-3" />
-                            Creator-Informed Insight — @{creatorName}
-                          </div>
-                          <div className="text-[13px] text-white/80 leading-relaxed whitespace-pre-wrap" data-testid="creator-ai-answer">
-                            {creatorAiAnswer}
-                          </div>
-                        </div>
-                      )}
-                    </div>
-
-                    <div className="px-4 py-3 border-t border-white/10">
-                      <div className="flex gap-2">
-                        <input
-                          value={creatorAiInput}
-                          onChange={(e) => setCreatorAiInput(e.target.value)}
-                          onKeyDown={(e) => e.key === "Enter" && handleCreatorAsk()}
-                          placeholder={`Ask about @${creatorName}'s approach...`}
-                          className="flex-1 bg-white/5 border border-white/10 rounded-lg px-3 py-2.5 text-sm text-white placeholder:text-white/25 focus:outline-none focus:border-purple-400/40"
-                          disabled={creatorAiLoading}
-                          data-testid="creator-ai-input"
-                        />
-                        <button
-                          onClick={handleCreatorAsk}
-                          disabled={!creatorAiInput.trim() || creatorAiLoading}
-                          className="px-4 rounded-lg bg-gradient-to-r from-purple-600 to-blue-600 text-white text-sm font-medium disabled:opacity-30 hover:from-purple-500 hover:to-blue-500 transition-all flex items-center gap-1.5"
-                          data-testid="creator-ai-send"
-                        >
-                          {creatorAiLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Send className="w-3.5 h-3.5" />}
-                        </button>
-                      </div>
-                    </div>
+            </div>
+          ) : activeTab === "creatorai" ? (
+            <div className="w-full h-full flex flex-col" style={{ background: '#0D0D0D' }}>
+              <div className="flex-1 overflow-y-auto px-5 sm:px-8 py-6 max-w-[800px] mx-auto w-full">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-600 to-blue-600 flex items-center justify-center">
+                    <Sparkles className="w-5 h-5 text-white" />
                   </div>
-                );
-              })()}
+                  <div>
+                    <h2 className="text-lg font-bold text-white" data-testid="text-creator-ai-title">Creator-Informed Analysis</h2>
+                    <p className="text-[11px] text-white/40">AI aggregates insights from 75+ top finance creators</p>
+                  </div>
+                </div>
+
+                <div className="bg-white/[0.03] border border-white/[0.06] rounded-xl p-4 mb-6">
+                  <div className="flex items-center gap-2 mb-3">
+                    <Upload className="w-4 h-4 text-purple-400" />
+                    <span className="text-sm font-medium text-white">Upload Credit Report</span>
+                  </div>
+                  <p className="text-[11px] text-white/35 mb-3">Upload your credit report so the AI can give personalized creator-informed guidance based on your actual data.</p>
+                  <div className="flex gap-2">
+                    <label className="flex-1">
+                      <input
+                        type="file"
+                        accept=".pdf,.txt,.csv"
+                        className="hidden"
+                        onChange={async (e) => {
+                          const file = e.target.files?.[0];
+                          if (!file) return;
+                          setCreatorAiUploading(true);
+                          try {
+                            const fileContent = await new Promise<string>((resolve, reject) => {
+                              const reader = new FileReader();
+                              const isPdf = file.name.toLowerCase().endsWith(".pdf");
+                              reader.onload = () => {
+                                if (isPdf) {
+                                  const base64 = (reader.result as string).split(",")[1];
+                                  resolve(base64);
+                                } else {
+                                  resolve(reader.result as string);
+                                }
+                              };
+                              reader.onerror = () => reject(new Error("Failed to read file"));
+                              if (isPdf) reader.readAsDataURL(file);
+                              else reader.readAsText(file);
+                            });
+                            const res = await fetch("/api/analyze-document", {
+                              method: "POST",
+                              headers: { "Content-Type": "application/json" },
+                              credentials: "include",
+                              body: JSON.stringify({ fileContent, documentType: "credit_report" }),
+                            });
+                            if (res.ok) {
+                              toast({ title: "Report Uploaded", description: "Your credit report has been analyzed. Ask questions below for creator-informed insights." });
+                              await fetchFundingReadiness();
+                            } else {
+                              const data = await res.json();
+                              toast({ title: "Upload Failed", description: data.error || "Could not process report.", variant: "destructive" });
+                            }
+                          } catch {
+                            toast({ title: "Upload Error", description: "Failed to upload. Try again.", variant: "destructive" });
+                          } finally {
+                            setCreatorAiUploading(false);
+                          }
+                        }}
+                        data-testid="creator-ai-upload-input"
+                      />
+                      <div className={cn(
+                        "flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg border border-dashed border-purple-400/30 bg-purple-500/5 cursor-pointer hover:bg-purple-500/10 transition-colors",
+                        creatorAiUploading && "opacity-50 pointer-events-none"
+                      )}>
+                        {creatorAiUploading ? (
+                          <><Loader2 className="w-4 h-4 animate-spin text-purple-400" /><span className="text-xs text-purple-300">Analyzing...</span></>
+                        ) : (
+                          <><FileText className="w-4 h-4 text-purple-400" /><span className="text-xs text-purple-300">Choose Credit Report (PDF/TXT)</span></>
+                        )}
+                      </div>
+                    </label>
+                  </div>
+                  {user?.hasCreditReport && (
+                    <div className="mt-2 flex items-center gap-1.5">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-green-400" />
+                      <span className="text-[11px] text-green-400/70">Credit report on file — AI will use your data</span>
+                    </div>
+                  )}
+                </div>
+
+                <div className="space-y-4 mb-4">
+                  {creatorAiMessages.length === 0 && (
+                    <div className="flex flex-col items-center justify-center py-12 text-center">
+                      <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-purple-500/15 to-blue-500/15 flex items-center justify-center mb-4 border border-purple-400/15">
+                        <Sparkles className="w-7 h-7 text-purple-400/60" />
+                      </div>
+                      <p className="text-sm text-white/50 mb-2">Ask any financial question</p>
+                      <p className="text-[11px] text-white/25 max-w-sm leading-relaxed">The AI will aggregate perspectives from top creators like Graham Stephan, Dave Ramsey, Alex Hormozi, Credit Shifu, and 70+ more — synthesizing their publicly known frameworks into personalized guidance.</p>
+                      <div className="flex flex-wrap justify-center gap-2 mt-4">
+                        {["How should I improve my credit score?", "What's the best way to build business credit?", "How do I prepare for funding?", "What would top creators say about my report?"].map((q) => (
+                          <button
+                            key={q}
+                            onClick={() => setCreatorAiInput(q)}
+                            className="px-3 py-1.5 rounded-full bg-white/[0.04] border border-white/[0.06] text-[10px] text-white/40 hover:bg-purple-500/10 hover:border-purple-400/20 hover:text-purple-300 transition-all"
+                            data-testid={`creator-ai-suggestion-${q.slice(0,20)}`}
+                          >
+                            {q}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {creatorAiMessages.map((msg, idx) => (
+                    <div key={idx} className={cn("flex", msg.role === "user" ? "justify-end" : "justify-start")}>
+                      <div className={cn(
+                        "max-w-[85%] rounded-xl px-4 py-3",
+                        msg.role === "user"
+                          ? "bg-purple-600/20 border border-purple-400/20 text-white"
+                          : "bg-white/[0.04] border border-white/[0.06] text-white/80"
+                      )}>
+                        {msg.role === "assistant" && (
+                          <div className="flex items-center gap-1.5 mb-2 text-[10px] text-purple-300/60">
+                            <Sparkles className="w-3 h-3" />
+                            Creator-Informed Insight
+                          </div>
+                        )}
+                        <div className="text-[13px] leading-relaxed whitespace-pre-wrap" data-testid={`creator-ai-msg-${idx}`}>{msg.content}</div>
+                      </div>
+                    </div>
+                  ))}
+
+                  {creatorAiLoading && (
+                    <div className="flex justify-start">
+                      <div className="bg-white/[0.04] border border-white/[0.06] rounded-xl px-4 py-3 flex items-center gap-2">
+                        <Loader2 className="w-4 h-4 animate-spin text-purple-400" />
+                        <span className="text-xs text-white/40">Aggregating creator insights...</span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div className="px-5 sm:px-8 py-4 border-t border-white/[0.06] max-w-[800px] mx-auto w-full">
+                <div className="flex gap-2">
+                  <input
+                    value={creatorAiInput}
+                    onChange={(e) => setCreatorAiInput(e.target.value)}
+                    onKeyDown={async (e) => {
+                      if (e.key === "Enter" && creatorAiInput.trim() && !creatorAiLoading) {
+                        const question = creatorAiInput.trim();
+                        setCreatorAiMessages(prev => [...prev, { role: "user", content: question }]);
+                        setCreatorAiInput("");
+                        setCreatorAiLoading(true);
+                        try {
+                          const resp = await fetch("/api/creator-insight", {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            credentials: "include",
+                            body: JSON.stringify({ question }),
+                          });
+                          const data = await resp.json();
+                          if (!resp.ok) throw new Error(data.error || "Failed");
+                          setCreatorAiMessages(prev => [...prev, { role: "assistant", content: data.answer }]);
+                        } catch (err: any) {
+                          setCreatorAiMessages(prev => [...prev, { role: "assistant", content: "Error: " + (err.message || "Could not get insight.") }]);
+                        } finally {
+                          setCreatorAiLoading(false);
+                        }
+                      }
+                    }}
+                    placeholder="Ask any financial question — AI aggregates 75+ creator perspectives..."
+                    className="flex-1 bg-white/[0.04] border border-white/[0.08] rounded-xl px-4 py-3 text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-purple-400/40 transition-colors"
+                    disabled={creatorAiLoading}
+                    data-testid="creator-ai-input"
+                  />
+                  <button
+                    onClick={async () => {
+                      if (!creatorAiInput.trim() || creatorAiLoading) return;
+                      const question = creatorAiInput.trim();
+                      setCreatorAiMessages(prev => [...prev, { role: "user", content: question }]);
+                      setCreatorAiInput("");
+                      setCreatorAiLoading(true);
+                      try {
+                        const resp = await fetch("/api/creator-insight", {
+                          method: "POST",
+                          headers: { "Content-Type": "application/json" },
+                          credentials: "include",
+                          body: JSON.stringify({ question }),
+                        });
+                        const data = await resp.json();
+                        if (!resp.ok) throw new Error(data.error || "Failed");
+                        setCreatorAiMessages(prev => [...prev, { role: "assistant", content: data.answer }]);
+                      } catch (err: any) {
+                        setCreatorAiMessages(prev => [...prev, { role: "assistant", content: "Error: " + (err.message || "Could not get insight.") }]);
+                      } finally {
+                        setCreatorAiLoading(false);
+                      }
+                    }}
+                    disabled={!creatorAiInput.trim() || creatorAiLoading}
+                    className="px-5 rounded-xl bg-gradient-to-r from-purple-600 to-blue-600 text-white text-sm font-medium disabled:opacity-30 hover:from-purple-500 hover:to-blue-500 transition-all flex items-center gap-1.5"
+                    data-testid="creator-ai-send"
+                  >
+                    {creatorAiLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+                  </button>
+                </div>
+              </div>
             </div>
           ) : (
             <div className="max-w-xl mx-auto w-full">

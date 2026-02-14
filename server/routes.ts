@@ -1200,15 +1200,25 @@ Be concise but thorough. Use bullet points and formatting for readability. If th
     res.status(204).send();
   });
 
+  const CREATOR_NAMES_BY_CATEGORY: Record<string, string[]> = {
+    finance: ["Graham Stephan", "The Graham Stephan Show", "Dave Ramsey", "Robert Kiyosaki", "Andrei Jikh", "Mark Tilbury", "Brian Jung", "Minority Mindset", "Meet Kevin", "Humphrey Yang", "Nate O'Brien", "The Plain Bagel", "Two Cents", "The Money Guy Show", "Caleb Hammer", "WhiteBoard Finance", "Our Rich Journey", "Earn Your Leisure", "Tai Lopez", "New Money", "Ryan Scribner", "The Financial Diet", "Ben Felix", "Khan Academy", "Joseph Carlson", "Ray Dalio", "Aswath Damodaran", "Patrick Boyle", "The Swedish Investor", "Chris Do"],
+    business: ["Alex Hormozi", "Patrick Bet-David", "Valuetainment", "Ali Abdaal", "Codie Sanchez", "Ed Mylett", "Tony Robbins", "Lewis Howes", "Gary Vee", "Noah Kagan", "Iman Gadzhi", "Slidebean", "Y Combinator", "My First Million", "Business Insider", "Neil Patel"],
+    realestate: ["BiggerPockets", "Grant Cardone", "Ryan Serhant", "Kris Krohn", "Ryan Pineda"],
+    credit: ["Credit Shifu", "Naam Wynn", "ProudMoney", "Ask Sebby"],
+    stocks: ["Financial Education", "ClearValue Tax", "Coin Bureau"],
+    tax: ["Karlton Dennis", "Mark J Kohler", "Toby Mathis"],
+    economics: ["Economics Explained"],
+    news: ["CNBC Make It", "Bloomberg", "Wall Street Journal", "BBC Business", "Entrepreneur", "Forbes", "NY Times Business", "CNBC"],
+  };
+
+  const ALL_CREATOR_NAMES = Object.values(CREATOR_NAMES_BY_CATEGORY).flat();
+
   app.post("/api/creator-insight", requireAuth, async (req, res) => {
     const userId = req.session.userId!;
     const body = z.object({
       question: z.string().min(1).max(2000),
-      creatorName: z.string().min(1).max(200),
-      videoTitle: z.string().optional(),
-      category: z.string().optional(),
     }).safeParse(req.body);
-    if (!body.success) return res.status(400).json({ error: "Question and creator name are required" });
+    if (!body.success) return res.status(400).json({ error: "Question is required" });
 
     const user = await storage.getUser(userId);
     if (!user) return res.status(404).json({ error: "User not found" });
@@ -1239,9 +1249,28 @@ Be concise but thorough. Use bullet points and formatting for readability. If th
     const profileContext = `\n\n--- USER FINANCIAL PROFILE ---\nCredit Score Range: ${user.creditScoreRange || "Not set"}\nCredit Score Exact: ${user.creditScoreExact ?? "N/A"}\nTotal Revolving Limit: $${user.totalRevolvingLimit?.toLocaleString() || "N/A"}\nTotal Balances: $${user.totalBalances?.toLocaleString() || "N/A"}\nInquiries (2yr): ${user.inquiries ?? "N/A"}\nDerogatory Accounts: ${user.derogatoryAccounts ?? "N/A"}\nLate Payments: ${user.latePayments ?? "N/A"}\nCollections: ${user.collections ?? "N/A"}\nOpen Accounts: ${user.openAccounts ?? "N/A"}\nClosed Accounts: ${user.closedAccounts ?? "N/A"}\nOldest Account (yrs): ${user.oldestAccountYears ?? "N/A"}\nAvg Account Age (yrs): ${user.avgAccountAgeYears ?? "N/A"}\nPublic Records: ${user.publicRecords ?? "N/A"}\nUtilization: ${user.utilizationPercent ?? "N/A"}%\nHas Credit Report: ${user.hasCreditReport ? "Yes" : "No"}\nHas Bank Statement: ${user.hasBankStatement ? "Yes" : "No"}\n--- END PROFILE ---`;
     financialContext += profileContext;
 
-    const systemPrompt = MASTER_SYSTEM_PROMPT + "\n\n" + CREATOR_INFORMED_PROMPT + `\n\nThe user is currently watching content from @${body.data.creatorName}${body.data.videoTitle ? ` — Video: "${body.data.videoTitle}"` : ""}${body.data.category ? ` — Category: ${body.data.category}` : ""}.
+    const creatorListStr = Object.entries(CREATOR_NAMES_BY_CATEGORY).map(([cat, names]) =>
+      `${cat.toUpperCase()}: ${names.join(", ")}`
+    ).join("\n");
 
-When answering, reference @${body.data.creatorName}'s publicly known educational frameworks and perspectives where relevant. Combine their known approach with your own analysis to give the user maximum value.${financialContext}`;
+    const systemPrompt = MASTER_SYSTEM_PROMPT + "\n\n" + CREATOR_INFORMED_PROMPT + `\n\n====================================================
+MULTI-CREATOR AGGREGATION MODE
+====================================================
+
+You have access to the following creator knowledge base, organized by category:
+
+${creatorListStr}
+
+When answering the user's question:
+1. Identify which creators are MOST relevant to the topic
+2. Aggregate and synthesize insights from 3-6 of the most relevant creators
+3. Use proper attribution: "@CreatorName emphasizes..." or "According to @CreatorName's framework..."
+4. Show where creators AGREE and where they DIFFER
+5. Apply their combined wisdom to the user's specific financial situation
+6. End with a synthesized recommendation that draws from multiple perspectives
+
+Do NOT just list creators — weave their insights into a cohesive, actionable analysis.
+If the user has uploaded a credit report, reference specific data points when applying creator frameworks.${financialContext}`;
 
     try {
       const response = await openai.chat.completions.create({
@@ -1250,13 +1279,13 @@ When answering, reference @${body.data.creatorName}'s publicly known educational
           { role: "system", content: systemPrompt },
           { role: "user", content: body.data.question },
         ],
-        max_tokens: 1500,
+        max_tokens: 2048,
       });
 
       const aiContent = response.choices[0]?.message?.content || "Unable to generate insight right now.";
       await storage.updateUser(userId, { monthlyUsage: user.monthlyUsage + 1 });
 
-      res.json({ answer: aiContent, creator: body.data.creatorName });
+      res.json({ answer: aiContent });
     } catch (error: any) {
       console.error("Creator Insight AI Error:", error);
       res.status(500).json({ error: "Error generating insight. Please try again." });

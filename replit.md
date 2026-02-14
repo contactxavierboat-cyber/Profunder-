@@ -4,10 +4,13 @@
 A free AI mentorship platform ("Mentorship On Demand") combining Capital Readiness analytics with AI-powered mentorship. Features a 6-component Capital Readiness evaluation system (Capital Strength, Credit Quality, Management & Structure, Earnings & Cash Flow, Liquidity & Leverage, Risk Signals), 2.5x exposure ceiling calculation, tier eligibility (Prime/Mid-Tier/Alternative), operating mode (Pre-Funding/Repair), denial simulation, AI chat workspace with 7 bot mentors, PDF document upload with OCR, friends list, admin panel, and free membership access.
 
 ## Recent Changes
-- 2026-02-14: Added Creator-Informed Analysis AI panel in Shorts feed — "Ask AI" button on each video opens overlay to ask questions about creator's publicly known frameworks
-- 2026-02-14: Added CREATOR_INFORMED_PROMPT system prompt for synthesizing creator educational insights with proper attribution (@CreatorName)
-- 2026-02-14: Added POST /api/creator-insight endpoint with creator context, video title, category, and user financial profile integration
-- 2026-02-14: Creator-Informed Analysis uses user's uploaded credit report and analysis summary for personalized creator-informed guidance
+- 2026-02-14: Creator-Informed Analysis is now a separate 4th tab ("Creator AI") alongside Dashboard, Live Feed, Workspace
+- 2026-02-14: Creator AI tab has its own credit report upload section for personalized analysis
+- 2026-02-14: AI automatically aggregates insights from 75+ creators across 8 categories (finance, business, realestate, credit, stocks, tax, economics, news)
+- 2026-02-14: Multi-Creator Aggregation Mode: AI selects 3-6 most relevant creators per question, synthesizes their frameworks, shows agreements/differences
+- 2026-02-14: CREATOR_INFORMED_PROMPT system prompt for synthesizing creator educational insights with proper @CreatorName attribution
+- 2026-02-14: POST /api/creator-insight endpoint with full financial profile, credit report, repair data, and multi-creator context
+- 2026-02-14: Chat-style Q&A interface with suggested starter questions and message history
 - 2026-02-13: Added Live Feed tab with 72+ curated finance/business/entrepreneurship creators from YouTube, news RSS, and podcasts
 - 2026-02-13: Live Feed auto-refreshes every 5 seconds with real-time content from top creators
 - 2026-02-13: Feed includes embedded YouTube video players (click-to-play), category filters (Finance, Business, Real Estate, Credit, Stocks, Marketing, Tax, Economics, News), load-more pagination
