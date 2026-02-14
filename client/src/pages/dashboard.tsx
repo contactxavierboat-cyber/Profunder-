@@ -223,7 +223,7 @@ export default function DashboardPage() {
     offline: false,
   });
   const [expandedMessages, setExpandedMessages] = useState<Set<number>>(new Set());
-  const [activeTab, setActiveTab] = useState<"dashboard" | "feed" | "chat" | "creatorai">("dashboard");
+  const [activeTab, setActiveTab] = useState<"dashboard" | "feed" | "chat" | "creatorai" | "repair">("dashboard");
   const [friendsList, setFriendsList] = useState<any[]>([]);
   const [pendingRequests, setPendingRequests] = useState<any[]>([]);
   const [showAddFriend, setShowAddFriend] = useState(false);
@@ -905,6 +905,20 @@ export default function DashboardPage() {
               {activeTab === "creatorai" && <div className="absolute bottom-0 left-1/4 right-1/4 h-[2px] bg-purple-400 rounded-full" />}
             </button>
             <button
+              data-testid="tab-repair"
+              onClick={() => setActiveTab("repair")}
+              className={cn(
+                "flex-1 py-2.5 text-[13px] font-semibold text-center transition-colors relative",
+                activeTab === "repair" ? "text-white" : "text-white/30 hover:text-white/50"
+              )}
+            >
+              <div className="flex items-center justify-center gap-1.5">
+                <Shield className="w-3.5 h-3.5" />
+                Repair
+              </div>
+              {activeTab === "repair" && <div className="absolute bottom-0 left-1/4 right-1/4 h-[2px] bg-orange-400 rounded-full" />}
+            </button>
+            <button
               data-testid="tab-chat"
               onClick={() => setActiveTab("chat")}
               className={cn(
@@ -1283,161 +1297,6 @@ export default function DashboardPage() {
                     </div>
                   )}
 
-                  <div className="rounded-2xl bg-white/[0.03] backdrop-blur-md border border-orange-500/10 p-6 mb-4" data-testid="credit-repair-card">
-                    <div className="flex items-center justify-between mb-4">
-                      <p className="text-xs text-orange-400/60">Credit Repair System</p>
-                      <span className="text-[9px] text-white/15 bg-white/[0.04] px-2 py-0.5 rounded-full">GPT-4o</span>
-                    </div>
-
-                    {!fundingData?.hasCreditReport ? (
-                      <div className="text-center py-8">
-                        <FileText className="w-8 h-8 text-white/10 mx-auto mb-3" />
-                        <p className="text-sm text-white/35 mb-1">Upload a credit report first</p>
-                        <p className="text-[10px] text-white/20">The repair system needs your credit report to detect issues and generate dispute letters.</p>
-                      </div>
-                    ) : !repairData ? (
-                      <div className="text-center py-8">
-                        <p className="text-sm text-white/40 mb-4">Credit report uploaded. Run the repair analysis to detect issues.</p>
-                        <button
-                          onClick={runRepairAnalysis}
-                          disabled={repairAnalyzing}
-                          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white/[0.06] border border-white/[0.08] hover:bg-white/[0.1] text-white/60 text-sm font-medium transition-all disabled:opacity-50"
-                          data-testid="button-run-repair"
-                        >
-                          {repairAnalyzing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Zap className="w-4 h-4" />}
-                          {repairAnalyzing ? "Analyzing Report..." : "Run Credit Repair Analysis"}
-                        </button>
-                      </div>
-                    ) : (
-                      <div className="space-y-4">
-                        <div className="flex items-center gap-2">
-                          <span className={cn(
-                            "text-[9px] font-bold uppercase px-2.5 py-1 rounded",
-                            repairData.mode === "repair" ? "bg-amber-500/10 text-amber-400/70" : "bg-emerald-500/10 text-emerald-400/70"
-                          )}>{repairData.mode === "repair" ? "Repair Mode" : "Pre-Funding Mode"}</span>
-                          <button
-                            onClick={runRepairAnalysis}
-                            disabled={repairAnalyzing}
-                            className="ml-auto flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/[0.04] border border-white/[0.06] hover:bg-white/[0.08] text-[10px] text-white/35 hover:text-white/50 transition-all disabled:opacity-50"
-                            data-testid="button-rerun-repair"
-                          >
-                            {repairAnalyzing ? <Loader2 className="w-3 h-3 animate-spin" /> : <RefreshCw className="w-3 h-3" />}
-                            Re-analyze
-                          </button>
-                        </div>
-
-                        {repairData.summary && (
-                          <div className="p-4 rounded-xl bg-white/[0.02] border border-white/[0.04]">
-                            <p className="text-[10px] text-white/30 mb-1.5">What's Hurting Your Profile</p>
-                            <p className="text-sm text-white/55 leading-relaxed mb-2">{repairData.summary.mainIssues}</p>
-                            <p className="text-[10px] text-orange-400/50 mb-1">Priority Action</p>
-                            <p className="text-sm text-white/45 leading-relaxed">{repairData.summary.priorityAction}</p>
-                          </div>
-                        )}
-
-                        {repairData.detectedIssues && repairData.detectedIssues.length > 0 && (
-                          <div>
-                            <p className="text-[10px] text-white/25 uppercase tracking-widest mb-3">Detected Issues ({repairData.detectedIssues.length})</p>
-                            <div className="space-y-2">
-                              {repairData.detectedIssues.map((issue: any, idx: number) => (
-                                <div key={idx} className="p-3.5 rounded-xl bg-white/[0.02] border border-white/[0.04]" data-testid={`repair-issue-${idx}`}>
-                                  <div className="flex items-center gap-2 mb-1.5 flex-wrap">
-                                    <span className={cn(
-                                      "text-[9px] font-bold uppercase px-2 py-0.5 rounded",
-                                      issue.severity === "High" ? "bg-red-500/10 text-red-400/70" :
-                                      issue.severity === "Medium" ? "bg-yellow-500/10 text-yellow-400/70" :
-                                      "bg-green-500/10 text-green-400/70"
-                                    )}>{issue.severity}</span>
-                                    <span className="text-[10px] text-white/25">{issue.bureau}</span>
-                                    <span className="text-[10px] text-white/15">·</span>
-                                    <span className="text-[10px] text-white/35">{issue.issueType}</span>
-                                  </div>
-                                  <p className="text-sm text-white/60">{issue.creditor} {issue.accountLast4 !== "N/A" ? `(****${issue.accountLast4})` : ""}</p>
-                                  {issue.monthsAffected !== "N/A" && (
-                                    <p className="text-[10px] text-white/25 mt-1">Months: {issue.monthsAffected}</p>
-                                  )}
-                                  <p className="text-[10px] text-white/30 mt-1.5">Attach: {issue.proofToAttach}</p>
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-
-                        {repairData.actionPlan && repairData.actionPlan.length > 0 && (
-                          <div>
-                            <p className="text-[10px] text-white/25 uppercase tracking-widest mb-3">Repair Action Plan</p>
-                            <div className="space-y-2">
-                              {repairData.actionPlan.map((step: any, idx: number) => (
-                                <div key={idx} className="flex items-start gap-3 p-3 rounded-xl bg-white/[0.02]" data-testid={`repair-step-${idx}`}>
-                                  <div className="w-6 h-6 rounded-full bg-white/[0.04] flex items-center justify-center text-[10px] font-mono text-white/30 shrink-0">
-                                    {step.step || idx + 1}
-                                  </div>
-                                  <div className="flex-1 min-w-0">
-                                    <p className="text-sm text-white/55">{step.action}</p>
-                                    <div className="flex items-center gap-3 mt-1">
-                                      <span className="text-[10px] text-orange-400/40 font-mono">{step.timing}</span>
-                                      {step.details && <span className="text-[10px] text-white/25">{step.details}</span>}
-                                    </div>
-                                  </div>
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-
-                        {repairData.letters && repairData.letters.length > 0 && (
-                          <div>
-                            <p className="text-[10px] text-white/25 uppercase tracking-widest mb-3">Generated Dispute Letters ({repairData.letters.length})</p>
-                            <div className="space-y-2">
-                              {repairData.letters.map((letter: any, idx: number) => (
-                                <div key={idx} className="rounded-xl bg-white/[0.02] border border-white/[0.04] overflow-hidden" data-testid={`letter-${idx}`}>
-                                  <button
-                                    onClick={() => setExpandedLetters(prev => {
-                                      const next = new Set(prev);
-                                      if (next.has(idx)) next.delete(idx); else next.add(idx);
-                                      return next;
-                                    })}
-                                    className="w-full text-left p-3.5 flex items-center gap-3 hover:bg-white/[0.02] transition-colors"
-                                    data-testid={`button-expand-letter-${idx}`}
-                                  >
-                                    <FileText className="w-4 h-4 text-orange-400/40 shrink-0" />
-                                    <div className="flex-1 min-w-0">
-                                      <p className="text-sm text-white/55 truncate">{letter.subject || `${letter.type === "bureau_dispute" ? "Bureau" : letter.type === "creditor_dispute" ? "Creditor" : "Info Correction"} Letter`}</p>
-                                      <p className="text-[10px] text-white/25 truncate">To: {letter.recipientName}</p>
-                                    </div>
-                                    <ChevronRight className={cn("w-4 h-4 text-white/10 shrink-0 transition-transform", expandedLetters.has(idx) && "rotate-90")} />
-                                  </button>
-                                  {expandedLetters.has(idx) && (
-                                    <div className="px-3.5 pb-3.5 border-t border-white/[0.04]">
-                                      <div className="flex items-center gap-2 py-2">
-                                        <span className="text-[9px] text-white/20">To: {letter.recipientAddress}</span>
-                                        <button
-                                          onClick={() => copyLetterToClipboard(letter.body, idx)}
-                                          className="ml-auto flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/[0.04] border border-white/[0.06] hover:bg-white/[0.08] text-[10px] text-white/40 font-medium transition-all"
-                                          data-testid={`button-copy-letter-${idx}`}
-                                        >
-                                          {copiedLetter === idx ? <CheckCircle2 className="w-3 h-3" /> : <Eye className="w-3 h-3" />}
-                                          {copiedLetter === idx ? "Copied!" : "Copy Letter"}
-                                        </button>
-                                      </div>
-                                      <div className="mt-2 p-4 rounded-xl bg-black/40 border border-white/[0.04] font-mono text-[10px] text-white/45 leading-relaxed whitespace-pre-wrap max-h-96 overflow-y-auto" style={{ scrollbarWidth: 'thin' }}>
-                                        {letter.body}
-                                      </div>
-                                    </div>
-                                  )}
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-
-                        {repairData.disclaimer && (
-                          <p className="text-[9px] text-white/15 italic mt-2 px-1">{repairData.disclaimer}</p>
-                        )}
-                      </div>
-                    )}
-                  </div>
-
                   <div className="rounded-2xl bg-white/[0.03] backdrop-blur-md border border-white/[0.08] p-6 mb-4" data-testid="insights-card">
                     <p className="text-xs text-white/40 mb-4">Insights</p>
                     <div className="space-y-2">
@@ -1450,132 +1309,6 @@ export default function DashboardPage() {
                     </div>
                   </div>
 
-                  <div className="rounded-2xl bg-white/[0.03] backdrop-blur-md border border-white/[0.08] overflow-hidden mb-4" data-testid="dashboard-qa-card">
-                    <button
-                      onClick={() => setQaOpen(!qaOpen)}
-                      className="w-full px-6 py-4 flex items-center justify-between hover:bg-white/[0.02] transition-colors"
-                      data-testid="button-toggle-qa"
-                    >
-                      <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-xl bg-white/[0.04] border border-white/[0.06] flex items-center justify-center">
-                          <MessageCircle className="w-4 h-4 text-white/40" />
-                        </div>
-                        <div className="text-left">
-                          <p className="text-sm font-medium text-white/70">Ask AI About Your Report</p>
-                          <p className="text-[10px] text-white/25">Get personalized answers based on your uploaded financial data</p>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        {qaMessages.length > 0 && (
-                          <span className="text-[9px] text-white/20 bg-white/[0.04] px-2 py-0.5 rounded-full">{Math.floor(qaMessages.length / 2)} Q&A</span>
-                        )}
-                        <ChevronDown className={cn("w-4 h-4 text-white/20 transition-transform", qaOpen && "rotate-180")} />
-                      </div>
-                    </button>
-
-                    {qaOpen && (
-                      <div className="border-t border-white/[0.06]">
-                        <div className="max-h-[400px] overflow-y-auto px-4 py-3 space-y-3" style={{ scrollbarWidth: 'thin' }}>
-                          {qaMessages.length === 0 && !qaLoading && (
-                            <div className="flex flex-col items-center justify-center py-8">
-                              <Sparkles className="w-6 h-6 text-white/10 mb-2" />
-                              <p className="text-xs text-white/25 text-center">Ask anything about your credit report, funding readiness, or financial profile</p>
-                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-4 w-full max-w-md">
-                                {[
-                                  "What's hurting my credit score?",
-                                  "Am I ready for funding?",
-                                  "How can I lower my balances?",
-                                  "What accounts should I dispute?",
-                                ].map((suggestion, i) => (
-                                  <button
-                                    key={i}
-                                    data-testid={`button-qa-suggestion-${i}`}
-                                    onClick={() => { setQaInput(suggestion); qaInputRef.current?.focus(); }}
-                                    className="text-left px-3 py-2.5 rounded-xl border border-white/[0.06] bg-white/[0.02] hover:bg-white/[0.05] transition-all text-[11px] text-white/35 hover:text-white/55"
-                                  >
-                                    {suggestion}
-                                  </button>
-                                ))}
-                              </div>
-                            </div>
-                          )}
-
-                          {qaMessages.map((msg: any) => (
-                            <div key={msg.id} className={cn("flex gap-2.5", msg.role === "user" ? "justify-end" : "justify-start")} data-testid={`qa-msg-${msg.id}`}>
-                              {msg.role === "assistant" && (
-                                <div className="w-7 h-7 rounded-lg bg-white/[0.04] border border-white/[0.06] flex items-center justify-center shrink-0 mt-0.5">
-                                  <Cpu className="w-3.5 h-3.5 text-white/30" />
-                                </div>
-                              )}
-                              <div className={cn(
-                                "max-w-[80%] rounded-2xl px-4 py-3",
-                                msg.role === "user"
-                                  ? "bg-white/[0.08] border border-white/[0.1]"
-                                  : "bg-white/[0.02] border border-white/[0.04]"
-                              )}>
-                                <p className="text-[12px] text-white/55 leading-relaxed whitespace-pre-wrap">{msg.content}</p>
-                                <p className="text-[9px] text-white/15 mt-1.5">
-                                  {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                </p>
-                              </div>
-                            </div>
-                          ))}
-
-                          {qaLoading && (
-                            <div className="flex gap-2.5 justify-start">
-                              <div className="w-7 h-7 rounded-lg bg-white/[0.04] border border-white/[0.06] flex items-center justify-center shrink-0">
-                                <Cpu className="w-3.5 h-3.5 text-white/30" />
-                              </div>
-                              <div className="bg-white/[0.02] border border-white/[0.04] rounded-2xl px-4 py-3">
-                                <div className="flex items-center gap-2">
-                                  <Loader2 className="w-3.5 h-3.5 animate-spin text-white/25" />
-                                  <span className="text-[11px] text-white/25">Analyzing your data...</span>
-                                </div>
-                              </div>
-                            </div>
-                          )}
-                          <div ref={qaEndRef} />
-                        </div>
-
-                        <div className="px-4 pb-4 pt-2 border-t border-white/[0.04]">
-                          <div className="flex gap-2">
-                            <textarea
-                              ref={qaInputRef}
-                              data-testid="input-qa"
-                              value={qaInput}
-                              onChange={(e) => setQaInput(e.target.value)}
-                              onKeyDown={(e) => {
-                                if (e.key === "Enter" && !e.shiftKey) {
-                                  e.preventDefault();
-                                  sendQA();
-                                }
-                              }}
-                              placeholder="Ask about your report..."
-                              className="flex-1 bg-white/[0.03] border border-white/[0.06] rounded-xl px-3.5 py-2.5 text-sm text-white/70 placeholder:text-white/20 resize-none focus:outline-none focus:border-white/[0.12] transition-colors"
-                              rows={1}
-                            />
-                            <button
-                              data-testid="button-send-qa"
-                              onClick={sendQA}
-                              disabled={!qaInput.trim() || qaLoading}
-                              className="w-10 h-10 rounded-xl bg-white/[0.06] border border-white/[0.08] hover:bg-white/[0.1] disabled:opacity-30 flex items-center justify-center transition-colors shrink-0"
-                            >
-                              <Send className="w-4 h-4 text-white/50" />
-                            </button>
-                          </div>
-                          {qaMessages.length > 0 && (
-                            <button
-                              data-testid="button-clear-qa"
-                              onClick={clearQA}
-                              className="mt-2 text-[10px] text-white/15 hover:text-white/30 transition-colors"
-                            >
-                              Clear conversation
-                            </button>
-                          )}
-                        </div>
-                      </div>
-                    )}
-                  </div>
                 </>
               ) : (
                 <div className="flex flex-col items-center justify-center py-20">
@@ -1770,6 +1503,290 @@ export default function DashboardPage() {
                 );
               })()}
 
+            </div>
+          ) : activeTab === "repair" ? (
+            <div className="w-full h-full flex flex-col" style={{ background: '#0D0D0D' }}>
+              <div className="flex-1 overflow-y-auto px-5 sm:px-8 py-6 max-w-[800px] mx-auto w-full">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-600 to-amber-600 flex items-center justify-center">
+                    <Shield className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <h2 className="text-lg font-bold text-white" data-testid="text-repair-center-title">Repair Center</h2>
+                    <p className="text-[11px] text-white/40">AI-powered credit repair, dispute letters & report Q&A</p>
+                  </div>
+                </div>
+
+                <div className="rounded-2xl bg-white/[0.03] backdrop-blur-md border border-orange-500/10 p-6 mb-4" data-testid="credit-repair-card">
+                  <div className="flex items-center justify-between mb-4">
+                    <p className="text-xs text-orange-400/60">Credit Repair System</p>
+                    <span className="text-[9px] text-white/15 bg-white/[0.04] px-2 py-0.5 rounded-full">GPT-4o</span>
+                  </div>
+
+                  {!fundingData?.hasCreditReport ? (
+                    <div className="text-center py-8">
+                      <FileText className="w-8 h-8 text-white/10 mx-auto mb-3" />
+                      <p className="text-sm text-white/35 mb-1">Upload a credit report first</p>
+                      <p className="text-[10px] text-white/20">Go to Dashboard and upload your credit report to enable the repair system.</p>
+                    </div>
+                  ) : !repairData ? (
+                    <div className="text-center py-8">
+                      <p className="text-sm text-white/40 mb-4">Credit report uploaded. Run the repair analysis to detect issues.</p>
+                      <button
+                        onClick={runRepairAnalysis}
+                        disabled={repairAnalyzing}
+                        className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white/[0.06] border border-white/[0.08] hover:bg-white/[0.1] text-white/60 text-sm font-medium transition-all disabled:opacity-50"
+                        data-testid="button-run-repair"
+                      >
+                        {repairAnalyzing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Zap className="w-4 h-4" />}
+                        {repairAnalyzing ? "Analyzing Report..." : "Run Credit Repair Analysis"}
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      <div className="flex items-center gap-2">
+                        <span className={cn(
+                          "text-[9px] font-bold uppercase px-2.5 py-1 rounded",
+                          repairData.mode === "repair" ? "bg-amber-500/10 text-amber-400/70" : "bg-emerald-500/10 text-emerald-400/70"
+                        )}>{repairData.mode === "repair" ? "Repair Mode" : "Pre-Funding Mode"}</span>
+                        <button
+                          onClick={runRepairAnalysis}
+                          disabled={repairAnalyzing}
+                          className="ml-auto flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/[0.04] border border-white/[0.06] hover:bg-white/[0.08] text-[10px] text-white/35 hover:text-white/50 transition-all disabled:opacity-50"
+                          data-testid="button-rerun-repair"
+                        >
+                          {repairAnalyzing ? <Loader2 className="w-3 h-3 animate-spin" /> : <RefreshCw className="w-3 h-3" />}
+                          Re-analyze
+                        </button>
+                      </div>
+
+                      {repairData.summary && (
+                        <div className="p-4 rounded-xl bg-white/[0.02] border border-white/[0.04]">
+                          <p className="text-[10px] text-white/30 mb-1.5">What's Hurting Your Profile</p>
+                          <p className="text-sm text-white/55 leading-relaxed mb-2">{repairData.summary.mainIssues}</p>
+                          <p className="text-[10px] text-orange-400/50 mb-1">Priority Action</p>
+                          <p className="text-sm text-white/45 leading-relaxed">{repairData.summary.priorityAction}</p>
+                        </div>
+                      )}
+
+                      {repairData.detectedIssues && repairData.detectedIssues.length > 0 && (
+                        <div>
+                          <p className="text-[10px] text-white/25 uppercase tracking-widest mb-3">Detected Issues ({repairData.detectedIssues.length})</p>
+                          <div className="space-y-2">
+                            {repairData.detectedIssues.map((issue: any, idx: number) => (
+                              <div key={idx} className="p-3.5 rounded-xl bg-white/[0.02] border border-white/[0.04]" data-testid={`repair-issue-${idx}`}>
+                                <div className="flex items-center gap-2 mb-1.5 flex-wrap">
+                                  <span className={cn(
+                                    "text-[9px] font-bold uppercase px-2 py-0.5 rounded",
+                                    issue.severity === "High" ? "bg-red-500/10 text-red-400/70" :
+                                    issue.severity === "Medium" ? "bg-yellow-500/10 text-yellow-400/70" :
+                                    "bg-green-500/10 text-green-400/70"
+                                  )}>{issue.severity}</span>
+                                  <span className="text-[10px] text-white/25">{issue.bureau}</span>
+                                  <span className="text-[10px] text-white/15">{'\u00B7'}</span>
+                                  <span className="text-[10px] text-white/35">{issue.issueType}</span>
+                                </div>
+                                <p className="text-sm text-white/60">{issue.creditor} {issue.accountLast4 !== "N/A" ? `(****${issue.accountLast4})` : ""}</p>
+                                {issue.monthsAffected !== "N/A" && (
+                                  <p className="text-[10px] text-white/25 mt-1">Months: {issue.monthsAffected}</p>
+                                )}
+                                <p className="text-[10px] text-white/30 mt-1.5">Attach: {issue.proofToAttach}</p>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {repairData.actionPlan && repairData.actionPlan.length > 0 && (
+                        <div>
+                          <p className="text-[10px] text-white/25 uppercase tracking-widest mb-3">Repair Action Plan</p>
+                          <div className="space-y-2">
+                            {repairData.actionPlan.map((step: any, idx: number) => (
+                              <div key={idx} className="flex items-start gap-3 p-3 rounded-xl bg-white/[0.02]" data-testid={`repair-step-${idx}`}>
+                                <div className="w-6 h-6 rounded-full bg-white/[0.04] flex items-center justify-center text-[10px] font-mono text-white/30 shrink-0">
+                                  {step.step || idx + 1}
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <p className="text-sm text-white/55">{step.action}</p>
+                                  <div className="flex items-center gap-3 mt-1">
+                                    <span className="text-[10px] text-orange-400/40 font-mono">{step.timing}</span>
+                                    {step.details && <span className="text-[10px] text-white/25">{step.details}</span>}
+                                  </div>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {repairData.letters && repairData.letters.length > 0 && (
+                        <div>
+                          <p className="text-[10px] text-white/25 uppercase tracking-widest mb-3">Generated Dispute Letters ({repairData.letters.length})</p>
+                          <div className="space-y-2">
+                            {repairData.letters.map((letter: any, idx: number) => (
+                              <div key={idx} className="rounded-xl bg-white/[0.02] border border-white/[0.04] overflow-hidden" data-testid={`letter-${idx}`}>
+                                <button
+                                  onClick={() => setExpandedLetters(prev => {
+                                    const next = new Set(prev);
+                                    if (next.has(idx)) next.delete(idx); else next.add(idx);
+                                    return next;
+                                  })}
+                                  className="w-full text-left p-3.5 flex items-center gap-3 hover:bg-white/[0.02] transition-colors"
+                                  data-testid={`button-expand-letter-${idx}`}
+                                >
+                                  <FileText className="w-4 h-4 text-orange-400/40 shrink-0" />
+                                  <div className="flex-1 min-w-0">
+                                    <p className="text-sm text-white/55 truncate">{letter.subject || `${letter.type === "bureau_dispute" ? "Bureau" : letter.type === "creditor_dispute" ? "Creditor" : "Info Correction"} Letter`}</p>
+                                    <p className="text-[10px] text-white/25 truncate">To: {letter.recipientName}</p>
+                                  </div>
+                                  <ChevronRight className={cn("w-4 h-4 text-white/10 shrink-0 transition-transform", expandedLetters.has(idx) && "rotate-90")} />
+                                </button>
+                                {expandedLetters.has(idx) && (
+                                  <div className="px-3.5 pb-3.5 border-t border-white/[0.04]">
+                                    <div className="flex items-center gap-2 py-2">
+                                      <span className="text-[9px] text-white/20">To: {letter.recipientAddress}</span>
+                                      <button
+                                        onClick={() => copyLetterToClipboard(letter.body, idx)}
+                                        className="ml-auto flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/[0.04] border border-white/[0.06] hover:bg-white/[0.08] text-[10px] text-white/40 font-medium transition-all"
+                                        data-testid={`button-copy-letter-${idx}`}
+                                      >
+                                        {copiedLetter === idx ? <CheckCircle2 className="w-3 h-3" /> : <Eye className="w-3 h-3" />}
+                                        {copiedLetter === idx ? "Copied!" : "Copy Letter"}
+                                      </button>
+                                    </div>
+                                    <div className="mt-2 p-4 rounded-xl bg-black/40 border border-white/[0.04] font-mono text-[10px] text-white/45 leading-relaxed whitespace-pre-wrap max-h-96 overflow-y-auto" style={{ scrollbarWidth: 'thin' }}>
+                                      {letter.body}
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {repairData.disclaimer && (
+                        <p className="text-[9px] text-white/15 italic mt-2 px-1">{repairData.disclaimer}</p>
+                      )}
+                    </div>
+                  )}
+                </div>
+
+                <div className="rounded-2xl bg-white/[0.03] backdrop-blur-md border border-white/[0.08] overflow-hidden mb-4" data-testid="repair-qa-card">
+                  <div className="px-6 py-4 flex items-center gap-3 border-b border-white/[0.06]">
+                    <div className="w-8 h-8 rounded-xl bg-white/[0.04] border border-white/[0.06] flex items-center justify-center">
+                      <MessageCircle className="w-4 h-4 text-orange-400/50" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-white/70">Ask AI About Your Report</p>
+                      <p className="text-[10px] text-white/25">Get personalized answers based on your uploaded financial data</p>
+                    </div>
+                    {qaMessages.length > 0 && (
+                      <span className="ml-auto text-[9px] text-white/20 bg-white/[0.04] px-2 py-0.5 rounded-full">{Math.floor(qaMessages.length / 2)} Q&A</span>
+                    )}
+                  </div>
+
+                  <div className="max-h-[500px] overflow-y-auto px-4 py-3 space-y-3" style={{ scrollbarWidth: 'thin' }}>
+                    {qaMessages.length === 0 && !qaLoading && (
+                      <div className="flex flex-col items-center justify-center py-8">
+                        <Sparkles className="w-6 h-6 text-white/10 mb-2" />
+                        <p className="text-xs text-white/25 text-center">Ask anything about your credit report, funding readiness, or financial profile</p>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-4 w-full max-w-md">
+                          {[
+                            "What's hurting my credit score?",
+                            "Am I ready for funding?",
+                            "How can I lower my balances?",
+                            "What accounts should I dispute?",
+                          ].map((suggestion, i) => (
+                            <button
+                              key={i}
+                              data-testid={`button-qa-suggestion-${i}`}
+                              onClick={() => { setQaInput(suggestion); qaInputRef.current?.focus(); }}
+                              className="text-left px-3 py-2.5 rounded-xl border border-white/[0.06] bg-white/[0.02] hover:bg-white/[0.05] transition-all text-[11px] text-white/35 hover:text-white/55"
+                            >
+                              {suggestion}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {qaMessages.map((msg: any) => (
+                      <div key={msg.id} className={cn("flex gap-2.5", msg.role === "user" ? "justify-end" : "justify-start")} data-testid={`qa-msg-${msg.id}`}>
+                        {msg.role === "assistant" && (
+                          <div className="w-7 h-7 rounded-lg bg-white/[0.04] border border-white/[0.06] flex items-center justify-center shrink-0 mt-0.5">
+                            <Cpu className="w-3.5 h-3.5 text-white/30" />
+                          </div>
+                        )}
+                        <div className={cn(
+                          "max-w-[80%] rounded-2xl px-4 py-3",
+                          msg.role === "user"
+                            ? "bg-white/[0.08] border border-white/[0.1]"
+                            : "bg-white/[0.02] border border-white/[0.04]"
+                        )}>
+                          <p className="text-[12px] text-white/55 leading-relaxed whitespace-pre-wrap">{msg.content}</p>
+                          <p className="text-[9px] text-white/15 mt-1.5">
+                            {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+
+                    {qaLoading && (
+                      <div className="flex gap-2.5 justify-start">
+                        <div className="w-7 h-7 rounded-lg bg-white/[0.04] border border-white/[0.06] flex items-center justify-center shrink-0">
+                          <Cpu className="w-3.5 h-3.5 text-white/30" />
+                        </div>
+                        <div className="bg-white/[0.02] border border-white/[0.04] rounded-2xl px-4 py-3">
+                          <div className="flex items-center gap-2">
+                            <Loader2 className="w-3.5 h-3.5 animate-spin text-white/25" />
+                            <span className="text-[11px] text-white/25">Analyzing your data...</span>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                    <div ref={qaEndRef} />
+                  </div>
+
+                  <div className="px-4 pb-4 pt-2 border-t border-white/[0.04]">
+                    <div className="flex gap-2">
+                      <textarea
+                        ref={qaInputRef}
+                        data-testid="input-qa"
+                        value={qaInput}
+                        onChange={(e) => setQaInput(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" && !e.shiftKey) {
+                            e.preventDefault();
+                            sendQA();
+                          }
+                        }}
+                        placeholder="Ask about your report..."
+                        className="flex-1 bg-white/[0.03] border border-white/[0.06] rounded-xl px-3.5 py-2.5 text-sm text-white/70 placeholder:text-white/20 resize-none focus:outline-none focus:border-white/[0.12] transition-colors"
+                        rows={1}
+                      />
+                      <button
+                        data-testid="button-send-qa"
+                        onClick={sendQA}
+                        disabled={!qaInput.trim() || qaLoading}
+                        className="w-10 h-10 rounded-xl bg-white/[0.06] border border-white/[0.08] hover:bg-white/[0.1] disabled:opacity-30 flex items-center justify-center transition-colors shrink-0"
+                      >
+                        <Send className="w-4 h-4 text-white/50" />
+                      </button>
+                    </div>
+                    {qaMessages.length > 0 && (
+                      <button
+                        data-testid="button-clear-qa"
+                        onClick={clearQA}
+                        className="mt-2 text-[10px] text-white/15 hover:text-white/30 transition-colors"
+                      >
+                        Clear conversation
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+              </div>
             </div>
           ) : activeTab === "creatorai" ? (
             <div className="w-full h-full flex flex-col" style={{ background: '#0D0D0D' }}>
