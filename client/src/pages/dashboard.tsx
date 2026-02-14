@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from "react";
 import { useAuth } from "@/lib/store";
 import { useLocation } from "wouter";
-import { Send, Plus, Paperclip, Loader2, ArrowDown, FileText, X, Menu, MessageCircle, RefreshCw, TrendingUp, UserPlus, Check, UserX, Search, AlertTriangle, Shield, ChevronRight, Target, BarChart3, BookOpen, CheckCircle2, AlertCircle, Info, Zap, Activity, Upload, Sparkles, Eye, Lock, Cpu, ChevronDown, Radio, Play, ExternalLink, Clock, Filter } from "lucide-react";
+import { Send, Plus, Paperclip, Loader2, ArrowDown, FileText, X, Menu, MessageCircle, RefreshCw, TrendingUp, UserPlus, Check, UserX, Search, AlertTriangle, Shield, ChevronRight, Target, BarChart3, BookOpen, CheckCircle2, AlertCircle, Info, Zap, Activity, Upload, Sparkles, Eye, Lock, Cpu, ChevronDown, Radio, Play, ExternalLink, Clock, Filter, ChevronUp, Volume2, VolumeX, Heart, MessageSquare, Share2, ThumbsUp } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -258,6 +258,9 @@ export default function DashboardPage() {
   const [feedHasMore, setFeedHasMore] = useState(false);
   const [feedTotal, setFeedTotal] = useState(0);
   const [playingVideo, setPlayingVideo] = useState<string | null>(null);
+  const [currentShortIndex, setCurrentShortIndex] = useState(0);
+  const [shortsAutoplay, setShortsAutoplay] = useState(true);
+  const shortsContainerRef = useRef<HTMLDivElement>(null);
 
   const TRUNCATE_LENGTH = 280;
 
@@ -1567,177 +1570,187 @@ export default function DashboardPage() {
               )}
             </div>
           ) : activeTab === "feed" ? (
-            <div className="w-full px-4 sm:px-6 py-6 max-w-[1400px] mx-auto">
-              <div className="flex items-center justify-between mb-6">
-                <div>
-                  <h1 className="text-2xl font-light text-white tracking-tight flex items-center gap-2" data-testid="text-feed-title">
-                    <Radio className="w-5 h-5 text-red-400" />
-                    Live Feed
-                    <span className="relative flex h-2.5 w-2.5 ml-1">
-                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                      <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-500"></span>
-                    </span>
-                  </h1>
-                  <p className="text-xs text-white/30 mt-1">
-                    Top creators in finance, business & entrepreneurship
-                    {feedLastUpdated && <span className="ml-2 text-white/15">Updated {timeAgo(feedLastUpdated)}</span>}
-                    {feedTotal > 0 && <span className="ml-2 text-white/15">{feedTotal} posts</span>}
-                  </p>
-                </div>
-                <button onClick={() => fetchFeed(0, feedFilter)} className="p-2 rounded-lg hover:bg-white/[0.04] transition-colors" data-testid="button-refresh-feed">
-                  <RefreshCw className={cn("w-4 h-4 text-white/30", feedLoading && "animate-spin")} />
-                </button>
-              </div>
-
-              <div className="flex gap-2 mb-5 overflow-x-auto pb-2 scrollbar-hide" data-testid="feed-filters">
-                {[
-                  { key: "all", label: "All" },
-                  { key: "video", label: "Videos" },
-                  { key: "finance", label: "Finance" },
-                  { key: "business", label: "Business" },
-                  { key: "realestate", label: "Real Estate" },
-                  { key: "credit", label: "Credit" },
-                  { key: "stocks", label: "Stocks" },
-                  { key: "marketing", label: "Marketing" },
-                  { key: "tax", label: "Tax" },
-                  { key: "economics", label: "Economics" },
-                  { key: "news", label: "News" },
-                ].map(f => (
-                  <button
-                    key={f.key}
-                    data-testid={`filter-${f.key}`}
-                    onClick={() => { setFeedFilter(f.key); setFeedPage(0); fetchFeed(0, f.key); }}
-                    className={cn(
-                      "px-3 py-1.5 rounded-lg text-[11px] font-medium whitespace-nowrap transition-all border",
-                      feedFilter === f.key
-                        ? "bg-white/[0.08] text-white border-white/[0.12]"
-                        : "bg-white/[0.02] text-white/35 border-white/[0.04] hover:bg-white/[0.04] hover:text-white/50"
-                    )}
-                  >
-                    {f.label}
-                  </button>
-                ))}
-              </div>
-
+            <div className="w-full h-full flex flex-col" style={{ background: '#000' }}>
               {feedLoading && feedItems.length === 0 ? (
-                <div className="flex items-center justify-center py-20">
-                  <Loader2 className="w-8 h-8 animate-spin text-white/30" />
+                <div className="flex-1 flex items-center justify-center">
+                  <div className="flex flex-col items-center gap-3">
+                    <Loader2 className="w-8 h-8 animate-spin text-white/30" />
+                    <p className="text-xs text-white/30">Loading shorts...</p>
+                  </div>
                 </div>
               ) : feedItems.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-20">
+                <div className="flex-1 flex flex-col items-center justify-center">
                   <Radio className="w-8 h-8 text-white/15 mb-3" />
                   <p className="text-sm text-white/35">No content available yet</p>
-                  <button onClick={() => fetchFeed()} className="mt-3 text-xs text-white/25 hover:text-white/50 underline">Refresh</button>
+                  <button onClick={() => fetchFeed()} className="mt-3 text-xs text-white/25 hover:text-white/50 underline" data-testid="button-refresh-feed">Refresh</button>
                 </div>
-              ) : (
-                <>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {(feedFilter === "all" ? feedItems : feedItems.filter(item => item.category === feedFilter || item.contentType === feedFilter)).map((item: any) => {
-                      const videoId = item.contentType === "video" && item.link
-                        ? item.link.match(/[?&]v=([^&]+)/)?.[1] || null
-                        : null;
-                      const isPlaying = playingVideo === item.id;
+              ) : (() => {
+                const videoItems = feedItems.filter((item: any) => {
+                  if (item.contentType !== "video") return false;
+                  const vid = item.link?.match(/[?&]v=([^&]+)/)?.[1];
+                  return !!vid;
+                });
+                if (videoItems.length === 0) return (
+                  <div className="flex-1 flex flex-col items-center justify-center">
+                    <Play className="w-8 h-8 text-white/15 mb-3" />
+                    <p className="text-sm text-white/35">No videos available</p>
+                  </div>
+                );
+
+                return (
+                  <div
+                    ref={shortsContainerRef}
+                    className="flex-1 overflow-y-scroll snap-y snap-mandatory scrollbar-hide"
+                    style={{ scrollBehavior: 'smooth' }}
+                    onScroll={(e) => {
+                      const el = e.currentTarget;
+                      const idx = Math.round(el.scrollTop / el.clientHeight);
+                      if (idx !== currentShortIndex) {
+                        setCurrentShortIndex(idx);
+                        if (idx >= videoItems.length - 3 && feedHasMore) {
+                          const next = feedPage + 1;
+                          setFeedPage(next);
+                          fetchFeed(next, feedFilter, true);
+                        }
+                      }
+                    }}
+                    data-testid="shorts-container"
+                  >
+                    {videoItems.map((item: any, idx: number) => {
+                      const videoId = item.link.match(/[?&]v=([^&]+)/)?.[1];
+                      const isActive = idx === currentShortIndex;
 
                       return (
                         <div
                           key={item.id}
-                          className="group bg-white/[0.02] border border-white/[0.05] rounded-xl overflow-hidden hover:bg-white/[0.04] hover:border-white/[0.08] transition-all"
-                          data-testid={`feed-item-${item.id}`}
+                          className="snap-start w-full relative flex items-center justify-center"
+                          style={{ height: '100%', minHeight: '100%' }}
+                          data-testid={`short-${item.id}`}
                         >
-                          {videoId && (
-                            <div className="relative aspect-video bg-black/40">
-                              {isPlaying ? (
-                                <iframe
-                                  src={`https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0`}
-                                  className="absolute inset-0 w-full h-full"
-                                  allow="autoplay; encrypted-media"
-                                  allowFullScreen
-                                  title={item.title}
+                          <div className="absolute inset-0 bg-black">
+                            {isActive && shortsAutoplay ? (
+                              <iframe
+                                src={`https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0&modestbranding=1&playsinline=1&loop=1&playlist=${videoId}&controls=1`}
+                                className="absolute inset-0 w-full h-full"
+                                allow="autoplay; encrypted-media; picture-in-picture"
+                                allowFullScreen
+                                title={item.title}
+                              />
+                            ) : (
+                              <>
+                                <img
+                                  src={`https://img.youtube.com/vi/${videoId}/hqdefault.jpg`}
+                                  alt={item.title}
+                                  className="absolute inset-0 w-full h-full object-cover"
+                                  loading="lazy"
                                 />
-                              ) : (
-                                <>
-                                  <img
-                                    src={item.image || `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`}
-                                    alt={item.title}
-                                    className="absolute inset-0 w-full h-full object-cover"
-                                    loading="lazy"
-                                  />
-                                  <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors" />
-                                  <button
-                                    onClick={() => setPlayingVideo(item.id)}
-                                    className="absolute inset-0 flex items-center justify-center"
-                                    data-testid={`play-${item.id}`}
-                                  >
-                                    <div className="w-14 h-14 rounded-full bg-white/90 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
-                                      <Play className="w-6 h-6 text-black ml-1" fill="black" />
-                                    </div>
-                                  </button>
-                                  <div className="absolute top-2 right-2 px-2 py-0.5 rounded bg-black/60 text-[9px] text-white/70 font-medium">
-                                    VIDEO
+                                <div className="absolute inset-0 bg-black/40" />
+                                <button
+                                  onClick={() => {
+                                    setCurrentShortIndex(idx);
+                                    setShortsAutoplay(true);
+                                  }}
+                                  className="absolute inset-0 flex items-center justify-center z-10"
+                                  data-testid={`play-short-${idx}`}
+                                >
+                                  <div className="w-16 h-16 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center border border-white/20">
+                                    <Play className="w-7 h-7 text-white ml-1" fill="white" />
                                   </div>
-                                </>
-                              )}
-                            </div>
-                          )}
+                                </button>
+                              </>
+                            )}
+                          </div>
 
-                          {!videoId && item.image && (
-                            <div className="relative aspect-[16/9] bg-black/20">
-                              <img src={item.image} alt={item.title} className="w-full h-full object-cover" loading="lazy" />
-                              <div className="absolute top-2 right-2 px-2 py-0.5 rounded bg-black/60 text-[9px] text-white/70 font-medium uppercase">
-                                {item.contentType}
-                              </div>
-                            </div>
-                          )}
-
-                          <div className="p-4">
-                            <div className="flex items-center gap-2 mb-2">
-                              <div className="w-6 h-6 rounded-full bg-gradient-to-br from-white/10 to-white/5 flex items-center justify-center text-[8px] font-bold text-white/50 border border-white/[0.06]">
+                          <div className="absolute bottom-0 left-0 right-16 p-4 pb-6 z-20" style={{ background: 'linear-gradient(transparent, rgba(0,0,0,0.85))' }}>
+                            <div className="flex items-center gap-2.5 mb-2.5">
+                              <div className="w-9 h-9 rounded-full bg-gradient-to-br from-red-500 via-pink-500 to-purple-500 flex items-center justify-center text-[11px] font-bold text-white border-2 border-white/30 shadow-lg">
                                 {item.source.charAt(0)}
                               </div>
-                              <span className="text-[11px] font-medium text-white/50 truncate">{item.source}</span>
-                              <span className="text-[9px] text-white/20 ml-auto whitespace-nowrap flex items-center gap-1">
-                                <Clock className="w-2.5 h-2.5" />
-                                {timeAgo(item.publishedAt)}
-                              </span>
-                            </div>
-                            <h3 className="text-[13px] font-medium text-white/80 leading-snug mb-2 line-clamp-2">{item.title}</h3>
-                            {item.description && (
-                              <p className="text-[11px] text-white/30 leading-relaxed line-clamp-2">{item.description}</p>
-                            )}
-                            <div className="flex items-center gap-2 mt-3">
-                              <span className="text-[9px] px-2 py-0.5 rounded bg-white/[0.04] text-white/25 border border-white/[0.04] uppercase tracking-wider">
+                              <div className="flex-1 min-w-0">
+                                <p className="text-[13px] font-semibold text-white truncate">{item.source}</p>
+                                <p className="text-[10px] text-white/50">{timeAgo(item.publishedAt)}</p>
+                              </div>
+                              <span className="text-[9px] px-2 py-1 rounded-full bg-white/10 text-white/60 border border-white/10 uppercase tracking-wider font-medium">
                                 {item.category}
                               </span>
-                              <a
-                                href={item.link}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="ml-auto text-[10px] text-white/20 hover:text-white/50 flex items-center gap-1 transition-colors"
-                                data-testid={`link-${item.id}`}
-                              >
-                                <ExternalLink className="w-3 h-3" />
-                                Open
-                              </a>
+                            </div>
+                            <h3 className="text-[14px] font-medium text-white leading-snug line-clamp-2 drop-shadow-lg">{item.title}</h3>
+                            {item.description && (
+                              <p className="text-[11px] text-white/50 leading-relaxed line-clamp-1 mt-1">{item.description}</p>
+                            )}
+                          </div>
+
+                          <div className="absolute right-3 bottom-20 z-20 flex flex-col items-center gap-5">
+                            <button
+                              className="flex flex-col items-center gap-1 group"
+                              onClick={() => {
+                                if (item.link) window.open(item.link, '_blank');
+                              }}
+                              data-testid={`link-${item.id}`}
+                            >
+                              <div className="w-10 h-10 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center border border-white/10 group-hover:bg-white/20 transition-colors">
+                                <ExternalLink className="w-4 h-4 text-white" />
+                              </div>
+                              <span className="text-[9px] text-white/50">Open</span>
+                            </button>
+                            <button
+                              className="flex flex-col items-center gap-1 group"
+                              onClick={() => {
+                                navigator.clipboard.writeText(item.link || '');
+                                toast({ title: "Link copied!" });
+                              }}
+                            >
+                              <div className="w-10 h-10 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center border border-white/10 group-hover:bg-white/20 transition-colors">
+                                <Share2 className="w-4 h-4 text-white" />
+                              </div>
+                              <span className="text-[9px] text-white/50">Share</span>
+                            </button>
+                          </div>
+
+                          <div className="absolute top-4 left-4 right-4 z-20 flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <h1 className="text-[15px] font-bold text-white drop-shadow-lg flex items-center gap-1.5" data-testid="text-feed-title">
+                                Shorts
+                                <span className="relative flex h-2 w-2">
+                                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                                  <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+                                </span>
+                              </h1>
+                              <span className="text-[10px] text-white/30 ml-1">{idx + 1}/{videoItems.length}</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <div className="flex gap-1 overflow-x-auto scrollbar-hide" data-testid="feed-filters">
+                                {[
+                                  { key: "all", label: "All" },
+                                  { key: "finance", label: "Finance" },
+                                  { key: "business", label: "Business" },
+                                  { key: "realestate", label: "Real Estate" },
+                                  { key: "credit", label: "Credit" },
+                                  { key: "stocks", label: "Stocks" },
+                                ].map(f => (
+                                  <button
+                                    key={f.key}
+                                    data-testid={`filter-${f.key}`}
+                                    onClick={() => { setFeedFilter(f.key); setFeedPage(0); setCurrentShortIndex(0); fetchFeed(0, f.key); }}
+                                    className={cn(
+                                      "px-2.5 py-1 rounded-full text-[9px] font-medium whitespace-nowrap transition-all",
+                                      feedFilter === f.key
+                                        ? "bg-white/20 text-white"
+                                        : "bg-white/5 text-white/40 hover:bg-white/10"
+                                    )}
+                                  >
+                                    {f.label}
+                                  </button>
+                                ))}
+                              </div>
                             </div>
                           </div>
                         </div>
                       );
                     })}
                   </div>
-
-                  {feedHasMore && (
-                    <div className="flex justify-center mt-6">
-                      <button
-                        onClick={() => { const next = feedPage + 1; setFeedPage(next); fetchFeed(next, feedFilter, true); }}
-                        className="px-6 py-2.5 rounded-xl bg-white/[0.04] border border-white/[0.06] text-xs text-white/40 hover:bg-white/[0.06] hover:text-white/60 transition-all"
-                        data-testid="button-load-more"
-                      >
-                        Load More
-                      </button>
-                    </div>
-                  )}
-                </>
-              )}
+                );
+              })()}
             </div>
           ) : (
             <div className="max-w-xl mx-auto w-full">
