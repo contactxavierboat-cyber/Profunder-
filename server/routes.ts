@@ -1200,6 +1200,69 @@ Be concise but thorough. Use bullet points and formatting for readability. If th
     res.status(204).send();
   });
 
+  app.post("/api/creator-insight", requireAuth, async (req, res) => {
+    const userId = req.session.userId!;
+    const body = z.object({
+      question: z.string().min(1).max(2000),
+      creatorName: z.string().min(1).max(200),
+      videoTitle: z.string().optional(),
+      category: z.string().optional(),
+    }).safeParse(req.body);
+    if (!body.success) return res.status(400).json({ error: "Question and creator name are required" });
+
+    const user = await storage.getUser(userId);
+    if (!user) return res.status(404).json({ error: "User not found" });
+
+    if (user.monthlyUsage >= user.maxUsage) {
+      return res.status(403).json({ error: "Monthly analysis limit reached. Please wait for reset." });
+    }
+
+    let financialContext = "";
+    if (user.lastCreditReportText) {
+      financialContext += `\n\n--- USER'S CREDIT REPORT (for context) ---\n${user.lastCreditReportText.slice(0, 8000)}\n--- END CREDIT REPORT ---`;
+    }
+    if (user.analysisSummary) {
+      financialContext += `\n\n--- LATEST ANALYSIS SUMMARY ---\n${user.analysisSummary}\n--- END ANALYSIS ---`;
+    }
+    if (user.analysisNextSteps) {
+      try {
+        const steps = JSON.parse(user.analysisNextSteps);
+        financialContext += `\n\n--- RECOMMENDED NEXT STEPS ---\n${steps.map((s: string, i: number) => `${i + 1}. ${s}`).join("\n")}\n--- END NEXT STEPS ---`;
+      } catch {}
+    }
+    if (user.creditRepairData) {
+      try {
+        const repairData = JSON.parse(user.creditRepairData);
+        financialContext += `\n\n--- CREDIT REPAIR DATA ---\nMode: ${repairData.mode}\nMain Issues: ${repairData.summary?.mainIssues || "N/A"}\nPriority Action: ${repairData.summary?.priorityAction || "N/A"}\nDetected Issues: ${repairData.detectedIssues?.length || 0}\n--- END CREDIT REPAIR ---`;
+      } catch {}
+    }
+    const profileContext = `\n\n--- USER FINANCIAL PROFILE ---\nCredit Score Range: ${user.creditScoreRange || "Not set"}\nCredit Score Exact: ${user.creditScoreExact ?? "N/A"}\nTotal Revolving Limit: $${user.totalRevolvingLimit?.toLocaleString() || "N/A"}\nTotal Balances: $${user.totalBalances?.toLocaleString() || "N/A"}\nInquiries (2yr): ${user.inquiries ?? "N/A"}\nDerogatory Accounts: ${user.derogatoryAccounts ?? "N/A"}\nLate Payments: ${user.latePayments ?? "N/A"}\nCollections: ${user.collections ?? "N/A"}\nOpen Accounts: ${user.openAccounts ?? "N/A"}\nClosed Accounts: ${user.closedAccounts ?? "N/A"}\nOldest Account (yrs): ${user.oldestAccountYears ?? "N/A"}\nAvg Account Age (yrs): ${user.avgAccountAgeYears ?? "N/A"}\nPublic Records: ${user.publicRecords ?? "N/A"}\nUtilization: ${user.utilizationPercent ?? "N/A"}%\nHas Credit Report: ${user.hasCreditReport ? "Yes" : "No"}\nHas Bank Statement: ${user.hasBankStatement ? "Yes" : "No"}\n--- END PROFILE ---`;
+    financialContext += profileContext;
+
+    const systemPrompt = MASTER_SYSTEM_PROMPT + "\n\n" + CREATOR_INFORMED_PROMPT + `\n\nThe user is currently watching content from @${body.data.creatorName}${body.data.videoTitle ? ` — Video: "${body.data.videoTitle}"` : ""}${body.data.category ? ` — Category: ${body.data.category}` : ""}.
+
+When answering, reference @${body.data.creatorName}'s publicly known educational frameworks and perspectives where relevant. Combine their known approach with your own analysis to give the user maximum value.${financialContext}`;
+
+    try {
+      const response = await openai.chat.completions.create({
+        model: "gpt-4o",
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: body.data.question },
+        ],
+        max_tokens: 1500,
+      });
+
+      const aiContent = response.choices[0]?.message?.content || "Unable to generate insight right now.";
+      await storage.updateUser(userId, { monthlyUsage: user.monthlyUsage + 1 });
+
+      res.json({ answer: aiContent, creator: body.data.creatorName });
+    } catch (error: any) {
+      console.error("Creator Insight AI Error:", error);
+      res.status(500).json({ error: "Error generating insight. Please try again." });
+    }
+  });
+
   app.get("/api/friends", requireAuth, async (req, res) => {
     try {
       const userId = req.session.userId!;

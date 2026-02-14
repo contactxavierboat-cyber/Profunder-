@@ -260,6 +260,10 @@ export default function DashboardPage() {
   const [playingVideo, setPlayingVideo] = useState<string | null>(null);
   const [currentShortIndex, setCurrentShortIndex] = useState(0);
   const [shortsAutoplay, setShortsAutoplay] = useState(true);
+  const [creatorAiOpen, setCreatorAiOpen] = useState(false);
+  const [creatorAiInput, setCreatorAiInput] = useState("");
+  const [creatorAiLoading, setCreatorAiLoading] = useState(false);
+  const [creatorAiAnswer, setCreatorAiAnswer] = useState<string | null>(null);
   const shortsContainerRef = useRef<HTMLDivElement>(null);
 
   const TRUNCATE_LENGTH = 280;
@@ -1705,6 +1709,16 @@ export default function DashboardPage() {
                               </div>
                               <span className="text-[9px] text-white/50">Share</span>
                             </button>
+                            <button
+                              className="flex flex-col items-center gap-1 group"
+                              onClick={() => { setCreatorAiOpen(true); setCreatorAiAnswer(null); setCreatorAiInput(""); }}
+                              data-testid={`ask-ai-${item.id}`}
+                            >
+                              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500/30 to-blue-500/30 backdrop-blur-sm flex items-center justify-center border border-purple-400/30 group-hover:from-purple-500/50 group-hover:to-blue-500/50 transition-all">
+                                <Sparkles className="w-4 h-4 text-purple-300" />
+                              </div>
+                              <span className="text-[9px] text-purple-300/70">Ask AI</span>
+                            </button>
                           </div>
 
                           <div className="absolute top-4 left-4 right-4 z-20 flex items-center justify-between">
@@ -1748,6 +1762,115 @@ export default function DashboardPage() {
                         </div>
                       );
                     })}
+                  </div>
+                );
+              })()}
+
+              {creatorAiOpen && (() => {
+                const videoItems = feedItems.filter((item: any) => item.contentType === "video" && item.link?.match(/[?&]v=([^&]+)/)?.[1]);
+                const currentItem = videoItems[currentShortIndex];
+                const creatorName = currentItem?.source || "Creator";
+                const videoTitle = currentItem?.title || "";
+                const category = currentItem?.category || "";
+
+                const handleCreatorAsk = async () => {
+                  if (!creatorAiInput.trim() || creatorAiLoading) return;
+                  setCreatorAiLoading(true);
+                  setCreatorAiAnswer(null);
+                  try {
+                    const resp = await fetch("/api/creator-insight", {
+                      method: "POST",
+                      headers: { "Content-Type": "application/json" },
+                      credentials: "include",
+                      body: JSON.stringify({ question: creatorAiInput.trim(), creatorName, videoTitle, category }),
+                    });
+                    const data = await resp.json();
+                    if (!resp.ok) throw new Error(data.error || "Failed");
+                    setCreatorAiAnswer(data.answer);
+                  } catch (err: any) {
+                    setCreatorAiAnswer("Error: " + (err.message || "Could not get insight."));
+                  } finally {
+                    setCreatorAiLoading(false);
+                  }
+                };
+
+                return (
+                  <div className="absolute inset-0 z-30 flex flex-col" style={{ background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(12px)' }}>
+                    <div className="flex items-center justify-between px-4 py-3 border-b border-white/10">
+                      <div className="flex items-center gap-2">
+                        <Sparkles className="w-4 h-4 text-purple-400" />
+                        <span className="text-sm font-semibold text-white">Creator-Informed Analysis</span>
+                      </div>
+                      <button onClick={() => setCreatorAiOpen(false)} className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 transition-colors" data-testid="close-creator-ai">
+                        <X className="w-4 h-4 text-white/60" />
+                      </button>
+                    </div>
+
+                    <div className="px-4 py-3 border-b border-white/5">
+                      <div className="flex items-center gap-2.5">
+                        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-red-500 via-pink-500 to-purple-500 flex items-center justify-center text-[10px] font-bold text-white border border-white/20">
+                          {creatorName.charAt(0)}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-xs font-medium text-white truncate">@{creatorName}</p>
+                          <p className="text-[10px] text-white/40 truncate">{videoTitle}</p>
+                        </div>
+                        <span className="text-[9px] px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-300 border border-purple-400/20">{category}</span>
+                      </div>
+                    </div>
+
+                    <div className="flex-1 overflow-y-auto px-4 py-4">
+                      {!creatorAiAnswer && !creatorAiLoading && (
+                        <div className="flex flex-col items-center justify-center h-full text-center px-4">
+                          <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-purple-500/20 to-blue-500/20 flex items-center justify-center mb-3 border border-purple-400/20">
+                            <Sparkles className="w-6 h-6 text-purple-400" />
+                          </div>
+                          <p className="text-sm text-white/60 mb-1">Ask about @{creatorName}'s insights</p>
+                          <p className="text-[11px] text-white/30 max-w-xs">Get AI analysis that synthesizes this creator's publicly known frameworks with your financial profile</p>
+                        </div>
+                      )}
+
+                      {creatorAiLoading && (
+                        <div className="flex flex-col items-center justify-center h-full">
+                          <Loader2 className="w-6 h-6 animate-spin text-purple-400 mb-2" />
+                          <p className="text-xs text-white/40">Analyzing with @{creatorName}'s frameworks...</p>
+                        </div>
+                      )}
+
+                      {creatorAiAnswer && (
+                        <div className="space-y-3">
+                          <div className="text-[11px] text-purple-300/60 flex items-center gap-1.5 mb-2">
+                            <Sparkles className="w-3 h-3" />
+                            Creator-Informed Insight — @{creatorName}
+                          </div>
+                          <div className="text-[13px] text-white/80 leading-relaxed whitespace-pre-wrap" data-testid="creator-ai-answer">
+                            {creatorAiAnswer}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="px-4 py-3 border-t border-white/10">
+                      <div className="flex gap-2">
+                        <input
+                          value={creatorAiInput}
+                          onChange={(e) => setCreatorAiInput(e.target.value)}
+                          onKeyDown={(e) => e.key === "Enter" && handleCreatorAsk()}
+                          placeholder={`Ask about @${creatorName}'s approach...`}
+                          className="flex-1 bg-white/5 border border-white/10 rounded-lg px-3 py-2.5 text-sm text-white placeholder:text-white/25 focus:outline-none focus:border-purple-400/40"
+                          disabled={creatorAiLoading}
+                          data-testid="creator-ai-input"
+                        />
+                        <button
+                          onClick={handleCreatorAsk}
+                          disabled={!creatorAiInput.trim() || creatorAiLoading}
+                          className="px-4 rounded-lg bg-gradient-to-r from-purple-600 to-blue-600 text-white text-sm font-medium disabled:opacity-30 hover:from-purple-500 hover:to-blue-500 transition-all flex items-center gap-1.5"
+                          data-testid="creator-ai-send"
+                        >
+                          {creatorAiLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Send className="w-3.5 h-3.5" />}
+                        </button>
+                      </div>
+                    </div>
                   </div>
                 );
               })()}
