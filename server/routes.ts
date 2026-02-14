@@ -3823,15 +3823,12 @@ If the user has uploaded a credit report, reference specific data points when ap
       else if (score >= 50) { status = "needs_improvement"; statusLabel = "Needs Improvement"; }
       else { status = "high_risk"; statusLabel = "High Risk"; }
 
-      // --- FUNDING RANGE ESTIMATION ---
+      // --- FUNDING RANGE ESTIMATION (1.5X - 2.5X of total revolving limit) ---
       let minRange = 0, maxRange = 0;
-      if (exposureCeiling > 0) {
-        if (score >= 85) { minRange = Math.round(exposureCeiling * 0.5); maxRange = exposureCeiling; }
-        else if (score >= 70) { minRange = Math.round(exposureCeiling * 0.25); maxRange = Math.round(exposureCeiling * 0.6); }
-        else if (score >= 50) { minRange = Math.round(exposureCeiling * 0.1); maxRange = Math.round(exposureCeiling * 0.3); }
-        else if (score >= 25) { minRange = Math.round(exposureCeiling * 0.05); maxRange = Math.round(exposureCeiling * 0.15); }
+      if (revolvingLimit > 0) {
+        minRange = Math.round(revolvingLimit * 1.5);
+        maxRange = Math.round(revolvingLimit * 2.5);
       }
-      if (minRange === 0 && score >= 25) { minRange = 5000; maxRange = 15000; }
 
       // --- RISK ALERTS ---
       if (utilization > 45) {
