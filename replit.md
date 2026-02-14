@@ -59,9 +59,13 @@ A free AI mentorship platform ("Mentorship On Demand") combining Capital Readine
 - 2026-02-12: Added 30 analyses/month usage limiting with proper error messages
 
 ## User Preferences
-- Dark theme (#0D0D0D background) with dark gray color scheme (#0D0D0D, #1A1A1A, #E0E0E0)
+- Dark theme (#080808 background) with high-contrast anti-glare design
+- All panel backgrounds use solid opaque colors (#1C1C1C, #222222, #282828) instead of translucent white/[0.02-0.06]
+- All borders use solid colors (#2A2A2A, #303030, #363636) for visibility in sunlight
+- Text contrast boosted across all files (minimum ~40% white opacity for any visible text)
+- No backdrop-blur glass effects (removed to prevent sunlight washout)
 - Inter font for UI, JetBrains Mono for data/metrics
-- "Digital Brutalism/Tech Finance" aesthetic with glass-panel effects and subtle grid backgrounds
+- "Digital Brutalism/Tech Finance" aesthetic with solid panels and grid backgrounds
 - API key must be stored server-side only, never exposed to frontend
 - Monthly usage limit of 30 analyses per user
 

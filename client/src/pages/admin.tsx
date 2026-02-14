@@ -70,7 +70,7 @@ export default function AdminPage() {
                 </TableHeader>
                 <TableBody>
                   {allUsers.map((u) => (
-                    <TableRow key={u.id} className="border-white/10 hover:bg-white/5">
+                    <TableRow key={u.id} className="border-white/10 hover:bg-white/15">
                       <TableCell className="font-mono text-xs text-muted-foreground">{u.id}</TableCell>
                       <TableCell className="font-medium">{u.displayName || u.email}</TableCell>
                       <TableCell>
@@ -114,7 +114,7 @@ export default function AdminPage() {
 
             <div className="sm:hidden space-y-2 px-3">
               {allUsers.map((u) => (
-                <div key={u.id} className="bg-white/5 border border-white/10 rounded-lg p-3 space-y-2">
+                <div key={u.id} className="bg-white/15 border border-white/10 rounded-lg p-3 space-y-2">
                   <div className="flex items-center justify-between">
                     <span className="text-sm font-medium truncate max-w-[180px]">{u.displayName || u.email}</span>
                     <Badge 

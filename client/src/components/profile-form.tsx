@@ -41,7 +41,7 @@ export function CreditProfileForm() {
   }
 
   return (
-    <Card className="bg-card/50 border-white/5 backdrop-blur-sm">
+    <Card className="bg-card/50 border-white/5 backdrop-blur-none">
       <CardHeader>
         <CardTitle>Credit Profile Data</CardTitle>
         <CardDescription>Enter your current credit statistics for accurate analysis.</CardDescription>

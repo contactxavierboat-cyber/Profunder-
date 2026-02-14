@@ -50,7 +50,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
             <p className="text-[10px] sm:text-xs text-muted-foreground mt-1">Mentorship, On Demand</p>
           </div>
           <button
-            className="md:hidden w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white/5"
+            className="md:hidden w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white/15"
             onClick={() => setMobileOpen(false)}
           >
             <X className="w-5 h-5 text-muted-foreground" />
@@ -92,7 +92,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
         <header className="h-12 flex items-center justify-between px-3 border-b border-sidebar-border md:hidden shrink-0 relative z-10 bg-background">
           <button
             onClick={() => setMobileOpen(true)}
-            className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white/5"
+            className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white/15"
           >
             <Menu className="w-5 h-5 text-muted-foreground" />
           </button>
