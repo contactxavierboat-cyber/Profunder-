@@ -93,10 +93,21 @@ export const dashboardQuestions = pgTable("dashboard_questions", {
   timestamp: timestamp("timestamp").defaultNow().notNull(),
 });
 
+export const directMessages = pgTable("direct_messages", {
+  id: serial("id").primaryKey(),
+  conversationKey: text("conversation_key").notNull(),
+  senderId: integer("sender_id").notNull().references(() => users.id),
+  receiverId: integer("receiver_id").notNull().references(() => users.id),
+  content: text("content").notNull(),
+  isAi: boolean("is_ai").default(false),
+  timestamp: timestamp("timestamp").defaultNow().notNull(),
+});
+
 export const insertCommentSchema = createInsertSchema(comments).omit({ id: true, timestamp: true });
 export const insertPostSchema = createInsertSchema(posts).omit({ id: true, timestamp: true });
 export const insertFriendshipSchema = createInsertSchema(friendships).omit({ id: true, createdAt: true });
 export const insertDashboardQuestionSchema = createInsertSchema(dashboardQuestions).omit({ id: true, timestamp: true });
+export const insertDirectMessageSchema = createInsertSchema(directMessages).omit({ id: true, timestamp: true });
 
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
@@ -110,3 +121,5 @@ export type Friendship = typeof friendships.$inferSelect;
 export type InsertFriendship = z.infer<typeof insertFriendshipSchema>;
 export type DashboardQuestion = typeof dashboardQuestions.$inferSelect;
 export type InsertDashboardQuestion = z.infer<typeof insertDashboardQuestionSchema>;
+export type DirectMessage = typeof directMessages.$inferSelect;
+export type InsertDirectMessage = z.infer<typeof insertDirectMessageSchema>;

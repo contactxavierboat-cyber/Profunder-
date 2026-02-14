@@ -1395,6 +1395,117 @@ If the user has uploaded a credit report, reference specific data points when ap
     }
   });
 
+  app.get("/api/dm/:friendId", requireAuth, async (req, res) => {
+    try {
+      const userId = req.session.userId!;
+      const friendId = parseInt(req.params.friendId);
+      if (isNaN(friendId)) return res.status(400).json({ error: "Invalid friendId" });
+      const friendship = await storage.getFriendship(userId, friendId);
+      if (!friendship || friendship.status !== "accepted") return res.status(403).json({ error: "Not friends" });
+      const convKey = [Math.min(userId, friendId), Math.max(userId, friendId)].join("_");
+      const messages = await storage.getDirectMessages(convKey);
+      res.json(messages);
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  app.post("/api/dm/:friendId", requireAuth, async (req, res) => {
+    try {
+      const userId = req.session.userId!;
+      const friendId = parseInt(req.params.friendId);
+      if (isNaN(friendId)) return res.status(400).json({ error: "Invalid friendId" });
+      const friendship = await storage.getFriendship(userId, friendId);
+      if (!friendship || friendship.status !== "accepted") return res.status(403).json({ error: "Not friends" });
+      const { content } = req.body;
+      if (!content || typeof content !== "string" || !content.trim()) return res.status(400).json({ error: "Empty message" });
+      const convKey = [Math.min(userId, friendId), Math.max(userId, friendId)].join("_");
+      const dm = await storage.createDirectMessage({ conversationKey: convKey, senderId: userId, receiverId: friendId, content: content.trim(), isAi: false });
+      res.json(dm);
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  app.post("/api/dm/:friendId/team-ai", requireAuth, async (req, res) => {
+    try {
+      const userId = req.session.userId!;
+      const friendId = parseInt(req.params.friendId);
+      if (isNaN(friendId)) return res.status(400).json({ error: "Invalid friendId" });
+      const friendship = await storage.getFriendship(userId, friendId);
+      if (!friendship || friendship.status !== "accepted") return res.status(403).json({ error: "Not friends" });
+      const { question } = req.body;
+      if (!question || typeof question !== "string" || !question.trim()) return res.status(400).json({ error: "Empty question" });
+      const convKey = [Math.min(userId, friendId), Math.max(userId, friendId)].join("_");
+
+      const user = await storage.getUser(userId);
+      const friend = await storage.getUser(friendId);
+      const userName = user?.displayName || user?.email || "User";
+      const friendName = friend?.displayName || friend?.email || "Friend";
+
+      await storage.createDirectMessage({ conversationKey: convKey, senderId: userId, receiverId: friendId, content: question.trim(), isAi: false });
+
+      const recentMessages = await storage.getDirectMessages(convKey);
+      const last20 = recentMessages.slice(-20);
+      const chatContext = last20.map(m => {
+        const name = m.senderId === userId ? userName : (m.isAi ? "MentXr® AI" : friendName);
+        return `${name}: ${m.content}`;
+      }).join("\n");
+
+      const teamPrompt = MASTER_SYSTEM_PROMPT + `\n\nYou are MentXr® Team AI — an AI assistant participating in a group conversation between friends on the MentXr® platform.
+
+PARTICIPANTS IN THIS CONVERSATION:
+- ${userName} (asking the question)
+- ${friendName} (their friend)
+- You (MentXr® AI — the team's AI advisor)
+
+BEHAVIOR:
+- Address both participants naturally — you're part of their team
+- Reference both users by name when relevant
+- Provide collaborative, actionable guidance that both friends can work on together
+- Encourage teamwork and accountability between them
+- Keep responses focused, practical, and conversational
+- If one person has strengths the other lacks, suggest how they can support each other
+
+RECENT CONVERSATION CONTEXT:
+${chatContext}
+
+Respond to the latest question as the team's AI mentor. Be direct, helpful, and team-oriented.`;
+
+      const openai = (await import("openai")).default;
+      const client = new openai();
+      const completion = await client.chat.completions.create({
+        model: "gpt-4o",
+        messages: [
+          { role: "system", content: teamPrompt },
+          { role: "user", content: question.trim() },
+        ],
+        max_tokens: 1200,
+      });
+
+      const aiResponse = completion.choices[0]?.message?.content || "I couldn't generate a response.";
+      const aiMsg = await storage.createDirectMessage({ conversationKey: convKey, senderId: 0, receiverId: 0, content: aiResponse, isAi: true });
+
+      res.json(aiMsg);
+    } catch (error: any) {
+      console.error("Team AI error:", error);
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  app.delete("/api/dm/:friendId", requireAuth, async (req, res) => {
+    try {
+      const userId = req.session.userId!;
+      const friendId = parseInt(req.params.friendId);
+      if (isNaN(friendId)) return res.status(400).json({ error: "Invalid friendId" });
+      const convKey = [Math.min(userId, friendId), Math.max(userId, friendId)].join("_");
+      await storage.clearDirectMessages(convKey);
+      res.status(204).send();
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
   app.get("/api/users/search", requireAuth, async (req, res) => {
     try {
       const userId = req.session.userId!;

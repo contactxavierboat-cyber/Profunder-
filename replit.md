@@ -93,6 +93,14 @@ A free AI mentorship platform ("Mentorship On Demand") combining Capital Readine
 - Users: email, password, role, subscriptionStatus, monthlyUsage, maxUsage, credit profile fields, document flags
 - Messages: userId, role (user/assistant), content, attachment type, mentor (nullable), timestamp
 
+### Messages / DM System
+- Messages tab (formerly Workspace) allows friends to DM each other directly
+- Team AI: Either friend can ask AI a question within the DM, both see the response
+- Team AI uses conversation context + both users' names for collaborative guidance
+- Auto-polls every 5 seconds for new messages when in a conversation
+- Schema: directMessages table (conversationKey, senderId, receiverId, content, isAi, timestamp)
+- API: GET/POST /api/dm/:friendId, POST /api/dm/:friendId/team-ai, DELETE /api/dm/:friendId
+
 ### Bot Mentor System
 - 7 anonymous bots: NovaSage247 (Sales), AlphaVolt889 (Investing), BlazeEcho512 (Marketing), LunarPeak303 (Leadership), IronFlux771 (Entrepreneurship), ZenCipher108 (Mindset), SteelWraith666 (Youth Advocacy)
 - Each has: color-gradient avatar with initials, system prompt, specialty, tagline, keyword detection

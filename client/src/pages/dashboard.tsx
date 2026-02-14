@@ -266,6 +266,71 @@ export default function DashboardPage() {
   const [creatorAiUploading, setCreatorAiUploading] = useState(false);
   const shortsContainerRef = useRef<HTMLDivElement>(null);
 
+  const [dmFriendId, setDmFriendId] = useState<number | null>(null);
+  const [dmFriendName, setDmFriendName] = useState("");
+  const [dmMessages, setDmMessages] = useState<any[]>([]);
+  const [dmInput, setDmInput] = useState("");
+  const [dmLoading, setDmLoading] = useState(false);
+  const [dmAiLoading, setDmAiLoading] = useState(false);
+  const dmEndRef = useRef<HTMLDivElement>(null);
+
+  const fetchDmMessages = async (friendId: number) => {
+    try {
+      const res = await fetch(`/api/dm/${friendId}`, { credentials: "include" });
+      if (res.ok) setDmMessages(await res.json());
+    } catch {}
+  };
+
+  const sendDm = async () => {
+    if (!dmInput.trim() || !dmFriendId || dmLoading) return;
+    setDmLoading(true);
+    try {
+      const res = await fetch(`/api/dm/${dmFriendId}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ content: dmInput.trim() }),
+      });
+      if (res.ok) {
+        setDmInput("");
+        await fetchDmMessages(dmFriendId);
+        setTimeout(() => dmEndRef.current?.scrollIntoView({ behavior: "smooth" }), 100);
+      }
+    } catch {} finally { setDmLoading(false); }
+  };
+
+  const sendTeamAi = async () => {
+    if (!dmInput.trim() || !dmFriendId || dmAiLoading) return;
+    setDmAiLoading(true);
+    try {
+      const res = await fetch(`/api/dm/${dmFriendId}/team-ai`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ question: dmInput.trim() }),
+      });
+      if (res.ok) {
+        setDmInput("");
+        await fetchDmMessages(dmFriendId);
+        setTimeout(() => dmEndRef.current?.scrollIntoView({ behavior: "smooth" }), 100);
+      }
+    } catch {} finally { setDmAiLoading(false); }
+  };
+
+  const openDm = (friendId: number, friendName: string) => {
+    setDmFriendId(friendId);
+    setDmFriendName(friendName);
+    setDmMessages([]);
+    fetchDmMessages(friendId);
+    setActiveTab("chat");
+  };
+
+  useEffect(() => {
+    if (activeTab !== "chat" || !dmFriendId) return;
+    const interval = setInterval(() => fetchDmMessages(dmFriendId), 5000);
+    return () => clearInterval(interval);
+  }, [activeTab, dmFriendId]);
+
   const TRUNCATE_LENGTH = 280;
 
   const toggleExpand = (id: number) => {
@@ -783,7 +848,7 @@ export default function DashboardPage() {
                   </div>
                 ))}
                 {friendsList.map((f: any) => (
-                  <div key={f.friendshipId} className="group h-11 flex items-center gap-3 px-4 hover:bg-white/[0.03] transition-colors">
+                  <div key={f.friendshipId} className="group h-11 flex items-center gap-3 px-4 hover:bg-white/[0.03] transition-colors cursor-pointer" onClick={() => { openDm(f.id, f.displayName || f.email); setSidebarOpen(false); }}>
                     <div className="relative shrink-0">
                       <div className="w-7 h-7 rounded-lg bg-white/[0.06] border border-white/[0.08] flex items-center justify-center text-[9px] font-bold text-white/50">
                         {(f.displayName || "?").substring(0, 2).toUpperCase()}
@@ -791,7 +856,7 @@ export default function DashboardPage() {
                       <div className="absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full bg-green-500 border-2 border-[#0a0a0a]" />
                     </div>
                     <p className="text-[11px] text-white/50 truncate flex-1">{f.displayName}</p>
-                    <button onClick={() => removeFriend(f.friendshipId)} className="hidden group-hover:flex w-5 h-5 rounded-md bg-red-500/10 hover:bg-red-500/20 items-center justify-center" data-testid={`remove-friend-${f.id}`}>
+                    <button onClick={(e) => { e.stopPropagation(); removeFriend(f.friendshipId); }} className="hidden group-hover:flex w-5 h-5 rounded-md bg-red-500/10 hover:bg-red-500/20 items-center justify-center" data-testid={`remove-friend-${f.id}`}>
                       <UserX className="w-3 h-3 text-red-400/60" />
                     </button>
                   </div>
@@ -927,8 +992,8 @@ export default function DashboardPage() {
               )}
             >
               <div className="flex items-center justify-center gap-1.5">
-                <MessageCircle className="w-3.5 h-3.5" />
-                Workspace
+                <MessageSquare className="w-3.5 h-3.5" />
+                Messages
               </div>
               {activeTab === "chat" && <div className="absolute bottom-0 left-1/4 right-1/4 h-[2px] bg-white rounded-full" />}
             </button>
@@ -1993,266 +2058,162 @@ export default function DashboardPage() {
               </div>
             </div>
           ) : (
-            <div className="max-w-xl mx-auto w-full">
-              {!hasMessages && (
-                <div className="flex flex-col items-center justify-center py-16 px-4">
-                  {activeMentor ? (
-                    <>
-                      <div className={cn("w-20 h-20 rounded-2xl flex items-center justify-center text-white text-xl font-bold border border-white/10 mb-4", activeMentorKey ? BOT_COLORS[activeMentorKey] : "")}>
-                        {activeMentor.initials}
-                      </div>
-                      <h2 className="text-xl font-bold mb-0.5">{activeMentor.name}</h2>
-                      <p className="text-white/30 text-sm text-center max-w-xs">{activeMentor.specialty} · {activeMentor.tagline}</p>
-                    </>
-                  ) : (
-                    <>
-                      <div className="w-20 h-20 rounded-2xl mb-4 bg-white/[0.06] border border-white/[0.06] flex items-center justify-center relative">
-                        <span className="absolute w-10 h-10 rounded-full bg-white/[0.06] animate-ping" />
-                        <span className="relative w-5 h-5 rounded-full bg-white shadow-[0_0_12px_rgba(255,255,255,0.2)]" />
-                      </div>
-                      <h2 className="text-xl font-bold mb-0.5">MentXr®</h2>
-                      <p className="text-white/30 text-sm text-center max-w-xs">Mentorship On Demand</p>
-                    </>
-                  )}
+            <div className="w-full h-full flex flex-col" style={{ background: '#0D0D0D' }}>
+              {!dmFriendId ? (
+                <div className="flex-1 overflow-y-auto px-5 sm:px-8 py-6 max-w-[600px] mx-auto w-full">
+                  <div className="flex items-center gap-3 mb-6">
+                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-600 to-cyan-600 flex items-center justify-center">
+                      <MessageSquare className="w-5 h-5 text-white" />
+                    </div>
+                    <div>
+                      <h2 className="text-lg font-bold text-white" data-testid="text-messages-title">Messages</h2>
+                      <p className="text-[11px] text-white/40">Chat with friends & ask AI together as a team</p>
+                    </div>
+                  </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 mt-8 max-w-md w-full">
-                    {[
-                      { text: "Analyze my credit report", icon: "📊" },
-                      { text: "How do I improve my funding score?", icon: "📈" },
-                      { text: "What do lenders look for?", icon: "🎯" },
-                      { text: "Help me build a funding strategy", icon: "💡" },
-                    ].map((prompt, i) => (
-                      <button
-                        key={i}
-                        data-testid={`button-chat-suggestion-${i}`}
-                        onClick={() => {
-                          setInput(prompt.text);
-                          textareaRef.current?.focus();
-                        }}
-                        className="text-left px-4 py-3 rounded-2xl border border-white/[0.06] bg-white/[0.02] hover:bg-white/[0.05] transition-all text-sm text-white/40 hover:text-white/60 flex items-center gap-3"
-                      >
-                        <span className="text-lg">{prompt.icon}</span>
-                        <span>{prompt.text}</span>
+                  {friendsList.length === 0 ? (
+                    <div className="text-center py-16">
+                      <UserPlus className="w-10 h-10 text-white/10 mx-auto mb-3" />
+                      <p className="text-sm text-white/35 mb-1">No friends yet</p>
+                      <p className="text-[11px] text-white/20 mb-4">Add friends from the buddy list to start messaging</p>
+                      <button onClick={() => setShowAddFriend(true)} className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white/[0.06] border border-white/[0.08] text-sm text-white/50 hover:bg-white/[0.1] transition-colors" data-testid="button-add-friend-dm">
+                        <UserPlus className="w-4 h-4" />
+                        Add Friend
                       </button>
-                    ))}
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      {friendsList.map((f: any) => (
+                        <button
+                          key={f.id}
+                          onClick={() => openDm(f.id, f.displayName || f.email)}
+                          className="w-full flex items-center gap-3 p-3.5 rounded-xl bg-white/[0.03] border border-white/[0.06] hover:bg-white/[0.06] transition-all text-left"
+                          data-testid={`dm-friend-${f.id}`}
+                        >
+                          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500/30 to-cyan-500/30 border border-white/10 flex items-center justify-center text-sm font-bold text-white/50">
+                            {(f.displayName || f.email || "?").substring(0, 2).toUpperCase()}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium text-white/70 truncate">{f.displayName || f.email}</p>
+                            <p className="text-[10px] text-white/25">Tap to chat</p>
+                          </div>
+                          <ChevronRight className="w-4 h-4 text-white/15" />
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="flex-1 flex flex-col min-h-0">
+                  <div className="shrink-0 px-4 py-3 border-b border-white/[0.06] flex items-center gap-3">
+                    <button onClick={() => { setDmFriendId(null); setDmMessages([]); }} className="w-8 h-8 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] flex items-center justify-center transition-colors" data-testid="button-dm-back">
+                      <ChevronRight className="w-4 h-4 text-white/40 rotate-180" />
+                    </button>
+                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500/30 to-cyan-500/30 border border-white/10 flex items-center justify-center text-[10px] font-bold text-white/50">
+                      {dmFriendName.substring(0, 2).toUpperCase()}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-white/70 truncate">{dmFriendName}</p>
+                      <p className="text-[9px] text-white/20">Direct Message · Team AI available</p>
+                    </div>
+                    <button onClick={() => { fetchDmMessages(dmFriendId!); }} className="w-8 h-8 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] flex items-center justify-center transition-colors" data-testid="button-dm-refresh">
+                      <RefreshCw className="w-3.5 h-3.5 text-white/30" />
+                    </button>
+                  </div>
+
+                  <div className="flex-1 overflow-y-auto px-4 py-3 space-y-3" style={{ scrollbarWidth: 'thin' }}>
+                    {dmMessages.length === 0 && (
+                      <div className="flex flex-col items-center justify-center py-12">
+                        <MessageSquare className="w-8 h-8 text-white/10 mb-3" />
+                        <p className="text-sm text-white/30 mb-1">Start the conversation</p>
+                        <p className="text-[10px] text-white/15">Send a message or ask AI together</p>
+                      </div>
+                    )}
+
+                    {dmMessages.map((msg: any) => {
+                      const isMe = msg.senderId === user.id;
+                      const isAi = msg.isAi;
+                      return (
+                        <div key={msg.id} className={cn("flex gap-2.5", isMe ? "justify-end" : "justify-start")} data-testid={`dm-msg-${msg.id}`}>
+                          {!isMe && (
+                            <div className={cn("w-7 h-7 rounded-lg flex items-center justify-center shrink-0 mt-0.5", isAi ? "bg-gradient-to-br from-purple-500/20 to-blue-500/20 border border-purple-500/20" : "bg-white/[0.04] border border-white/[0.06]")}>
+                              {isAi ? <Sparkles className="w-3.5 h-3.5 text-purple-400/60" /> : <span className="text-[9px] font-bold text-white/30">{dmFriendName.substring(0, 2).toUpperCase()}</span>}
+                            </div>
+                          )}
+                          <div className={cn(
+                            "max-w-[80%] rounded-2xl px-4 py-3",
+                            isAi ? "bg-purple-500/[0.08] border border-purple-500/[0.12]" :
+                            isMe ? "bg-white/[0.08] border border-white/[0.1]" :
+                            "bg-white/[0.02] border border-white/[0.04]"
+                          )}>
+                            {isAi && <p className="text-[9px] text-purple-400/50 font-medium mb-1">MentXr® Team AI</p>}
+                            {!isMe && !isAi && <p className="text-[9px] text-white/25 font-medium mb-1">{dmFriendName}</p>}
+                            <p className="text-[12px] text-white/55 leading-relaxed whitespace-pre-wrap">{msg.content}</p>
+                            <p className="text-[9px] text-white/15 mt-1.5">
+                              {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                            </p>
+                          </div>
+                        </div>
+                      );
+                    })}
+
+                    {(dmLoading || dmAiLoading) && (
+                      <div className="flex gap-2.5 justify-start">
+                        <div className={cn("w-7 h-7 rounded-lg flex items-center justify-center shrink-0", dmAiLoading ? "bg-gradient-to-br from-purple-500/20 to-blue-500/20 border border-purple-500/20" : "bg-white/[0.04] border border-white/[0.06]")}>
+                          {dmAiLoading ? <Sparkles className="w-3.5 h-3.5 text-purple-400/60" /> : <Loader2 className="w-3.5 h-3.5 animate-spin text-white/30" />}
+                        </div>
+                        <div className={cn("rounded-2xl px-4 py-3", dmAiLoading ? "bg-purple-500/[0.08] border border-purple-500/[0.12]" : "bg-white/[0.02] border border-white/[0.04]")}>
+                          <div className="flex items-center gap-2">
+                            <Loader2 className="w-3.5 h-3.5 animate-spin text-white/25" />
+                            <span className="text-[11px] text-white/25">{dmAiLoading ? "Team AI thinking..." : "Sending..."}</span>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                    <div ref={dmEndRef} />
+                  </div>
+
+                  <div className="shrink-0 px-4 pb-4 pt-2 border-t border-white/[0.06] bg-[#080808]/80">
+                    <div className="flex gap-2">
+                      <textarea
+                        data-testid="input-dm"
+                        value={dmInput}
+                        onChange={(e) => setDmInput(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" && !e.shiftKey) {
+                            e.preventDefault();
+                            sendDm();
+                          }
+                        }}
+                        placeholder={`Message ${dmFriendName}...`}
+                        className="flex-1 bg-white/[0.03] border border-white/[0.06] rounded-xl px-3.5 py-2.5 text-sm text-white/70 placeholder:text-white/20 resize-none focus:outline-none focus:border-white/[0.12] transition-colors"
+                        rows={1}
+                      />
+                      <button
+                        data-testid="button-send-dm"
+                        onClick={sendDm}
+                        disabled={!dmInput.trim() || dmLoading || dmAiLoading}
+                        className="w-10 h-10 rounded-xl bg-white/[0.06] border border-white/[0.08] hover:bg-white/[0.1] disabled:opacity-30 flex items-center justify-center transition-colors shrink-0"
+                        title="Send message"
+                      >
+                        <Send className="w-4 h-4 text-white/50" />
+                      </button>
+                      <button
+                        data-testid="button-team-ai"
+                        onClick={sendTeamAi}
+                        disabled={!dmInput.trim() || dmLoading || dmAiLoading}
+                        className="h-10 px-3 rounded-xl bg-gradient-to-r from-purple-600/80 to-blue-600/80 border border-purple-500/20 hover:from-purple-500 hover:to-blue-500 disabled:opacity-30 flex items-center gap-1.5 transition-all shrink-0"
+                        title="Ask Team AI"
+                      >
+                        <Sparkles className="w-3.5 h-3.5 text-white/80" />
+                        <span className="text-[11px] text-white/80 font-medium">AI</span>
+                      </button>
+                    </div>
                   </div>
                 </div>
               )}
-
-              <div className="divide-y divide-white/[0.04]">
-                {messages.map((m) => {
-                  const mentorData = m.role === 'assistant' && m.mentor ? MENTOR_INFO[m.mentor] : null;
-                  const isUser = m.role === "user";
-                  const posterName = isUser ? "You" : (mentorData ? mentorData.name : "MentXr® AI");
-                  const posterHandle = isUser ? `@${user.displayName || user.email.split("@")[0]}` : (mentorData ? `@${m.mentor}` : "@mentxr");
-                  const posterInitials = isUser ? null : (mentorData ? mentorData.initials : null);
-                  const posterMentorKey = isUser ? null : (m.mentor || null);
-                  const posterSpecialty = !isUser && mentorData ? mentorData.specialty : (!isUser ? "AI Mentor" : null);
-
-                  return (
-                    <div key={m.id} className="px-4 py-4 hover:bg-white/[0.01] transition-colors" data-testid={`post-${m.id}`}>
-                      <div className="flex gap-3">
-                        <div className="shrink-0">
-                          {isUser ? (
-                            <div className="w-10 h-10 rounded-full bg-white/[0.06] border border-white/[0.06] flex items-center justify-center text-[12px] font-bold text-white/40">
-                              {(user.displayName || user.email).substring(0, 2).toUpperCase()}
-                            </div>
-                          ) : posterInitials && posterMentorKey ? (
-                            <div className={cn("w-10 h-10 rounded-full flex items-center justify-center text-white text-sm font-bold border border-white/10", BOT_COLORS[posterMentorKey])}>{posterInitials}</div>
-                          ) : (
-                            <div className="w-10 h-10 rounded-xl flex items-center justify-center relative bg-white/[0.06]">
-                              <span className="absolute w-5 h-5 rounded-full bg-white/[0.08] animate-ping" />
-                              <span className="relative w-2.5 h-2.5 rounded-full bg-white shadow-[0_0_8px_rgba(255,255,255,0.2)]" />
-                            </div>
-                          )}
-                        </div>
-
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-1.5 mb-0.5">
-                            <span className="text-[14px] font-bold text-white/80 truncate">{posterName}</span>
-                            {!isUser && (
-                              <span className="shrink-0">
-                                <svg className="w-[14px] h-[14px] text-white/50" viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg>
-                              </span>
-                            )}
-                            <span className="text-[13px] text-white/20 truncate">{posterHandle}</span>
-                            <span className="text-white/10 text-[13px]">·</span>
-                            <span className="text-[13px] text-white/20 shrink-0">{m.timestamp ? timeAgo(m.timestamp) : "now"}</span>
-                          </div>
-
-                          {posterSpecialty && (
-                            <p className="text-[11px] text-white/25 mb-2">{posterSpecialty}</p>
-                          )}
-
-                          {m.attachment && (
-                            <div className="inline-flex items-center gap-2 mb-2.5 px-3 py-1.5 rounded-xl bg-white/[0.03] border border-white/[0.06] text-[12px] text-white/30">
-                              <FileText className="w-3.5 h-3.5" />
-                              {m.attachment.replace("_", " ")}.pdf
-                            </div>
-                          )}
-
-                          <div className="text-[14px] sm:text-[15px] leading-[1.6] text-white/65 whitespace-pre-wrap break-words">
-                            {m.content.length > TRUNCATE_LENGTH && !expandedMessages.has(m.id) ? (
-                              <>
-                                {m.content.substring(0, TRUNCATE_LENGTH).trimEnd()}...
-                                <button
-                                  onClick={() => toggleExpand(m.id)}
-                                  className="text-white/40 hover:text-white/60 ml-1 text-[13px] font-medium"
-                                  data-testid={`button-readmore-${m.id}`}
-                                >
-                                  Read more
-                                </button>
-                              </>
-                            ) : (
-                              <>
-                                {m.content}
-                                {m.content.length > TRUNCATE_LENGTH && (
-                                  <button
-                                    onClick={() => toggleExpand(m.id)}
-                                    className="block text-white/25 hover:text-white/40 mt-1 text-[13px] font-medium"
-                                    data-testid={`button-showless-${m.id}`}
-                                  >
-                                    Show less
-                                  </button>
-                                )}
-                              </>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-
-                {isLoading && (
-                  <div className="px-4 py-4">
-                    <div className="flex gap-3">
-                      <div className="shrink-0">
-                        {activeMentor ? (
-                          <div className={cn("w-10 h-10 rounded-full flex items-center justify-center text-white text-sm font-bold border border-white/10", activeMentorKey ? BOT_COLORS[activeMentorKey] : "")}>{activeMentor.initials}</div>
-                        ) : (
-                          <div className="w-10 h-10 rounded-xl flex items-center justify-center relative bg-white/[0.06]">
-                            <span className="absolute w-5 h-5 rounded-full bg-white/[0.08] animate-ping" />
-                            <span className="relative w-2.5 h-2.5 rounded-full bg-white shadow-[0_0_8px_rgba(255,255,255,0.2)]" />
-                          </div>
-                        )}
-                      </div>
-                      <div className="flex-1">
-                        <div className="flex items-center gap-1.5 mb-1">
-                          <span className="text-[14px] font-bold text-white/80">{activeMentor ? activeMentor.name : "MentXr® AI"}</span>
-                          <span className="shrink-0">
-                            <svg className="w-[14px] h-[14px] text-white/50" viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg>
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-1.5 py-2">
-                          <span className="w-2 h-2 bg-white/20 rounded-full animate-bounce"></span>
-                          <span className="w-2 h-2 bg-white/20 rounded-full animate-bounce [animation-delay:0.15s]"></span>
-                          <span className="w-2 h-2 bg-white/20 rounded-full animate-bounce [animation-delay:0.3s]"></span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              <div ref={messagesEndRef} className="h-4" />
             </div>
           )}
-        </div>
-
-        {showScrollBtn && (
-          <div className="absolute bottom-28 sm:bottom-32 left-1/2 -translate-x-1/2 z-10 md:left-[calc(50%+130px)]">
-            <button
-              onClick={scrollToBottom}
-              className="w-9 h-9 rounded-full bg-white/[0.06] border border-white/[0.06] backdrop-blur-lg flex items-center justify-center hover:bg-white/[0.1] transition-colors shadow-lg"
-            >
-              <ArrowDown className="w-4 h-4" />
-            </button>
-          </div>
-        )}
-
-        <div className="shrink-0 border-t border-white/[0.04] bg-[#080808]/80 backdrop-blur-xl px-3 sm:px-4 pb-3 sm:pb-4 pt-2 safe-area-pb">
-          <div className="max-w-xl mx-auto">
-            {activeMentor && hasMessages && (
-              <div className="flex items-center gap-2 mb-2 px-1">
-                <div className={cn("w-5 h-5 rounded-full flex items-center justify-center text-white text-[8px] font-bold border border-white/10", activeMentorKey ? BOT_COLORS[activeMentorKey] : "")}>{activeMentor.initials}</div>
-                <span className="text-[11px] text-white/20">Replying to <span className="text-white/40 font-medium">{activeMentor.name}</span></span>
-                <button onClick={() => { setSelectedMentor(null); setMentorCleared(true); }} className="text-white/15 hover:text-white/40 ml-auto" data-testid="button-clear-mentor">
-                  <X className="w-3.5 h-3.5" />
-                </button>
-              </div>
-            )}
-            {attachedFile && (
-              <div className="flex items-center gap-2 mb-2 px-1">
-                <div className="flex items-center gap-2 bg-white/[0.03] border border-white/[0.06] rounded-xl px-3 py-1.5 text-[12px] text-white/40">
-                  <FileText className="w-3.5 h-3.5 text-white/25 shrink-0" />
-                  <span className="truncate max-w-[180px]">{attachedFile.name}</span>
-                  <button
-                    onClick={() => setAttachedFile(null)}
-                    className="text-white/20 hover:text-white/50 ml-1"
-                    data-testid="button-remove-file"
-                  >
-                    <X className="w-3.5 h-3.5" />
-                  </button>
-                </div>
-              </div>
-            )}
-            <div className="flex items-end gap-2">
-              <div className="shrink-0">
-                <div className="w-8 h-8 rounded-full bg-white/[0.06] border border-white/[0.06] flex items-center justify-center text-[10px] font-bold text-white/35">
-                  {(user.displayName || user.email).substring(0, 2).toUpperCase()}
-                </div>
-              </div>
-              <div className="flex-1 relative flex items-end bg-white/[0.03] border border-white/[0.06] rounded-2xl px-4 py-2.5 focus-within:border-white/[0.1] focus-within:bg-white/[0.04] transition-all">
-                <textarea
-                  ref={textareaRef}
-                  data-testid="input-message"
-                  value={input}
-                  onChange={handleTextareaInput}
-                  onKeyDown={handleKeyDown}
-                  placeholder="Message MentXr..."
-                  rows={1}
-                  className="flex-1 bg-transparent outline-none resize-none text-[14px] text-white/80 placeholder-white/20 max-h-[200px] leading-relaxed"
-                  style={{ scrollbarWidth: 'thin' }}
-                />
-                <div className="flex items-center gap-1 ml-2">
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept=".pdf,.doc,.docx,.txt,.csv"
-                    className="hidden"
-                    data-testid="input-file"
-                    onChange={(e) => {
-                      if (e.target.files?.[0]) {
-                        setAttachedFile(e.target.files[0]);
-                      }
-                      e.target.value = "";
-                    }}
-                  />
-                  <button
-                    data-testid="button-attach"
-                    onClick={() => fileInputRef.current?.click()}
-                    className="w-8 h-8 flex items-center justify-center rounded-xl hover:bg-white/[0.06] transition-colors text-white/25 hover:text-white/50"
-                  >
-                    <Paperclip className="w-4 h-4" />
-                  </button>
-                  <button
-                    data-testid="button-send"
-                    onClick={handleSend}
-                    disabled={!input.trim() && !attachedFile || isLoading}
-                    className={cn(
-                      "w-8 h-8 flex items-center justify-center rounded-xl transition-all",
-                      (input.trim() || attachedFile) && !isLoading
-                        ? "bg-white text-black hover:bg-white/90"
-                        : "text-white/15"
-                    )}
-                  >
-                    {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
         </div>
       </main>
 

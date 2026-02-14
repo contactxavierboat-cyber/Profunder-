@@ -1,6 +1,6 @@
-import { users, messages, comments, posts, friendships, dashboardQuestions, type User, type InsertUser, type Message, type InsertMessage, type Comment, type InsertComment, type Post, type InsertPost, type Friendship, type DashboardQuestion, type InsertDashboardQuestion } from "@shared/schema";
+import { users, messages, comments, posts, friendships, dashboardQuestions, directMessages, type User, type InsertUser, type Message, type InsertMessage, type Comment, type InsertComment, type Post, type InsertPost, type Friendship, type DashboardQuestion, type InsertDashboardQuestion, type DirectMessage, type InsertDirectMessage } from "@shared/schema";
 import { db } from "./db";
-import { eq, count, desc, or, and, ne, ilike, isNull, sql } from "drizzle-orm";
+import { eq, count, desc, or, and, ne, ilike, isNull, sql, asc } from "drizzle-orm";
 
 export interface IStorage {
   getUser(id: number): Promise<User | undefined>;
@@ -33,6 +33,10 @@ export interface IStorage {
   getDashboardQuestions(userId: number): Promise<DashboardQuestion[]>;
   createDashboardQuestion(question: InsertDashboardQuestion): Promise<DashboardQuestion>;
   clearDashboardQuestions(userId: number): Promise<void>;
+
+  getDirectMessages(conversationKey: string): Promise<DirectMessage[]>;
+  createDirectMessage(dm: InsertDirectMessage): Promise<DirectMessage>;
+  clearDirectMessages(conversationKey: string): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -157,6 +161,19 @@ export class DatabaseStorage implements IStorage {
 
   async clearDashboardQuestions(userId: number): Promise<void> {
     await db.delete(dashboardQuestions).where(eq(dashboardQuestions.userId, userId));
+  }
+
+  async getDirectMessages(conversationKey: string): Promise<DirectMessage[]> {
+    return db.select().from(directMessages).where(eq(directMessages.conversationKey, conversationKey)).orderBy(asc(directMessages.timestamp));
+  }
+
+  async createDirectMessage(dm: InsertDirectMessage): Promise<DirectMessage> {
+    const [msg] = await db.insert(directMessages).values(dm).returning();
+    return msg;
+  }
+
+  async clearDirectMessages(conversationKey: string): Promise<void> {
+    await db.delete(directMessages).where(eq(directMessages.conversationKey, conversationKey));
   }
 }
 
