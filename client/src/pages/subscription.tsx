@@ -100,7 +100,7 @@ export default function SubscriptionPage() {
   ];
 
   return (
-    <div className="min-h-[100dvh] bg-transparent text-[#1A1A1A] flex flex-col items-center justify-center p-3 sm:p-4 relative overflow-hidden" style={{ fontFamily: "'Inter', sans-serif" }}>
+    <div className="min-h-[100dvh] bg-[#F8F9FA] text-[#1A1A1A] flex flex-col items-center justify-center p-3 sm:p-4 relative overflow-hidden" style={{ fontFamily: "'Inter', sans-serif" }}>
       <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(0,0,0,0.03)_1px,transparent_1px),linear-gradient(to_bottom,rgba(0,0,0,0.03)_1px,transparent_1px)] bg-[size:40px_40px] pointer-events-none"></div>
 
       <div className="z-10 w-full max-w-md space-y-6 sm:space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700">

@@ -1,524 +1,780 @@
 import { useState, useEffect, useRef } from "react";
 import { useAuth } from "@/lib/store";
 
-function HeroBlobs() {
+function TechBackground() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
-    let animId: number;
-    let time = 0;
+
+    let animationId: number;
+    let mouseX = -1000;
+    let mouseY = -1000;
+
+    interface Particle {
+      x: number; y: number; vx: number; vy: number;
+      size: number; opacity: number; pulse: number; pulseSpeed: number;
+      isNode: boolean;
+    }
+
+    let particles: Particle[] = [];
 
     const resize = () => {
-      const dpr = window.devicePixelRatio || 1;
-      const w = canvas.parentElement!.clientWidth;
-      const h = canvas.parentElement!.clientHeight;
-      canvas.width = w * dpr;
-      canvas.height = h * dpr;
+      const w = window.innerWidth;
+      const h = window.innerHeight;
       canvas.style.width = w + 'px';
       canvas.style.height = h + 'px';
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      canvas.width = w * window.devicePixelRatio;
+      canvas.height = h * window.devicePixelRatio;
+      ctx.setTransform(window.devicePixelRatio, 0, 0, window.devicePixelRatio, 0, 0);
     };
 
-    const metaball = (ctx: CanvasRenderingContext2D, cx: number, cy: number, radius: number, t: number, seed: number) => {
-      ctx.beginPath();
-      const steps = 80;
-      for (let i = 0; i <= steps; i++) {
-        const a = (i / steps) * Math.PI * 2;
-        const n1 = Math.sin(a * 2 + t * 1.2 + seed) * 0.22;
-        const n2 = Math.cos(a * 3 + t * 0.9 + seed * 1.7) * 0.15;
-        const n3 = Math.sin(a * 5 + t * 0.6 + seed * 0.5) * 0.08;
-        const n4 = Math.cos(a * 1.5 + t * 1.5 + seed * 2.1) * 0.12;
-        const r = radius * (1 + n1 + n2 + n3 + n4);
-        const x = cx + Math.cos(a) * r;
-        const y = cy + Math.sin(a) * r;
-        if (i === 0) ctx.moveTo(x, y);
-        else ctx.lineTo(x, y);
+    const init = () => {
+      const w = window.innerWidth;
+      const h = window.innerHeight;
+      const count = Math.min(Math.floor((w * h) / 4000), 380);
+      particles = [];
+      for (let i = 0; i < count; i++) {
+        const isNode = Math.random() < 0.2;
+        particles.push({
+          x: Math.random() * w,
+          y: Math.random() * h,
+          vx: (Math.random() - 0.5) * 0.5,
+          vy: (Math.random() - 0.5) * 0.5,
+          size: isNode ? Math.random() * 2.5 + 1.5 : Math.random() * 1.3 + 0.4,
+          opacity: isNode ? Math.random() * 0.4 + 0.3 : Math.random() * 0.25 + 0.1,
+          pulse: Math.random() * Math.PI * 2,
+          pulseSpeed: Math.random() * 0.03 + 0.008,
+          isNode,
+        });
       }
-      ctx.closePath();
     };
 
-    const blobs = [
-      { bx: 0.25, by: 0.45, r: 0.28, seed: 0, alpha: 0.55, sx: 0.3, sy: 0.25 },
-      { bx: 0.55, by: 0.30, r: 0.22, seed: 2.5, alpha: 0.45, sx: 0.4, sy: 0.35 },
-      { bx: 0.70, by: 0.65, r: 0.18, seed: 5, alpha: 0.40, sx: 0.35, sy: 0.4 },
-      { bx: 0.40, by: 0.70, r: 0.24, seed: 7.5, alpha: 0.50, sx: 0.25, sy: 0.3 },
-      { bx: 0.15, by: 0.25, r: 0.15, seed: 10, alpha: 0.35, sx: 0.45, sy: 0.2 },
-    ];
+    const onMouseMove = (e: MouseEvent) => {
+      mouseX = e.clientX;
+      mouseY = e.clientY;
+    };
+    window.addEventListener('mousemove', onMouseMove);
 
     const draw = () => {
-      const w = canvas.parentElement!.clientWidth;
-      const h = canvas.parentElement!.clientHeight;
+      const w = window.innerWidth;
+      const h = window.innerHeight;
       ctx.clearRect(0, 0, w, h);
-      time += 0.005;
 
-      ctx.fillStyle = '#0b1f19';
-      ctx.fillRect(0, 0, w, h);
+      particles.forEach(p => {
+        p.x += p.vx;
+        p.y += p.vy;
+        p.pulse += p.pulseSpeed;
+        if (p.x < -10) p.x = w + 10;
+        if (p.x > w + 10) p.x = -10;
+        if (p.y < -10) p.y = h + 10;
+        if (p.y > h + 10) p.y = -10;
 
-      const dim = Math.min(w, h);
-
-      blobs.forEach(b => {
-        const cx = (b.bx + Math.sin(time * b.sx + b.seed) * 0.04) * w;
-        const cy = (b.by + Math.cos(time * b.sy + b.seed) * 0.03) * h;
-        const r = b.r * dim;
-
-        const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, r * 1.3);
-        grad.addColorStop(0, `rgba(75, 210, 170, ${b.alpha})`);
-        grad.addColorStop(0.4, `rgba(55, 185, 150, ${b.alpha * 0.6})`);
-        grad.addColorStop(0.7, `rgba(35, 155, 125, ${b.alpha * 0.3})`);
-        grad.addColorStop(1, `rgba(15, 120, 95, 0)`);
-
-        ctx.save();
-        metaball(ctx, cx, cy, r, time, b.seed);
-        ctx.fillStyle = grad;
-        ctx.fill();
-        ctx.restore();
+        const dx = p.x - mouseX;
+        const dy = p.y - mouseY;
+        const mouseDist = Math.sqrt(dx * dx + dy * dy);
+        if (mouseDist < 180 && mouseDist > 0) {
+          const force = (180 - mouseDist) / 180 * 0.02;
+          p.vx += (dx / mouseDist) * force;
+          p.vy += (dy / mouseDist) * force;
+        }
+        const speed = Math.sqrt(p.vx * p.vx + p.vy * p.vy);
+        if (speed > 0.8) {
+          p.vx = (p.vx / speed) * 0.8;
+          p.vy = (p.vy / speed) * 0.8;
+        }
       });
 
-      ctx.fillStyle = 'rgba(11, 31, 25, 0.08)';
-      ctx.fillRect(0, 0, w, h);
+      const connectionDist = 160;
+      for (let i = 0; i < particles.length; i++) {
+        const pi = particles[i];
+        if (!pi.isNode) continue;
+        for (let j = i + 1; j < particles.length; j++) {
+          const pj = particles[j];
+          const dx = pi.x - pj.x;
+          const dy = pi.y - pj.y;
+          if (Math.abs(dx) > connectionDist || Math.abs(dy) > connectionDist) continue;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          if (dist < connectionDist) {
+            const alpha = (1 - dist / connectionDist) * 0.06;
+            ctx.beginPath();
+            ctx.strokeStyle = `rgba(0, 0, 0, ${alpha})`;
+            ctx.lineWidth = 0.7;
+            ctx.moveTo(pi.x, pi.y);
+            ctx.lineTo(pj.x, pj.y);
+            ctx.stroke();
+          }
+        }
+      }
 
-      animId = requestAnimationFrame(draw);
+      particles.forEach(p => {
+        const glow = Math.sin(p.pulse) * 0.4 + 0.6;
+        const mouseDist = Math.sqrt((p.x - mouseX) ** 2 + (p.y - mouseY) ** 2);
+        const mouseBoost = mouseDist < 180 ? 1 + (180 - mouseDist) / 180 * 1.5 : 1;
+        const alpha = Math.min(p.opacity * glow * mouseBoost * 0.3, 0.12);
+        const drawSize = p.size * (mouseBoost > 1 ? mouseBoost * 0.5 + 0.5 : 1);
+
+        ctx.beginPath();
+        ctx.fillStyle = `rgba(0, 0, 0, ${alpha})`;
+        ctx.arc(p.x, p.y, drawSize, 0, Math.PI * 2);
+        ctx.fill();
+
+        if (p.isNode || drawSize > 1.2) {
+          ctx.beginPath();
+          const glowRadius = drawSize * (p.isNode ? 6 : 3);
+          const grad = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, glowRadius);
+          grad.addColorStop(0, `rgba(0, 0, 0, ${alpha * 0.25})`);
+          grad.addColorStop(0.5, `rgba(0, 0, 0, ${alpha * 0.06})`);
+          grad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+          ctx.fillStyle = grad;
+          ctx.arc(p.x, p.y, glowRadius, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      });
+
+      if (mouseX > 0 && mouseY > 0) {
+        const mGrad = ctx.createRadialGradient(mouseX, mouseY, 0, mouseX, mouseY, 200);
+        mGrad.addColorStop(0, 'rgba(0, 0, 0, 0.02)');
+        mGrad.addColorStop(0.5, 'rgba(0, 0, 0, 0.008)');
+        mGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+        ctx.fillStyle = mGrad;
+        ctx.fillRect(mouseX - 200, mouseY - 200, 400, 400);
+      }
+
+      animationId = requestAnimationFrame(draw);
     };
 
     resize();
+    init();
     draw();
-    window.addEventListener('resize', resize);
-    return () => { cancelAnimationFrame(animId); window.removeEventListener('resize', resize); };
-  }, []);
-  return <canvas ref={canvasRef} className="absolute inset-0" />;
-}
 
-function TopoPattern() {
-  const paths: string[] = [];
-  for (let i = 0; i < 20; i++) {
-    const y = 30 + i * 35;
-    const a1 = 55 + Math.sin(i * 0.6) * 25;
-    const a2 = 45 + Math.cos(i * 0.4) * 20;
-    const o = Math.sin(i * 0.9) * 40;
-    paths.push(`M-100 ${y + o} Q200 ${y - a1 + o} 450 ${y + o} Q700 ${y + a2 + o} 950 ${y + o} Q1150 ${y - a1 + o} 1400 ${y + o}`);
-  }
+    const resizeHandler = () => { resize(); init(); };
+    window.addEventListener('resize', resizeHandler);
+
+    return () => {
+      cancelAnimationFrame(animationId);
+      window.removeEventListener('resize', resizeHandler);
+      window.removeEventListener('mousemove', onMouseMove);
+    };
+  }, []);
+
   return (
-    <svg className="absolute inset-0 w-full h-full" viewBox="0 0 1200 700" preserveAspectRatio="xMidYMid slice" fill="none">
-      {paths.map((d, i) => <path key={i} d={d} stroke="#a8d4c6" strokeWidth="1" opacity="0.45" />)}
-    </svg>
+    <canvas
+      ref={canvasRef}
+      className="fixed top-0 left-0 pointer-events-none"
+      style={{ zIndex: 1 }}
+    />
   );
 }
+
+const gradientText = (dir = '180deg', from = 0.95, to = 0.5) => ({
+  background: `linear-gradient(${dir}, rgba(26,26,26,${from}) 0%, rgba(26,26,26,${to}) 100%)`,
+  WebkitBackgroundClip: 'text' as const,
+  WebkitTextFillColor: 'transparent' as const,
+  backgroundClip: 'text' as const,
+});
+
+const sectionBg = { background: 'linear-gradient(180deg, rgba(255,255,255,0.96) 0%, rgba(248,249,250,0.92) 60%, rgba(241,243,245,0.85) 100%)' };
+
+const SectionLabel = ({ children }: { children: string }) => (
+  <p className="text-[11px] tracking-[0.2em] uppercase mb-6 sm:mb-8 text-[#999]">{children}</p>
+);
+
+const faqItems = [
+  { q: "Do I need perfect credit to use MentXr?", a: "No. MentXr works for all credit profiles — from thin files to complex portfolios. Our engine evaluates 6 capital components and places you in the right tier with a clear action plan, whether you're Prime-eligible or in Repair mode." },
+  { q: "How is this different from a credit monitoring app?", a: "Credit monitoring shows you a score. MentXr tells you what that score means to a lender, what products you actually qualify for, what will get you denied, and exactly how to fix it. It's underwriting intelligence, not a dashboard." },
+  { q: "What documents do I need to upload?", a: "Start with your credit report (from any bureau) and your most recent bank statement. Our AI extracts over 40 data points automatically — no manual entry required." },
+  { q: "How accurate is the denial simulation?", a: "Our denial engine uses real underwriting triggers from SBA, conventional, and alternative lenders. It catches issues that cause 73% of funding denials before you ever submit an application." },
+  { q: "Is my financial data secure?", a: "All data is encrypted in transit and at rest. We never share your financial information with lenders, brokers, or third parties. Your data is used solely to generate your Capital Readiness analysis." },
+  { q: "What's included with free access?", a: "Free access includes your full Capital Readiness Score, 6-component breakdown, tier eligibility, operating mode analysis, denial simulation, AI mentor chat, and credit repair recommendations — all 30 analyses per month." },
+  { q: "Can I use this to prepare for an SBA loan?", a: "Absolutely. MentXr evaluates you against SBA 7(a) and 504 underwriting criteria. You'll see exactly where you stand, what flags exist, and what to fix before applying." },
+];
+
+const proofMessages = [
+  "Jay just sought out tax advice from Marcus Allen.",
+  "$50K just funded",
+  "Sofia connected with branding expert Elena Cruz.",
+  "$100K just funded",
+  "David started a strategy session with Ryan Cole.",
+  "Mia asked investment insights from Andre Thompson.",
+  "$75K just funded",
+  "Liam requested growth advice from Chloe Bennett.",
+  "Aisha connected with startup mentor Victor Hale.",
+  "$200K just funded",
+  "Noah sought marketing guidance from Isabella Reed.",
+  "Emma started a leadership conversation with Daniel Brooks.",
+  "$35K just funded",
+  "Lucas tapped into real estate insights from Carter Hayes.",
+  "Ava requested funding strategy from Marcus Allen.",
+  "$150K just funded",
+  "Ethan connected with e-commerce expert Natalie Shaw.",
+  "Olivia sought content strategy advice from Jordan Blake.",
+  "Mason started a business scaling session with Priya Desai.",
+  "$90K just funded",
+  "$250K just funded",
+  "$120K just funded",
+  "$300K just funded",
+];
 
 export default function LandingPage() {
   const [email, setEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [showLogin, setShowLogin] = useState(false);
+  const [openFaq, setOpenFaq] = useState<number | null>(null);
   const { login } = useAuth();
-  const [vis, setVis] = useState(false);
+  const [proofIndex, setProofIndex] = useState(0);
+  const [proofVisible, setProofVisible] = useState(true);
 
-  useEffect(() => { setTimeout(() => setVis(true), 150); }, []);
+  useEffect(() => {
+    const cycle = setInterval(() => {
+      setProofVisible(false);
+      setTimeout(() => {
+        setProofIndex((i) => (i + 1) % proofMessages.length);
+        setProofVisible(true);
+      }, 600);
+    }, 3500);
+    return () => clearInterval(cycle);
+  }, []);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email) return;
+    const target = e.currentTarget as HTMLFormElement;
+    const input = target.querySelector('input[type="email"]') as HTMLInputElement;
+    const val = input?.value;
+    if (!val) return;
     setIsLoading(true);
-    try { await login(email); } catch { setIsLoading(false); }
+    try {
+      await login(val);
+    } catch {
+      setIsLoading(false);
+    }
   };
 
-  const serif = "'Georgia', 'Times New Roman', serif";
-
   return (
-    <div className="min-h-screen overflow-x-hidden bg-[#0b1f19]">
+    <div className="relative min-h-screen bg-white text-[#1A1A1A] overflow-x-hidden" style={{ fontFamily: "'Inter', sans-serif" }}>
+      <TechBackground />
 
-      {/* ══ NAV ══ exactly matching: white bg, logo left, links + green pill button right */}
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-white" style={{ borderBottom: '1px solid #ececec' }}>
-        <div className="flex items-center justify-between px-5 sm:px-8 lg:px-12 h-[60px] max-w-[1440px] mx-auto">
-          {/* Left: logo icon + brand name */}
-          <div className="flex items-center gap-2">
-            {/* Two-circle icon — like Hyperliquid's overlapping glasses */}
-            <svg width="32" height="20" viewBox="0 0 32 20" fill="none">
-              <circle cx="10" cy="10" r="8.5" fill="#0b1f19" />
-              <circle cx="22" cy="10" r="8.5" fill="#0b1f19" />
-            </svg>
-            <span style={{ fontFamily: serif, fontSize: 18, letterSpacing: -0.3 }}>
-              <span style={{ color: '#0b1f19' }}>Ment</span>
-              <span style={{ color: '#5ee8c5', fontStyle: 'italic' }}>Xr</span>
-            </span>
-          </div>
+      <div
+        className="fixed bottom-6 left-6 z-50 flex items-center gap-2.5 px-4 py-2.5 rounded-xl bg-white border border-[#E5E7EB] shadow-lg backdrop-blur-none"
+        style={{
+          transition: "opacity 0.5s ease, transform 0.5s ease",
+          opacity: proofVisible ? 1 : 0,
+          transform: proofVisible ? "translateY(0)" : "translateY(8px)",
+        }}
+      >
+        <span className="w-2 h-2 rounded-full bg-[#2E7D32] animate-pulse shrink-0"></span>
+        <span className="text-[12px] sm:text-[13px] text-[#333] font-medium whitespace-nowrap">{proofMessages[proofIndex]}</span>
+      </div>
 
-          {/* Right: nav links + Launch App button */}
-          <div className="flex items-center gap-5 sm:gap-7">
-            <span className="text-[14px] text-[#0b1f19]/70 cursor-pointer hover:text-[#0b1f19] transition-colors hidden sm:inline" style={{ fontFamily: serif }}>Stats</span>
-            <span className="text-[14px] cursor-pointer hover:opacity-80 transition-colors hidden sm:inline" style={{ fontFamily: serif, color: '#5ee8c5' }}>Docs</span>
-            <span className="text-[14px] text-[#0b1f19]/70 cursor-pointer hover:text-[#0b1f19] transition-colors hidden sm:inline" style={{ fontFamily: serif }}>Ecosystem</span>
-            <button
-              onClick={() => setShowLogin(true)}
-              className="rounded-full flex items-center justify-center"
-              style={{ height: 38, paddingLeft: 20, paddingRight: 20, backgroundColor: '#5ee8c5', color: '#0b1f19', fontSize: 14, fontWeight: 500, fontFamily: serif, border: 'none', cursor: 'pointer' }}
-            >
-              Launch App
-            </button>
+      <nav className="relative z-20 flex items-center justify-between px-6 sm:px-10 h-14 border-b border-[#E5E7EB]">
+        <div className="flex items-center gap-2.5">
+          <div className="w-6 h-6 rounded-full border-2 border-[#333] flex items-center justify-center">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#1A1A1A]"></span>
           </div>
+          <span className="text-[13px] font-bold tracking-[0.08em] text-[#1A1A1A] uppercase">MentXr</span>
+        </div>
+        <div className="flex items-center gap-6">
+          <span className="text-[12px] tracking-[0.08em] text-[#999] uppercase hidden sm:block">Private Access</span>
         </div>
       </nav>
 
-      {/* ══ LOGIN MODAL ══ */}
-      {showLogin && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center" style={{ background: 'rgba(0,0,0,0.55)', backdropFilter: 'blur(4px)' }} onClick={() => setShowLogin(false)}>
-          <div className="bg-white rounded-2xl p-8 w-full max-w-[400px] mx-4" style={{ boxShadow: '0 25px 60px rgba(0,0,0,0.3)' }} onClick={e => e.stopPropagation()}>
-            <h3 className="mb-2" style={{ fontFamily: serif, fontSize: 22, color: '#0b1f19' }}>Launch App</h3>
-            <p style={{ fontSize: 14, color: '#0b1f19', opacity: 0.45, marginBottom: 24 }}>Enter your email to get free access.</p>
-            <form onSubmit={handleLogin}>
+      {/* ═══════════════ 1. HERO ═══════════════ */}
+      <section className="relative z-10 min-h-[90vh] flex flex-col justify-center px-6 sm:px-12 md:px-20 lg:px-28 py-20">
+        <div className="absolute inset-0" style={{ background: 'radial-gradient(ellipse 90% 80% at 30% 50%, rgba(255,255,255,0.98) 0%, rgba(248,249,250,0.9) 50%, transparent 100%)' }} />
+        <div className="relative max-w-[900px]">
+          <p className="text-[11px] tracking-[0.2em] uppercase text-[#999] mb-6" data-testid="text-hero-label">Capital Readiness Engine</p>
+          <h1
+            className="text-[38px] sm:text-[56px] md:text-[72px] lg:text-[88px] uppercase leading-[0.95] mb-8"
+            style={{ fontFamily: "'Satoshi', sans-serif", fontWeight: 400, letterSpacing: '-0.06em', ...gradientText('180deg', 1, 0.6) }}
+            data-testid="text-hero-headline"
+          >
+            Know Exactly<br />Where You Stand<br />Before You Apply
+          </h1>
+          <p className="text-[15px] sm:text-[17px] text-[#666] leading-[1.8] max-w-[560px] mb-10">
+            MentXr&reg; runs your financial profile through real underwriting logic — the same criteria banks use to approve or deny you. Get your Capital Readiness Score, exposure ceiling, tier eligibility, and denial risk before you ever submit an application.
+          </p>
+
+          <form onSubmit={handleLogin} className="w-full max-w-[440px] mb-8">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center bg-white border border-[#E5E7EB] rounded-2xl sm:rounded-full sm:h-[52px] sm:pl-5 sm:pr-1.5 overflow-hidden shadow-sm">
               <input
                 data-testid="input-email"
                 type="email"
-                placeholder="you@email.com"
+                placeholder="Enter your email"
+                className="flex-1 bg-transparent text-[14px] text-[#1A1A1A] placeholder:text-[#999] outline-none px-4 py-3.5 sm:px-0 sm:py-0"
                 value={email}
-                onChange={e => setEmail(e.target.value)}
+                onChange={(e) => setEmail(e.target.value)}
                 required
-                autoFocus
                 disabled={isLoading}
-                style={{ width: '100%', height: 48, padding: '0 16px', borderRadius: 12, border: '1px solid #e0e0e0', fontSize: 15, color: '#0b1f19', outline: 'none', marginBottom: 16, boxSizing: 'border-box' }}
               />
               <button
                 data-testid="button-join"
                 type="submit"
                 disabled={isLoading}
-                style={{ width: '100%', height: 48, borderRadius: 12, backgroundColor: '#5ee8c5', color: '#0b1f19', fontSize: 15, fontWeight: 600, border: 'none', cursor: 'pointer' }}
+                className="h-[44px] sm:h-[40px] px-6 sm:rounded-full bg-[#2E7D32] text-white text-[13px] font-bold hover:bg-[#256829] transition-colors shrink-0 border-t border-[#E5E7EB] sm:border-t-0 mx-1.5 mb-1.5 sm:mb-0 sm:mx-0 rounded-xl sm:rounded-full tracking-wide"
               >
-                {isLoading ? "Loading..." : "Get Free Access"}
+                {isLoading ? "..." : "GET FREE ACCESS"}
               </button>
-            </form>
-            <p style={{ fontSize: 12, color: '#0b1f19', opacity: 0.25, marginTop: 16, textAlign: 'center' }}>Free forever. No credit card.</p>
-          </div>
-        </div>
-      )}
+            </div>
+          </form>
 
-      {/* ══ HERO ══ dark green bg, animated liquid blobs, centered text */}
-      <section className="relative flex items-center justify-center overflow-hidden" style={{ minHeight: '100vh', paddingTop: 60, background: '#0b1f19' }}>
-        <HeroBlobs />
-        {/* Top gradient fade for smooth nav transition */}
-        <div className="absolute top-0 left-0 right-0 h-[120px] pointer-events-none" style={{ background: 'linear-gradient(180deg, rgba(11,31,25,0.6) 0%, transparent 100%)' }} />
-        {/* Bottom gradient */}
-        <div className="absolute bottom-0 left-0 right-0 h-[200px] pointer-events-none" style={{ background: 'linear-gradient(0deg, rgba(11,31,25,0.8) 0%, transparent 100%)' }} />
-
-        <div className="relative z-10 text-center px-6" style={{ maxWidth: 880 }}>
-          {/* White circle icon — exactly like Hyper's */}
-          <div
-            style={{
-              width: 44, height: 44, borderRadius: '50%', backgroundColor: 'rgba(255,255,255,0.88)',
-              margin: '0 auto 48px', display: 'flex', alignItems: 'center', justifyContent: 'center',
-              boxShadow: '0 4px 20px rgba(255,255,255,0.15)',
-              opacity: vis ? 1 : 0, transform: vis ? 'translateY(0)' : 'translateY(12px)',
-              transition: 'all 0.6s ease 0.1s',
-            }}
-          >
-            <div style={{ width: 12, height: 12, borderRadius: '50%', backgroundColor: '#5ee8c5' }} />
-          </div>
-
-          {/* Headline — thin serif, large, exactly matching */}
-          <h1
-            data-testid="text-hero-headline"
-            style={{
-              fontFamily: serif, fontWeight: 300, color: 'white',
-              fontSize: 'clamp(42px, 8vw, 94px)', lineHeight: 1.08, letterSpacing: '-0.02em',
-              marginBottom: 36,
-              opacity: vis ? 1 : 0, transform: vis ? 'translateY(0)' : 'translateY(24px)',
-              transition: 'all 0.9s ease 0.2s',
-            }}
-          >
-            The Platform To<br />House All Finance
-          </h1>
-
-          {/* Subtitle — centered, muted */}
-          <p style={{
-            fontFamily: "'Inter', sans-serif", fontSize: 15, lineHeight: 1.75,
-            color: 'rgba(255,255,255,0.45)', maxWidth: 440, margin: '0 auto 40px',
-            opacity: vis ? 1 : 0, transform: vis ? 'translateY(0)' : 'translateY(16px)',
-            transition: 'all 0.7s ease 0.4s',
-          }}>
-            Funding is fragmented today, but it doesn't need to be.
-            For the first time, analyze your credit, build your score, and
-            access mentorship on the same hyper-intelligent platform.
-          </p>
-
-          {/* Two buttons — outlined pills, side by side, exactly like "Start Trading" + "Start Building" */}
-          <div
-            style={{
-              display: 'flex', justifyContent: 'center', gap: 12,
-              opacity: vis ? 1 : 0, transform: vis ? 'translateY(0)' : 'translateY(12px)',
-              transition: 'all 0.7s ease 0.5s',
-            }}
-          >
-            <button
-              data-testid="button-start-analyzing"
-              onClick={() => setShowLogin(true)}
-              style={{
-                height: 44, padding: '0 28px', borderRadius: 22,
-                border: '1px solid rgba(94,232,197,0.35)', background: 'transparent',
-                color: '#5ee8c5', fontSize: 14, fontWeight: 500, cursor: 'pointer',
-                fontFamily: "'Inter', sans-serif",
-                transition: 'all 0.2s',
-              }}
-              onMouseEnter={e => { (e.target as HTMLElement).style.background = 'rgba(94,232,197,0.08)'; (e.target as HTMLElement).style.borderColor = 'rgba(94,232,197,0.55)'; }}
-              onMouseLeave={e => { (e.target as HTMLElement).style.background = 'transparent'; (e.target as HTMLElement).style.borderColor = 'rgba(94,232,197,0.35)'; }}
-            >
-              Start Analyzing
-            </button>
-            <button
-              data-testid="button-start-building"
-              onClick={() => setShowLogin(true)}
-              style={{
-                height: 44, padding: '0 28px', borderRadius: 22,
-                border: '1px solid rgba(94,232,197,0.35)', background: 'transparent',
-                color: '#5ee8c5', fontSize: 14, fontWeight: 500, cursor: 'pointer',
-                fontFamily: "'Inter', sans-serif",
-                transition: 'all 0.2s',
-              }}
-              onMouseEnter={e => { (e.target as HTMLElement).style.background = 'rgba(94,232,197,0.08)'; (e.target as HTMLElement).style.borderColor = 'rgba(94,232,197,0.55)'; }}
-              onMouseLeave={e => { (e.target as HTMLElement).style.background = 'transparent'; (e.target as HTMLElement).style.borderColor = 'rgba(94,232,197,0.35)'; }}
-            >
-              Start Building
-            </button>
+          <div className="flex flex-wrap items-center gap-6 text-[11px] text-[#999] tracking-wide">
+            <span>Free forever</span>
+            <span className="w-1 h-1 rounded-full bg-[#DEE2E6]"></span>
+            <span>No credit card</span>
+            <span className="w-1 h-1 rounded-full bg-[#DEE2E6]"></span>
+            <span>30 analyses / month</span>
           </div>
         </div>
       </section>
 
-      {/* ══ FEATURES — white bg, spaced green letters, app card center, 4 features ══ */}
-      <section style={{ background: '#ffffff', padding: '100px 0' }}>
-        <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 24px' }}>
-          {/* Title with spaced mint letters */}
-          <p style={{ textAlign: 'center', marginBottom: 80, fontFamily: serif, fontSize: 'clamp(18px, 2.5vw, 28px)', color: '#0b1f19', lineHeight: 1.5 }}>
-            The flagship application: the premier{' '}
-            <span style={{ color: '#5ee8c5', letterSpacing: '0.25em' }}>CAPITAL READINESS</span>
-            {' '}engine
-          </p>
-
-          {/* 3-column: left features, center card, right features */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr', gap: 48, alignItems: 'center' }} className="max-lg:!grid-cols-1">
-            {/* Left */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 64 }}>
-              <div style={{ display: 'flex', alignItems: 'flex-start', gap: 16, flexDirection: 'row-reverse', textAlign: 'right' }} className="max-lg:!flex-row max-lg:!text-left">
-                <div style={{ width: 52, height: 52, borderRadius: '50%', border: '1px solid #d8d8d8', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#5ee8c5" strokeWidth="1.5"><circle cx="12" cy="12" r="10" /></svg>
-                </div>
-                <div>
-                  <h3 style={{ fontFamily: serif, fontSize: 17, color: '#0b1f19', marginBottom: 6, fontStyle: 'italic' }}>Zero Manual Entry</h3>
-                  <p style={{ fontSize: 14, color: '#0b1f19', opacity: 0.4, lineHeight: 1.65 }}>AI extracts 40+ data points<br />from your documents automatically.</p>
-                </div>
-              </div>
-              <div style={{ display: 'flex', alignItems: 'flex-start', gap: 16, flexDirection: 'row-reverse', textAlign: 'right' }} className="max-lg:!flex-row max-lg:!text-left">
-                <div style={{ width: 52, height: 52, borderRadius: '50%', border: '1px solid #d8d8d8', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#5ee8c5" strokeWidth="1.5"><path d="M18 6L6 18M6 6l12 12" /></svg>
-                </div>
-                <div>
-                  <h3 style={{ fontFamily: serif, fontSize: 17, color: '#0b1f19', marginBottom: 6, fontStyle: 'italic' }}>2.5x Exposure Logic</h3>
-                  <p style={{ fontSize: 14, color: '#0b1f19', opacity: 0.4, lineHeight: 1.65 }}>Maximum fundable amount with<br />dynamic multiplier adjustments.</p>
-                </div>
-              </div>
-            </div>
-
-            {/* Center — dark app preview card */}
-            <div style={{ width: 340, borderRadius: 16, background: '#0e2a22', border: '1px solid rgba(255,255,255,0.06)', boxShadow: '0 20px 60px rgba(0,0,0,0.25)', overflow: 'hidden' }} className="max-lg:!mx-auto">
-              <div style={{ padding: '12px 16px', borderBottom: '1px solid rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.25)', fontFamily: "'JetBrains Mono', monospace" }}>MentXr® — Capital Readiness</span>
-                <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#5ee8c5' }} />
-              </div>
-              <div style={{ padding: 24, textAlign: 'center' }}>
-                <svg viewBox="0 0 100 100" width="96" height="96" style={{ display: 'block', margin: '0 auto 12px', transform: 'rotate(-90deg)' }}>
-                  <circle cx="50" cy="50" r="42" fill="none" stroke="rgba(255,255,255,0.04)" strokeWidth="4.5" />
-                  <circle cx="50" cy="50" r="42" fill="none" stroke="#5ee8c5" strokeWidth="4.5" strokeLinecap="round" strokeDasharray="264" strokeDashoffset="66" style={{ filter: 'drop-shadow(0 0 8px rgba(94,232,197,0.3))' }} />
-                </svg>
-                <span style={{ fontSize: 30, fontWeight: 700, color: 'white', fontFamily: "'JetBrains Mono', monospace", display: 'block' }}>75</span>
-                <span style={{ fontSize: 9, color: 'rgba(255,255,255,0.2)', letterSpacing: '0.15em', textTransform: 'uppercase' as const }}>Capital Score</span>
-              </div>
-              <div style={{ padding: '0 24px 20px' }}>
-                {[
-                  { l: 'Tier', v: 'Prime', g: true },
-                  { l: 'Ceiling', v: '$210K', g: false },
-                  { l: 'Credit', v: '17/20', g: false },
-                  { l: 'Risk', v: 'Clear', g: true },
-                ].map(r => (
-                  <div key={r.l} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 0', borderTop: '1px solid rgba(255,255,255,0.04)' }}>
-                    <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.2)' }}>{r.l}</span>
-                    <span style={{ fontSize: 12, fontWeight: 600, color: r.g ? '#5ee8c5' : 'rgba(255,255,255,0.55)', fontFamily: "'JetBrains Mono', monospace" }}>{r.v}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Right */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 64 }}>
-              <div style={{ display: 'flex', alignItems: 'flex-start', gap: 16 }}>
-                <div style={{ width: 52, height: 52, borderRadius: '50%', border: '1px solid #d8d8d8', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#5ee8c5" strokeWidth="1.5"><circle cx="12" cy="12" r="3" /><path d="M12 1v4m0 14v4M4.22 4.22l2.83 2.83m9.9 9.9l2.83 2.83M1 12h4m14 0h4M4.22 19.78l2.83-2.83m9.9-9.9l2.83-2.83" /></svg>
-                </div>
-                <div>
-                  <h3 style={{ fontFamily: serif, fontSize: 17, color: '#0b1f19', marginBottom: 6, fontStyle: 'italic' }}>Transparent</h3>
-                  <p style={{ fontSize: 14, color: '#0b1f19', opacity: 0.4, lineHeight: 1.65 }}>See exactly how every component<br />of your score is calculated.</p>
-                </div>
-              </div>
-              <div style={{ display: 'flex', alignItems: 'flex-start', gap: 16 }}>
-                <div style={{ width: 52, height: 52, borderRadius: '50%', border: '1px solid #d8d8d8', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#5ee8c5" strokeWidth="1.5"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
-                </div>
-                <div>
-                  <h3 style={{ fontFamily: serif, fontSize: 17, color: '#0b1f19', marginBottom: 6, fontStyle: 'italic' }}>Seamless</h3>
-                  <p style={{ fontSize: 14, color: '#0b1f19', opacity: 0.4, lineHeight: 1.65 }}>Upload, analyze, and get your<br />action plan — all in one flow.</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ══ THE STACK — dark bg ══ */}
-      <section style={{ background: '#0b1f19', padding: '100px 0', overflow: 'hidden' }}>
-        <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 24px' }}>
-          <h2 style={{ fontFamily: serif, fontWeight: 300, fontSize: 'clamp(36px, 5vw, 68px)', color: 'white', textAlign: 'center', letterSpacing: '-0.02em', marginBottom: 64 }}>
-            The <span style={{ color: '#5ee8c5', fontStyle: 'italic' }}>MentXr</span> Stack
+      {/* ═══════════════ 2. PROBLEM / PAIN ═══════════════ */}
+      <section className="relative z-10 px-6 sm:px-12 md:px-20 py-20 sm:py-28 border-t border-[#E5E7EB]">
+        <div className="absolute inset-0" style={sectionBg} />
+        <div className="relative max-w-[800px]">
+          <SectionLabel>The Problem</SectionLabel>
+          <h2 className="text-[26px] sm:text-[36px] md:text-[44px] leading-[1.1] mb-10 tracking-[-0.03em]" style={gradientText('180deg', 0.95, 0.55)}>
+            73% of funding applications get denied. Most founders never find out why until it's too late.
           </h2>
-
-          {/* Isometric columns visualization */}
-          <div style={{ position: 'relative', maxWidth: 700, margin: '0 auto', height: 360 }}>
-            {/* Base layers */}
-            <div style={{ position: 'absolute', bottom: 0, left: '50%', transform: 'translateX(-50%) perspective(600px) rotateX(50deg) rotateZ(-45deg)', width: 400, height: 200, background: 'rgba(94,232,197,0.04)', border: '1px solid rgba(94,232,197,0.08)', borderRadius: 6 }} />
-            <div style={{ position: 'absolute', bottom: 20, left: '50%', transform: 'translateX(-50%) perspective(600px) rotateX(50deg) rotateZ(-45deg)', width: 340, height: 160, background: 'rgba(94,232,197,0.06)', border: '1px solid rgba(94,232,197,0.1)', borderRadius: 6 }} />
-            <div style={{ position: 'absolute', bottom: 40, left: '50%', transform: 'translateX(-50%) perspective(600px) rotateX(50deg) rotateZ(-45deg)', width: 280, height: 120, background: 'rgba(94,232,197,0.08)', border: '1px solid rgba(94,232,197,0.12)', borderRadius: 6 }} />
-
-            {/* Column bars */}
-            <div style={{ position: 'absolute', bottom: 80, left: '50%', transform: 'translateX(-50%)', display: 'flex', alignItems: 'flex-end', gap: 8 }}>
-              {[
-                { h: 80, l: 'Capital' }, { h: 100, l: 'Credit' }, { h: 130, l: 'Scoring' },
-                { h: 150, l: 'Denial\nSim' }, { h: 120, l: 'Repair' }, { h: 110, l: 'Mentors' },
-                { h: 90, l: 'Risk' },
-              ].map((c, i) => (
-                <div key={i} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                  <div style={{
-                    width: 28, height: c.h, borderRadius: '3px 3px 0 0',
-                    background: `linear-gradient(180deg, rgba(94,232,197,0.55) 0%, rgba(94,232,197,0.15) 100%)`,
-                    border: '1px solid rgba(94,232,197,0.25)', borderBottom: 'none',
-                    boxShadow: '0 0 12px rgba(94,232,197,0.08)',
-                  }} />
-                  <span style={{ fontSize: 8, color: 'rgba(94,232,197,0.35)', fontFamily: "'JetBrains Mono', monospace", marginTop: 4, textAlign: 'center', whiteSpace: 'pre-line' as const, lineHeight: 1.2 }}>{c.l}</span>
-                </div>
-              ))}
-            </div>
-
-            {/* Layer labels */}
-            <div style={{ position: 'absolute', bottom: 5, left: '50%', transform: 'translateX(-50%)', display: 'flex', gap: 40, fontSize: 9, color: 'rgba(94,232,197,0.2)', fontFamily: "'JetBrains Mono', monospace" }}>
-              <span>Intelligence Engine</span>
-              <span>AI Layer</span>
-              <span>Data Core</span>
-            </div>
-          </div>
-
-          {/* 4 corner text blocks */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px 64px', marginTop: 48, maxWidth: 900, marginLeft: 'auto', marginRight: 'auto' }} className="max-sm:!grid-cols-1">
-            <p style={{ fontSize: 14, color: 'rgba(94,232,197,0.65)', lineHeight: 1.85 }}>
-              Capital scoring and AI mentorship are two flagship applications built on MentXr's engine. But they are just the tip of the iceberg.
-            </p>
-            <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.35)', lineHeight: 1.85 }}>
-              High performance analysis is built natively. These financial primitives on the intelligence engine are accessible to all features. The scoring engine and AI layer exist as one unified state, unlocking applications that simultaneously require performance, accuracy, and programmability.
-            </p>
-            <p style={{ fontSize: 14, color: 'rgba(94,232,197,0.65)', lineHeight: 1.85 }}>
-              Credit repair, denial simulation, and 7 AI mentors interact seamlessly with the engine to let anyone analyze, repair, and apply, all in one place.
-            </p>
-            <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.35)', lineHeight: 1.85 }}>
-              The foundation of MentXr is its 6-component underwriting engine, which processes your financial profile through real bank criteria. The state comprises all applications, built on the intelligence engine and the AI layer.
-            </p>
-          </div>
-
-          {/* Stats */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 24, marginTop: 72, maxWidth: 800, marginLeft: 'auto', marginRight: 'auto', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: 48 }} className="max-sm:!grid-cols-2">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
             {[
-              { l: 'Score Components', v: '6' },
-              { l: 'AI Mentors', v: '7' },
-              { l: 'Data Points', v: '40+' },
-              { l: 'Approval Rate', v: '89%' },
-            ].map(s => (
-              <div key={s.l} style={{ textAlign: 'center' }}>
-                <p style={{ fontSize: 'clamp(28px, 3vw, 42px)', fontWeight: 400, color: 'white', fontFamily: "'JetBrains Mono', monospace", marginBottom: 4 }}>{s.v}</p>
-                <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.2)' }}>{s.l}</p>
+              { num: "01", text: "You apply for funding with no idea how a lender actually evaluates you" },
+              { num: "02", text: "Credit scores alone don't tell you what products you qualify for" },
+              { num: "03", text: "Hidden risk signals silently kill your application before a human reviews it" },
+              { num: "04", text: "Every denial leaves an inquiry on your report, making the next application harder" },
+            ].map((item) => (
+              <div key={item.num} className="flex gap-4 items-start p-5 rounded-xl bg-white border border-[#E5E7EB] shadow-sm">
+                <span className="text-[11px] font-mono text-[#999] shrink-0 mt-0.5">{item.num}</span>
+                <p className="text-[13px] sm:text-[14px] text-[#666] leading-[1.7]">{item.text}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* ══ COMMUNITY FIRST — light mint, topo lines ══ */}
-      <section style={{ background: '#e4f4ee', padding: '140px 0 100px', position: 'relative', overflow: 'hidden' }}>
-        <TopoPattern />
-        <div style={{ position: 'relative', zIndex: 1, textAlign: 'center', padding: '0 24px', maxWidth: 800, margin: '0 auto' }}>
-          <p style={{ fontFamily: serif, fontSize: 17, color: '#0b1f19', opacity: 0.55, marginBottom: 12 }}>
-            No gatekeepers. No hidden fees. No credit pull.
-          </p>
-          <h2 style={{ fontFamily: serif, fontWeight: 300, fontSize: 'clamp(52px, 8vw, 100px)', color: '#0b1f19', lineHeight: 1.0, letterSpacing: '-0.03em' }}>
-            Community first.
+      {/* ═══════════════ 3. SOLUTION OVERVIEW ═══════════════ */}
+      <section className="relative z-10 px-6 sm:px-12 md:px-20 py-20 sm:py-28 border-t border-[#E5E7EB]">
+        <div className="absolute inset-0" style={sectionBg} />
+        <div className="relative max-w-[800px]">
+          <SectionLabel>The Solution</SectionLabel>
+          <h2 className="text-[26px] sm:text-[36px] md:text-[44px] leading-[1.1] mb-6 tracking-[-0.03em]" style={gradientText('180deg', 0.95, 0.55)}>
+            AI-powered underwriting intelligence that tells you exactly what to fix — before you apply.
           </h2>
-        </div>
-      </section>
-
-      {/* ══ CTA ══ */}
-      <section style={{ background: '#e4f4ee', padding: '0 0 80px', position: 'relative' }}>
-        <div style={{ textAlign: 'center', padding: '0 24px', maxWidth: 540, margin: '0 auto' }}>
-          <p style={{ fontFamily: serif, fontSize: 15, color: '#0b1f19', opacity: 0.4, lineHeight: 1.75, marginBottom: 12 }}>
-            Anyone can access, analyze, and improve their Capital Readiness through MentXr — completely free.
+          <p className="text-[15px] sm:text-[16px] text-[#666] leading-[1.8] mb-12 max-w-[640px]">
+            MentXr® analyzes your credit report and bank statements using the same 6-component framework real lenders use. You get a Capital Readiness Score, tier placement, exposure ceiling, denial simulation, and a step-by-step action plan — all powered by AI.
           </p>
-          <p style={{ fontFamily: serif, fontSize: 15, color: '#0b1f19', opacity: 0.28, marginBottom: 36 }}>
-            Own your funding journey today.
-          </p>
-          <div style={{ display: 'flex', justifyContent: 'center', gap: 12 }}>
-            <button
-              data-testid="button-join-bottom"
-              onClick={() => setShowLogin(true)}
-              style={{ height: 44, padding: '0 28px', borderRadius: 22, border: '1px solid rgba(11,31,25,0.18)', background: 'transparent', color: '#0b1f19', fontSize: 14, fontWeight: 500, cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}
-            >
-              Start Analyzing
-            </button>
-            <button
-              onClick={() => setShowLogin(true)}
-              style={{ height: 44, padding: '0 28px', borderRadius: 22, border: '1px solid rgba(11,31,25,0.18)', background: 'transparent', color: '#0b1f19', fontSize: 14, fontWeight: 500, cursor: 'pointer', fontFamily: "'Inter', sans-serif" }}
-            >
-              Start Building
-            </button>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+            {[
+              { label: "Capital Readiness Score", val: "0–100" },
+              { label: "Exposure Ceiling", val: "2.5x Logic" },
+              { label: "Tier Eligibility", val: "3 Tiers" },
+              { label: "Denial Simulation", val: "Pre-Screen" },
+              { label: "AI Mentor Chat", val: "7 Bots" },
+              { label: "Credit Repair", val: "Auto Letters" },
+            ].map((item) => (
+              <div key={item.label} className="p-4 sm:p-5 rounded-xl bg-white border border-[#E5E7EB] shadow-sm">
+                <p className="text-[20px] sm:text-[24px] font-mono text-[#333] mb-2" style={{ fontFamily: "'JetBrains Mono', monospace" }}>{item.val}</p>
+                <p className="text-[11px] text-[#999] tracking-wide uppercase">{item.label}</p>
+              </div>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* ══ GIANT BRAND ══ */}
-      <section style={{ background: '#e4f4ee', padding: '60px 0 40px', position: 'relative' }}>
-        <div style={{ maxWidth: 1400, margin: '0 auto', padding: '0 24px' }}>
-          <h2 style={{ fontFamily: serif, fontWeight: 300, fontSize: 'clamp(60px, 14vw, 200px)', color: '#0b1f19', textAlign: 'center', lineHeight: 0.95, letterSpacing: '-0.04em' }}>
-            Ment<span style={{ color: '#5ee8c5', fontStyle: 'italic' }}>Xr</span><span style={{ opacity: 0.15 }}>®</span>
+      {/* ═══════════════ 4. HOW IT WORKS ═══════════════ */}
+      <section className="relative z-10 px-6 sm:px-12 md:px-20 py-20 sm:py-28 border-t border-[#E5E7EB]">
+        <div className="absolute inset-0" style={sectionBg} />
+        <div className="relative max-w-[800px]">
+          <SectionLabel>How It Works</SectionLabel>
+          <h2 className="text-[26px] sm:text-[36px] md:text-[44px] leading-[1.1] mb-14 tracking-[-0.03em]" style={gradientText('180deg', 0.9, 0.5)}>
+            Four steps from unknown to underwriting-ready.
           </h2>
-          {/* Logo + social row */}
-          <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: 16, marginTop: 32 }}>
-            <svg width="30" height="18" viewBox="0 0 30 18"><circle cx="8" cy="9" r="7" fill="#5ee8c5" /><circle cx="22" cy="9" r="7" fill="#5ee8c5" /></svg>
-          </div>
-          <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: 18, marginTop: 12, paddingBottom: 8 }}>
-            {/* X */}
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="#0b1f19"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" /></svg>
-            {/* Discord */}
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="#0b1f19"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03z" /></svg>
-            {/* GitHub */}
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="#0b1f19"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" /></svg>
-            {/* Telegram */}
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="#0b1f19"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0h-.056zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z" /></svg>
+          <div className="space-y-0">
+            {[
+              { step: "01", title: "Upload Your Documents", desc: "Drop in your credit report and bank statement. Our AI extracts 40+ data points automatically — no manual entry." },
+              { step: "02", title: "Get Your Capital Readiness Score", desc: "We evaluate 6 components: Capital Strength, Credit Quality, Management & Structure, Cash Flow, Liquidity, and Risk Signals." },
+              { step: "03", title: "See Your Tier & Exposure Ceiling", desc: "Find out if you're Prime, Mid-Tier, or Alternative eligible — and your maximum fundable amount using 2.5x exposure logic." },
+              { step: "04", title: "Run Denial Simulation & Fix Issues", desc: "Our engine flags every underwriting trigger that would cause a denial. Get auto-generated dispute letters and a repair timeline." },
+            ].map((item, i) => (
+              <div key={item.step} className="flex gap-6 sm:gap-8 items-start py-8 border-t border-[#E5E7EB] first:border-t-0">
+                <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-[#F1F3F5] border border-[#E5E7EB] flex items-center justify-center shrink-0">
+                  <span className="text-[13px] font-mono text-[#666]">{item.step}</span>
+                </div>
+                <div>
+                  <h3 className="text-[16px] sm:text-[18px] text-[#333] font-medium mb-2">{item.title}</h3>
+                  <p className="text-[13px] sm:text-[14px] text-[#666] leading-[1.7] max-w-[500px]">{item.desc}</p>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* ══ FOOTER — dark bar ══ */}
-      <footer style={{ background: '#091610', padding: '20px 24px' }}>
-        <div style={{ maxWidth: 1400, margin: '0 auto', display: 'flex', flexWrap: 'wrap' as const, justifyContent: 'space-between', alignItems: 'center', gap: 12 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 20, flexWrap: 'wrap' as const }}>
-            <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.2)' }}>2026</span>
-            <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.2)', cursor: 'pointer' }}>Terms of Service</span>
-            <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.2)', cursor: 'pointer' }}>Privacy Policy</span>
+      {/* ═══════════════ 5. FUNDING OUTCOMES ═══════════════ */}
+      <section className="relative z-10 px-6 sm:px-12 md:px-20 py-20 sm:py-28 border-t border-[#E5E7EB]">
+        <div className="absolute inset-0" style={sectionBg} />
+        <div className="relative max-w-[900px]">
+          <SectionLabel>What You Get</SectionLabel>
+          <h2 className="text-[26px] sm:text-[36px] md:text-[44px] leading-[1.1] mb-14 tracking-[-0.03em]" style={gradientText('180deg', 0.9, 0.5)}>
+            Everything you need to walk into a lender's office with confidence.
+          </h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {[
+              { icon: "◎", title: "Capital Readiness Score", desc: "A 0–100 composite score based on 6 weighted underwriting components" },
+              { icon: "⬡", title: "2.5x Exposure Ceiling", desc: "Your maximum fundable amount calculated with dynamic multiplier adjustments" },
+              { icon: "◈", title: "Tier Eligibility Report", desc: "Know if you qualify for Prime, Mid-Tier, or Alternative capital products" },
+              { icon: "⊘", title: "Denial Simulation", desc: "Pre-screen every trigger that would cause a real lender to decline your file" },
+              { icon: "◇", title: "Credit Repair Plan", desc: "AI-parsed issues with auto-generated dispute letters for all 3 bureaus" },
+              { icon: "△", title: "AI Mentor Access", desc: "7 specialized AI mentors for sales, investing, marketing, leadership, and more" },
+              { icon: "▣", title: "Operating Mode Engine", desc: "Pre-Funding or Repair mode with tailored action sequences" },
+              { icon: "◐", title: "Risk Signal Detection", desc: "Identifies liens, judgments, utilization spikes, and velocity flags" },
+              { icon: "⬢", title: "Personalized Next Steps", desc: "AI-generated action plan prioritized by impact on your fundability" },
+            ].map((item) => (
+              <div key={item.title} className="p-5 sm:p-6 rounded-xl bg-white border border-[#E5E7EB] shadow-sm group hover:shadow-md transition-shadow">
+                <span className="text-[20px] text-[#999] mb-4 block">{item.icon}</span>
+                <h3 className="text-[14px] sm:text-[15px] text-[#333] font-medium mb-2">{item.title}</h3>
+                <p className="text-[12px] sm:text-[13px] text-[#666] leading-[1.7]">{item.desc}</p>
+              </div>
+            ))}
           </div>
-          <svg width="24" height="14" viewBox="0 0 24 14"><circle cx="6" cy="7" r="5.5" fill="#5ee8c5" /><circle cx="18" cy="7" r="5.5" fill="#5ee8c5" /></svg>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 20, flexWrap: 'wrap' as const }}>
-            <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.2)', cursor: 'pointer' }}>Contact</span>
-            <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.2)', cursor: 'pointer' }}>Support</span>
+        </div>
+      </section>
+
+      {/* ═══════════════ 6. SOCIAL PROOF ═══════════════ */}
+      <section className="relative z-10 px-6 sm:px-12 md:px-20 py-20 sm:py-28 border-t border-[#E5E7EB]">
+        <div className="absolute inset-0" style={sectionBg} />
+        <div className="relative max-w-[900px]">
+          <SectionLabel>Results</SectionLabel>
+          <h2 className="text-[26px] sm:text-[36px] md:text-[44px] leading-[1.1] mb-14 tracking-[-0.03em]" style={gradientText('180deg', 0.9, 0.5)}>
+            Founders are getting funded with clarity, not luck.
+          </h2>
+
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-14">
+            {[
+              { val: "12,500+", label: "Founders Analyzed" },
+              { val: "$47M+", label: "Capital Deployed" },
+              { val: "89%", label: "Approval Rate" },
+              { val: "6.2x", label: "Avg Score Improvement" },
+            ].map((s) => (
+              <div key={s.label} className="text-center p-5 rounded-xl bg-white border border-[#E5E7EB] shadow-sm">
+                <p className="text-[24px] sm:text-[30px] font-mono text-[#333] mb-1" style={{ fontFamily: "'JetBrains Mono', monospace" }}>{s.val}</p>
+                <p className="text-[10px] sm:text-[11px] text-[#999] tracking-wide uppercase">{s.label}</p>
+              </div>
+            ))}
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            {[
+              { name: "Marcus T.", role: "E-commerce Founder", quote: "I went from a 42 to a 78 Capital Readiness Score in 60 days. Got approved for a $250K line of credit on the first try." },
+              { name: "Aisha K.", role: "Real Estate Investor", quote: "The denial simulation caught 3 triggers I didn't know existed. Fixed them all before applying — approved same week." },
+              { name: "David L.", role: "SaaS Startup CEO", quote: "MentXr showed me I was Mid-Tier when I thought I was Prime. After following the repair plan, I moved up and saved 4% on rates." },
+            ].map((t) => (
+              <div key={t.name} className="p-6 rounded-xl bg-white border border-[#E5E7EB] shadow-sm">
+                <p className="text-[13px] text-[#666] leading-[1.8] mb-5 italic">"{t.quote}"</p>
+                <div>
+                  <p className="text-[13px] text-[#333] font-medium">{t.name}</p>
+                  <p className="text-[11px] text-[#999]">{t.role}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ═══════════════ 7. RISK REVERSAL ═══════════════ */}
+      <section className="relative z-10 px-6 sm:px-12 md:px-20 py-20 sm:py-28 border-t border-[#E5E7EB]">
+        <div className="absolute inset-0" style={sectionBg} />
+        <div className="relative max-w-[800px]">
+          <SectionLabel>No More Guessing</SectionLabel>
+          <h2 className="text-[26px] sm:text-[36px] md:text-[44px] leading-[1.1] mb-6 tracking-[-0.03em]" style={gradientText('180deg', 0.95, 0.55)}>
+            Stop applying blind. Start applying ready.
+          </h2>
+          <p className="text-[15px] text-[#666] leading-[1.8] mb-12 max-w-[600px]">
+            Every denied application costs you: hard inquiries, wasted time, damaged confidence. MentXr eliminates the guesswork by showing you exactly what a lender sees — before you ever submit.
+          </p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            <div className="p-6 rounded-xl border border-red-200 bg-red-50/50">
+              <p className="text-[11px] tracking-[0.15em] uppercase text-red-400 mb-4">Without MentXr</p>
+              <ul className="space-y-3">
+                {["Guess at eligibility", "Apply to multiple lenders", "Accumulate hard inquiries", "Get denied without explanation", "Repeat the cycle"].map((t) => (
+                  <li key={t} className="flex items-start gap-3 text-[13px] text-[#666] leading-[1.6]">
+                    <span className="text-red-400 mt-0.5 shrink-0">✕</span>{t}
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div className="p-6 rounded-xl border border-[#E5E7EB] bg-white shadow-sm">
+              <p className="text-[11px] tracking-[0.15em] uppercase text-[#2E7D32] mb-4">With MentXr</p>
+              <ul className="space-y-3">
+                {["Know your exact tier & ceiling", "Fix issues before applying", "Apply once, with confidence", "Get approved on first submission", "Build on momentum"].map((t) => (
+                  <li key={t} className="flex items-start gap-3 text-[13px] text-[#666] leading-[1.6]">
+                    <span className="text-[#2E7D32] mt-0.5 shrink-0">→</span>{t}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ═══════════════ 8. FEATURE BREAKDOWN ═══════════════ */}
+      <section className="relative z-10 px-6 sm:px-12 md:px-20 py-20 sm:py-28 border-t border-[#E5E7EB]">
+        <div className="absolute inset-0" style={sectionBg} />
+        <div className="relative max-w-[900px]">
+          <SectionLabel>Feature Breakdown</SectionLabel>
+          <h2 className="text-[26px] sm:text-[36px] md:text-[44px] leading-[1.1] mb-14 tracking-[-0.03em]" style={gradientText('180deg', 0.9, 0.5)}>
+            Six components. One score. Complete clarity.
+          </h2>
+          <div className="space-y-3">
+            {[
+              { name: "Capital Strength", weight: "0–20 pts", desc: "Revenue, assets, collateral position, and business capitalization" },
+              { name: "Credit Quality", weight: "0–20 pts", desc: "FICO, payment history, derogatory marks, utilization ratios" },
+              { name: "Management & Structure", weight: "0–15 pts", desc: "Entity type, years in business, ownership structure, EIN status" },
+              { name: "Earnings & Cash Flow", weight: "0–15 pts", desc: "Monthly revenue trends, DSCR, cash reserves, deposit consistency" },
+              { name: "Liquidity & Leverage", weight: "0–15 pts", desc: "Debt-to-income, current ratio, available credit, existing obligations" },
+              { name: "Risk Signals", weight: "0–15 pts", desc: "Liens, judgments, NSFs, velocity flags, recent inquiries, collections" },
+            ].map((c) => (
+              <div key={c.name} className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-6 p-5 rounded-xl bg-white border border-[#E5E7EB] shadow-sm">
+                <div className="flex items-center gap-4 sm:w-[200px] shrink-0">
+                  <span className="text-[14px] sm:text-[15px] text-[#333] font-medium">{c.name}</span>
+                </div>
+                <span className="text-[12px] font-mono text-[#333] sm:w-[80px] shrink-0" style={{ fontFamily: "'JetBrains Mono', monospace" }}>{c.weight}</span>
+                <p className="text-[12px] sm:text-[13px] text-[#999] leading-[1.6]">{c.desc}</p>
+              </div>
+            ))}
+          </div>
+          <div className="mt-8 p-5 rounded-xl bg-[#F1F3F5] border border-[#E5E7EB]">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-8">
+              <span className="text-[15px] text-[#333] font-medium">Total: 0–100 pts</span>
+              <span className="text-[12px] text-[#999]">→ Qualification Range: $25K – $5M+ based on composite score and tier placement</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ═══════════════ 9. MODE DIFFERENTIATION ═══════════════ */}
+      <section className="relative z-10 px-6 sm:px-12 md:px-20 py-20 sm:py-28 border-t border-[#E5E7EB]">
+        <div className="absolute inset-0" style={sectionBg} />
+        <div className="relative max-w-[900px]">
+          <SectionLabel>Operating Modes</SectionLabel>
+          <h2 className="text-[26px] sm:text-[36px] md:text-[44px] leading-[1.1] mb-14 tracking-[-0.03em]" style={gradientText('180deg', 0.9, 0.5)}>
+            Two modes. One goal: get you funded.
+          </h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            <div className="p-6 sm:p-8 rounded-xl bg-white border border-[#E5E7EB] shadow-sm">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-3 h-3 rounded-full bg-[#2E7D32]"></div>
+                <span className="text-[11px] tracking-[0.15em] uppercase text-[#666]">Pre-Funding Mode</span>
+              </div>
+              <h3 className="text-[20px] sm:text-[24px] text-[#333] font-light mb-4 tracking-[-0.02em]">Score 60+</h3>
+              <p className="text-[13px] text-[#666] leading-[1.8] mb-6">
+                You're fundable. This mode focuses on optimization — maximizing your ceiling, refining your tier placement, and identifying the best products for your profile.
+              </p>
+              <ul className="space-y-2.5">
+                {["Tier 1–2 product matching", "Exposure ceiling maximization", "Application timing strategy", "Rate optimization guidance"].map((t) => (
+                  <li key={t} className="flex items-center gap-3 text-[12px] text-[#666]">
+                    <span className="w-1 h-1 rounded-full bg-[#DEE2E6]"></span>{t}
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div className="p-6 sm:p-8 rounded-xl bg-white border border-[#E5E7EB] shadow-sm">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-3 h-3 rounded-full bg-[#DEE2E6] border border-[#999]"></div>
+                <span className="text-[11px] tracking-[0.15em] uppercase text-[#666]">Repair Mode</span>
+              </div>
+              <h3 className="text-[20px] sm:text-[24px] text-[#333] font-light mb-4 tracking-[-0.02em]">Score &lt;60</h3>
+              <p className="text-[13px] text-[#666] leading-[1.8] mb-6">
+                You need work before applying. This mode focuses on fixing issues — dispute letters, payment optimization, structure corrections, and timeline to fundability.
+              </p>
+              <ul className="space-y-2.5">
+                {["Auto-generated dispute letters", "Credit issue prioritization", "90-day repair timeline", "Score impact projections"].map((t) => (
+                  <li key={t} className="flex items-center gap-3 text-[12px] text-[#666]">
+                    <span className="w-1 h-1 rounded-full bg-[#DEE2E6]"></span>{t}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ═══════════════ 10. TIER POSITIONING ═══════════════ */}
+      <section className="relative z-10 px-6 sm:px-12 md:px-20 py-20 sm:py-28 border-t border-[#E5E7EB]">
+        <div className="absolute inset-0" style={sectionBg} />
+        <div className="relative max-w-[900px]">
+          <SectionLabel>Tier Eligibility</SectionLabel>
+          <h2 className="text-[26px] sm:text-[36px] md:text-[44px] leading-[1.1] mb-14 tracking-[-0.03em]" style={gradientText('180deg', 0.9, 0.5)}>
+            Three tiers. Know which one you belong to.
+          </h2>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            {[
+              { tier: "Tier 1", name: "Prime Capital", score: "75–100", products: "SBA 7(a) & 504, Conventional LOC, Term Loans, Equipment Finance", color: "border-[#2E7D32]/30" },
+              { tier: "Tier 2", name: "Mid-Tier", score: "50–74", products: "Revenue-Based Lending, Invoice Factoring, Merchant Cash Advance, Bridge Loans", color: "border-[#E5E7EB]" },
+              { tier: "Tier 3", name: "Alternative", score: "25–49", products: "Microloans, Secured Cards, Credit Builder Programs, Community Development Loans", color: "border-[#E5E7EB]" },
+            ].map((t) => (
+              <div key={t.tier} className={`p-6 rounded-xl bg-white border ${t.color} shadow-sm`}>
+                <span className="text-[10px] font-mono text-[#999] tracking-wider uppercase">{t.tier}</span>
+                <h3 className="text-[18px] sm:text-[20px] text-[#333] font-medium mt-2 mb-1">{t.name}</h3>
+                <p className="text-[13px] font-mono text-[#666] mb-5" style={{ fontFamily: "'JetBrains Mono', monospace" }}>Score: {t.score}</p>
+                <p className="text-[12px] text-[#999] leading-[1.7]">{t.products}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ═══════════════ 11. CASE STUDY ═══════════════ */}
+      <section className="relative z-10 px-6 sm:px-12 md:px-20 py-20 sm:py-28 border-t border-[#E5E7EB]">
+        <div className="absolute inset-0" style={sectionBg} />
+        <div className="relative max-w-[800px]">
+          <SectionLabel>Example Walkthrough</SectionLabel>
+          <h2 className="text-[26px] sm:text-[36px] md:text-[44px] leading-[1.1] mb-14 tracking-[-0.03em]" style={gradientText('180deg', 0.9, 0.5)}>
+            How a 38-score founder became funding-ready in 67 days.
+          </h2>
+
+          <div className="space-y-0">
+            {[
+              { day: "Day 1", title: "Initial Analysis", detail: "Score: 38/100. Tier 3 (Alternative). 4 denial triggers flagged: high utilization (78%), 2 collections, thin business file, no EIN separation." },
+              { day: "Day 3", title: "Repair Plan Generated", detail: "MentXr auto-generated 6 dispute letters (2 per bureau), created a 90-day utilization reduction plan, and recommended EIN registration + business bank account." },
+              { day: "Day 30", title: "First Checkpoint", detail: "Score: 52/100. Moved to Tier 2. 1 collection removed. Utilization down to 45%. Business structure improved. Exposure ceiling: $85K." },
+              { day: "Day 67", title: "Funding Ready", detail: "Score: 71/100. Tier 2 (upper). 0 denial triggers. Utilization: 22%. Clean business file. Exposure ceiling: $210K. Applied for $175K LOC — approved in 5 days." },
+            ].map((step) => (
+              <div key={step.day} className="flex gap-6 sm:gap-8 py-7 border-t border-[#E5E7EB] first:border-t-0">
+                <div className="w-[70px] shrink-0">
+                  <span className="text-[12px] font-mono text-[#666]" style={{ fontFamily: "'JetBrains Mono', monospace" }}>{step.day}</span>
+                </div>
+                <div>
+                  <h3 className="text-[15px] text-[#333] font-medium mb-2">{step.title}</h3>
+                  <p className="text-[13px] text-[#666] leading-[1.7]">{step.detail}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ═══════════════ 12. FAQ / OBJECTION HANDLING ═══════════════ */}
+      <section className="relative z-10 px-6 sm:px-12 md:px-20 py-20 sm:py-28 border-t border-[#E5E7EB]">
+        <div className="absolute inset-0" style={sectionBg} />
+        <div className="relative max-w-[700px]">
+          <SectionLabel>FAQ</SectionLabel>
+          <h2 className="text-[26px] sm:text-[36px] md:text-[44px] leading-[1.1] mb-12 tracking-[-0.03em]" style={gradientText('180deg', 0.9, 0.5)}>
+            Common questions, straight answers.
+          </h2>
+          <div className="space-y-0">
+            {faqItems.map((item, i) => (
+              <div key={i} className="border-b border-[#E5E7EB]">
+                <button
+                  data-testid={`button-faq-${i}`}
+                  className="w-full flex items-center justify-between py-5 text-left group"
+                  onClick={() => setOpenFaq(openFaq === i ? null : i)}
+                >
+                  <span className="text-[14px] sm:text-[15px] font-medium text-[#333] group-hover:text-[#1A1A1A] transition-colors pr-4">{item.q}</span>
+                  <span className="text-[18px] text-[#999] shrink-0 leading-none transition-transform duration-200" style={{ transform: openFaq === i ? 'rotate(45deg)' : 'rotate(0deg)' }}>+</span>
+                </button>
+                {openFaq === i && (
+                  <div className="pb-5">
+                    <p className="text-[13px] text-[#666] leading-[1.8]">{item.a}</p>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ═══════════════ 13. TRUST & COMPLIANCE ═══════════════ */}
+      <section className="relative z-10 px-6 sm:px-12 md:px-20 py-20 sm:py-28 border-t border-[#E5E7EB]">
+        <div className="absolute inset-0" style={sectionBg} />
+        <div className="relative max-w-[800px]">
+          <SectionLabel>Trust & Security</SectionLabel>
+          <h2 className="text-[26px] sm:text-[36px] md:text-[44px] leading-[1.1] mb-12 tracking-[-0.03em]" style={gradientText('180deg', 0.9, 0.5)}>
+            Your data. Your control. Always.
+          </h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {[
+              { icon: "⬡", title: "Encrypted", desc: "AES-256 encryption at rest and TLS 1.3 in transit" },
+              { icon: "◎", title: "Private", desc: "We never share data with lenders, brokers, or third parties" },
+              { icon: "◇", title: "Compliant", desc: "FCRA-aligned analysis and dispute letter generation" },
+              { icon: "▣", title: "No Credit Pull", desc: "We analyze your uploaded reports — zero impact on your score" },
+            ].map((item) => (
+              <div key={item.title} className="p-5 rounded-xl bg-white border border-[#E5E7EB] shadow-sm">
+                <span className="text-[18px] text-[#999] mb-3 block">{item.icon}</span>
+                <h3 className="text-[13px] text-[#333] font-medium mb-1.5">{item.title}</h3>
+                <p className="text-[11px] text-[#999] leading-[1.6]">{item.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ═══════════════ 14. FINAL CTA ═══════════════ */}
+      <section className="relative z-10 px-6 sm:px-12 md:px-20 py-24 sm:py-36 border-t border-[#E5E7EB]">
+        <div className="absolute inset-0" style={{ background: 'radial-gradient(ellipse 80% 70% at 50% 50%, rgba(255,255,255,0.98) 0%, rgba(248,249,250,0.7) 50%, rgba(241,243,245,0.4) 100%)' }} />
+        <div className="relative max-w-[700px] mx-auto text-center">
+          <h2
+            className="text-[30px] sm:text-[44px] md:text-[56px] leading-[1.05] mb-6 tracking-[-0.04em]"
+            style={{ fontFamily: "'Satoshi', sans-serif", fontWeight: 400, ...gradientText('180deg', 1, 0.55) }}
+            data-testid="text-final-cta"
+          >
+            Stop guessing.<br />Start knowing.
+          </h2>
+          <p className="text-[15px] text-[#666] leading-[1.8] mb-10 max-w-[480px] mx-auto">
+            Get your Capital Readiness Score, tier eligibility, exposure ceiling, and denial simulation — free. No credit card. No credit pull. No commitment.
+          </p>
+          <form onSubmit={handleLogin} className="w-full max-w-[440px] mx-auto mb-6">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center bg-white border border-[#E5E7EB] rounded-2xl sm:rounded-full sm:h-[52px] sm:pl-5 sm:pr-1.5 overflow-hidden shadow-sm">
+              <input
+                data-testid="input-email-bottom"
+                type="email"
+                placeholder="Enter your email"
+                className="flex-1 bg-transparent text-[14px] text-[#1A1A1A] placeholder:text-[#999] outline-none px-4 py-3.5 sm:px-0 sm:py-0"
+                defaultValue=""
+                required
+                disabled={isLoading}
+              />
+              <button
+                data-testid="button-join-bottom"
+                type="submit"
+                disabled={isLoading}
+                className="h-[44px] sm:h-[40px] px-6 sm:rounded-full bg-[#2E7D32] text-white text-[13px] font-bold hover:bg-[#256829] transition-colors shrink-0 border-t border-[#E5E7EB] sm:border-t-0 mx-1.5 mb-1.5 sm:mb-0 sm:mx-0 rounded-xl sm:rounded-full tracking-wide"
+              >
+                {isLoading ? "..." : "GET FREE ACCESS"}
+              </button>
+            </div>
+          </form>
+          <p className="text-[11px] text-[#DEE2E6] tracking-wide">
+            Join 12,500+ founders already using MentXr&reg;
+          </p>
+        </div>
+      </section>
+
+      {/* ═══════════════ 15. FOOTER ═══════════════ */}
+      <footer className="relative z-10 border-t border-[#E5E7EB] px-6 sm:px-12 md:px-20 py-10 sm:py-14">
+        <div className="absolute inset-0" style={{ background: 'rgba(248,249,250,0.85)' }} />
+        <div className="relative">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-8 mb-10">
+            <div className="flex items-center gap-2.5">
+              <div className="w-6 h-6 rounded-full border-2 border-[#666] flex items-center justify-center">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#333]"></span>
+              </div>
+              <span className="text-[13px] font-bold tracking-[0.08em] text-[#333] uppercase">MentXr</span>
+            </div>
+            <div className="flex flex-wrap gap-6 sm:gap-8">
+              {["Privacy Policy", "Terms of Service", "Contact", "Support"].map((link) => (
+                <span key={link} className="text-[11px] text-[#999] tracking-wide uppercase cursor-pointer hover:text-[#666] transition-colors">{link}</span>
+              ))}
+            </div>
+          </div>
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pt-6 border-t border-[#E5E7EB]">
+            <p className="text-[11px] text-[#999]">
+              &copy; 2026 MentXr&reg; by <span className="text-[#666] font-medium">CMD Supply</span>. All rights reserved.
+            </p>
+            <p className="text-[10px] text-[#DEE2E6] max-w-[400px] leading-[1.6]">
+              MentXr is not a lender, broker, or financial advisor. All analyses are for informational purposes only and do not constitute financial advice or guaranteed lending outcomes.
+            </p>
           </div>
         </div>
       </footer>

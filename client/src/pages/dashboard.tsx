@@ -695,7 +695,7 @@ export default function DashboardPage() {
     : [];
 
   return (
-    <div className="h-[100dvh] flex text-[#1A1A1A] relative bg-transparent">
+    <div className="h-[100dvh] flex text-[#1A1A1A] relative">
       <TechBackground />
 
       {sidebarOpen && (
@@ -711,7 +711,7 @@ export default function DashboardPage() {
         sidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0",
         "md:flex",
         !sidebarOpen && "hidden md:flex"
-      )} style={{ background: 'rgba(248,249,250,0.85)', backdropFilter: 'blur(20px)' }}>
+      )} style={{ background: '#F8F9FA' }}>
         <div className="h-11 px-4 flex items-center justify-between border-b border-[#E5E7EB] bg-[#F1F3F5]">
           <div className="flex items-center gap-2">
             <span className="relative w-7 h-7 flex items-center justify-center">
@@ -911,7 +911,7 @@ export default function DashboardPage() {
 
       <main className="flex-1 flex flex-col min-w-0 relative z-10 bg-transparent">
 
-        <header className="shrink-0 relative z-10 bg-white/90 backdrop-blur-xl border-b border-[#E5E7EB]">
+        <header className="shrink-0 relative z-10 bg-white/95 backdrop-blur-none border-b border-[#E5E7EB]">
           <div className="h-14 flex items-center justify-between px-4">
             <div className="flex items-center gap-3">
               <button
@@ -1020,7 +1020,7 @@ export default function DashboardPage() {
                   </div>
 
                   <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 mb-4">
-                    <div className="lg:col-span-2 rounded-2xl bg-white/90 backdrop-blur-xl border border-[#E5E7EB] shadow-sm p-6" data-testid="funding-score-card">
+                    <div className="lg:col-span-2 rounded-2xl bg-white backdrop-blur-none border border-[#E5E7EB] shadow-sm p-6" data-testid="funding-score-card">
                       <p className="text-xs text-[#333] mb-1">Capital Readiness Score</p>
                       <div className="flex items-end gap-1">
                         <span className="text-4xl sm:text-5xl font-bold text-[#1A1A1A] tracking-tight font-mono" data-testid="text-score">{fundingData.score}</span>
@@ -1044,7 +1044,7 @@ export default function DashboardPage() {
                       </div>
                     </div>
 
-                    <div className="lg:col-span-3 rounded-2xl bg-white/90 backdrop-blur-xl border border-[#E5E7EB] shadow-sm p-6" data-testid="stats-row">
+                    <div className="lg:col-span-3 rounded-2xl bg-white backdrop-blur-none border border-[#E5E7EB] shadow-sm p-6" data-testid="stats-row">
                       <div className="grid grid-cols-3 h-full">
                         <div className="flex flex-col justify-center px-2">
                           <p className="text-xs text-[#444] mb-1">Tier</p>
@@ -1075,7 +1075,7 @@ export default function DashboardPage() {
 
                   <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 mb-4">
                     <div className="lg:col-span-2 space-y-4">
-                      <div className="rounded-2xl bg-white/90 backdrop-blur-xl border border-[#E5E7EB] shadow-sm p-6" data-testid="savings-donut-card">
+                      <div className="rounded-2xl bg-white backdrop-blur-none border border-[#E5E7EB] shadow-sm p-6" data-testid="savings-donut-card">
                         <div className="flex items-center justify-between">
                           <div>
                             <p className="text-xs text-[#444] mb-1">Funding Range</p>
@@ -1099,7 +1099,7 @@ export default function DashboardPage() {
                         </div>
                       </div>
 
-                      <div className="rounded-2xl bg-white/90 backdrop-blur-xl border border-[#E5E7EB] shadow-sm p-6" data-testid="document-upload-card">
+                      <div className="rounded-2xl bg-white backdrop-blur-none border border-[#E5E7EB] shadow-sm p-6" data-testid="document-upload-card">
                         <div className="flex items-center justify-between mb-4">
                           <p className="text-xs text-[#333]">Document Analysis</p>
                           <span className="text-[9px] text-[#888] bg-[#F1F3F5] px-2 py-0.5 rounded-full">GPT-4o</span>
@@ -1195,7 +1195,7 @@ export default function DashboardPage() {
                       </div>
                     </div>
 
-                    <div className="lg:col-span-3 rounded-2xl bg-white/90 backdrop-blur-xl border border-[#E5E7EB] shadow-sm p-6" data-testid="component-breakdown-card">
+                    <div className="lg:col-span-3 rounded-2xl bg-white backdrop-blur-none border border-[#E5E7EB] shadow-sm p-6" data-testid="component-breakdown-card">
                       <div className="flex items-center justify-between mb-5">
                         <p className="text-xs text-[#333]">Component Breakdown</p>
                       </div>
@@ -1245,7 +1245,7 @@ export default function DashboardPage() {
                   </div>
 
                   {fundingData.alerts.length > 0 && (
-                    <div className="rounded-2xl bg-white/90 backdrop-blur-xl border border-[#E5E7EB] shadow-sm p-6 mb-4" data-testid="risk-alerts-card">
+                    <div className="rounded-2xl bg-white backdrop-blur-none border border-[#E5E7EB] shadow-sm p-6 mb-4" data-testid="risk-alerts-card">
                       <div className="flex items-center justify-between mb-4">
                         <p className="text-xs text-[#333]">Risk Alerts</p>
                         <span className="text-[10px] text-[#888]">{fundingData.alerts.length} alert{fundingData.alerts.length > 1 ? "s" : ""}</span>
@@ -1288,7 +1288,7 @@ export default function DashboardPage() {
                   )}
 
                   {fundingData.denialSimulation && fundingData.denialSimulation.length > 0 && (
-                    <div className="rounded-2xl bg-white/90 backdrop-blur-xl border border-red-500/10 p-6 mb-4" data-testid="denial-simulation-card">
+                    <div className="rounded-2xl bg-white backdrop-blur-none border border-red-500/10 p-6 mb-4" data-testid="denial-simulation-card">
                       <div className="flex items-center justify-between mb-4">
                         <p className="text-xs text-red-400/60">Denial Simulation</p>
                         <span className="text-[10px] text-[#999]">{fundingData.denialSimulation.length} trigger{fundingData.denialSimulation.length > 1 ? "s" : ""}</span>
@@ -1330,7 +1330,7 @@ export default function DashboardPage() {
                   )}
 
                   {fundingData.actionPlan.length > 0 && (
-                    <div className="rounded-2xl bg-white/90 backdrop-blur-xl border border-[#E5E7EB] shadow-sm p-6 mb-4" data-testid="action-plan-card">
+                    <div className="rounded-2xl bg-white backdrop-blur-none border border-[#E5E7EB] shadow-sm p-6 mb-4" data-testid="action-plan-card">
                       <p className="text-xs text-[#333] mb-4">Action Plan</p>
                       <div className="space-y-2">
                         {fundingData.actionPlan.map((step, idx) => (
@@ -1346,7 +1346,7 @@ export default function DashboardPage() {
                   )}
 
                   {fundingData.analysisNextSteps && fundingData.analysisNextSteps.length > 0 && (
-                    <div className="rounded-2xl bg-white/90 backdrop-blur-xl border border-[#E5E7EB] shadow-sm p-6 mb-4" data-testid="next-steps-card">
+                    <div className="rounded-2xl bg-white backdrop-blur-none border border-[#E5E7EB] shadow-sm p-6 mb-4" data-testid="next-steps-card">
                       <div className="flex items-center justify-between mb-4">
                         <p className="text-xs text-[#333]">Next Steps</p>
                         <span className="text-[9px] text-[#999] bg-[#F1F3F5] px-2 py-0.5 rounded-full">AI Generated</span>
@@ -1362,7 +1362,7 @@ export default function DashboardPage() {
                     </div>
                   )}
 
-                  <div className="rounded-2xl bg-white/90 backdrop-blur-xl border border-[#E5E7EB] shadow-sm p-6 mb-4" data-testid="insights-card">
+                  <div className="rounded-2xl bg-white backdrop-blur-none border border-[#E5E7EB] shadow-sm p-6 mb-4" data-testid="insights-card">
                     <p className="text-xs text-[#333] mb-4">Insights</p>
                     <div className="space-y-2">
                       {INSIGHTS.map((insight, idx) => (
@@ -1386,7 +1386,7 @@ export default function DashboardPage() {
               )}
             </div>
           ) : activeTab === "feed" ? (
-            <div className="w-full h-full flex flex-col" style={{ background: 'rgba(248,249,250,0.85)', backdropFilter: 'blur(20px)' }}>
+            <div className="w-full h-full flex flex-col" style={{ background: '#F8F9FA' }}>
               {feedLoading && feedItems.length === 0 ? (
                 <div className="flex-1 flex items-center justify-center">
                   <div className="flex flex-col items-center gap-3">
@@ -1570,7 +1570,7 @@ export default function DashboardPage() {
 
             </div>
           ) : activeTab === "repair" ? (
-            <div className="w-full h-full flex flex-col" style={{ background: 'rgba(248,249,250,0.85)', backdropFilter: 'blur(20px)' }}>
+            <div className="w-full h-full flex flex-col" style={{ background: '#F8F9FA' }}>
               <div className="flex-1 overflow-y-auto px-5 sm:px-8 py-6 max-w-[800px] mx-auto w-full">
                 <div className="flex items-center gap-3 mb-6">
                   <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-600 to-amber-600 flex items-center justify-center">
@@ -1582,7 +1582,7 @@ export default function DashboardPage() {
                   </div>
                 </div>
 
-                <div className="rounded-2xl bg-white/90 backdrop-blur-xl border border-orange-500/10 p-6 mb-4" data-testid="credit-repair-card">
+                <div className="rounded-2xl bg-white backdrop-blur-none border border-orange-500/10 p-6 mb-4" data-testid="credit-repair-card">
                   <div className="flex items-center justify-between mb-4">
                     <p className="text-xs text-orange-400/60">Credit Repair System</p>
                     <span className="text-[9px] text-[#999] bg-[#F1F3F5] px-2 py-0.5 rounded-full">GPT-4o</span>
@@ -1737,7 +1737,7 @@ export default function DashboardPage() {
                   )}
                 </div>
 
-                <div className="rounded-2xl bg-white/90 backdrop-blur-xl border border-[#E5E7EB] shadow-sm overflow-hidden mb-4" data-testid="repair-qa-card">
+                <div className="rounded-2xl bg-white backdrop-blur-none border border-[#E5E7EB] shadow-sm overflow-hidden mb-4" data-testid="repair-qa-card">
                   <div className="px-6 py-4 flex items-center gap-3 border-b border-[#E5E7EB]">
                     <div className="w-8 h-8 rounded-xl bg-[#F1F3F5] border border-[#E5E7EB] flex items-center justify-center">
                       <MessageCircle className="w-4 h-4 text-orange-400/50" />
@@ -1854,7 +1854,7 @@ export default function DashboardPage() {
               </div>
             </div>
           ) : activeTab === "creatorai" ? (
-            <div className="w-full h-full flex flex-col" style={{ background: 'rgba(248,249,250,0.85)', backdropFilter: 'blur(20px)' }}>
+            <div className="w-full h-full flex flex-col" style={{ background: '#F8F9FA' }}>
               <div className="flex-1 overflow-y-auto px-5 sm:px-8 py-6 max-w-[800px] mx-auto w-full">
                 <div className="flex items-center gap-3 mb-6">
                   <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-600 to-blue-600 flex items-center justify-center">
@@ -2058,7 +2058,7 @@ export default function DashboardPage() {
               </div>
             </div>
           ) : (
-            <div className="w-full h-full flex flex-col" style={{ background: 'rgba(248,249,250,0.85)', backdropFilter: 'blur(20px)' }}>
+            <div className="w-full h-full flex flex-col" style={{ background: '#F8F9FA' }}>
               {!dmFriendId ? (
                 <div className="flex-1 overflow-y-auto px-5 sm:px-8 py-6 max-w-[600px] mx-auto w-full">
                   <div className="flex items-center gap-3 mb-6">
