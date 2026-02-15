@@ -155,10 +155,12 @@ function SpaceBackground() {
 }
 
 const gradientText = (dir = '180deg', _from = 0.85, _to = 0.5) => ({
-  backgroundImage: `linear-gradient(${dir}, #111111 0%, #555555 100%)`,
+  backgroundImage: `linear-gradient(${dir}, #000000 0%, #2a2a4a 45%, #6a6a8a 100%)`,
   WebkitBackgroundClip: 'text' as const,
   WebkitTextFillColor: 'transparent' as const,
   backgroundClip: 'text' as const,
+  fontStyle: 'italic' as const,
+  lineHeight: '0.95',
 });
 
 const sectionBg = { background: 'linear-gradient(180deg, rgba(255,255,255,0.97) 0%, rgba(248,248,252,0.95) 60%, rgba(245,245,250,0.9) 100%)' };
@@ -311,13 +313,13 @@ export default function LandingPage() {
         <div className="relative max-w-[900px] mx-auto">
           <p className="text-[11px] tracking-[0.2em] uppercase text-[#6a6a8a] mb-6" data-testid="text-hero-label">Digital Underwriting Engine</p>
           <h1
-            className="text-[38px] sm:text-[56px] md:text-[72px] lg:text-[88px] uppercase leading-[0.95] mb-8"
-            style={{ fontFamily: "'Satoshi', sans-serif", fontWeight: 400, letterSpacing: '-0.06em', ...gradientText('180deg', 1, 0.6) }}
+            className="text-[38px] sm:text-[56px] md:text-[72px] lg:text-[88px] uppercase italic leading-[0.85] mb-8"
+            style={{ fontFamily: "'Satoshi', sans-serif", fontWeight: 400, letterSpacing: '-0.06em', backgroundImage: 'linear-gradient(180deg, #000000 0%, #3a3a5a 50%, #7a7a9a 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}
             data-testid="text-hero-headline"
           >
             Know Exactly<br />Where You Stand<br />Before You Apply
           </h1>
-          <p className="text-[15px] sm:text-[17px] text-[#5a5a7a] leading-[1.8] max-w-[560px] mx-auto mb-10">
+          <p className="text-[15px] sm:text-[17px] text-[#5a5a7a] leading-[1.8] max-w-[560px] mx-auto mb-10" style={{ textAlign: 'justify', textAlignLast: 'center' }}>
             MentXr&reg; runs your financial profile through real underwriting logic — the same criteria banks use to approve or deny you. Get your Capital Readiness Score, exposure ceiling, tier eligibility, and denial risk before you ever submit an application.
           </p>
 
@@ -361,7 +363,7 @@ export default function LandingPage() {
         <div className="absolute inset-0" style={sectionBg} />
         <div className="relative max-w-[800px] mx-auto">
           <SectionLabel>The Problem</SectionLabel>
-          <h2 className="text-[26px] sm:text-[36px] md:text-[44px] leading-[1.1] mb-10 tracking-[-0.03em]" style={gradientText('180deg', 0.95, 0.55)}>
+          <h2 className="text-[26px] sm:text-[36px] md:text-[44px] leading-[0.9] mb-10 tracking-[-0.03em]" style={gradientText('180deg', 0.95, 0.55)}>
             73% of funding applications get denied. Most founders never find out why until it's too late.
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
@@ -373,7 +375,7 @@ export default function LandingPage() {
             ].map((item) => (
               <div key={item.num} className="flex gap-4 items-start p-5 rounded-xl bg-[#f8f8fc] border border-[#e0e0ea]">
                 <span className="text-[11px] font-mono text-[#8a8aa5] shrink-0 mt-0.5">{item.num}</span>
-                <p className="text-[13px] sm:text-[14px] text-[#5a5a7a] leading-[1.7]">{item.text}</p>
+                <p className="text-[13px] sm:text-[14px] text-[#5a5a7a] leading-[1.7]" style={{ textAlign: 'justify' }}>{item.text}</p>
               </div>
             ))}
           </div>
@@ -387,10 +389,10 @@ export default function LandingPage() {
         <div className="absolute inset-0" style={sectionBg} />
         <div className="relative max-w-[800px] mx-auto">
           <SectionLabel>The Solution</SectionLabel>
-          <h2 className="text-[26px] sm:text-[36px] md:text-[44px] leading-[1.1] mb-6 tracking-[-0.03em]" style={gradientText('180deg', 0.95, 0.55)}>
+          <h2 className="text-[26px] sm:text-[36px] md:text-[44px] leading-[0.9] mb-6 tracking-[-0.03em]" style={gradientText('180deg', 0.95, 0.55)}>
             AI-powered underwriting intelligence that tells you exactly what to fix — before you apply.
           </h2>
-          <p className="text-[15px] sm:text-[16px] text-[#6a6a8a] leading-[1.8] mb-12 max-w-[640px] mx-auto">
+          <p className="text-[15px] sm:text-[16px] text-[#6a6a8a] leading-[1.8] mb-12 max-w-[640px] mx-auto" style={{ textAlign: 'justify', textAlignLast: 'center' }}>
             MentXr® analyzes your credit report and bank statements using the same 6-component framework real lenders use. You get a Capital Readiness Score, tier placement, exposure ceiling, denial simulation, and a step-by-step action plan — all powered by AI.
           </p>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
@@ -418,7 +420,7 @@ export default function LandingPage() {
         <div className="absolute inset-0" style={sectionBg} />
         <div className="relative max-w-[800px] mx-auto">
           <SectionLabel>How It Works</SectionLabel>
-          <h2 className="text-[26px] sm:text-[36px] md:text-[44px] leading-[1.1] mb-14 tracking-[-0.03em]" style={gradientText('180deg', 0.9, 0.5)}>
+          <h2 className="text-[26px] sm:text-[36px] md:text-[44px] leading-[0.9] mb-14 tracking-[-0.03em]" style={gradientText('180deg', 0.9, 0.5)}>
             Four steps from unknown to underwriting-ready.
           </h2>
           <div className="space-y-0">
@@ -434,7 +436,7 @@ export default function LandingPage() {
                 </div>
                 <div>
                   <h3 className="text-[16px] sm:text-[18px] text-[#1a1a2e] font-medium mb-2">{item.title}</h3>
-                  <p className="text-[13px] sm:text-[14px] text-[#3a3a5a] leading-[1.7] max-w-[500px]">{item.desc}</p>
+                  <p className="text-[13px] sm:text-[14px] text-[#3a3a5a] leading-[1.7] max-w-[500px]" style={{ textAlign: 'justify' }}>{item.desc}</p>
                 </div>
               </div>
             ))}
@@ -449,7 +451,7 @@ export default function LandingPage() {
         <div className="absolute inset-0" style={sectionBg} />
         <div className="relative max-w-[900px] mx-auto">
           <SectionLabel>What You Get</SectionLabel>
-          <h2 className="text-[26px] sm:text-[36px] md:text-[44px] leading-[1.1] mb-14 tracking-[-0.03em]" style={gradientText('180deg', 0.9, 0.5)}>
+          <h2 className="text-[26px] sm:text-[36px] md:text-[44px] leading-[0.9] mb-14 tracking-[-0.03em]" style={gradientText('180deg', 0.9, 0.5)}>
             Everything you need to walk into a lender's office with confidence.
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -467,7 +469,7 @@ export default function LandingPage() {
               <div key={item.title} className="p-5 sm:p-6 rounded-xl bg-[#f8f8fc] border border-[#e0e0ea] group hover:bg-[#f2f2f8] transition-colors">
                 <span className="text-[20px] text-[#8a8aa5] mb-4 block">{item.icon}</span>
                 <h3 className="text-[14px] sm:text-[15px] text-[#1a1a2e] font-medium mb-2">{item.title}</h3>
-                <p className="text-[12px] sm:text-[13px] text-[#3a3a5a] leading-[1.7]">{item.desc}</p>
+                <p className="text-[12px] sm:text-[13px] text-[#3a3a5a] leading-[1.7]" style={{ textAlign: 'justify' }}>{item.desc}</p>
               </div>
             ))}
           </div>
@@ -481,7 +483,7 @@ export default function LandingPage() {
         <div className="absolute inset-0" style={sectionBg} />
         <div className="relative max-w-[900px] mx-auto">
           <SectionLabel>Results</SectionLabel>
-          <h2 className="text-[26px] sm:text-[36px] md:text-[44px] leading-[1.1] mb-14 tracking-[-0.03em]" style={gradientText('180deg', 0.9, 0.5)}>
+          <h2 className="text-[26px] sm:text-[36px] md:text-[44px] leading-[0.9] mb-14 tracking-[-0.03em]" style={gradientText('180deg', 0.9, 0.5)}>
             Founders are getting funded with clarity, not luck.
           </h2>
 
@@ -506,7 +508,7 @@ export default function LandingPage() {
               { name: "David L.", role: "SaaS Startup CEO", quote: "MentXr showed me I was Mid-Tier when I thought I was Prime. After following the repair plan, I moved up and saved 4% on rates." },
             ].map((t) => (
               <div key={t.name} className="p-6 rounded-xl bg-[#f8f8fc] border border-[#e0e0ea]">
-                <p className="text-[13px] text-[#6a6a8a] leading-[1.8] mb-5 italic">"{t.quote}"</p>
+                <p className="text-[13px] text-[#6a6a8a] leading-[1.8] mb-5 italic" style={{ textAlign: 'justify' }}>"{t.quote}"</p>
                 <div>
                   <p className="text-[13px] text-[#3a3a5a] font-medium">{t.name}</p>
                   <p className="text-[11px] text-[#8a8aa5]">{t.role}</p>
@@ -524,10 +526,10 @@ export default function LandingPage() {
         <div className="absolute inset-0" style={sectionBg} />
         <div className="relative max-w-[800px] mx-auto">
           <SectionLabel>No More Guessing</SectionLabel>
-          <h2 className="text-[26px] sm:text-[36px] md:text-[44px] leading-[1.1] mb-6 tracking-[-0.03em]" style={gradientText('180deg', 0.95, 0.55)}>
+          <h2 className="text-[26px] sm:text-[36px] md:text-[44px] leading-[0.9] mb-6 tracking-[-0.03em]" style={gradientText('180deg', 0.95, 0.55)}>
             Stop applying blind. Start applying ready.
           </h2>
-          <p className="text-[15px] text-[#6a6a8a] leading-[1.8] mb-12 max-w-[600px] mx-auto">
+          <p className="text-[15px] text-[#6a6a8a] leading-[1.8] mb-12 max-w-[600px] mx-auto" style={{ textAlign: 'justify', textAlignLast: 'center' }}>
             Every denied application costs you: hard inquiries, wasted time, damaged confidence. MentXr eliminates the guesswork by showing you exactly what a lender sees — before you ever submit.
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
@@ -562,7 +564,7 @@ export default function LandingPage() {
         <div className="absolute inset-0" style={sectionBg} />
         <div className="relative max-w-[900px] mx-auto">
           <SectionLabel>Feature Breakdown</SectionLabel>
-          <h2 className="text-[26px] sm:text-[36px] md:text-[44px] leading-[1.1] mb-14 tracking-[-0.03em]" style={gradientText('180deg', 0.9, 0.5)}>
+          <h2 className="text-[26px] sm:text-[36px] md:text-[44px] leading-[0.9] mb-14 tracking-[-0.03em]" style={gradientText('180deg', 0.9, 0.5)}>
             Six components. One score. Complete clarity.
           </h2>
           <div className="space-y-3">
@@ -579,7 +581,7 @@ export default function LandingPage() {
                   <span className="text-[14px] sm:text-[15px] text-[#3a3a5a] font-medium">{c.name}</span>
                 </div>
                 <span className="text-[12px] font-mono text-[#3a3a5a] sm:w-[80px] shrink-0" style={{ fontFamily: "'JetBrains Mono', monospace" }}>{c.weight}</span>
-                <p className="text-[12px] sm:text-[13px] text-[#8a8aa5] leading-[1.6]">{c.desc}</p>
+                <p className="text-[12px] sm:text-[13px] text-[#8a8aa5] leading-[1.6]" style={{ textAlign: 'justify' }}>{c.desc}</p>
               </div>
             ))}
           </div>
@@ -599,7 +601,7 @@ export default function LandingPage() {
         <div className="absolute inset-0" style={sectionBg} />
         <div className="relative max-w-[900px] mx-auto">
           <SectionLabel>Operating Modes</SectionLabel>
-          <h2 className="text-[26px] sm:text-[36px] md:text-[44px] leading-[1.1] mb-14 tracking-[-0.03em]" style={gradientText('180deg', 0.9, 0.5)}>
+          <h2 className="text-[26px] sm:text-[36px] md:text-[44px] leading-[0.9] mb-14 tracking-[-0.03em]" style={gradientText('180deg', 0.9, 0.5)}>
             Two modes. One goal: get you funded.
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
@@ -609,7 +611,7 @@ export default function LandingPage() {
                 <span className="text-[11px] tracking-[0.15em] uppercase text-[#6a6a8a]">Pre-Funding Mode</span>
               </div>
               <h3 className="text-[20px] sm:text-[24px] text-[#1a1a2e] font-light mb-4 tracking-[-0.02em]">Score 60+</h3>
-              <p className="text-[13px] text-[#3a3a5a] leading-[1.8] mb-6">
+              <p className="text-[13px] text-[#3a3a5a] leading-[1.8] mb-6" style={{ textAlign: 'justify' }}>
                 You're fundable. This mode focuses on optimization — maximizing your ceiling, refining your tier placement, and identifying the best products for your profile.
               </p>
               <ul className="space-y-2.5">
@@ -626,7 +628,7 @@ export default function LandingPage() {
                 <span className="text-[11px] tracking-[0.15em] uppercase text-[#6a6a8a]">Repair Mode</span>
               </div>
               <h3 className="text-[20px] sm:text-[24px] text-[#1a1a2e] font-light mb-4 tracking-[-0.02em]">Score &lt;60</h3>
-              <p className="text-[13px] text-[#3a3a5a] leading-[1.8] mb-6">
+              <p className="text-[13px] text-[#3a3a5a] leading-[1.8] mb-6" style={{ textAlign: 'justify' }}>
                 You need work before applying. This mode focuses on fixing issues — dispute letters, payment optimization, structure corrections, and timeline to fundability.
               </p>
               <ul className="space-y-2.5">
@@ -648,7 +650,7 @@ export default function LandingPage() {
         <div className="absolute inset-0" style={sectionBg} />
         <div className="relative max-w-[900px] mx-auto">
           <SectionLabel>Tier Eligibility</SectionLabel>
-          <h2 className="text-[26px] sm:text-[36px] md:text-[44px] leading-[1.1] mb-14 tracking-[-0.03em]" style={gradientText('180deg', 0.9, 0.5)}>
+          <h2 className="text-[26px] sm:text-[36px] md:text-[44px] leading-[0.9] mb-14 tracking-[-0.03em]" style={gradientText('180deg', 0.9, 0.5)}>
             Three tiers. Know which one you belong to.
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -661,7 +663,7 @@ export default function LandingPage() {
                 <span className="text-[10px] font-mono text-[#8a8aa5] tracking-wider uppercase">{t.tier}</span>
                 <h3 className="text-[18px] sm:text-[20px] text-[#1a1a2e] font-medium mt-2 mb-1">{t.name}</h3>
                 <p className="text-[13px] font-mono text-[#6a6a8a] mb-5" style={{ fontFamily: "'JetBrains Mono', monospace" }}>Score: {t.score}</p>
-                <p className="text-[12px] text-[#8a8aa5] leading-[1.7]">{t.products}</p>
+                <p className="text-[12px] text-[#8a8aa5] leading-[1.7]" style={{ textAlign: 'justify' }}>{t.products}</p>
               </div>
             ))}
           </div>
@@ -675,7 +677,7 @@ export default function LandingPage() {
         <div className="absolute inset-0" style={sectionBg} />
         <div className="relative max-w-[800px] mx-auto">
           <SectionLabel>Example Walkthrough</SectionLabel>
-          <h2 className="text-[26px] sm:text-[36px] md:text-[44px] leading-[1.1] mb-14 tracking-[-0.03em]" style={gradientText('180deg', 0.9, 0.5)}>
+          <h2 className="text-[26px] sm:text-[36px] md:text-[44px] leading-[0.9] mb-14 tracking-[-0.03em]" style={gradientText('180deg', 0.9, 0.5)}>
             How a 38-score founder became funding-ready in 67 days.
           </h2>
 
@@ -692,7 +694,7 @@ export default function LandingPage() {
                 </div>
                 <div>
                   <h3 className="text-[15px] text-[#1a1a2e] font-medium mb-2">{step.title}</h3>
-                  <p className="text-[13px] text-[#3a3a5a] leading-[1.7]">{step.detail}</p>
+                  <p className="text-[13px] text-[#3a3a5a] leading-[1.7]" style={{ textAlign: 'justify' }}>{step.detail}</p>
                 </div>
               </div>
             ))}
@@ -707,7 +709,7 @@ export default function LandingPage() {
         <div className="absolute inset-0" style={sectionBg} />
         <div className="relative max-w-[700px] mx-auto">
           <SectionLabel>FAQ</SectionLabel>
-          <h2 className="text-[26px] sm:text-[36px] md:text-[44px] leading-[1.1] mb-12 tracking-[-0.03em]" style={gradientText('180deg', 0.9, 0.5)}>
+          <h2 className="text-[26px] sm:text-[36px] md:text-[44px] leading-[0.9] mb-12 tracking-[-0.03em]" style={gradientText('180deg', 0.9, 0.5)}>
             Common questions, straight answers.
           </h2>
           <div className="space-y-0">
@@ -723,7 +725,7 @@ export default function LandingPage() {
                 </button>
                 {openFaq === i && (
                   <div className="pb-5">
-                    <p className="text-[13px] text-[#3a3a5a] leading-[1.8]">{item.a}</p>
+                    <p className="text-[13px] text-[#3a3a5a] leading-[1.8]" style={{ textAlign: 'justify' }}>{item.a}</p>
                   </div>
                 )}
               </div>
@@ -739,7 +741,7 @@ export default function LandingPage() {
         <div className="absolute inset-0" style={sectionBg} />
         <div className="relative max-w-[800px] mx-auto">
           <SectionLabel>Trust & Security</SectionLabel>
-          <h2 className="text-[26px] sm:text-[36px] md:text-[44px] leading-[1.1] mb-12 tracking-[-0.03em]" style={gradientText('180deg', 0.9, 0.5)}>
+          <h2 className="text-[26px] sm:text-[36px] md:text-[44px] leading-[0.9] mb-12 tracking-[-0.03em]" style={gradientText('180deg', 0.9, 0.5)}>
             Your data. Your control. Always.
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -752,7 +754,7 @@ export default function LandingPage() {
               <div key={item.title} className="p-5 rounded-xl bg-[#f8f8fc] border border-[#e0e0ea]">
                 <span className="text-[18px] text-[#8a8aa5] mb-3 block">{item.icon}</span>
                 <h3 className="text-[13px] text-[#3a3a5a] font-medium mb-1.5">{item.title}</h3>
-                <p className="text-[11px] text-[#8a8aa5] leading-[1.6]">{item.desc}</p>
+                <p className="text-[11px] text-[#8a8aa5] leading-[1.6]" style={{ textAlign: 'justify' }}>{item.desc}</p>
               </div>
             ))}
           </div>
@@ -766,13 +768,13 @@ export default function LandingPage() {
         <div className="absolute inset-0" style={{ background: 'radial-gradient(ellipse 80% 70% at 50% 50%, rgba(255,255,255,0.97) 0%, rgba(248,248,252,0.85) 50%, rgba(245,245,250,0.6) 100%)' }} />
         <div className="relative max-w-[700px] mx-auto text-center">
           <h2
-            className="text-[30px] sm:text-[44px] md:text-[56px] leading-[1.05] mb-6 tracking-[-0.04em]"
+            className="text-[30px] sm:text-[44px] md:text-[56px] leading-[0.9] mb-6 tracking-[-0.04em]"
             style={{ fontFamily: "'Satoshi', sans-serif", fontWeight: 400, ...gradientText('180deg', 1, 0.55) }}
             data-testid="text-final-cta"
           >
             Stop guessing.<br />Start knowing.
           </h2>
-          <p className="text-[15px] text-[#6a6a8a] leading-[1.8] mb-10 max-w-[480px] mx-auto">
+          <p className="text-[15px] text-[#6a6a8a] leading-[1.8] mb-10 max-w-[480px] mx-auto" style={{ textAlign: 'justify', textAlignLast: 'center' }}>
             Get your Capital Readiness Score, tier eligibility, exposure ceiling, and denial simulation. Subscribe today and unlock the full platform.
           </p>
           <form onSubmit={handleLogin} className="w-full max-w-[440px] mx-auto mb-6">
@@ -827,6 +829,7 @@ export default function LandingPage() {
             </p>
             <p className="text-[10px] text-[#b0b0c0] max-w-[400px] leading-[1.6]">
               MentXr is not a lender, broker, or financial advisor. All analyses are for informational purposes only and do not constitute financial advice or guaranteed lending outcomes.
+          
             </p>
           </div>
         </div>
