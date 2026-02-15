@@ -81,7 +81,7 @@ function TechBackground() {
     window.addEventListener('resize', resizeHandler);
     return () => { cancelAnimationFrame(animationId); window.removeEventListener('resize', resizeHandler); };
   }, []);
-  return <canvas ref={canvasRef} className="fixed top-0 left-0 pointer-events-none" style={{ zIndex: 15 }} />;
+  return <canvas ref={canvasRef} className="fixed top-0 left-0 pointer-events-none" style={{ zIndex: 1 }} />;
 }
 
 const BOT_COLORS: Record<string, string> = {
