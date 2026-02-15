@@ -4,8 +4,9 @@
 A free AI mentorship platform ("Mentorship On Demand") combining Capital Readiness analytics with AI-powered mentorship. Features a 6-component Capital Readiness evaluation system (Capital Strength, Credit Quality, Management & Structure, Earnings & Cash Flow, Liquidity & Leverage, Risk Signals), 2.5x exposure ceiling calculation, tier eligibility (Prime/Mid-Tier/Alternative), operating mode (Pre-Funding/Repair), denial simulation, AI chat workspace with 7 bot mentors, PDF document upload with OCR, friends list, admin panel, and free membership access.
 
 ## Recent Changes
-- 2026-02-14: Creator-Informed Analysis is now a separate 4th tab ("Creator AI") alongside Dashboard, Live Feed, Workspace
-- 2026-02-14: Creator AI tab has its own credit report upload section for personalized analysis
+- 2026-02-15: Renamed "Creator AI" tab to "Creator Connect" across dashboard
+- 2026-02-14: Creator Connect (formerly Creator AI) is a separate 4th tab alongside Dashboard, Live Feed, Workspace
+- 2026-02-14: Creator Connect tab has its own credit report upload section for personalized analysis
 - 2026-02-14: AI automatically aggregates insights from 75+ creators across 8 categories (finance, business, realestate, credit, stocks, tax, economics, news)
 - 2026-02-14: Multi-Creator Aggregation Mode: AI selects 3-6 most relevant creators per question, synthesizes their frameworks, shows agreements/differences
 - 2026-02-14: CREATOR_INFORMED_PROMPT system prompt for synthesizing creator educational insights with proper @CreatorName attribution

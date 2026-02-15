@@ -919,7 +919,7 @@ export default function DashboardPage() {
             >
               <div className="flex items-center justify-center gap-1.5">
                 <Sparkles className="w-3.5 h-3.5" />
-                Creator AI
+                Creator Connect
               </div>
               {activeTab === "creatorai" && <div className="absolute bottom-0 left-1/4 right-1/4 h-[2px] bg-purple-400 rounded-full" />}
             </button>
@@ -1815,8 +1815,8 @@ export default function DashboardPage() {
                     <Sparkles className="w-5 h-5 text-[#1a1a2e]" />
                   </div>
                   <div>
-                    <h2 className="text-lg font-bold text-[#1a1a2e]" data-testid="text-creator-ai-title">Creator-Informed Analysis</h2>
-                    <p className="text-[11px] text-[#1a1a2e]/75">AI aggregates insights from 75+ top finance creators</p>
+                    <h2 className="text-lg font-bold text-[#1a1a2e]" data-testid="text-creator-ai-title">Creator Connect</h2>
+                    <p className="text-[11px] text-[#1a1a2e]/75">AI-powered insights from 75+ top finance creators</p>
                   </div>
                 </div>
 
