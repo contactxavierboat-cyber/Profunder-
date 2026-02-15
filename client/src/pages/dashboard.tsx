@@ -1965,40 +1965,41 @@ export default function DashboardPage() {
                       </div>
                     ) : (
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                      {creatorMatchResults.creators.map((creator: any, idx: number) => (
-                        <div key={creator.channelId || idx} className="bg-white/70 backdrop-blur-sm border border-white/40 rounded-xl p-4 hover:shadow-md transition-all" data-testid={`creator-card-${idx}`}>
+                      {creatorMatchResults.creators.map((creator: any, idx: number) => {
+                        const categoryColors: Record<string, string> = {
+                          credit_repair: "from-orange-400 to-red-400",
+                          business_funding: "from-green-400 to-emerald-500",
+                          business_credit: "from-blue-400 to-indigo-500",
+                          financial_literacy: "from-purple-400 to-violet-500",
+                          entrepreneurship: "from-amber-400 to-orange-500",
+                          credit_building: "from-teal-400 to-cyan-500",
+                          investing: "from-pink-400 to-rose-500",
+                        };
+                        const gradient = categoryColors[creator.category] || "from-purple-400 to-blue-400";
+                        return (
+                        <div key={idx} className="bg-white/70 backdrop-blur-sm border border-white/40 rounded-xl p-4 hover:shadow-md transition-all" data-testid={`creator-card-${idx}`}>
                           <div className="flex items-start gap-3">
-                            {creator.thumbnail ? (
-                              <img src={creator.thumbnail} alt={creator.title} className="w-12 h-12 rounded-full object-cover border-2 border-white shadow-sm shrink-0" />
-                            ) : (
-                              <div className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-400 to-blue-400 flex items-center justify-center text-white font-bold text-sm shrink-0">
-                                {(creator.title || "?")[0]}
-                              </div>
-                            )}
+                            <div className={`w-11 h-11 rounded-full bg-gradient-to-br ${gradient} flex items-center justify-center text-white font-bold text-sm shrink-0 shadow-sm`}>
+                              {(creator.channelName || "?")[0]}
+                            </div>
                             <div className="flex-1 min-w-0">
-                              <h4 className="text-[13px] font-bold text-[#1a1a2e] truncate">{creator.title}</h4>
-                              {creator.subscriberCount && (
-                                <p className="text-[10px] text-[#1a1a2e]/55 mt-0.5">
-                                  {creator.subscriberCount >= 1000000
-                                    ? `${(creator.subscriberCount / 1000000).toFixed(1)}M subscribers`
-                                    : creator.subscriberCount >= 1000
-                                      ? `${(creator.subscriberCount / 1000).toFixed(0)}K subscribers`
-                                      : `${creator.subscriberCount} subscribers`}
-                                  {creator.videoCount ? ` · ${creator.videoCount.toLocaleString()} videos` : ""}
-                                </p>
-                              )}
+                              <h4 className="text-[13px] font-bold text-[#1a1a2e] truncate">{creator.channelName}</h4>
+                              <div className="flex items-center gap-2 mt-0.5">
+                                {creator.handle && <span className="text-[10px] text-purple-500 font-medium">{creator.handle}</span>}
+                                {creator.subscriberEstimate && <span className="text-[10px] text-[#1a1a2e]/50">{creator.subscriberEstimate} subs</span>}
+                              </div>
                             </div>
                           </div>
-                          <p className="text-[11px] text-[#1a1a2e]/60 mt-2 line-clamp-2 leading-relaxed">{creator.description || "YouTube creator"}</p>
+                          <p className="text-[11px] text-[#1a1a2e]/70 mt-2 leading-relaxed">{creator.specialty}</p>
                           {creator.matchReason && (
-                            <p className="text-[10px] text-purple-600/80 mt-1.5 flex items-center gap-1">
-                              <Sparkles className="w-3 h-3 shrink-0" />
-                              <span className="line-clamp-1">{creator.matchReason}</span>
+                            <p className="text-[10px] text-purple-600/80 mt-1.5 flex items-start gap-1">
+                              <Sparkles className="w-3 h-3 shrink-0 mt-0.5" />
+                              <span className="line-clamp-2">{creator.matchReason}</span>
                             </p>
                           )}
                           <div className="flex items-center gap-2 mt-3">
                             <a
-                              href={creator.customUrl ? `https://www.youtube.com/${creator.customUrl}` : creator.channelUrl}
+                              href={creator.channelUrl}
                               target="_blank"
                               rel="noopener noreferrer"
                               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-500/10 border border-red-300/30 text-red-600 text-[11px] font-medium hover:bg-red-500/20 transition-colors"
@@ -2007,17 +2008,18 @@ export default function DashboardPage() {
                               <Play className="w-3 h-3" /> YouTube
                             </a>
                             <a
-                              href={creator.customUrl ? `https://www.youtube.com/${creator.customUrl}/about` : `${creator.channelUrl}/about`}
+                              href={creator.searchUrl}
                               target="_blank"
                               rel="noopener noreferrer"
                               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-500/10 border border-blue-300/30 text-blue-600 text-[11px] font-medium hover:bg-blue-500/20 transition-colors"
-                              data-testid={`creator-about-link-${idx}`}
+                              data-testid={`creator-search-link-${idx}`}
                             >
-                              <ExternalLink className="w-3 h-3" /> Contact
+                              <Search className="w-3 h-3" /> Search
                             </a>
                           </div>
                         </div>
-                      ))}
+                        );
+                      })}
                     </div>
                     )}
                   </div>

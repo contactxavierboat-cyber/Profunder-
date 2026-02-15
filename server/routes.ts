@@ -1237,55 +1237,10 @@ Be concise but thorough. Use bullet points and formatting for readability. If th
 
   const ALL_CREATOR_NAMES = Object.values(CREATOR_NAMES_BY_CATEGORY).flat();
 
-  async function searchYouTubeChannels(query: string, maxResults: number = 10): Promise<any[]> {
-    const apiKey = process.env.YOUTUBE_API_KEY;
-    if (!apiKey) return [];
-    try {
-      const searchUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(query)}&type=channel&maxResults=${maxResults}&order=relevance&key=${apiKey}`;
-      const searchResp = await fetch(searchUrl);
-      if (!searchResp.ok) return [];
-      const searchData = await searchResp.json() as any;
-      const channelIds = (searchData.items || []).map((item: any) => item.id?.channelId).filter(Boolean);
-      if (channelIds.length === 0) return [];
-      const detailsUrl = `https://www.googleapis.com/youtube/v3/channels?part=snippet,statistics,brandingSettings&id=${channelIds.join(",")}&key=${apiKey}`;
-      const detailsResp = await fetch(detailsUrl);
-      if (!detailsResp.ok) return searchData.items.map((item: any) => ({
-        channelId: item.id?.channelId,
-        title: item.snippet?.title,
-        description: item.snippet?.description,
-        thumbnail: item.snippet?.thumbnails?.high?.url || item.snippet?.thumbnails?.default?.url,
-        subscriberCount: null,
-        videoCount: null,
-        viewCount: null,
-        channelUrl: `https://www.youtube.com/channel/${item.id?.channelId}`,
-      }));
-      const detailsData = await detailsResp.json() as any;
-      return (detailsData.items || []).map((ch: any) => ({
-        channelId: ch.id,
-        title: ch.snippet?.title,
-        description: ch.snippet?.description,
-        thumbnail: ch.snippet?.thumbnails?.high?.url || ch.snippet?.thumbnails?.default?.url,
-        subscriberCount: ch.statistics?.subscriberCount ? parseInt(ch.statistics.subscriberCount) : null,
-        videoCount: ch.statistics?.videoCount ? parseInt(ch.statistics.videoCount) : null,
-        viewCount: ch.statistics?.viewCount ? parseInt(ch.statistics.viewCount) : null,
-        channelUrl: `https://www.youtube.com/channel/${ch.id}`,
-        customUrl: ch.snippet?.customUrl || null,
-        country: ch.snippet?.country || null,
-      }));
-    } catch (err) {
-      console.error("YouTube search error:", err);
-      return [];
-    }
-  }
-
   app.post("/api/creator-match", requireAuth, async (req, res) => {
     const userId = req.session.userId!;
     const user = await storage.getUser(userId);
     if (!user) return res.status(404).json({ error: "User not found" });
-
-    if (!process.env.YOUTUBE_API_KEY) {
-      return res.status(503).json({ error: "YouTube search is not configured. Please add a YOUTUBE_API_KEY." });
-    }
 
     if (user.monthlyUsage >= user.maxUsage) {
       return res.status(403).json({ error: "Monthly analysis limit reached. Please wait for reset." });
@@ -1304,23 +1259,47 @@ Be concise but thorough. Use bullet points and formatting for readability. If th
     const profileSummary = `Score: ${user.creditScoreExact ?? user.creditScoreRange ?? "Unknown"}, Utilization: ${user.utilizationPercent ?? "N/A"}%, Late Payments: ${user.latePayments ?? 0}, Collections: ${user.collections ?? 0}, Derogatories: ${user.derogatoryAccounts ?? 0}, Inquiries: ${user.inquiries ?? "N/A"}, Revolving Limit: $${user.totalRevolvingLimit?.toLocaleString() || "N/A"}, Public Records: ${user.publicRecords ?? 0}`;
     financialContext += `\nProfile: ${profileSummary}`;
 
-    const aiPrompt = `You are an expert financial advisor AI. Analyze this user's financial situation and determine:
-1. Their MODE: "repair" (needs credit repair, has collections/lates/derogatories/low score) or "funding" (ready for funding, good credit, looking to leverage)
-2. Generate exactly 3 YouTube search queries that would find the BEST creators to help this specific person. Be specific - don't just search "credit repair" - include specific issues like "how to remove collections from credit report" or "business funding with 700 credit score".
-3. For each search query, explain in 1 sentence WHY this creator type would help them.
-4. Write a short summary (2-3 sentences) explaining the user's situation and what kind of creator help they need.
+    const aiPrompt = `You are an expert financial advisor who knows ALL major YouTube creators in the credit repair, business funding, finance, and entrepreneurship space. Analyze this user's financial situation and recommend the BEST real YouTube creators to help them.
 
 User's Financial Data:
 ${financialContext}
 
-Respond in this exact JSON format:
+Instructions:
+1. Determine their MODE: "repair" (needs credit repair - has collections/lates/derogatories/low score below 680) or "funding" (ready for funding - good credit 680+, looking to leverage capital)
+2. Write a 2-3 sentence summary of their situation and what help they need
+3. Recommend 8-12 REAL YouTube creators who make content most relevant to this user's SPECIFIC situation. Think about the EXACT issues they face.
+
+For REPAIR mode users, prioritize creators who teach:
+- How to dispute and remove negative items (collections, charge-offs, late payments)
+- Credit score improvement strategies
+- 609 dispute letters, goodwill letters, pay-for-delete strategies
+- Dealing with collection agencies
+- Credit bureau dispute processes
+- Rebuilding credit from scratch
+
+For FUNDING mode users, prioritize creators who teach:
+- Business credit building (Dun & Bradstreet, Nav, credit suite)
+- SBA loans, business lines of credit
+- 0% APR credit card strategies, credit stacking
+- Startup funding without revenue
+- Business credit cards and tradelines
+- Leveraging personal credit for business capital
+
+IMPORTANT: Only recommend REAL YouTube creators that actually exist. Include their exact YouTube channel name, their real handle/custom URL (like @channelname), and a brief description of what they teach. Include a mix of large and smaller niche creators.
+
+You MUST respond with valid JSON only (no markdown, no code blocks):
 {
   "mode": "repair" or "funding",
-  "summary": "2-3 sentence summary of user's situation",
-  "searches": [
-    {"query": "youtube search query 1", "reason": "why this helps"},
-    {"query": "youtube search query 2", "reason": "why this helps"},
-    {"query": "youtube search query 3", "reason": "why this helps"}
+  "summary": "2-3 sentence summary",
+  "creators": [
+    {
+      "channelName": "Exact YouTube Channel Name",
+      "handle": "@theirhandle",
+      "specialty": "What they specifically teach",
+      "matchReason": "Why this creator is perfect for THIS user's specific situation",
+      "subscriberEstimate": "approximate subscriber count like 500K or 1.2M",
+      "category": "credit_repair" or "business_funding" or "business_credit" or "financial_literacy" or "entrepreneurship" or "credit_building" or "investing"
+    }
   ]
 }`;
 
@@ -1328,10 +1307,10 @@ Respond in this exact JSON format:
       const aiResponse = await openai.chat.completions.create({
         model: "gpt-4o",
         messages: [
-          { role: "system", content: "You are a financial analysis AI. Always respond with valid JSON only, no markdown." },
+          { role: "system", content: "You are a YouTube creator expert specializing in finance, credit, and business funding channels. You have encyclopedic knowledge of real YouTube creators in these spaces. Always respond with valid JSON only, no markdown code blocks." },
           { role: "user", content: aiPrompt },
         ],
-        max_tokens: 1024,
+        max_tokens: 3000,
       });
 
       let aiResult: any;
@@ -1339,38 +1318,26 @@ Respond in this exact JSON format:
         const raw = aiResponse.choices[0]?.message?.content || "{}";
         aiResult = JSON.parse(raw.replace(/```json?\n?/g, "").replace(/```/g, "").trim());
       } catch {
-        aiResult = { mode: "repair", summary: "Unable to fully analyze. Showing general recommendations.", searches: [
-          { query: "credit repair tips 2025", reason: "General credit improvement guidance" },
-          { query: "business funding strategies", reason: "Funding readiness preparation" },
-          { query: "financial literacy for entrepreneurs", reason: "Overall financial education" },
-        ]};
+        aiResult = { mode: "repair", summary: "Unable to fully analyze. Showing general recommendations.", creators: [] };
       }
 
-      const allCreators: any[] = [];
-      const seenIds = new Set<string>();
-
-      const searchPromises = (aiResult.searches || []).map(async (s: any) => {
-        const results = await searchYouTubeChannels(s.query, 8);
-        return { reason: s.reason, query: s.query, creators: results };
-      });
-      const searchResults = await Promise.all(searchPromises);
-
-      for (const group of searchResults) {
-        for (const creator of group.creators) {
-          if (!seenIds.has(creator.channelId)) {
-            seenIds.add(creator.channelId);
-            allCreators.push({ ...creator, matchReason: group.reason, searchQuery: group.query });
-          }
-        }
-      }
+      const creators = (aiResult.creators || []).map((c: any) => ({
+        channelName: c.channelName,
+        handle: c.handle,
+        specialty: c.specialty,
+        matchReason: c.matchReason,
+        subscriberEstimate: c.subscriberEstimate,
+        category: c.category,
+        channelUrl: c.handle ? `https://www.youtube.com/${c.handle}` : `https://www.youtube.com/results?search_query=${encodeURIComponent(c.channelName)}`,
+        searchUrl: `https://www.youtube.com/results?search_query=${encodeURIComponent(c.channelName)}`,
+      }));
 
       await storage.updateUser(userId, { monthlyUsage: user.monthlyUsage + 1 });
 
       res.json({
         mode: aiResult.mode,
         summary: aiResult.summary,
-        searches: aiResult.searches,
-        creators: allCreators.slice(0, 20),
+        creators,
       });
     } catch (error: any) {
       console.error("Creator Match Error:", error);
