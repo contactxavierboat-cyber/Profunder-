@@ -299,7 +299,7 @@ export default function LandingPage() {
       <section className="relative z-10 min-h-[90vh] flex flex-col items-center justify-center px-6 sm:px-12 md:px-20 lg:px-28 py-20 text-center">
         <div className="absolute inset-0" style={{ background: 'radial-gradient(ellipse 90% 80% at 50% 50%, rgba(8,8,8,0.98) 0%, rgba(8,8,8,0.9) 50%, transparent 100%)' }} />
         <div className="relative max-w-[900px] mx-auto">
-          <p className="text-[11px] tracking-[0.2em] uppercase text-white/60 mb-6" data-testid="text-hero-label">Capital Readiness Engine</p>
+          <p className="text-[11px] tracking-[0.2em] uppercase text-white/60 mb-6" data-testid="text-hero-label">Digital Underwriting Engine</p>
           <h1
             className="text-[38px] sm:text-[56px] md:text-[72px] lg:text-[88px] uppercase leading-[0.95] mb-8"
             style={{ fontFamily: "'Satoshi', sans-serif", fontWeight: 400, letterSpacing: '-0.06em', ...gradientText('180deg', 1, 0.6) }}
