@@ -269,25 +269,25 @@ export default function LandingPage() {
       </div>
 
       <div className="sticky top-0 z-50 w-full flex justify-center px-6 sm:px-10 pt-4" data-testid="nav-top">
-        <nav className="flex items-center justify-between w-full max-w-[900px] h-[52px] bg-white rounded-full px-2.5 pl-3 shadow-lg shadow-black/8">
-          <div className="flex items-center gap-2 bg-[#F5F5F7] rounded-full px-3.5 py-1.5" data-testid="nav-logo">
-            <div className="w-[18px] h-[18px] rounded-full bg-gradient-to-br from-[#1a1a2e] to-[#16213e] flex items-center justify-center">
-              <span className="w-1.5 h-1.5 rounded-full bg-white"></span>
+        <nav className="flex items-center justify-between w-full max-w-[900px] h-[52px] bg-[#141414] border border-[#2A2A2A] rounded-full px-2.5 pl-3">
+          <div className="flex items-center gap-2 bg-[#1E1E1E] rounded-full px-3.5 py-1.5" data-testid="nav-logo">
+            <div className="w-[18px] h-[18px] rounded-full bg-gradient-to-br from-white/80 to-white/50 flex items-center justify-center">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#141414]"></span>
             </div>
-            <span className="text-[12.5px] font-semibold tracking-[0.03em] text-[#1a1a2e]">MentXr<span className="text-[8px] align-super">®</span></span>
+            <span className="text-[12.5px] font-semibold tracking-[0.03em] text-white/90">MentXr<span className="text-[8px] align-super">®</span></span>
           </div>
 
           <div className="hidden md:flex items-center gap-8">
-            <a href="#how-it-works" className="text-[13px] font-medium text-[#4a4a5a] hover:text-[#1a1a2e] transition-colors" data-testid="link-how-it-works">How It Works</a>
-            <a href="#features" className="text-[13px] font-medium text-[#4a4a5a] hover:text-[#1a1a2e] transition-colors" data-testid="link-features">Features</a>
-            <a href="#results" className="text-[13px] font-medium text-[#4a4a5a] hover:text-[#1a1a2e] transition-colors" data-testid="link-results">Results</a>
-            <a href="#faq" className="text-[13px] font-medium text-[#4a4a5a] hover:text-[#1a1a2e] transition-colors" data-testid="link-faq">FAQ</a>
+            <a href="#how-it-works" className="text-[13px] font-medium text-white/55 hover:text-white/90 transition-colors" data-testid="link-how-it-works">How It Works</a>
+            <a href="#features" className="text-[13px] font-medium text-white/55 hover:text-white/90 transition-colors" data-testid="link-features">Features</a>
+            <a href="#results" className="text-[13px] font-medium text-white/55 hover:text-white/90 transition-colors" data-testid="link-results">Results</a>
+            <a href="#faq" className="text-[13px] font-medium text-white/55 hover:text-white/90 transition-colors" data-testid="link-faq">FAQ</a>
           </div>
 
           <button
             onClick={() => document.querySelector<HTMLInputElement>('[data-testid="input-email"]')?.focus()}
-            className="rounded-full px-5 py-2 text-[12.5px] font-semibold text-white shadow-sm hover:shadow-md transition-all duration-200 hover:scale-[1.02]"
-            style={{ background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)' }}
+            className="rounded-full px-5 py-2 text-[12.5px] font-semibold text-black transition-all duration-200 hover:scale-[1.02]"
+            style={{ background: 'linear-gradient(135deg, #ffffff 0%, #d4d4d4 100%)' }}
             data-testid="button-get-started"
           >
             Get Started Free
