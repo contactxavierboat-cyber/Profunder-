@@ -101,7 +101,7 @@ function TechBackground() {
           if (dist < connectionDist) {
             const alpha = (1 - dist / connectionDist) * 0.18;
             ctx.beginPath();
-            ctx.strokeStyle = `rgba(255, 255, 255, ${alpha})`;
+            ctx.strokeStyle = `rgba(100, 255, 140, ${alpha})`;
             ctx.lineWidth = 0.7;
             ctx.moveTo(pi.x, pi.y);
             ctx.lineTo(pj.x, pj.y);
@@ -118,7 +118,7 @@ function TechBackground() {
         const drawSize = p.size * (mouseBoost > 1 ? mouseBoost * 0.5 + 0.5 : 1);
 
         ctx.beginPath();
-        ctx.fillStyle = `rgba(255, 255, 255, ${alpha})`;
+        ctx.fillStyle = `rgba(100, 255, 140, ${alpha})`;
         ctx.arc(p.x, p.y, drawSize, 0, Math.PI * 2);
         ctx.fill();
 
@@ -126,9 +126,9 @@ function TechBackground() {
           ctx.beginPath();
           const glowRadius = drawSize * (p.isNode ? 6 : 3);
           const grad = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, glowRadius);
-          grad.addColorStop(0, `rgba(255, 255, 255, ${alpha * 0.25})`);
-          grad.addColorStop(0.5, `rgba(255, 255, 255, ${alpha * 0.06})`);
-          grad.addColorStop(1, 'rgba(255, 255, 255, 0)');
+          grad.addColorStop(0, `rgba(80, 230, 120, ${alpha * 0.25})`);
+          grad.addColorStop(0.5, `rgba(80, 230, 120, ${alpha * 0.06})`);
+          grad.addColorStop(1, 'rgba(80, 230, 120, 0)');
           ctx.fillStyle = grad;
           ctx.arc(p.x, p.y, glowRadius, 0, Math.PI * 2);
           ctx.fill();
@@ -137,9 +137,9 @@ function TechBackground() {
 
       if (mouseX > 0 && mouseY > 0) {
         const mGrad = ctx.createRadialGradient(mouseX, mouseY, 0, mouseX, mouseY, 200);
-        mGrad.addColorStop(0, 'rgba(255, 255, 255, 0.03)');
-        mGrad.addColorStop(0.5, 'rgba(255, 255, 255, 0.01)');
-        mGrad.addColorStop(1, 'rgba(255, 255, 255, 0)');
+        mGrad.addColorStop(0, 'rgba(80, 230, 120, 0.05)');
+        mGrad.addColorStop(0.5, 'rgba(80, 230, 120, 0.02)');
+        mGrad.addColorStop(1, 'rgba(80, 230, 120, 0)');
         ctx.fillStyle = mGrad;
         ctx.fillRect(mouseX - 200, mouseY - 200, 400, 400);
       }
@@ -177,7 +177,7 @@ const gradientText = (dir = '180deg', from = 0.85, to = 0.5) => ({
   backgroundClip: 'text' as const,
 });
 
-const sectionBg = { background: 'linear-gradient(180deg, rgba(8,8,8,0.96) 0%, rgba(8,8,8,0.92) 60%, rgba(8,8,8,0.85) 100%)' };
+const sectionBg = { background: 'linear-gradient(180deg, rgba(2,26,10,0.92) 0%, rgba(3,45,18,0.85) 60%, rgba(6,74,30,0.75) 100%)' };
 
 const SectionLabel = ({ children }: { children: string }) => (
   <p className="text-[11px] tracking-[0.2em] uppercase mb-6 sm:mb-8 text-white/75">{children}</p>
@@ -253,11 +253,11 @@ export default function LandingPage() {
   };
 
   return (
-    <div className="relative min-h-screen bg-[#080808] text-white overflow-x-hidden" style={{ fontFamily: "'Inter', sans-serif" }}>
+    <div className="relative min-h-screen text-white overflow-x-hidden" style={{ fontFamily: "'Inter', sans-serif", background: 'linear-gradient(160deg, #021a0a 0%, #032d12 15%, #064a1e 30%, #0a5c28 45%, #0d7a34 55%, #064a1e 70%, #032d12 85%, #021a0a 100%)' }}>
       <TechBackground />
 
       <div
-        className="fixed bottom-6 left-6 z-50 flex items-center gap-2.5 px-4 py-2.5 rounded-xl bg-[#111]/98 border border-[#303030] shadow-lg shadow-black/60 backdrop-blur-none"
+        className="fixed bottom-6 left-6 z-50 flex items-center gap-2.5 px-4 py-2.5 rounded-xl bg-[#111]/98 border border-[#1a4a28] shadow-lg shadow-black/60 backdrop-blur-none"
         style={{
           transition: "opacity 0.5s ease, transform 0.5s ease",
           opacity: proofVisible ? 1 : 0,
@@ -269,25 +269,25 @@ export default function LandingPage() {
       </div>
 
       <div className="sticky top-0 z-50 w-full flex justify-center px-6 sm:px-10 pt-4" data-testid="nav-top">
-        <nav className="flex items-center justify-between w-full max-w-[900px] h-[52px] bg-[#141414] border border-[#2A2A2A] rounded-full px-2.5 pl-3">
-          <div className="flex items-center gap-2 bg-[#1E1E1E] rounded-full px-3.5 py-1.5" data-testid="nav-logo">
-            <div className="w-[18px] h-[18px] rounded-full bg-gradient-to-br from-white/80 to-white/50 flex items-center justify-center animate-logo-pulse">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#141414]"></span>
+        <nav className="flex items-center justify-between w-full max-w-[900px] h-[52px] bg-white rounded-full px-2.5 pl-3 shadow-lg shadow-black/10">
+          <div className="flex items-center gap-2 bg-[#f0f7f2] rounded-full px-3.5 py-1.5" data-testid="nav-logo">
+            <div className="w-[18px] h-[18px] rounded-full bg-gradient-to-br from-[#0d7a34] to-[#064a1e] flex items-center justify-center animate-logo-pulse">
+              <span className="w-1.5 h-1.5 rounded-full bg-white"></span>
             </div>
-            <span className="text-[12.5px] font-semibold tracking-[0.03em] text-white/90">MentXr<span className="text-[8px] align-super">®</span></span>
+            <span className="text-[12.5px] font-semibold tracking-[0.03em] text-[#0d2b14]">MentXr<span className="text-[8px] align-super">®</span></span>
           </div>
 
           <div className="hidden md:flex items-center gap-8">
-            <a href="#how-it-works" className="text-[13px] font-medium text-white/55 hover:text-white/90 transition-colors" data-testid="link-how-it-works">How It Works</a>
-            <a href="#features" className="text-[13px] font-medium text-white/55 hover:text-white/90 transition-colors" data-testid="link-features">Features</a>
-            <a href="#results" className="text-[13px] font-medium text-white/55 hover:text-white/90 transition-colors" data-testid="link-results">Results</a>
-            <a href="#faq" className="text-[13px] font-medium text-white/55 hover:text-white/90 transition-colors" data-testid="link-faq">FAQ</a>
+            <a href="#how-it-works" className="text-[13px] font-medium text-[#3a5a42] hover:text-[#0d2b14] transition-colors" data-testid="link-how-it-works">How It Works</a>
+            <a href="#features" className="text-[13px] font-medium text-[#3a5a42] hover:text-[#0d2b14] transition-colors" data-testid="link-features">Features</a>
+            <a href="#results" className="text-[13px] font-medium text-[#3a5a42] hover:text-[#0d2b14] transition-colors" data-testid="link-results">Results</a>
+            <a href="#faq" className="text-[13px] font-medium text-[#3a5a42] hover:text-[#0d2b14] transition-colors" data-testid="link-faq">FAQ</a>
           </div>
 
           <button
             onClick={() => document.querySelector<HTMLInputElement>('[data-testid="input-email"]')?.focus()}
-            className="rounded-full px-5 py-2 text-[12.5px] font-semibold text-black transition-all duration-200 hover:scale-[1.02]"
-            style={{ background: 'linear-gradient(135deg, #ffffff 0%, #d4d4d4 100%)' }}
+            className="rounded-full px-5 py-2 text-[12.5px] font-semibold text-white transition-all duration-200 hover:scale-[1.02] shadow-sm"
+            style={{ background: 'linear-gradient(135deg, #0d7a34 0%, #064a1e 100%)' }}
             data-testid="button-get-started"
           >
             Get Started Free
@@ -297,7 +297,7 @@ export default function LandingPage() {
 
       {/* ═══════════════ 1. HERO ═══════════════ */}
       <section className="relative z-10 min-h-[90vh] flex flex-col items-center justify-center px-6 sm:px-12 md:px-20 lg:px-28 py-20 text-center">
-        <div className="absolute inset-0" style={{ background: 'radial-gradient(ellipse 90% 80% at 50% 50%, rgba(8,8,8,0.98) 0%, rgba(8,8,8,0.9) 50%, transparent 100%)' }} />
+        <div className="absolute inset-0" style={{ background: 'radial-gradient(ellipse 90% 80% at 50% 50%, rgba(2,26,10,0.95) 0%, rgba(3,45,18,0.8) 50%, transparent 100%)' }} />
         <div className="relative max-w-[900px] mx-auto">
           <p className="text-[11px] tracking-[0.2em] uppercase text-white/60 mb-6" data-testid="text-hero-label">Digital Underwriting Engine</p>
           <h1
@@ -312,7 +312,7 @@ export default function LandingPage() {
           </p>
 
           <form onSubmit={handleLogin} className="w-full max-w-[440px] mx-auto mb-8">
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center bg-[#1E1E1E] border border-[#363636] rounded-2xl sm:rounded-full sm:h-[52px] sm:pl-5 sm:pr-1.5 overflow-hidden">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center bg-[#0c2e18] border border-[#1f5530] rounded-2xl sm:rounded-full sm:h-[52px] sm:pl-5 sm:pr-1.5 overflow-hidden">
               <input
                 data-testid="input-email"
                 type="email"
@@ -345,7 +345,7 @@ export default function LandingPage() {
       </section>
 
       {/* ═══════════════ 2. PROBLEM / PAIN ═══════════════ */}
-      <section className="relative z-10 px-6 sm:px-12 md:px-20 py-20 sm:py-28 border-t border-[#404040] text-center">
+      <section className="relative z-10 px-6 sm:px-12 md:px-20 py-20 sm:py-28 border-t border-[#1a4a28] text-center">
         <div className="absolute inset-0" style={sectionBg} />
         <div className="relative max-w-[800px] mx-auto">
           <SectionLabel>The Problem</SectionLabel>
@@ -359,7 +359,7 @@ export default function LandingPage() {
               { num: "03", text: "Hidden risk signals silently kill your application before a human reviews it" },
               { num: "04", text: "Every denial leaves an inquiry on your report, making the next application harder" },
             ].map((item) => (
-              <div key={item.num} className="flex gap-4 items-start p-5 rounded-xl bg-[#1C1C1C] border border-[#404040]">
+              <div key={item.num} className="flex gap-4 items-start p-5 rounded-xl bg-[#0a2614] border border-[#1a4a28]">
                 <span className="text-[11px] font-mono text-white/45 shrink-0 mt-0.5">{item.num}</span>
                 <p className="text-[13px] sm:text-[14px] text-white/65 leading-[1.7]">{item.text}</p>
               </div>
@@ -369,7 +369,7 @@ export default function LandingPage() {
       </section>
 
       {/* ═══════════════ 3. SOLUTION OVERVIEW ═══════════════ */}
-      <section className="relative z-10 px-6 sm:px-12 md:px-20 py-20 sm:py-28 border-t border-[#404040] text-center">
+      <section className="relative z-10 px-6 sm:px-12 md:px-20 py-20 sm:py-28 border-t border-[#1a4a28] text-center">
         <div className="absolute inset-0" style={sectionBg} />
         <div className="relative max-w-[800px] mx-auto">
           <SectionLabel>The Solution</SectionLabel>
@@ -388,7 +388,7 @@ export default function LandingPage() {
               { label: "AI Mentor Chat", val: "7 Bots" },
               { label: "Credit Repair", val: "Auto Letters" },
             ].map((item) => (
-              <div key={item.label} className="p-4 sm:p-5 rounded-xl bg-[#1C1C1C] border border-[#404040]">
+              <div key={item.label} className="p-4 sm:p-5 rounded-xl bg-[#0a2614] border border-[#1a4a28]">
                 <p className="text-[20px] sm:text-[24px] font-mono text-white/75 mb-2" style={{ fontFamily: "'JetBrains Mono', monospace" }}>{item.val}</p>
                 <p className="text-[11px] text-white/45 tracking-wide uppercase">{item.label}</p>
               </div>
@@ -398,7 +398,7 @@ export default function LandingPage() {
       </section>
 
       {/* ═══════════════ 4. HOW IT WORKS ═══════════════ */}
-      <section id="how-it-works" className="relative z-10 px-6 sm:px-12 md:px-20 py-20 sm:py-28 border-t border-[#404040] text-center">
+      <section id="how-it-works" className="relative z-10 px-6 sm:px-12 md:px-20 py-20 sm:py-28 border-t border-[#1a4a28] text-center">
         <div className="absolute inset-0" style={sectionBg} />
         <div className="relative max-w-[800px] mx-auto">
           <SectionLabel>How It Works</SectionLabel>
@@ -412,8 +412,8 @@ export default function LandingPage() {
               { step: "03", title: "See Your Tier & Exposure Ceiling", desc: "Find out if you're Prime, Mid-Tier, or Alternative eligible — and your maximum fundable amount using 2.5x exposure logic." },
               { step: "04", title: "Run Denial Simulation & Fix Issues", desc: "Our engine flags every underwriting trigger that would cause a denial. Get auto-generated dispute letters and a repair timeline." },
             ].map((item, i) => (
-              <div key={item.step} className="flex gap-6 sm:gap-8 items-start py-8 border-t border-[#404040] first:border-t-0">
-                <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-[#222222] border border-[#303030] flex items-center justify-center shrink-0">
+              <div key={item.step} className="flex gap-6 sm:gap-8 items-start py-8 border-t border-[#1a4a28] first:border-t-0">
+                <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-[#0f3320] border border-[#1a4a28] flex items-center justify-center shrink-0">
                   <span className="text-[13px] font-mono text-white/65">{item.step}</span>
                 </div>
                 <div>
@@ -427,7 +427,7 @@ export default function LandingPage() {
       </section>
 
       {/* ═══════════════ 5. FUNDING OUTCOMES ═══════════════ */}
-      <section id="features" className="relative z-10 px-6 sm:px-12 md:px-20 py-20 sm:py-28 border-t border-[#404040] text-center">
+      <section id="features" className="relative z-10 px-6 sm:px-12 md:px-20 py-20 sm:py-28 border-t border-[#1a4a28] text-center">
         <div className="absolute inset-0" style={sectionBg} />
         <div className="relative max-w-[900px] mx-auto">
           <SectionLabel>What You Get</SectionLabel>
@@ -446,7 +446,7 @@ export default function LandingPage() {
               { icon: "◐", title: "Risk Signal Detection", desc: "Identifies liens, judgments, utilization spikes, and velocity flags" },
               { icon: "⬢", title: "Personalized Next Steps", desc: "AI-generated action plan prioritized by impact on your fundability" },
             ].map((item) => (
-              <div key={item.title} className="p-5 sm:p-6 rounded-xl bg-[#1C1C1C] border border-[#404040] group hover:bg-[#222222] transition-colors">
+              <div key={item.title} className="p-5 sm:p-6 rounded-xl bg-[#0a2614] border border-[#1a4a28] group hover:bg-[#0f3320] transition-colors">
                 <span className="text-[20px] text-white/45 mb-4 block">{item.icon}</span>
                 <h3 className="text-[14px] sm:text-[15px] text-white/80 font-medium mb-2">{item.title}</h3>
                 <p className="text-[12px] sm:text-[13px] text-white/75 leading-[1.7]">{item.desc}</p>
@@ -457,7 +457,7 @@ export default function LandingPage() {
       </section>
 
       {/* ═══════════════ 6. SOCIAL PROOF ═══════════════ */}
-      <section id="results" className="relative z-10 px-6 sm:px-12 md:px-20 py-20 sm:py-28 border-t border-[#404040] text-center">
+      <section id="results" className="relative z-10 px-6 sm:px-12 md:px-20 py-20 sm:py-28 border-t border-[#1a4a28] text-center">
         <div className="absolute inset-0" style={sectionBg} />
         <div className="relative max-w-[900px] mx-auto">
           <SectionLabel>Results</SectionLabel>
@@ -472,7 +472,7 @@ export default function LandingPage() {
               { val: "89%", label: "Approval Rate" },
               { val: "6.2x", label: "Avg Score Improvement" },
             ].map((s) => (
-              <div key={s.label} className="text-center p-5 rounded-xl bg-[#1C1C1C] border border-[#404040]">
+              <div key={s.label} className="text-center p-5 rounded-xl bg-[#0a2614] border border-[#1a4a28]">
                 <p className="text-[24px] sm:text-[30px] font-mono text-white/75 mb-1" style={{ fontFamily: "'JetBrains Mono', monospace" }}>{s.val}</p>
                 <p className="text-[10px] sm:text-[11px] text-white/45 tracking-wide uppercase">{s.label}</p>
               </div>
@@ -485,7 +485,7 @@ export default function LandingPage() {
               { name: "Aisha K.", role: "Real Estate Investor", quote: "The denial simulation caught 3 triggers I didn't know existed. Fixed them all before applying — approved same week." },
               { name: "David L.", role: "SaaS Startup CEO", quote: "MentXr showed me I was Mid-Tier when I thought I was Prime. After following the repair plan, I moved up and saved 4% on rates." },
             ].map((t) => (
-              <div key={t.name} className="p-6 rounded-xl bg-[#1C1C1C] border border-[#404040]">
+              <div key={t.name} className="p-6 rounded-xl bg-[#0a2614] border border-[#1a4a28]">
                 <p className="text-[13px] text-white/60 leading-[1.8] mb-5 italic">"{t.quote}"</p>
                 <div>
                   <p className="text-[13px] text-white/75 font-medium">{t.name}</p>
@@ -498,7 +498,7 @@ export default function LandingPage() {
       </section>
 
       {/* ═══════════════ 7. RISK REVERSAL ═══════════════ */}
-      <section className="relative z-10 px-6 sm:px-12 md:px-20 py-20 sm:py-28 border-t border-[#404040] text-center">
+      <section className="relative z-10 px-6 sm:px-12 md:px-20 py-20 sm:py-28 border-t border-[#1a4a28] text-center">
         <div className="absolute inset-0" style={sectionBg} />
         <div className="relative max-w-[800px] mx-auto">
           <SectionLabel>No More Guessing</SectionLabel>
@@ -519,7 +519,7 @@ export default function LandingPage() {
                 ))}
               </ul>
             </div>
-            <div className="p-6 rounded-xl border border-[#363636] bg-[#1C1C1C]">
+            <div className="p-6 rounded-xl border border-[#1f5530] bg-[#0a2614]">
               <p className="text-[11px] tracking-[0.15em] uppercase text-white/60 mb-4">With MentXr</p>
               <ul className="space-y-3">
                 {["Know your exact tier & ceiling", "Fix issues before applying", "Apply once, with confidence", "Get approved on first submission", "Build on momentum"].map((t) => (
@@ -534,7 +534,7 @@ export default function LandingPage() {
       </section>
 
       {/* ═══════════════ 8. FEATURE BREAKDOWN ═══════════════ */}
-      <section className="relative z-10 px-6 sm:px-12 md:px-20 py-20 sm:py-28 border-t border-[#404040] text-center">
+      <section className="relative z-10 px-6 sm:px-12 md:px-20 py-20 sm:py-28 border-t border-[#1a4a28] text-center">
         <div className="absolute inset-0" style={sectionBg} />
         <div className="relative max-w-[900px] mx-auto">
           <SectionLabel>Feature Breakdown</SectionLabel>
@@ -550,7 +550,7 @@ export default function LandingPage() {
               { name: "Liquidity & Leverage", weight: "0–15 pts", desc: "Debt-to-income, current ratio, available credit, existing obligations" },
               { name: "Risk Signals", weight: "0–15 pts", desc: "Liens, judgments, NSFs, velocity flags, recent inquiries, collections" },
             ].map((c) => (
-              <div key={c.name} className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-6 p-5 rounded-xl bg-[#1C1C1C] border border-[#404040]">
+              <div key={c.name} className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-6 p-5 rounded-xl bg-[#0a2614] border border-[#1a4a28]">
                 <div className="flex items-center gap-4 sm:w-[200px] shrink-0">
                   <span className="text-[14px] sm:text-[15px] text-white/75 font-medium">{c.name}</span>
                 </div>
@@ -559,7 +559,7 @@ export default function LandingPage() {
               </div>
             ))}
           </div>
-          <div className="mt-8 p-5 rounded-xl bg-[#222222] border border-[#303030]">
+          <div className="mt-8 p-5 rounded-xl bg-[#0f3320] border border-[#1a4a28]">
             <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-8">
               <span className="text-[15px] text-white/80 font-medium">Total: 0–100 pts</span>
               <span className="text-[12px] text-white/45">→ Qualification Range: $25K – $5M+ based on composite score and tier placement</span>
@@ -569,7 +569,7 @@ export default function LandingPage() {
       </section>
 
       {/* ═══════════════ 9. MODE DIFFERENTIATION ═══════════════ */}
-      <section className="relative z-10 px-6 sm:px-12 md:px-20 py-20 sm:py-28 border-t border-[#404040] text-center">
+      <section className="relative z-10 px-6 sm:px-12 md:px-20 py-20 sm:py-28 border-t border-[#1a4a28] text-center">
         <div className="absolute inset-0" style={sectionBg} />
         <div className="relative max-w-[900px] mx-auto">
           <SectionLabel>Operating Modes</SectionLabel>
@@ -577,7 +577,7 @@ export default function LandingPage() {
             Two modes. One goal: get you funded.
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-            <div className="p-6 sm:p-8 rounded-xl bg-[#1C1C1C] border border-[#303030]">
+            <div className="p-6 sm:p-8 rounded-xl bg-[#0a2614] border border-[#1a4a28]">
               <div className="flex items-center gap-3 mb-6">
                 <div className="w-3 h-3 rounded-full bg-white/20"></div>
                 <span className="text-[11px] tracking-[0.15em] uppercase text-white/60">Pre-Funding Mode</span>
@@ -594,7 +594,7 @@ export default function LandingPage() {
                 ))}
               </ul>
             </div>
-            <div className="p-6 sm:p-8 rounded-xl bg-[#1C1C1C] border border-[#303030]">
+            <div className="p-6 sm:p-8 rounded-xl bg-[#0a2614] border border-[#1a4a28]">
               <div className="flex items-center gap-3 mb-6">
                 <div className="w-3 h-3 rounded-full bg-white/25 border border-white/20"></div>
                 <span className="text-[11px] tracking-[0.15em] uppercase text-white/60">Repair Mode</span>
@@ -616,7 +616,7 @@ export default function LandingPage() {
       </section>
 
       {/* ═══════════════ 10. TIER POSITIONING ═══════════════ */}
-      <section className="relative z-10 px-6 sm:px-12 md:px-20 py-20 sm:py-28 border-t border-[#404040] text-center">
+      <section className="relative z-10 px-6 sm:px-12 md:px-20 py-20 sm:py-28 border-t border-[#1a4a28] text-center">
         <div className="absolute inset-0" style={sectionBg} />
         <div className="relative max-w-[900px] mx-auto">
           <SectionLabel>Tier Eligibility</SectionLabel>
@@ -629,7 +629,7 @@ export default function LandingPage() {
               { tier: "Tier 2", name: "Mid-Tier", score: "50–74", products: "Revenue-Based Lending, Invoice Factoring, Merchant Cash Advance, Bridge Loans", color: "border-[#303030]" },
               { tier: "Tier 3", name: "Alternative", score: "25–49", products: "Microloans, Secured Cards, Credit Builder Programs, Community Development Loans", color: "border-[#404040]" },
             ].map((t) => (
-              <div key={t.tier} className={`p-6 rounded-xl bg-[#1C1C1C] border ${t.color}`}>
+              <div key={t.tier} className={`p-6 rounded-xl bg-[#0a2614] border ${t.color}`}>
                 <span className="text-[10px] font-mono text-white/45 tracking-wider uppercase">{t.tier}</span>
                 <h3 className="text-[18px] sm:text-[20px] text-white/80 font-medium mt-2 mb-1">{t.name}</h3>
                 <p className="text-[13px] font-mono text-white/60 mb-5" style={{ fontFamily: "'JetBrains Mono', monospace" }}>Score: {t.score}</p>
@@ -641,7 +641,7 @@ export default function LandingPage() {
       </section>
 
       {/* ═══════════════ 11. CASE STUDY ═══════════════ */}
-      <section className="relative z-10 px-6 sm:px-12 md:px-20 py-20 sm:py-28 border-t border-[#404040] text-center">
+      <section className="relative z-10 px-6 sm:px-12 md:px-20 py-20 sm:py-28 border-t border-[#1a4a28] text-center">
         <div className="absolute inset-0" style={sectionBg} />
         <div className="relative max-w-[800px] mx-auto">
           <SectionLabel>Example Walkthrough</SectionLabel>
@@ -656,7 +656,7 @@ export default function LandingPage() {
               { day: "Day 30", title: "First Checkpoint", detail: "Score: 52/100. Moved to Tier 2. 1 collection removed. Utilization down to 45%. Business structure improved. Exposure ceiling: $85K." },
               { day: "Day 67", title: "Funding Ready", detail: "Score: 71/100. Tier 2 (upper). 0 denial triggers. Utilization: 22%. Clean business file. Exposure ceiling: $210K. Applied for $175K LOC — approved in 5 days." },
             ].map((step) => (
-              <div key={step.day} className="flex gap-6 sm:gap-8 py-7 border-t border-[#404040] first:border-t-0">
+              <div key={step.day} className="flex gap-6 sm:gap-8 py-7 border-t border-[#1a4a28] first:border-t-0">
                 <div className="w-[70px] shrink-0">
                   <span className="text-[12px] font-mono text-white/60" style={{ fontFamily: "'JetBrains Mono', monospace" }}>{step.day}</span>
                 </div>
@@ -671,7 +671,7 @@ export default function LandingPage() {
       </section>
 
       {/* ═══════════════ 12. FAQ / OBJECTION HANDLING ═══════════════ */}
-      <section id="faq" className="relative z-10 px-6 sm:px-12 md:px-20 py-20 sm:py-28 border-t border-[#404040] text-center">
+      <section id="faq" className="relative z-10 px-6 sm:px-12 md:px-20 py-20 sm:py-28 border-t border-[#1a4a28] text-center">
         <div className="absolute inset-0" style={sectionBg} />
         <div className="relative max-w-[700px] mx-auto">
           <SectionLabel>FAQ</SectionLabel>
@@ -701,7 +701,7 @@ export default function LandingPage() {
       </section>
 
       {/* ═══════════════ 13. TRUST & COMPLIANCE ═══════════════ */}
-      <section className="relative z-10 px-6 sm:px-12 md:px-20 py-20 sm:py-28 border-t border-[#404040]">
+      <section className="relative z-10 px-6 sm:px-12 md:px-20 py-20 sm:py-28 border-t border-[#1a4a28]">
         <div className="absolute inset-0" style={sectionBg} />
         <div className="relative max-w-[800px]">
           <SectionLabel>Trust & Security</SectionLabel>
@@ -715,7 +715,7 @@ export default function LandingPage() {
               { icon: "◇", title: "Compliant", desc: "FCRA-aligned analysis and dispute letter generation" },
               { icon: "▣", title: "No Credit Pull", desc: "We analyze your uploaded reports — zero impact on your score" },
             ].map((item) => (
-              <div key={item.title} className="p-5 rounded-xl bg-[#1C1C1C] border border-[#404040]">
+              <div key={item.title} className="p-5 rounded-xl bg-[#0a2614] border border-[#1a4a28]">
                 <span className="text-[18px] text-white/45 mb-3 block">{item.icon}</span>
                 <h3 className="text-[13px] text-white/75 font-medium mb-1.5">{item.title}</h3>
                 <p className="text-[11px] text-white/45 leading-[1.6]">{item.desc}</p>
@@ -726,8 +726,8 @@ export default function LandingPage() {
       </section>
 
       {/* ═══════════════ 14. FINAL CTA ═══════════════ */}
-      <section className="relative z-10 px-6 sm:px-12 md:px-20 py-24 sm:py-36 border-t border-[#404040]">
-        <div className="absolute inset-0" style={{ background: 'radial-gradient(ellipse 80% 70% at 50% 50%, rgba(8,8,8,0.98) 0%, rgba(8,8,8,0.7) 50%, rgba(8,8,8,0.4) 100%)' }} />
+      <section className="relative z-10 px-6 sm:px-12 md:px-20 py-24 sm:py-36 border-t border-[#1a4a28]">
+        <div className="absolute inset-0" style={{ background: 'radial-gradient(ellipse 80% 70% at 50% 50%, rgba(2,26,10,0.95) 0%, rgba(3,45,18,0.7) 50%, rgba(6,74,30,0.4) 100%)' }} />
         <div className="relative max-w-[700px] mx-auto text-center">
           <h2
             className="text-[30px] sm:text-[44px] md:text-[56px] leading-[1.05] mb-6 tracking-[-0.04em]"
@@ -740,7 +740,7 @@ export default function LandingPage() {
             Get your Capital Readiness Score, tier eligibility, exposure ceiling, and denial simulation — free. No credit card. No credit pull. No commitment.
           </p>
           <form onSubmit={handleLogin} className="w-full max-w-[440px] mx-auto mb-6">
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center bg-[#1E1E1E] border border-[#363636] rounded-2xl sm:rounded-full sm:h-[52px] sm:pl-5 sm:pr-1.5 overflow-hidden">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center bg-[#0c2e18] border border-[#1f5530] rounded-2xl sm:rounded-full sm:h-[52px] sm:pl-5 sm:pr-1.5 overflow-hidden">
               <input
                 data-testid="input-email-bottom"
                 type="email"
@@ -767,8 +767,8 @@ export default function LandingPage() {
       </section>
 
       {/* ═══════════════ 15. FOOTER ═══════════════ */}
-      <footer className="relative z-10 border-t border-[#404040] px-6 sm:px-12 md:px-20 py-10 sm:py-14 text-center">
-        <div className="absolute inset-0" style={{ background: 'rgba(8,8,8,0.85)' }} />
+      <footer className="relative z-10 border-t border-[#1a4a28] px-6 sm:px-12 md:px-20 py-10 sm:py-14 text-center">
+        <div className="absolute inset-0" style={{ background: 'rgba(2,26,10,0.9)' }} />
         <div className="relative max-w-[900px] mx-auto">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-8 mb-10">
             <div className="flex items-center gap-2.5">
@@ -783,7 +783,7 @@ export default function LandingPage() {
               ))}
             </div>
           </div>
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-6 border-t border-[#404040]">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-6 border-t border-[#1a4a28]">
             <p className="text-[11px] text-white/40">
               &copy; 2026 MentXr&reg; by <span className="text-white/45 font-medium">CMD Supply</span>. All rights reserved.
             </p>
