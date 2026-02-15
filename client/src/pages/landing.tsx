@@ -21,6 +21,9 @@ function SpaceBackground() {
       wobbleSpeed: number;
       wobbleAmp: number;
       points: number;
+      squeezePhase: number;
+      squeezeSpeed: number;
+      squeezeAmount: number;
     }
 
     let blobs: Blob[] = [];
@@ -43,7 +46,7 @@ function SpaceBackground() {
       const blobCount = Math.min(Math.floor((w * h) / 40000), 50);
       blobs = [];
       for (let i = 0; i < blobCount; i++) {
-        const speed = Math.random() * 0.55 + 0.25;
+        const speed = Math.random() * 1.0 + 0.5;
         const angle = Math.random() * Math.PI * 2;
         blobs.push({
           x: Math.random() * w,
@@ -53,9 +56,12 @@ function SpaceBackground() {
           radius: Math.random() * 100 + 50,
           opacity: Math.random() * 0.18 + 0.1,
           phase: Math.random() * Math.PI * 2,
-          wobbleSpeed: Math.random() * 0.8 + 0.3,
-          wobbleAmp: Math.random() * 0.25 + 0.1,
+          wobbleSpeed: Math.random() * 1.2 + 0.5,
+          wobbleAmp: Math.random() * 0.35 + 0.15,
           points: Math.floor(Math.random() * 4) + 6,
+          squeezePhase: Math.random() * Math.PI * 2,
+          squeezeSpeed: Math.random() * 1.5 + 0.6,
+          squeezeAmount: Math.random() * 0.4 + 0.25,
         });
       }
     };
@@ -64,14 +70,18 @@ function SpaceBackground() {
       const breathe = Math.sin(time * 0.6 + b.phase) * 0.12 + 1;
       const r = b.radius * breathe;
 
+      const sqz = Math.sin(time * b.squeezeSpeed + b.squeezePhase) * b.squeezeAmount;
+      const scaleX = 1 + sqz;
+      const scaleY = 1 - sqz;
+
       const pts: { x: number; y: number }[] = [];
       for (let i = 0; i < b.points; i++) {
         const a = (Math.PI * 2 / b.points) * i;
         const wobble = Math.sin(time * b.wobbleSpeed + b.phase + i * 1.3) * b.wobbleAmp;
         const dist = r * (1 + wobble);
         pts.push({
-          x: b.x + Math.cos(a) * dist,
-          y: b.y + Math.sin(a) * dist,
+          x: b.x + Math.cos(a) * dist * scaleX,
+          y: b.y + Math.sin(a) * dist * scaleY,
         });
       }
 
