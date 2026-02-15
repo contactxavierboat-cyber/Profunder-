@@ -99,9 +99,9 @@ function TechBackground() {
           if (Math.abs(dx) > connectionDist || Math.abs(dy) > connectionDist) continue;
           const dist = Math.sqrt(dx * dx + dy * dy);
           if (dist < connectionDist) {
-            const alpha = (1 - dist / connectionDist) * 0.18;
+            const alpha = (1 - dist / connectionDist) * 0.06;
             ctx.beginPath();
-            ctx.strokeStyle = `rgba(255, 255, 255, ${alpha})`;
+            ctx.strokeStyle = `rgba(0, 0, 0, ${alpha})`;
             ctx.lineWidth = 0.7;
             ctx.moveTo(pi.x, pi.y);
             ctx.lineTo(pj.x, pj.y);
@@ -114,11 +114,11 @@ function TechBackground() {
         const glow = Math.sin(p.pulse) * 0.4 + 0.6;
         const mouseDist = Math.sqrt((p.x - mouseX) ** 2 + (p.y - mouseY) ** 2);
         const mouseBoost = mouseDist < 180 ? 1 + (180 - mouseDist) / 180 * 1.5 : 1;
-        const alpha = Math.min(p.opacity * glow * mouseBoost, 0.85);
+        const alpha = Math.min(p.opacity * glow * mouseBoost * 0.3, 0.12);
         const drawSize = p.size * (mouseBoost > 1 ? mouseBoost * 0.5 + 0.5 : 1);
 
         ctx.beginPath();
-        ctx.fillStyle = `rgba(255, 255, 255, ${alpha})`;
+        ctx.fillStyle = `rgba(0, 0, 0, ${alpha})`;
         ctx.arc(p.x, p.y, drawSize, 0, Math.PI * 2);
         ctx.fill();
 
@@ -126,9 +126,9 @@ function TechBackground() {
           ctx.beginPath();
           const glowRadius = drawSize * (p.isNode ? 6 : 3);
           const grad = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, glowRadius);
-          grad.addColorStop(0, `rgba(255, 255, 255, ${alpha * 0.25})`);
-          grad.addColorStop(0.5, `rgba(255, 255, 255, ${alpha * 0.06})`);
-          grad.addColorStop(1, 'rgba(255, 255, 255, 0)');
+          grad.addColorStop(0, `rgba(0, 0, 0, ${alpha * 0.25})`);
+          grad.addColorStop(0.5, `rgba(0, 0, 0, ${alpha * 0.06})`);
+          grad.addColorStop(1, 'rgba(0, 0, 0, 0)');
           ctx.fillStyle = grad;
           ctx.arc(p.x, p.y, glowRadius, 0, Math.PI * 2);
           ctx.fill();
@@ -137,9 +137,9 @@ function TechBackground() {
 
       if (mouseX > 0 && mouseY > 0) {
         const mGrad = ctx.createRadialGradient(mouseX, mouseY, 0, mouseX, mouseY, 200);
-        mGrad.addColorStop(0, 'rgba(255, 255, 255, 0.03)');
-        mGrad.addColorStop(0.5, 'rgba(255, 255, 255, 0.01)');
-        mGrad.addColorStop(1, 'rgba(255, 255, 255, 0)');
+        mGrad.addColorStop(0, 'rgba(0, 0, 0, 0.02)');
+        mGrad.addColorStop(0.5, 'rgba(0, 0, 0, 0.008)');
+        mGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
         ctx.fillStyle = mGrad;
         ctx.fillRect(mouseX - 200, mouseY - 200, 400, 400);
       }
@@ -170,17 +170,17 @@ function TechBackground() {
   );
 }
 
-const gradientText = (dir = '180deg', from = 0.85, to = 0.5) => ({
-  background: `linear-gradient(${dir}, rgba(255,255,255,${from}) 0%, rgba(255,255,255,${to}) 100%)`,
+const gradientText = (dir = '180deg', from = 0.95, to = 0.5) => ({
+  background: `linear-gradient(${dir}, rgba(26,26,26,${from}) 0%, rgba(26,26,26,${to}) 100%)`,
   WebkitBackgroundClip: 'text' as const,
   WebkitTextFillColor: 'transparent' as const,
   backgroundClip: 'text' as const,
 });
 
-const sectionBg = { background: 'linear-gradient(180deg, rgba(8,8,8,0.96) 0%, rgba(8,8,8,0.92) 60%, rgba(8,8,8,0.85) 100%)' };
+const sectionBg = { background: 'linear-gradient(180deg, rgba(255,255,255,0.96) 0%, rgba(248,249,250,0.92) 60%, rgba(241,243,245,0.85) 100%)' };
 
 const SectionLabel = ({ children }: { children: string }) => (
-  <p className="text-[11px] tracking-[0.2em] uppercase mb-6 sm:mb-8 text-white/75">{children}</p>
+  <p className="text-[11px] tracking-[0.2em] uppercase mb-6 sm:mb-8 text-[#999]">{children}</p>
 );
 
 const faqItems = [
@@ -253,38 +253,38 @@ export default function LandingPage() {
   };
 
   return (
-    <div className="relative min-h-screen bg-[#080808] text-white overflow-x-hidden" style={{ fontFamily: "'Inter', sans-serif" }}>
+    <div className="relative min-h-screen bg-white text-[#1A1A1A] overflow-x-hidden" style={{ fontFamily: "'Inter', sans-serif" }}>
       <TechBackground />
 
       <div
-        className="fixed bottom-6 left-6 z-50 flex items-center gap-2.5 px-4 py-2.5 rounded-xl bg-[#111]/98 border border-[#303030] shadow-lg shadow-black/60 backdrop-blur-none"
+        className="fixed bottom-6 left-6 z-50 flex items-center gap-2.5 px-4 py-2.5 rounded-xl bg-white border border-[#E5E7EB] shadow-lg backdrop-blur-none"
         style={{
           transition: "opacity 0.5s ease, transform 0.5s ease",
           opacity: proofVisible ? 1 : 0,
           transform: proofVisible ? "translateY(0)" : "translateY(8px)",
         }}
       >
-        <span className="w-2 h-2 rounded-full bg-white/60 animate-pulse shrink-0"></span>
-        <span className="text-[12px] sm:text-[13px] text-white/80 font-medium whitespace-nowrap">{proofMessages[proofIndex]}</span>
+        <span className="w-2 h-2 rounded-full bg-[#2E7D32] animate-pulse shrink-0"></span>
+        <span className="text-[12px] sm:text-[13px] text-[#333] font-medium whitespace-nowrap">{proofMessages[proofIndex]}</span>
       </div>
 
-      <nav className="relative z-20 flex items-center justify-between px-6 sm:px-10 h-14 border-b border-[#404040]">
+      <nav className="relative z-20 flex items-center justify-between px-6 sm:px-10 h-14 border-b border-[#E5E7EB]">
         <div className="flex items-center gap-2.5">
-          <div className="w-6 h-6 rounded-full border-2 border-white/60 flex items-center justify-center">
-            <span className="w-1.5 h-1.5 rounded-full bg-white/80"></span>
+          <div className="w-6 h-6 rounded-full border-2 border-[#333] flex items-center justify-center">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#1A1A1A]"></span>
           </div>
-          <span className="text-[13px] font-bold tracking-[0.08em] text-white uppercase">MentXr</span>
+          <span className="text-[13px] font-bold tracking-[0.08em] text-[#1A1A1A] uppercase">MentXr</span>
         </div>
         <div className="flex items-center gap-6">
-          <span className="text-[12px] tracking-[0.08em] text-white/65 uppercase hidden sm:block">Private Access</span>
+          <span className="text-[12px] tracking-[0.08em] text-[#999] uppercase hidden sm:block">Private Access</span>
         </div>
       </nav>
 
       {/* ═══════════════ 1. HERO ═══════════════ */}
       <section className="relative z-10 min-h-[90vh] flex flex-col justify-center px-6 sm:px-12 md:px-20 lg:px-28 py-20">
-        <div className="absolute inset-0" style={{ background: 'radial-gradient(ellipse 90% 80% at 30% 50%, rgba(8,8,8,0.98) 0%, rgba(8,8,8,0.9) 50%, transparent 100%)' }} />
+        <div className="absolute inset-0" style={{ background: 'radial-gradient(ellipse 90% 80% at 30% 50%, rgba(255,255,255,0.98) 0%, rgba(248,249,250,0.9) 50%, transparent 100%)' }} />
         <div className="relative max-w-[900px]">
-          <p className="text-[11px] tracking-[0.2em] uppercase text-white/60 mb-6" data-testid="text-hero-label">Capital Readiness Engine</p>
+          <p className="text-[11px] tracking-[0.2em] uppercase text-[#999] mb-6" data-testid="text-hero-label">Capital Readiness Engine</p>
           <h1
             className="text-[38px] sm:text-[56px] md:text-[72px] lg:text-[88px] uppercase leading-[0.95] mb-8"
             style={{ fontFamily: "'Satoshi', sans-serif", fontWeight: 400, letterSpacing: '-0.06em', ...gradientText('180deg', 1, 0.6) }}
@@ -292,17 +292,17 @@ export default function LandingPage() {
           >
             Know Exactly<br />Where You Stand<br />Before You Apply
           </h1>
-          <p className="text-[15px] sm:text-[17px] text-white/65 leading-[1.8] max-w-[560px] mb-10">
+          <p className="text-[15px] sm:text-[17px] text-[#666] leading-[1.8] max-w-[560px] mb-10">
             MentXr&reg; runs your financial profile through real underwriting logic — the same criteria banks use to approve or deny you. Get your Capital Readiness Score, exposure ceiling, tier eligibility, and denial risk before you ever submit an application.
           </p>
 
           <form onSubmit={handleLogin} className="w-full max-w-[440px] mb-8">
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center bg-[#1E1E1E] border border-[#363636] rounded-2xl sm:rounded-full sm:h-[52px] sm:pl-5 sm:pr-1.5 overflow-hidden">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center bg-white border border-[#E5E7EB] rounded-2xl sm:rounded-full sm:h-[52px] sm:pl-5 sm:pr-1.5 overflow-hidden shadow-sm">
               <input
                 data-testid="input-email"
                 type="email"
                 placeholder="Enter your email"
-                className="flex-1 bg-transparent text-[14px] text-white placeholder:text-white/75 outline-none px-4 py-3.5 sm:px-0 sm:py-0"
+                className="flex-1 bg-transparent text-[14px] text-[#1A1A1A] placeholder:text-[#999] outline-none px-4 py-3.5 sm:px-0 sm:py-0"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
@@ -312,25 +312,25 @@ export default function LandingPage() {
                 data-testid="button-join"
                 type="submit"
                 disabled={isLoading}
-                className="h-[44px] sm:h-[40px] px-6 sm:rounded-full bg-white text-black text-[13px] font-bold hover:bg-white/90 transition-colors shrink-0 border-t border-[#303030] sm:border-t-0 mx-1.5 mb-1.5 sm:mb-0 sm:mx-0 rounded-xl sm:rounded-full tracking-wide"
+                className="h-[44px] sm:h-[40px] px-6 sm:rounded-full bg-[#2E7D32] text-white text-[13px] font-bold hover:bg-[#256829] transition-colors shrink-0 border-t border-[#E5E7EB] sm:border-t-0 mx-1.5 mb-1.5 sm:mb-0 sm:mx-0 rounded-xl sm:rounded-full tracking-wide"
               >
                 {isLoading ? "..." : "GET FREE ACCESS"}
               </button>
             </div>
           </form>
 
-          <div className="flex flex-wrap items-center gap-6 text-[11px] text-white/45 tracking-wide">
+          <div className="flex flex-wrap items-center gap-6 text-[11px] text-[#999] tracking-wide">
             <span>Free forever</span>
-            <span className="w-1 h-1 rounded-full bg-white/25"></span>
+            <span className="w-1 h-1 rounded-full bg-[#DEE2E6]"></span>
             <span>No credit card</span>
-            <span className="w-1 h-1 rounded-full bg-white/25"></span>
+            <span className="w-1 h-1 rounded-full bg-[#DEE2E6]"></span>
             <span>30 analyses / month</span>
           </div>
         </div>
       </section>
 
       {/* ═══════════════ 2. PROBLEM / PAIN ═══════════════ */}
-      <section className="relative z-10 px-6 sm:px-12 md:px-20 py-20 sm:py-28 border-t border-[#404040]">
+      <section className="relative z-10 px-6 sm:px-12 md:px-20 py-20 sm:py-28 border-t border-[#E5E7EB]">
         <div className="absolute inset-0" style={sectionBg} />
         <div className="relative max-w-[800px]">
           <SectionLabel>The Problem</SectionLabel>
@@ -344,9 +344,9 @@ export default function LandingPage() {
               { num: "03", text: "Hidden risk signals silently kill your application before a human reviews it" },
               { num: "04", text: "Every denial leaves an inquiry on your report, making the next application harder" },
             ].map((item) => (
-              <div key={item.num} className="flex gap-4 items-start p-5 rounded-xl bg-[#1C1C1C] border border-[#404040]">
-                <span className="text-[11px] font-mono text-white/45 shrink-0 mt-0.5">{item.num}</span>
-                <p className="text-[13px] sm:text-[14px] text-white/65 leading-[1.7]">{item.text}</p>
+              <div key={item.num} className="flex gap-4 items-start p-5 rounded-xl bg-white border border-[#E5E7EB] shadow-sm">
+                <span className="text-[11px] font-mono text-[#999] shrink-0 mt-0.5">{item.num}</span>
+                <p className="text-[13px] sm:text-[14px] text-[#666] leading-[1.7]">{item.text}</p>
               </div>
             ))}
           </div>
@@ -354,14 +354,14 @@ export default function LandingPage() {
       </section>
 
       {/* ═══════════════ 3. SOLUTION OVERVIEW ═══════════════ */}
-      <section className="relative z-10 px-6 sm:px-12 md:px-20 py-20 sm:py-28 border-t border-[#404040]">
+      <section className="relative z-10 px-6 sm:px-12 md:px-20 py-20 sm:py-28 border-t border-[#E5E7EB]">
         <div className="absolute inset-0" style={sectionBg} />
         <div className="relative max-w-[800px]">
           <SectionLabel>The Solution</SectionLabel>
           <h2 className="text-[26px] sm:text-[36px] md:text-[44px] leading-[1.1] mb-6 tracking-[-0.03em]" style={gradientText('180deg', 0.95, 0.55)}>
             AI-powered underwriting intelligence that tells you exactly what to fix — before you apply.
           </h2>
-          <p className="text-[15px] sm:text-[16px] text-white/60 leading-[1.8] mb-12 max-w-[640px]">
+          <p className="text-[15px] sm:text-[16px] text-[#666] leading-[1.8] mb-12 max-w-[640px]">
             MentXr® analyzes your credit report and bank statements using the same 6-component framework real lenders use. You get a Capital Readiness Score, tier placement, exposure ceiling, denial simulation, and a step-by-step action plan — all powered by AI.
           </p>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
@@ -373,9 +373,9 @@ export default function LandingPage() {
               { label: "AI Mentor Chat", val: "7 Bots" },
               { label: "Credit Repair", val: "Auto Letters" },
             ].map((item) => (
-              <div key={item.label} className="p-4 sm:p-5 rounded-xl bg-[#1C1C1C] border border-[#404040]">
-                <p className="text-[20px] sm:text-[24px] font-mono text-white/75 mb-2" style={{ fontFamily: "'JetBrains Mono', monospace" }}>{item.val}</p>
-                <p className="text-[11px] text-white/45 tracking-wide uppercase">{item.label}</p>
+              <div key={item.label} className="p-4 sm:p-5 rounded-xl bg-white border border-[#E5E7EB] shadow-sm">
+                <p className="text-[20px] sm:text-[24px] font-mono text-[#333] mb-2" style={{ fontFamily: "'JetBrains Mono', monospace" }}>{item.val}</p>
+                <p className="text-[11px] text-[#999] tracking-wide uppercase">{item.label}</p>
               </div>
             ))}
           </div>
@@ -383,7 +383,7 @@ export default function LandingPage() {
       </section>
 
       {/* ═══════════════ 4. HOW IT WORKS ═══════════════ */}
-      <section className="relative z-10 px-6 sm:px-12 md:px-20 py-20 sm:py-28 border-t border-[#404040]">
+      <section className="relative z-10 px-6 sm:px-12 md:px-20 py-20 sm:py-28 border-t border-[#E5E7EB]">
         <div className="absolute inset-0" style={sectionBg} />
         <div className="relative max-w-[800px]">
           <SectionLabel>How It Works</SectionLabel>
@@ -397,13 +397,13 @@ export default function LandingPage() {
               { step: "03", title: "See Your Tier & Exposure Ceiling", desc: "Find out if you're Prime, Mid-Tier, or Alternative eligible — and your maximum fundable amount using 2.5x exposure logic." },
               { step: "04", title: "Run Denial Simulation & Fix Issues", desc: "Our engine flags every underwriting trigger that would cause a denial. Get auto-generated dispute letters and a repair timeline." },
             ].map((item, i) => (
-              <div key={item.step} className="flex gap-6 sm:gap-8 items-start py-8 border-t border-[#404040] first:border-t-0">
-                <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-[#222222] border border-[#303030] flex items-center justify-center shrink-0">
-                  <span className="text-[13px] font-mono text-white/65">{item.step}</span>
+              <div key={item.step} className="flex gap-6 sm:gap-8 items-start py-8 border-t border-[#E5E7EB] first:border-t-0">
+                <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-[#F1F3F5] border border-[#E5E7EB] flex items-center justify-center shrink-0">
+                  <span className="text-[13px] font-mono text-[#666]">{item.step}</span>
                 </div>
                 <div>
-                  <h3 className="text-[16px] sm:text-[18px] text-white/80 font-medium mb-2">{item.title}</h3>
-                  <p className="text-[13px] sm:text-[14px] text-white/75 leading-[1.7] max-w-[500px]">{item.desc}</p>
+                  <h3 className="text-[16px] sm:text-[18px] text-[#333] font-medium mb-2">{item.title}</h3>
+                  <p className="text-[13px] sm:text-[14px] text-[#666] leading-[1.7] max-w-[500px]">{item.desc}</p>
                 </div>
               </div>
             ))}
@@ -412,7 +412,7 @@ export default function LandingPage() {
       </section>
 
       {/* ═══════════════ 5. FUNDING OUTCOMES ═══════════════ */}
-      <section className="relative z-10 px-6 sm:px-12 md:px-20 py-20 sm:py-28 border-t border-[#404040]">
+      <section className="relative z-10 px-6 sm:px-12 md:px-20 py-20 sm:py-28 border-t border-[#E5E7EB]">
         <div className="absolute inset-0" style={sectionBg} />
         <div className="relative max-w-[900px]">
           <SectionLabel>What You Get</SectionLabel>
@@ -431,10 +431,10 @@ export default function LandingPage() {
               { icon: "◐", title: "Risk Signal Detection", desc: "Identifies liens, judgments, utilization spikes, and velocity flags" },
               { icon: "⬢", title: "Personalized Next Steps", desc: "AI-generated action plan prioritized by impact on your fundability" },
             ].map((item) => (
-              <div key={item.title} className="p-5 sm:p-6 rounded-xl bg-[#1C1C1C] border border-[#404040] group hover:bg-[#222222] transition-colors">
-                <span className="text-[20px] text-white/45 mb-4 block">{item.icon}</span>
-                <h3 className="text-[14px] sm:text-[15px] text-white/80 font-medium mb-2">{item.title}</h3>
-                <p className="text-[12px] sm:text-[13px] text-white/75 leading-[1.7]">{item.desc}</p>
+              <div key={item.title} className="p-5 sm:p-6 rounded-xl bg-white border border-[#E5E7EB] shadow-sm group hover:shadow-md transition-shadow">
+                <span className="text-[20px] text-[#999] mb-4 block">{item.icon}</span>
+                <h3 className="text-[14px] sm:text-[15px] text-[#333] font-medium mb-2">{item.title}</h3>
+                <p className="text-[12px] sm:text-[13px] text-[#666] leading-[1.7]">{item.desc}</p>
               </div>
             ))}
           </div>
@@ -442,7 +442,7 @@ export default function LandingPage() {
       </section>
 
       {/* ═══════════════ 6. SOCIAL PROOF ═══════════════ */}
-      <section className="relative z-10 px-6 sm:px-12 md:px-20 py-20 sm:py-28 border-t border-[#404040]">
+      <section className="relative z-10 px-6 sm:px-12 md:px-20 py-20 sm:py-28 border-t border-[#E5E7EB]">
         <div className="absolute inset-0" style={sectionBg} />
         <div className="relative max-w-[900px]">
           <SectionLabel>Results</SectionLabel>
@@ -457,9 +457,9 @@ export default function LandingPage() {
               { val: "89%", label: "Approval Rate" },
               { val: "6.2x", label: "Avg Score Improvement" },
             ].map((s) => (
-              <div key={s.label} className="text-center p-5 rounded-xl bg-[#1C1C1C] border border-[#404040]">
-                <p className="text-[24px] sm:text-[30px] font-mono text-white/75 mb-1" style={{ fontFamily: "'JetBrains Mono', monospace" }}>{s.val}</p>
-                <p className="text-[10px] sm:text-[11px] text-white/45 tracking-wide uppercase">{s.label}</p>
+              <div key={s.label} className="text-center p-5 rounded-xl bg-white border border-[#E5E7EB] shadow-sm">
+                <p className="text-[24px] sm:text-[30px] font-mono text-[#333] mb-1" style={{ fontFamily: "'JetBrains Mono', monospace" }}>{s.val}</p>
+                <p className="text-[10px] sm:text-[11px] text-[#999] tracking-wide uppercase">{s.label}</p>
               </div>
             ))}
           </div>
@@ -470,11 +470,11 @@ export default function LandingPage() {
               { name: "Aisha K.", role: "Real Estate Investor", quote: "The denial simulation caught 3 triggers I didn't know existed. Fixed them all before applying — approved same week." },
               { name: "David L.", role: "SaaS Startup CEO", quote: "MentXr showed me I was Mid-Tier when I thought I was Prime. After following the repair plan, I moved up and saved 4% on rates." },
             ].map((t) => (
-              <div key={t.name} className="p-6 rounded-xl bg-[#1C1C1C] border border-[#404040]">
-                <p className="text-[13px] text-white/60 leading-[1.8] mb-5 italic">"{t.quote}"</p>
+              <div key={t.name} className="p-6 rounded-xl bg-white border border-[#E5E7EB] shadow-sm">
+                <p className="text-[13px] text-[#666] leading-[1.8] mb-5 italic">"{t.quote}"</p>
                 <div>
-                  <p className="text-[13px] text-white/75 font-medium">{t.name}</p>
-                  <p className="text-[11px] text-white/45">{t.role}</p>
+                  <p className="text-[13px] text-[#333] font-medium">{t.name}</p>
+                  <p className="text-[11px] text-[#999]">{t.role}</p>
                 </div>
               </div>
             ))}
@@ -483,33 +483,33 @@ export default function LandingPage() {
       </section>
 
       {/* ═══════════════ 7. RISK REVERSAL ═══════════════ */}
-      <section className="relative z-10 px-6 sm:px-12 md:px-20 py-20 sm:py-28 border-t border-[#404040]">
+      <section className="relative z-10 px-6 sm:px-12 md:px-20 py-20 sm:py-28 border-t border-[#E5E7EB]">
         <div className="absolute inset-0" style={sectionBg} />
         <div className="relative max-w-[800px]">
           <SectionLabel>No More Guessing</SectionLabel>
           <h2 className="text-[26px] sm:text-[36px] md:text-[44px] leading-[1.1] mb-6 tracking-[-0.03em]" style={gradientText('180deg', 0.95, 0.55)}>
             Stop applying blind. Start applying ready.
           </h2>
-          <p className="text-[15px] text-white/60 leading-[1.8] mb-12 max-w-[600px]">
+          <p className="text-[15px] text-[#666] leading-[1.8] mb-12 max-w-[600px]">
             Every denied application costs you: hard inquiries, wasted time, damaged confidence. MentXr eliminates the guesswork by showing you exactly what a lender sees — before you ever submit.
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-            <div className="p-6 rounded-xl border border-red-500/10 bg-red-500/[0.02]">
-              <p className="text-[11px] tracking-[0.15em] uppercase text-red-400/30 mb-4">Without MentXr</p>
+            <div className="p-6 rounded-xl border border-red-200 bg-red-50/50">
+              <p className="text-[11px] tracking-[0.15em] uppercase text-red-400 mb-4">Without MentXr</p>
               <ul className="space-y-3">
                 {["Guess at eligibility", "Apply to multiple lenders", "Accumulate hard inquiries", "Get denied without explanation", "Repeat the cycle"].map((t) => (
-                  <li key={t} className="flex items-start gap-3 text-[13px] text-white/75 leading-[1.6]">
-                    <span className="text-red-400/25 mt-0.5 shrink-0">✕</span>{t}
+                  <li key={t} className="flex items-start gap-3 text-[13px] text-[#666] leading-[1.6]">
+                    <span className="text-red-400 mt-0.5 shrink-0">✕</span>{t}
                   </li>
                 ))}
               </ul>
             </div>
-            <div className="p-6 rounded-xl border border-[#363636] bg-[#1C1C1C]">
-              <p className="text-[11px] tracking-[0.15em] uppercase text-white/60 mb-4">With MentXr</p>
+            <div className="p-6 rounded-xl border border-[#E5E7EB] bg-white shadow-sm">
+              <p className="text-[11px] tracking-[0.15em] uppercase text-[#2E7D32] mb-4">With MentXr</p>
               <ul className="space-y-3">
                 {["Know your exact tier & ceiling", "Fix issues before applying", "Apply once, with confidence", "Get approved on first submission", "Build on momentum"].map((t) => (
-                  <li key={t} className="flex items-start gap-3 text-[13px] text-white/65 leading-[1.6]">
-                    <span className="text-white/60 mt-0.5 shrink-0">→</span>{t}
+                  <li key={t} className="flex items-start gap-3 text-[13px] text-[#666] leading-[1.6]">
+                    <span className="text-[#2E7D32] mt-0.5 shrink-0">→</span>{t}
                   </li>
                 ))}
               </ul>
@@ -519,7 +519,7 @@ export default function LandingPage() {
       </section>
 
       {/* ═══════════════ 8. FEATURE BREAKDOWN ═══════════════ */}
-      <section className="relative z-10 px-6 sm:px-12 md:px-20 py-20 sm:py-28 border-t border-[#404040]">
+      <section className="relative z-10 px-6 sm:px-12 md:px-20 py-20 sm:py-28 border-t border-[#E5E7EB]">
         <div className="absolute inset-0" style={sectionBg} />
         <div className="relative max-w-[900px]">
           <SectionLabel>Feature Breakdown</SectionLabel>
@@ -535,26 +535,26 @@ export default function LandingPage() {
               { name: "Liquidity & Leverage", weight: "0–15 pts", desc: "Debt-to-income, current ratio, available credit, existing obligations" },
               { name: "Risk Signals", weight: "0–15 pts", desc: "Liens, judgments, NSFs, velocity flags, recent inquiries, collections" },
             ].map((c) => (
-              <div key={c.name} className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-6 p-5 rounded-xl bg-[#1C1C1C] border border-[#404040]">
+              <div key={c.name} className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-6 p-5 rounded-xl bg-white border border-[#E5E7EB] shadow-sm">
                 <div className="flex items-center gap-4 sm:w-[200px] shrink-0">
-                  <span className="text-[14px] sm:text-[15px] text-white/75 font-medium">{c.name}</span>
+                  <span className="text-[14px] sm:text-[15px] text-[#333] font-medium">{c.name}</span>
                 </div>
-                <span className="text-[12px] font-mono text-white/75 sm:w-[80px] shrink-0" style={{ fontFamily: "'JetBrains Mono', monospace" }}>{c.weight}</span>
-                <p className="text-[12px] sm:text-[13px] text-white/45 leading-[1.6]">{c.desc}</p>
+                <span className="text-[12px] font-mono text-[#333] sm:w-[80px] shrink-0" style={{ fontFamily: "'JetBrains Mono', monospace" }}>{c.weight}</span>
+                <p className="text-[12px] sm:text-[13px] text-[#999] leading-[1.6]">{c.desc}</p>
               </div>
             ))}
           </div>
-          <div className="mt-8 p-5 rounded-xl bg-[#222222] border border-[#303030]">
+          <div className="mt-8 p-5 rounded-xl bg-[#F1F3F5] border border-[#E5E7EB]">
             <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-8">
-              <span className="text-[15px] text-white/80 font-medium">Total: 0–100 pts</span>
-              <span className="text-[12px] text-white/45">→ Qualification Range: $25K – $5M+ based on composite score and tier placement</span>
+              <span className="text-[15px] text-[#333] font-medium">Total: 0–100 pts</span>
+              <span className="text-[12px] text-[#999]">→ Qualification Range: $25K – $5M+ based on composite score and tier placement</span>
             </div>
           </div>
         </div>
       </section>
 
       {/* ═══════════════ 9. MODE DIFFERENTIATION ═══════════════ */}
-      <section className="relative z-10 px-6 sm:px-12 md:px-20 py-20 sm:py-28 border-t border-[#404040]">
+      <section className="relative z-10 px-6 sm:px-12 md:px-20 py-20 sm:py-28 border-t border-[#E5E7EB]">
         <div className="absolute inset-0" style={sectionBg} />
         <div className="relative max-w-[900px]">
           <SectionLabel>Operating Modes</SectionLabel>
@@ -562,36 +562,36 @@ export default function LandingPage() {
             Two modes. One goal: get you funded.
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-            <div className="p-6 sm:p-8 rounded-xl bg-[#1C1C1C] border border-[#303030]">
+            <div className="p-6 sm:p-8 rounded-xl bg-white border border-[#E5E7EB] shadow-sm">
               <div className="flex items-center gap-3 mb-6">
-                <div className="w-3 h-3 rounded-full bg-white/20"></div>
-                <span className="text-[11px] tracking-[0.15em] uppercase text-white/60">Pre-Funding Mode</span>
+                <div className="w-3 h-3 rounded-full bg-[#2E7D32]"></div>
+                <span className="text-[11px] tracking-[0.15em] uppercase text-[#666]">Pre-Funding Mode</span>
               </div>
-              <h3 className="text-[20px] sm:text-[24px] text-white/80 font-light mb-4 tracking-[-0.02em]">Score 60+</h3>
-              <p className="text-[13px] text-white/75 leading-[1.8] mb-6">
+              <h3 className="text-[20px] sm:text-[24px] text-[#333] font-light mb-4 tracking-[-0.02em]">Score 60+</h3>
+              <p className="text-[13px] text-[#666] leading-[1.8] mb-6">
                 You're fundable. This mode focuses on optimization — maximizing your ceiling, refining your tier placement, and identifying the best products for your profile.
               </p>
               <ul className="space-y-2.5">
                 {["Tier 1–2 product matching", "Exposure ceiling maximization", "Application timing strategy", "Rate optimization guidance"].map((t) => (
-                  <li key={t} className="flex items-center gap-3 text-[12px] text-white/60">
-                    <span className="w-1 h-1 rounded-full bg-white/15"></span>{t}
+                  <li key={t} className="flex items-center gap-3 text-[12px] text-[#666]">
+                    <span className="w-1 h-1 rounded-full bg-[#DEE2E6]"></span>{t}
                   </li>
                 ))}
               </ul>
             </div>
-            <div className="p-6 sm:p-8 rounded-xl bg-[#1C1C1C] border border-[#303030]">
+            <div className="p-6 sm:p-8 rounded-xl bg-white border border-[#E5E7EB] shadow-sm">
               <div className="flex items-center gap-3 mb-6">
-                <div className="w-3 h-3 rounded-full bg-white/25 border border-white/20"></div>
-                <span className="text-[11px] tracking-[0.15em] uppercase text-white/60">Repair Mode</span>
+                <div className="w-3 h-3 rounded-full bg-[#DEE2E6] border border-[#999]"></div>
+                <span className="text-[11px] tracking-[0.15em] uppercase text-[#666]">Repair Mode</span>
               </div>
-              <h3 className="text-[20px] sm:text-[24px] text-white/80 font-light mb-4 tracking-[-0.02em]">Score &lt;60</h3>
-              <p className="text-[13px] text-white/75 leading-[1.8] mb-6">
+              <h3 className="text-[20px] sm:text-[24px] text-[#333] font-light mb-4 tracking-[-0.02em]">Score &lt;60</h3>
+              <p className="text-[13px] text-[#666] leading-[1.8] mb-6">
                 You need work before applying. This mode focuses on fixing issues — dispute letters, payment optimization, structure corrections, and timeline to fundability.
               </p>
               <ul className="space-y-2.5">
                 {["Auto-generated dispute letters", "Credit issue prioritization", "90-day repair timeline", "Score impact projections"].map((t) => (
-                  <li key={t} className="flex items-center gap-3 text-[12px] text-white/60">
-                    <span className="w-1 h-1 rounded-full bg-white/15"></span>{t}
+                  <li key={t} className="flex items-center gap-3 text-[12px] text-[#666]">
+                    <span className="w-1 h-1 rounded-full bg-[#DEE2E6]"></span>{t}
                   </li>
                 ))}
               </ul>
@@ -601,7 +601,7 @@ export default function LandingPage() {
       </section>
 
       {/* ═══════════════ 10. TIER POSITIONING ═══════════════ */}
-      <section className="relative z-10 px-6 sm:px-12 md:px-20 py-20 sm:py-28 border-t border-[#404040]">
+      <section className="relative z-10 px-6 sm:px-12 md:px-20 py-20 sm:py-28 border-t border-[#E5E7EB]">
         <div className="absolute inset-0" style={sectionBg} />
         <div className="relative max-w-[900px]">
           <SectionLabel>Tier Eligibility</SectionLabel>
@@ -610,15 +610,15 @@ export default function LandingPage() {
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             {[
-              { tier: "Tier 1", name: "Prime Capital", score: "75–100", products: "SBA 7(a) & 504, Conventional LOC, Term Loans, Equipment Finance", color: "border-[#3C3C3C]" },
-              { tier: "Tier 2", name: "Mid-Tier", score: "50–74", products: "Revenue-Based Lending, Invoice Factoring, Merchant Cash Advance, Bridge Loans", color: "border-[#303030]" },
-              { tier: "Tier 3", name: "Alternative", score: "25–49", products: "Microloans, Secured Cards, Credit Builder Programs, Community Development Loans", color: "border-[#404040]" },
+              { tier: "Tier 1", name: "Prime Capital", score: "75–100", products: "SBA 7(a) & 504, Conventional LOC, Term Loans, Equipment Finance", color: "border-[#2E7D32]/30" },
+              { tier: "Tier 2", name: "Mid-Tier", score: "50–74", products: "Revenue-Based Lending, Invoice Factoring, Merchant Cash Advance, Bridge Loans", color: "border-[#E5E7EB]" },
+              { tier: "Tier 3", name: "Alternative", score: "25–49", products: "Microloans, Secured Cards, Credit Builder Programs, Community Development Loans", color: "border-[#E5E7EB]" },
             ].map((t) => (
-              <div key={t.tier} className={`p-6 rounded-xl bg-[#1C1C1C] border ${t.color}`}>
-                <span className="text-[10px] font-mono text-white/45 tracking-wider uppercase">{t.tier}</span>
-                <h3 className="text-[18px] sm:text-[20px] text-white/80 font-medium mt-2 mb-1">{t.name}</h3>
-                <p className="text-[13px] font-mono text-white/60 mb-5" style={{ fontFamily: "'JetBrains Mono', monospace" }}>Score: {t.score}</p>
-                <p className="text-[12px] text-white/45 leading-[1.7]">{t.products}</p>
+              <div key={t.tier} className={`p-6 rounded-xl bg-white border ${t.color} shadow-sm`}>
+                <span className="text-[10px] font-mono text-[#999] tracking-wider uppercase">{t.tier}</span>
+                <h3 className="text-[18px] sm:text-[20px] text-[#333] font-medium mt-2 mb-1">{t.name}</h3>
+                <p className="text-[13px] font-mono text-[#666] mb-5" style={{ fontFamily: "'JetBrains Mono', monospace" }}>Score: {t.score}</p>
+                <p className="text-[12px] text-[#999] leading-[1.7]">{t.products}</p>
               </div>
             ))}
           </div>
@@ -626,7 +626,7 @@ export default function LandingPage() {
       </section>
 
       {/* ═══════════════ 11. CASE STUDY ═══════════════ */}
-      <section className="relative z-10 px-6 sm:px-12 md:px-20 py-20 sm:py-28 border-t border-[#404040]">
+      <section className="relative z-10 px-6 sm:px-12 md:px-20 py-20 sm:py-28 border-t border-[#E5E7EB]">
         <div className="absolute inset-0" style={sectionBg} />
         <div className="relative max-w-[800px]">
           <SectionLabel>Example Walkthrough</SectionLabel>
@@ -641,13 +641,13 @@ export default function LandingPage() {
               { day: "Day 30", title: "First Checkpoint", detail: "Score: 52/100. Moved to Tier 2. 1 collection removed. Utilization down to 45%. Business structure improved. Exposure ceiling: $85K." },
               { day: "Day 67", title: "Funding Ready", detail: "Score: 71/100. Tier 2 (upper). 0 denial triggers. Utilization: 22%. Clean business file. Exposure ceiling: $210K. Applied for $175K LOC — approved in 5 days." },
             ].map((step) => (
-              <div key={step.day} className="flex gap-6 sm:gap-8 py-7 border-t border-[#404040] first:border-t-0">
+              <div key={step.day} className="flex gap-6 sm:gap-8 py-7 border-t border-[#E5E7EB] first:border-t-0">
                 <div className="w-[70px] shrink-0">
-                  <span className="text-[12px] font-mono text-white/60" style={{ fontFamily: "'JetBrains Mono', monospace" }}>{step.day}</span>
+                  <span className="text-[12px] font-mono text-[#666]" style={{ fontFamily: "'JetBrains Mono', monospace" }}>{step.day}</span>
                 </div>
                 <div>
-                  <h3 className="text-[15px] text-white/80 font-medium mb-2">{step.title}</h3>
-                  <p className="text-[13px] text-white/75 leading-[1.7]">{step.detail}</p>
+                  <h3 className="text-[15px] text-[#333] font-medium mb-2">{step.title}</h3>
+                  <p className="text-[13px] text-[#666] leading-[1.7]">{step.detail}</p>
                 </div>
               </div>
             ))}
@@ -656,7 +656,7 @@ export default function LandingPage() {
       </section>
 
       {/* ═══════════════ 12. FAQ / OBJECTION HANDLING ═══════════════ */}
-      <section className="relative z-10 px-6 sm:px-12 md:px-20 py-20 sm:py-28 border-t border-[#404040]">
+      <section className="relative z-10 px-6 sm:px-12 md:px-20 py-20 sm:py-28 border-t border-[#E5E7EB]">
         <div className="absolute inset-0" style={sectionBg} />
         <div className="relative max-w-[700px]">
           <SectionLabel>FAQ</SectionLabel>
@@ -665,18 +665,18 @@ export default function LandingPage() {
           </h2>
           <div className="space-y-0">
             {faqItems.map((item, i) => (
-              <div key={i} className="border-b border-[#404040]">
+              <div key={i} className="border-b border-[#E5E7EB]">
                 <button
                   data-testid={`button-faq-${i}`}
                   className="w-full flex items-center justify-between py-5 text-left group"
                   onClick={() => setOpenFaq(openFaq === i ? null : i)}
                 >
-                  <span className="text-[14px] sm:text-[15px] font-medium text-white/70 group-hover:text-white/80 transition-colors pr-4">{item.q}</span>
-                  <span className="text-[18px] text-white/40 shrink-0 leading-none transition-transform duration-200" style={{ transform: openFaq === i ? 'rotate(45deg)' : 'rotate(0deg)' }}>+</span>
+                  <span className="text-[14px] sm:text-[15px] font-medium text-[#333] group-hover:text-[#1A1A1A] transition-colors pr-4">{item.q}</span>
+                  <span className="text-[18px] text-[#999] shrink-0 leading-none transition-transform duration-200" style={{ transform: openFaq === i ? 'rotate(45deg)' : 'rotate(0deg)' }}>+</span>
                 </button>
                 {openFaq === i && (
                   <div className="pb-5">
-                    <p className="text-[13px] text-white/75 leading-[1.8]">{item.a}</p>
+                    <p className="text-[13px] text-[#666] leading-[1.8]">{item.a}</p>
                   </div>
                 )}
               </div>
@@ -686,7 +686,7 @@ export default function LandingPage() {
       </section>
 
       {/* ═══════════════ 13. TRUST & COMPLIANCE ═══════════════ */}
-      <section className="relative z-10 px-6 sm:px-12 md:px-20 py-20 sm:py-28 border-t border-[#404040]">
+      <section className="relative z-10 px-6 sm:px-12 md:px-20 py-20 sm:py-28 border-t border-[#E5E7EB]">
         <div className="absolute inset-0" style={sectionBg} />
         <div className="relative max-w-[800px]">
           <SectionLabel>Trust & Security</SectionLabel>
@@ -700,10 +700,10 @@ export default function LandingPage() {
               { icon: "◇", title: "Compliant", desc: "FCRA-aligned analysis and dispute letter generation" },
               { icon: "▣", title: "No Credit Pull", desc: "We analyze your uploaded reports — zero impact on your score" },
             ].map((item) => (
-              <div key={item.title} className="p-5 rounded-xl bg-[#1C1C1C] border border-[#404040]">
-                <span className="text-[18px] text-white/45 mb-3 block">{item.icon}</span>
-                <h3 className="text-[13px] text-white/75 font-medium mb-1.5">{item.title}</h3>
-                <p className="text-[11px] text-white/45 leading-[1.6]">{item.desc}</p>
+              <div key={item.title} className="p-5 rounded-xl bg-white border border-[#E5E7EB] shadow-sm">
+                <span className="text-[18px] text-[#999] mb-3 block">{item.icon}</span>
+                <h3 className="text-[13px] text-[#333] font-medium mb-1.5">{item.title}</h3>
+                <p className="text-[11px] text-[#999] leading-[1.6]">{item.desc}</p>
               </div>
             ))}
           </div>
@@ -711,8 +711,8 @@ export default function LandingPage() {
       </section>
 
       {/* ═══════════════ 14. FINAL CTA ═══════════════ */}
-      <section className="relative z-10 px-6 sm:px-12 md:px-20 py-24 sm:py-36 border-t border-[#404040]">
-        <div className="absolute inset-0" style={{ background: 'radial-gradient(ellipse 80% 70% at 50% 50%, rgba(8,8,8,0.98) 0%, rgba(8,8,8,0.7) 50%, rgba(8,8,8,0.4) 100%)' }} />
+      <section className="relative z-10 px-6 sm:px-12 md:px-20 py-24 sm:py-36 border-t border-[#E5E7EB]">
+        <div className="absolute inset-0" style={{ background: 'radial-gradient(ellipse 80% 70% at 50% 50%, rgba(255,255,255,0.98) 0%, rgba(248,249,250,0.7) 50%, rgba(241,243,245,0.4) 100%)' }} />
         <div className="relative max-w-[700px] mx-auto text-center">
           <h2
             className="text-[30px] sm:text-[44px] md:text-[56px] leading-[1.05] mb-6 tracking-[-0.04em]"
@@ -721,16 +721,16 @@ export default function LandingPage() {
           >
             Stop guessing.<br />Start knowing.
           </h2>
-          <p className="text-[15px] text-white/60 leading-[1.8] mb-10 max-w-[480px] mx-auto">
+          <p className="text-[15px] text-[#666] leading-[1.8] mb-10 max-w-[480px] mx-auto">
             Get your Capital Readiness Score, tier eligibility, exposure ceiling, and denial simulation — free. No credit card. No credit pull. No commitment.
           </p>
           <form onSubmit={handleLogin} className="w-full max-w-[440px] mx-auto mb-6">
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center bg-[#1E1E1E] border border-[#363636] rounded-2xl sm:rounded-full sm:h-[52px] sm:pl-5 sm:pr-1.5 overflow-hidden">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center bg-white border border-[#E5E7EB] rounded-2xl sm:rounded-full sm:h-[52px] sm:pl-5 sm:pr-1.5 overflow-hidden shadow-sm">
               <input
                 data-testid="input-email-bottom"
                 type="email"
                 placeholder="Enter your email"
-                className="flex-1 bg-transparent text-[14px] text-white placeholder:text-white/75 outline-none px-4 py-3.5 sm:px-0 sm:py-0"
+                className="flex-1 bg-transparent text-[14px] text-[#1A1A1A] placeholder:text-[#999] outline-none px-4 py-3.5 sm:px-0 sm:py-0"
                 defaultValue=""
                 required
                 disabled={isLoading}
@@ -739,40 +739,40 @@ export default function LandingPage() {
                 data-testid="button-join-bottom"
                 type="submit"
                 disabled={isLoading}
-                className="h-[44px] sm:h-[40px] px-6 sm:rounded-full bg-white text-black text-[13px] font-bold hover:bg-white/90 transition-colors shrink-0 border-t border-[#303030] sm:border-t-0 mx-1.5 mb-1.5 sm:mb-0 sm:mx-0 rounded-xl sm:rounded-full tracking-wide"
+                className="h-[44px] sm:h-[40px] px-6 sm:rounded-full bg-[#2E7D32] text-white text-[13px] font-bold hover:bg-[#256829] transition-colors shrink-0 border-t border-[#E5E7EB] sm:border-t-0 mx-1.5 mb-1.5 sm:mb-0 sm:mx-0 rounded-xl sm:rounded-full tracking-wide"
               >
                 {isLoading ? "..." : "GET FREE ACCESS"}
               </button>
             </div>
           </form>
-          <p className="text-[11px] text-white/12 tracking-wide">
+          <p className="text-[11px] text-[#DEE2E6] tracking-wide">
             Join 12,500+ founders already using MentXr&reg;
           </p>
         </div>
       </section>
 
       {/* ═══════════════ 15. FOOTER ═══════════════ */}
-      <footer className="relative z-10 border-t border-[#404040] px-6 sm:px-12 md:px-20 py-10 sm:py-14">
-        <div className="absolute inset-0" style={{ background: 'rgba(8,8,8,0.85)' }} />
+      <footer className="relative z-10 border-t border-[#E5E7EB] px-6 sm:px-12 md:px-20 py-10 sm:py-14">
+        <div className="absolute inset-0" style={{ background: 'rgba(248,249,250,0.85)' }} />
         <div className="relative">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-8 mb-10">
             <div className="flex items-center gap-2.5">
-              <div className="w-6 h-6 rounded-full border-2 border-white/40 flex items-center justify-center">
-                <span className="w-1.5 h-1.5 rounded-full bg-white/60"></span>
+              <div className="w-6 h-6 rounded-full border-2 border-[#666] flex items-center justify-center">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#333]"></span>
               </div>
-              <span className="text-[13px] font-bold tracking-[0.08em] text-white/80 uppercase">MentXr</span>
+              <span className="text-[13px] font-bold tracking-[0.08em] text-[#333] uppercase">MentXr</span>
             </div>
             <div className="flex flex-wrap gap-6 sm:gap-8">
               {["Privacy Policy", "Terms of Service", "Contact", "Support"].map((link) => (
-                <span key={link} className="text-[11px] text-white/45 tracking-wide uppercase cursor-pointer hover:text-white/65 transition-colors">{link}</span>
+                <span key={link} className="text-[11px] text-[#999] tracking-wide uppercase cursor-pointer hover:text-[#666] transition-colors">{link}</span>
               ))}
             </div>
           </div>
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pt-6 border-t border-[#404040]">
-            <p className="text-[11px] text-white/40">
-              &copy; 2026 MentXr&reg; by <span className="text-white/45 font-medium">CMD Supply</span>. All rights reserved.
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pt-6 border-t border-[#E5E7EB]">
+            <p className="text-[11px] text-[#999]">
+              &copy; 2026 MentXr&reg; by <span className="text-[#666] font-medium">CMD Supply</span>. All rights reserved.
             </p>
-            <p className="text-[10px] text-white/8 max-w-[400px] leading-[1.6]">
+            <p className="text-[10px] text-[#DEE2E6] max-w-[400px] leading-[1.6]">
               MentXr is not a lender, broker, or financial advisor. All analyses are for informational purposes only and do not constitute financial advice or guaranteed lending outcomes.
             </p>
           </div>

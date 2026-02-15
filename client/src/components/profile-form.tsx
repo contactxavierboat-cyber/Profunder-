@@ -41,10 +41,10 @@ export function CreditProfileForm() {
   }
 
   return (
-    <Card className="bg-card/50 border-white/5 backdrop-blur-none">
+    <Card className="bg-white border-[#E5E7EB] shadow-sm">
       <CardHeader>
-        <CardTitle>Credit Profile Data</CardTitle>
-        <CardDescription>Enter your current credit statistics for accurate analysis.</CardDescription>
+        <CardTitle className="text-[#1A1A1A]">Credit Profile Data</CardTitle>
+        <CardDescription className="text-[#666]">Enter your current credit statistics for accurate analysis.</CardDescription>
       </CardHeader>
       <CardContent>
         <Form {...form}>
@@ -54,10 +54,10 @@ export function CreditProfileForm() {
               name="creditScoreRange"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Credit Score Range</FormLabel>
+                  <FormLabel className="text-[#333]">Credit Score Range</FormLabel>
                   <Select onValueChange={field.onChange} defaultValue={field.value}>
                     <FormControl>
-                      <SelectTrigger className="bg-background/50 border-white/10">
+                      <SelectTrigger className="bg-white border-[#E5E7EB] text-[#1A1A1A]">
                         <SelectValue placeholder="Select range" />
                       </SelectTrigger>
                     </FormControl>
@@ -80,9 +80,9 @@ export function CreditProfileForm() {
                 name="totalRevolvingLimit"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Total Revolving Limits ($)</FormLabel>
+                    <FormLabel className="text-[#333]">Total Revolving Limits ($)</FormLabel>
                     <FormControl>
-                      <Input type="number" {...field} className="bg-background/50 border-white/10 font-mono" />
+                      <Input type="number" {...field} className="bg-white border-[#E5E7EB] text-[#1A1A1A] font-mono" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -94,9 +94,9 @@ export function CreditProfileForm() {
                 name="totalBalances"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Total Balances ($)</FormLabel>
+                    <FormLabel className="text-[#333]">Total Balances ($)</FormLabel>
                     <FormControl>
-                      <Input type="number" {...field} className="bg-background/50 border-white/10 font-mono" />
+                      <Input type="number" {...field} className="bg-white border-[#E5E7EB] text-[#1A1A1A] font-mono" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -110,9 +110,9 @@ export function CreditProfileForm() {
                 name="inquiries"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Hard Inquiries (Last 6mo)</FormLabel>
+                    <FormLabel className="text-[#333]">Hard Inquiries (Last 6mo)</FormLabel>
                     <FormControl>
-                      <Input type="number" {...field} className="bg-background/50 border-white/10 font-mono" />
+                      <Input type="number" {...field} className="bg-white border-[#E5E7EB] text-[#1A1A1A] font-mono" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -124,9 +124,9 @@ export function CreditProfileForm() {
                 name="derogatoryAccounts"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Derogatory Accounts</FormLabel>
+                    <FormLabel className="text-[#333]">Derogatory Accounts</FormLabel>
                     <FormControl>
-                      <Input type="number" {...field} className="bg-background/50 border-white/10 font-mono" />
+                      <Input type="number" {...field} className="bg-white border-[#E5E7EB] text-[#1A1A1A] font-mono" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -134,7 +134,7 @@ export function CreditProfileForm() {
               />
             </div>
 
-            <Button type="submit" className="w-full bg-primary text-primary-foreground hover:bg-primary/90 font-medium">
+            <Button type="submit" className="w-full bg-[#2E7D32] text-white hover:bg-[#256d29] font-medium">
               Save Profile Data
             </Button>
           </form>
