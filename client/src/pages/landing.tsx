@@ -12,54 +12,19 @@ function SpaceBackground() {
 
     let animationId: number;
 
-    interface Star {
+    interface Blob {
       x: number; y: number;
       vx: number; vy: number;
-      size: number;
-      brightness: number;
-      twinkleSpeed: number;
-      twinklePhase: number;
-      glow: boolean;
-    }
-
-    interface Constellation {
-      stars: { ox: number; oy: number; size: number }[];
-      edges: [number, number][];
-      x: number; y: number;
-      vx: number; vy: number;
-      rotation: number;
-      rotSpeed: number;
-      scale: number;
+      radius: number;
       opacity: number;
       phase: number;
+      wobbleSpeed: number;
+      wobbleAmp: number;
+      points: number;
     }
 
-    let stars: Star[] = [];
-    let constellations: Constellation[] = [];
+    let blobs: Blob[] = [];
     let time = 0;
-
-    const constellationPatterns: { stars: { ox: number; oy: number; size: number }[]; edges: [number, number][] }[] = [
-      { stars: [{ox:0,oy:-40,size:3},{ox:-35,oy:-15,size:2.5},{ox:-20,oy:20,size:2},{ox:25,oy:15,size:2.5},{ox:40,oy:-10,size:2},{ox:10,oy:40,size:2},{ox:-10,oy:-5,size:1.5}],
-        edges: [[0,1],[1,2],[2,5],[0,4],[4,3],[3,5],[1,6],[6,3]] },
-      { stars: [{ox:0,oy:-50,size:3},{ox:-30,oy:-20,size:2},{ox:30,oy:-20,size:2},{ox:-45,oy:15,size:2.5},{ox:45,oy:15,size:2.5},{ox:-25,oy:45,size:2},{ox:25,oy:45,size:2}],
-        edges: [[0,1],[0,2],[1,3],[2,4],[3,5],[4,6],[5,6],[1,2]] },
-      { stars: [{ox:-50,oy:0,size:2.5},{ox:-25,oy:-20,size:2},{ox:0,oy:5,size:3},{ox:25,oy:-15,size:2},{ox:50,oy:0,size:2.5},{ox:15,oy:25,size:2},{ox:-15,oy:30,size:1.5}],
-        edges: [[0,1],[1,2],[2,3],[3,4],[2,5],[2,6],[5,6]] },
-      { stars: [{ox:0,oy:-45,size:3},{ox:-40,oy:0,size:2.5},{ox:40,oy:0,size:2.5},{ox:0,oy:45,size:3},{ox:-20,oy:-20,size:1.5},{ox:20,oy:-20,size:1.5},{ox:-20,oy:20,size:1.5},{ox:20,oy:20,size:1.5}],
-        edges: [[0,4],[0,5],[4,1],[5,2],[1,6],[2,7],[6,3],[7,3],[4,5],[6,7]] },
-      { stars: [{ox:-40,oy:-30,size:2.5},{ox:0,oy:-45,size:3},{ox:40,oy:-30,size:2.5},{ox:35,oy:10,size:2},{ox:15,oy:40,size:2},{ox:-15,oy:40,size:2},{ox:-35,oy:10,size:2}],
-        edges: [[0,1],[1,2],[2,3],[3,4],[4,5],[5,6],[6,0]] },
-      { stars: [{ox:-45,oy:-10,size:2},{ox:-20,oy:-35,size:2.5},{ox:10,oy:-25,size:2},{ox:35,oy:-40,size:3},{ox:45,oy:-5,size:2},{ox:20,oy:15,size:2},{ox:-5,oy:30,size:2.5},{ox:-30,oy:20,size:2}],
-        edges: [[0,1],[1,2],[2,3],[3,4],[4,5],[5,6],[6,7],[7,0],[2,5]] },
-      { stars: [{ox:0,oy:-35,size:3},{ox:-30,oy:0,size:2},{ox:30,oy:0,size:2},{ox:0,oy:35,size:3},{ox:0,oy:0,size:2}],
-        edges: [[0,1],[0,2],[1,3],[2,3],[0,4],[4,3],[1,4],[2,4]] },
-      { stars: [{ox:-50,oy:-15,size:2},{ox:-30,oy:10,size:2.5},{ox:-5,oy:-20,size:2},{ox:15,oy:5,size:3},{ox:40,oy:-10,size:2},{ox:55,oy:15,size:2.5}],
-        edges: [[0,1],[1,2],[2,3],[3,4],[4,5]] },
-      { stars: [{ox:0,oy:-50,size:3},{ox:-25,oy:-25,size:2},{ox:25,oy:-25,size:2},{ox:-40,oy:5,size:2},{ox:40,oy:5,size:2},{ox:-25,oy:35,size:2.5},{ox:25,oy:35,size:2.5},{ox:0,oy:10,size:2}],
-        edges: [[0,1],[0,2],[1,3],[2,4],[3,5],[4,6],[1,7],[2,7],[7,5],[7,6]] },
-      { stars: [{ox:-35,oy:-35,size:2},{ox:0,oy:-50,size:3},{ox:35,oy:-35,size:2},{ox:50,oy:0,size:2.5},{ox:35,oy:35,size:2},{ox:0,oy:50,size:3},{ox:-35,oy:35,size:2},{ox:-50,oy:0,size:2.5}],
-        edges: [[0,1],[1,2],[2,3],[3,4],[4,5],[5,6],[6,7],[7,0]] },
-    ];
 
     const resize = () => {
       const w = window.innerWidth;
@@ -75,45 +40,66 @@ function SpaceBackground() {
       const w = window.innerWidth;
       const h = document.documentElement.scrollHeight;
 
-      const starCount = Math.min(Math.floor((w * h) / 2500), 600);
-      stars = [];
-      for (let i = 0; i < starCount; i++) {
-        const speed = Math.random() * 0.15 + 0.02;
+      const blobCount = Math.min(Math.floor((w * h) / 40000), 50);
+      blobs = [];
+      for (let i = 0; i < blobCount; i++) {
+        const speed = Math.random() * 0.2 + 0.05;
         const angle = Math.random() * Math.PI * 2;
-        const sz = Math.random();
-        stars.push({
+        blobs.push({
           x: Math.random() * w,
           y: Math.random() * h,
           vx: Math.cos(angle) * speed,
           vy: Math.sin(angle) * speed,
-          size: sz < 0.5 ? Math.random() * 1.8 + 0.5 : Math.random() * 3.5 + 1.5,
-          brightness: Math.random() * 0.45 + 0.2,
-          twinkleSpeed: Math.random() * 0.03 + 0.008,
-          twinklePhase: Math.random() * Math.PI * 2,
-          glow: sz > 0.5,
+          radius: Math.random() * 100 + 50,
+          opacity: Math.random() * 0.12 + 0.06,
+          phase: Math.random() * Math.PI * 2,
+          wobbleSpeed: Math.random() * 0.8 + 0.3,
+          wobbleAmp: Math.random() * 0.25 + 0.1,
+          points: Math.floor(Math.random() * 4) + 6,
+        });
+      }
+    };
+
+    const drawBlob = (b: Blob) => {
+      const breathe = Math.sin(time * 0.6 + b.phase) * 0.12 + 1;
+      const r = b.radius * breathe;
+
+      const pts: { x: number; y: number }[] = [];
+      for (let i = 0; i < b.points; i++) {
+        const a = (Math.PI * 2 / b.points) * i;
+        const wobble = Math.sin(time * b.wobbleSpeed + b.phase + i * 1.3) * b.wobbleAmp;
+        const dist = r * (1 + wobble);
+        pts.push({
+          x: b.x + Math.cos(a) * dist,
+          y: b.y + Math.sin(a) * dist,
         });
       }
 
-      const cCount = Math.min(Math.floor((w * h) / 60000), 40);
-      constellations = [];
-      for (let i = 0; i < cCount; i++) {
-        const pattern = constellationPatterns[Math.floor(Math.random() * constellationPatterns.length)];
-        const speed = Math.random() * 0.18 + 0.04;
-        const angle = Math.random() * Math.PI * 2;
-        constellations.push({
-          stars: pattern.stars.map(s => ({ ...s })),
-          edges: pattern.edges.map(e => [...e] as [number, number]),
-          x: Math.random() * w,
-          y: Math.random() * h,
-          vx: Math.cos(angle) * speed,
-          vy: Math.sin(angle) * speed,
-          rotation: Math.random() * Math.PI * 2,
-          rotSpeed: (Math.random() - 0.5) * 0.003,
-          scale: Math.random() * 1.8 + 0.9,
-          opacity: Math.random() * 0.25 + 0.25,
-          phase: Math.random() * Math.PI * 2,
-        });
+      ctx.beginPath();
+      ctx.moveTo(
+        (pts[pts.length - 1].x + pts[0].x) / 2,
+        (pts[pts.length - 1].y + pts[0].y) / 2
+      );
+      for (let i = 0; i < pts.length; i++) {
+        const next = pts[(i + 1) % pts.length];
+        ctx.quadraticCurveTo(pts[i].x, pts[i].y, (pts[i].x + next.x) / 2, (pts[i].y + next.y) / 2);
       }
+      ctx.closePath();
+
+      const grad = ctx.createRadialGradient(b.x, b.y, 0, b.x, b.y, r * 1.3);
+      grad.addColorStop(0, `rgba(160, 160, 175, ${b.opacity * 1.2})`);
+      grad.addColorStop(0.4, `rgba(150, 150, 168, ${b.opacity * 0.8})`);
+      grad.addColorStop(0.7, `rgba(140, 140, 158, ${b.opacity * 0.4})`);
+      grad.addColorStop(1, `rgba(130, 130, 148, 0)`);
+      ctx.fillStyle = grad;
+      ctx.fill();
+
+      const edgeGrad = ctx.createRadialGradient(b.x, b.y, r * 0.6, b.x, b.y, r * 1.1);
+      edgeGrad.addColorStop(0, `rgba(170, 170, 185, 0)`);
+      edgeGrad.addColorStop(0.7, `rgba(170, 170, 185, ${b.opacity * 0.3})`);
+      edgeGrad.addColorStop(1, `rgba(170, 170, 185, 0)`);
+      ctx.fillStyle = edgeGrad;
+      ctx.fill();
     };
 
     const draw = () => {
@@ -122,93 +108,15 @@ function SpaceBackground() {
       ctx.clearRect(0, 0, w, h);
       time += 0.016;
 
-      stars.forEach(s => {
-        s.x += s.vx;
-        s.y += s.vy;
-        if (s.x < -5) s.x = w + 5;
-        if (s.x > w + 5) s.x = -5;
-        if (s.y < -5) s.y = h + 5;
-        if (s.y > h + 5) s.y = -5;
-
-        const twinkle = Math.sin(time * s.twinkleSpeed * 60 + s.twinklePhase) * 0.4 + 0.6;
-        const alpha = s.brightness * twinkle;
-        ctx.beginPath();
-        ctx.fillStyle = `rgba(100, 105, 160, ${alpha})`;
-        ctx.arc(s.x, s.y, s.size, 0, Math.PI * 2);
-        ctx.fill();
-
-        if (s.glow) {
-          const gr = s.size * 5;
-          const grad = ctx.createRadialGradient(s.x, s.y, 0, s.x, s.y, gr);
-          grad.addColorStop(0, `rgba(100, 105, 160, ${alpha * 0.35})`);
-          grad.addColorStop(1, `rgba(100, 105, 160, 0)`);
-          ctx.beginPath();
-          ctx.fillStyle = grad;
-          ctx.arc(s.x, s.y, gr, 0, Math.PI * 2);
-          ctx.fill();
-        }
-      });
-
-      constellations.forEach(c => {
-        c.x += c.vx;
-        c.y += c.vy;
-        c.rotation += c.rotSpeed;
-        const margin = 80 * c.scale;
-        if (c.x < -margin) c.x = w + margin;
-        if (c.x > w + margin) c.x = -margin;
-        if (c.y < -margin) c.y = h + margin;
-        if (c.y > h + margin) c.y = -margin;
-
-        const pulse = Math.sin(time * 0.8 + c.phase) * 0.15 + 0.85;
-        const alpha = c.opacity * pulse;
-        const cos = Math.cos(c.rotation);
-        const sin = Math.sin(c.rotation);
-
-        const pts = c.stars.map(s => ({
-          x: c.x + (s.ox * cos - s.oy * sin) * c.scale,
-          y: c.y + (s.ox * sin + s.oy * cos) * c.scale,
-          size: s.size * c.scale,
-        }));
-
-        c.edges.forEach(([a, b]) => {
-          ctx.beginPath();
-          ctx.strokeStyle = `rgba(120, 125, 175, ${alpha * 0.7})`;
-          ctx.lineWidth = 1.5;
-          ctx.moveTo(pts[a].x, pts[a].y);
-          ctx.lineTo(pts[b].x, pts[b].y);
-          ctx.stroke();
-
-          const midX = (pts[a].x + pts[b].x) / 2;
-          const midY = (pts[a].y + pts[b].y) / 2;
-          const dx = pts[b].x - pts[a].x;
-          const dy = pts[b].y - pts[a].y;
-          const len = Math.sqrt(dx * dx + dy * dy);
-          if (len > 20) {
-            const dotProgress = ((time * 0.5 + c.phase + a * 0.7) % 1);
-            const dotX = pts[a].x + dx * dotProgress;
-            const dotY = pts[a].y + dy * dotProgress;
-            ctx.beginPath();
-            ctx.fillStyle = `rgba(130, 140, 200, ${alpha * 0.9})`;
-            ctx.arc(dotX, dotY, 1.8, 0, Math.PI * 2);
-            ctx.fill();
-          }
-        });
-
-        pts.forEach(p => {
-          ctx.beginPath();
-          ctx.fillStyle = `rgba(110, 115, 175, ${alpha})`;
-          ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-          ctx.fill();
-
-          const gr = p.size * 5;
-          const grad = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, gr);
-          grad.addColorStop(0, `rgba(110, 115, 175, ${alpha * 0.4})`);
-          grad.addColorStop(1, `rgba(110, 115, 175, 0)`);
-          ctx.beginPath();
-          ctx.fillStyle = grad;
-          ctx.arc(p.x, p.y, gr, 0, Math.PI * 2);
-          ctx.fill();
-        });
+      blobs.forEach(b => {
+        b.x += b.vx;
+        b.y += b.vy;
+        const margin = b.radius * 2;
+        if (b.x < -margin) b.x = w + margin;
+        if (b.x > w + margin) b.x = -margin;
+        if (b.y < -margin) b.y = h + margin;
+        if (b.y > h + margin) b.y = -margin;
+        drawBlob(b);
       });
 
       animationId = requestAnimationFrame(draw);
