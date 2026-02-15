@@ -319,7 +319,7 @@ export default function LandingPage() {
           >
             Know Exactly<br />Where You Stand<br />Before You Apply
           </h1>
-          <p className="text-[15px] sm:text-[17px] text-[#5a5a7a] leading-[1.8] max-w-[560px] mx-auto mb-10" style={{ textAlign: 'justify', textAlignLast: 'center' }}>
+          <p className="text-[13px] sm:text-[17px] text-[#5a5a7a] leading-[1.7] sm:leading-[1.8] max-w-[560px] mx-auto mb-10 text-justify-smart-center">
             MentXr&reg; runs your financial profile through real underwriting logic — the same criteria banks use to approve or deny you. Get your Capital Readiness Score, exposure ceiling, tier eligibility, and denial risk before you ever submit an application.
           </p>
 
@@ -375,7 +375,7 @@ export default function LandingPage() {
             ].map((item) => (
               <div key={item.num} className="flex gap-4 items-start p-5 rounded-xl bg-[#f8f8fc] border border-[#e0e0ea]">
                 <span className="text-[11px] font-mono text-[#8a8aa5] shrink-0 mt-0.5">{item.num}</span>
-                <p className="text-[13px] sm:text-[14px] text-[#5a5a7a] leading-[1.7]" style={{ textAlign: 'justify' }}>{item.text}</p>
+                <p className="text-[11px] sm:text-[14px] text-[#5a5a7a] leading-[1.6] sm:leading-[1.7] text-justify-smart">{item.text}</p>
               </div>
             ))}
           </div>
@@ -392,7 +392,7 @@ export default function LandingPage() {
           <h2 className="text-[26px] sm:text-[36px] md:text-[44px] leading-[0.9] mb-6 tracking-[-0.03em]" style={gradientText('180deg', 0.95, 0.55)}>
             AI-powered underwriting intelligence that tells you exactly what to fix — before you apply.
           </h2>
-          <p className="text-[15px] sm:text-[16px] text-[#6a6a8a] leading-[1.8] mb-12 max-w-[640px] mx-auto" style={{ textAlign: 'justify', textAlignLast: 'center' }}>
+          <p className="text-[12px] sm:text-[16px] text-[#6a6a8a] leading-[1.6] sm:leading-[1.8] mb-12 max-w-[640px] mx-auto text-justify-smart-center">
             MentXr® analyzes your credit report and bank statements using the same 6-component framework real lenders use. You get a Capital Readiness Score, tier placement, exposure ceiling, denial simulation, and a step-by-step action plan — all powered by AI.
           </p>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
@@ -435,7 +435,7 @@ export default function LandingPage() {
                   <span className="text-[13px] font-mono text-[#5a5a7a]">{item.step}</span>
                 </div>
                 <h3 className="text-[16px] sm:text-[18px] text-[#1a1a2e] font-medium mb-2">{item.title}</h3>
-                <p className="text-[13px] sm:text-[14px] text-[#3a3a5a] leading-[1.7]" style={{ textAlign: 'justify', textAlignLast: 'center' }}>{item.desc}</p>
+                <p className="text-[11px] sm:text-[14px] text-[#3a3a5a] leading-[1.6] sm:leading-[1.7] text-justify-smart-center">{item.desc}</p>
               </div>
             ))}
           </div>
@@ -467,7 +467,7 @@ export default function LandingPage() {
               <div key={item.title} className="p-5 sm:p-6 rounded-xl bg-[#f8f8fc] border border-[#e0e0ea] group hover:bg-[#f2f2f8] transition-colors">
                 <span className="text-[20px] text-[#8a8aa5] mb-4 block">{item.icon}</span>
                 <h3 className="text-[14px] sm:text-[15px] text-[#1a1a2e] font-medium mb-2">{item.title}</h3>
-                <p className="text-[12px] sm:text-[13px] text-[#3a3a5a] leading-[1.7]" style={{ textAlign: 'justify' }}>{item.desc}</p>
+                <p className="text-[11px] sm:text-[13px] text-[#3a3a5a] leading-[1.6] sm:leading-[1.7] text-justify-smart">{item.desc}</p>
               </div>
             ))}
           </div>
@@ -506,7 +506,7 @@ export default function LandingPage() {
               { name: "David L.", role: "SaaS Startup CEO", quote: "MentXr showed me I was Mid-Tier when I thought I was Prime. After following the repair plan, I moved up and saved 4% on rates." },
             ].map((t) => (
               <div key={t.name} className="p-6 rounded-xl bg-[#f8f8fc] border border-[#e0e0ea]">
-                <p className="text-[13px] text-[#6a6a8a] leading-[1.8] mb-5 italic" style={{ textAlign: 'justify' }}>"{t.quote}"</p>
+                <p className="text-[11px] sm:text-[13px] text-[#6a6a8a] leading-[1.6] sm:leading-[1.8] mb-5 italic text-justify-smart">"{t.quote}"</p>
                 <div>
                   <p className="text-[13px] text-[#3a3a5a] font-medium">{t.name}</p>
                   <p className="text-[11px] text-[#8a8aa5]">{t.role}</p>
@@ -527,7 +527,7 @@ export default function LandingPage() {
           <h2 className="text-[26px] sm:text-[36px] md:text-[44px] leading-[0.9] mb-6 tracking-[-0.03em]" style={gradientText('180deg', 0.95, 0.55)}>
             Stop applying blind. Start applying ready.
           </h2>
-          <p className="text-[15px] text-[#6a6a8a] leading-[1.8] mb-12 max-w-[600px] mx-auto" style={{ textAlign: 'justify', textAlignLast: 'center' }}>
+          <p className="text-[12px] sm:text-[15px] text-[#6a6a8a] leading-[1.6] sm:leading-[1.8] mb-12 max-w-[600px] mx-auto text-justify-smart-center">
             Every denied application costs you: hard inquiries, wasted time, damaged confidence. MentXr eliminates the guesswork by showing you exactly what a lender sees — before you ever submit.
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
@@ -579,7 +579,7 @@ export default function LandingPage() {
                   <span className="text-[14px] sm:text-[15px] text-[#3a3a5a] font-medium">{c.name}</span>
                 </div>
                 <span className="text-[12px] font-mono text-[#3a3a5a] sm:w-[80px] shrink-0" style={{ fontFamily: "'JetBrains Mono', monospace" }}>{c.weight}</span>
-                <p className="text-[12px] sm:text-[13px] text-[#8a8aa5] leading-[1.6]" style={{ textAlign: 'justify' }}>{c.desc}</p>
+                <p className="text-[10px] sm:text-[13px] text-[#8a8aa5] leading-[1.5] sm:leading-[1.6] text-justify-smart">{c.desc}</p>
               </div>
             ))}
           </div>
@@ -609,7 +609,7 @@ export default function LandingPage() {
                 <span className="text-[11px] tracking-[0.15em] uppercase text-[#6a6a8a]">Pre-Funding Mode</span>
               </div>
               <h3 className="text-[20px] sm:text-[24px] text-[#1a1a2e] font-light mb-4 tracking-[-0.02em]">Score 60+</h3>
-              <p className="text-[13px] text-[#3a3a5a] leading-[1.8] mb-6" style={{ textAlign: 'justify' }}>
+              <p className="text-[11px] sm:text-[13px] text-[#3a3a5a] leading-[1.6] sm:leading-[1.8] mb-6 text-justify-smart">
                 You're fundable. This mode focuses on optimization — maximizing your ceiling, refining your tier placement, and identifying the best products for your profile.
               </p>
               <ul className="space-y-2.5">
@@ -626,7 +626,7 @@ export default function LandingPage() {
                 <span className="text-[11px] tracking-[0.15em] uppercase text-[#6a6a8a]">Repair Mode</span>
               </div>
               <h3 className="text-[20px] sm:text-[24px] text-[#1a1a2e] font-light mb-4 tracking-[-0.02em]">Score &lt;60</h3>
-              <p className="text-[13px] text-[#3a3a5a] leading-[1.8] mb-6" style={{ textAlign: 'justify' }}>
+              <p className="text-[11px] sm:text-[13px] text-[#3a3a5a] leading-[1.6] sm:leading-[1.8] mb-6 text-justify-smart">
                 You need work before applying. This mode focuses on fixing issues — dispute letters, payment optimization, structure corrections, and timeline to fundability.
               </p>
               <ul className="space-y-2.5">
@@ -661,7 +661,7 @@ export default function LandingPage() {
                 <span className="text-[10px] font-mono text-[#8a8aa5] tracking-wider uppercase">{t.tier}</span>
                 <h3 className="text-[18px] sm:text-[20px] text-[#1a1a2e] font-medium mt-2 mb-1">{t.name}</h3>
                 <p className="text-[13px] font-mono text-[#6a6a8a] mb-5" style={{ fontFamily: "'JetBrains Mono', monospace" }}>Score: {t.score}</p>
-                <p className="text-[12px] text-[#8a8aa5] leading-[1.7]" style={{ textAlign: 'justify' }}>{t.products}</p>
+                <p className="text-[10px] sm:text-[12px] text-[#8a8aa5] leading-[1.5] sm:leading-[1.7] text-justify-smart">{t.products}</p>
               </div>
             ))}
           </div>
@@ -692,7 +692,7 @@ export default function LandingPage() {
                 </div>
                 <div>
                   <h3 className="text-[15px] text-[#1a1a2e] font-medium mb-2">{step.title}</h3>
-                  <p className="text-[13px] text-[#3a3a5a] leading-[1.7]" style={{ textAlign: 'justify' }}>{step.detail}</p>
+                  <p className="text-[11px] sm:text-[13px] text-[#3a3a5a] leading-[1.6] sm:leading-[1.7] text-justify-smart">{step.detail}</p>
                 </div>
               </div>
             ))}
@@ -723,7 +723,7 @@ export default function LandingPage() {
                 </button>
                 {openFaq === i && (
                   <div className="pb-5">
-                    <p className="text-[13px] text-[#3a3a5a] leading-[1.8]" style={{ textAlign: 'justify' }}>{item.a}</p>
+                    <p className="text-[11px] sm:text-[13px] text-[#3a3a5a] leading-[1.6] sm:leading-[1.8] text-justify-smart">{item.a}</p>
                   </div>
                 )}
               </div>
@@ -752,7 +752,7 @@ export default function LandingPage() {
               <div key={item.title} className="p-5 rounded-xl bg-[#f8f8fc] border border-[#e0e0ea]">
                 <span className="text-[18px] text-[#8a8aa5] mb-3 block">{item.icon}</span>
                 <h3 className="text-[13px] text-[#3a3a5a] font-medium mb-1.5">{item.title}</h3>
-                <p className="text-[11px] text-[#8a8aa5] leading-[1.6]" style={{ textAlign: 'justify' }}>{item.desc}</p>
+                <p className="text-[10px] sm:text-[11px] text-[#8a8aa5] leading-[1.5] sm:leading-[1.6] text-justify-smart">{item.desc}</p>
               </div>
             ))}
           </div>
@@ -772,7 +772,7 @@ export default function LandingPage() {
           >
             Stop guessing.<br />Start knowing.
           </h2>
-          <p className="text-[15px] text-[#6a6a8a] leading-[1.8] mb-10 max-w-[480px] mx-auto" style={{ textAlign: 'justify', textAlignLast: 'center' }}>
+          <p className="text-[12px] sm:text-[15px] text-[#6a6a8a] leading-[1.6] sm:leading-[1.8] mb-10 max-w-[480px] mx-auto text-justify-smart-center">
             Get your Capital Readiness Score, tier eligibility, exposure ceiling, and denial simulation. Subscribe today and unlock the full platform.
           </p>
           <form onSubmit={handleLogin} className="w-full max-w-[440px] mx-auto mb-6">

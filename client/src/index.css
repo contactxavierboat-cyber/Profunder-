@@ -37,6 +37,38 @@ section[id] {
   animation: bounce-slow 2s ease-in-out infinite;
 }
 
+.text-justify-smart {
+  text-align: left;
+  word-spacing: normal;
+  hyphens: auto;
+  -webkit-hyphens: auto;
+}
+
+@media (min-width: 640px) {
+  .text-justify-smart {
+    text-align: justify;
+    word-spacing: -0.02em;
+    text-justify: inter-word;
+  }
+}
+
+.text-justify-smart-center {
+  text-align: left;
+  word-spacing: normal;
+  hyphens: auto;
+  -webkit-hyphens: auto;
+  text-align-last: left;
+}
+
+@media (min-width: 640px) {
+  .text-justify-smart-center {
+    text-align: justify;
+    word-spacing: -0.02em;
+    text-justify: inter-word;
+    text-align-last: center;
+  }
+}
+
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
