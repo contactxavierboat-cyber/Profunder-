@@ -344,7 +344,7 @@ export default function LandingPage() {
               { num: "03", text: "Hidden risk signals silently kill your application before a human reviews it" },
               { num: "04", text: "Every denial leaves an inquiry on your report, making the next application harder" },
             ].map((item) => (
-              <div key={item.num} className="flex gap-4 items-start p-5 rounded-xl bg-white border border-[#E5E7EB] shadow-sm">
+              <div key={item.num} className="flex gap-4 items-start p-5 rounded-xl bg-white/90 backdrop-blur-xl border border-[#E5E7EB] shadow-sm">
                 <span className="text-[11px] font-mono text-[#999] shrink-0 mt-0.5">{item.num}</span>
                 <p className="text-[13px] sm:text-[14px] text-[#666] leading-[1.7]">{item.text}</p>
               </div>
@@ -373,7 +373,7 @@ export default function LandingPage() {
               { label: "AI Mentor Chat", val: "7 Bots" },
               { label: "Credit Repair", val: "Auto Letters" },
             ].map((item) => (
-              <div key={item.label} className="p-4 sm:p-5 rounded-xl bg-white border border-[#E5E7EB] shadow-sm">
+              <div key={item.label} className="p-4 sm:p-5 rounded-xl bg-white/90 backdrop-blur-xl border border-[#E5E7EB] shadow-sm">
                 <p className="text-[20px] sm:text-[24px] font-mono text-[#333] mb-2" style={{ fontFamily: "'JetBrains Mono', monospace" }}>{item.val}</p>
                 <p className="text-[11px] text-[#999] tracking-wide uppercase">{item.label}</p>
               </div>
@@ -431,7 +431,7 @@ export default function LandingPage() {
               { icon: "◐", title: "Risk Signal Detection", desc: "Identifies liens, judgments, utilization spikes, and velocity flags" },
               { icon: "⬢", title: "Personalized Next Steps", desc: "AI-generated action plan prioritized by impact on your fundability" },
             ].map((item) => (
-              <div key={item.title} className="p-5 sm:p-6 rounded-xl bg-white border border-[#E5E7EB] shadow-sm group hover:shadow-md transition-shadow">
+              <div key={item.title} className="p-5 sm:p-6 rounded-xl bg-white/90 backdrop-blur-xl border border-[#E5E7EB] shadow-sm group hover:shadow-md transition-shadow">
                 <span className="text-[20px] text-[#999] mb-4 block">{item.icon}</span>
                 <h3 className="text-[14px] sm:text-[15px] text-[#333] font-medium mb-2">{item.title}</h3>
                 <p className="text-[12px] sm:text-[13px] text-[#666] leading-[1.7]">{item.desc}</p>
@@ -457,7 +457,7 @@ export default function LandingPage() {
               { val: "89%", label: "Approval Rate" },
               { val: "6.2x", label: "Avg Score Improvement" },
             ].map((s) => (
-              <div key={s.label} className="text-center p-5 rounded-xl bg-white border border-[#E5E7EB] shadow-sm">
+              <div key={s.label} className="text-center p-5 rounded-xl bg-white/90 backdrop-blur-xl border border-[#E5E7EB] shadow-sm">
                 <p className="text-[24px] sm:text-[30px] font-mono text-[#333] mb-1" style={{ fontFamily: "'JetBrains Mono', monospace" }}>{s.val}</p>
                 <p className="text-[10px] sm:text-[11px] text-[#999] tracking-wide uppercase">{s.label}</p>
               </div>
@@ -470,7 +470,7 @@ export default function LandingPage() {
               { name: "Aisha K.", role: "Real Estate Investor", quote: "The denial simulation caught 3 triggers I didn't know existed. Fixed them all before applying — approved same week." },
               { name: "David L.", role: "SaaS Startup CEO", quote: "MentXr showed me I was Mid-Tier when I thought I was Prime. After following the repair plan, I moved up and saved 4% on rates." },
             ].map((t) => (
-              <div key={t.name} className="p-6 rounded-xl bg-white border border-[#E5E7EB] shadow-sm">
+              <div key={t.name} className="p-6 rounded-xl bg-white/90 backdrop-blur-xl border border-[#E5E7EB] shadow-sm">
                 <p className="text-[13px] text-[#666] leading-[1.8] mb-5 italic">"{t.quote}"</p>
                 <div>
                   <p className="text-[13px] text-[#333] font-medium">{t.name}</p>
@@ -535,7 +535,7 @@ export default function LandingPage() {
               { name: "Liquidity & Leverage", weight: "0–15 pts", desc: "Debt-to-income, current ratio, available credit, existing obligations" },
               { name: "Risk Signals", weight: "0–15 pts", desc: "Liens, judgments, NSFs, velocity flags, recent inquiries, collections" },
             ].map((c) => (
-              <div key={c.name} className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-6 p-5 rounded-xl bg-white border border-[#E5E7EB] shadow-sm">
+              <div key={c.name} className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-6 p-5 rounded-xl bg-white/90 backdrop-blur-xl border border-[#E5E7EB] shadow-sm">
                 <div className="flex items-center gap-4 sm:w-[200px] shrink-0">
                   <span className="text-[14px] sm:text-[15px] text-[#333] font-medium">{c.name}</span>
                 </div>
@@ -562,7 +562,7 @@ export default function LandingPage() {
             Two modes. One goal: get you funded.
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-            <div className="p-6 sm:p-8 rounded-xl bg-white border border-[#E5E7EB] shadow-sm">
+            <div className="p-6 sm:p-8 rounded-xl bg-white/90 backdrop-blur-xl border border-[#E5E7EB] shadow-sm">
               <div className="flex items-center gap-3 mb-6">
                 <div className="w-3 h-3 rounded-full bg-[#2E7D32]"></div>
                 <span className="text-[11px] tracking-[0.15em] uppercase text-[#666]">Pre-Funding Mode</span>
@@ -579,7 +579,7 @@ export default function LandingPage() {
                 ))}
               </ul>
             </div>
-            <div className="p-6 sm:p-8 rounded-xl bg-white border border-[#E5E7EB] shadow-sm">
+            <div className="p-6 sm:p-8 rounded-xl bg-white/90 backdrop-blur-xl border border-[#E5E7EB] shadow-sm">
               <div className="flex items-center gap-3 mb-6">
                 <div className="w-3 h-3 rounded-full bg-[#DEE2E6] border border-[#999]"></div>
                 <span className="text-[11px] tracking-[0.15em] uppercase text-[#666]">Repair Mode</span>
@@ -700,7 +700,7 @@ export default function LandingPage() {
               { icon: "◇", title: "Compliant", desc: "FCRA-aligned analysis and dispute letter generation" },
               { icon: "▣", title: "No Credit Pull", desc: "We analyze your uploaded reports — zero impact on your score" },
             ].map((item) => (
-              <div key={item.title} className="p-5 rounded-xl bg-white border border-[#E5E7EB] shadow-sm">
+              <div key={item.title} className="p-5 rounded-xl bg-white/90 backdrop-blur-xl border border-[#E5E7EB] shadow-sm">
                 <span className="text-[18px] text-[#999] mb-3 block">{item.icon}</span>
                 <h3 className="text-[13px] text-[#333] font-medium mb-1.5">{item.title}</h3>
                 <p className="text-[11px] text-[#999] leading-[1.6]">{item.desc}</p>

@@ -33,7 +33,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
       )}
 
       <aside className={cn(
-        "w-64 border-r border-[#E5E7EB] bg-[#F8F9FA] flex flex-col fixed h-full z-40 transition-transform duration-200 ease-out",
+        "w-64 border-r border-[#E5E7EB] bg-[#F8F9FA]/90 backdrop-blur-xl flex flex-col fixed h-full z-40 transition-transform duration-200 ease-out",
         mobileOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0",
         "md:flex",
         !mobileOpen && "hidden md:flex"
