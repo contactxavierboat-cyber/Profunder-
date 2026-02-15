@@ -218,6 +218,8 @@ export default function DashboardPage() {
   const [creatorAiLoading, setCreatorAiLoading] = useState(false);
   const [creatorAiMessages, setCreatorAiMessages] = useState<{role: "user" | "assistant"; content: string}[]>([]);
   const [creatorAiUploading, setCreatorAiUploading] = useState(false);
+  const [creatorMatchLoading, setCreatorMatchLoading] = useState(false);
+  const [creatorMatchResults, setCreatorMatchResults] = useState<{mode: string; summary: string; searches: any[]; creators: any[]} | null>(null);
   const shortsContainerRef = useRef<HTMLDivElement>(null);
 
   const [dmFriendId, setDmFriendId] = useState<number | null>(null);
@@ -1809,23 +1811,23 @@ export default function DashboardPage() {
             </div>
           ) : activeTab === "creatorai" ? (
             <div className="w-full h-full flex flex-col" style={{ background: 'transparent' }}>
-              <div className="flex-1 overflow-y-auto px-5 sm:px-8 py-6 max-w-[800px] mx-auto w-full">
-                <div className="flex items-center gap-3 mb-6">
+              <div className="flex-1 overflow-y-auto px-5 sm:px-8 py-6 max-w-[900px] mx-auto w-full">
+                <div className="flex items-center gap-3 mb-2">
                   <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-600 to-blue-600 flex items-center justify-center">
-                    <Sparkles className="w-5 h-5 text-[#1a1a2e]" />
+                    <Sparkles className="w-5 h-5 text-white" />
                   </div>
                   <div>
                     <h2 className="text-lg font-bold text-[#1a1a2e]" data-testid="text-creator-ai-title">Creator Connect</h2>
-                    <p className="text-[11px] text-[#1a1a2e]/75">AI-powered insights from 75+ top finance creators</p>
+                    <p className="text-[11px] text-[#1a1a2e]/70">We connect you with the best YouTube creators for your situation — whether you need credit repair or funding guidance</p>
                   </div>
                 </div>
 
                 <div className="bg-white/50 border border-white/30 rounded-xl p-4 mb-6">
-                  <div className="flex items-center gap-2 mb-3">
-                    <Upload className="w-4 h-4 text-purple-400" />
-                    <span className="text-sm font-medium text-[#1a1a2e]">Upload Credit Report</span>
+                  <div className="flex items-center gap-2 mb-2">
+                    <Upload className="w-4 h-4 text-purple-500" />
+                    <span className="text-sm font-semibold text-[#1a1a2e]">Step 1: Upload Your Credit Report</span>
                   </div>
-                  <p className="text-[11px] text-[#1a1a2e]/70 mb-3">Upload your credit report so the AI can give personalized creator-informed guidance based on your actual data.</p>
+                  <p className="text-[11px] text-[#1a1a2e]/65 mb-3">Upload your report and our AI will analyze your situation, then search all of YouTube to find the best creators to help you — whether that's credit repair experts or funding strategists.</p>
                   <div className="flex gap-2">
                     <label className="flex-1">
                       <input
@@ -1859,7 +1861,7 @@ export default function DashboardPage() {
                               body: JSON.stringify({ fileContent, documentType: "credit_report" }),
                             });
                             if (res.ok) {
-                              toast({ title: "Report Uploaded", description: "Your credit report has been analyzed. Ask questions below for creator-informed insights." });
+                              toast({ title: "Report Analyzed", description: "Now click 'Find My Creators' to get matched with the best YouTube creators for your situation." });
                               await fetchFundingReadiness();
                             } else {
                               const data = await res.json();
@@ -1878,81 +1880,261 @@ export default function DashboardPage() {
                         creatorAiUploading && "opacity-50 pointer-events-none"
                       )}>
                         {creatorAiUploading ? (
-                          <><Loader2 className="w-4 h-4 animate-spin text-purple-400" /><span className="text-xs text-purple-300">Analyzing...</span></>
+                          <><Loader2 className="w-4 h-4 animate-spin text-purple-500" /><span className="text-xs text-purple-600">Analyzing your report...</span></>
                         ) : (
-                          <><FileText className="w-4 h-4 text-purple-400" /><span className="text-xs text-purple-300">Choose Credit Report (PDF/TXT)</span></>
+                          <><FileText className="w-4 h-4 text-purple-500" /><span className="text-xs text-purple-600">Choose Credit Report (PDF/TXT)</span></>
                         )}
                       </div>
                     </label>
                   </div>
                   {user?.hasCreditReport && (
                     <div className="mt-2 flex items-center gap-1.5">
-                      <CheckCircle2 className="w-3.5 h-3.5 text-green-400" />
-                      <span className="text-[11px] text-green-400/70">Credit report on file — AI will use your data</span>
+                      <CheckCircle2 className="w-3.5 h-3.5 text-green-500" />
+                      <span className="text-[11px] text-green-600">Credit report on file</span>
                     </div>
                   )}
                 </div>
 
-                <div className="space-y-4 mb-4">
-                  {creatorAiMessages.length === 0 && (
-                    <div className="flex flex-col items-center justify-center py-12 text-center">
-                      <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-purple-500/15 to-blue-500/15 flex items-center justify-center mb-4 border border-purple-400/15">
-                        <Sparkles className="w-7 h-7 text-purple-400/60" />
-                      </div>
-                      <p className="text-sm text-[#1a1a2e]/80 mb-2">Ask any financial question</p>
-                      <p className="text-[11px] text-[#1a1a2e]/60 max-w-sm leading-relaxed">The AI will aggregate perspectives from top creators like Graham Stephan, Dave Ramsey, Alex Hormozi, Credit Shifu, and 70+ more — synthesizing their publicly known frameworks into personalized guidance.</p>
-                      <div className="flex flex-wrap justify-center gap-2 mt-4">
-                        {["How should I improve my credit score?", "What's the best way to build business credit?", "How do I prepare for funding?", "What would top creators say about my report?"].map((q) => (
-                          <button
-                            key={q}
-                            onClick={() => setCreatorAiInput(q)}
-                            className="px-3 py-1.5 rounded-full bg-white/60 border border-white/30 text-[10px] text-[#1a1a2e]/75 hover:bg-purple-500/10 hover:border-purple-400/20 hover:text-purple-300 transition-all"
-                            data-testid={`creator-ai-suggestion-${q.slice(0,20)}`}
-                          >
-                            {q}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  )}
+                <div className="bg-white/50 border border-white/30 rounded-xl p-4 mb-6">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Search className="w-4 h-4 text-purple-500" />
+                    <span className="text-sm font-semibold text-[#1a1a2e]">Step 2: Find Your Best-Fit Creators</span>
+                  </div>
+                  <p className="text-[11px] text-[#1a1a2e]/65 mb-3">AI analyzes your credit profile, determines if you need repair or funding help, then searches all of YouTube to find the creators who specialize in exactly what you need.</p>
+                  <button
+                    onClick={async () => {
+                      setCreatorMatchLoading(true);
+                      setCreatorMatchResults(null);
+                      try {
+                        const resp = await fetch("/api/creator-match", {
+                          method: "POST",
+                          headers: { "Content-Type": "application/json" },
+                          credentials: "include",
+                        });
+                        const data = await resp.json();
+                        if (!resp.ok) throw new Error(data.error || "Failed");
+                        setCreatorMatchResults(data);
+                      } catch (err: any) {
+                        toast({ title: "Match Error", description: err.message || "Could not find creators.", variant: "destructive" });
+                      } finally {
+                        setCreatorMatchLoading(false);
+                      }
+                    }}
+                    disabled={creatorMatchLoading}
+                    className="w-full py-3 rounded-xl bg-gradient-to-r from-purple-600 to-blue-600 text-white text-sm font-semibold disabled:opacity-50 hover:from-purple-500 hover:to-blue-500 transition-all flex items-center justify-center gap-2"
+                    data-testid="creator-match-btn"
+                  >
+                    {creatorMatchLoading ? (
+                      <><Loader2 className="w-4 h-4 animate-spin" /> Searching all of YouTube...</>
+                    ) : (
+                      <><Sparkles className="w-4 h-4" /> Find My Creators</>
+                    )}
+                  </button>
+                </div>
 
-                  {creatorAiMessages.map((msg, idx) => (
-                    <div key={idx} className={cn("flex", msg.role === "user" ? "justify-end" : "justify-start")}>
-                      <div className={cn(
-                        "max-w-[85%] rounded-xl px-4 py-3",
-                        msg.role === "user"
-                          ? "bg-purple-600/20 border border-purple-400/20 text-[#1a1a2e]"
-                          : "bg-white/60 border border-white/30 text-[#1a1a2e]"
-                      )}>
-                        {msg.role === "assistant" && (
-                          <div className="flex items-center gap-1.5 mb-2 text-[10px] text-purple-300/60">
-                            <Sparkles className="w-3 h-3" />
-                            Creator-Informed Insight
-                          </div>
+                {creatorMatchResults && (
+                  <div className="space-y-4 mb-6">
+                    <div className={cn(
+                      "rounded-xl p-4 border",
+                      creatorMatchResults.mode === "repair"
+                        ? "bg-orange-50/80 border-orange-200/50"
+                        : "bg-emerald-50/80 border-emerald-200/50"
+                    )}>
+                      <div className="flex items-center gap-2 mb-2">
+                        {creatorMatchResults.mode === "repair" ? (
+                          <AlertTriangle className="w-4 h-4 text-orange-500" />
+                        ) : (
+                          <TrendingUp className="w-4 h-4 text-emerald-500" />
                         )}
-                        <div className="text-[13px] leading-relaxed whitespace-pre-wrap" data-testid={`creator-ai-msg-${idx}`}>{msg.content}</div>
+                        <span className={cn("text-sm font-bold", creatorMatchResults.mode === "repair" ? "text-orange-700" : "text-emerald-700")}>
+                          {creatorMatchResults.mode === "repair" ? "Credit Repair Mode" : "Funding Ready Mode"}
+                        </span>
                       </div>
+                      <p className="text-[12px] leading-relaxed text-[#1a1a2e]/80">{creatorMatchResults.summary}</p>
                     </div>
-                  ))}
 
-                  {creatorAiLoading && (
-                    <div className="flex justify-start">
-                      <div className="bg-white/60 border border-white/30 rounded-xl px-4 py-3 flex items-center gap-2">
-                        <Loader2 className="w-4 h-4 animate-spin text-purple-400" />
-                        <span className="text-xs text-[#1a1a2e]/75">Aggregating creator insights...</span>
-                      </div>
+                    <div className="flex items-center gap-2 mb-1">
+                      <Play className="w-4 h-4 text-red-500" />
+                      <h3 className="text-sm font-bold text-[#1a1a2e]">Your Best-Fit YouTube Creators</h3>
+                      <span className="text-[10px] text-[#1a1a2e]/50 ml-auto">{(creatorMatchResults.creators || []).length} creators found</span>
                     </div>
-                  )}
-                </div>
+
+                    {(!creatorMatchResults.creators || creatorMatchResults.creators.length === 0) ? (
+                      <div className="bg-white/50 border border-white/30 rounded-xl p-6 text-center">
+                        <p className="text-sm text-[#1a1a2e]/70">No YouTube creators found. Try uploading your credit report first so the AI can search more accurately.</p>
+                      </div>
+                    ) : (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      {creatorMatchResults.creators.map((creator: any, idx: number) => (
+                        <div key={creator.channelId || idx} className="bg-white/70 backdrop-blur-sm border border-white/40 rounded-xl p-4 hover:shadow-md transition-all" data-testid={`creator-card-${idx}`}>
+                          <div className="flex items-start gap-3">
+                            {creator.thumbnail ? (
+                              <img src={creator.thumbnail} alt={creator.title} className="w-12 h-12 rounded-full object-cover border-2 border-white shadow-sm shrink-0" />
+                            ) : (
+                              <div className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-400 to-blue-400 flex items-center justify-center text-white font-bold text-sm shrink-0">
+                                {(creator.title || "?")[0]}
+                              </div>
+                            )}
+                            <div className="flex-1 min-w-0">
+                              <h4 className="text-[13px] font-bold text-[#1a1a2e] truncate">{creator.title}</h4>
+                              {creator.subscriberCount && (
+                                <p className="text-[10px] text-[#1a1a2e]/55 mt-0.5">
+                                  {creator.subscriberCount >= 1000000
+                                    ? `${(creator.subscriberCount / 1000000).toFixed(1)}M subscribers`
+                                    : creator.subscriberCount >= 1000
+                                      ? `${(creator.subscriberCount / 1000).toFixed(0)}K subscribers`
+                                      : `${creator.subscriberCount} subscribers`}
+                                  {creator.videoCount ? ` · ${creator.videoCount.toLocaleString()} videos` : ""}
+                                </p>
+                              )}
+                            </div>
+                          </div>
+                          <p className="text-[11px] text-[#1a1a2e]/60 mt-2 line-clamp-2 leading-relaxed">{creator.description || "YouTube creator"}</p>
+                          {creator.matchReason && (
+                            <p className="text-[10px] text-purple-600/80 mt-1.5 flex items-center gap-1">
+                              <Sparkles className="w-3 h-3 shrink-0" />
+                              <span className="line-clamp-1">{creator.matchReason}</span>
+                            </p>
+                          )}
+                          <div className="flex items-center gap-2 mt-3">
+                            <a
+                              href={creator.customUrl ? `https://www.youtube.com/${creator.customUrl}` : creator.channelUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-500/10 border border-red-300/30 text-red-600 text-[11px] font-medium hover:bg-red-500/20 transition-colors"
+                              data-testid={`creator-yt-link-${idx}`}
+                            >
+                              <Play className="w-3 h-3" /> YouTube
+                            </a>
+                            <a
+                              href={creator.customUrl ? `https://www.youtube.com/${creator.customUrl}/about` : `${creator.channelUrl}/about`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-500/10 border border-blue-300/30 text-blue-600 text-[11px] font-medium hover:bg-blue-500/20 transition-colors"
+                              data-testid={`creator-about-link-${idx}`}
+                            >
+                              <ExternalLink className="w-3 h-3" /> Contact
+                            </a>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                    )}
+                  </div>
+                )}
+
+                {creatorMatchResults && (
+                  <button
+                    onClick={() => setCreatorMatchResults(null)}
+                    className="mt-2 mb-4 text-[11px] text-purple-500 hover:text-purple-700 underline transition-colors"
+                    data-testid="creator-match-back"
+                  >
+                    Back to Q&A
+                  </button>
+                )}
+
+                {!creatorMatchResults && !creatorMatchLoading && (
+                  <>
+                    <div className="border-t border-white/20 pt-5 mb-4">
+                      <div className="flex items-center gap-2 mb-3">
+                        <MessageCircle className="w-4 h-4 text-purple-500" />
+                        <span className="text-sm font-semibold text-[#1a1a2e]">Ask Creator-Informed Questions</span>
+                      </div>
+                      <p className="text-[11px] text-[#1a1a2e]/60 mb-3">Or ask any financial question — AI draws from 75+ top YouTube creators' frameworks to give you personalized guidance.</p>
+                    </div>
+
+                    <div className="space-y-4 mb-4">
+                      {creatorAiMessages.length === 0 && (
+                        <div className="flex flex-col items-center justify-center py-8 text-center">
+                          <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-purple-500/15 to-blue-500/15 flex items-center justify-center mb-3 border border-purple-400/15">
+                            <Sparkles className="w-6 h-6 text-purple-400/60" />
+                          </div>
+                          <p className="text-sm text-[#1a1a2e]/80 mb-1">Ask any financial question</p>
+                          <p className="text-[11px] text-[#1a1a2e]/55 max-w-sm leading-relaxed">AI aggregates perspectives from Graham Stephan, Dave Ramsey, Alex Hormozi, Credit Shifu and 70+ more creators.</p>
+                          <div className="flex flex-wrap justify-center gap-2 mt-3">
+                            {["How should I improve my credit score?", "What's the best way to build business credit?", "How do I prepare for funding?", "What would top creators say about my report?"].map((q) => (
+                              <button
+                                key={q}
+                                onClick={() => setCreatorAiInput(q)}
+                                className="px-3 py-1.5 rounded-full bg-white/60 border border-white/30 text-[10px] text-[#1a1a2e]/70 hover:bg-purple-500/10 hover:border-purple-400/20 hover:text-purple-600 transition-all"
+                                data-testid={`creator-ai-suggestion-${q.slice(0,20)}`}
+                              >
+                                {q}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {creatorAiMessages.map((msg, idx) => (
+                        <div key={idx} className={cn("flex", msg.role === "user" ? "justify-end" : "justify-start")}>
+                          <div className={cn(
+                            "max-w-[85%] rounded-xl px-4 py-3",
+                            msg.role === "user"
+                              ? "bg-purple-600/15 border border-purple-400/20 text-[#1a1a2e]"
+                              : "bg-white/60 border border-white/30 text-[#1a1a2e]"
+                          )}>
+                            {msg.role === "assistant" && (
+                              <div className="flex items-center gap-1.5 mb-2 text-[10px] text-purple-500/60">
+                                <Sparkles className="w-3 h-3" />
+                                Creator-Informed Insight
+                              </div>
+                            )}
+                            <div className="text-[13px] leading-relaxed whitespace-pre-wrap" data-testid={`creator-ai-msg-${idx}`}>{msg.content}</div>
+                          </div>
+                        </div>
+                      ))}
+
+                      {creatorAiLoading && (
+                        <div className="flex justify-start">
+                          <div className="bg-white/60 border border-white/30 rounded-xl px-4 py-3 flex items-center gap-2">
+                            <Loader2 className="w-4 h-4 animate-spin text-purple-500" />
+                            <span className="text-xs text-[#1a1a2e]/70">Aggregating creator insights...</span>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </>
+                )}
               </div>
 
-              <div className="px-5 sm:px-8 py-4 border-t border-white/30 max-w-[800px] mx-auto w-full">
-                <div className="flex gap-2">
-                  <input
-                    value={creatorAiInput}
-                    onChange={(e) => setCreatorAiInput(e.target.value)}
-                    onKeyDown={async (e) => {
-                      if (e.key === "Enter" && creatorAiInput.trim() && !creatorAiLoading) {
+              {!creatorMatchResults && (
+                <div className="px-5 sm:px-8 py-4 border-t border-white/30 max-w-[900px] mx-auto w-full">
+                  <div className="flex gap-2">
+                    <input
+                      value={creatorAiInput}
+                      onChange={(e) => setCreatorAiInput(e.target.value)}
+                      onKeyDown={async (e) => {
+                        if (e.key === "Enter" && creatorAiInput.trim() && !creatorAiLoading) {
+                          const question = creatorAiInput.trim();
+                          setCreatorAiMessages(prev => [...prev, { role: "user", content: question }]);
+                          setCreatorAiInput("");
+                          setCreatorAiLoading(true);
+                          try {
+                            const resp = await fetch("/api/creator-insight", {
+                              method: "POST",
+                              headers: { "Content-Type": "application/json" },
+                              credentials: "include",
+                              body: JSON.stringify({ question }),
+                            });
+                            const data = await resp.json();
+                            if (!resp.ok) throw new Error(data.error || "Failed");
+                            setCreatorAiMessages(prev => [...prev, { role: "assistant", content: data.answer }]);
+                          } catch (err: any) {
+                            setCreatorAiMessages(prev => [...prev, { role: "assistant", content: "Error: " + (err.message || "Could not get insight.") }]);
+                          } finally {
+                            setCreatorAiLoading(false);
+                          }
+                        }
+                      }}
+                      placeholder="Ask any financial question — AI aggregates 75+ creator perspectives..."
+                      className="flex-1 bg-white/60 border border-white/30 rounded-xl px-4 py-3 text-sm text-[#1a1a2e] placeholder:text-[#8a8aa5]/50 focus:outline-none focus:border-purple-400/40 transition-colors"
+                      disabled={creatorAiLoading}
+                      data-testid="creator-ai-input"
+                    />
+                    <button
+                      onClick={async () => {
+                        if (!creatorAiInput.trim() || creatorAiLoading) return;
                         const question = creatorAiInput.trim();
                         setCreatorAiMessages(prev => [...prev, { role: "user", content: question }]);
                         setCreatorAiInput("");
@@ -1972,44 +2154,16 @@ export default function DashboardPage() {
                         } finally {
                           setCreatorAiLoading(false);
                         }
-                      }
-                    }}
-                    placeholder="Ask any financial question — AI aggregates 75+ creator perspectives..."
-                    className="flex-1 bg-white/60 border border-white/30 rounded-xl px-4 py-3 text-sm text-[#1a1a2e] placeholder:text-[#8a8aa5]/50 focus:outline-none focus:border-purple-400/40 transition-colors"
-                    disabled={creatorAiLoading}
-                    data-testid="creator-ai-input"
-                  />
-                  <button
-                    onClick={async () => {
-                      if (!creatorAiInput.trim() || creatorAiLoading) return;
-                      const question = creatorAiInput.trim();
-                      setCreatorAiMessages(prev => [...prev, { role: "user", content: question }]);
-                      setCreatorAiInput("");
-                      setCreatorAiLoading(true);
-                      try {
-                        const resp = await fetch("/api/creator-insight", {
-                          method: "POST",
-                          headers: { "Content-Type": "application/json" },
-                          credentials: "include",
-                          body: JSON.stringify({ question }),
-                        });
-                        const data = await resp.json();
-                        if (!resp.ok) throw new Error(data.error || "Failed");
-                        setCreatorAiMessages(prev => [...prev, { role: "assistant", content: data.answer }]);
-                      } catch (err: any) {
-                        setCreatorAiMessages(prev => [...prev, { role: "assistant", content: "Error: " + (err.message || "Could not get insight.") }]);
-                      } finally {
-                        setCreatorAiLoading(false);
-                      }
-                    }}
-                    disabled={!creatorAiInput.trim() || creatorAiLoading}
-                    className="px-5 rounded-xl bg-gradient-to-r from-purple-600 to-blue-600 text-[#1a1a2e] text-sm font-medium disabled:opacity-30 hover:from-purple-500 hover:to-blue-500 transition-all flex items-center gap-1.5"
-                    data-testid="creator-ai-send"
-                  >
-                    {creatorAiLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
-                  </button>
+                      }}
+                      disabled={!creatorAiInput.trim() || creatorAiLoading}
+                      className="px-5 rounded-xl bg-gradient-to-r from-purple-600 to-blue-600 text-white text-sm font-medium disabled:opacity-30 hover:from-purple-500 hover:to-blue-500 transition-all flex items-center gap-1.5"
+                      data-testid="creator-ai-send"
+                    >
+                      {creatorAiLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+                    </button>
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
           ) : (
             <div className="w-full h-full flex flex-col" style={{ background: 'transparent' }}>
