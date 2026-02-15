@@ -79,48 +79,48 @@ section[id] {
   --radius-md: 0.5rem;
   --radius-lg: 0.75rem;
 
-  --color-background: #080808;
-  --color-foreground: hsl(0 0% 98%);
+  --color-background: #f8f8ff;
+  --color-foreground: hsl(240 20% 12%);
 
-  --color-card: hsl(0 0% 10%);
-  --color-card-foreground: hsl(0 0% 98%);
+  --color-card: hsl(240 20% 97%);
+  --color-card-foreground: hsl(240 20% 12%);
 
-  --color-popover: hsl(0 0% 10%);
-  --color-popover-foreground: hsl(0 0% 98%);
+  --color-popover: hsl(0 0% 100%);
+  --color-popover-foreground: hsl(240 20% 12%);
 
-  --color-primary: hsl(72 100% 50%);
-  --color-primary-foreground: hsl(0 0% 0%);
+  --color-primary: hsl(245 58% 51%);
+  --color-primary-foreground: hsl(0 0% 100%);
 
-  --color-secondary: hsl(0 0% 16%);
-  --color-secondary-foreground: hsl(0 0% 98%);
+  --color-secondary: hsl(240 10% 93%);
+  --color-secondary-foreground: hsl(240 20% 20%);
 
-  --color-muted: hsl(0 0% 16%);
-  --color-muted-foreground: hsl(0 0% 72%);
+  --color-muted: hsl(240 10% 93%);
+  --color-muted-foreground: hsl(240 10% 46%);
 
-  --color-accent: hsl(0 0% 16%);
-  --color-accent-foreground: hsl(0 0% 98%);
+  --color-accent: hsl(240 10% 93%);
+  --color-accent-foreground: hsl(240 20% 20%);
 
-  --color-destructive: hsl(0 62.8% 30.6%);
-  --color-destructive-foreground: hsl(0 0% 98%);
+  --color-destructive: hsl(0 72% 51%);
+  --color-destructive-foreground: hsl(0 0% 100%);
 
-  --color-border: hsl(0 0% 20%);
-  --color-input: hsl(0 0% 18%);
-  --color-ring: hsl(72 100% 50%);
+  --color-border: hsl(240 10% 87%);
+  --color-input: hsl(240 10% 90%);
+  --color-ring: hsl(245 58% 51%);
 
-  --color-chart-1: hsl(72 100% 50%);
-  --color-chart-2: hsl(180 100% 50%);
-  --color-chart-3: hsl(280 100% 60%);
-  --color-chart-4: hsl(0 100% 65%);
-  --color-chart-5: hsl(30 100% 60%);
+  --color-chart-1: hsl(245 58% 51%);
+  --color-chart-2: hsl(200 80% 50%);
+  --color-chart-3: hsl(280 60% 55%);
+  --color-chart-4: hsl(340 70% 55%);
+  --color-chart-5: hsl(30 80% 55%);
 
-  --color-sidebar: hsl(0 0% 6%);
-  --color-sidebar-foreground: hsl(0 0% 98%);
-  --color-sidebar-primary: hsl(72 100% 50%);
-  --color-sidebar-primary-foreground: hsl(0 0% 0%);
-  --color-sidebar-accent: hsl(0 0% 14%);
-  --color-sidebar-accent-foreground: hsl(0 0% 98%);
-  --color-sidebar-border: hsl(0 0% 18%);
-  --color-sidebar-ring: hsl(72 100% 50%);
+  --color-sidebar: hsl(240 20% 97%);
+  --color-sidebar-foreground: hsl(240 20% 12%);
+  --color-sidebar-primary: hsl(245 58% 51%);
+  --color-sidebar-primary-foreground: hsl(0 0% 100%);
+  --color-sidebar-accent: hsl(240 15% 93%);
+  --color-sidebar-accent-foreground: hsl(240 20% 20%);
+  --color-sidebar-border: hsl(240 10% 87%);
+  --color-sidebar-ring: hsl(245 58% 51%);
 }
 
 @layer base {
@@ -134,21 +134,21 @@ section[id] {
 
 @layer utilities {
   .glass-panel {
-    @apply bg-card border border-white/15 shadow-xl;
+    @apply bg-white/80 backdrop-blur-md border border-white/40 shadow-lg;
   }
   
   .tech-border {
-    @apply border border-white/20 hover:border-primary/50 transition-colors duration-300;
+    @apply border border-white/40 hover:border-primary/50 transition-colors duration-300;
   }
 
   .glow-text {
-    text-shadow: 0 0 20px hsla(72, 100%, 50%, 0.3);
+    text-shadow: 0 0 20px hsla(245, 58%, 51%, 0.2);
   }
 
   .chat-report {
     line-height: 1.65;
     padding: 1rem 1.25rem;
-    color: rgba(255, 255, 255, 0.95);
+    color: rgba(26, 26, 46, 0.92);
   }
 
   .chat-report > div:first-child > .w-full {
@@ -232,18 +232,18 @@ section[id] {
 
 .tech-grid-bg {
   background-image:
-    linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px);
+    linear-gradient(rgba(200,200,220,0.12) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(200,200,220,0.12) 1px, transparent 1px);
   background-size: 40px 40px;
   animation: gridPulse 8s ease-in-out infinite;
 }
 
 .card-glow {
-  box-shadow: inset 0 1px 0 0 rgba(255,255,255,0.08), 0 0 20px rgba(0,0,0,0.4);
+  box-shadow: inset 0 1px 0 0 rgba(255,255,255,0.5), 0 4px 20px rgba(0,0,0,0.06);
 }
 
 .card-shimmer {
-  background-image: linear-gradient(135deg, rgba(255,255,255,0.04) 0%, transparent 50%, rgba(255,255,255,0.02) 100%);
+  background-image: linear-gradient(135deg, rgba(255,255,255,0.6) 0%, transparent 50%, rgba(255,255,255,0.3) 100%);
 }
 
 .score-ring-glow {
@@ -251,7 +251,7 @@ section[id] {
 }
 
 .text-gradient {
-  background: linear-gradient(135deg, #fff 0%, rgba(255,255,255,0.75) 100%);
+  background: linear-gradient(135deg, #1a1a2e 0%, #3a3a5a 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -266,7 +266,7 @@ section[id] {
 
 .neon-line {
   height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+  background: linear-gradient(90deg, transparent, rgba(138,138,165,0.3), transparent);
 }
 
 .hover-lift {
@@ -275,7 +275,7 @@ section[id] {
 
 .hover-lift:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 30px rgba(0,0,0,0.4);
+  box-shadow: 0 8px 30px rgba(0,0,0,0.08);
 }
 
 .scrollbar-hide {
