@@ -43,7 +43,7 @@ function SpaceBackground() {
       const blobCount = Math.min(Math.floor((w * h) / 40000), 50);
       blobs = [];
       for (let i = 0; i < blobCount; i++) {
-        const speed = Math.random() * 0.2 + 0.05;
+        const speed = Math.random() * 0.35 + 0.12;
         const angle = Math.random() * Math.PI * 2;
         blobs.push({
           x: Math.random() * w,
