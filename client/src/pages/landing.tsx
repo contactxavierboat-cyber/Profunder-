@@ -20,23 +20,31 @@ function SpaceBackground() {
       vx: number; vy: number;
     }
 
-    interface ShootingStar {
-      x: number; y: number; vx: number; vy: number;
-      life: number; maxLife: number; size: number;
+    interface TechElement {
+      x: number; y: number;
+      vx: number; vy: number;
+      type: 'hexagon' | 'bracket' | 'circuit' | 'diamond' | 'chip' | 'wave' | 'grid' | 'binary';
+      size: number;
+      rotation: number;
+      rotSpeed: number;
+      opacity: number;
+      phase: number;
     }
 
     let stars: Star[] = [];
-    let shootingStars: ShootingStar[] = [];
+    let techElements: TechElement[] = [];
     let time = 0;
 
     const starColors: [number, number, number][] = [
-      [120, 120, 180],
-      [100, 130, 200],
-      [160, 140, 200],
-      [90, 110, 180],
-      [140, 120, 190],
-      [110, 140, 210],
+      [140, 140, 190],
+      [120, 140, 210],
+      [170, 150, 210],
+      [110, 130, 195],
+      [155, 135, 200],
+      [130, 155, 220],
     ];
+
+    const techTypes: TechElement['type'][] = ['hexagon', 'bracket', 'circuit', 'diamond', 'chip', 'wave', 'grid', 'binary'];
 
     const resize = () => {
       const w = window.innerWidth;
@@ -51,25 +59,167 @@ function SpaceBackground() {
     const init = () => {
       const w = window.innerWidth;
       const h = document.documentElement.scrollHeight;
-      const count = Math.min(Math.floor((w * h) / 2500), 600);
+      const starCount = Math.min(Math.floor((w * h) / 3000), 500);
       stars = [];
-      for (let i = 0; i < count; i++) {
+      for (let i = 0; i < starCount; i++) {
         const z = Math.random();
-        const speed = (z * 0.3 + 0.05);
+        const speed = (z * 0.25 + 0.04);
         const angle = Math.random() * Math.PI * 2;
         stars.push({
           x: Math.random() * w,
           y: Math.random() * h,
           z,
-          size: z < 0.3 ? Math.random() * 0.6 + 0.2 : z < 0.7 ? Math.random() * 1.2 + 0.4 : Math.random() * 2 + 0.8,
-          brightness: Math.random() * 0.4 + 0.15,
-          twinkleSpeed: Math.random() * 0.04 + 0.01,
+          size: z < 0.3 ? Math.random() * 0.5 + 0.2 : z < 0.7 ? Math.random() * 1 + 0.3 : Math.random() * 1.8 + 0.6,
+          brightness: Math.random() * 0.3 + 0.1,
+          twinkleSpeed: Math.random() * 0.03 + 0.008,
           twinklePhase: Math.random() * Math.PI * 2,
           color: starColors[Math.floor(Math.random() * starColors.length)],
           vx: Math.cos(angle) * speed,
           vy: Math.sin(angle) * speed,
         });
       }
+
+      const techCount = Math.min(Math.floor((w * h) / 18000), 80);
+      techElements = [];
+      for (let i = 0; i < techCount; i++) {
+        const speed = Math.random() * 0.15 + 0.03;
+        const angle = Math.random() * Math.PI * 2;
+        techElements.push({
+          x: Math.random() * w,
+          y: Math.random() * h,
+          vx: Math.cos(angle) * speed,
+          vy: Math.sin(angle) * speed,
+          type: techTypes[Math.floor(Math.random() * techTypes.length)],
+          size: Math.random() * 16 + 8,
+          rotation: Math.random() * Math.PI * 2,
+          rotSpeed: (Math.random() - 0.5) * 0.008,
+          opacity: Math.random() * 0.08 + 0.03,
+          phase: Math.random() * Math.PI * 2,
+        });
+      }
+    };
+
+    const drawHexagon = (x: number, y: number, r: number, rot: number) => {
+      ctx.beginPath();
+      for (let i = 0; i < 6; i++) {
+        const a = rot + (Math.PI / 3) * i;
+        const px = x + Math.cos(a) * r;
+        const py = y + Math.sin(a) * r;
+        i === 0 ? ctx.moveTo(px, py) : ctx.lineTo(px, py);
+      }
+      ctx.closePath();
+    };
+
+    const drawTechElement = (el: TechElement) => {
+      const pulse = Math.sin(time * 1.5 + el.phase) * 0.3 + 0.7;
+      const alpha = el.opacity * pulse;
+      ctx.save();
+      ctx.translate(el.x, el.y);
+      ctx.rotate(el.rotation);
+      ctx.strokeStyle = `rgba(100, 110, 160, ${alpha})`;
+      ctx.fillStyle = `rgba(100, 110, 160, ${alpha * 0.3})`;
+      ctx.lineWidth = 0.8;
+
+      switch (el.type) {
+        case 'hexagon':
+          drawHexagon(0, 0, el.size, 0);
+          ctx.stroke();
+          drawHexagon(0, 0, el.size * 0.5, Math.PI / 6);
+          ctx.stroke();
+          break;
+
+        case 'bracket':
+          const bw = el.size * 0.6, bh = el.size;
+          ctx.beginPath();
+          ctx.moveTo(-bw, -bh); ctx.lineTo(-bw * 1.5, -bh);
+          ctx.lineTo(-bw * 1.5, bh); ctx.lineTo(-bw, bh);
+          ctx.stroke();
+          ctx.beginPath();
+          ctx.moveTo(bw, -bh); ctx.lineTo(bw * 1.5, -bh);
+          ctx.lineTo(bw * 1.5, bh); ctx.lineTo(bw, bh);
+          ctx.stroke();
+          ctx.beginPath();
+          ctx.arc(0, 0, 2, 0, Math.PI * 2);
+          ctx.fill();
+          break;
+
+        case 'circuit':
+          ctx.beginPath();
+          ctx.moveTo(-el.size, 0); ctx.lineTo(-el.size * 0.3, 0);
+          ctx.lineTo(0, -el.size * 0.4); ctx.lineTo(el.size * 0.3, 0);
+          ctx.lineTo(el.size, 0);
+          ctx.stroke();
+          ctx.beginPath();
+          ctx.arc(-el.size, 0, 2, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.beginPath();
+          ctx.arc(el.size, 0, 2, 0, Math.PI * 2);
+          ctx.fill();
+          break;
+
+        case 'diamond':
+          ctx.beginPath();
+          ctx.moveTo(0, -el.size); ctx.lineTo(el.size * 0.7, 0);
+          ctx.lineTo(0, el.size); ctx.lineTo(-el.size * 0.7, 0);
+          ctx.closePath();
+          ctx.stroke();
+          ctx.beginPath();
+          ctx.moveTo(0, -el.size * 0.4); ctx.lineTo(el.size * 0.28, 0);
+          ctx.lineTo(0, el.size * 0.4); ctx.lineTo(-el.size * 0.28, 0);
+          ctx.closePath();
+          ctx.stroke();
+          break;
+
+        case 'chip':
+          const cs = el.size * 0.7;
+          ctx.strokeRect(-cs, -cs, cs * 2, cs * 2);
+          const pins = 3;
+          for (let i = 0; i < pins; i++) {
+            const p = -cs + (cs * 2 / (pins + 1)) * (i + 1);
+            ctx.beginPath(); ctx.moveTo(p, -cs); ctx.lineTo(p, -cs - 5); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(p, cs); ctx.lineTo(p, cs + 5); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(-cs, p); ctx.lineTo(-cs - 5, p); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(cs, p); ctx.lineTo(cs + 5, p); ctx.stroke();
+          }
+          break;
+
+        case 'wave':
+          ctx.beginPath();
+          for (let i = -20; i <= 20; i++) {
+            const wx = i * (el.size / 10);
+            const wy = Math.sin(i * 0.5 + time * 2 + el.phase) * el.size * 0.3;
+            i === -20 ? ctx.moveTo(wx, wy) : ctx.lineTo(wx, wy);
+          }
+          ctx.stroke();
+          break;
+
+        case 'grid':
+          const gs = el.size;
+          for (let r = 0; r < 3; r++) {
+            for (let c = 0; c < 3; c++) {
+              const gx = -gs + c * gs;
+              const gy = -gs + r * gs;
+              ctx.beginPath();
+              ctx.arc(gx, gy, 1.5, 0, Math.PI * 2);
+              ctx.fill();
+            }
+          }
+          ctx.beginPath();
+          ctx.moveTo(-gs, 0); ctx.lineTo(gs, 0);
+          ctx.moveTo(0, -gs); ctx.lineTo(0, gs);
+          ctx.stroke();
+          break;
+
+        case 'binary':
+          ctx.font = `${el.size * 0.5}px 'JetBrains Mono', monospace`;
+          ctx.fillStyle = `rgba(100, 110, 160, ${alpha})`;
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          const bits = ['01', '10', '{ }', '< >', '//'];
+          ctx.fillText(bits[Math.floor(el.phase * 10) % bits.length], 0, 0);
+          break;
+      }
+      ctx.restore();
     };
 
     const draw = () => {
@@ -81,7 +231,6 @@ function SpaceBackground() {
       stars.forEach(s => {
         s.x += s.vx;
         s.y += s.vy;
-
         if (s.x < -10) s.x = w + 10;
         if (s.x > w + 10) s.x = -10;
         if (s.y < -10) s.y = h + 10;
@@ -99,7 +248,7 @@ function SpaceBackground() {
         if (s.z > 0.7 && s.size > 1.2) {
           const glowR = s.size * 3;
           const grad = ctx.createRadialGradient(s.x, s.y, 0, s.x, s.y, glowR);
-          grad.addColorStop(0, `rgba(${r}, ${g}, ${b}, ${alpha * 0.2})`);
+          grad.addColorStop(0, `rgba(${r}, ${g}, ${b}, ${alpha * 0.15})`);
           grad.addColorStop(1, `rgba(${r}, ${g}, ${b}, 0)`);
           ctx.beginPath();
           ctx.fillStyle = grad;
@@ -108,44 +257,15 @@ function SpaceBackground() {
         }
       });
 
-      if (Math.random() < 0.002) {
-        const startX = Math.random() * w;
-        const startY = Math.random() * h * 0.5;
-        const angle = Math.random() * 0.8 + 0.3;
-        shootingStars.push({
-          x: startX, y: startY,
-          vx: Math.cos(angle) * 10,
-          vy: Math.sin(angle) * 10,
-          life: 0, maxLife: 35 + Math.random() * 25,
-          size: Math.random() * 1.2 + 0.6,
-        });
-      }
-
-      shootingStars = shootingStars.filter(ss => {
-        ss.x += ss.vx;
-        ss.y += ss.vy;
-        ss.life++;
-        const progress = ss.life / ss.maxLife;
-        const alpha = (progress < 0.1 ? progress * 10 : 1 - progress) * 0.5;
-
-        const tailLen = 6;
-        for (let i = 0; i < tailLen; i++) {
-          const t = i / tailLen;
-          const tx = ss.x - ss.vx * t * 3;
-          const ty = ss.y - ss.vy * t * 3;
-          const ta = alpha * (1 - t) * 0.5;
-          ctx.beginPath();
-          ctx.fillStyle = `rgba(140, 130, 200, ${ta})`;
-          ctx.arc(tx, ty, ss.size * (1 - t * 0.5), 0, Math.PI * 2);
-          ctx.fill();
-        }
-
-        ctx.beginPath();
-        ctx.fillStyle = `rgba(140, 130, 200, ${alpha})`;
-        ctx.arc(ss.x, ss.y, ss.size, 0, Math.PI * 2);
-        ctx.fill();
-
-        return ss.life < ss.maxLife;
+      techElements.forEach(el => {
+        el.x += el.vx;
+        el.y += el.vy;
+        el.rotation += el.rotSpeed;
+        if (el.x < -50) el.x = w + 50;
+        if (el.x > w + 50) el.x = -50;
+        if (el.y < -50) el.y = h + 50;
+        if (el.y > h + 50) el.y = -50;
+        drawTechElement(el);
       });
 
       animationId = requestAnimationFrame(draw);
@@ -256,7 +376,7 @@ export default function LandingPage() {
   };
 
   return (
-    <div className="relative min-h-screen text-[#1a1a2e] overflow-x-hidden" style={{ fontFamily: "'Inter', sans-serif", background: '#ffffff' }}>
+    <div className="relative min-h-screen text-[#1a1a2e] overflow-x-hidden" style={{ fontFamily: "'Inter', sans-serif", background: 'linear-gradient(180deg, #ffffff 0%, #f5f5fc 12%, #eef0fa 25%, #f8f8ff 40%, #f2f0fb 55%, #f6f5fc 70%, #f0eff8 85%, #eceaf5 100%)' }}>
       <SpaceBackground />
 
       <div
