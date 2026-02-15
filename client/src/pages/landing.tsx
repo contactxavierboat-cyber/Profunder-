@@ -167,13 +167,39 @@ const SectionLabel = ({ children }: { children: string }) => (
   <p className="text-[11px] tracking-[0.2em] uppercase mb-6 sm:mb-8 text-[#7a7a9a]">{children}</p>
 );
 
+const SubscribeButton = ({ className = "" }: { className?: string }) => (
+  <button
+    onClick={() => window.location.href = '/subscription'}
+    className={`inline-flex items-center justify-center h-[44px] px-8 rounded-full text-white text-[13px] font-bold tracking-wide hover:opacity-90 transition-all hover:scale-[1.02] shadow-sm ${className}`}
+    style={{ background: 'linear-gradient(135deg, #2a2a2a 0%, #0a0a0a 100%)' }}
+    data-testid="button-subscribe"
+  >
+    SUBSCRIBE NOW
+  </button>
+);
+
+const ScrollArrow = ({ targetId }: { targetId: string }) => (
+  <button
+    onClick={() => document.getElementById(targetId)?.scrollIntoView({ behavior: 'smooth' })}
+    className="relative z-20 flex justify-center w-full mt-10 group cursor-pointer"
+    aria-label="Scroll to next section"
+    data-testid={`arrow-to-${targetId}`}
+  >
+    <div className="w-10 h-10 flex items-center justify-center rounded-full border border-[#d0d0de] bg-white/80 hover:bg-white transition-colors shadow-sm animate-bounce-slow">
+      <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M9 3.5V14.5M9 14.5L4 9.5M9 14.5L14 9.5" stroke="#7a7a9a" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+    </div>
+  </button>
+);
+
 const faqItems = [
   { q: "Do I need perfect credit to use MentXr?", a: "No. MentXr works for all credit profiles — from thin files to complex portfolios. Our engine evaluates 6 capital components and places you in the right tier with a clear action plan, whether you're Prime-eligible or in Repair mode." },
   { q: "How is this different from a credit monitoring app?", a: "Credit monitoring shows you a score. MentXr tells you what that score means to a lender, what products you actually qualify for, what will get you denied, and exactly how to fix it. It's underwriting intelligence, not a dashboard." },
   { q: "What documents do I need to upload?", a: "Start with your credit report (from any bureau) and your most recent bank statement. Our AI extracts over 40 data points automatically — no manual entry required." },
   { q: "How accurate is the denial simulation?", a: "Our denial engine uses real underwriting triggers from SBA, conventional, and alternative lenders. It catches issues that cause 73% of funding denials before you ever submit an application." },
   { q: "Is my financial data secure?", a: "All data is encrypted in transit and at rest. We never share your financial information with lenders, brokers, or third parties. Your data is used solely to generate your Capital Readiness analysis." },
-  { q: "What's included with free access?", a: "Free access includes your full Capital Readiness Score, 6-component breakdown, tier eligibility, operating mode analysis, denial simulation, AI mentor chat, and credit repair recommendations — all 30 analyses per month." },
+  { q: "What's included with a subscription?", a: "Your subscription includes your full Capital Readiness Score, 6-component breakdown, tier eligibility, operating mode analysis, denial simulation, AI mentor chat, and credit repair recommendations — all 30 analyses per month." },
   { q: "Can I use this to prepare for an SBA loan?", a: "Absolutely. MentXr evaluates you against SBA 7(a) and 504 underwriting criteria. You'll see exactly where you stand, what flags exist, and what to fix before applying." },
 ];
 
@@ -274,13 +300,13 @@ export default function LandingPage() {
             style={{ background: 'linear-gradient(135deg, #2a2a2a 0%, #0a0a0a 100%)' }}
             data-testid="button-get-started"
           >
-            Get Started Free
+            Subscribe
           </button>
         </nav>
       </div>
 
       {/* ═══════════════ 1. HERO ═══════════════ */}
-      <section className="relative z-10 min-h-[90vh] flex flex-col items-center justify-center px-6 sm:px-12 md:px-20 lg:px-28 py-20 text-center">
+      <section id="sec-hero" className="relative z-10 min-h-[90vh] flex flex-col items-center justify-center px-6 sm:px-12 md:px-20 lg:px-28 py-20 text-center">
         <div className="absolute inset-0" style={{ background: 'radial-gradient(ellipse 90% 80% at 50% 50%, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.7) 50%, transparent 100%)' }} />
         <div className="relative max-w-[900px] mx-auto">
           <p className="text-[11px] tracking-[0.2em] uppercase text-[#6a6a8a] mb-6" data-testid="text-hero-label">Digital Underwriting Engine</p>
@@ -314,23 +340,24 @@ export default function LandingPage() {
                 className="h-[44px] sm:h-[40px] px-6 sm:rounded-full text-white text-[13px] font-bold hover:opacity-90 transition-colors shrink-0 border-t border-[#e0e0ea] sm:border-t-0 mx-1.5 mb-1.5 sm:mb-0 sm:mx-0 rounded-xl sm:rounded-full tracking-wide"
                 style={{ background: 'linear-gradient(135deg, #2a2a2a 0%, #0a0a0a 100%)' }}
               >
-                {isLoading ? "..." : "GET FREE ACCESS"}
+                {isLoading ? "..." : "SUBSCRIBE"}
               </button>
             </div>
           </form>
 
           <div className="flex flex-wrap items-center justify-center gap-6 text-[11px] text-[#8a8aa5] tracking-wide">
-            <span>Free forever</span>
+            <span>Full platform access</span>
             <span className="w-1 h-1 rounded-full bg-[#c0c0d0]"></span>
-            <span>No credit card</span>
+            <span>Cancel anytime</span>
             <span className="w-1 h-1 rounded-full bg-[#c0c0d0]"></span>
             <span>30 analyses / month</span>
           </div>
+          <ScrollArrow targetId="sec-problem" />
         </div>
       </section>
 
       {/* ═══════════════ 2. PROBLEM / PAIN ═══════════════ */}
-      <section className="relative z-10 px-6 sm:px-12 md:px-20 py-20 sm:py-28 border-t border-[#e8e8f0] text-center">
+      <section id="sec-problem" className="relative z-10 px-6 sm:px-12 md:px-20 py-20 sm:py-28 border-t border-[#e8e8f0] text-center">
         <div className="absolute inset-0" style={sectionBg} />
         <div className="relative max-w-[800px] mx-auto">
           <SectionLabel>The Problem</SectionLabel>
@@ -350,11 +377,13 @@ export default function LandingPage() {
               </div>
             ))}
           </div>
+          <SubscribeButton className="mt-10" />
+          <ScrollArrow targetId="sec-solution" />
         </div>
       </section>
 
       {/* ═══════════════ 3. SOLUTION OVERVIEW ═══════════════ */}
-      <section className="relative z-10 px-6 sm:px-12 md:px-20 py-20 sm:py-28 border-t border-[#e8e8f0] text-center">
+      <section id="sec-solution" className="relative z-10 px-6 sm:px-12 md:px-20 py-20 sm:py-28 border-t border-[#e8e8f0] text-center">
         <div className="absolute inset-0" style={sectionBg} />
         <div className="relative max-w-[800px] mx-auto">
           <SectionLabel>The Solution</SectionLabel>
@@ -379,6 +408,8 @@ export default function LandingPage() {
               </div>
             ))}
           </div>
+          <SubscribeButton className="mt-10" />
+          <ScrollArrow targetId="how-it-works" />
         </div>
       </section>
 
@@ -408,6 +439,8 @@ export default function LandingPage() {
               </div>
             ))}
           </div>
+          <SubscribeButton className="mt-10" />
+          <ScrollArrow targetId="features" />
         </div>
       </section>
 
@@ -438,6 +471,8 @@ export default function LandingPage() {
               </div>
             ))}
           </div>
+          <SubscribeButton className="mt-10" />
+          <ScrollArrow targetId="results" />
         </div>
       </section>
 
@@ -479,11 +514,13 @@ export default function LandingPage() {
               </div>
             ))}
           </div>
+          <SubscribeButton className="mt-10" />
+          <ScrollArrow targetId="sec-risk" />
         </div>
       </section>
 
       {/* ═══════════════ 7. RISK REVERSAL ═══════════════ */}
-      <section className="relative z-10 px-6 sm:px-12 md:px-20 py-20 sm:py-28 border-t border-[#e8e8f0] text-center">
+      <section id="sec-risk" className="relative z-10 px-6 sm:px-12 md:px-20 py-20 sm:py-28 border-t border-[#e8e8f0] text-center">
         <div className="absolute inset-0" style={sectionBg} />
         <div className="relative max-w-[800px] mx-auto">
           <SectionLabel>No More Guessing</SectionLabel>
@@ -515,11 +552,13 @@ export default function LandingPage() {
               </ul>
             </div>
           </div>
+          <SubscribeButton className="mt-10" />
+          <ScrollArrow targetId="sec-breakdown" />
         </div>
       </section>
 
       {/* ═══════════════ 8. FEATURE BREAKDOWN ═══════════════ */}
-      <section className="relative z-10 px-6 sm:px-12 md:px-20 py-20 sm:py-28 border-t border-[#e8e8f0] text-center">
+      <section id="sec-breakdown" className="relative z-10 px-6 sm:px-12 md:px-20 py-20 sm:py-28 border-t border-[#e8e8f0] text-center">
         <div className="absolute inset-0" style={sectionBg} />
         <div className="relative max-w-[900px] mx-auto">
           <SectionLabel>Feature Breakdown</SectionLabel>
@@ -550,11 +589,13 @@ export default function LandingPage() {
               <span className="text-[12px] text-[#8a8aa5]">→ Qualification Range: $25K – $5M+ based on composite score and tier placement</span>
             </div>
           </div>
+          <SubscribeButton className="mt-10" />
+          <ScrollArrow targetId="sec-modes" />
         </div>
       </section>
 
       {/* ═══════════════ 9. MODE DIFFERENTIATION ═══════════════ */}
-      <section className="relative z-10 px-6 sm:px-12 md:px-20 py-20 sm:py-28 border-t border-[#e8e8f0] text-center">
+      <section id="sec-modes" className="relative z-10 px-6 sm:px-12 md:px-20 py-20 sm:py-28 border-t border-[#e8e8f0] text-center">
         <div className="absolute inset-0" style={sectionBg} />
         <div className="relative max-w-[900px] mx-auto">
           <SectionLabel>Operating Modes</SectionLabel>
@@ -597,11 +638,13 @@ export default function LandingPage() {
               </ul>
             </div>
           </div>
+          <SubscribeButton className="mt-10" />
+          <ScrollArrow targetId="sec-tiers" />
         </div>
       </section>
 
       {/* ═══════════════ 10. TIER POSITIONING ═══════════════ */}
-      <section className="relative z-10 px-6 sm:px-12 md:px-20 py-20 sm:py-28 border-t border-[#e8e8f0] text-center">
+      <section id="sec-tiers" className="relative z-10 px-6 sm:px-12 md:px-20 py-20 sm:py-28 border-t border-[#e8e8f0] text-center">
         <div className="absolute inset-0" style={sectionBg} />
         <div className="relative max-w-[900px] mx-auto">
           <SectionLabel>Tier Eligibility</SectionLabel>
@@ -622,11 +665,13 @@ export default function LandingPage() {
               </div>
             ))}
           </div>
+          <SubscribeButton className="mt-10" />
+          <ScrollArrow targetId="sec-case" />
         </div>
       </section>
 
       {/* ═══════════════ 11. CASE STUDY ═══════════════ */}
-      <section className="relative z-10 px-6 sm:px-12 md:px-20 py-20 sm:py-28 border-t border-[#e8e8f0] text-center">
+      <section id="sec-case" className="relative z-10 px-6 sm:px-12 md:px-20 py-20 sm:py-28 border-t border-[#e8e8f0] text-center">
         <div className="absolute inset-0" style={sectionBg} />
         <div className="relative max-w-[800px] mx-auto">
           <SectionLabel>Example Walkthrough</SectionLabel>
@@ -652,6 +697,8 @@ export default function LandingPage() {
               </div>
             ))}
           </div>
+          <SubscribeButton className="mt-10" />
+          <ScrollArrow targetId="faq" />
         </div>
       </section>
 
@@ -682,13 +729,15 @@ export default function LandingPage() {
               </div>
             ))}
           </div>
+          <SubscribeButton className="mt-10" />
+          <ScrollArrow targetId="sec-trust" />
         </div>
       </section>
 
       {/* ═══════════════ 13. TRUST & COMPLIANCE ═══════════════ */}
-      <section className="relative z-10 px-6 sm:px-12 md:px-20 py-20 sm:py-28 border-t border-[#e8e8f0]">
+      <section id="sec-trust" className="relative z-10 px-6 sm:px-12 md:px-20 py-20 sm:py-28 border-t border-[#e8e8f0] text-center">
         <div className="absolute inset-0" style={sectionBg} />
-        <div className="relative max-w-[800px]">
+        <div className="relative max-w-[800px] mx-auto">
           <SectionLabel>Trust & Security</SectionLabel>
           <h2 className="text-[26px] sm:text-[36px] md:text-[44px] leading-[1.1] mb-12 tracking-[-0.03em]" style={gradientText('180deg', 0.9, 0.5)}>
             Your data. Your control. Always.
@@ -707,11 +756,13 @@ export default function LandingPage() {
               </div>
             ))}
           </div>
+          <SubscribeButton className="mt-10" />
+          <ScrollArrow targetId="sec-cta" />
         </div>
       </section>
 
       {/* ═══════════════ 14. FINAL CTA ═══════════════ */}
-      <section className="relative z-10 px-6 sm:px-12 md:px-20 py-24 sm:py-36 border-t border-[#e8e8f0]">
+      <section id="sec-cta" className="relative z-10 px-6 sm:px-12 md:px-20 py-24 sm:py-36 border-t border-[#e8e8f0]">
         <div className="absolute inset-0" style={{ background: 'radial-gradient(ellipse 80% 70% at 50% 50%, rgba(255,255,255,0.97) 0%, rgba(248,248,252,0.85) 50%, rgba(245,245,250,0.6) 100%)' }} />
         <div className="relative max-w-[700px] mx-auto text-center">
           <h2
@@ -722,7 +773,7 @@ export default function LandingPage() {
             Stop guessing.<br />Start knowing.
           </h2>
           <p className="text-[15px] text-[#6a6a8a] leading-[1.8] mb-10 max-w-[480px] mx-auto">
-            Get your Capital Readiness Score, tier eligibility, exposure ceiling, and denial simulation — free. No credit card. No credit pull. No commitment.
+            Get your Capital Readiness Score, tier eligibility, exposure ceiling, and denial simulation. Subscribe today and unlock the full platform.
           </p>
           <form onSubmit={handleLogin} className="w-full max-w-[440px] mx-auto mb-6">
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center bg-[#f5f5fa] border border-[#e0e0ea] rounded-2xl sm:rounded-full sm:h-[52px] sm:pl-5 sm:pr-1.5 overflow-hidden">
@@ -742,13 +793,14 @@ export default function LandingPage() {
                 className="h-[44px] sm:h-[40px] px-6 sm:rounded-full text-white text-[13px] font-bold hover:opacity-90 transition-colors shrink-0 border-t border-[#e0e0ea] sm:border-t-0 mx-1.5 mb-1.5 sm:mb-0 sm:mx-0 rounded-xl sm:rounded-full tracking-wide"
                 style={{ background: 'linear-gradient(135deg, #2a2a2a 0%, #0a0a0a 100%)' }}
               >
-                {isLoading ? "..." : "GET FREE ACCESS"}
+                {isLoading ? "..." : "SUBSCRIBE"}
               </button>
             </div>
           </form>
           <p className="text-[11px] text-[#b0b0c0] tracking-wide">
             Join 12,500+ founders already using MentXr&reg;
           </p>
+          <SubscribeButton className="mt-6" />
         </div>
       </section>
 
