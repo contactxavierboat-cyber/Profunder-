@@ -43,7 +43,7 @@ function SpaceBackground() {
       const blobCount = Math.min(Math.floor((w * h) / 40000), 50);
       blobs = [];
       for (let i = 0; i < blobCount; i++) {
-        const speed = Math.random() * 0.35 + 0.12;
+        const speed = Math.random() * 0.55 + 0.25;
         const angle = Math.random() * Math.PI * 2;
         blobs.push({
           x: Math.random() * w,
@@ -51,7 +51,7 @@ function SpaceBackground() {
           vx: Math.cos(angle) * speed,
           vy: Math.sin(angle) * speed,
           radius: Math.random() * 100 + 50,
-          opacity: Math.random() * 0.12 + 0.06,
+          opacity: Math.random() * 0.18 + 0.1,
           phase: Math.random() * Math.PI * 2,
           wobbleSpeed: Math.random() * 0.8 + 0.3,
           wobbleAmp: Math.random() * 0.25 + 0.1,
@@ -87,17 +87,17 @@ function SpaceBackground() {
       ctx.closePath();
 
       const grad = ctx.createRadialGradient(b.x, b.y, 0, b.x, b.y, r * 1.3);
-      grad.addColorStop(0, `rgba(160, 160, 175, ${b.opacity * 1.2})`);
-      grad.addColorStop(0.4, `rgba(150, 150, 168, ${b.opacity * 0.8})`);
-      grad.addColorStop(0.7, `rgba(140, 140, 158, ${b.opacity * 0.4})`);
-      grad.addColorStop(1, `rgba(130, 130, 148, 0)`);
+      grad.addColorStop(0, `rgba(155, 155, 172, ${b.opacity * 1.5})`);
+      grad.addColorStop(0.35, `rgba(145, 145, 165, ${b.opacity * 1.1})`);
+      grad.addColorStop(0.65, `rgba(135, 135, 155, ${b.opacity * 0.55})`);
+      grad.addColorStop(1, `rgba(125, 125, 145, 0)`);
       ctx.fillStyle = grad;
       ctx.fill();
 
       const edgeGrad = ctx.createRadialGradient(b.x, b.y, r * 0.6, b.x, b.y, r * 1.1);
       edgeGrad.addColorStop(0, `rgba(170, 170, 185, 0)`);
-      edgeGrad.addColorStop(0.7, `rgba(170, 170, 185, ${b.opacity * 0.3})`);
-      edgeGrad.addColorStop(1, `rgba(170, 170, 185, 0)`);
+      edgeGrad.addColorStop(0.7, `rgba(165, 165, 182, ${b.opacity * 0.45})`);
+      edgeGrad.addColorStop(1, `rgba(165, 165, 182, 0)`);
       ctx.fillStyle = edgeGrad;
       ctx.fill();
     };
