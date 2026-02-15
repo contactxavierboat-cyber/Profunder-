@@ -174,7 +174,7 @@ function SpaceBackground() {
 }
 
 const gradientText = (dir = '180deg', _from = 0.85, _to = 0.5) => ({
-  background: `linear-gradient(${dir}, #1a1a2e 0%, #3a3a6e 100%)`,
+  background: `linear-gradient(${dir}, #111111 0%, #555555 100%)`,
   WebkitBackgroundClip: 'text' as const,
   WebkitTextFillColor: 'transparent' as const,
   backgroundClip: 'text' as const,
@@ -267,30 +267,30 @@ export default function LandingPage() {
           transform: proofVisible ? "translateY(0)" : "translateY(8px)",
         }}
       >
-        <span className="w-2 h-2 rounded-full bg-[#4a3aff] animate-pulse shrink-0"></span>
+        <span className="w-2 h-2 rounded-full bg-[#2a2a2a] animate-pulse shrink-0"></span>
         <span className="text-[12px] sm:text-[13px] text-[#3a3a5a] font-medium whitespace-nowrap">{proofMessages[proofIndex]}</span>
       </div>
 
       <div className="sticky top-0 z-50 w-full flex justify-center px-6 sm:px-10 pt-4" data-testid="nav-top">
         <nav className="flex items-center justify-between w-full max-w-[900px] h-[52px] bg-white/95 rounded-full px-2.5 pl-3 shadow-lg shadow-black/15">
           <div className="flex items-center gap-2 bg-[#f0f0f8] rounded-full px-3.5 py-1.5" data-testid="nav-logo">
-            <div className="w-[18px] h-[18px] rounded-full bg-gradient-to-br from-[#4a3aff] to-[#1a0a5e] flex items-center justify-center animate-logo-pulse">
+            <div className="w-[18px] h-[18px] rounded-full bg-gradient-to-br from-[#2a2a2a] to-[#0a0a0a] flex items-center justify-center animate-logo-pulse">
               <span className="w-1.5 h-1.5 rounded-full bg-white"></span>
             </div>
-            <span className="text-[12.5px] font-semibold tracking-[0.03em] text-[#1a0a3e]">MentXr<span className="text-[8px] align-super">®</span></span>
+            <span className="text-[12.5px] font-semibold tracking-[0.03em] text-[#1a1a1a]">MentXr<span className="text-[8px] align-super">®</span></span>
           </div>
 
           <div className="hidden md:flex items-center gap-8">
-            <a href="#how-it-works" className="text-[13px] font-medium text-[#5a5a7a] hover:text-[#1a0a3e] transition-colors" data-testid="link-how-it-works">How It Works</a>
-            <a href="#features" className="text-[13px] font-medium text-[#5a5a7a] hover:text-[#1a0a3e] transition-colors" data-testid="link-features">Features</a>
-            <a href="#results" className="text-[13px] font-medium text-[#5a5a7a] hover:text-[#1a0a3e] transition-colors" data-testid="link-results">Results</a>
-            <a href="#faq" className="text-[13px] font-medium text-[#5a5a7a] hover:text-[#1a0a3e] transition-colors" data-testid="link-faq">FAQ</a>
+            <a href="#how-it-works" className="text-[13px] font-medium text-[#5a5a7a] hover:text-[#111111] transition-colors" data-testid="link-how-it-works">How It Works</a>
+            <a href="#features" className="text-[13px] font-medium text-[#5a5a7a] hover:text-[#111111] transition-colors" data-testid="link-features">Features</a>
+            <a href="#results" className="text-[13px] font-medium text-[#5a5a7a] hover:text-[#111111] transition-colors" data-testid="link-results">Results</a>
+            <a href="#faq" className="text-[13px] font-medium text-[#5a5a7a] hover:text-[#111111] transition-colors" data-testid="link-faq">FAQ</a>
           </div>
 
           <button
             onClick={() => document.querySelector<HTMLInputElement>('[data-testid="input-email"]')?.focus()}
             className="rounded-full px-5 py-2 text-[12.5px] font-semibold text-white transition-all duration-200 hover:scale-[1.02] shadow-sm"
-            style={{ background: 'linear-gradient(135deg, #4a3aff 0%, #1a0a5e 100%)' }}
+            style={{ background: 'linear-gradient(135deg, #2a2a2a 0%, #0a0a0a 100%)' }}
             data-testid="button-get-started"
           >
             Get Started Free
@@ -331,7 +331,7 @@ export default function LandingPage() {
                 type="submit"
                 disabled={isLoading}
                 className="h-[44px] sm:h-[40px] px-6 sm:rounded-full text-white text-[13px] font-bold hover:opacity-90 transition-colors shrink-0 border-t border-[#e0e0ea] sm:border-t-0 mx-1.5 mb-1.5 sm:mb-0 sm:mx-0 rounded-xl sm:rounded-full tracking-wide"
-                style={{ background: 'linear-gradient(135deg, #4a3aff 0%, #1a0a5e 100%)' }}
+                style={{ background: 'linear-gradient(135deg, #2a2a2a 0%, #0a0a0a 100%)' }}
               >
                 {isLoading ? "..." : "GET FREE ACCESS"}
               </button>
@@ -759,7 +759,7 @@ export default function LandingPage() {
                 type="submit"
                 disabled={isLoading}
                 className="h-[44px] sm:h-[40px] px-6 sm:rounded-full text-white text-[13px] font-bold hover:opacity-90 transition-colors shrink-0 border-t border-[#e0e0ea] sm:border-t-0 mx-1.5 mb-1.5 sm:mb-0 sm:mx-0 rounded-xl sm:rounded-full tracking-wide"
-                style={{ background: 'linear-gradient(135deg, #4a3aff 0%, #1a0a5e 100%)' }}
+                style={{ background: 'linear-gradient(135deg, #2a2a2a 0%, #0a0a0a 100%)' }}
               >
                 {isLoading ? "..." : "GET FREE ACCESS"}
               </button>
