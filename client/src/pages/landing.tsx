@@ -423,21 +423,19 @@ export default function LandingPage() {
           <h2 className="text-[26px] sm:text-[36px] md:text-[44px] leading-[0.9] mb-14 tracking-[-0.03em]" style={gradientText('180deg', 0.9, 0.5)}>
             Four steps from unknown to underwriting-ready.
           </h2>
-          <div className="space-y-0">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
             {[
               { step: "01", title: "Upload Your Documents", desc: "Drop in your credit report and bank statement. Our AI extracts 40+ data points automatically — no manual entry." },
               { step: "02", title: "Get Your Capital Readiness Score", desc: "We evaluate 6 components: Capital Strength, Credit Quality, Management & Structure, Cash Flow, Liquidity, and Risk Signals." },
               { step: "03", title: "See Your Tier & Exposure Ceiling", desc: "Find out if you're Prime, Mid-Tier, or Alternative eligible — and your maximum fundable amount using 2.5x exposure logic." },
               { step: "04", title: "Run Denial Simulation & Fix Issues", desc: "Our engine flags every underwriting trigger that would cause a denial. Get auto-generated dispute letters and a repair timeline." },
-            ].map((item, i) => (
-              <div key={item.step} className="flex gap-6 sm:gap-8 items-start py-8 border-t border-[#e8e8f0] first:border-t-0">
-                <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-[#f2f2f8] border border-[#e0e0ea] flex items-center justify-center shrink-0">
+            ].map((item) => (
+              <div key={item.step} className="flex flex-col items-center text-center p-6 rounded-xl bg-[#f8f8fc] border border-[#e0e0ea]">
+                <div className="w-12 h-12 rounded-full bg-[#f2f2f8] border border-[#e0e0ea] flex items-center justify-center mb-4">
                   <span className="text-[13px] font-mono text-[#5a5a7a]">{item.step}</span>
                 </div>
-                <div>
-                  <h3 className="text-[16px] sm:text-[18px] text-[#1a1a2e] font-medium mb-2">{item.title}</h3>
-                  <p className="text-[13px] sm:text-[14px] text-[#3a3a5a] leading-[1.7] max-w-[500px]" style={{ textAlign: 'justify' }}>{item.desc}</p>
-                </div>
+                <h3 className="text-[16px] sm:text-[18px] text-[#1a1a2e] font-medium mb-2">{item.title}</h3>
+                <p className="text-[13px] sm:text-[14px] text-[#3a3a5a] leading-[1.7]" style={{ textAlign: 'justify', textAlignLast: 'center' }}>{item.desc}</p>
               </div>
             ))}
           </div>
