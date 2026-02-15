@@ -55,7 +55,7 @@ function FormatReport({ content }: { content: string }) {
 
         return (
           <div key={i}>
-            {i > 0 && <div className="w-full h-px bg-[#d0d0de] my-5" />}
+            {i > 0 && <div className="w-full h-px bg-white/40 my-5" />}
             {isTitle ? (
               <p className="text-[15px] font-bold text-[#3a3a5a] tracking-wide uppercase mb-1">{trimmed}</p>
             ) : hasBullets ? (
@@ -149,18 +149,18 @@ export function ChatInterface() {
   };
 
   return (
-    <Card className="flex flex-col h-[600px] bg-[#f5f5fa] border border-[#d0d0de]">
-      <CardHeader className="flex flex-row items-center justify-between py-3 border-b border-[#d0d0de]">
+    <Card className="flex flex-col h-[600px] bg-white/60 border border-white/30">
+      <CardHeader className="flex flex-row items-center justify-between py-3 border-b border-white/30">
         <div className="flex items-center gap-2">
           {activeMentor ? (
             <button onClick={() => setShowMentorPanel(!showMentorPanel)} className="relative group" data-testid="button-mentor-avatar">
-              <div className={cn("w-8 h-8 rounded-full flex items-center justify-center text-[#1a1a2e] text-xs font-bold border-2 border-[#d0d0de] group-hover:border-[#b0b0c0] transition-colors", activeMentorKey ? BOT_COLORS[activeMentorKey] : "")}>{activeMentor.initials}</div>
-              <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-[#f8f8fc] border border-[#d0d0de] flex items-center justify-center">
+              <div className={cn("w-8 h-8 rounded-full flex items-center justify-center text-[#1a1a2e] text-xs font-bold border-2 border-white/30 group-hover:border-[#b0b0c0] transition-colors", activeMentorKey ? BOT_COLORS[activeMentorKey] : "")}>{activeMentor.initials}</div>
+              <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-white/70 border border-white/30 flex items-center justify-center">
                 <Users className="w-2 h-2 text-[#5a5a7a]" />
               </div>
             </button>
           ) : (
-            <button onClick={() => setShowMentorPanel(!showMentorPanel)} className="w-7 h-7 rounded-full bg-[#f2f2f8] border border-[#d0d0de] flex items-center justify-center hover:border-[#b0b0c0] transition-colors" data-testid="button-mentor-select">
+            <button onClick={() => setShowMentorPanel(!showMentorPanel)} className="w-7 h-7 rounded-full bg-white/50 border border-white/30 flex items-center justify-center hover:border-[#b0b0c0] transition-colors" data-testid="button-mentor-select">
               <Bot className="w-4 h-4 text-[#5a5a7a]" />
             </button>
           )}
@@ -170,20 +170,20 @@ export function ChatInterface() {
           </div>
         </div>
         <div className="flex gap-1">
-          <Button variant="ghost" size="sm" onClick={() => setShowMentorPanel(!showMentorPanel)} className="h-8 text-xs text-[#6a6a8a] hover:text-[#1a1a2e] hover:bg-[#eeeef4]" data-testid="button-switch-mentor">
+          <Button variant="ghost" size="sm" onClick={() => setShowMentorPanel(!showMentorPanel)} className="h-8 text-xs text-[#6a6a8a] hover:text-[#1a1a2e] hover:bg-white/60" data-testid="button-switch-mentor">
             <Users className="w-3.5 h-3.5 mr-1" /> Mentors
           </Button>
-          <Button variant="ghost" size="sm" onClick={() => clearChat()} className="h-8 text-xs text-[#6a6a8a] hover:text-[#1a1a2e] hover:bg-[#eeeef4]" data-testid="button-new-chat">
+          <Button variant="ghost" size="sm" onClick={() => clearChat()} className="h-8 text-xs text-[#6a6a8a] hover:text-[#1a1a2e] hover:bg-white/60" data-testid="button-new-chat">
             <Trash2 className="w-3.5 h-3.5 mr-1" /> New
           </Button>
-          <Button variant="ghost" size="sm" onClick={downloadSummary} className="h-8 text-xs text-[#6a6a8a] hover:text-[#1a1a2e] hover:bg-[#eeeef4]" data-testid="button-export">
+          <Button variant="ghost" size="sm" onClick={downloadSummary} className="h-8 text-xs text-[#6a6a8a] hover:text-[#1a1a2e] hover:bg-white/60" data-testid="button-export">
             <Download className="w-3.5 h-3.5 mr-1" /> Export
           </Button>
         </div>
       </CardHeader>
 
       {showMentorPanel && (
-        <div className="border-b border-[#d0d0de] bg-[#f8f8fc] p-4" data-testid="panel-mentor-selection">
+        <div className="border-b border-white/30 bg-white/70 p-4" data-testid="panel-mentor-selection">
           <div className="flex items-center justify-between mb-3">
             <div>
               <p className="text-xs font-bold text-[#3a3a5a] uppercase tracking-widest">Choose Your Mentor</p>
@@ -199,12 +199,12 @@ export function ChatInterface() {
               className={cn(
                 "flex flex-col items-center gap-1.5 p-3 rounded-xl border transition-all text-center",
                 !activeMentorKey
-                  ? "border-[#d0d0de] bg-white/70"
-                  : "border-[#d0d0de] hover:border-[#d0d0de] hover:bg-white/70"
+                  ? "border-white/30 bg-white/70"
+                  : "border-white/30 hover:border-white/30 hover:bg-white/70"
               )}
               data-testid="button-mentor-default"
             >
-              <div className="w-10 h-10 rounded-full bg-[#f2f2f8] border border-[#d0d0de] flex items-center justify-center">
+              <div className="w-10 h-10 rounded-full bg-white/50 border border-white/30 flex items-center justify-center">
                 <Bot className="w-5 h-5 text-[#5a5a7a]" />
               </div>
               <p className="text-[11px] font-semibold text-[#2a2a4a] leading-tight">MentXr® AI</p>
@@ -217,8 +217,8 @@ export function ChatInterface() {
                 className={cn(
                   "flex flex-col items-center gap-1.5 p-3 rounded-xl border transition-all text-center",
                   activeMentorKey === key
-                    ? "border-[#d0d0de] bg-white/70"
-                    : "border-[#d0d0de] hover:border-[#d0d0de] hover:bg-white/70"
+                    ? "border-white/30 bg-white/70"
+                    : "border-white/30 hover:border-white/30 hover:bg-white/70"
                 )}
                 data-testid={`button-mentor-${key}`}
               >
@@ -237,7 +237,7 @@ export function ChatInterface() {
             <div className="flex flex-col items-center justify-center h-[400px] text-center">
               {activeMentor ? (
                 <>
-                  <div className={cn("w-20 h-20 rounded-full flex items-center justify-center text-[#1a1a2e] text-2xl font-bold border-2 border-[#d0d0de] mb-4 opacity-60", activeMentorKey ? BOT_COLORS[activeMentorKey] : "")}>{activeMentor.initials}</div>
+                  <div className={cn("w-20 h-20 rounded-full flex items-center justify-center text-[#1a1a2e] text-2xl font-bold border-2 border-white/30 mb-4 opacity-60", activeMentorKey ? BOT_COLORS[activeMentorKey] : "")}>{activeMentor.initials}</div>
                   <p className="text-sm font-medium text-[#7a7a9a]">{activeMentor.name}</p>
                   <p className="text-xs text-[#6a6a8a] mt-1">{activeMentor.tagline}</p>
                   <p className="text-[10px] text-[#7a7a9a] mt-3 max-w-[250px]">Start typing to begin your mentorship session</p>
@@ -256,13 +256,13 @@ export function ChatInterface() {
             return (
               <div key={m.id} className={cn("flex gap-3 max-w-[90%] items-start", m.role === 'user' ? "ml-auto flex-row-reverse" : "")}>
                 {m.role === 'user' ? (
-                  <div className="w-8 h-8 rounded-full flex items-center justify-center shrink-0 border bg-[#f2f2f8] border-[#d0d0de]">
+                  <div className="w-8 h-8 rounded-full flex items-center justify-center shrink-0 border bg-white/50 border-white/30">
                     <User className="w-4 h-4 text-[#5a5a7a]" />
                   </div>
                 ) : mentorData ? (
-                  <div className={cn("w-10 h-10 min-w-[40px] min-h-[40px] rounded-full flex items-center justify-center text-[#1a1a2e] text-sm font-bold shrink-0 border-2 border-[#d0d0de] mt-0.5", m.mentor ? BOT_COLORS[m.mentor] : "")}>{mentorData.initials}</div>
+                  <div className={cn("w-10 h-10 min-w-[40px] min-h-[40px] rounded-full flex items-center justify-center text-[#1a1a2e] text-sm font-bold shrink-0 border-2 border-white/30 mt-0.5", m.mentor ? BOT_COLORS[m.mentor] : "")}>{mentorData.initials}</div>
                 ) : (
-                  <div className="w-8 h-8 rounded-full flex items-center justify-center shrink-0 border bg-[#f2f2f8] border-[#d0d0de]">
+                  <div className="w-8 h-8 rounded-full flex items-center justify-center shrink-0 border bg-white/50 border-white/30">
                     <Bot className="w-4 h-4 text-[#5a5a7a]" />
                   </div>
                 )}
@@ -274,10 +274,10 @@ export function ChatInterface() {
                     "rounded-2xl text-sm",
                     m.role === 'user' 
                       ? "p-3 bg-[#e0e0ea] text-[#1a1a2e] font-medium leading-relaxed whitespace-pre-wrap" 
-                      : "bg-[#f2f2f8] border border-[#d0d0de]"
+                      : "bg-white/50 border border-white/30"
                   )}>
                     {m.attachment && (
-                      <div className="flex items-center gap-2 mb-2 p-2 rounded bg-[#eeeef4] text-xs font-mono text-[#6a6a8a] mx-3 mt-3">
+                      <div className="flex items-center gap-2 mb-2 p-2 rounded bg-white/60 text-xs font-mono text-[#6a6a8a] mx-3 mt-3">
                         <FileText className="w-3 h-3" />
                         Attached: {m.attachment.replace('_', ' ')}.pdf
                       </div>
@@ -297,10 +297,10 @@ export function ChatInterface() {
           })}
           {isLoading && (
             <div className="flex gap-3">
-              <div className="w-8 h-8 rounded-full bg-[#f2f2f8] border border-[#d0d0de] flex items-center justify-center shrink-0">
+              <div className="w-8 h-8 rounded-full bg-white/50 border border-white/30 flex items-center justify-center shrink-0">
                 <Loader2 className="w-4 h-4 text-[#7a7a9a] animate-spin" />
               </div>
-              <div className="p-3 rounded-2xl bg-[#f2f2f8] border border-[#d0d0de] flex gap-1.5">
+              <div className="p-3 rounded-2xl bg-white/50 border border-white/30 flex gap-1.5">
                 <span className="w-1.5 h-1.5 bg-[#c0c0d0] rounded-full animate-bounce"></span>
                 <span className="w-1.5 h-1.5 bg-[#c0c0d0] rounded-full animate-bounce [animation-delay:0.2s]"></span>
                 <span className="w-1.5 h-1.5 bg-[#c0c0d0] rounded-full animate-bounce [animation-delay:0.4s]"></span>
@@ -310,7 +310,7 @@ export function ChatInterface() {
         </div>
       </ScrollArea>
 
-      <div className="border-t border-[#d0d0de] bg-[#f8f8fc]">
+      <div className="border-t border-white/30 bg-white/70">
         {activeMentor && (
           <div className="px-4 pt-2 flex items-center gap-2">
             <div className={cn("w-4 h-4 rounded-full flex items-center justify-center text-[#1a1a2e] text-[6px] font-bold", activeMentorKey ? BOT_COLORS[activeMentorKey] : "")}>{activeMentor.initials}</div>
@@ -327,7 +327,7 @@ export function ChatInterface() {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && handleSend()}
-              className="pr-10 bg-[#f2f2f8] border-[#d0d0de] h-11 text-[#1a1a2e] placeholder:text-[#6a6a8a]"
+              className="pr-10 bg-white/50 border-white/30 h-11 text-[#1a1a2e] placeholder:text-[#6a6a8a]"
               disabled={isLoading}
               data-testid="input-chat"
             />
@@ -335,7 +335,7 @@ export function ChatInterface() {
               <Button 
                 size="icon" 
                 variant="ghost" 
-                className="w-8 h-8 rounded-full hover:bg-[#eeeef4] text-[#7a7a9a]"
+                className="w-8 h-8 rounded-full hover:bg-white/60 text-[#7a7a9a]"
                 onClick={() => handleSend("credit_report")}
                 title="Attach Credit Report"
                 disabled={isLoading || !user?.hasCreditReport}

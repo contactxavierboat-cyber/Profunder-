@@ -81,7 +81,7 @@ function TechBackground() {
     window.addEventListener('resize', resizeHandler);
     return () => { cancelAnimationFrame(animationId); window.removeEventListener('resize', resizeHandler); };
   }, []);
-  return <canvas ref={canvasRef} className="fixed top-0 left-0 pointer-events-none" style={{ zIndex: 1 }} />;
+  return <canvas ref={canvasRef} className="fixed top-0 left-0 pointer-events-none" style={{ zIndex: 15 }} />;
 }
 
 const BOT_COLORS: Record<string, string> = {
@@ -665,8 +665,8 @@ export default function DashboardPage() {
         sidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0",
         "md:flex",
         !sidebarOpen && "hidden md:flex"
-      )} style={{ background: 'rgba(248,248,252,0.98)' }}>
-        <div className="h-11 px-4 flex items-center justify-between border-b border-[#d0d0de] bg-[#f2f2f8]">
+      )} style={{ background: 'rgba(255,255,255,0.75)', backdropFilter: 'blur(20px)' }}>
+        <div className="h-11 px-4 flex items-center justify-between border-b border-white/30 bg-white/50">
           <div className="flex items-center gap-2">
             <span className="relative w-7 h-7 flex items-center justify-center">
               <span className="absolute inset-0 rounded-full bg-[#3a3a5a]/15 animate-ping" />
@@ -679,12 +679,12 @@ export default function DashboardPage() {
           </button>
         </div>
 
-        <div className="h-14 px-4 flex items-center gap-3 border-b border-[#d0d0de] bg-transparent">
+        <div className="h-14 px-4 flex items-center gap-3 border-b border-white/30 bg-transparent">
           <div className="relative shrink-0">
-            <div className="w-9 h-9 rounded-lg bg-[#f2f2f8] border border-[#d0d0de] flex items-center justify-center text-[11px] font-bold text-[#1a1a2e]/90">
+            <div className="w-9 h-9 rounded-lg bg-white/50 border border-white/30 flex items-center justify-center text-[11px] font-bold text-[#1a1a2e]/90">
               {(user.displayName || user.email).substring(0, 2).toUpperCase()}
             </div>
-            <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-green-500 border-2 border-[#e0e0ea]" />
+            <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-green-500 border-2 border-white/40" />
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-[12px] font-semibold text-[#1a1a2e] truncate">{user.displayName || user.email.split("@")[0]}</p>
@@ -692,21 +692,21 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        <div className="h-10 px-4 flex items-center gap-2 border-b border-[#d0d0de] bg-transparent">
+        <div className="h-10 px-4 flex items-center gap-2 border-b border-white/30 bg-transparent">
           <button
             data-testid="button-new-chat"
             onClick={() => { clearChat(); setSelectedMentor(null); setMentorCleared(true); setSidebarOpen(false); setActiveTab("chat"); }}
-            className="flex-1 h-7 text-[11px] rounded-lg bg-[#f0f0f6] border border-[#d0d0de] hover:bg-[#eeeef4] active:bg-[#f2f2f8] text-[#1a1a2e]/90 font-medium transition-colors"
+            className="flex-1 h-7 text-[11px] rounded-lg bg-white/60 border border-white/30 hover:bg-white/60 active:bg-white/50 text-[#1a1a2e]/90 font-medium transition-colors"
           >
             + New Chat
           </button>
         </div>
 
         <div className="flex-1 overflow-y-auto bg-transparent" style={{ scrollbarWidth: 'thin' }}>
-          <div className="border-b border-[#d0d0de]">
+          <div className="border-b border-white/30">
             <button
               onClick={() => setBuddyGroups(prev => ({ ...prev, mentors: !prev.mentors }))}
-              className="w-full h-9 flex items-center gap-2 px-4 hover:bg-[#f0f0f6] text-left transition-colors"
+              className="w-full h-9 flex items-center gap-2 px-4 hover:bg-white/50 text-left transition-colors"
               data-testid="buddy-group-mentors"
             >
               <span className="text-[10px] text-[#1a1a2e]/45 font-mono w-3">{buddyGroups.mentors ? "▾" : "▸"}</span>
@@ -739,13 +739,13 @@ export default function DashboardPage() {
                       className={cn(
                         "w-full h-11 flex items-center gap-3 px-4 text-left transition-all",
                         isActive
-                          ? "bg-[#f2f2f8] border-l-2 border-l-[#8a8aa5]"
-                          : "hover:bg-[#f2f2f8] border-l-2 border-l-transparent"
+                          ? "bg-white/50 border-l-2 border-l-[#8a8aa5]"
+                          : "hover:bg-white/50 border-l-2 border-l-transparent"
                       )}
                     >
                       <div className="relative shrink-0">
-                        <div className={cn("w-8 h-8 rounded-lg border border-[#d0d0de] flex items-center justify-center text-[#1a1a2e] text-[10px] font-bold", BOT_COLORS[key])}>{mentor.initials}</div>
-                        <div className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-green-500 border-2 border-[#e0e0ea]" />
+                        <div className={cn("w-8 h-8 rounded-lg border border-white/30 flex items-center justify-center text-[#1a1a2e] text-[10px] font-bold", BOT_COLORS[key])}>{mentor.initials}</div>
+                        <div className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-green-500 border-2 border-white/40" />
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className={cn("text-[12px] font-semibold truncate leading-tight", isActive ? "text-[#1a1a2e]" : "text-[#1a1a2e]/90")}>{mentor.name}</p>
@@ -758,10 +758,10 @@ export default function DashboardPage() {
             )}
           </div>
 
-          <div className="border-b border-[#d0d0de]">
+          <div className="border-b border-white/30">
             <button
               onClick={() => setBuddyGroups(prev => ({ ...prev, friends: !prev.friends }))}
-              className="w-full h-9 flex items-center gap-2 px-4 hover:bg-[#f0f0f6] text-left transition-colors"
+              className="w-full h-9 flex items-center gap-2 px-4 hover:bg-white/50 text-left transition-colors"
               data-testid="buddy-group-friends"
             >
               <span className="text-[10px] text-[#1a1a2e]/45 font-mono w-3">{buddyGroups.friends ? "▾" : "▸"}</span>
@@ -772,7 +772,7 @@ export default function DashboardPage() {
               <div className="pb-1">
                 <button
                   onClick={() => setShowAddFriend(true)}
-                  className="w-full h-9 flex items-center gap-3 px-4 hover:bg-[#f2f2f8] text-left transition-colors"
+                  className="w-full h-9 flex items-center gap-3 px-4 hover:bg-white/50 text-left transition-colors"
                   data-testid="button-add-friend"
                 >
                   <UserPlus className="w-3.5 h-3.5 text-green-400/50" />
@@ -784,7 +784,7 @@ export default function DashboardPage() {
                   </div>
                 )}
                 {pendingRequests.map((req: any) => (
-                  <div key={req.friendshipId} className="h-11 flex items-center gap-3 px-4 hover:bg-[#f2f2f8] transition-colors">
+                  <div key={req.friendshipId} className="h-11 flex items-center gap-3 px-4 hover:bg-white/50 transition-colors">
                     <div className="w-7 h-7 rounded-lg bg-amber-500/15 border border-amber-500/20 flex items-center justify-center text-[9px] font-bold text-amber-400">
                       {(req.displayName || "?").substring(0, 2).toUpperCase()}
                     </div>
@@ -802,12 +802,12 @@ export default function DashboardPage() {
                   </div>
                 ))}
                 {friendsList.map((f: any) => (
-                  <div key={f.friendshipId} className="group h-11 flex items-center gap-3 px-4 hover:bg-[#f2f2f8] transition-colors cursor-pointer" onClick={() => { openDm(f.id, f.displayName || f.email); setSidebarOpen(false); }}>
+                  <div key={f.friendshipId} className="group h-11 flex items-center gap-3 px-4 hover:bg-white/50 transition-colors cursor-pointer" onClick={() => { openDm(f.id, f.displayName || f.email); setSidebarOpen(false); }}>
                     <div className="relative shrink-0">
-                      <div className="w-7 h-7 rounded-lg bg-[#f2f2f8] border border-[#d0d0de] flex items-center justify-center text-[9px] font-bold text-[#1a1a2e]/80">
+                      <div className="w-7 h-7 rounded-lg bg-white/50 border border-white/30 flex items-center justify-center text-[9px] font-bold text-[#1a1a2e]/80">
                         {(f.displayName || "?").substring(0, 2).toUpperCase()}
                       </div>
-                      <div className="absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full bg-green-500 border-2 border-[#e0e0ea]" />
+                      <div className="absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full bg-green-500 border-2 border-white/40" />
                     </div>
                     <p className="text-[11px] text-[#1a1a2e]/80 truncate flex-1">{f.displayName}</p>
                     <button onClick={(e) => { e.stopPropagation(); removeFriend(f.friendshipId); }} className="hidden group-hover:flex w-5 h-5 rounded-md bg-red-500/10 hover:bg-red-500/20 items-center justify-center" data-testid={`remove-friend-${f.id}`}>
@@ -824,10 +824,10 @@ export default function DashboardPage() {
             )}
           </div>
 
-          <div className="border-b border-[#d0d0de]">
+          <div className="border-b border-white/30">
             <button
               onClick={() => setBuddyGroups(prev => ({ ...prev, offline: !prev.offline }))}
-              className="w-full h-9 flex items-center gap-2 px-4 hover:bg-[#f0f0f6] text-left transition-colors"
+              className="w-full h-9 flex items-center gap-2 px-4 hover:bg-white/50 text-left transition-colors"
               data-testid="buddy-group-offline"
             >
               <span className="text-[10px] text-[#1a1a2e]/45 font-mono w-3">{buddyGroups.offline ? "▾" : "▸"}</span>
@@ -836,7 +836,7 @@ export default function DashboardPage() {
             {buddyGroups.offline && (
               <div className="pb-1">
                 {messages.length > 0 ? (
-                  <div className="h-9 flex items-center gap-3 px-4 hover:bg-[#f2f2f8] cursor-pointer transition-colors">
+                  <div className="h-9 flex items-center gap-3 px-4 hover:bg-white/50 cursor-pointer transition-colors">
                     <div className="w-2.5 h-2.5 rounded-full bg-green-500 shrink-0" />
                     <span className="text-[11px] text-[#1a1a2e]/65 truncate flex-1">{messages[0]?.content.substring(0, 35)}...</span>
                   </div>
@@ -850,13 +850,13 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        <div className="h-11 px-4 flex items-center gap-3 border-t border-[#d0d0de] bg-[#f2f2f8]">
+        <div className="h-11 px-4 flex items-center gap-3 border-t border-white/30 bg-white/50">
           <div className="w-2.5 h-2.5 rounded-full bg-green-500 shrink-0" />
           <span className="text-[10px] text-[#1a1a2e]/65 flex-1 truncate">{user.displayName || user.email}</span>
           <button
             data-testid="button-logout"
             onClick={logout}
-            className="h-7 text-[10px] px-3 rounded-lg bg-[#f0f0f6] border border-[#d0d0de] hover:bg-[#eeeef4] text-[#1a1a2e]/65 transition-colors"
+            className="h-7 text-[10px] px-3 rounded-lg bg-white/60 border border-white/30 hover:bg-white/60 text-[#1a1a2e]/65 transition-colors"
           >
             Sign Off
           </button>
@@ -865,18 +865,18 @@ export default function DashboardPage() {
 
       <main className="flex-1 flex flex-col min-w-0 relative z-10 bg-transparent">
 
-        <header className="shrink-0 relative z-10 bg-white/90 backdrop-blur-md border-b border-[#d0d0de]">
+        <header className="shrink-0 relative z-10 bg-white/90 backdrop-blur-md border-b border-white/30">
           <div className="h-14 flex items-center justify-between px-4">
             <div className="flex items-center gap-3">
               <button
                 data-testid="button-menu"
                 onClick={() => setSidebarOpen(true)}
-                className="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-[#eeeef4] transition-colors md:hidden"
+                className="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-white/60 transition-colors md:hidden"
               >
                 <Menu className="w-5 h-5 text-[#1a1a2e]/80" />
               </button>
             </div>
-            <button data-testid="button-new-chat-header" onClick={() => { clearChat(); setSelectedMentor(null); setMentorCleared(true); setActiveTab("chat"); }} className="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-[#eeeef4] transition-colors">
+            <button data-testid="button-new-chat-header" onClick={() => { clearChat(); setSelectedMentor(null); setMentorCleared(true); setActiveTab("chat"); }} className="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-white/60 transition-colors">
               <Plus className="w-5 h-5 text-[#1a1a2e]/75" />
             </button>
           </div>
@@ -974,7 +974,7 @@ export default function DashboardPage() {
                   </div>
 
                   <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 mb-4">
-                    <div className="lg:col-span-2 rounded-2xl bg-[#f2f2f8] backdrop-blur-none border border-[#d0d0de] p-6" data-testid="funding-score-card">
+                    <div className="lg:col-span-2 rounded-2xl bg-white/80 backdrop-blur-md border border-white/40 shadow-[0_8px_32px_rgba(0,0,0,0.04),0_2px_8px_rgba(0,0,0,0.02)] p-6" data-testid="funding-score-card">
                       <p className="text-xs text-[#1a1a2e]/75 mb-1">Capital Readiness Score</p>
                       <div className="flex items-end gap-1">
                         <span className="text-4xl sm:text-5xl font-bold text-[#1a1a2e] tracking-tight font-mono" data-testid="text-score">{fundingData.score}</span>
@@ -983,14 +983,14 @@ export default function DashboardPage() {
                       <div className="flex gap-2 mt-5">
                         <button
                           onClick={fetchFundingReadiness}
-                          className="flex-1 h-10 rounded-xl bg-[#f2f2f8] border border-[#d0d0de] hover:bg-[#eeeef4] text-xs font-medium text-[#1a1a2e]/95 transition-colors flex items-center justify-center gap-2"
+                          className="flex-1 h-10 rounded-xl bg-white/50 border border-white/30 hover:bg-white/60 text-xs font-medium text-[#1a1a2e]/95 transition-colors flex items-center justify-center gap-2"
                           data-testid="button-refresh-score"
                         >
                           <RefreshCw className="w-3.5 h-3.5" /> REFRESH
                         </button>
                         <button
                           onClick={() => setActiveTab("chat")}
-                          className="flex-1 h-10 rounded-xl bg-[#f2f2f8] border border-[#d0d0de] hover:bg-[#eeeef4] text-xs font-medium text-[#1a1a2e]/95 transition-colors flex items-center justify-center gap-2"
+                          className="flex-1 h-10 rounded-xl bg-white/50 border border-white/30 hover:bg-white/60 text-xs font-medium text-[#1a1a2e]/95 transition-colors flex items-center justify-center gap-2"
                           data-testid="button-go-chat"
                         >
                           <MessageCircle className="w-3.5 h-3.5" /> ANALYZE
@@ -998,7 +998,7 @@ export default function DashboardPage() {
                       </div>
                     </div>
 
-                    <div className="lg:col-span-3 rounded-2xl bg-[#f2f2f8] backdrop-blur-none border border-[#d0d0de] p-6" data-testid="stats-row">
+                    <div className="lg:col-span-3 rounded-2xl bg-white/80 backdrop-blur-md border border-white/40 shadow-[0_8px_32px_rgba(0,0,0,0.04),0_2px_8px_rgba(0,0,0,0.02)] p-6" data-testid="stats-row">
                       <div className="grid grid-cols-3 h-full">
                         <div className="flex flex-col justify-center px-2">
                           <p className="text-xs text-[#1a1a2e]/70 mb-1">Tier</p>
@@ -1007,14 +1007,14 @@ export default function DashboardPage() {
                           </p>
                           <p className="text-[10px] text-[#1a1a2e]/60 mt-0.5 truncate">{fundingData.tierEligibility?.label || "No data"}</p>
                         </div>
-                        <div className="flex flex-col justify-center px-2 border-l border-[#d0d0de]">
+                        <div className="flex flex-col justify-center px-2 border-l border-white/30">
                           <p className="text-xs text-[#1a1a2e]/70 mb-1">Mode</p>
                           <p className="text-xl sm:text-2xl font-bold text-[#1a1a2e]" data-testid="text-mode">
                             {fundingData.operatingMode ? (fundingData.operatingMode.mode === "pre_funding" ? "Pre-Fund" : "Repair") : "—"}
                           </p>
                           <p className="text-[10px] text-[#1a1a2e]/60 mt-0.5 truncate">{fundingData.operatingMode?.label || "No data"}</p>
                         </div>
-                        <div className="flex flex-col justify-center px-2 border-l border-[#d0d0de]">
+                        <div className="flex flex-col justify-center px-2 border-l border-white/30">
                           <p className="text-xs text-[#1a1a2e]/70 mb-1">Exposure</p>
                           <p className="text-xl sm:text-2xl font-bold text-[#1a1a2e]" data-testid="text-exposure">
                             {fundingData.exposureCeiling ? `$${(fundingData.exposureCeiling.ceiling / 1000).toFixed(0)}K` : "—"}
@@ -1029,7 +1029,7 @@ export default function DashboardPage() {
 
                   <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 mb-4">
                     <div className="lg:col-span-2 space-y-4">
-                      <div className="rounded-2xl bg-[#f2f2f8] backdrop-blur-none border border-[#d0d0de] p-6" data-testid="savings-donut-card">
+                      <div className="rounded-2xl bg-white/80 backdrop-blur-md border border-white/40 shadow-[0_8px_32px_rgba(0,0,0,0.04),0_2px_8px_rgba(0,0,0,0.02)] p-6" data-testid="savings-donut-card">
                         <div className="flex items-center justify-between">
                           <div>
                             <p className="text-xs text-[#1a1a2e]/70 mb-1">Funding Range</p>
@@ -1053,10 +1053,10 @@ export default function DashboardPage() {
                         </div>
                       </div>
 
-                      <div className="rounded-2xl bg-[#f2f2f8] backdrop-blur-none border border-[#d0d0de] p-6" data-testid="document-upload-card">
+                      <div className="rounded-2xl bg-white/80 backdrop-blur-md border border-white/40 shadow-[0_8px_32px_rgba(0,0,0,0.04),0_2px_8px_rgba(0,0,0,0.02)] p-6" data-testid="document-upload-card">
                         <div className="flex items-center justify-between mb-4">
                           <p className="text-xs text-[#1a1a2e]/75">Document Analysis</p>
-                          <span className="text-[9px] text-[#1a1a2e]/55 bg-[#f0f0f6] px-2 py-0.5 rounded-full">GPT-4o</span>
+                          <span className="text-[9px] text-[#1a1a2e]/55 bg-white/50 px-2 py-0.5 rounded-full">GPT-4o</span>
                         </div>
                         <input
                           ref={creditReportInputRef}
@@ -1090,7 +1090,7 @@ export default function DashboardPage() {
                               "w-full flex items-center gap-3 p-3 rounded-xl border transition-all text-left",
                               fundingData.hasCreditReport
                                 ? "border-green-500/20 bg-green-500/[0.04]"
-                                : "border-[#d0d0de] bg-[#f2f2f8] hover:bg-[#eeeef4]",
+                                : "border-white/30 bg-white/50 hover:bg-white/60",
                               docUploading && docUploadType === "credit_report" && "opacity-50"
                             )}
                             data-testid="button-upload-credit-report"
@@ -1114,7 +1114,7 @@ export default function DashboardPage() {
                               "w-full flex items-center gap-3 p-3 rounded-xl border transition-all text-left",
                               fundingData.hasBankStatement
                                 ? "border-green-500/20 bg-green-500/[0.04]"
-                                : "border-[#d0d0de] bg-[#f2f2f8] hover:bg-[#eeeef4]",
+                                : "border-white/30 bg-white/50 hover:bg-white/60",
                               docUploading && docUploadType === "bank_statement" && "opacity-50"
                             )}
                             data-testid="button-upload-bank-statement"
@@ -1133,13 +1133,13 @@ export default function DashboardPage() {
                           </button>
                         </div>
                         {docUploading && (
-                          <div className="mt-3 flex items-center gap-3 p-3 rounded-xl bg-[#f2f2f8] border border-[#d0d0de]">
+                          <div className="mt-3 flex items-center gap-3 p-3 rounded-xl bg-white/50 border border-white/30">
                             <Loader2 className="w-4 h-4 text-[#1a1a2e]/75 animate-spin shrink-0" />
                             <p className="text-[10px] text-[#1a1a2e]/75">Analyzing document...</p>
                           </div>
                         )}
                         {fundingData.analysisSummary && (
-                          <div className="mt-3 p-3 rounded-xl bg-[#f2f2f8] border border-[#d0d0de]">
+                          <div className="mt-3 p-3 rounded-xl bg-white/50 border border-white/30">
                             <p className="text-[10px] text-[#1a1a2e]/80 leading-relaxed">{fundingData.analysisSummary}</p>
                             {fundingData.lastAnalysisDate && (
                               <p className="text-[9px] text-[#1a1a2e]/55 mt-1.5">{timeAgo(fundingData.lastAnalysisDate)} ago</p>
@@ -1149,7 +1149,7 @@ export default function DashboardPage() {
                       </div>
                     </div>
 
-                    <div className="lg:col-span-3 rounded-2xl bg-[#f2f2f8] backdrop-blur-none border border-[#d0d0de] p-6" data-testid="component-breakdown-card">
+                    <div className="lg:col-span-3 rounded-2xl bg-white/80 backdrop-blur-md border border-white/40 shadow-[0_8px_32px_rgba(0,0,0,0.04),0_2px_8px_rgba(0,0,0,0.02)] p-6" data-testid="component-breakdown-card">
                       <div className="flex items-center justify-between mb-5">
                         <p className="text-xs text-[#1a1a2e]/75">Component Breakdown</p>
                       </div>
@@ -1188,7 +1188,7 @@ export default function DashboardPage() {
                                 <span className="text-[11px] text-[#1a1a2e]/80">{comp.label}</span>
                                 <span className="text-[11px] font-mono text-[#1a1a2e]/70">{comp.score}/{comp.max}</span>
                               </div>
-                              <div className="w-full h-1.5 rounded-full bg-[#f0f0f6] overflow-hidden">
+                              <div className="w-full h-1.5 rounded-full bg-white/50 overflow-hidden">
                                 <div className="h-full rounded-full transition-all duration-700 bg-[#8a8aa5]/60" style={{ width: `${pct}%` }} />
                               </div>
                             </div>
@@ -1199,7 +1199,7 @@ export default function DashboardPage() {
                   </div>
 
                   {fundingData.alerts.length > 0 && (
-                    <div className="rounded-2xl bg-[#f2f2f8] backdrop-blur-none border border-[#d0d0de] p-6 mb-4" data-testid="risk-alerts-card">
+                    <div className="rounded-2xl bg-white/80 backdrop-blur-md border border-white/40 shadow-[0_8px_32px_rgba(0,0,0,0.04),0_2px_8px_rgba(0,0,0,0.02)] p-6 mb-4" data-testid="risk-alerts-card">
                       <div className="flex items-center justify-between mb-4">
                         <p className="text-xs text-[#1a1a2e]/75">Risk Alerts</p>
                         <span className="text-[10px] text-[#1a1a2e]/55">{fundingData.alerts.length} alert{fundingData.alerts.length > 1 ? "s" : ""}</span>
@@ -1214,7 +1214,7 @@ export default function DashboardPage() {
                               return next;
                             })}
                             className={cn(
-                              "w-full text-left rounded-xl border-l-[3px] bg-[#f2f2f8] hover:bg-[#eeeef4] transition-all p-3.5",
+                              "w-full text-left rounded-xl border-l-[3px] bg-white/50 hover:bg-white/60 transition-all p-3.5",
                               alert.severity === "red" ? "border-l-red-500/60" : alert.severity === "yellow" ? "border-l-yellow-500/60" : "border-l-[#c0c0d0]"
                             )}
                             data-testid={`alert-${idx}`}
@@ -1242,7 +1242,7 @@ export default function DashboardPage() {
                   )}
 
                   {fundingData.denialSimulation && fundingData.denialSimulation.length > 0 && (
-                    <div className="rounded-2xl bg-[#f2f2f8] backdrop-blur-none border border-red-500/10 p-6 mb-4" data-testid="denial-simulation-card">
+                    <div className="rounded-2xl bg-white/50 backdrop-blur-none border border-red-500/10 p-6 mb-4" data-testid="denial-simulation-card">
                       <div className="flex items-center justify-between mb-4">
                         <p className="text-xs text-red-400/60">Denial Simulation</p>
                         <span className="text-[10px] text-[#1a1a2e]/45">{fundingData.denialSimulation.length} trigger{fundingData.denialSimulation.length > 1 ? "s" : ""}</span>
@@ -1256,7 +1256,7 @@ export default function DashboardPage() {
                               if (next.has(idx)) next.delete(idx); else next.add(idx);
                               return next;
                             })}
-                            className="w-full text-left rounded-xl bg-[#f2f2f8] hover:bg-[#eeeef4] transition-all p-3.5"
+                            className="w-full text-left rounded-xl bg-white/50 hover:bg-white/60 transition-all p-3.5"
                             data-testid={`denial-${idx}`}
                           >
                             <div className="flex items-start gap-3">
@@ -1284,12 +1284,12 @@ export default function DashboardPage() {
                   )}
 
                   {fundingData.actionPlan.length > 0 && (
-                    <div className="rounded-2xl bg-[#f2f2f8] backdrop-blur-none border border-[#d0d0de] p-6 mb-4" data-testid="action-plan-card">
+                    <div className="rounded-2xl bg-white/80 backdrop-blur-md border border-white/40 shadow-[0_8px_32px_rgba(0,0,0,0.04),0_2px_8px_rgba(0,0,0,0.02)] p-6 mb-4" data-testid="action-plan-card">
                       <p className="text-xs text-[#1a1a2e]/75 mb-4">Action Plan</p>
                       <div className="space-y-2">
                         {fundingData.actionPlan.map((step, idx) => (
-                          <div key={idx} className="flex items-start gap-3 p-3 rounded-xl bg-[#f2f2f8]" data-testid={`action-step-${idx}`}>
-                            <div className="w-6 h-6 rounded-full bg-[#f2f2f8] flex items-center justify-center text-[10px] font-mono text-[#1a1a2e]/75 shrink-0">
+                          <div key={idx} className="flex items-start gap-3 p-3 rounded-xl bg-white/50" data-testid={`action-step-${idx}`}>
+                            <div className="w-6 h-6 rounded-full bg-white/50 flex items-center justify-center text-[10px] font-mono text-[#1a1a2e]/75 shrink-0">
                               {idx + 1}
                             </div>
                             <p className="text-sm text-[#1a1a2e]/90 leading-relaxed">{step}</p>
@@ -1300,14 +1300,14 @@ export default function DashboardPage() {
                   )}
 
                   {fundingData.analysisNextSteps && fundingData.analysisNextSteps.length > 0 && (
-                    <div className="rounded-2xl bg-[#f2f2f8] backdrop-blur-none border border-[#d0d0de] p-6 mb-4" data-testid="next-steps-card">
+                    <div className="rounded-2xl bg-white/80 backdrop-blur-md border border-white/40 shadow-[0_8px_32px_rgba(0,0,0,0.04),0_2px_8px_rgba(0,0,0,0.02)] p-6 mb-4" data-testid="next-steps-card">
                       <div className="flex items-center justify-between mb-4">
                         <p className="text-xs text-[#1a1a2e]/75">Next Steps</p>
-                        <span className="text-[9px] text-[#1a1a2e]/45 bg-[#f0f0f6] px-2 py-0.5 rounded-full">AI Generated</span>
+                        <span className="text-[9px] text-[#1a1a2e]/45 bg-white/50 px-2 py-0.5 rounded-full">AI Generated</span>
                       </div>
                       <div className="space-y-2">
                         {fundingData.analysisNextSteps.map((step, idx) => (
-                          <div key={idx} className="flex items-start gap-3 p-3 rounded-xl bg-[#f2f2f8]" data-testid={`next-step-${idx}`}>
+                          <div key={idx} className="flex items-start gap-3 p-3 rounded-xl bg-white/50" data-testid={`next-step-${idx}`}>
                             <Sparkles className="w-4 h-4 text-[#1a1a2e]/55 shrink-0 mt-0.5" />
                             <p className="text-sm text-[#1a1a2e]/80 leading-relaxed">{step}</p>
                           </div>
@@ -1316,11 +1316,11 @@ export default function DashboardPage() {
                     </div>
                   )}
 
-                  <div className="rounded-2xl bg-[#f2f2f8] backdrop-blur-none border border-[#d0d0de] p-6 mb-4" data-testid="insights-card">
+                  <div className="rounded-2xl bg-white/80 backdrop-blur-md border border-white/40 shadow-[0_8px_32px_rgba(0,0,0,0.04),0_2px_8px_rgba(0,0,0,0.02)] p-6 mb-4" data-testid="insights-card">
                     <p className="text-xs text-[#1a1a2e]/75 mb-4">Insights</p>
                     <div className="space-y-2">
                       {INSIGHTS.map((insight, idx) => (
-                        <div key={idx} className="p-3.5 rounded-xl bg-[#f2f2f8] border border-[#d0d0de]" data-testid={`insight-${idx}`}>
+                        <div key={idx} className="p-3.5 rounded-xl bg-white/50 border border-white/30" data-testid={`insight-${idx}`}>
                           <p className="text-sm text-[#1a1a2e]/90 mb-1">{insight.title}</p>
                           <p className="text-[11px] text-[#1a1a2e]/65 leading-relaxed">{insight.summary}</p>
                         </div>
@@ -1423,7 +1423,7 @@ export default function DashboardPage() {
                                   className="absolute inset-0 flex items-center justify-center z-10"
                                   data-testid={`play-short-${idx}`}
                                 >
-                                  <div className="w-16 h-16 rounded-full bg-white/70 backdrop-blur-none flex items-center justify-center border border-[#d0d0de]">
+                                  <div className="w-16 h-16 rounded-full bg-white/70 backdrop-blur-none flex items-center justify-center border border-white/30">
                                     <Play className="w-7 h-7 text-[#1a1a2e] ml-1" fill="white" />
                                   </div>
                                 </button>
@@ -1440,7 +1440,7 @@ export default function DashboardPage() {
                                 <p className="text-[13px] font-semibold text-[#1a1a2e] truncate">{item.source}</p>
                                 <p className="text-[10px] text-[#1a1a2e]/80">{timeAgo(item.publishedAt)}</p>
                               </div>
-                              <span className="text-[9px] px-2 py-1 rounded-full bg-white/60 text-[#1a1a2e]/90 border border-[#e0e0ea] uppercase tracking-wider font-medium">
+                              <span className="text-[9px] px-2 py-1 rounded-full bg-white/60 text-[#1a1a2e]/90 border border-white/40 uppercase tracking-wider font-medium">
                                 {item.category}
                               </span>
                             </div>
@@ -1458,7 +1458,7 @@ export default function DashboardPage() {
                               }}
                               data-testid={`link-${item.id}`}
                             >
-                              <div className="w-10 h-10 rounded-full bg-white/60 backdrop-blur-none flex items-center justify-center border border-[#e0e0ea] group-hover:bg-white/70 transition-colors">
+                              <div className="w-10 h-10 rounded-full bg-white/60 backdrop-blur-none flex items-center justify-center border border-white/40 group-hover:bg-white/70 transition-colors">
                                 <ExternalLink className="w-4 h-4 text-[#1a1a2e]" />
                               </div>
                               <span className="text-[9px] text-[#1a1a2e]/80">Open</span>
@@ -1470,7 +1470,7 @@ export default function DashboardPage() {
                                 toast({ title: "Link copied!" });
                               }}
                             >
-                              <div className="w-10 h-10 rounded-full bg-white/60 backdrop-blur-none flex items-center justify-center border border-[#e0e0ea] group-hover:bg-white/70 transition-colors">
+                              <div className="w-10 h-10 rounded-full bg-white/60 backdrop-blur-none flex items-center justify-center border border-white/40 group-hover:bg-white/70 transition-colors">
                                 <Share2 className="w-4 h-4 text-[#1a1a2e]" />
                               </div>
                               <span className="text-[9px] text-[#1a1a2e]/80">Share</span>
@@ -1524,7 +1524,7 @@ export default function DashboardPage() {
 
             </div>
           ) : activeTab === "repair" ? (
-            <div className="w-full h-full flex flex-col" style={{ background: '#f8f8fc' }}>
+            <div className="w-full h-full flex flex-col" style={{ background: 'transparent' }}>
               <div className="flex-1 overflow-y-auto px-5 sm:px-8 py-6 max-w-[800px] mx-auto w-full">
                 <div className="flex items-center gap-3 mb-6">
                   <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-600 to-amber-600 flex items-center justify-center">
@@ -1536,10 +1536,10 @@ export default function DashboardPage() {
                   </div>
                 </div>
 
-                <div className="rounded-2xl bg-[#f2f2f8] backdrop-blur-none border border-orange-500/10 p-6 mb-4" data-testid="credit-repair-card">
+                <div className="rounded-2xl bg-white/50 backdrop-blur-none border border-orange-500/10 p-6 mb-4" data-testid="credit-repair-card">
                   <div className="flex items-center justify-between mb-4">
                     <p className="text-xs text-orange-400/60">Credit Repair System</p>
-                    <span className="text-[9px] text-[#1a1a2e]/45 bg-[#f0f0f6] px-2 py-0.5 rounded-full">GPT-4o</span>
+                    <span className="text-[9px] text-[#1a1a2e]/45 bg-white/50 px-2 py-0.5 rounded-full">GPT-4o</span>
                   </div>
 
                   {!fundingData?.hasCreditReport ? (
@@ -1554,7 +1554,7 @@ export default function DashboardPage() {
                       <button
                         onClick={runRepairAnalysis}
                         disabled={repairAnalyzing}
-                        className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#f2f2f8] border border-[#d0d0de] hover:bg-[#eeeef4] text-[#1a1a2e]/90 text-sm font-medium transition-all disabled:opacity-50"
+                        className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white/50 border border-white/30 hover:bg-white/60 text-[#1a1a2e]/90 text-sm font-medium transition-all disabled:opacity-50"
                         data-testid="button-run-repair"
                       >
                         {repairAnalyzing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Zap className="w-4 h-4" />}
@@ -1571,7 +1571,7 @@ export default function DashboardPage() {
                         <button
                           onClick={runRepairAnalysis}
                           disabled={repairAnalyzing}
-                          className="ml-auto flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#f0f0f6] border border-[#d0d0de] hover:bg-[#eeeef4] text-[10px] text-[#1a1a2e]/70 hover:text-[#1a1a2e]/80 transition-all disabled:opacity-50"
+                          className="ml-auto flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/60 border border-white/30 hover:bg-white/60 text-[10px] text-[#1a1a2e]/70 hover:text-[#1a1a2e]/80 transition-all disabled:opacity-50"
                           data-testid="button-rerun-repair"
                         >
                           {repairAnalyzing ? <Loader2 className="w-3 h-3 animate-spin" /> : <RefreshCw className="w-3 h-3" />}
@@ -1580,7 +1580,7 @@ export default function DashboardPage() {
                       </div>
 
                       {repairData.summary && (
-                        <div className="p-4 rounded-xl bg-[#f2f2f8] border border-[#d0d0de]">
+                        <div className="p-4 rounded-xl bg-white/50 border border-white/30">
                           <p className="text-[10px] text-[#1a1a2e]/65 mb-1.5">What's Hurting Your Profile</p>
                           <p className="text-sm text-[#1a1a2e]/90 leading-relaxed mb-2">{repairData.summary.mainIssues}</p>
                           <p className="text-[10px] text-orange-400/50 mb-1">Priority Action</p>
@@ -1593,7 +1593,7 @@ export default function DashboardPage() {
                           <p className="text-[10px] text-[#1a1a2e]/60 uppercase tracking-widest mb-3">Detected Issues ({repairData.detectedIssues.length})</p>
                           <div className="space-y-2">
                             {repairData.detectedIssues.map((issue: any, idx: number) => (
-                              <div key={idx} className="p-3.5 rounded-xl bg-[#f2f2f8] border border-[#d0d0de]" data-testid={`repair-issue-${idx}`}>
+                              <div key={idx} className="p-3.5 rounded-xl bg-white/50 border border-white/30" data-testid={`repair-issue-${idx}`}>
                                 <div className="flex items-center gap-2 mb-1.5 flex-wrap">
                                   <span className={cn(
                                     "text-[9px] font-bold uppercase px-2 py-0.5 rounded",
@@ -1621,8 +1621,8 @@ export default function DashboardPage() {
                           <p className="text-[10px] text-[#1a1a2e]/60 uppercase tracking-widest mb-3">Repair Action Plan</p>
                           <div className="space-y-2">
                             {repairData.actionPlan.map((step: any, idx: number) => (
-                              <div key={idx} className="flex items-start gap-3 p-3 rounded-xl bg-[#f2f2f8]" data-testid={`repair-step-${idx}`}>
-                                <div className="w-6 h-6 rounded-full bg-[#f0f0f6] flex items-center justify-center text-[10px] font-mono text-[#1a1a2e]/65 shrink-0">
+                              <div key={idx} className="flex items-start gap-3 p-3 rounded-xl bg-white/50" data-testid={`repair-step-${idx}`}>
+                                <div className="w-6 h-6 rounded-full bg-white/50 flex items-center justify-center text-[10px] font-mono text-[#1a1a2e]/65 shrink-0">
                                   {step.step || idx + 1}
                                 </div>
                                 <div className="flex-1 min-w-0">
@@ -1643,14 +1643,14 @@ export default function DashboardPage() {
                           <p className="text-[10px] text-[#1a1a2e]/60 uppercase tracking-widest mb-3">Generated Dispute Letters ({repairData.letters.length})</p>
                           <div className="space-y-2">
                             {repairData.letters.map((letter: any, idx: number) => (
-                              <div key={idx} className="rounded-xl bg-[#f2f2f8] border border-[#d0d0de] overflow-hidden" data-testid={`letter-${idx}`}>
+                              <div key={idx} className="rounded-xl bg-white/50 border border-white/30 overflow-hidden" data-testid={`letter-${idx}`}>
                                 <button
                                   onClick={() => setExpandedLetters(prev => {
                                     const next = new Set(prev);
                                     if (next.has(idx)) next.delete(idx); else next.add(idx);
                                     return next;
                                   })}
-                                  className="w-full text-left p-3.5 flex items-center gap-3 hover:bg-[#f0f0f6] transition-colors"
+                                  className="w-full text-left p-3.5 flex items-center gap-3 hover:bg-white/50 transition-colors"
                                   data-testid={`button-expand-letter-${idx}`}
                                 >
                                   <FileText className="w-4 h-4 text-orange-400/40 shrink-0" />
@@ -1661,19 +1661,19 @@ export default function DashboardPage() {
                                   <ChevronRight className={cn("w-4 h-4 text-[#1a1a2e]/40 shrink-0 transition-transform", expandedLetters.has(idx) && "rotate-90")} />
                                 </button>
                                 {expandedLetters.has(idx) && (
-                                  <div className="px-3.5 pb-3.5 border-t border-[#d0d0de]">
+                                  <div className="px-3.5 pb-3.5 border-t border-white/30">
                                     <div className="flex items-center gap-2 py-2">
                                       <span className="text-[9px] text-[#1a1a2e]/55">To: {letter.recipientAddress}</span>
                                       <button
                                         onClick={() => copyLetterToClipboard(letter.body, idx)}
-                                        className="ml-auto flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#f0f0f6] border border-[#d0d0de] hover:bg-[#eeeef4] text-[10px] text-[#1a1a2e]/75 font-medium transition-all"
+                                        className="ml-auto flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/60 border border-white/30 hover:bg-white/60 text-[10px] text-[#1a1a2e]/75 font-medium transition-all"
                                         data-testid={`button-copy-letter-${idx}`}
                                       >
                                         {copiedLetter === idx ? <CheckCircle2 className="w-3 h-3" /> : <Eye className="w-3 h-3" />}
                                         {copiedLetter === idx ? "Copied!" : "Copy Letter"}
                                       </button>
                                     </div>
-                                    <div className="mt-2 p-4 rounded-xl bg-[#f0f0f6] border border-[#d0d0de] font-mono text-[10px] text-[#1a1a2e]/80 leading-relaxed whitespace-pre-wrap max-h-96 overflow-y-auto" style={{ scrollbarWidth: 'thin' }}>
+                                    <div className="mt-2 p-4 rounded-xl bg-white/60 border border-white/30 font-mono text-[10px] text-[#1a1a2e]/80 leading-relaxed whitespace-pre-wrap max-h-96 overflow-y-auto" style={{ scrollbarWidth: 'thin' }}>
                                       {letter.body}
                                     </div>
                                   </div>
@@ -1691,9 +1691,9 @@ export default function DashboardPage() {
                   )}
                 </div>
 
-                <div className="rounded-2xl bg-[#f2f2f8] backdrop-blur-none border border-[#d0d0de] overflow-hidden mb-4" data-testid="repair-qa-card">
-                  <div className="px-6 py-4 flex items-center gap-3 border-b border-[#d0d0de]">
-                    <div className="w-8 h-8 rounded-xl bg-[#f0f0f6] border border-[#d0d0de] flex items-center justify-center">
+                <div className="rounded-2xl bg-white/80 backdrop-blur-md border border-white/40 shadow-[0_8px_32px_rgba(0,0,0,0.04),0_2px_8px_rgba(0,0,0,0.02)] overflow-hidden mb-4" data-testid="repair-qa-card">
+                  <div className="px-6 py-4 flex items-center gap-3 border-b border-white/30">
+                    <div className="w-8 h-8 rounded-xl bg-white/60 border border-white/30 flex items-center justify-center">
                       <MessageCircle className="w-4 h-4 text-orange-400/50" />
                     </div>
                     <div>
@@ -1701,7 +1701,7 @@ export default function DashboardPage() {
                       <p className="text-[10px] text-[#1a1a2e]/60">Get personalized answers based on your uploaded financial data</p>
                     </div>
                     {qaMessages.length > 0 && (
-                      <span className="ml-auto text-[9px] text-[#1a1a2e]/55 bg-[#f0f0f6] px-2 py-0.5 rounded-full">{Math.floor(qaMessages.length / 2)} Q&A</span>
+                      <span className="ml-auto text-[9px] text-[#1a1a2e]/55 bg-white/50 px-2 py-0.5 rounded-full">{Math.floor(qaMessages.length / 2)} Q&A</span>
                     )}
                   </div>
 
@@ -1721,7 +1721,7 @@ export default function DashboardPage() {
                               key={i}
                               data-testid={`button-qa-suggestion-${i}`}
                               onClick={() => { setQaInput(suggestion); qaInputRef.current?.focus(); }}
-                              className="text-left px-3 py-2.5 rounded-xl border border-[#d0d0de] bg-[#f2f2f8] hover:bg-[#eeeef4] transition-all text-[11px] text-[#1a1a2e]/70 hover:text-[#1a1a2e]/90"
+                              className="text-left px-3 py-2.5 rounded-xl border border-white/30 bg-white/50 hover:bg-white/60 transition-all text-[11px] text-[#1a1a2e]/70 hover:text-[#1a1a2e]/90"
                             >
                               {suggestion}
                             </button>
@@ -1733,15 +1733,15 @@ export default function DashboardPage() {
                     {qaMessages.map((msg: any) => (
                       <div key={msg.id} className={cn("flex gap-2.5", msg.role === "user" ? "justify-end" : "justify-start")} data-testid={`qa-msg-${msg.id}`}>
                         {msg.role === "assistant" && (
-                          <div className="w-7 h-7 rounded-lg bg-[#f0f0f6] border border-[#d0d0de] flex items-center justify-center shrink-0 mt-0.5">
+                          <div className="w-7 h-7 rounded-lg bg-white/60 border border-white/30 flex items-center justify-center shrink-0 mt-0.5">
                             <Cpu className="w-3.5 h-3.5 text-[#1a1a2e]/65" />
                           </div>
                         )}
                         <div className={cn(
                           "max-w-[80%] rounded-2xl px-4 py-3",
                           msg.role === "user"
-                            ? "bg-[#eeeef4] border border-[#d0d0de]"
-                            : "bg-[#f2f2f8] border border-[#d0d0de]"
+                            ? "bg-white/60 border border-white/30"
+                            : "bg-white/50 border border-white/30"
                         )}>
                           <p className="text-[12px] text-[#1a1a2e]/90 leading-relaxed whitespace-pre-wrap">{msg.content}</p>
                           <p className="text-[9px] text-[#1a1a2e]/45 mt-1.5">
@@ -1753,10 +1753,10 @@ export default function DashboardPage() {
 
                     {qaLoading && (
                       <div className="flex gap-2.5 justify-start">
-                        <div className="w-7 h-7 rounded-lg bg-[#f0f0f6] border border-[#d0d0de] flex items-center justify-center shrink-0">
+                        <div className="w-7 h-7 rounded-lg bg-white/60 border border-white/30 flex items-center justify-center shrink-0">
                           <Cpu className="w-3.5 h-3.5 text-[#1a1a2e]/65" />
                         </div>
-                        <div className="bg-[#f2f2f8] border border-[#d0d0de] rounded-2xl px-4 py-3">
+                        <div className="bg-white/50 border border-white/30 rounded-2xl px-4 py-3">
                           <div className="flex items-center gap-2">
                             <Loader2 className="w-3.5 h-3.5 animate-spin text-[#1a1a2e]/60" />
                             <span className="text-[11px] text-[#1a1a2e]/60">Analyzing your data...</span>
@@ -1767,7 +1767,7 @@ export default function DashboardPage() {
                     <div ref={qaEndRef} />
                   </div>
 
-                  <div className="px-4 pb-4 pt-2 border-t border-[#d0d0de]">
+                  <div className="px-4 pb-4 pt-2 border-t border-white/30">
                     <div className="flex gap-2">
                       <textarea
                         ref={qaInputRef}
@@ -1781,14 +1781,14 @@ export default function DashboardPage() {
                           }
                         }}
                         placeholder="Ask about your report..."
-                        className="flex-1 bg-[#f2f2f8] border border-[#d0d0de] rounded-xl px-3.5 py-2.5 text-sm text-[#1a1a2e]/95 placeholder:text-[#8a8aa5]/50 resize-none focus:outline-none focus:border-[#c0c0d0] transition-colors"
+                        className="flex-1 bg-white/50 border border-white/30 rounded-xl px-3.5 py-2.5 text-sm text-[#1a1a2e]/95 placeholder:text-[#8a8aa5]/50 resize-none focus:outline-none focus:border-[#c0c0d0] transition-colors"
                         rows={1}
                       />
                       <button
                         data-testid="button-send-qa"
                         onClick={sendQA}
                         disabled={!qaInput.trim() || qaLoading}
-                        className="w-10 h-10 rounded-xl bg-[#f2f2f8] border border-[#d0d0de] hover:bg-[#eeeef4] disabled:opacity-30 flex items-center justify-center transition-colors shrink-0"
+                        className="w-10 h-10 rounded-xl bg-white/50 border border-white/30 hover:bg-white/60 disabled:opacity-30 flex items-center justify-center transition-colors shrink-0"
                       >
                         <Send className="w-4 h-4 text-[#1a1a2e]/80" />
                       </button>
@@ -1808,7 +1808,7 @@ export default function DashboardPage() {
               </div>
             </div>
           ) : activeTab === "creatorai" ? (
-            <div className="w-full h-full flex flex-col" style={{ background: '#f8f8fc' }}>
+            <div className="w-full h-full flex flex-col" style={{ background: 'transparent' }}>
               <div className="flex-1 overflow-y-auto px-5 sm:px-8 py-6 max-w-[800px] mx-auto w-full">
                 <div className="flex items-center gap-3 mb-6">
                   <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-600 to-blue-600 flex items-center justify-center">
@@ -1820,7 +1820,7 @@ export default function DashboardPage() {
                   </div>
                 </div>
 
-                <div className="bg-[#f2f2f8] border border-[#d0d0de] rounded-xl p-4 mb-6">
+                <div className="bg-white/50 border border-white/30 rounded-xl p-4 mb-6">
                   <div className="flex items-center gap-2 mb-3">
                     <Upload className="w-4 h-4 text-purple-400" />
                     <span className="text-sm font-medium text-[#1a1a2e]">Upload Credit Report</span>
@@ -1906,7 +1906,7 @@ export default function DashboardPage() {
                           <button
                             key={q}
                             onClick={() => setCreatorAiInput(q)}
-                            className="px-3 py-1.5 rounded-full bg-[#f0f0f6] border border-[#d0d0de] text-[10px] text-[#1a1a2e]/75 hover:bg-purple-500/10 hover:border-purple-400/20 hover:text-purple-300 transition-all"
+                            className="px-3 py-1.5 rounded-full bg-white/60 border border-white/30 text-[10px] text-[#1a1a2e]/75 hover:bg-purple-500/10 hover:border-purple-400/20 hover:text-purple-300 transition-all"
                             data-testid={`creator-ai-suggestion-${q.slice(0,20)}`}
                           >
                             {q}
@@ -1922,7 +1922,7 @@ export default function DashboardPage() {
                         "max-w-[85%] rounded-xl px-4 py-3",
                         msg.role === "user"
                           ? "bg-purple-600/20 border border-purple-400/20 text-[#1a1a2e]"
-                          : "bg-[#f0f0f6] border border-[#d0d0de] text-[#1a1a2e]"
+                          : "bg-white/60 border border-white/30 text-[#1a1a2e]"
                       )}>
                         {msg.role === "assistant" && (
                           <div className="flex items-center gap-1.5 mb-2 text-[10px] text-purple-300/60">
@@ -1937,7 +1937,7 @@ export default function DashboardPage() {
 
                   {creatorAiLoading && (
                     <div className="flex justify-start">
-                      <div className="bg-[#f0f0f6] border border-[#d0d0de] rounded-xl px-4 py-3 flex items-center gap-2">
+                      <div className="bg-white/60 border border-white/30 rounded-xl px-4 py-3 flex items-center gap-2">
                         <Loader2 className="w-4 h-4 animate-spin text-purple-400" />
                         <span className="text-xs text-[#1a1a2e]/75">Aggregating creator insights...</span>
                       </div>
@@ -1946,7 +1946,7 @@ export default function DashboardPage() {
                 </div>
               </div>
 
-              <div className="px-5 sm:px-8 py-4 border-t border-[#d0d0de] max-w-[800px] mx-auto w-full">
+              <div className="px-5 sm:px-8 py-4 border-t border-white/30 max-w-[800px] mx-auto w-full">
                 <div className="flex gap-2">
                   <input
                     value={creatorAiInput}
@@ -1975,7 +1975,7 @@ export default function DashboardPage() {
                       }
                     }}
                     placeholder="Ask any financial question — AI aggregates 75+ creator perspectives..."
-                    className="flex-1 bg-[#f0f0f6] border border-[#d0d0de] rounded-xl px-4 py-3 text-sm text-[#1a1a2e] placeholder:text-[#8a8aa5]/50 focus:outline-none focus:border-purple-400/40 transition-colors"
+                    className="flex-1 bg-white/60 border border-white/30 rounded-xl px-4 py-3 text-sm text-[#1a1a2e] placeholder:text-[#8a8aa5]/50 focus:outline-none focus:border-purple-400/40 transition-colors"
                     disabled={creatorAiLoading}
                     data-testid="creator-ai-input"
                   />
@@ -2012,7 +2012,7 @@ export default function DashboardPage() {
               </div>
             </div>
           ) : (
-            <div className="w-full h-full flex flex-col" style={{ background: '#f8f8fc' }}>
+            <div className="w-full h-full flex flex-col" style={{ background: 'transparent' }}>
               {!dmFriendId ? (
                 <div className="flex-1 overflow-y-auto px-5 sm:px-8 py-6 max-w-[600px] mx-auto w-full">
                   <div className="flex items-center gap-3 mb-6">
@@ -2030,7 +2030,7 @@ export default function DashboardPage() {
                       <UserPlus className="w-10 h-10 text-[#1a1a2e]/40 mx-auto mb-3" />
                       <p className="text-sm text-[#1a1a2e]/70 mb-1">No friends yet</p>
                       <p className="text-[11px] text-[#1a1a2e]/55 mb-4">Add friends from the buddy list to start messaging</p>
-                      <button onClick={() => setShowAddFriend(true)} className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[#f2f2f8] border border-[#d0d0de] text-sm text-[#1a1a2e]/80 hover:bg-[#eeeef4] transition-colors" data-testid="button-add-friend-dm">
+                      <button onClick={() => setShowAddFriend(true)} className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white/50 border border-white/30 text-sm text-[#1a1a2e]/80 hover:bg-white/60 transition-colors" data-testid="button-add-friend-dm">
                         <UserPlus className="w-4 h-4" />
                         Add Friend
                       </button>
@@ -2041,10 +2041,10 @@ export default function DashboardPage() {
                         <button
                           key={f.id}
                           onClick={() => openDm(f.id, f.displayName || f.email)}
-                          className="w-full flex items-center gap-3 p-3.5 rounded-xl bg-[#f2f2f8] border border-[#d0d0de] hover:bg-[#f2f2f8] transition-all text-left"
+                          className="w-full flex items-center gap-3 p-3.5 rounded-xl bg-white/50 border border-white/30 hover:bg-white/50 transition-all text-left"
                           data-testid={`dm-friend-${f.id}`}
                         >
-                          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500/30 to-cyan-500/30 border border-[#e0e0ea] flex items-center justify-center text-sm font-bold text-[#1a1a2e]/80">
+                          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500/30 to-cyan-500/30 border border-white/40 flex items-center justify-center text-sm font-bold text-[#1a1a2e]/80">
                             {(f.displayName || f.email || "?").substring(0, 2).toUpperCase()}
                           </div>
                           <div className="flex-1 min-w-0">
@@ -2059,18 +2059,18 @@ export default function DashboardPage() {
                 </div>
               ) : (
                 <div className="flex-1 flex flex-col min-h-0">
-                  <div className="shrink-0 px-4 py-3 border-b border-[#d0d0de] flex items-center gap-3">
-                    <button onClick={() => { setDmFriendId(null); setDmMessages([]); }} className="w-8 h-8 rounded-xl bg-[#f0f0f6] hover:bg-[#eeeef4] flex items-center justify-center transition-colors" data-testid="button-dm-back">
+                  <div className="shrink-0 px-4 py-3 border-b border-white/30 flex items-center gap-3">
+                    <button onClick={() => { setDmFriendId(null); setDmMessages([]); }} className="w-8 h-8 rounded-xl bg-white/50 hover:bg-white/60 flex items-center justify-center transition-colors" data-testid="button-dm-back">
                       <ChevronRight className="w-4 h-4 text-[#1a1a2e]/75 rotate-180" />
                     </button>
-                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500/30 to-cyan-500/30 border border-[#e0e0ea] flex items-center justify-center text-[10px] font-bold text-[#1a1a2e]/80">
+                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500/30 to-cyan-500/30 border border-white/40 flex items-center justify-center text-[10px] font-bold text-[#1a1a2e]/80">
                       {dmFriendName.substring(0, 2).toUpperCase()}
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium text-[#1a1a2e]/95 truncate">{dmFriendName}</p>
                       <p className="text-[9px] text-[#1a1a2e]/55">Direct Message · Team AI available</p>
                     </div>
-                    <button onClick={() => { fetchDmMessages(dmFriendId!); }} className="w-8 h-8 rounded-xl bg-[#f0f0f6] hover:bg-[#eeeef4] flex items-center justify-center transition-colors" data-testid="button-dm-refresh">
+                    <button onClick={() => { fetchDmMessages(dmFriendId!); }} className="w-8 h-8 rounded-xl bg-white/50 hover:bg-white/60 flex items-center justify-center transition-colors" data-testid="button-dm-refresh">
                       <RefreshCw className="w-3.5 h-3.5 text-[#1a1a2e]/65" />
                     </button>
                   </div>
@@ -2090,15 +2090,15 @@ export default function DashboardPage() {
                       return (
                         <div key={msg.id} className={cn("flex gap-2.5", isMe ? "justify-end" : "justify-start")} data-testid={`dm-msg-${msg.id}`}>
                           {!isMe && (
-                            <div className={cn("w-7 h-7 rounded-lg flex items-center justify-center shrink-0 mt-0.5", isAi ? "bg-gradient-to-br from-purple-500/20 to-blue-500/20 border border-purple-500/20" : "bg-[#f0f0f6] border border-[#d0d0de]")}>
+                            <div className={cn("w-7 h-7 rounded-lg flex items-center justify-center shrink-0 mt-0.5", isAi ? "bg-gradient-to-br from-purple-500/20 to-blue-500/20 border border-purple-500/20" : "bg-white/60 border border-white/30")}>
                               {isAi ? <Sparkles className="w-3.5 h-3.5 text-purple-400/60" /> : <span className="text-[9px] font-bold text-[#1a1a2e]/65">{dmFriendName.substring(0, 2).toUpperCase()}</span>}
                             </div>
                           )}
                           <div className={cn(
                             "max-w-[80%] rounded-2xl px-4 py-3",
                             isAi ? "bg-purple-500/[0.08] border border-purple-500/[0.12]" :
-                            isMe ? "bg-[#eeeef4] border border-[#d0d0de]" :
-                            "bg-[#f2f2f8] border border-[#d0d0de]"
+                            isMe ? "bg-white/60 border border-white/30" :
+                            "bg-white/50 border border-white/30"
                           )}>
                             {isAi && <p className="text-[9px] text-purple-400/50 font-medium mb-1">MentXr® Team AI</p>}
                             {!isMe && !isAi && <p className="text-[9px] text-[#1a1a2e]/60 font-medium mb-1">{dmFriendName}</p>}
@@ -2113,10 +2113,10 @@ export default function DashboardPage() {
 
                     {(dmLoading || dmAiLoading) && (
                       <div className="flex gap-2.5 justify-start">
-                        <div className={cn("w-7 h-7 rounded-lg flex items-center justify-center shrink-0", dmAiLoading ? "bg-gradient-to-br from-purple-500/20 to-blue-500/20 border border-purple-500/20" : "bg-[#f0f0f6] border border-[#d0d0de]")}>
+                        <div className={cn("w-7 h-7 rounded-lg flex items-center justify-center shrink-0", dmAiLoading ? "bg-gradient-to-br from-purple-500/20 to-blue-500/20 border border-purple-500/20" : "bg-white/60 border border-white/30")}>
                           {dmAiLoading ? <Sparkles className="w-3.5 h-3.5 text-purple-400/60" /> : <Loader2 className="w-3.5 h-3.5 animate-spin text-[#1a1a2e]/65" />}
                         </div>
-                        <div className={cn("rounded-2xl px-4 py-3", dmAiLoading ? "bg-purple-500/[0.08] border border-purple-500/[0.12]" : "bg-[#f2f2f8] border border-[#d0d0de]")}>
+                        <div className={cn("rounded-2xl px-4 py-3", dmAiLoading ? "bg-purple-500/[0.08] border border-purple-500/[0.12]" : "bg-white/50 border border-white/30")}>
                           <div className="flex items-center gap-2">
                             <Loader2 className="w-3.5 h-3.5 animate-spin text-[#1a1a2e]/60" />
                             <span className="text-[11px] text-[#1a1a2e]/60">{dmAiLoading ? "Team AI thinking..." : "Sending..."}</span>
@@ -2127,7 +2127,7 @@ export default function DashboardPage() {
                     <div ref={dmEndRef} />
                   </div>
 
-                  <div className="shrink-0 px-4 pb-4 pt-2 border-t border-[#d0d0de] bg-white/90 backdrop-blur-md">
+                  <div className="shrink-0 px-4 pb-4 pt-2 border-t border-white/30 bg-white/90 backdrop-blur-md">
                     <div className="flex gap-2">
                       <textarea
                         data-testid="input-dm"
@@ -2140,14 +2140,14 @@ export default function DashboardPage() {
                           }
                         }}
                         placeholder={`Message ${dmFriendName}...`}
-                        className="flex-1 bg-[#f2f2f8] border border-[#d0d0de] rounded-xl px-3.5 py-2.5 text-sm text-[#1a1a2e]/95 placeholder:text-[#8a8aa5]/50 resize-none focus:outline-none focus:border-[#c0c0d0] transition-colors"
+                        className="flex-1 bg-white/50 border border-white/30 rounded-xl px-3.5 py-2.5 text-sm text-[#1a1a2e]/95 placeholder:text-[#8a8aa5]/50 resize-none focus:outline-none focus:border-[#c0c0d0] transition-colors"
                         rows={1}
                       />
                       <button
                         data-testid="button-send-dm"
                         onClick={sendDm}
                         disabled={!dmInput.trim() || dmLoading || dmAiLoading}
-                        className="w-10 h-10 rounded-xl bg-[#f2f2f8] border border-[#d0d0de] hover:bg-[#eeeef4] disabled:opacity-30 flex items-center justify-center transition-colors shrink-0"
+                        className="w-10 h-10 rounded-xl bg-white/50 border border-white/30 hover:bg-white/60 disabled:opacity-30 flex items-center justify-center transition-colors shrink-0"
                         title="Send message"
                       >
                         <Send className="w-4 h-4 text-[#1a1a2e]/80" />
@@ -2173,7 +2173,7 @@ export default function DashboardPage() {
 
       {showAddFriend && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-none" onClick={() => setShowAddFriend(false)}>
-          <div className="w-[340px] bg-white/95 backdrop-blur-md border border-[#d0d0de] rounded-2xl p-5 shadow-2xl" onClick={e => e.stopPropagation()}>
+          <div className="w-[340px] bg-white/95 backdrop-blur-md border border-white/30 rounded-2xl p-5 shadow-2xl" onClick={e => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-4">
               <p className="text-sm font-semibold text-[#1a1a2e]/95">Add Friend</p>
               <button onClick={() => setShowAddFriend(false)} className="text-[#1a1a2e]/60 hover:text-[#1a1a2e]/80">
@@ -2188,18 +2188,18 @@ export default function DashboardPage() {
                 value={friendSearch}
                 onChange={e => { setFriendSearch(e.target.value); searchFriends(e.target.value); }}
                 placeholder="Search by name..."
-                className="w-full h-10 pl-10 pr-4 rounded-xl bg-[#f0f0f6] border border-[#d0d0de] text-sm text-[#1a1a2e]/95 placeholder-white/50 outline-none focus:border-[#c0c0d0]"
+                className="w-full h-10 pl-10 pr-4 rounded-xl bg-white/60 border border-white/30 text-sm text-[#1a1a2e]/95 placeholder-white/50 outline-none focus:border-[#c0c0d0]"
               />
             </div>
             {friendSearchLoading && <p className="text-[10px] text-[#1a1a2e]/60 text-center py-2">Searching...</p>}
             <div className="space-y-1 max-h-48 overflow-y-auto">
               {friendSearchResults.map((u: any) => (
-                <div key={u.id} className="flex items-center gap-3 p-2 rounded-xl hover:bg-[#f2f2f8] transition-colors">
-                  <div className="w-8 h-8 rounded-lg bg-[#f0f0f6] border border-[#d0d0de] flex items-center justify-center text-[10px] font-bold text-[#1a1a2e]/70">
+                <div key={u.id} className="flex items-center gap-3 p-2 rounded-xl hover:bg-white/50 transition-colors">
+                  <div className="w-8 h-8 rounded-lg bg-white/60 border border-white/30 flex items-center justify-center text-[10px] font-bold text-[#1a1a2e]/70">
                     {(u.displayName || u.email || "?").substring(0, 2).toUpperCase()}
                   </div>
                   <p className="text-sm text-[#1a1a2e]/80 flex-1 truncate">{u.displayName || u.email}</p>
-                  <button onClick={() => sendFriendRequest(u.id)} className="h-7 px-3 rounded-lg bg-[#f2f2f8] hover:bg-[#eeeef4] text-[10px] text-[#1a1a2e]/80 font-medium transition-colors" data-testid={`add-friend-${u.id}`}>
+                  <button onClick={() => sendFriendRequest(u.id)} className="h-7 px-3 rounded-lg bg-white/50 hover:bg-white/60 text-[10px] text-[#1a1a2e]/80 font-medium transition-colors" data-testid={`add-friend-${u.id}`}>
                     Add
                   </button>
                 </div>

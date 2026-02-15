@@ -41,7 +41,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
         "md:flex",
         !mobileOpen && "hidden md:flex"
       )}>
-        <div className="p-4 sm:p-6 border-b border-[#e0e0ea]/60 flex items-center justify-between">
+        <div className="p-4 sm:p-6 border-b border-white/40 flex items-center justify-between">
           <div>
             <h1 className="font-sans font-bold text-lg sm:text-xl tracking-tighter flex items-center gap-2 text-[#1a1a2e]">
               <span className="relative w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center">
@@ -53,7 +53,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
             <p className="text-[10px] sm:text-xs text-[#8a8aa5] mt-1">Mentorship, On Demand</p>
           </div>
           <button
-            className="md:hidden w-8 h-8 flex items-center justify-center rounded-lg hover:bg-[#f2f2f8]"
+            className="md:hidden w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white/50"
             onClick={() => setMobileOpen(false)}
           >
             <X className="w-5 h-5 text-[#8a8aa5]" />
@@ -74,9 +74,9 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
           ))}
         </nav>
 
-        <div className="p-3 sm:p-4 border-t border-[#e0e0ea]/60">
+        <div className="p-3 sm:p-4 border-t border-white/40">
           <div className="flex items-center gap-3 px-3 py-2 sm:py-3 mb-2">
-            <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-[#f2f2f8] border border-[#e0e0ea] flex items-center justify-center text-[10px] sm:text-xs font-mono text-[#5a5a7a]">
+            <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-white/50 border border-white/40 flex items-center justify-center text-[10px] sm:text-xs font-mono text-[#5a5a7a]">
               {(user.displayName || user.email).substring(0, 2).toUpperCase()}
             </div>
             <div className="overflow-hidden">
@@ -95,10 +95,10 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
       </aside>
 
       <div className="flex-1 md:ml-64 relative flex flex-col min-h-[100dvh]">
-        <header className="h-12 flex items-center justify-between px-3 border-b border-[#e0e0ea]/40 md:hidden shrink-0 relative z-10 bg-white/60 backdrop-blur-md">
+        <header className="h-12 flex items-center justify-between px-3 border-b border-white/30 md:hidden shrink-0 relative z-10 bg-white/60 backdrop-blur-md">
           <button
             onClick={() => setMobileOpen(true)}
-            className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-[#f2f2f8]"
+            className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white/50"
           >
             <Menu className="w-5 h-5 text-[#6a6a8a]" />
           </button>

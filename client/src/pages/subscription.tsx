@@ -79,7 +79,7 @@ function BlobBackground() {
     window.addEventListener('resize', resizeHandler);
     return () => { cancelAnimationFrame(animationId); window.removeEventListener('resize', resizeHandler); };
   }, []);
-  return <canvas ref={canvasRef} className="fixed top-0 left-0 pointer-events-none" style={{ zIndex: 1 }} />;
+  return <canvas ref={canvasRef} className="fixed top-0 left-0 pointer-events-none" style={{ zIndex: 15 }} />;
 }
 
 const gradientText = {
@@ -225,7 +225,7 @@ export default function SubscriptionPage() {
             <div className="space-y-3.5 sm:space-y-4">
               {features.map((feature, i) => (
                 <div key={i} className="flex items-center gap-3">
-                  <div className="w-5 h-5 rounded-full bg-[#f2f2f8] border border-[#e0e0ea] flex items-center justify-center shrink-0">
+                  <div className="w-5 h-5 rounded-full bg-white/50 border border-white/40 flex items-center justify-center shrink-0">
                     <Check className="w-3 h-3 text-[#6a6a8a]" />
                   </div>
                   <span className="text-[13px] sm:text-[14px] text-[#3a3a5a]">{feature}</span>
@@ -240,7 +240,7 @@ export default function SubscriptionPage() {
                 data-testid="button-manage-billing"
                 onClick={handleManageBilling}
                 disabled={isProcessing}
-                className="w-full h-[48px] sm:h-[52px] rounded-full border border-[#d0d0de] bg-[#f8f8fc] text-[#3a3a5a] text-[13px] sm:text-[14px] font-bold hover:bg-[#f2f2f8] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                className="w-full h-[48px] sm:h-[52px] rounded-full border border-white/30 bg-[#f8f8fc] text-[#3a3a5a] text-[13px] sm:text-[14px] font-bold hover:bg-white/50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
                 {isProcessing ? <Loader2 className="w-4 h-4 animate-spin" /> : <><ExternalLink className="w-4 h-4" /> Manage Billing</>}
               </button>
