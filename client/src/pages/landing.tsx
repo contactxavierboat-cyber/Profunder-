@@ -288,7 +288,7 @@ function SpaceBackground() {
     <canvas
       ref={canvasRef}
       className="fixed top-0 left-0 pointer-events-none"
-      style={{ zIndex: 1 }}
+      style={{ zIndex: 15 }}
     />
   );
 }
