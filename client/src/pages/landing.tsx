@@ -268,15 +268,30 @@ export default function LandingPage() {
         <span className="text-[12px] sm:text-[13px] text-white/80 font-medium whitespace-nowrap">{proofMessages[proofIndex]}</span>
       </div>
 
-      <nav className="relative z-20 flex items-center justify-between px-6 sm:px-10 h-14 border-b border-[#404040]">
-        <div className="flex items-center gap-2.5">
-          <div className="w-6 h-6 rounded-full border-2 border-white/60 flex items-center justify-center">
-            <span className="w-1.5 h-1.5 rounded-full bg-white/80"></span>
+      <nav className="sticky top-0 z-50 w-full bg-white" data-testid="nav-top">
+        <div className="flex items-center justify-between h-[64px] px-6 sm:px-10 lg:px-14">
+          <div className="flex items-center gap-2.5 bg-[#F5F5F7] rounded-full px-4 py-2" data-testid="nav-logo">
+            <div className="w-5 h-5 rounded-full bg-gradient-to-br from-[#1a1a2e] to-[#16213e] flex items-center justify-center">
+              <span className="w-1.5 h-1.5 rounded-full bg-white"></span>
+            </div>
+            <span className="text-[13px] font-semibold tracking-[0.04em] text-[#1a1a2e]">MentXr<span className="text-[9px] align-super">®</span></span>
           </div>
-          <span className="text-[13px] font-bold tracking-[0.08em] text-white uppercase">MentXr</span>
-        </div>
-        <div className="flex items-center gap-6">
-          <span className="text-[12px] tracking-[0.08em] text-white/65 uppercase hidden sm:block">Private Access</span>
+
+          <div className="hidden md:flex items-center gap-10">
+            <a href="#how-it-works" className="text-[13.5px] font-medium text-[#4a4a5a] hover:text-[#1a1a2e] transition-colors" data-testid="link-how-it-works">How It Works</a>
+            <a href="#features" className="text-[13.5px] font-medium text-[#4a4a5a] hover:text-[#1a1a2e] transition-colors" data-testid="link-features">Features</a>
+            <a href="#results" className="text-[13.5px] font-medium text-[#4a4a5a] hover:text-[#1a1a2e] transition-colors" data-testid="link-results">Results</a>
+            <a href="#faq" className="text-[13.5px] font-medium text-[#4a4a5a] hover:text-[#1a1a2e] transition-colors" data-testid="link-faq">FAQ</a>
+          </div>
+
+          <button
+            onClick={() => document.querySelector<HTMLInputElement>('[data-testid="input-email"]')?.focus()}
+            className="rounded-full px-6 py-2.5 text-[13px] font-semibold text-white shadow-md hover:shadow-lg transition-all duration-200 hover:scale-[1.02]"
+            style={{ background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)' }}
+            data-testid="button-get-started"
+          >
+            Get Started Free
+          </button>
         </div>
       </nav>
 
@@ -383,7 +398,7 @@ export default function LandingPage() {
       </section>
 
       {/* ═══════════════ 4. HOW IT WORKS ═══════════════ */}
-      <section className="relative z-10 px-6 sm:px-12 md:px-20 py-20 sm:py-28 border-t border-[#404040]">
+      <section id="how-it-works" className="relative z-10 px-6 sm:px-12 md:px-20 py-20 sm:py-28 border-t border-[#404040]">
         <div className="absolute inset-0" style={sectionBg} />
         <div className="relative max-w-[800px]">
           <SectionLabel>How It Works</SectionLabel>
@@ -412,7 +427,7 @@ export default function LandingPage() {
       </section>
 
       {/* ═══════════════ 5. FUNDING OUTCOMES ═══════════════ */}
-      <section className="relative z-10 px-6 sm:px-12 md:px-20 py-20 sm:py-28 border-t border-[#404040]">
+      <section id="features" className="relative z-10 px-6 sm:px-12 md:px-20 py-20 sm:py-28 border-t border-[#404040]">
         <div className="absolute inset-0" style={sectionBg} />
         <div className="relative max-w-[900px]">
           <SectionLabel>What You Get</SectionLabel>
@@ -442,7 +457,7 @@ export default function LandingPage() {
       </section>
 
       {/* ═══════════════ 6. SOCIAL PROOF ═══════════════ */}
-      <section className="relative z-10 px-6 sm:px-12 md:px-20 py-20 sm:py-28 border-t border-[#404040]">
+      <section id="results" className="relative z-10 px-6 sm:px-12 md:px-20 py-20 sm:py-28 border-t border-[#404040]">
         <div className="absolute inset-0" style={sectionBg} />
         <div className="relative max-w-[900px]">
           <SectionLabel>Results</SectionLabel>
@@ -656,7 +671,7 @@ export default function LandingPage() {
       </section>
 
       {/* ═══════════════ 12. FAQ / OBJECTION HANDLING ═══════════════ */}
-      <section className="relative z-10 px-6 sm:px-12 md:px-20 py-20 sm:py-28 border-t border-[#404040]">
+      <section id="faq" className="relative z-10 px-6 sm:px-12 md:px-20 py-20 sm:py-28 border-t border-[#404040]">
         <div className="absolute inset-0" style={sectionBg} />
         <div className="relative max-w-[700px]">
           <SectionLabel>FAQ</SectionLabel>
