@@ -12,18 +12,19 @@ function SpaceBackground() {
 
     let animationId: number;
 
-    interface Star {
-      x: number; y: number; z: number;
-      size: number; brightness: number;
-      twinkleSpeed: number; twinklePhase: number;
-      color: [number, number, number];
-      vx: number; vy: number;
-    }
-
-    interface TechElement {
+    interface Blob {
       x: number; y: number;
       vx: number; vy: number;
-      type: 'hexagon' | 'bracket' | 'circuit' | 'diamond' | 'chip' | 'wave' | 'grid' | 'binary';
+      radius: number;
+      opacity: number;
+      phase: number;
+      color: [number, number, number];
+    }
+
+    interface TechShape {
+      x: number; y: number;
+      vx: number; vy: number;
+      type: number;
       size: number;
       rotation: number;
       rotSpeed: number;
@@ -31,20 +32,19 @@ function SpaceBackground() {
       phase: number;
     }
 
+    interface Star {
+      x: number; y: number;
+      vx: number; vy: number;
+      size: number;
+      brightness: number;
+      twinkleSpeed: number;
+      twinklePhase: number;
+    }
+
+    let blobs: Blob[] = [];
+    let techShapes: TechShape[] = [];
     let stars: Star[] = [];
-    let techElements: TechElement[] = [];
     let time = 0;
-
-    const starColors: [number, number, number][] = [
-      [140, 140, 190],
-      [120, 140, 210],
-      [170, 150, 210],
-      [110, 130, 195],
-      [155, 135, 200],
-      [130, 155, 220],
-    ];
-
-    const techTypes: TechElement['type'][] = ['hexagon', 'bracket', 'circuit', 'diamond', 'chip', 'wave', 'grid', 'binary'];
 
     const resize = () => {
       const w = window.innerWidth;
@@ -59,164 +59,205 @@ function SpaceBackground() {
     const init = () => {
       const w = window.innerWidth;
       const h = document.documentElement.scrollHeight;
-      const starCount = Math.min(Math.floor((w * h) / 3000), 500);
+
+      const blobColors: [number, number, number][] = [
+        [180, 180, 200], [160, 170, 195], [190, 185, 210],
+        [170, 175, 200], [185, 180, 205], [175, 185, 210],
+      ];
+      const blobCount = Math.min(Math.floor((w * h) / 80000), 30);
+      blobs = [];
+      for (let i = 0; i < blobCount; i++) {
+        const speed = Math.random() * 0.12 + 0.02;
+        const angle = Math.random() * Math.PI * 2;
+        blobs.push({
+          x: Math.random() * w,
+          y: Math.random() * h,
+          vx: Math.cos(angle) * speed,
+          vy: Math.sin(angle) * speed,
+          radius: Math.random() * 80 + 40,
+          opacity: Math.random() * 0.06 + 0.03,
+          phase: Math.random() * Math.PI * 2,
+          color: blobColors[Math.floor(Math.random() * blobColors.length)],
+        });
+      }
+
+      const techCount = Math.min(Math.floor((w * h) / 8000), 200);
+      techShapes = [];
+      for (let i = 0; i < techCount; i++) {
+        const speed = Math.random() * 0.25 + 0.06;
+        const angle = Math.random() * Math.PI * 2;
+        techShapes.push({
+          x: Math.random() * w,
+          y: Math.random() * h,
+          vx: Math.cos(angle) * speed,
+          vy: Math.sin(angle) * speed,
+          type: Math.floor(Math.random() * 12),
+          size: Math.random() * 35 + 12,
+          rotation: Math.random() * Math.PI * 2,
+          rotSpeed: (Math.random() - 0.5) * 0.012,
+          opacity: Math.random() * 0.18 + 0.08,
+          phase: Math.random() * Math.PI * 2,
+        });
+      }
+
+      const starCount = Math.min(Math.floor((w * h) / 4000), 400);
       stars = [];
       for (let i = 0; i < starCount; i++) {
-        const z = Math.random();
-        const speed = (z * 0.25 + 0.04);
+        const speed = Math.random() * 0.2 + 0.03;
         const angle = Math.random() * Math.PI * 2;
         stars.push({
           x: Math.random() * w,
           y: Math.random() * h,
-          z,
-          size: z < 0.3 ? Math.random() * 0.5 + 0.2 : z < 0.7 ? Math.random() * 1 + 0.3 : Math.random() * 1.8 + 0.6,
-          brightness: Math.random() * 0.3 + 0.1,
+          vx: Math.cos(angle) * speed,
+          vy: Math.sin(angle) * speed,
+          size: Math.random() * 1.8 + 0.3,
+          brightness: Math.random() * 0.25 + 0.08,
           twinkleSpeed: Math.random() * 0.03 + 0.008,
           twinklePhase: Math.random() * Math.PI * 2,
-          color: starColors[Math.floor(Math.random() * starColors.length)],
-          vx: Math.cos(angle) * speed,
-          vy: Math.sin(angle) * speed,
-        });
-      }
-
-      const techCount = Math.min(Math.floor((w * h) / 12000), 120);
-      techElements = [];
-      for (let i = 0; i < techCount; i++) {
-        const speed = Math.random() * 0.2 + 0.05;
-        const angle = Math.random() * Math.PI * 2;
-        techElements.push({
-          x: Math.random() * w,
-          y: Math.random() * h,
-          vx: Math.cos(angle) * speed,
-          vy: Math.sin(angle) * speed,
-          type: techTypes[Math.floor(Math.random() * techTypes.length)],
-          size: Math.random() * 24 + 14,
-          rotation: Math.random() * Math.PI * 2,
-          rotSpeed: (Math.random() - 0.5) * 0.01,
-          opacity: Math.random() * 0.12 + 0.08,
-          phase: Math.random() * Math.PI * 2,
         });
       }
     };
 
-    const drawHexagon = (x: number, y: number, r: number, rot: number) => {
+    const drawHex = (r: number) => {
       ctx.beginPath();
       for (let i = 0; i < 6; i++) {
-        const a = rot + (Math.PI / 3) * i;
-        const px = x + Math.cos(a) * r;
-        const py = y + Math.sin(a) * r;
-        i === 0 ? ctx.moveTo(px, py) : ctx.lineTo(px, py);
+        const a = (Math.PI / 3) * i - Math.PI / 6;
+        i === 0 ? ctx.moveTo(Math.cos(a) * r, Math.sin(a) * r) : ctx.lineTo(Math.cos(a) * r, Math.sin(a) * r);
       }
       ctx.closePath();
     };
 
-    const drawTechElement = (el: TechElement) => {
-      const pulse = Math.sin(time * 1.5 + el.phase) * 0.3 + 0.7;
-      const alpha = el.opacity * pulse;
+    const drawShape = (s: TechShape) => {
+      const pulse = Math.sin(time * 1.2 + s.phase) * 0.3 + 0.7;
+      const a = s.opacity * pulse;
       ctx.save();
-      ctx.translate(el.x, el.y);
-      ctx.rotate(el.rotation);
-      ctx.strokeStyle = `rgba(80, 90, 140, ${alpha})`;
-      ctx.fillStyle = `rgba(80, 90, 140, ${alpha * 0.4})`;
-      ctx.lineWidth = 1.2;
+      ctx.translate(s.x, s.y);
+      ctx.rotate(s.rotation);
+      ctx.strokeStyle = `rgba(100, 105, 145, ${a})`;
+      ctx.fillStyle = `rgba(100, 105, 145, ${a * 0.25})`;
+      ctx.lineWidth = 1.5;
 
-      switch (el.type) {
-        case 'hexagon':
-          drawHexagon(0, 0, el.size, 0);
+      const sz = s.size;
+      switch (s.type) {
+        case 0:
+          drawHex(sz);
           ctx.stroke();
-          drawHexagon(0, 0, el.size * 0.5, Math.PI / 6);
+          drawHex(sz * 0.45);
           ctx.stroke();
           break;
-
-        case 'bracket':
-          const bw = el.size * 0.6, bh = el.size;
-          ctx.beginPath();
-          ctx.moveTo(-bw, -bh); ctx.lineTo(-bw * 1.5, -bh);
-          ctx.lineTo(-bw * 1.5, bh); ctx.lineTo(-bw, bh);
-          ctx.stroke();
-          ctx.beginPath();
-          ctx.moveTo(bw, -bh); ctx.lineTo(bw * 1.5, -bh);
-          ctx.lineTo(bw * 1.5, bh); ctx.lineTo(bw, bh);
-          ctx.stroke();
-          ctx.beginPath();
-          ctx.arc(0, 0, 2, 0, Math.PI * 2);
-          ctx.fill();
-          break;
-
-        case 'circuit':
-          ctx.beginPath();
-          ctx.moveTo(-el.size, 0); ctx.lineTo(-el.size * 0.3, 0);
-          ctx.lineTo(0, -el.size * 0.4); ctx.lineTo(el.size * 0.3, 0);
-          ctx.lineTo(el.size, 0);
-          ctx.stroke();
-          ctx.beginPath();
-          ctx.arc(-el.size, 0, 2, 0, Math.PI * 2);
-          ctx.fill();
-          ctx.beginPath();
-          ctx.arc(el.size, 0, 2, 0, Math.PI * 2);
-          ctx.fill();
-          break;
-
-        case 'diamond':
-          ctx.beginPath();
-          ctx.moveTo(0, -el.size); ctx.lineTo(el.size * 0.7, 0);
-          ctx.lineTo(0, el.size); ctx.lineTo(-el.size * 0.7, 0);
-          ctx.closePath();
-          ctx.stroke();
-          ctx.beginPath();
-          ctx.moveTo(0, -el.size * 0.4); ctx.lineTo(el.size * 0.28, 0);
-          ctx.lineTo(0, el.size * 0.4); ctx.lineTo(-el.size * 0.28, 0);
-          ctx.closePath();
-          ctx.stroke();
-          break;
-
-        case 'chip':
-          const cs = el.size * 0.7;
-          ctx.strokeRect(-cs, -cs, cs * 2, cs * 2);
-          const pins = 3;
-          for (let i = 0; i < pins; i++) {
-            const p = -cs + (cs * 2 / (pins + 1)) * (i + 1);
-            ctx.beginPath(); ctx.moveTo(p, -cs); ctx.lineTo(p, -cs - 5); ctx.stroke();
-            ctx.beginPath(); ctx.moveTo(p, cs); ctx.lineTo(p, cs + 5); ctx.stroke();
-            ctx.beginPath(); ctx.moveTo(-cs, p); ctx.lineTo(-cs - 5, p); ctx.stroke();
-            ctx.beginPath(); ctx.moveTo(cs, p); ctx.lineTo(cs + 5, p); ctx.stroke();
+        case 1:
+          ctx.strokeRect(-sz * 0.6, -sz * 0.6, sz * 1.2, sz * 1.2);
+          for (let p = 0; p < 4; p++) {
+            const off = -sz * 0.35 + p * (sz * 0.7 / 3);
+            ctx.beginPath(); ctx.moveTo(off, -sz * 0.6); ctx.lineTo(off, -sz * 0.6 - 6); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(off, sz * 0.6); ctx.lineTo(off, sz * 0.6 + 6); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(-sz * 0.6, off); ctx.lineTo(-sz * 0.6 - 6, off); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(sz * 0.6, off); ctx.lineTo(sz * 0.6 + 6, off); ctx.stroke();
           }
+          ctx.beginPath(); ctx.arc(0, 0, sz * 0.15, 0, Math.PI * 2); ctx.fill();
           break;
-
-        case 'wave':
+        case 2: {
+          const bw = sz * 0.5, bh = sz;
           ctx.beginPath();
-          for (let i = -20; i <= 20; i++) {
-            const wx = i * (el.size / 10);
-            const wy = Math.sin(i * 0.5 + time * 2 + el.phase) * el.size * 0.3;
-            i === -20 ? ctx.moveTo(wx, wy) : ctx.lineTo(wx, wy);
+          ctx.moveTo(-bw, -bh); ctx.lineTo(-bw - sz * 0.4, -bh);
+          ctx.lineTo(-bw - sz * 0.4, bh); ctx.lineTo(-bw, bh);
+          ctx.stroke();
+          ctx.beginPath();
+          ctx.moveTo(bw, -bh); ctx.lineTo(bw + sz * 0.4, -bh);
+          ctx.lineTo(bw + sz * 0.4, bh); ctx.lineTo(bw, bh);
+          ctx.stroke();
+          ctx.beginPath(); ctx.arc(0, 0, 2.5, 0, Math.PI * 2); ctx.fill();
+          break;
+        }
+        case 3:
+          ctx.beginPath();
+          ctx.moveTo(-sz, 0); ctx.lineTo(-sz * 0.3, 0);
+          ctx.lineTo(0, -sz * 0.5); ctx.lineTo(sz * 0.3, 0); ctx.lineTo(sz, 0);
+          ctx.stroke();
+          ctx.beginPath(); ctx.arc(-sz, 0, 3, 0, Math.PI * 2); ctx.fill();
+          ctx.beginPath(); ctx.arc(sz, 0, 3, 0, Math.PI * 2); ctx.fill();
+          ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(0, sz * 0.6); ctx.stroke();
+          ctx.beginPath(); ctx.arc(0, sz * 0.6, 3, 0, Math.PI * 2); ctx.fill();
+          break;
+        case 4:
+          ctx.beginPath();
+          ctx.moveTo(0, -sz); ctx.lineTo(sz * 0.65, 0);
+          ctx.lineTo(0, sz); ctx.lineTo(-sz * 0.65, 0);
+          ctx.closePath(); ctx.stroke();
+          ctx.beginPath();
+          ctx.moveTo(0, -sz * 0.35); ctx.lineTo(sz * 0.23, 0);
+          ctx.lineTo(0, sz * 0.35); ctx.lineTo(-sz * 0.23, 0);
+          ctx.closePath(); ctx.stroke();
+          break;
+        case 5:
+          ctx.beginPath();
+          for (let i = -25; i <= 25; i++) {
+            const wx = i * (sz / 12);
+            const wy = Math.sin(i * 0.4 + time * 2.5 + s.phase) * sz * 0.35;
+            i === -25 ? ctx.moveTo(wx, wy) : ctx.lineTo(wx, wy);
           }
           ctx.stroke();
           break;
-
-        case 'grid':
-          const gs = el.size;
-          for (let r = 0; r < 3; r++) {
-            for (let c = 0; c < 3; c++) {
-              const gx = -gs + c * gs;
-              const gy = -gs + r * gs;
+        case 6: {
+          const g = sz * 0.8;
+          for (let r = 0; r < 4; r++) {
+            for (let c = 0; c < 4; c++) {
               ctx.beginPath();
-              ctx.arc(gx, gy, 1.5, 0, Math.PI * 2);
+              ctx.arc(-g * 1.5 + c * g, -g * 1.5 + r * g, 2, 0, Math.PI * 2);
               ctx.fill();
             }
           }
-          ctx.beginPath();
-          ctx.moveTo(-gs, 0); ctx.lineTo(gs, 0);
-          ctx.moveTo(0, -gs); ctx.lineTo(0, gs);
-          ctx.stroke();
           break;
-
-        case 'binary':
-          ctx.font = `${el.size * 0.5}px 'JetBrains Mono', monospace`;
-          ctx.fillStyle = `rgba(100, 110, 160, ${alpha})`;
+        }
+        case 7:
+          ctx.font = `bold ${sz * 0.55}px 'JetBrains Mono', monospace`;
+          ctx.fillStyle = `rgba(100, 105, 145, ${a})`;
           ctx.textAlign = 'center';
           ctx.textBaseline = 'middle';
-          const bits = ['01', '10', '{ }', '< >', '//'];
-          ctx.fillText(bits[Math.floor(el.phase * 10) % bits.length], 0, 0);
+          const labels = ['{ }', '< />', '( )', '[ ]', '0x', '#!', '/*', '::'];
+          ctx.fillText(labels[Math.floor(s.phase * 10) % labels.length], 0, 0);
+          break;
+        case 8:
+          ctx.beginPath(); ctx.arc(0, 0, sz, 0, Math.PI * 2); ctx.stroke();
+          ctx.beginPath(); ctx.arc(0, 0, sz * 0.55, 0, Math.PI * 2); ctx.stroke();
+          ctx.beginPath(); ctx.arc(0, 0, 2.5, 0, Math.PI * 2); ctx.fill();
+          for (let i = 0; i < 4; i++) {
+            const ang = (Math.PI / 2) * i;
+            ctx.beginPath();
+            ctx.moveTo(Math.cos(ang) * sz * 0.55, Math.sin(ang) * sz * 0.55);
+            ctx.lineTo(Math.cos(ang) * sz, Math.sin(ang) * sz);
+            ctx.stroke();
+          }
+          break;
+        case 9:
+          for (let i = 0; i < 3; i++) {
+            const lx = -sz + i * sz;
+            ctx.beginPath();
+            ctx.moveTo(lx, -sz); ctx.lineTo(lx, sz);
+            ctx.stroke();
+            ctx.beginPath(); ctx.arc(lx, -sz, 2.5, 0, Math.PI * 2); ctx.fill();
+            ctx.beginPath(); ctx.arc(lx, sz, 2.5, 0, Math.PI * 2); ctx.fill();
+          }
+          ctx.beginPath(); ctx.moveTo(-sz, 0); ctx.lineTo(sz, 0); ctx.stroke();
+          break;
+        case 10:
+          ctx.beginPath();
+          for (let i = 0; i < 5; i++) {
+            const ang = (Math.PI * 2 / 5) * i - Math.PI / 2;
+            const ix = Math.cos(ang) * sz;
+            const iy = Math.sin(ang) * sz;
+            i === 0 ? ctx.moveTo(ix, iy) : ctx.lineTo(ix, iy);
+          }
+          ctx.closePath(); ctx.stroke();
+          break;
+        case 11:
+          ctx.beginPath();
+          ctx.moveTo(-sz, -sz * 0.3); ctx.lineTo(-sz * 0.5, -sz * 0.3);
+          ctx.lineTo(-sz * 0.3, -sz * 0.8); ctx.lineTo(sz * 0.2, 0);
+          ctx.lineTo(sz * 0.5, 0); ctx.lineTo(sz, sz * 0.4);
+          ctx.stroke();
+          ctx.beginPath(); ctx.arc(-sz, -sz * 0.3, 3, 0, Math.PI * 2); ctx.fill();
+          ctx.beginPath(); ctx.arc(sz, sz * 0.4, 3, 0, Math.PI * 2); ctx.fill();
           break;
       }
       ctx.restore();
@@ -228,44 +269,52 @@ function SpaceBackground() {
       ctx.clearRect(0, 0, w, h);
       time += 0.016;
 
+      blobs.forEach(b => {
+        b.x += b.vx;
+        b.y += b.vy;
+        if (b.x < -b.radius * 2) b.x = w + b.radius * 2;
+        if (b.x > w + b.radius * 2) b.x = -b.radius * 2;
+        if (b.y < -b.radius * 2) b.y = h + b.radius * 2;
+        if (b.y > h + b.radius * 2) b.y = -b.radius * 2;
+
+        const breathe = Math.sin(time * 0.8 + b.phase) * 0.15 + 1;
+        const r = b.radius * breathe;
+        const [cr, cg, cb] = b.color;
+        const grad = ctx.createRadialGradient(b.x, b.y, 0, b.x, b.y, r);
+        grad.addColorStop(0, `rgba(${cr}, ${cg}, ${cb}, ${b.opacity})`);
+        grad.addColorStop(0.6, `rgba(${cr}, ${cg}, ${cb}, ${b.opacity * 0.4})`);
+        grad.addColorStop(1, `rgba(${cr}, ${cg}, ${cb}, 0)`);
+        ctx.beginPath();
+        ctx.fillStyle = grad;
+        ctx.arc(b.x, b.y, r, 0, Math.PI * 2);
+        ctx.fill();
+      });
+
       stars.forEach(s => {
         s.x += s.vx;
         s.y += s.vy;
-        if (s.x < -10) s.x = w + 10;
-        if (s.x > w + 10) s.x = -10;
-        if (s.y < -10) s.y = h + 10;
-        if (s.y > h + 10) s.y = -10;
+        if (s.x < -5) s.x = w + 5;
+        if (s.x > w + 5) s.x = -5;
+        if (s.y < -5) s.y = h + 5;
+        if (s.y > h + 5) s.y = -5;
 
         const twinkle = Math.sin(time * s.twinkleSpeed * 60 + s.twinklePhase) * 0.4 + 0.6;
         const alpha = s.brightness * twinkle;
-        const [r, g, b] = s.color;
-
         ctx.beginPath();
-        ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${alpha})`;
+        ctx.fillStyle = `rgba(130, 135, 180, ${alpha})`;
         ctx.arc(s.x, s.y, s.size, 0, Math.PI * 2);
         ctx.fill();
-
-        if (s.z > 0.7 && s.size > 1.2) {
-          const glowR = s.size * 3;
-          const grad = ctx.createRadialGradient(s.x, s.y, 0, s.x, s.y, glowR);
-          grad.addColorStop(0, `rgba(${r}, ${g}, ${b}, ${alpha * 0.15})`);
-          grad.addColorStop(1, `rgba(${r}, ${g}, ${b}, 0)`);
-          ctx.beginPath();
-          ctx.fillStyle = grad;
-          ctx.arc(s.x, s.y, glowR, 0, Math.PI * 2);
-          ctx.fill();
-        }
       });
 
-      techElements.forEach(el => {
+      techShapes.forEach(el => {
         el.x += el.vx;
         el.y += el.vy;
         el.rotation += el.rotSpeed;
-        if (el.x < -50) el.x = w + 50;
-        if (el.x > w + 50) el.x = -50;
-        if (el.y < -50) el.y = h + 50;
-        if (el.y > h + 50) el.y = -50;
-        drawTechElement(el);
+        if (el.x < -60) el.x = w + 60;
+        if (el.x > w + 60) el.x = -60;
+        if (el.y < -60) el.y = h + 60;
+        if (el.y > h + 60) el.y = -60;
+        drawShape(el);
       });
 
       animationId = requestAnimationFrame(draw);
