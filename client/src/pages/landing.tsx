@@ -149,7 +149,7 @@ function SpaceBackground() {
     <canvas
       ref={canvasRef}
       className="fixed top-0 left-0 pointer-events-none"
-      style={{ zIndex: 5 }}
+      style={{ zIndex: 15 }}
     />
   );
 }
@@ -163,7 +163,9 @@ const gradientText = (dir = '180deg', _from = 0.85, _to = 0.5) => ({
   lineHeight: '0.95',
 });
 
-const sectionBg = { background: 'linear-gradient(180deg, rgba(255,255,255,0.97) 0%, rgba(248,248,252,0.95) 60%, rgba(245,245,250,0.9) 100%)' };
+const sectionBg = { background: 'transparent' };
+
+const contentBlockStyle = "relative z-30 rounded-2xl bg-white/80 backdrop-blur-md border border-white/40 shadow-[0_8px_32px_rgba(0,0,0,0.04),0_2px_8px_rgba(0,0,0,0.02)] p-6 sm:p-8";
 
 const SectionLabel = ({ children }: { children: string }) => (
   <p className="text-[11px] tracking-[0.2em] uppercase mb-6 sm:mb-8 text-[#7a7a9a]">{children}</p>
@@ -183,7 +185,7 @@ const SubscribeButton = ({ className = "" }: { className?: string }) => (
 const ScrollArrow = ({ targetId }: { targetId: string }) => (
   <button
     onClick={() => document.getElementById(targetId)?.scrollIntoView({ behavior: 'smooth' })}
-    className="relative z-20 flex justify-center w-full mt-10 group cursor-pointer"
+    className="relative z-30 flex justify-center w-full mt-10 group cursor-pointer"
     aria-label="Scroll to next section"
     data-testid={`arrow-to-${targetId}`}
   >
@@ -308,8 +310,8 @@ export default function LandingPage() {
       </div>
 
       {/* ═══════════════ 1. HERO ═══════════════ */}
-      <section id="sec-hero" className="relative z-10 min-h-[90vh] flex flex-col items-center justify-center px-6 sm:px-12 md:px-20 lg:px-28 py-20 text-center">
-        <div className="absolute inset-0" style={{ background: 'radial-gradient(ellipse 90% 80% at 50% 50%, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.7) 50%, transparent 100%)' }} />
+      <section id="sec-hero" className="relative z-20 min-h-[90vh] flex flex-col items-center justify-center px-6 sm:px-12 md:px-20 lg:px-28 py-20 text-center">
+        <div className="absolute inset-0" style={{ background: 'radial-gradient(ellipse 90% 80% at 50% 50%, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0.1) 50%, transparent 100%)' }} />
         <div className="relative max-w-[900px] mx-auto">
           <p className="text-[11px] tracking-[0.2em] uppercase text-[#6a6a8a] mb-6" data-testid="text-hero-label">Digital Underwriting Engine</p>
           <h1
@@ -359,14 +361,14 @@ export default function LandingPage() {
       </section>
 
       {/* ═══════════════ 2. PROBLEM / PAIN ═══════════════ */}
-      <section id="sec-problem" className="relative z-10 px-6 sm:px-12 md:px-20 py-20 sm:py-28 border-t border-[#e8e8f0] text-center">
+      <section id="sec-problem" className="relative z-20 px-6 sm:px-12 md:px-20 py-20 sm:py-28 border-t border-[#e8e8f0] text-center">
         <div className="absolute inset-0" style={sectionBg} />
         <div className="relative max-w-[800px] mx-auto">
           <SectionLabel>The Problem</SectionLabel>
           <h2 className="text-[26px] sm:text-[36px] md:text-[44px] leading-[0.9] mb-10 tracking-[-0.03em]" style={gradientText('180deg', 0.95, 0.55)}>
             73% of funding applications get denied. Most founders never find out why until it's too late.
           </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+          <div className={`${contentBlockStyle} !p-5 sm:!p-6`}><div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
             {[
               { num: "01", text: "You apply for funding with no idea how a lender actually evaluates you" },
               { num: "02", text: "Credit scores alone don't tell you what products you qualify for" },
@@ -378,14 +380,14 @@ export default function LandingPage() {
                 <p className="text-[11px] sm:text-[14px] text-[#5a5a7a] leading-[1.6] sm:leading-[1.7] text-justify-smart">{item.text}</p>
               </div>
             ))}
-          </div>
+          </div></div>
           <SubscribeButton className="mt-10" />
           <ScrollArrow targetId="sec-solution" />
         </div>
       </section>
 
       {/* ═══════════════ 3. SOLUTION OVERVIEW ═══════════════ */}
-      <section id="sec-solution" className="relative z-10 px-6 sm:px-12 md:px-20 py-20 sm:py-28 border-t border-[#e8e8f0] text-center">
+      <section id="sec-solution" className="relative z-20 px-6 sm:px-12 md:px-20 py-20 sm:py-28 border-t border-[#e8e8f0] text-center">
         <div className="absolute inset-0" style={sectionBg} />
         <div className="relative max-w-[800px] mx-auto">
           <SectionLabel>The Solution</SectionLabel>
@@ -395,7 +397,7 @@ export default function LandingPage() {
           <p className="text-[12px] sm:text-[16px] text-[#6a6a8a] leading-[1.6] sm:leading-[1.8] mb-12 max-w-[640px] mx-auto text-justify-smart-center">
             MentXr® analyzes your credit report and bank statements using the same 6-component framework real lenders use. You get a Capital Readiness Score, tier placement, exposure ceiling, denial simulation, and a step-by-step action plan — all powered by AI.
           </p>
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+          <div className={contentBlockStyle}><div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
             {[
               { label: "Capital Readiness Score", val: "0–100" },
               { label: "Exposure Ceiling", val: "2.5x Logic" },
@@ -404,33 +406,33 @@ export default function LandingPage() {
               { label: "AI Mentor Chat", val: "7 Bots" },
               { label: "Credit Repair", val: "Auto Letters" },
             ].map((item) => (
-              <div key={item.label} className="p-4 sm:p-5 rounded-xl bg-[#f8f8fc] border border-[#e0e0ea]">
+              <div key={item.label} className="p-4 sm:p-5 rounded-xl bg-[#f8f8fc]/60 border border-[#e0e0ea]/50">
                 <p className="text-[20px] sm:text-[24px] font-mono text-[#3a3a5a] mb-2" style={{ fontFamily: "'JetBrains Mono', monospace" }}>{item.val}</p>
                 <p className="text-[11px] text-[#8a8aa5] tracking-wide uppercase">{item.label}</p>
               </div>
             ))}
-          </div>
+          </div></div>
           <SubscribeButton className="mt-10" />
           <ScrollArrow targetId="how-it-works" />
         </div>
       </section>
 
       {/* ═══════════════ 4. HOW IT WORKS ═══════════════ */}
-      <section id="how-it-works" className="relative z-10 px-6 sm:px-12 md:px-20 py-20 sm:py-28 border-t border-[#e8e8f0] text-center">
+      <section id="how-it-works" className="relative z-20 px-6 sm:px-12 md:px-20 py-20 sm:py-28 border-t border-[#e8e8f0] text-center">
         <div className="absolute inset-0" style={sectionBg} />
         <div className="relative max-w-[800px] mx-auto">
           <SectionLabel>How It Works</SectionLabel>
           <h2 className="text-[26px] sm:text-[36px] md:text-[44px] leading-[0.9] mb-14 tracking-[-0.03em]" style={gradientText('180deg', 0.9, 0.5)}>
             Four steps from unknown to underwriting-ready.
           </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+          <div className={contentBlockStyle}><div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
             {[
               { step: "01", title: "Upload Your Documents", desc: "Drop in your credit report and bank statement. Our AI extracts 40+ data points automatically — no manual entry." },
               { step: "02", title: "Get Your Capital Readiness Score", desc: "We evaluate 6 components: Capital Strength, Credit Quality, Management & Structure, Cash Flow, Liquidity, and Risk Signals." },
               { step: "03", title: "See Your Tier & Exposure Ceiling", desc: "Find out if you're Prime, Mid-Tier, or Alternative eligible — and your maximum fundable amount using 2.5x exposure logic." },
               { step: "04", title: "Run Denial Simulation & Fix Issues", desc: "Our engine flags every underwriting trigger that would cause a denial. Get auto-generated dispute letters and a repair timeline." },
             ].map((item) => (
-              <div key={item.step} className="flex flex-col items-center text-center p-6 rounded-xl bg-[#f8f8fc] border border-[#e0e0ea]">
+              <div key={item.step} className="flex flex-col items-center text-center p-6 rounded-xl bg-[#f8f8fc]/60 border border-[#e0e0ea]/50">
                 <div className="w-12 h-12 rounded-full bg-[#f2f2f8] border border-[#e0e0ea] flex items-center justify-center mb-4">
                   <span className="text-[13px] font-mono text-[#5a5a7a]">{item.step}</span>
                 </div>
@@ -438,21 +440,21 @@ export default function LandingPage() {
                 <p className="text-[11px] sm:text-[14px] text-[#3a3a5a] leading-[1.6] sm:leading-[1.7] text-justify-smart-center">{item.desc}</p>
               </div>
             ))}
-          </div>
+          </div></div>
           <SubscribeButton className="mt-10" />
           <ScrollArrow targetId="features" />
         </div>
       </section>
 
       {/* ═══════════════ 5. FUNDING OUTCOMES ═══════════════ */}
-      <section id="features" className="relative z-10 px-6 sm:px-12 md:px-20 py-20 sm:py-28 border-t border-[#e8e8f0] text-center">
+      <section id="features" className="relative z-20 px-6 sm:px-12 md:px-20 py-20 sm:py-28 border-t border-[#e8e8f0] text-center">
         <div className="absolute inset-0" style={sectionBg} />
         <div className="relative max-w-[900px] mx-auto">
           <SectionLabel>What You Get</SectionLabel>
           <h2 className="text-[26px] sm:text-[36px] md:text-[44px] leading-[0.9] mb-14 tracking-[-0.03em]" style={gradientText('180deg', 0.9, 0.5)}>
             Everything you need to walk into a lender's office with confidence.
           </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className={contentBlockStyle}><div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {[
               { icon: "◎", title: "Capital Readiness Score", desc: "A 0–100 composite score based on 6 weighted underwriting components" },
               { icon: "⬡", title: "2.5x Exposure Ceiling", desc: "Your maximum fundable amount calculated with dynamic multiplier adjustments" },
@@ -464,20 +466,20 @@ export default function LandingPage() {
               { icon: "◐", title: "Risk Signal Detection", desc: "Identifies liens, judgments, utilization spikes, and velocity flags" },
               { icon: "⬢", title: "Personalized Next Steps", desc: "AI-generated action plan prioritized by impact on your fundability" },
             ].map((item) => (
-              <div key={item.title} className="p-5 sm:p-6 rounded-xl bg-[#f8f8fc] border border-[#e0e0ea] group hover:bg-[#f2f2f8] transition-colors">
+              <div key={item.title} className="p-5 sm:p-6 rounded-xl bg-[#f8f8fc]/60 border border-[#e0e0ea]/50 group hover:bg-[#f2f2f8]/70 transition-colors">
                 <span className="text-[20px] text-[#8a8aa5] mb-4 block">{item.icon}</span>
                 <h3 className="text-[14px] sm:text-[15px] text-[#1a1a2e] font-medium mb-2">{item.title}</h3>
                 <p className="text-[11px] sm:text-[13px] text-[#3a3a5a] leading-[1.6] sm:leading-[1.7] text-justify-smart">{item.desc}</p>
               </div>
             ))}
-          </div>
+          </div></div>
           <SubscribeButton className="mt-10" />
           <ScrollArrow targetId="results" />
         </div>
       </section>
 
       {/* ═══════════════ 6. SOCIAL PROOF ═══════════════ */}
-      <section id="results" className="relative z-10 px-6 sm:px-12 md:px-20 py-20 sm:py-28 border-t border-[#e8e8f0] text-center">
+      <section id="results" className="relative z-20 px-6 sm:px-12 md:px-20 py-20 sm:py-28 border-t border-[#e8e8f0] text-center">
         <div className="absolute inset-0" style={sectionBg} />
         <div className="relative max-w-[900px] mx-auto">
           <SectionLabel>Results</SectionLabel>
@@ -485,27 +487,27 @@ export default function LandingPage() {
             Founders are getting funded with clarity, not luck.
           </h2>
 
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-14">
+          <div className={`${contentBlockStyle} mb-14`}><div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
             {[
               { val: "12,500+", label: "Founders Analyzed" },
               { val: "$47M+", label: "Capital Deployed" },
               { val: "89%", label: "Approval Rate" },
               { val: "6.2x", label: "Avg Score Improvement" },
             ].map((s) => (
-              <div key={s.label} className="text-center p-5 rounded-xl bg-[#f8f8fc] border border-[#e0e0ea]">
+              <div key={s.label} className="text-center p-5 rounded-xl bg-[#f8f8fc]/60 border border-[#e0e0ea]/50">
                 <p className="text-[24px] sm:text-[30px] font-mono text-[#3a3a5a] mb-1" style={{ fontFamily: "'JetBrains Mono', monospace" }}>{s.val}</p>
                 <p className="text-[10px] sm:text-[11px] text-[#8a8aa5] tracking-wide uppercase">{s.label}</p>
               </div>
             ))}
-          </div>
+          </div></div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className={contentBlockStyle}><div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             {[
               { name: "Marcus T.", role: "E-commerce Founder", quote: "I went from a 42 to a 78 Capital Readiness Score in 60 days. Got approved for a $250K line of credit on the first try." },
               { name: "Aisha K.", role: "Real Estate Investor", quote: "The denial simulation caught 3 triggers I didn't know existed. Fixed them all before applying — approved same week." },
               { name: "David L.", role: "SaaS Startup CEO", quote: "MentXr showed me I was Mid-Tier when I thought I was Prime. After following the repair plan, I moved up and saved 4% on rates." },
             ].map((t) => (
-              <div key={t.name} className="p-6 rounded-xl bg-[#f8f8fc] border border-[#e0e0ea]">
+              <div key={t.name} className="p-6 rounded-xl bg-[#f8f8fc]/60 border border-[#e0e0ea]/50">
                 <p className="text-[11px] sm:text-[13px] text-[#6a6a8a] leading-[1.6] sm:leading-[1.8] mb-5 italic text-justify-smart">"{t.quote}"</p>
                 <div>
                   <p className="text-[13px] text-[#3a3a5a] font-medium">{t.name}</p>
@@ -513,14 +515,14 @@ export default function LandingPage() {
                 </div>
               </div>
             ))}
-          </div>
+          </div></div>
           <SubscribeButton className="mt-10" />
           <ScrollArrow targetId="sec-risk" />
         </div>
       </section>
 
       {/* ═══════════════ 7. RISK REVERSAL ═══════════════ */}
-      <section id="sec-risk" className="relative z-10 px-6 sm:px-12 md:px-20 py-20 sm:py-28 border-t border-[#e8e8f0] text-center">
+      <section id="sec-risk" className="relative z-20 px-6 sm:px-12 md:px-20 py-20 sm:py-28 border-t border-[#e8e8f0] text-center">
         <div className="absolute inset-0" style={sectionBg} />
         <div className="relative max-w-[800px] mx-auto">
           <SectionLabel>No More Guessing</SectionLabel>
@@ -530,7 +532,7 @@ export default function LandingPage() {
           <p className="text-[12px] sm:text-[15px] text-[#6a6a8a] leading-[1.6] sm:leading-[1.8] mb-12 max-w-[600px] mx-auto text-justify-smart-center">
             Every denied application costs you: hard inquiries, wasted time, damaged confidence. MentXr eliminates the guesswork by showing you exactly what a lender sees — before you ever submit.
           </p>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+          <div className={contentBlockStyle}><div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
             <div className="p-6 rounded-xl border border-red-500/10 bg-red-500/[0.02]">
               <p className="text-[11px] tracking-[0.15em] uppercase text-red-400/30 mb-4">Without MentXr</p>
               <ul className="space-y-3">
@@ -541,7 +543,7 @@ export default function LandingPage() {
                 ))}
               </ul>
             </div>
-            <div className="p-6 rounded-xl border border-[#e0e0ea] bg-[#f8f8fc]">
+            <div className="p-6 rounded-xl border border-[#e0e0ea]/50 bg-[#f8f8fc]/60">
               <p className="text-[11px] tracking-[0.15em] uppercase text-[#6a6a8a] mb-4">With MentXr</p>
               <ul className="space-y-3">
                 {["Know your exact tier & ceiling", "Fix issues before applying", "Apply once, with confidence", "Get approved on first submission", "Build on momentum"].map((t) => (
@@ -551,21 +553,21 @@ export default function LandingPage() {
                 ))}
               </ul>
             </div>
-          </div>
+          </div></div>
           <SubscribeButton className="mt-10" />
           <ScrollArrow targetId="sec-breakdown" />
         </div>
       </section>
 
       {/* ═══════════════ 8. FEATURE BREAKDOWN ═══════════════ */}
-      <section id="sec-breakdown" className="relative z-10 px-6 sm:px-12 md:px-20 py-20 sm:py-28 border-t border-[#e8e8f0] text-center">
+      <section id="sec-breakdown" className="relative z-20 px-6 sm:px-12 md:px-20 py-20 sm:py-28 border-t border-[#e8e8f0] text-center">
         <div className="absolute inset-0" style={sectionBg} />
         <div className="relative max-w-[900px] mx-auto">
           <SectionLabel>Feature Breakdown</SectionLabel>
           <h2 className="text-[26px] sm:text-[36px] md:text-[44px] leading-[0.9] mb-14 tracking-[-0.03em]" style={gradientText('180deg', 0.9, 0.5)}>
             Six components. One score. Complete clarity.
           </h2>
-          <div className="space-y-3">
+          <div className={contentBlockStyle}><div className="space-y-3">
             {[
               { name: "Capital Strength", weight: "0–20 pts", desc: "Revenue, assets, collateral position, and business capitalization" },
               { name: "Credit Quality", weight: "0–20 pts", desc: "FICO, payment history, derogatory marks, utilization ratios" },
@@ -574,7 +576,7 @@ export default function LandingPage() {
               { name: "Liquidity & Leverage", weight: "0–15 pts", desc: "Debt-to-income, current ratio, available credit, existing obligations" },
               { name: "Risk Signals", weight: "0–15 pts", desc: "Liens, judgments, NSFs, velocity flags, recent inquiries, collections" },
             ].map((c) => (
-              <div key={c.name} className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-6 p-5 rounded-xl bg-[#f8f8fc] border border-[#e0e0ea]">
+              <div key={c.name} className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-6 p-5 rounded-xl bg-[#f8f8fc]/60 border border-[#e0e0ea]/50">
                 <div className="flex items-center gap-4 sm:w-[200px] shrink-0">
                   <span className="text-[14px] sm:text-[15px] text-[#3a3a5a] font-medium">{c.name}</span>
                 </div>
@@ -583,27 +585,27 @@ export default function LandingPage() {
               </div>
             ))}
           </div>
-          <div className="mt-8 p-5 rounded-xl bg-[#f2f2f8] border border-[#e0e0ea]">
+          <div className="mt-8 p-5 rounded-xl bg-[#f2f2f8]/60 border border-[#e0e0ea]/50">
             <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-8">
               <span className="text-[15px] text-[#1a1a2e] font-medium">Total: 0–100 pts</span>
               <span className="text-[12px] text-[#8a8aa5]">→ Qualification Range: $25K – $5M+ based on composite score and tier placement</span>
             </div>
-          </div>
+          </div></div>
           <SubscribeButton className="mt-10" />
           <ScrollArrow targetId="sec-modes" />
         </div>
       </section>
 
       {/* ═══════════════ 9. MODE DIFFERENTIATION ═══════════════ */}
-      <section id="sec-modes" className="relative z-10 px-6 sm:px-12 md:px-20 py-20 sm:py-28 border-t border-[#e8e8f0] text-center">
+      <section id="sec-modes" className="relative z-20 px-6 sm:px-12 md:px-20 py-20 sm:py-28 border-t border-[#e8e8f0] text-center">
         <div className="absolute inset-0" style={sectionBg} />
         <div className="relative max-w-[900px] mx-auto">
           <SectionLabel>Operating Modes</SectionLabel>
           <h2 className="text-[26px] sm:text-[36px] md:text-[44px] leading-[0.9] mb-14 tracking-[-0.03em]" style={gradientText('180deg', 0.9, 0.5)}>
             Two modes. One goal: get you funded.
           </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-            <div className="p-6 sm:p-8 rounded-xl bg-[#f8f8fc] border border-[#e0e0ea]">
+          <div className={contentBlockStyle}><div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            <div className="p-6 sm:p-8 rounded-xl bg-[#f8f8fc]/60 border border-[#e0e0ea]/50">
               <div className="flex items-center gap-3 mb-6">
                 <div className="w-3 h-3 rounded-full bg-white/20"></div>
                 <span className="text-[11px] tracking-[0.15em] uppercase text-[#6a6a8a]">Pre-Funding Mode</span>
@@ -620,7 +622,7 @@ export default function LandingPage() {
                 ))}
               </ul>
             </div>
-            <div className="p-6 sm:p-8 rounded-xl bg-[#f8f8fc] border border-[#e0e0ea]">
+            <div className="p-6 sm:p-8 rounded-xl bg-[#f8f8fc]/60 border border-[#e0e0ea]/50">
               <div className="flex items-center gap-3 mb-6">
                 <div className="w-3 h-3 rounded-full bg-[#c0c0d0] border border-white/20"></div>
                 <span className="text-[11px] tracking-[0.15em] uppercase text-[#6a6a8a]">Repair Mode</span>
@@ -637,41 +639,41 @@ export default function LandingPage() {
                 ))}
               </ul>
             </div>
-          </div>
+          </div></div>
           <SubscribeButton className="mt-10" />
           <ScrollArrow targetId="sec-tiers" />
         </div>
       </section>
 
       {/* ═══════════════ 10. TIER POSITIONING ═══════════════ */}
-      <section id="sec-tiers" className="relative z-10 px-6 sm:px-12 md:px-20 py-20 sm:py-28 border-t border-[#e8e8f0] text-center">
+      <section id="sec-tiers" className="relative z-20 px-6 sm:px-12 md:px-20 py-20 sm:py-28 border-t border-[#e8e8f0] text-center">
         <div className="absolute inset-0" style={sectionBg} />
         <div className="relative max-w-[900px] mx-auto">
           <SectionLabel>Tier Eligibility</SectionLabel>
           <h2 className="text-[26px] sm:text-[36px] md:text-[44px] leading-[0.9] mb-14 tracking-[-0.03em]" style={gradientText('180deg', 0.9, 0.5)}>
             Three tiers. Know which one you belong to.
           </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className={contentBlockStyle}><div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             {[
-              { tier: "Tier 1", name: "Prime Capital", score: "75–100", products: "SBA 7(a) & 504, Conventional LOC, Term Loans, Equipment Finance", color: "border-[#3C3C3C]" },
-              { tier: "Tier 2", name: "Mid-Tier", score: "50–74", products: "Revenue-Based Lending, Invoice Factoring, Merchant Cash Advance, Bridge Loans", color: "border-[#303030]" },
-              { tier: "Tier 3", name: "Alternative", score: "25–49", products: "Microloans, Secured Cards, Credit Builder Programs, Community Development Loans", color: "border-[#404040]" },
+              { tier: "Tier 1", name: "Prime Capital", score: "75–100", products: "SBA 7(a) & 504, Conventional LOC, Term Loans, Equipment Finance", color: "border-[#3C3C3C]/30" },
+              { tier: "Tier 2", name: "Mid-Tier", score: "50–74", products: "Revenue-Based Lending, Invoice Factoring, Merchant Cash Advance, Bridge Loans", color: "border-[#303030]/30" },
+              { tier: "Tier 3", name: "Alternative", score: "25–49", products: "Microloans, Secured Cards, Credit Builder Programs, Community Development Loans", color: "border-[#404040]/30" },
             ].map((t) => (
-              <div key={t.tier} className={`p-6 rounded-xl bg-[#f8f8fc] border ${t.color}`}>
+              <div key={t.tier} className={`p-6 rounded-xl bg-[#f8f8fc]/60 border ${t.color}`}>
                 <span className="text-[10px] font-mono text-[#8a8aa5] tracking-wider uppercase">{t.tier}</span>
                 <h3 className="text-[18px] sm:text-[20px] text-[#1a1a2e] font-medium mt-2 mb-1">{t.name}</h3>
                 <p className="text-[13px] font-mono text-[#6a6a8a] mb-5" style={{ fontFamily: "'JetBrains Mono', monospace" }}>Score: {t.score}</p>
                 <p className="text-[10px] sm:text-[12px] text-[#8a8aa5] leading-[1.5] sm:leading-[1.7] text-justify-smart">{t.products}</p>
               </div>
             ))}
-          </div>
+          </div></div>
           <SubscribeButton className="mt-10" />
           <ScrollArrow targetId="sec-case" />
         </div>
       </section>
 
       {/* ═══════════════ 11. CASE STUDY ═══════════════ */}
-      <section id="sec-case" className="relative z-10 px-6 sm:px-12 md:px-20 py-20 sm:py-28 border-t border-[#e8e8f0] text-center">
+      <section id="sec-case" className="relative z-20 px-6 sm:px-12 md:px-20 py-20 sm:py-28 border-t border-[#e8e8f0] text-center">
         <div className="absolute inset-0" style={sectionBg} />
         <div className="relative max-w-[800px] mx-auto">
           <SectionLabel>Example Walkthrough</SectionLabel>
@@ -679,7 +681,7 @@ export default function LandingPage() {
             How a 38-score founder became funding-ready in 67 days.
           </h2>
 
-          <div className="space-y-0">
+          <div className={contentBlockStyle}><div className="space-y-0">
             {[
               { day: "Day 1", title: "Initial Analysis", detail: "Score: 38/100. Tier 3 (Alternative). 4 denial triggers flagged: high utilization (78%), 2 collections, thin business file, no EIN separation." },
               { day: "Day 3", title: "Repair Plan Generated", detail: "MentXr auto-generated 6 dispute letters (2 per bureau), created a 90-day utilization reduction plan, and recommended EIN registration + business bank account." },
@@ -696,21 +698,21 @@ export default function LandingPage() {
                 </div>
               </div>
             ))}
-          </div>
+          </div></div>
           <SubscribeButton className="mt-10" />
           <ScrollArrow targetId="faq" />
         </div>
       </section>
 
       {/* ═══════════════ 12. FAQ / OBJECTION HANDLING ═══════════════ */}
-      <section id="faq" className="relative z-10 px-6 sm:px-12 md:px-20 py-20 sm:py-28 border-t border-[#e8e8f0] text-center">
+      <section id="faq" className="relative z-20 px-6 sm:px-12 md:px-20 py-20 sm:py-28 border-t border-[#e8e8f0] text-center">
         <div className="absolute inset-0" style={sectionBg} />
         <div className="relative max-w-[700px] mx-auto">
           <SectionLabel>FAQ</SectionLabel>
           <h2 className="text-[26px] sm:text-[36px] md:text-[44px] leading-[0.9] mb-12 tracking-[-0.03em]" style={gradientText('180deg', 0.9, 0.5)}>
             Common questions, straight answers.
           </h2>
-          <div className="space-y-0">
+          <div className={contentBlockStyle}><div className="space-y-0">
             {faqItems.map((item, i) => (
               <div key={i} className="border-b border-[#404040]">
                 <button
@@ -728,21 +730,21 @@ export default function LandingPage() {
                 )}
               </div>
             ))}
-          </div>
+          </div></div>
           <SubscribeButton className="mt-10" />
           <ScrollArrow targetId="sec-trust" />
         </div>
       </section>
 
       {/* ═══════════════ 13. TRUST & COMPLIANCE ═══════════════ */}
-      <section id="sec-trust" className="relative z-10 px-6 sm:px-12 md:px-20 py-20 sm:py-28 border-t border-[#e8e8f0] text-center">
+      <section id="sec-trust" className="relative z-20 px-6 sm:px-12 md:px-20 py-20 sm:py-28 border-t border-[#e8e8f0] text-center">
         <div className="absolute inset-0" style={sectionBg} />
         <div className="relative max-w-[800px] mx-auto">
           <SectionLabel>Trust & Security</SectionLabel>
           <h2 className="text-[26px] sm:text-[36px] md:text-[44px] leading-[0.9] mb-12 tracking-[-0.03em]" style={gradientText('180deg', 0.9, 0.5)}>
             Your data. Your control. Always.
           </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className={contentBlockStyle}><div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {[
               { icon: "⬡", title: "Encrypted", desc: "AES-256 encryption at rest and TLS 1.3 in transit" },
               { icon: "◎", title: "Private", desc: "We never share data with lenders, brokers, or third parties" },
@@ -755,15 +757,15 @@ export default function LandingPage() {
                 <p className="text-[10px] sm:text-[11px] text-[#8a8aa5] leading-[1.5] sm:leading-[1.6] text-justify-smart">{item.desc}</p>
               </div>
             ))}
-          </div>
+          </div></div>
           <SubscribeButton className="mt-10" />
           <ScrollArrow targetId="sec-cta" />
         </div>
       </section>
 
       {/* ═══════════════ 14. FINAL CTA ═══════════════ */}
-      <section id="sec-cta" className="relative z-10 px-6 sm:px-12 md:px-20 py-24 sm:py-36 border-t border-[#e8e8f0]">
-        <div className="absolute inset-0" style={{ background: 'radial-gradient(ellipse 80% 70% at 50% 50%, rgba(255,255,255,0.97) 0%, rgba(248,248,252,0.85) 50%, rgba(245,245,250,0.6) 100%)' }} />
+      <section id="sec-cta" className="relative z-20 px-6 sm:px-12 md:px-20 py-24 sm:py-36 border-t border-[#e8e8f0]">
+        <div className="absolute inset-0" style={sectionBg} />
         <div className="relative max-w-[700px] mx-auto text-center">
           <h2
             className="text-[30px] sm:text-[44px] md:text-[56px] leading-[0.9] mb-6 tracking-[-0.04em]"
@@ -805,8 +807,8 @@ export default function LandingPage() {
       </section>
 
       {/* ═══════════════ 15. FOOTER ═══════════════ */}
-      <footer className="relative z-10 border-t border-[#e8e8f0] px-6 sm:px-12 md:px-20 py-10 sm:py-14 text-center">
-        <div className="absolute inset-0" style={{ background: 'rgba(255,255,255,0.95)' }} />
+      <footer className="relative z-20 border-t border-[#e8e8f0] px-6 sm:px-12 md:px-20 py-10 sm:py-14 text-center">
+        <div className="absolute inset-0" style={sectionBg} />
         <div className="relative max-w-[900px] mx-auto">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-8 mb-10">
             <div className="flex items-center gap-2.5">
