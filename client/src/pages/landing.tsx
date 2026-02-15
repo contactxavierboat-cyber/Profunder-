@@ -12,26 +12,6 @@ function SpaceBackground() {
 
     let animationId: number;
 
-    interface Blob {
-      x: number; y: number;
-      vx: number; vy: number;
-      radius: number;
-      opacity: number;
-      phase: number;
-      color: [number, number, number];
-    }
-
-    interface TechShape {
-      x: number; y: number;
-      vx: number; vy: number;
-      type: number;
-      size: number;
-      rotation: number;
-      rotSpeed: number;
-      opacity: number;
-      phase: number;
-    }
-
     interface Star {
       x: number; y: number;
       vx: number; vy: number;
@@ -39,12 +19,47 @@ function SpaceBackground() {
       brightness: number;
       twinkleSpeed: number;
       twinklePhase: number;
+      glow: boolean;
     }
 
-    let blobs: Blob[] = [];
-    let techShapes: TechShape[] = [];
+    interface Constellation {
+      stars: { ox: number; oy: number; size: number }[];
+      edges: [number, number][];
+      x: number; y: number;
+      vx: number; vy: number;
+      rotation: number;
+      rotSpeed: number;
+      scale: number;
+      opacity: number;
+      phase: number;
+    }
+
     let stars: Star[] = [];
+    let constellations: Constellation[] = [];
     let time = 0;
+
+    const constellationPatterns: { stars: { ox: number; oy: number; size: number }[]; edges: [number, number][] }[] = [
+      { stars: [{ox:0,oy:-40,size:3},{ox:-35,oy:-15,size:2.5},{ox:-20,oy:20,size:2},{ox:25,oy:15,size:2.5},{ox:40,oy:-10,size:2},{ox:10,oy:40,size:2},{ox:-10,oy:-5,size:1.5}],
+        edges: [[0,1],[1,2],[2,5],[0,4],[4,3],[3,5],[1,6],[6,3]] },
+      { stars: [{ox:0,oy:-50,size:3},{ox:-30,oy:-20,size:2},{ox:30,oy:-20,size:2},{ox:-45,oy:15,size:2.5},{ox:45,oy:15,size:2.5},{ox:-25,oy:45,size:2},{ox:25,oy:45,size:2}],
+        edges: [[0,1],[0,2],[1,3],[2,4],[3,5],[4,6],[5,6],[1,2]] },
+      { stars: [{ox:-50,oy:0,size:2.5},{ox:-25,oy:-20,size:2},{ox:0,oy:5,size:3},{ox:25,oy:-15,size:2},{ox:50,oy:0,size:2.5},{ox:15,oy:25,size:2},{ox:-15,oy:30,size:1.5}],
+        edges: [[0,1],[1,2],[2,3],[3,4],[2,5],[2,6],[5,6]] },
+      { stars: [{ox:0,oy:-45,size:3},{ox:-40,oy:0,size:2.5},{ox:40,oy:0,size:2.5},{ox:0,oy:45,size:3},{ox:-20,oy:-20,size:1.5},{ox:20,oy:-20,size:1.5},{ox:-20,oy:20,size:1.5},{ox:20,oy:20,size:1.5}],
+        edges: [[0,4],[0,5],[4,1],[5,2],[1,6],[2,7],[6,3],[7,3],[4,5],[6,7]] },
+      { stars: [{ox:-40,oy:-30,size:2.5},{ox:0,oy:-45,size:3},{ox:40,oy:-30,size:2.5},{ox:35,oy:10,size:2},{ox:15,oy:40,size:2},{ox:-15,oy:40,size:2},{ox:-35,oy:10,size:2}],
+        edges: [[0,1],[1,2],[2,3],[3,4],[4,5],[5,6],[6,0]] },
+      { stars: [{ox:-45,oy:-10,size:2},{ox:-20,oy:-35,size:2.5},{ox:10,oy:-25,size:2},{ox:35,oy:-40,size:3},{ox:45,oy:-5,size:2},{ox:20,oy:15,size:2},{ox:-5,oy:30,size:2.5},{ox:-30,oy:20,size:2}],
+        edges: [[0,1],[1,2],[2,3],[3,4],[4,5],[5,6],[6,7],[7,0],[2,5]] },
+      { stars: [{ox:0,oy:-35,size:3},{ox:-30,oy:0,size:2},{ox:30,oy:0,size:2},{ox:0,oy:35,size:3},{ox:0,oy:0,size:2}],
+        edges: [[0,1],[0,2],[1,3],[2,3],[0,4],[4,3],[1,4],[2,4]] },
+      { stars: [{ox:-50,oy:-15,size:2},{ox:-30,oy:10,size:2.5},{ox:-5,oy:-20,size:2},{ox:15,oy:5,size:3},{ox:40,oy:-10,size:2},{ox:55,oy:15,size:2.5}],
+        edges: [[0,1],[1,2],[2,3],[3,4],[4,5]] },
+      { stars: [{ox:0,oy:-50,size:3},{ox:-25,oy:-25,size:2},{ox:25,oy:-25,size:2},{ox:-40,oy:5,size:2},{ox:40,oy:5,size:2},{ox:-25,oy:35,size:2.5},{ox:25,oy:35,size:2.5},{ox:0,oy:10,size:2}],
+        edges: [[0,1],[0,2],[1,3],[2,4],[3,5],[4,6],[1,7],[2,7],[7,5],[7,6]] },
+      { stars: [{ox:-35,oy:-35,size:2},{ox:0,oy:-50,size:3},{ox:35,oy:-35,size:2},{ox:50,oy:0,size:2.5},{ox:35,oy:35,size:2},{ox:0,oy:50,size:3},{ox:-35,oy:35,size:2},{ox:-50,oy:0,size:2.5}],
+        edges: [[0,1],[1,2],[2,3],[3,4],[4,5],[5,6],[6,7],[7,0]] },
+    ];
 
     const resize = () => {
       const w = window.innerWidth;
@@ -60,207 +75,45 @@ function SpaceBackground() {
       const w = window.innerWidth;
       const h = document.documentElement.scrollHeight;
 
-      const blobColors: [number, number, number][] = [
-        [180, 180, 200], [160, 170, 195], [190, 185, 210],
-        [170, 175, 200], [185, 180, 205], [175, 185, 210],
-      ];
-      const blobCount = Math.min(Math.floor((w * h) / 80000), 30);
-      blobs = [];
-      for (let i = 0; i < blobCount; i++) {
-        const speed = Math.random() * 0.12 + 0.02;
-        const angle = Math.random() * Math.PI * 2;
-        blobs.push({
-          x: Math.random() * w,
-          y: Math.random() * h,
-          vx: Math.cos(angle) * speed,
-          vy: Math.sin(angle) * speed,
-          radius: Math.random() * 80 + 40,
-          opacity: Math.random() * 0.06 + 0.03,
-          phase: Math.random() * Math.PI * 2,
-          color: blobColors[Math.floor(Math.random() * blobColors.length)],
-        });
-      }
-
-      const techCount = Math.min(Math.floor((w * h) / 8000), 200);
-      techShapes = [];
-      for (let i = 0; i < techCount; i++) {
-        const speed = Math.random() * 0.25 + 0.06;
-        const angle = Math.random() * Math.PI * 2;
-        techShapes.push({
-          x: Math.random() * w,
-          y: Math.random() * h,
-          vx: Math.cos(angle) * speed,
-          vy: Math.sin(angle) * speed,
-          type: Math.floor(Math.random() * 12),
-          size: Math.random() * 35 + 12,
-          rotation: Math.random() * Math.PI * 2,
-          rotSpeed: (Math.random() - 0.5) * 0.012,
-          opacity: Math.random() * 0.18 + 0.08,
-          phase: Math.random() * Math.PI * 2,
-        });
-      }
-
-      const starCount = Math.min(Math.floor((w * h) / 4000), 400);
+      const starCount = Math.min(Math.floor((w * h) / 2500), 600);
       stars = [];
       for (let i = 0; i < starCount; i++) {
-        const speed = Math.random() * 0.2 + 0.03;
+        const speed = Math.random() * 0.15 + 0.02;
         const angle = Math.random() * Math.PI * 2;
+        const sz = Math.random();
         stars.push({
           x: Math.random() * w,
           y: Math.random() * h,
           vx: Math.cos(angle) * speed,
           vy: Math.sin(angle) * speed,
-          size: Math.random() * 1.8 + 0.3,
-          brightness: Math.random() * 0.25 + 0.08,
+          size: sz < 0.6 ? Math.random() * 1.2 + 0.3 : Math.random() * 2.5 + 1,
+          brightness: Math.random() * 0.3 + 0.1,
           twinkleSpeed: Math.random() * 0.03 + 0.008,
           twinklePhase: Math.random() * Math.PI * 2,
+          glow: sz > 0.75,
         });
       }
-    };
 
-    const drawHex = (r: number) => {
-      ctx.beginPath();
-      for (let i = 0; i < 6; i++) {
-        const a = (Math.PI / 3) * i - Math.PI / 6;
-        i === 0 ? ctx.moveTo(Math.cos(a) * r, Math.sin(a) * r) : ctx.lineTo(Math.cos(a) * r, Math.sin(a) * r);
+      const cCount = Math.min(Math.floor((w * h) / 60000), 40);
+      constellations = [];
+      for (let i = 0; i < cCount; i++) {
+        const pattern = constellationPatterns[Math.floor(Math.random() * constellationPatterns.length)];
+        const speed = Math.random() * 0.18 + 0.04;
+        const angle = Math.random() * Math.PI * 2;
+        constellations.push({
+          stars: pattern.stars.map(s => ({ ...s })),
+          edges: pattern.edges.map(e => [...e] as [number, number]),
+          x: Math.random() * w,
+          y: Math.random() * h,
+          vx: Math.cos(angle) * speed,
+          vy: Math.sin(angle) * speed,
+          rotation: Math.random() * Math.PI * 2,
+          rotSpeed: (Math.random() - 0.5) * 0.003,
+          scale: Math.random() * 1.2 + 0.6,
+          opacity: Math.random() * 0.2 + 0.12,
+          phase: Math.random() * Math.PI * 2,
+        });
       }
-      ctx.closePath();
-    };
-
-    const drawShape = (s: TechShape) => {
-      const pulse = Math.sin(time * 1.2 + s.phase) * 0.3 + 0.7;
-      const a = s.opacity * pulse;
-      ctx.save();
-      ctx.translate(s.x, s.y);
-      ctx.rotate(s.rotation);
-      ctx.strokeStyle = `rgba(100, 105, 145, ${a})`;
-      ctx.fillStyle = `rgba(100, 105, 145, ${a * 0.25})`;
-      ctx.lineWidth = 1.5;
-
-      const sz = s.size;
-      switch (s.type) {
-        case 0:
-          drawHex(sz);
-          ctx.stroke();
-          drawHex(sz * 0.45);
-          ctx.stroke();
-          break;
-        case 1:
-          ctx.strokeRect(-sz * 0.6, -sz * 0.6, sz * 1.2, sz * 1.2);
-          for (let p = 0; p < 4; p++) {
-            const off = -sz * 0.35 + p * (sz * 0.7 / 3);
-            ctx.beginPath(); ctx.moveTo(off, -sz * 0.6); ctx.lineTo(off, -sz * 0.6 - 6); ctx.stroke();
-            ctx.beginPath(); ctx.moveTo(off, sz * 0.6); ctx.lineTo(off, sz * 0.6 + 6); ctx.stroke();
-            ctx.beginPath(); ctx.moveTo(-sz * 0.6, off); ctx.lineTo(-sz * 0.6 - 6, off); ctx.stroke();
-            ctx.beginPath(); ctx.moveTo(sz * 0.6, off); ctx.lineTo(sz * 0.6 + 6, off); ctx.stroke();
-          }
-          ctx.beginPath(); ctx.arc(0, 0, sz * 0.15, 0, Math.PI * 2); ctx.fill();
-          break;
-        case 2: {
-          const bw = sz * 0.5, bh = sz;
-          ctx.beginPath();
-          ctx.moveTo(-bw, -bh); ctx.lineTo(-bw - sz * 0.4, -bh);
-          ctx.lineTo(-bw - sz * 0.4, bh); ctx.lineTo(-bw, bh);
-          ctx.stroke();
-          ctx.beginPath();
-          ctx.moveTo(bw, -bh); ctx.lineTo(bw + sz * 0.4, -bh);
-          ctx.lineTo(bw + sz * 0.4, bh); ctx.lineTo(bw, bh);
-          ctx.stroke();
-          ctx.beginPath(); ctx.arc(0, 0, 2.5, 0, Math.PI * 2); ctx.fill();
-          break;
-        }
-        case 3:
-          ctx.beginPath();
-          ctx.moveTo(-sz, 0); ctx.lineTo(-sz * 0.3, 0);
-          ctx.lineTo(0, -sz * 0.5); ctx.lineTo(sz * 0.3, 0); ctx.lineTo(sz, 0);
-          ctx.stroke();
-          ctx.beginPath(); ctx.arc(-sz, 0, 3, 0, Math.PI * 2); ctx.fill();
-          ctx.beginPath(); ctx.arc(sz, 0, 3, 0, Math.PI * 2); ctx.fill();
-          ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(0, sz * 0.6); ctx.stroke();
-          ctx.beginPath(); ctx.arc(0, sz * 0.6, 3, 0, Math.PI * 2); ctx.fill();
-          break;
-        case 4:
-          ctx.beginPath();
-          ctx.moveTo(0, -sz); ctx.lineTo(sz * 0.65, 0);
-          ctx.lineTo(0, sz); ctx.lineTo(-sz * 0.65, 0);
-          ctx.closePath(); ctx.stroke();
-          ctx.beginPath();
-          ctx.moveTo(0, -sz * 0.35); ctx.lineTo(sz * 0.23, 0);
-          ctx.lineTo(0, sz * 0.35); ctx.lineTo(-sz * 0.23, 0);
-          ctx.closePath(); ctx.stroke();
-          break;
-        case 5:
-          ctx.beginPath();
-          for (let i = -25; i <= 25; i++) {
-            const wx = i * (sz / 12);
-            const wy = Math.sin(i * 0.4 + time * 2.5 + s.phase) * sz * 0.35;
-            i === -25 ? ctx.moveTo(wx, wy) : ctx.lineTo(wx, wy);
-          }
-          ctx.stroke();
-          break;
-        case 6: {
-          const g = sz * 0.8;
-          for (let r = 0; r < 4; r++) {
-            for (let c = 0; c < 4; c++) {
-              ctx.beginPath();
-              ctx.arc(-g * 1.5 + c * g, -g * 1.5 + r * g, 2, 0, Math.PI * 2);
-              ctx.fill();
-            }
-          }
-          break;
-        }
-        case 7:
-          ctx.font = `bold ${sz * 0.55}px 'JetBrains Mono', monospace`;
-          ctx.fillStyle = `rgba(100, 105, 145, ${a})`;
-          ctx.textAlign = 'center';
-          ctx.textBaseline = 'middle';
-          const labels = ['{ }', '< />', '( )', '[ ]', '0x', '#!', '/*', '::'];
-          ctx.fillText(labels[Math.floor(s.phase * 10) % labels.length], 0, 0);
-          break;
-        case 8:
-          ctx.beginPath(); ctx.arc(0, 0, sz, 0, Math.PI * 2); ctx.stroke();
-          ctx.beginPath(); ctx.arc(0, 0, sz * 0.55, 0, Math.PI * 2); ctx.stroke();
-          ctx.beginPath(); ctx.arc(0, 0, 2.5, 0, Math.PI * 2); ctx.fill();
-          for (let i = 0; i < 4; i++) {
-            const ang = (Math.PI / 2) * i;
-            ctx.beginPath();
-            ctx.moveTo(Math.cos(ang) * sz * 0.55, Math.sin(ang) * sz * 0.55);
-            ctx.lineTo(Math.cos(ang) * sz, Math.sin(ang) * sz);
-            ctx.stroke();
-          }
-          break;
-        case 9:
-          for (let i = 0; i < 3; i++) {
-            const lx = -sz + i * sz;
-            ctx.beginPath();
-            ctx.moveTo(lx, -sz); ctx.lineTo(lx, sz);
-            ctx.stroke();
-            ctx.beginPath(); ctx.arc(lx, -sz, 2.5, 0, Math.PI * 2); ctx.fill();
-            ctx.beginPath(); ctx.arc(lx, sz, 2.5, 0, Math.PI * 2); ctx.fill();
-          }
-          ctx.beginPath(); ctx.moveTo(-sz, 0); ctx.lineTo(sz, 0); ctx.stroke();
-          break;
-        case 10:
-          ctx.beginPath();
-          for (let i = 0; i < 5; i++) {
-            const ang = (Math.PI * 2 / 5) * i - Math.PI / 2;
-            const ix = Math.cos(ang) * sz;
-            const iy = Math.sin(ang) * sz;
-            i === 0 ? ctx.moveTo(ix, iy) : ctx.lineTo(ix, iy);
-          }
-          ctx.closePath(); ctx.stroke();
-          break;
-        case 11:
-          ctx.beginPath();
-          ctx.moveTo(-sz, -sz * 0.3); ctx.lineTo(-sz * 0.5, -sz * 0.3);
-          ctx.lineTo(-sz * 0.3, -sz * 0.8); ctx.lineTo(sz * 0.2, 0);
-          ctx.lineTo(sz * 0.5, 0); ctx.lineTo(sz, sz * 0.4);
-          ctx.stroke();
-          ctx.beginPath(); ctx.arc(-sz, -sz * 0.3, 3, 0, Math.PI * 2); ctx.fill();
-          ctx.beginPath(); ctx.arc(sz, sz * 0.4, 3, 0, Math.PI * 2); ctx.fill();
-          break;
-      }
-      ctx.restore();
     };
 
     const draw = () => {
@@ -268,27 +121,6 @@ function SpaceBackground() {
       const h = document.documentElement.scrollHeight;
       ctx.clearRect(0, 0, w, h);
       time += 0.016;
-
-      blobs.forEach(b => {
-        b.x += b.vx;
-        b.y += b.vy;
-        if (b.x < -b.radius * 2) b.x = w + b.radius * 2;
-        if (b.x > w + b.radius * 2) b.x = -b.radius * 2;
-        if (b.y < -b.radius * 2) b.y = h + b.radius * 2;
-        if (b.y > h + b.radius * 2) b.y = -b.radius * 2;
-
-        const breathe = Math.sin(time * 0.8 + b.phase) * 0.15 + 1;
-        const r = b.radius * breathe;
-        const [cr, cg, cb] = b.color;
-        const grad = ctx.createRadialGradient(b.x, b.y, 0, b.x, b.y, r);
-        grad.addColorStop(0, `rgba(${cr}, ${cg}, ${cb}, ${b.opacity})`);
-        grad.addColorStop(0.6, `rgba(${cr}, ${cg}, ${cb}, ${b.opacity * 0.4})`);
-        grad.addColorStop(1, `rgba(${cr}, ${cg}, ${cb}, 0)`);
-        ctx.beginPath();
-        ctx.fillStyle = grad;
-        ctx.arc(b.x, b.y, r, 0, Math.PI * 2);
-        ctx.fill();
-      });
 
       stars.forEach(s => {
         s.x += s.vx;
@@ -301,20 +133,82 @@ function SpaceBackground() {
         const twinkle = Math.sin(time * s.twinkleSpeed * 60 + s.twinklePhase) * 0.4 + 0.6;
         const alpha = s.brightness * twinkle;
         ctx.beginPath();
-        ctx.fillStyle = `rgba(130, 135, 180, ${alpha})`;
+        ctx.fillStyle = `rgba(120, 125, 170, ${alpha})`;
         ctx.arc(s.x, s.y, s.size, 0, Math.PI * 2);
         ctx.fill();
+
+        if (s.glow) {
+          const gr = s.size * 4;
+          const grad = ctx.createRadialGradient(s.x, s.y, 0, s.x, s.y, gr);
+          grad.addColorStop(0, `rgba(120, 125, 170, ${alpha * 0.2})`);
+          grad.addColorStop(1, `rgba(120, 125, 170, 0)`);
+          ctx.beginPath();
+          ctx.fillStyle = grad;
+          ctx.arc(s.x, s.y, gr, 0, Math.PI * 2);
+          ctx.fill();
+        }
       });
 
-      techShapes.forEach(el => {
-        el.x += el.vx;
-        el.y += el.vy;
-        el.rotation += el.rotSpeed;
-        if (el.x < -60) el.x = w + 60;
-        if (el.x > w + 60) el.x = -60;
-        if (el.y < -60) el.y = h + 60;
-        if (el.y > h + 60) el.y = -60;
-        drawShape(el);
+      constellations.forEach(c => {
+        c.x += c.vx;
+        c.y += c.vy;
+        c.rotation += c.rotSpeed;
+        const margin = 80 * c.scale;
+        if (c.x < -margin) c.x = w + margin;
+        if (c.x > w + margin) c.x = -margin;
+        if (c.y < -margin) c.y = h + margin;
+        if (c.y > h + margin) c.y = -margin;
+
+        const pulse = Math.sin(time * 0.8 + c.phase) * 0.15 + 0.85;
+        const alpha = c.opacity * pulse;
+        const cos = Math.cos(c.rotation);
+        const sin = Math.sin(c.rotation);
+
+        const pts = c.stars.map(s => ({
+          x: c.x + (s.ox * cos - s.oy * sin) * c.scale,
+          y: c.y + (s.ox * sin + s.oy * cos) * c.scale,
+          size: s.size * c.scale,
+        }));
+
+        c.edges.forEach(([a, b]) => {
+          ctx.beginPath();
+          ctx.strokeStyle = `rgba(140, 145, 185, ${alpha * 0.5})`;
+          ctx.lineWidth = 1;
+          ctx.moveTo(pts[a].x, pts[a].y);
+          ctx.lineTo(pts[b].x, pts[b].y);
+          ctx.stroke();
+
+          const midX = (pts[a].x + pts[b].x) / 2;
+          const midY = (pts[a].y + pts[b].y) / 2;
+          const dx = pts[b].x - pts[a].x;
+          const dy = pts[b].y - pts[a].y;
+          const len = Math.sqrt(dx * dx + dy * dy);
+          if (len > 20) {
+            const dotProgress = ((time * 0.5 + c.phase + a * 0.7) % 1);
+            const dotX = pts[a].x + dx * dotProgress;
+            const dotY = pts[a].y + dy * dotProgress;
+            ctx.beginPath();
+            ctx.fillStyle = `rgba(160, 165, 210, ${alpha * 0.7})`;
+            ctx.arc(dotX, dotY, 1.2, 0, Math.PI * 2);
+            ctx.fill();
+          }
+        });
+
+        pts.forEach(p => {
+          ctx.beginPath();
+          ctx.fillStyle = `rgba(140, 145, 190, ${alpha})`;
+          ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+          ctx.fill();
+
+          const gr = p.size * 3;
+          const grad = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, gr);
+          grad.addColorStop(0, `rgba(140, 145, 190, ${alpha * 0.25})`);
+          grad.addColorStop(1, `rgba(140, 145, 190, 0)`);
+          ctx.beginPath();
+          ctx.fillStyle = grad;
+          ctx.arc(p.x, p.y, gr, 0, Math.PI * 2);
+          ctx.fill();
+        });
       });
 
       animationId = requestAnimationFrame(draw);
