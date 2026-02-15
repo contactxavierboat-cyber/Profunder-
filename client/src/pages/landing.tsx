@@ -271,7 +271,7 @@ export default function LandingPage() {
       <div className="sticky top-0 z-50 w-full flex justify-center px-6 sm:px-10 pt-4" data-testid="nav-top">
         <nav className="flex items-center justify-between w-full max-w-[900px] h-[52px] bg-[#141414] border border-[#2A2A2A] rounded-full px-2.5 pl-3">
           <div className="flex items-center gap-2 bg-[#1E1E1E] rounded-full px-3.5 py-1.5" data-testid="nav-logo">
-            <div className="w-[18px] h-[18px] rounded-full bg-gradient-to-br from-white/80 to-white/50 flex items-center justify-center">
+            <div className="w-[18px] h-[18px] rounded-full bg-gradient-to-br from-white/80 to-white/50 flex items-center justify-center animate-logo-pulse">
               <span className="w-1.5 h-1.5 rounded-full bg-[#141414]"></span>
             </div>
             <span className="text-[12.5px] font-semibold tracking-[0.03em] text-white/90">MentXr<span className="text-[8px] align-super">®</span></span>
