@@ -695,7 +695,7 @@ export default function DashboardPage() {
     : [];
 
   return (
-    <div className="h-[100dvh] flex text-[#1A1A1A] relative">
+    <div className="h-[100dvh] flex text-[#1A1A1A] relative bg-transparent">
       <TechBackground />
 
       {sidebarOpen && (

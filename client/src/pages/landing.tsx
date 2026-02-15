@@ -177,7 +177,7 @@ const gradientText = (dir = '180deg', from = 0.95, to = 0.5) => ({
   backgroundClip: 'text' as const,
 });
 
-const sectionBg = { background: 'linear-gradient(180deg, rgba(255,255,255,0.96) 0%, rgba(248,249,250,0.92) 60%, rgba(241,243,245,0.85) 100%)' };
+const sectionBg = { background: 'linear-gradient(180deg, rgba(255,255,255,0.85) 0%, rgba(248,249,250,0.78) 60%, rgba(241,243,245,0.70) 100%)' };
 
 const SectionLabel = ({ children }: { children: string }) => (
   <p className="text-[11px] tracking-[0.2em] uppercase mb-6 sm:mb-8 text-[#999]">{children}</p>
@@ -253,7 +253,7 @@ export default function LandingPage() {
   };
 
   return (
-    <div className="relative min-h-screen bg-white text-[#1A1A1A] overflow-x-hidden" style={{ fontFamily: "'Inter', sans-serif" }}>
+    <div className="relative min-h-screen bg-transparent text-[#1A1A1A] overflow-x-hidden" style={{ fontFamily: "'Inter', sans-serif" }}>
       <TechBackground />
 
       <div

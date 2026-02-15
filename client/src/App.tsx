@@ -22,10 +22,24 @@ function Router() {
   );
 }
 
+function SiliconValleyMesh() {
+  return (
+    <div className="sv-mesh-bg" aria-hidden="true">
+      <div className="sv-blob sv-blob-1" />
+      <div className="sv-blob sv-blob-2" />
+      <div className="sv-blob sv-blob-3" />
+      <div className="sv-blob sv-blob-4" />
+      <div className="sv-blob sv-blob-5" />
+      <div className="sv-mesh-grid" />
+    </div>
+  );
+}
+
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
+        <SiliconValleyMesh />
         <Router />
         <Toaster />
       </AuthProvider>

@@ -24,7 +24,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
   ];
 
   return (
-    <div className="min-h-[100dvh] bg-white text-[#1A1A1A] flex">
+    <div className="min-h-[100dvh] bg-transparent text-[#1A1A1A] flex">
       {mobileOpen && (
         <div
           className="fixed inset-0 bg-black/20 z-30 md:hidden"
@@ -88,7 +88,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
         </div>
       </aside>
 
-      <div className="flex-1 md:ml-64 bg-white relative flex flex-col min-h-[100dvh]">
+      <div className="flex-1 md:ml-64 bg-white/80 relative flex flex-col min-h-[100dvh]">
         <header className="h-12 flex items-center justify-between px-3 border-b border-[#E5E7EB] md:hidden shrink-0 relative z-10 bg-white">
           <button
             onClick={() => setMobileOpen(true)}

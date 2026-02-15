@@ -217,3 +217,107 @@
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
 }
+
+@keyframes meshFloat1 {
+  0%, 100% { transform: translate(0%, 0%) scale(1); }
+  25% { transform: translate(5%, -8%) scale(1.05); }
+  50% { transform: translate(-3%, 5%) scale(0.95); }
+  75% { transform: translate(8%, 3%) scale(1.02); }
+}
+
+@keyframes meshFloat2 {
+  0%, 100% { transform: translate(0%, 0%) scale(1); }
+  25% { transform: translate(-6%, 5%) scale(1.03); }
+  50% { transform: translate(4%, -6%) scale(0.97); }
+  75% { transform: translate(-5%, -3%) scale(1.04); }
+}
+
+@keyframes meshFloat3 {
+  0%, 100% { transform: translate(0%, 0%) scale(1); }
+  25% { transform: translate(7%, 4%) scale(0.96); }
+  50% { transform: translate(-5%, -7%) scale(1.06); }
+  75% { transform: translate(3%, 6%) scale(0.98); }
+}
+
+@keyframes meshFloat4 {
+  0%, 100% { transform: translate(0%, 0%) scale(1); }
+  25% { transform: translate(-4%, -6%) scale(1.04); }
+  50% { transform: translate(6%, 3%) scale(0.94); }
+  75% { transform: translate(-7%, 5%) scale(1.03); }
+}
+
+@keyframes meshFloat5 {
+  0%, 100% { transform: translate(0%, 0%) scale(1); }
+  25% { transform: translate(3%, 7%) scale(1.02); }
+  50% { transform: translate(-6%, -4%) scale(1.05); }
+  75% { transform: translate(5%, -5%) scale(0.97); }
+}
+
+.sv-mesh-bg {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.sv-blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  will-change: transform;
+}
+
+.sv-blob-1 {
+  width: 600px;
+  height: 600px;
+  top: -10%;
+  right: -5%;
+  background: radial-gradient(circle, rgba(46,125,50,0.12) 0%, rgba(46,125,50,0.04) 50%, transparent 70%);
+  animation: meshFloat1 20s ease-in-out infinite;
+}
+
+.sv-blob-2 {
+  width: 500px;
+  height: 500px;
+  top: 30%;
+  left: -8%;
+  background: radial-gradient(circle, rgba(8,145,178,0.10) 0%, rgba(8,145,178,0.03) 50%, transparent 70%);
+  animation: meshFloat2 25s ease-in-out infinite;
+}
+
+.sv-blob-3 {
+  width: 550px;
+  height: 550px;
+  bottom: -5%;
+  right: 15%;
+  background: radial-gradient(circle, rgba(124,58,237,0.08) 0%, rgba(124,58,237,0.02) 50%, transparent 70%);
+  animation: meshFloat3 22s ease-in-out infinite;
+}
+
+.sv-blob-4 {
+  width: 450px;
+  height: 450px;
+  top: 60%;
+  left: 25%;
+  background: radial-gradient(circle, rgba(46,125,50,0.06) 0%, rgba(46,125,50,0.02) 50%, transparent 70%);
+  animation: meshFloat4 28s ease-in-out infinite;
+}
+
+.sv-blob-5 {
+  width: 400px;
+  height: 400px;
+  top: 10%;
+  left: 40%;
+  background: radial-gradient(circle, rgba(234,88,12,0.06) 0%, rgba(234,88,12,0.02) 50%, transparent 70%);
+  animation: meshFloat5 24s ease-in-out infinite;
+}
+
+.sv-mesh-grid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(0,0,0,0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,0,0,0.025) 1px, transparent 1px);
+  background-size: 60px 60px;
+}
