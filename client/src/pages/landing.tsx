@@ -79,10 +79,10 @@ function SpaceBackground() {
         });
       }
 
-      const techCount = Math.min(Math.floor((w * h) / 18000), 80);
+      const techCount = Math.min(Math.floor((w * h) / 12000), 120);
       techElements = [];
       for (let i = 0; i < techCount; i++) {
-        const speed = Math.random() * 0.15 + 0.03;
+        const speed = Math.random() * 0.2 + 0.05;
         const angle = Math.random() * Math.PI * 2;
         techElements.push({
           x: Math.random() * w,
@@ -90,10 +90,10 @@ function SpaceBackground() {
           vx: Math.cos(angle) * speed,
           vy: Math.sin(angle) * speed,
           type: techTypes[Math.floor(Math.random() * techTypes.length)],
-          size: Math.random() * 16 + 8,
+          size: Math.random() * 24 + 14,
           rotation: Math.random() * Math.PI * 2,
-          rotSpeed: (Math.random() - 0.5) * 0.008,
-          opacity: Math.random() * 0.08 + 0.03,
+          rotSpeed: (Math.random() - 0.5) * 0.01,
+          opacity: Math.random() * 0.12 + 0.08,
           phase: Math.random() * Math.PI * 2,
         });
       }
@@ -116,9 +116,9 @@ function SpaceBackground() {
       ctx.save();
       ctx.translate(el.x, el.y);
       ctx.rotate(el.rotation);
-      ctx.strokeStyle = `rgba(100, 110, 160, ${alpha})`;
-      ctx.fillStyle = `rgba(100, 110, 160, ${alpha * 0.3})`;
-      ctx.lineWidth = 0.8;
+      ctx.strokeStyle = `rgba(80, 90, 140, ${alpha})`;
+      ctx.fillStyle = `rgba(80, 90, 140, ${alpha * 0.4})`;
+      ctx.lineWidth = 1.2;
 
       switch (el.type) {
         case 'hexagon':
@@ -294,7 +294,7 @@ function SpaceBackground() {
 }
 
 const gradientText = (dir = '180deg', _from = 0.85, _to = 0.5) => ({
-  background: `linear-gradient(${dir}, #111111 0%, #555555 100%)`,
+  backgroundImage: `linear-gradient(${dir}, #111111 0%, #555555 100%)`,
   WebkitBackgroundClip: 'text' as const,
   WebkitTextFillColor: 'transparent' as const,
   backgroundClip: 'text' as const,
