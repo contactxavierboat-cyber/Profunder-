@@ -86,11 +86,11 @@ function SpaceBackground() {
           y: Math.random() * h,
           vx: Math.cos(angle) * speed,
           vy: Math.sin(angle) * speed,
-          size: sz < 0.6 ? Math.random() * 1.2 + 0.3 : Math.random() * 2.5 + 1,
-          brightness: Math.random() * 0.3 + 0.1,
+          size: sz < 0.5 ? Math.random() * 1.8 + 0.5 : Math.random() * 3.5 + 1.5,
+          brightness: Math.random() * 0.45 + 0.2,
           twinkleSpeed: Math.random() * 0.03 + 0.008,
           twinklePhase: Math.random() * Math.PI * 2,
-          glow: sz > 0.75,
+          glow: sz > 0.5,
         });
       }
 
@@ -109,8 +109,8 @@ function SpaceBackground() {
           vy: Math.sin(angle) * speed,
           rotation: Math.random() * Math.PI * 2,
           rotSpeed: (Math.random() - 0.5) * 0.003,
-          scale: Math.random() * 1.2 + 0.6,
-          opacity: Math.random() * 0.2 + 0.12,
+          scale: Math.random() * 1.8 + 0.9,
+          opacity: Math.random() * 0.25 + 0.25,
           phase: Math.random() * Math.PI * 2,
         });
       }
@@ -133,15 +133,15 @@ function SpaceBackground() {
         const twinkle = Math.sin(time * s.twinkleSpeed * 60 + s.twinklePhase) * 0.4 + 0.6;
         const alpha = s.brightness * twinkle;
         ctx.beginPath();
-        ctx.fillStyle = `rgba(120, 125, 170, ${alpha})`;
+        ctx.fillStyle = `rgba(100, 105, 160, ${alpha})`;
         ctx.arc(s.x, s.y, s.size, 0, Math.PI * 2);
         ctx.fill();
 
         if (s.glow) {
-          const gr = s.size * 4;
+          const gr = s.size * 5;
           const grad = ctx.createRadialGradient(s.x, s.y, 0, s.x, s.y, gr);
-          grad.addColorStop(0, `rgba(120, 125, 170, ${alpha * 0.2})`);
-          grad.addColorStop(1, `rgba(120, 125, 170, 0)`);
+          grad.addColorStop(0, `rgba(100, 105, 160, ${alpha * 0.35})`);
+          grad.addColorStop(1, `rgba(100, 105, 160, 0)`);
           ctx.beginPath();
           ctx.fillStyle = grad;
           ctx.arc(s.x, s.y, gr, 0, Math.PI * 2);
@@ -172,8 +172,8 @@ function SpaceBackground() {
 
         c.edges.forEach(([a, b]) => {
           ctx.beginPath();
-          ctx.strokeStyle = `rgba(140, 145, 185, ${alpha * 0.5})`;
-          ctx.lineWidth = 1;
+          ctx.strokeStyle = `rgba(120, 125, 175, ${alpha * 0.7})`;
+          ctx.lineWidth = 1.5;
           ctx.moveTo(pts[a].x, pts[a].y);
           ctx.lineTo(pts[b].x, pts[b].y);
           ctx.stroke();
@@ -188,22 +188,22 @@ function SpaceBackground() {
             const dotX = pts[a].x + dx * dotProgress;
             const dotY = pts[a].y + dy * dotProgress;
             ctx.beginPath();
-            ctx.fillStyle = `rgba(160, 165, 210, ${alpha * 0.7})`;
-            ctx.arc(dotX, dotY, 1.2, 0, Math.PI * 2);
+            ctx.fillStyle = `rgba(130, 140, 200, ${alpha * 0.9})`;
+            ctx.arc(dotX, dotY, 1.8, 0, Math.PI * 2);
             ctx.fill();
           }
         });
 
         pts.forEach(p => {
           ctx.beginPath();
-          ctx.fillStyle = `rgba(140, 145, 190, ${alpha})`;
+          ctx.fillStyle = `rgba(110, 115, 175, ${alpha})`;
           ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
           ctx.fill();
 
-          const gr = p.size * 3;
+          const gr = p.size * 5;
           const grad = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, gr);
-          grad.addColorStop(0, `rgba(140, 145, 190, ${alpha * 0.25})`);
-          grad.addColorStop(1, `rgba(140, 145, 190, 0)`);
+          grad.addColorStop(0, `rgba(110, 115, 175, ${alpha * 0.4})`);
+          grad.addColorStop(1, `rgba(110, 115, 175, 0)`);
           ctx.beginPath();
           ctx.fillStyle = grad;
           ctx.arc(p.x, p.y, gr, 0, Math.PI * 2);
