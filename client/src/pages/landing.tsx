@@ -296,9 +296,9 @@ export default function LandingPage() {
       </div>
 
       {/* ═══════════════ 1. HERO ═══════════════ */}
-      <section className="relative z-10 min-h-[90vh] flex flex-col justify-center px-6 sm:px-12 md:px-20 lg:px-28 py-20">
-        <div className="absolute inset-0" style={{ background: 'radial-gradient(ellipse 90% 80% at 30% 50%, rgba(8,8,8,0.98) 0%, rgba(8,8,8,0.9) 50%, transparent 100%)' }} />
-        <div className="relative max-w-[900px]">
+      <section className="relative z-10 min-h-[90vh] flex flex-col items-center justify-center px-6 sm:px-12 md:px-20 lg:px-28 py-20 text-center">
+        <div className="absolute inset-0" style={{ background: 'radial-gradient(ellipse 90% 80% at 50% 50%, rgba(8,8,8,0.98) 0%, rgba(8,8,8,0.9) 50%, transparent 100%)' }} />
+        <div className="relative max-w-[900px] mx-auto">
           <p className="text-[11px] tracking-[0.2em] uppercase text-white/60 mb-6" data-testid="text-hero-label">Capital Readiness Engine</p>
           <h1
             className="text-[38px] sm:text-[56px] md:text-[72px] lg:text-[88px] uppercase leading-[0.95] mb-8"
@@ -307,11 +307,11 @@ export default function LandingPage() {
           >
             Know Exactly<br />Where You Stand<br />Before You Apply
           </h1>
-          <p className="text-[15px] sm:text-[17px] text-white/65 leading-[1.8] max-w-[560px] mb-10">
+          <p className="text-[15px] sm:text-[17px] text-white/65 leading-[1.8] max-w-[560px] mx-auto mb-10">
             MentXr&reg; runs your financial profile through real underwriting logic — the same criteria banks use to approve or deny you. Get your Capital Readiness Score, exposure ceiling, tier eligibility, and denial risk before you ever submit an application.
           </p>
 
-          <form onSubmit={handleLogin} className="w-full max-w-[440px] mb-8">
+          <form onSubmit={handleLogin} className="w-full max-w-[440px] mx-auto mb-8">
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center bg-[#1E1E1E] border border-[#363636] rounded-2xl sm:rounded-full sm:h-[52px] sm:pl-5 sm:pr-1.5 overflow-hidden">
               <input
                 data-testid="input-email"
@@ -334,7 +334,7 @@ export default function LandingPage() {
             </div>
           </form>
 
-          <div className="flex flex-wrap items-center gap-6 text-[11px] text-white/45 tracking-wide">
+          <div className="flex flex-wrap items-center justify-center gap-6 text-[11px] text-white/45 tracking-wide">
             <span>Free forever</span>
             <span className="w-1 h-1 rounded-full bg-white/25"></span>
             <span>No credit card</span>
@@ -345,9 +345,9 @@ export default function LandingPage() {
       </section>
 
       {/* ═══════════════ 2. PROBLEM / PAIN ═══════════════ */}
-      <section className="relative z-10 px-6 sm:px-12 md:px-20 py-20 sm:py-28 border-t border-[#404040]">
+      <section className="relative z-10 px-6 sm:px-12 md:px-20 py-20 sm:py-28 border-t border-[#404040] text-center">
         <div className="absolute inset-0" style={sectionBg} />
-        <div className="relative max-w-[800px]">
+        <div className="relative max-w-[800px] mx-auto">
           <SectionLabel>The Problem</SectionLabel>
           <h2 className="text-[26px] sm:text-[36px] md:text-[44px] leading-[1.1] mb-10 tracking-[-0.03em]" style={gradientText('180deg', 0.95, 0.55)}>
             73% of funding applications get denied. Most founders never find out why until it's too late.
@@ -369,14 +369,14 @@ export default function LandingPage() {
       </section>
 
       {/* ═══════════════ 3. SOLUTION OVERVIEW ═══════════════ */}
-      <section className="relative z-10 px-6 sm:px-12 md:px-20 py-20 sm:py-28 border-t border-[#404040]">
+      <section className="relative z-10 px-6 sm:px-12 md:px-20 py-20 sm:py-28 border-t border-[#404040] text-center">
         <div className="absolute inset-0" style={sectionBg} />
-        <div className="relative max-w-[800px]">
+        <div className="relative max-w-[800px] mx-auto">
           <SectionLabel>The Solution</SectionLabel>
           <h2 className="text-[26px] sm:text-[36px] md:text-[44px] leading-[1.1] mb-6 tracking-[-0.03em]" style={gradientText('180deg', 0.95, 0.55)}>
             AI-powered underwriting intelligence that tells you exactly what to fix — before you apply.
           </h2>
-          <p className="text-[15px] sm:text-[16px] text-white/60 leading-[1.8] mb-12 max-w-[640px]">
+          <p className="text-[15px] sm:text-[16px] text-white/60 leading-[1.8] mb-12 max-w-[640px] mx-auto">
             MentXr® analyzes your credit report and bank statements using the same 6-component framework real lenders use. You get a Capital Readiness Score, tier placement, exposure ceiling, denial simulation, and a step-by-step action plan — all powered by AI.
           </p>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
@@ -398,9 +398,9 @@ export default function LandingPage() {
       </section>
 
       {/* ═══════════════ 4. HOW IT WORKS ═══════════════ */}
-      <section id="how-it-works" className="relative z-10 px-6 sm:px-12 md:px-20 py-20 sm:py-28 border-t border-[#404040]">
+      <section id="how-it-works" className="relative z-10 px-6 sm:px-12 md:px-20 py-20 sm:py-28 border-t border-[#404040] text-center">
         <div className="absolute inset-0" style={sectionBg} />
-        <div className="relative max-w-[800px]">
+        <div className="relative max-w-[800px] mx-auto">
           <SectionLabel>How It Works</SectionLabel>
           <h2 className="text-[26px] sm:text-[36px] md:text-[44px] leading-[1.1] mb-14 tracking-[-0.03em]" style={gradientText('180deg', 0.9, 0.5)}>
             Four steps from unknown to underwriting-ready.
@@ -427,9 +427,9 @@ export default function LandingPage() {
       </section>
 
       {/* ═══════════════ 5. FUNDING OUTCOMES ═══════════════ */}
-      <section id="features" className="relative z-10 px-6 sm:px-12 md:px-20 py-20 sm:py-28 border-t border-[#404040]">
+      <section id="features" className="relative z-10 px-6 sm:px-12 md:px-20 py-20 sm:py-28 border-t border-[#404040] text-center">
         <div className="absolute inset-0" style={sectionBg} />
-        <div className="relative max-w-[900px]">
+        <div className="relative max-w-[900px] mx-auto">
           <SectionLabel>What You Get</SectionLabel>
           <h2 className="text-[26px] sm:text-[36px] md:text-[44px] leading-[1.1] mb-14 tracking-[-0.03em]" style={gradientText('180deg', 0.9, 0.5)}>
             Everything you need to walk into a lender's office with confidence.
@@ -457,9 +457,9 @@ export default function LandingPage() {
       </section>
 
       {/* ═══════════════ 6. SOCIAL PROOF ═══════════════ */}
-      <section id="results" className="relative z-10 px-6 sm:px-12 md:px-20 py-20 sm:py-28 border-t border-[#404040]">
+      <section id="results" className="relative z-10 px-6 sm:px-12 md:px-20 py-20 sm:py-28 border-t border-[#404040] text-center">
         <div className="absolute inset-0" style={sectionBg} />
-        <div className="relative max-w-[900px]">
+        <div className="relative max-w-[900px] mx-auto">
           <SectionLabel>Results</SectionLabel>
           <h2 className="text-[26px] sm:text-[36px] md:text-[44px] leading-[1.1] mb-14 tracking-[-0.03em]" style={gradientText('180deg', 0.9, 0.5)}>
             Founders are getting funded with clarity, not luck.
@@ -498,14 +498,14 @@ export default function LandingPage() {
       </section>
 
       {/* ═══════════════ 7. RISK REVERSAL ═══════════════ */}
-      <section className="relative z-10 px-6 sm:px-12 md:px-20 py-20 sm:py-28 border-t border-[#404040]">
+      <section className="relative z-10 px-6 sm:px-12 md:px-20 py-20 sm:py-28 border-t border-[#404040] text-center">
         <div className="absolute inset-0" style={sectionBg} />
-        <div className="relative max-w-[800px]">
+        <div className="relative max-w-[800px] mx-auto">
           <SectionLabel>No More Guessing</SectionLabel>
           <h2 className="text-[26px] sm:text-[36px] md:text-[44px] leading-[1.1] mb-6 tracking-[-0.03em]" style={gradientText('180deg', 0.95, 0.55)}>
             Stop applying blind. Start applying ready.
           </h2>
-          <p className="text-[15px] text-white/60 leading-[1.8] mb-12 max-w-[600px]">
+          <p className="text-[15px] text-white/60 leading-[1.8] mb-12 max-w-[600px] mx-auto">
             Every denied application costs you: hard inquiries, wasted time, damaged confidence. MentXr eliminates the guesswork by showing you exactly what a lender sees — before you ever submit.
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
@@ -534,9 +534,9 @@ export default function LandingPage() {
       </section>
 
       {/* ═══════════════ 8. FEATURE BREAKDOWN ═══════════════ */}
-      <section className="relative z-10 px-6 sm:px-12 md:px-20 py-20 sm:py-28 border-t border-[#404040]">
+      <section className="relative z-10 px-6 sm:px-12 md:px-20 py-20 sm:py-28 border-t border-[#404040] text-center">
         <div className="absolute inset-0" style={sectionBg} />
-        <div className="relative max-w-[900px]">
+        <div className="relative max-w-[900px] mx-auto">
           <SectionLabel>Feature Breakdown</SectionLabel>
           <h2 className="text-[26px] sm:text-[36px] md:text-[44px] leading-[1.1] mb-14 tracking-[-0.03em]" style={gradientText('180deg', 0.9, 0.5)}>
             Six components. One score. Complete clarity.
@@ -569,9 +569,9 @@ export default function LandingPage() {
       </section>
 
       {/* ═══════════════ 9. MODE DIFFERENTIATION ═══════════════ */}
-      <section className="relative z-10 px-6 sm:px-12 md:px-20 py-20 sm:py-28 border-t border-[#404040]">
+      <section className="relative z-10 px-6 sm:px-12 md:px-20 py-20 sm:py-28 border-t border-[#404040] text-center">
         <div className="absolute inset-0" style={sectionBg} />
-        <div className="relative max-w-[900px]">
+        <div className="relative max-w-[900px] mx-auto">
           <SectionLabel>Operating Modes</SectionLabel>
           <h2 className="text-[26px] sm:text-[36px] md:text-[44px] leading-[1.1] mb-14 tracking-[-0.03em]" style={gradientText('180deg', 0.9, 0.5)}>
             Two modes. One goal: get you funded.
@@ -616,9 +616,9 @@ export default function LandingPage() {
       </section>
 
       {/* ═══════════════ 10. TIER POSITIONING ═══════════════ */}
-      <section className="relative z-10 px-6 sm:px-12 md:px-20 py-20 sm:py-28 border-t border-[#404040]">
+      <section className="relative z-10 px-6 sm:px-12 md:px-20 py-20 sm:py-28 border-t border-[#404040] text-center">
         <div className="absolute inset-0" style={sectionBg} />
-        <div className="relative max-w-[900px]">
+        <div className="relative max-w-[900px] mx-auto">
           <SectionLabel>Tier Eligibility</SectionLabel>
           <h2 className="text-[26px] sm:text-[36px] md:text-[44px] leading-[1.1] mb-14 tracking-[-0.03em]" style={gradientText('180deg', 0.9, 0.5)}>
             Three tiers. Know which one you belong to.
@@ -641,9 +641,9 @@ export default function LandingPage() {
       </section>
 
       {/* ═══════════════ 11. CASE STUDY ═══════════════ */}
-      <section className="relative z-10 px-6 sm:px-12 md:px-20 py-20 sm:py-28 border-t border-[#404040]">
+      <section className="relative z-10 px-6 sm:px-12 md:px-20 py-20 sm:py-28 border-t border-[#404040] text-center">
         <div className="absolute inset-0" style={sectionBg} />
-        <div className="relative max-w-[800px]">
+        <div className="relative max-w-[800px] mx-auto">
           <SectionLabel>Example Walkthrough</SectionLabel>
           <h2 className="text-[26px] sm:text-[36px] md:text-[44px] leading-[1.1] mb-14 tracking-[-0.03em]" style={gradientText('180deg', 0.9, 0.5)}>
             How a 38-score founder became funding-ready in 67 days.
@@ -671,9 +671,9 @@ export default function LandingPage() {
       </section>
 
       {/* ═══════════════ 12. FAQ / OBJECTION HANDLING ═══════════════ */}
-      <section id="faq" className="relative z-10 px-6 sm:px-12 md:px-20 py-20 sm:py-28 border-t border-[#404040]">
+      <section id="faq" className="relative z-10 px-6 sm:px-12 md:px-20 py-20 sm:py-28 border-t border-[#404040] text-center">
         <div className="absolute inset-0" style={sectionBg} />
-        <div className="relative max-w-[700px]">
+        <div className="relative max-w-[700px] mx-auto">
           <SectionLabel>FAQ</SectionLabel>
           <h2 className="text-[26px] sm:text-[36px] md:text-[44px] leading-[1.1] mb-12 tracking-[-0.03em]" style={gradientText('180deg', 0.9, 0.5)}>
             Common questions, straight answers.
@@ -767,10 +767,10 @@ export default function LandingPage() {
       </section>
 
       {/* ═══════════════ 15. FOOTER ═══════════════ */}
-      <footer className="relative z-10 border-t border-[#404040] px-6 sm:px-12 md:px-20 py-10 sm:py-14">
+      <footer className="relative z-10 border-t border-[#404040] px-6 sm:px-12 md:px-20 py-10 sm:py-14 text-center">
         <div className="absolute inset-0" style={{ background: 'rgba(8,8,8,0.85)' }} />
-        <div className="relative">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-8 mb-10">
+        <div className="relative max-w-[900px] mx-auto">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-8 mb-10">
             <div className="flex items-center gap-2.5">
               <div className="w-6 h-6 rounded-full border-2 border-white/40 flex items-center justify-center">
                 <span className="w-1.5 h-1.5 rounded-full bg-white/60"></span>
@@ -783,7 +783,7 @@ export default function LandingPage() {
               ))}
             </div>
           </div>
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pt-6 border-t border-[#404040]">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-6 border-t border-[#404040]">
             <p className="text-[11px] text-white/40">
               &copy; 2026 MentXr&reg; by <span className="text-white/45 font-medium">CMD Supply</span>. All rights reserved.
             </p>
