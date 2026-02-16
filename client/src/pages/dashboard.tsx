@@ -1051,9 +1051,15 @@ export default function DashboardPage() {
                           <div key={idx} className="flex items-start gap-3 p-3 rounded-xl bg-white/50 border border-white/30" data-testid={`issue-${idx}`}>
                             <AlertTriangle className="w-4 h-4 text-orange-500/70 shrink-0 mt-0.5" />
                             <div className="flex-1 min-w-0">
-                              <p className="text-sm text-[#1a1a2e]/90">{issue.issue || issue.description || issue}</p>
+                              <p className="text-sm text-[#1a1a2e]/90">
+                                {typeof issue === "string" ? issue : (issue.issue || issue.description || issue.issueType || issue.creditor || `Issue ${idx + 1}`)}
+                              </p>
+                              {issue.creditor && <p className="text-[10px] text-[#1a1a2e]/50 mt-0.5">Creditor: {issue.creditor}</p>}
+                              {issue.accountLast4 && <p className="text-[10px] text-[#1a1a2e]/50">Account: ...{issue.accountLast4}</p>}
                               {issue.bureau && <p className="text-[10px] text-[#1a1a2e]/50 mt-0.5">Bureau: {issue.bureau}</p>}
+                              {issue.severity && <p className="text-[10px] text-[#1a1a2e]/50">Severity: {issue.severity}</p>}
                               {issue.impact && <p className="text-[10px] text-[#1a1a2e]/50">Impact: {issue.impact}</p>}
+                              {issue.monthsAffected && <p className="text-[10px] text-[#1a1a2e]/50">Months Affected: {issue.monthsAffected}</p>}
                             </div>
                           </div>
                         ))}
