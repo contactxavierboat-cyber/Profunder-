@@ -200,12 +200,11 @@ function DonutChart({ value, max, size = 120, strokeWidth = 10, color = "#3a3a5a
   );
 }
 
-type TabKey = "mission_control" | "repair_engine" | "build_strategy" | "funding_strategy" | "creator_connect" | "messages" | "progress_tracker";
+type TabKey = "mission_control" | "repair_engine" | "funding_strategy" | "creator_connect" | "messages" | "progress_tracker";
 
 const NAV_ITEMS: { key: TabKey; label: string; icon: any }[] = [
   { key: "mission_control", label: "Mission Control", icon: Target },
   { key: "repair_engine", label: "Repair Engine", icon: Shield },
-  { key: "build_strategy", label: "Build Strategy", icon: Building2 },
   { key: "funding_strategy", label: "Funding Strategy", icon: DollarSign },
   { key: "creator_connect", label: "Creator Connect", icon: Sparkles },
   { key: "messages", label: "Messages", icon: MessageSquare },
@@ -965,11 +964,11 @@ export default function DashboardPage() {
                             <p className="text-[10px] text-[#1a1a2e]/50">Dispute & resolve issues</p>
                           </div>
                         </button>
-                        <button onClick={() => setActiveTab("build_strategy")} className="w-full flex items-center gap-3 p-3 rounded-xl bg-white/50 border border-white/30 hover:bg-white/60 text-left transition-colors">
-                          <Building2 className="w-4 h-4 text-[#1a1a2e]/60" />
+                        <button onClick={() => setActiveTab("funding_strategy")} className="w-full flex items-center gap-3 p-3 rounded-xl bg-white/50 border border-white/30 hover:bg-white/60 text-left transition-colors">
+                          <DollarSign className="w-4 h-4 text-[#1a1a2e]/60" />
                           <div>
-                            <p className="text-xs font-medium text-[#1a1a2e]/90">Run Simulations</p>
-                            <p className="text-[10px] text-[#1a1a2e]/50">Bank rating & pledge loan</p>
+                            <p className="text-xs font-medium text-[#1a1a2e]/90">Funding Strategy</p>
+                            <p className="text-[10px] text-[#1a1a2e]/50">Application timing & capital stack</p>
                           </div>
                         </button>
                       </div>
@@ -1136,107 +1135,101 @@ export default function DashboardPage() {
                   )}
                 </>
               )}
-            </div>
-          )}
 
-          {activeTab === "build_strategy" && (
-            <div className="w-full px-5 sm:px-8 py-6 max-w-[1000px] mx-auto">
-              <div className="mb-6">
-                <h2 className="text-lg font-semibold text-[#1a1a2e]" data-testid="text-build-title">Build Strategy</h2>
-                <p className="text-[11px] text-[#1a1a2e]/60">Simulate bank ratings and pledge loan scenarios</p>
-              </div>
-
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div className="rounded-2xl bg-white/70 backdrop-blur-md border border-white/40 p-6" data-testid="bank-rating-simulator">
-                  <p className="text-xs text-[#1a1a2e]/70 mb-4">Bank Rating Simulator</p>
-                  <div className="space-y-3 mb-4">
-                    <div>
-                      <label className="text-[10px] text-[#1a1a2e]/60 mb-1 block">Avg Monthly Deposits ($)</label>
-                      <input type="number" value={bankRatingForm.avgMonthlyDeposits} onChange={e => setBankRatingForm(p => ({ ...p, avgMonthlyDeposits: Number(e.target.value) }))}
-                        className="w-full h-10 px-3 rounded-xl bg-white/60 border border-white/30 text-sm text-[#1a1a2e] outline-none focus:border-[#c0c0d0]" data-testid="input-monthly-deposits" />
+              <div className="mt-6">
+                <p className="text-xs text-[#1a1a2e]/70 mb-4">Build Strategy Simulators</p>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  <div className="rounded-2xl bg-white/70 backdrop-blur-md border border-white/40 p-6" data-testid="bank-rating-simulator">
+                    <p className="text-xs text-[#1a1a2e]/70 mb-4">Bank Rating Simulator</p>
+                    <div className="space-y-3 mb-4">
+                      <div>
+                        <label className="text-[10px] text-[#1a1a2e]/60 mb-1 block">Avg Monthly Deposits ($)</label>
+                        <input type="number" value={bankRatingForm.avgMonthlyDeposits} onChange={e => setBankRatingForm(p => ({ ...p, avgMonthlyDeposits: Number(e.target.value) }))}
+                          className="w-full h-10 px-3 rounded-xl bg-white/60 border border-white/30 text-sm text-[#1a1a2e] outline-none focus:border-[#c0c0d0]" data-testid="input-monthly-deposits" />
+                      </div>
+                      <div>
+                        <label className="text-[10px] text-[#1a1a2e]/60 mb-1 block">Relationship Years</label>
+                        <input type="number" value={bankRatingForm.relationshipYears} onChange={e => setBankRatingForm(p => ({ ...p, relationshipYears: Number(e.target.value) }))}
+                          className="w-full h-10 px-3 rounded-xl bg-white/60 border border-white/30 text-sm text-[#1a1a2e] outline-none focus:border-[#c0c0d0]" data-testid="input-relationship-years" />
+                      </div>
+                      <div>
+                        <label className="text-[10px] text-[#1a1a2e]/60 mb-1 block">Target Institution</label>
+                        <input type="text" value={bankRatingForm.targetInstitution} onChange={e => setBankRatingForm(p => ({ ...p, targetInstitution: e.target.value }))}
+                          placeholder="e.g., Chase, Wells Fargo"
+                          className="w-full h-10 px-3 rounded-xl bg-white/60 border border-white/30 text-sm text-[#1a1a2e] placeholder:text-[#1a1a2e]/30 outline-none focus:border-[#c0c0d0]" data-testid="input-target-institution" />
+                      </div>
                     </div>
-                    <div>
-                      <label className="text-[10px] text-[#1a1a2e]/60 mb-1 block">Relationship Years</label>
-                      <input type="number" value={bankRatingForm.relationshipYears} onChange={e => setBankRatingForm(p => ({ ...p, relationshipYears: Number(e.target.value) }))}
-                        className="w-full h-10 px-3 rounded-xl bg-white/60 border border-white/30 text-sm text-[#1a1a2e] outline-none focus:border-[#c0c0d0]" data-testid="input-relationship-years" />
-                    </div>
-                    <div>
-                      <label className="text-[10px] text-[#1a1a2e]/60 mb-1 block">Target Institution</label>
-                      <input type="text" value={bankRatingForm.targetInstitution} onChange={e => setBankRatingForm(p => ({ ...p, targetInstitution: e.target.value }))}
-                        placeholder="e.g., Chase, Wells Fargo"
-                        className="w-full h-10 px-3 rounded-xl bg-white/60 border border-white/30 text-sm text-[#1a1a2e] placeholder:text-[#1a1a2e]/30 outline-none focus:border-[#c0c0d0]" data-testid="input-target-institution" />
-                    </div>
-                  </div>
-                  <button onClick={submitBankRating} disabled={bankRatingLoading}
-                    className="w-full h-10 rounded-xl bg-[#3a3a5a] text-white text-xs font-medium hover:bg-[#2a2a4a] disabled:opacity-50 transition-colors flex items-center justify-center gap-2" data-testid="button-simulate-bank-rating">
-                    {bankRatingLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Gauge className="w-3.5 h-3.5" />}
-                    Simulate Rating
-                  </button>
-                  {bankRatingResult && (
-                    <div className="mt-4 p-4 rounded-xl bg-white/50 border border-white/30" data-testid="bank-rating-result">
-                      <div className="flex items-center gap-3 mb-3">
-                        <div className="flex gap-0.5">
-                          {[1,2,3,4,5].map(n => (
-                            <div key={n} className={cn("w-6 h-6 rounded-md flex items-center justify-center text-[10px] font-bold", n <= Math.round(bankRatingResult.rating) ? "bg-[#3a3a5a] text-white" : "bg-[#e0e0ea] text-[#1a1a2e]/40")}>{n}</div>
+                    <button onClick={submitBankRating} disabled={bankRatingLoading}
+                      className="w-full h-10 rounded-xl bg-[#3a3a5a] text-white text-xs font-medium hover:bg-[#2a2a4a] disabled:opacity-50 transition-colors flex items-center justify-center gap-2" data-testid="button-simulate-bank-rating">
+                      {bankRatingLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Gauge className="w-3.5 h-3.5" />}
+                      Simulate Rating
+                    </button>
+                    {bankRatingResult && (
+                      <div className="mt-4 p-4 rounded-xl bg-white/50 border border-white/30" data-testid="bank-rating-result">
+                        <div className="flex items-center gap-3 mb-3">
+                          <div className="flex gap-0.5">
+                            {[1,2,3,4,5].map(n => (
+                              <div key={n} className={cn("w-6 h-6 rounded-md flex items-center justify-center text-[10px] font-bold", n <= Math.round(bankRatingResult.rating) ? "bg-[#3a3a5a] text-white" : "bg-[#e0e0ea] text-[#1a1a2e]/40")}>{n}</div>
+                            ))}
+                          </div>
+                          <span className="text-sm font-semibold text-[#1a1a2e]">{bankRatingResult.label}</span>
+                        </div>
+                        <div className="space-y-1.5">
+                          {bankRatingResult.recommendations?.map((r: string, i: number) => (
+                            <p key={i} className="text-[11px] text-[#1a1a2e]/70 flex items-start gap-2">
+                              <span className="text-[#1a1a2e]/30 mt-0.5">·</span>{r}
+                            </p>
                           ))}
                         </div>
-                        <span className="text-sm font-semibold text-[#1a1a2e]">{bankRatingResult.label}</span>
                       </div>
-                      <div className="space-y-1.5">
-                        {bankRatingResult.recommendations?.map((r: string, i: number) => (
-                          <p key={i} className="text-[11px] text-[#1a1a2e]/70 flex items-start gap-2">
-                            <span className="text-[#1a1a2e]/30 mt-0.5">·</span>{r}
-                          </p>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
-
-                <div className="rounded-2xl bg-white/70 backdrop-blur-md border border-white/40 p-6" data-testid="pledge-loan-simulator">
-                  <p className="text-xs text-[#1a1a2e]/70 mb-4">Pledge Loan Simulator</p>
-                  <div className="space-y-3 mb-4">
-                    <div>
-                      <label className="text-[10px] text-[#1a1a2e]/60 mb-1 block">Loan Amount ($)</label>
-                      <input type="number" value={pledgeLoanForm.loanAmount} onChange={e => setPledgeLoanForm(p => ({ ...p, loanAmount: Number(e.target.value) }))}
-                        className="w-full h-10 px-3 rounded-xl bg-white/60 border border-white/30 text-sm text-[#1a1a2e] outline-none focus:border-[#c0c0d0]" data-testid="input-loan-amount" />
-                    </div>
-                    <div>
-                      <label className="text-[10px] text-[#1a1a2e]/60 mb-1 block">Paydown Percent (%)</label>
-                      <input type="number" value={pledgeLoanForm.paydownPercent} onChange={e => setPledgeLoanForm(p => ({ ...p, paydownPercent: Number(e.target.value) }))}
-                        className="w-full h-10 px-3 rounded-xl bg-white/60 border border-white/30 text-sm text-[#1a1a2e] outline-none focus:border-[#c0c0d0]" data-testid="input-paydown-percent" />
-                    </div>
+                    )}
                   </div>
-                  <button onClick={submitPledgeLoan} disabled={pledgeLoanLoading}
-                    className="w-full h-10 rounded-xl bg-[#3a3a5a] text-white text-xs font-medium hover:bg-[#2a2a4a] disabled:opacity-50 transition-colors flex items-center justify-center gap-2" data-testid="button-simulate-pledge-loan">
-                    {pledgeLoanLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <TrendingUp className="w-3.5 h-3.5" />}
-                    Simulate Pledge Loan
-                  </button>
-                  {pledgeLoanResult && (
-                    <div className="mt-4 p-4 rounded-xl bg-white/50 border border-white/30" data-testid="pledge-loan-result">
-                      <div className="grid grid-cols-2 gap-4 mb-4">
-                        <div className="text-center p-3 rounded-lg bg-white/60">
-                          <p className="text-[9px] text-[#1a1a2e]/50 uppercase mb-1">Before</p>
-                          <p className="text-xl font-bold text-[#1a1a2e]">{pledgeLoanResult.utilBefore}%</p>
-                          <p className="text-[9px] text-[#1a1a2e]/40">utilization</p>
-                        </div>
-                        <div className="text-center p-3 rounded-lg bg-green-500/[0.06] border border-green-500/10">
-                          <p className="text-[9px] text-green-600/60 uppercase mb-1">After</p>
-                          <p className="text-xl font-bold text-green-600">{pledgeLoanResult.utilAfter}%</p>
-                          <p className="text-[9px] text-green-600/40">utilization</p>
-                        </div>
+
+                  <div className="rounded-2xl bg-white/70 backdrop-blur-md border border-white/40 p-6" data-testid="pledge-loan-simulator">
+                    <p className="text-xs text-[#1a1a2e]/70 mb-4">Pledge Loan Simulator</p>
+                    <div className="space-y-3 mb-4">
+                      <div>
+                        <label className="text-[10px] text-[#1a1a2e]/60 mb-1 block">Loan Amount ($)</label>
+                        <input type="number" value={pledgeLoanForm.loanAmount} onChange={e => setPledgeLoanForm(p => ({ ...p, loanAmount: Number(e.target.value) }))}
+                          className="w-full h-10 px-3 rounded-xl bg-white/60 border border-white/30 text-sm text-[#1a1a2e] outline-none focus:border-[#c0c0d0]" data-testid="input-loan-amount" />
                       </div>
-                      <div className="flex items-center justify-between text-xs mb-2">
-                        <span className="text-[#1a1a2e]/60">Estimated Score Impact</span>
-                        <span className="font-semibold text-green-600">+{pledgeLoanResult.scoreDelta} pts</span>
+                      <div>
+                        <label className="text-[10px] text-[#1a1a2e]/60 mb-1 block">Paydown Percent (%)</label>
+                        <input type="number" value={pledgeLoanForm.paydownPercent} onChange={e => setPledgeLoanForm(p => ({ ...p, paydownPercent: Number(e.target.value) }))}
+                          className="w-full h-10 px-3 rounded-xl bg-white/60 border border-white/30 text-sm text-[#1a1a2e] outline-none focus:border-[#c0c0d0]" data-testid="input-paydown-percent" />
                       </div>
-                      <div className="flex items-center justify-between text-xs mb-3">
-                        <span className="text-[#1a1a2e]/60">Timeline</span>
-                        <span className="font-medium text-[#1a1a2e]/80">{pledgeLoanResult.timelineMonths} months</span>
-                      </div>
-                      <p className="text-[11px] text-[#1a1a2e]/70 leading-relaxed">{pledgeLoanResult.recommendation}</p>
                     </div>
-                  )}
+                    <button onClick={submitPledgeLoan} disabled={pledgeLoanLoading}
+                      className="w-full h-10 rounded-xl bg-[#3a3a5a] text-white text-xs font-medium hover:bg-[#2a2a4a] disabled:opacity-50 transition-colors flex items-center justify-center gap-2" data-testid="button-simulate-pledge-loan">
+                      {pledgeLoanLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <TrendingUp className="w-3.5 h-3.5" />}
+                      Simulate Pledge Loan
+                    </button>
+                    {pledgeLoanResult && (
+                      <div className="mt-4 p-4 rounded-xl bg-white/50 border border-white/30" data-testid="pledge-loan-result">
+                        <div className="grid grid-cols-2 gap-4 mb-4">
+                          <div className="text-center p-3 rounded-lg bg-white/60">
+                            <p className="text-[9px] text-[#1a1a2e]/50 uppercase mb-1">Before</p>
+                            <p className="text-xl font-bold text-[#1a1a2e]">{pledgeLoanResult.utilBefore}%</p>
+                            <p className="text-[9px] text-[#1a1a2e]/40">utilization</p>
+                          </div>
+                          <div className="text-center p-3 rounded-lg bg-green-500/[0.06] border border-green-500/10">
+                            <p className="text-[9px] text-green-600/60 uppercase mb-1">After</p>
+                            <p className="text-xl font-bold text-green-600">{pledgeLoanResult.utilAfter}%</p>
+                            <p className="text-[9px] text-green-600/40">utilization</p>
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between text-xs mb-2">
+                          <span className="text-[#1a1a2e]/60">Estimated Score Impact</span>
+                          <span className="font-semibold text-green-600">+{pledgeLoanResult.scoreDelta} pts</span>
+                        </div>
+                        <div className="flex items-center justify-between text-xs mb-3">
+                          <span className="text-[#1a1a2e]/60">Timeline</span>
+                          <span className="font-medium text-[#1a1a2e]/80">{pledgeLoanResult.timelineMonths} months</span>
+                        </div>
+                        <p className="text-[11px] text-[#1a1a2e]/70 leading-relaxed">{pledgeLoanResult.recommendation}</p>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
