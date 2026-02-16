@@ -1,4 +1,4 @@
-import { users, messages, comments, posts, friendships, dashboardQuestions, directMessages, type User, type InsertUser, type Message, type InsertMessage, type Comment, type InsertComment, type Post, type InsertPost, type Friendship, type DashboardQuestion, type InsertDashboardQuestion, type DirectMessage, type InsertDirectMessage } from "@shared/schema";
+import { users, messages, comments, posts, friendships, dashboardQuestions, directMessages, disputeCases, systemAlerts, type User, type InsertUser, type Message, type InsertMessage, type Comment, type InsertComment, type Post, type InsertPost, type Friendship, type DashboardQuestion, type InsertDashboardQuestion, type DirectMessage, type InsertDirectMessage, type DisputeCase, type InsertDisputeCase, type SystemAlert, type InsertSystemAlert } from "@shared/schema";
 import { db } from "./db";
 import { eq, count, desc, or, and, ne, ilike, isNull, sql, asc } from "drizzle-orm";
 
@@ -37,6 +37,16 @@ export interface IStorage {
   getDirectMessages(conversationKey: string): Promise<DirectMessage[]>;
   createDirectMessage(dm: InsertDirectMessage): Promise<DirectMessage>;
   clearDirectMessages(conversationKey: string): Promise<void>;
+
+  getDisputeCases(userId: number): Promise<DisputeCase[]>;
+  createDisputeCase(dispute: InsertDisputeCase): Promise<DisputeCase>;
+  updateDisputeCase(id: number, data: Partial<DisputeCase>): Promise<DisputeCase>;
+  deleteDisputeCase(id: number, userId: number): Promise<void>;
+
+  getSystemAlerts(userId: number): Promise<SystemAlert[]>;
+  createSystemAlert(alert: InsertSystemAlert): Promise<SystemAlert>;
+  markAlertRead(id: number, userId: number): Promise<void>;
+  getUnreadAlertCount(userId: number): Promise<number>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -174,6 +184,42 @@ export class DatabaseStorage implements IStorage {
 
   async clearDirectMessages(conversationKey: string): Promise<void> {
     await db.delete(directMessages).where(eq(directMessages.conversationKey, conversationKey));
+  }
+
+  async getDisputeCases(userId: number): Promise<DisputeCase[]> {
+    return db.select().from(disputeCases).where(eq(disputeCases.userId, userId)).orderBy(desc(disputeCases.createdAt));
+  }
+
+  async createDisputeCase(dispute: InsertDisputeCase): Promise<DisputeCase> {
+    const [d] = await db.insert(disputeCases).values(dispute).returning();
+    return d;
+  }
+
+  async updateDisputeCase(id: number, data: Partial<DisputeCase>): Promise<DisputeCase> {
+    const [d] = await db.update(disputeCases).set({ ...data, updatedAt: new Date() }).where(eq(disputeCases.id, id)).returning();
+    return d;
+  }
+
+  async deleteDisputeCase(id: number, userId: number): Promise<void> {
+    await db.delete(disputeCases).where(and(eq(disputeCases.id, id), eq(disputeCases.userId, userId)));
+  }
+
+  async getSystemAlerts(userId: number): Promise<SystemAlert[]> {
+    return db.select().from(systemAlerts).where(eq(systemAlerts.userId, userId)).orderBy(desc(systemAlerts.createdAt));
+  }
+
+  async createSystemAlert(alert: InsertSystemAlert): Promise<SystemAlert> {
+    const [a] = await db.insert(systemAlerts).values(alert).returning();
+    return a;
+  }
+
+  async markAlertRead(id: number, userId: number): Promise<void> {
+    await db.update(systemAlerts).set({ isRead: true }).where(and(eq(systemAlerts.id, id), eq(systemAlerts.userId, userId)));
+  }
+
+  async getUnreadAlertCount(userId: number): Promise<number> {
+    const [result] = await db.select({ value: count() }).from(systemAlerts).where(and(eq(systemAlerts.userId, userId), eq(systemAlerts.isRead, false)));
+    return result?.value || 0;
   }
 }
 

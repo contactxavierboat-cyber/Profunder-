@@ -15,6 +15,8 @@ import { sql } from "drizzle-orm";
 import { promisify } from "util";
 import { writeFile, readdir, readFile, unlink, mkdir } from "fs/promises";
 import path from "path";
+import { calculateFundingPhase, calculateCapitalReadiness, calculateSafeExposure, calculateBureauHealth, calculateApplicationWindow, simulateBankRating, simulatePledgeLoan, simulateCapitalStack } from "./capitalEngines";
+import { disputeCases, systemAlerts } from "@shared/schema";
 
 const execFileAsync = promisify(execFile);
 
@@ -4611,6 +4613,239 @@ ${reportText.slice(0, 25000)}
       res.json({ totalUsers: result, activeNow: Math.floor(result * 0.03) + Math.floor(Math.random() * 20) + 5 });
     } catch (error) {
       res.json({ totalUsers: 0, activeNow: 0 });
+    }
+  });
+
+  // === CAPITAL OPERATING SYSTEM ROUTES ===
+
+  app.get("/api/capital-os/dashboard", requireAuth, async (req: any, res) => {
+    try {
+      const user = await storage.getUser(req.session.userId);
+      if (!user) return res.status(404).json({ error: "User not found" });
+
+      const phase = calculateFundingPhase(user);
+      const readiness = calculateCapitalReadiness(user);
+      const exposure = calculateSafeExposure(user);
+      const bureauHealth = calculateBureauHealth(user);
+      const appWindow = calculateApplicationWindow(user);
+
+      await storage.updateUser(user.id, { fundingPhase: phase.phase, lastPhaseUpdate: new Date() });
+
+      res.json({ phase, readiness, exposure, bureauHealth, applicationWindow: appWindow });
+    } catch (error: any) {
+      console.error("Capital OS Dashboard Error:", error);
+      res.status(500).json({ error: "Failed to calculate capital metrics" });
+    }
+  });
+
+  app.get("/api/capital-os/phase", requireAuth, async (req: any, res) => {
+    const user = await storage.getUser(req.session.userId);
+    if (!user) return res.status(404).json({ error: "User not found" });
+    res.json(calculateFundingPhase(user));
+  });
+
+  app.get("/api/capital-os/readiness", requireAuth, async (req: any, res) => {
+    const user = await storage.getUser(req.session.userId);
+    if (!user) return res.status(404).json({ error: "User not found" });
+    res.json(calculateCapitalReadiness(user));
+  });
+
+  app.get("/api/capital-os/exposure", requireAuth, async (req: any, res) => {
+    const user = await storage.getUser(req.session.userId);
+    if (!user) return res.status(404).json({ error: "User not found" });
+    res.json(calculateSafeExposure(user));
+  });
+
+  app.get("/api/capital-os/bureau-health", requireAuth, async (req: any, res) => {
+    const user = await storage.getUser(req.session.userId);
+    if (!user) return res.status(404).json({ error: "User not found" });
+    res.json(calculateBureauHealth(user));
+  });
+
+  app.get("/api/capital-os/application-window", requireAuth, async (req: any, res) => {
+    const user = await storage.getUser(req.session.userId);
+    if (!user) return res.status(404).json({ error: "User not found" });
+    res.json(calculateApplicationWindow(user));
+  });
+
+  app.post("/api/capital-os/bank-rating", requireAuth, async (req: any, res) => {
+    const body = z.object({
+      avgMonthlyDeposits: z.number().min(0),
+      relationshipYears: z.number().min(0),
+      targetInstitution: z.string().optional(),
+    }).safeParse(req.body);
+    if (!body.success) return res.status(400).json({ error: "Invalid input" });
+    const { avgMonthlyDeposits, relationshipYears, targetInstitution } = body.data;
+    await storage.updateUser(req.session.userId, { avgMonthlyDeposits, bankRelationshipYears: relationshipYears, targetInstitution: targetInstitution || null });
+    res.json(simulateBankRating(avgMonthlyDeposits, relationshipYears, targetInstitution || ""));
+  });
+
+  app.post("/api/capital-os/pledge-loan", requireAuth, async (req: any, res) => {
+    const body = z.object({
+      loanAmount: z.number().min(1000),
+      paydownPercent: z.number().min(0).max(100),
+    }).safeParse(req.body);
+    if (!body.success) return res.status(400).json({ error: "Invalid input" });
+    const user = await storage.getUser(req.session.userId);
+    if (!user) return res.status(404).json({ error: "User not found" });
+    res.json(simulatePledgeLoan(user, body.data.loanAmount, body.data.paydownPercent));
+  });
+
+  app.post("/api/capital-os/capital-stack", requireAuth, async (req: any, res) => {
+    const body = z.object({ targetAmount: z.number().min(1000) }).safeParse(req.body);
+    if (!body.success) return res.status(400).json({ error: "Invalid input" });
+    const user = await storage.getUser(req.session.userId);
+    if (!user) return res.status(404).json({ error: "User not found" });
+    res.json(simulateCapitalStack(user, body.data.targetAmount));
+  });
+
+  // Dispute Case Management
+  app.get("/api/capital-os/disputes", requireAuth, async (req: any, res) => {
+    const cases = await storage.getDisputeCases(req.session.userId);
+    res.json(cases);
+  });
+
+  app.post("/api/capital-os/disputes", requireAuth, async (req: any, res) => {
+    const body = z.object({
+      bureau: z.string(),
+      accountName: z.string(),
+      accountNumber: z.string().optional(),
+      disputeType: z.string(),
+      disputeMethod: z.string(),
+      fcraCitation: z.string().optional(),
+      letterContent: z.string().optional(),
+    }).safeParse(req.body);
+    if (!body.success) return res.status(400).json({ error: "Invalid input" });
+    const dispute = await storage.createDisputeCase({
+      userId: req.session.userId,
+      ...body.data,
+      accountNumber: body.data.accountNumber || null,
+      fcraCitation: body.data.fcraCitation || null,
+      letterContent: body.data.letterContent || null,
+      status: "draft",
+      sentDate: null,
+      reminderDate: null,
+      responseDeadline: null,
+      resolution: null,
+    });
+    res.json(dispute);
+  });
+
+  app.patch("/api/capital-os/disputes/:id", requireAuth, async (req: any, res) => {
+    const id = parseInt(req.params.id);
+    const userId = req.session.userId;
+
+    const existing = await storage.getDisputeCases(userId);
+    const owns = existing.find(d => d.id === id);
+    if (!owns) return res.status(403).json({ error: "Not authorized" });
+
+    const updateSchema = z.object({
+      status: z.string().optional(),
+      resolution: z.string().nullable().optional(),
+      letterContent: z.string().optional(),
+    }).safeParse(req.body);
+    if (!updateSchema.success) return res.status(400).json({ error: "Invalid input" });
+
+    const data: any = { ...updateSchema.data };
+    if (data.status === "sent") {
+      const now = new Date();
+      const reminder = new Date(now);
+      reminder.setDate(reminder.getDate() + 14);
+      const deadline = new Date(now);
+      deadline.setDate(deadline.getDate() + 30);
+      data.sentDate = now;
+      data.reminderDate = reminder;
+      data.responseDeadline = deadline;
+    }
+    const updated = await storage.updateDisputeCase(id, data);
+    res.json(updated);
+  });
+
+  app.delete("/api/capital-os/disputes/:id", requireAuth, async (req: any, res) => {
+    await storage.deleteDisputeCase(parseInt(req.params.id), req.session.userId);
+    res.json({ success: true });
+  });
+
+  // System Alerts
+  app.get("/api/capital-os/alerts", requireAuth, async (req: any, res) => {
+    const alerts = await storage.getSystemAlerts(req.session.userId);
+    const unread = await storage.getUnreadAlertCount(req.session.userId);
+    res.json({ alerts, unreadCount: unread });
+  });
+
+  app.patch("/api/capital-os/alerts/:id/read", requireAuth, async (req: any, res) => {
+    await storage.markAlertRead(parseInt(req.params.id), req.session.userId);
+    res.json({ success: true });
+  });
+
+  // Auto-generate dispute letter with AI
+  app.post("/api/capital-os/generate-dispute-letter", requireAuth, async (req: any, res) => {
+    const body = z.object({
+      bureau: z.string(),
+      accountName: z.string(),
+      accountNumber: z.string().optional(),
+      disputeType: z.string(),
+      disputeMethod: z.string(),
+      issueDescription: z.string(),
+    }).safeParse(req.body);
+    if (!body.success) return res.status(400).json({ error: "Invalid input" });
+
+    const user = await storage.getUser(req.session.userId);
+    if (!user) return res.status(404).json({ error: "User not found" });
+
+    const { bureau, accountName, accountNumber, disputeType, disputeMethod, issueDescription } = body.data;
+
+    const fcraCitations: Record<string, string> = {
+      "validation": "FCRA § 611(a)(1)(A) - Duty to investigate disputed information",
+      "inaccuracy": "FCRA § 623(a)(2) - Duty to correct and update inaccurate information",
+      "goodwill": "FCRA § 605(a) - Conditions for reporting (requesting goodwill adjustment)",
+      "pay_for_delete": "FCRA § 623(a)(2) - Settlement and removal agreement",
+      "obsolete": "FCRA § 605 - Requirements relating to information contained in consumer reports (7-year limit)",
+      "identity": "FCRA § 605B - Block of information resulting from identity theft",
+    };
+
+    const citation = fcraCitations[disputeMethod] || "FCRA § 611 - Procedure in case of disputed accuracy";
+
+    try {
+      const aiResponse = await openai.chat.completions.create({
+        model: "gpt-4o",
+        messages: [
+          { role: "system", content: "You are a credit repair legal document specialist. Generate professional dispute letters citing specific FCRA provisions. Be direct, formal, and legally precise. No marketing language." },
+          { role: "user", content: `Generate a ${disputeMethod} dispute letter for:
+Bureau: ${bureau}
+Account: ${accountName}
+Account Number: ${accountNumber || "Unknown"}
+Dispute Type: ${disputeType}
+Issue: ${issueDescription}
+FCRA Citation: ${citation}
+
+Include: sender placeholder [YOUR NAME/ADDRESS], date, bureau address, account details, specific FCRA citation, demand for action, 30-day response requirement. Format as a ready-to-send letter.` },
+        ],
+        max_tokens: 1500,
+      });
+
+      const letterContent = aiResponse.choices[0]?.message?.content || "";
+
+      const dispute = await storage.createDisputeCase({
+        userId: req.session.userId,
+        bureau,
+        accountName,
+        accountNumber: accountNumber || null,
+        disputeType,
+        disputeMethod,
+        fcraCitation: citation,
+        letterContent,
+        status: "draft",
+        sentDate: null,
+        reminderDate: null,
+        responseDeadline: null,
+        resolution: null,
+      });
+
+      res.json({ dispute, letter: letterContent, citation });
+    } catch (error: any) {
+      console.error("Dispute Letter Generation Error:", error);
+      res.status(500).json({ error: "Failed to generate dispute letter" });
     }
   });
 

@@ -1,0 +1,313 @@
+BASE44 UPDATE PROMPT
+
+Upgrade Existing SaaS to Capital Operating System Architecture
+
+Do NOT rebuild the application.
+
+Refactor and enhance the existing system to follow a structured Capital Operating System model.
+
+Maintain current authentication, database structure, and PDF parsing logic.
+
+Add the following enhancements and structural changes:
+
+1. ADD FUNDING PHASE ENGINE
+
+Create a dynamic Funding Phase indicator that assigns users to one of five phases:
+
+Repair
+
+Build
+
+Optimize
+
+Apply
+
+Scale
+
+Phase must be calculated automatically using:
+
+Number of derogatories
+
+Utilization %
+
+Average account age
+
+Inquiry density (last 6 months)
+
+Total exposure (total limits)
+
+Payment history
+
+Display phase prominently on dashboard.
+
+Add visual progress bar:
+Repair → Build → Optimize → Apply → Scale
+
+System must update phase dynamically after report re-upload.
+
+2. ADD CAPITAL READINESS SCORE REFINEMENT
+
+Enhance scoring model to include weighted categories:
+
+Payment History (30%)
+
+Utilization (25%)
+
+Exposure Depth (15%)
+
+Inquiry Sensitivity (10%)
+
+Account Age (10%)
+
+Bureau Strength Distribution (10%)
+
+Score output: 0–100
+
+Display sub-scores under each category.
+
+Add tooltip explaining why score is not higher.
+
+3. ADD SAFE EXPOSURE METER
+
+Create a visual exposure gauge:
+
+Safe Zone
+Caution Zone
+Denial Zone
+
+Algorithm must estimate:
+
+Maximum additional credit user can add before:
+
+Utilization risk increases
+
+Inquiry density becomes high-risk
+
+Thin file flag triggers
+
+Display:
+"You can safely add approximately $X in new credit without increasing denial probability."
+
+This must be dynamically calculated from:
+
+Total current limits
+
+Utilization
+
+Average limit per tradeline
+
+Recent inquiries
+
+4. ADD BUREAU HEALTH MAP
+
+Create 3 bureau tiles:
+
+Experian
+Equifax
+TransUnion
+
+Each tile must show:
+
+Utilization %
+
+Hard inquiries (last 12 months)
+
+Derogatory count
+
+Oldest account age
+
+Risk status (Strong / Moderate / Weak)
+
+System must auto-recommend which bureau to prioritize for funding.
+
+5. UPGRADE REPAIR ENGINE
+
+Do not use static templates.
+
+When detecting:
+
+Late payments
+
+Collections
+
+Charge-offs
+
+Duplicate accounts
+
+Incorrect balances
+
+System must:
+
+Identify dispute type automatically.
+
+Select appropriate dispute method:
+
+Validation
+
+Inaccuracy
+
+Goodwill
+
+Pay for delete strategy
+
+Auto-fill:
+
+Bureau address
+
+Furnisher name
+
+Account number
+
+Relevant FCRA citation
+
+Add internal dispute tracker with timeline:
+
+Sent date
+
+14-day reminder
+
+30-day bureau response window
+
+Allow user to download or send via integrated mailing service.
+
+6. ADD BUILD STRATEGY MODULE
+
+Create new section: Build Strategy
+
+Include:
+
+A. Internal Bank Rating Simulator
+
+User inputs:
+
+Average monthly deposits
+
+Bank relationship length
+
+Target institution
+
+System estimates internal relationship strength (1–5 scale).
+
+Provide improvement recommendations.
+
+B. Pledge Loan Simulator
+
+User inputs:
+
+Loan amount
+
+Immediate paydown percentage
+
+System simulates:
+
+Utilization effect
+
+Score impact
+
+Timeline improvement
+
+Display before/after comparison.
+
+7. ADD FUNDING STRATEGY SECTION
+
+Create structured application intelligence.
+
+Include:
+
+A. Bureau Strategy Map
+Display estimated institution types by bureau strength.
+
+B. Application Window Timer
+Calculate ideal funding window based on:
+
+Recent inquiries
+
+New accounts
+
+Utilization trends
+
+Display countdown:
+"Optimal funding window in X days."
+
+C. Capital Stack Simulator
+User selects target funding amount.
+System suggests staged acquisition plan across bureaus.
+
+8. UPGRADE CREATOR CONNECT
+
+Convert from simple marketplace to tier-gated access.
+
+Access rules:
+
+Repair Phase → only repair professionals visible
+Build Phase → mid-tier funders visible
+Optimize/Apply Phase → Tier 1 funders visible
+
+Add partner ranking system:
+
+Success rate
+
+Average funding secured
+
+Turnaround time
+
+9. UPGRADE MESSAGING SYSTEM
+
+Convert from support inbox to structured case management.
+
+Add:
+
+Phase alerts
+
+Funding window alerts
+
+Utilization spike warnings
+
+Document request automation
+
+Messages should feel strategic, not reactive.
+
+10. UI RESTRUCTURE
+
+Left navigation must now include:
+
+Mission Control
+Repair Engine
+Build Strategy
+Funding Strategy
+Creator Connect
+Messages
+Progress Tracker
+
+Top dashboard must show:
+
+Capital Readiness Score
+Funding Phase
+Safe Exposure Meter
+Next Optimal Application Window
+
+Design aesthetic:
+Minimal
+Fintech
+Clean
+No flashy marketing language
+
+This is infrastructure, not hype.
+
+FINAL CONSTRAINTS
+
+Do NOT:
+
+Remove existing data
+
+Break current parsing logic
+
+Add unnecessary animations
+
+Add marketing fluff
+
+This is a financial intelligence system.
+
+All recommendations must be algorithm-based, not generic advice.
+
+End update prompt.

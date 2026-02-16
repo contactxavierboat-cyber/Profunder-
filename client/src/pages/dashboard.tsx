@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from "react";
 import { useAuth } from "@/lib/store";
 import { useLocation } from "wouter";
-import { Send, Plus, Paperclip, Loader2, ArrowDown, FileText, X, Menu, MessageCircle, RefreshCw, TrendingUp, UserPlus, Check, UserX, Search, AlertTriangle, Shield, ChevronRight, Target, BarChart3, BookOpen, CheckCircle2, AlertCircle, Info, Zap, Activity, Upload, Sparkles, Eye, Lock, Cpu, ChevronDown, Radio, Play, ExternalLink, Clock, Filter, ChevronUp, Volume2, VolumeX, Heart, MessageSquare, Share2, ThumbsUp } from "lucide-react";
+import { Send, Plus, Paperclip, Loader2, ArrowDown, FileText, X, Menu, MessageCircle, RefreshCw, TrendingUp, UserPlus, Check, UserX, Search, AlertTriangle, Shield, ChevronRight, Target, BarChart3, BookOpen, CheckCircle2, AlertCircle, Info, Zap, Activity, Upload, Sparkles, Eye, Lock, Cpu, ChevronDown, Radio, Play, ExternalLink, Clock, Filter, ChevronUp, Volume2, VolumeX, Heart, MessageSquare, Share2, ThumbsUp, Users, DollarSign, Building2, Gauge, Calendar, ArrowRight, Copy, ChevronLeft } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -133,6 +133,45 @@ interface FundingReadiness {
   hasBankStatement: boolean;
 }
 
+interface CapitalOsDashboard {
+  phase: {
+    phase: string;
+    phaseIndex: number;
+    phaseLabel: string;
+    progress: number;
+    phases: { key: string; label: string; active: boolean; completed: boolean }[];
+    reasoning: string;
+  };
+  readiness: {
+    total: number;
+    categories: { name: string; weight: number; score: number; maxScore: number; weightedScore: number; tooltip: string }[];
+    grade: string;
+    gradeColor: string;
+  };
+  exposure: {
+    safeAmount: number;
+    currentExposure: number;
+    maxSafeExposure: number;
+    zone: "safe" | "caution" | "denial";
+    zoneLabel: string;
+    zoneColor: string;
+    percentage: number;
+    reasoning: string;
+    limits: { safe: number; caution: number; denial: number };
+  };
+  bureauHealth: {
+    bureaus: { bureau: string; utilization: number; hardInquiries: number; derogatoryCount: number; oldestAccountAge: number; riskStatus: string; riskColor: string; priority: boolean; recommendation: string }[];
+    priorityBureau: string;
+  };
+  applicationWindow: {
+    daysUntilOptimal: number;
+    optimalDate: string;
+    currentStatus: "ready" | "wait" | "repair_first";
+    reasoning: string;
+    factors: { factor: string; status: "good" | "warning" | "bad"; detail: string }[];
+  };
+}
+
 function timeAgo(date: Date | string): string {
   const now = new Date();
   const then = new Date(date);
@@ -161,6 +200,18 @@ function DonutChart({ value, max, size = 120, strokeWidth = 10, color = "#3a3a5a
   );
 }
 
+type TabKey = "mission_control" | "repair_engine" | "build_strategy" | "funding_strategy" | "creator_connect" | "messages" | "progress_tracker";
+
+const NAV_ITEMS: { key: TabKey; label: string; icon: any }[] = [
+  { key: "mission_control", label: "Mission Control", icon: Target },
+  { key: "repair_engine", label: "Repair Engine", icon: Shield },
+  { key: "build_strategy", label: "Build Strategy", icon: Building2 },
+  { key: "funding_strategy", label: "Funding Strategy", icon: DollarSign },
+  { key: "creator_connect", label: "Creator Connect", icon: Sparkles },
+  { key: "messages", label: "Messages", icon: MessageSquare },
+  { key: "progress_tracker", label: "Progress Tracker", icon: Activity },
+];
+
 export default function DashboardPage() {
   const { user, messages, sendMessage, clearChat, logout } = useAuth();
   const [, setLocation] = useLocation();
@@ -169,6 +220,7 @@ export default function DashboardPage() {
   const [showScrollBtn, setShowScrollBtn] = useState(false);
   const [attachedFile, setAttachedFile] = useState<File | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [buddyOpen, setBuddyOpen] = useState(false);
   const [selectedMentor, setSelectedMentor] = useState<string | null>(null);
   const [mentorCleared, setMentorCleared] = useState(false);
   const [buddyGroups, setBuddyGroups] = useState<Record<string, boolean>>({
@@ -177,7 +229,7 @@ export default function DashboardPage() {
     offline: false,
   });
   const [expandedMessages, setExpandedMessages] = useState<Set<number>>(new Set());
-  const [activeTab, setActiveTab] = useState<"dashboard" | "chat" | "creatorai" | "repair">("dashboard");
+  const [activeTab, setActiveTab] = useState<TabKey>("mission_control");
   const [friendsList, setFriendsList] = useState<any[]>([]);
   const [pendingRequests, setPendingRequests] = useState<any[]>([]);
   const [showAddFriend, setShowAddFriend] = useState(false);
@@ -218,6 +270,19 @@ export default function DashboardPage() {
   const [dmLoading, setDmLoading] = useState(false);
   const [dmAiLoading, setDmAiLoading] = useState(false);
   const dmEndRef = useRef<HTMLDivElement>(null);
+
+  const [capitalOsData, setCapitalOsData] = useState<CapitalOsDashboard | null>(null);
+  const [capitalOsLoading, setCapitalOsLoading] = useState(false);
+
+  const [bankRatingForm, setBankRatingForm] = useState({ avgMonthlyDeposits: 10000, relationshipYears: 2, targetInstitution: "" });
+  const [bankRatingResult, setBankRatingResult] = useState<any>(null);
+  const [bankRatingLoading, setBankRatingLoading] = useState(false);
+  const [pledgeLoanForm, setPledgeLoanForm] = useState({ loanAmount: 5000, paydownPercent: 50 });
+  const [pledgeLoanResult, setPledgeLoanResult] = useState<any>(null);
+  const [pledgeLoanLoading, setPledgeLoanLoading] = useState(false);
+  const [capitalStackAmount, setCapitalStackAmount] = useState(50000);
+  const [capitalStackResult, setCapitalStackResult] = useState<any>(null);
+  const [capitalStackLoading, setCapitalStackLoading] = useState(false);
 
   const fetchDmMessages = async (friendId: number) => {
     try {
@@ -267,11 +332,11 @@ export default function DashboardPage() {
     setDmFriendName(friendName);
     setDmMessages([]);
     fetchDmMessages(friendId);
-    setActiveTab("chat");
+    setActiveTab("messages");
   };
 
   useEffect(() => {
-    if (activeTab !== "chat" || !dmFriendId) return;
+    if (activeTab !== "messages" || !dmFriendId) return;
     const interval = setInterval(() => fetchDmMessages(dmFriendId), 5000);
     return () => clearInterval(interval);
   }, [activeTab, dmFriendId]);
@@ -340,13 +405,8 @@ export default function DashboardPage() {
   const fetchQA = async () => {
     try {
       const res = await fetch("/api/dashboard-qa", { credentials: "include" });
-      if (res.ok) {
-        const data = await res.json();
-        setQaMessages(data);
-      }
-    } catch (err) {
-      console.error("Failed to fetch Q&A", err);
-    }
+      if (res.ok) setQaMessages(await res.json());
+    } catch (err) { console.error("Failed to fetch Q&A", err); }
   };
 
   const sendQA = async () => {
@@ -371,9 +431,7 @@ export default function DashboardPage() {
       }
     } catch (err) {
       toast({ title: "Error", description: "Failed to send question", variant: "destructive" });
-    } finally {
-      setQaLoading(false);
-    }
+    } finally { setQaLoading(false); }
   };
 
   const clearQA = async () => {
@@ -387,15 +445,18 @@ export default function DashboardPage() {
     setFundingLoading(true);
     try {
       const res = await fetch("/api/funding-readiness", { credentials: "include" });
-      if (res.ok) {
-        const data = await res.json();
-        setFundingData(data);
-      }
-    } catch (err) {
-      console.error("Failed to fetch funding readiness", err);
-    } finally {
-      setFundingLoading(false);
-    }
+      if (res.ok) setFundingData(await res.json());
+    } catch (err) { console.error("Failed to fetch funding readiness", err); }
+    finally { setFundingLoading(false); }
+  };
+
+  const fetchCapitalOsDashboard = async () => {
+    setCapitalOsLoading(true);
+    try {
+      const res = await fetch("/api/capital-os/dashboard", { credentials: "include" });
+      if (res.ok) setCapitalOsData(await res.json());
+    } catch (err) { console.error("Failed to fetch capital OS data", err); }
+    finally { setCapitalOsLoading(false); }
   };
 
   const handleDocumentUpload = async (file: File, documentType: "credit_report" | "bank_statement") => {
@@ -409,45 +470,34 @@ export default function DashboardPage() {
           if (isPdf) {
             const base64 = (reader.result as string).split(",")[1];
             resolve(base64);
-          } else {
-            resolve(reader.result as string);
-          }
+          } else { resolve(reader.result as string); }
         };
         reader.onerror = () => reject(new Error("Failed to read file"));
-        if (isPdf) {
-          reader.readAsDataURL(file);
-        } else {
-          reader.readAsText(file);
-        }
+        if (isPdf) reader.readAsDataURL(file);
+        else reader.readAsText(file);
       });
-
       const res = await fetch("/api/analyze-document", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
         body: JSON.stringify({ fileContent, documentType }),
       });
-
       if (res.ok) {
         const data = await res.json();
         toast({ title: "Analysis Complete", description: "Your document has been analyzed and your funding score has been updated." });
         await fetchFundingReadiness();
+        await fetchCapitalOsDashboard();
         if (data.repairResult) {
           setRepairData(data.repairResult);
           toast({ title: "Credit Repair Updated", description: `${data.repairResult.detectedIssues?.length || 0} issues detected. ${data.repairResult.letters?.length || 0} letters generated.` });
-        } else {
-          await fetchRepairData();
-        }
+        } else { await fetchRepairData(); }
       } else {
         const data = await res.json();
         toast({ title: "Analysis Failed", description: data.error || "Could not analyze document.", variant: "destructive" });
       }
     } catch (err) {
       toast({ title: "Upload Error", description: "Failed to upload document. Please try again.", variant: "destructive" });
-    } finally {
-      setDocUploading(false);
-      setDocUploadType(null);
-    }
+    } finally { setDocUploading(false); setDocUploadType(null); }
   };
 
   const fetchRepairData = async () => {
@@ -458,11 +508,8 @@ export default function DashboardPage() {
         const data = await res.json();
         if (data.hasData) setRepairData(data);
       }
-    } catch (err) {
-      console.error("Failed to fetch repair data", err);
-    } finally {
-      setRepairLoading(false);
-    }
+    } catch (err) { console.error("Failed to fetch repair data", err); }
+    finally { setRepairLoading(false); }
   };
 
   const runRepairAnalysis = async () => {
@@ -484,9 +531,7 @@ export default function DashboardPage() {
       }
     } catch (err) {
       toast({ title: "Error", description: "Failed to run repair analysis.", variant: "destructive" });
-    } finally {
-      setRepairAnalyzing(false);
-    }
+    } finally { setRepairAnalyzing(false); }
   };
 
   const copyLetterToClipboard = (text: string, idx: number) => {
@@ -497,6 +542,50 @@ export default function DashboardPage() {
     });
   };
 
+  const submitBankRating = async () => {
+    setBankRatingLoading(true);
+    try {
+      const res = await fetch("/api/capital-os/bank-rating", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify(bankRatingForm),
+      });
+      if (res.ok) setBankRatingResult(await res.json());
+      else toast({ title: "Error", description: "Failed to simulate bank rating.", variant: "destructive" });
+    } catch { toast({ title: "Error", description: "Failed to simulate bank rating.", variant: "destructive" }); }
+    finally { setBankRatingLoading(false); }
+  };
+
+  const submitPledgeLoan = async () => {
+    setPledgeLoanLoading(true);
+    try {
+      const res = await fetch("/api/capital-os/pledge-loan", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify(pledgeLoanForm),
+      });
+      if (res.ok) setPledgeLoanResult(await res.json());
+      else toast({ title: "Error", description: "Failed to simulate pledge loan.", variant: "destructive" });
+    } catch { toast({ title: "Error", description: "Failed to simulate pledge loan.", variant: "destructive" }); }
+    finally { setPledgeLoanLoading(false); }
+  };
+
+  const submitCapitalStack = async () => {
+    setCapitalStackLoading(true);
+    try {
+      const res = await fetch("/api/capital-os/capital-stack", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ targetAmount: capitalStackAmount }),
+      });
+      if (res.ok) setCapitalStackResult(await res.json());
+      else toast({ title: "Error", description: "Failed to simulate capital stack.", variant: "destructive" });
+    } catch { toast({ title: "Error", description: "Failed to simulate capital stack.", variant: "destructive" }); }
+    finally { setCapitalStackLoading(false); }
+  };
 
   useEffect(() => {
     if (user) {
@@ -504,6 +593,7 @@ export default function DashboardPage() {
       fetchFundingReadiness();
       fetchRepairData();
       fetchQA();
+      fetchCapitalOsDashboard();
     }
   }, [user]);
 
@@ -517,19 +607,12 @@ export default function DashboardPage() {
   const { toast } = useToast();
 
   useEffect(() => {
-    if (!user) {
-      setLocation("/");
-      return;
-    }
+    if (!user) { setLocation("/"); return; }
   }, [user, setLocation]);
 
-  useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
+  useEffect(() => { scrollToBottom(); }, [messages]);
 
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  };
+  const scrollToBottom = () => { messagesEndRef.current?.scrollIntoView({ behavior: "smooth" }); };
 
   const handleScroll = () => {
     if (!scrollContainerRef.current) return;
@@ -547,7 +630,7 @@ export default function DashboardPage() {
     setAttachedFile(null);
     if (textareaRef.current) textareaRef.current.style.height = "auto";
     setIsLoading(true);
-    setActiveTab("chat");
+    setActiveTab("messages");
     try {
       let fileContent: string | undefined;
       if (file) {
@@ -555,33 +638,20 @@ export default function DashboardPage() {
           const reader = new FileReader();
           const isPdf = file.name.toLowerCase().endsWith(".pdf");
           reader.onload = () => {
-            if (isPdf) {
-              const base64 = (reader.result as string).split(",")[1];
-              resolve(base64);
-            } else {
-              resolve(reader.result as string);
-            }
+            if (isPdf) { resolve((reader.result as string).split(",")[1]); }
+            else { resolve(reader.result as string); }
           };
           reader.onerror = () => reject(new Error("Failed to read file"));
-          if (isPdf) {
-            reader.readAsDataURL(file);
-          } else {
-            reader.readAsText(file);
-          }
+          if (isPdf) reader.readAsDataURL(file);
+          else reader.readAsText(file);
         });
       }
       await sendMessage(msg, attachment, fileContent, activeMentorKey);
-    } catch {
-    } finally {
-      setIsLoading(false);
-    }
+    } catch {} finally { setIsLoading(false); }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      handleSend();
-    }
+    if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSend(); }
   };
 
   const handleTextareaInput = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -602,224 +672,85 @@ export default function DashboardPage() {
     return "#ef4444";
   };
 
-  const componentChartData = fundingData?.componentBreakdown
-    ? Object.entries(fundingData.componentBreakdown).map(([key, comp]) => ({
-        name: comp.label.split(" ")[0],
-        score: comp.score,
-        max: comp.max,
-        pct: Math.round((comp.score / comp.max) * 100),
-      }))
-    : [];
+  const statusMessages: Record<string, string> = {
+    nova_sage: "Scaling up! Let's close deals",
+    alpha_volt: "Analyzing market trends...",
+    blaze_echo: "Creating content rn",
+    lunar_peak: "Living my best life",
+    iron_flux: "Building the next big thing",
+    zen_cipher: "Unlocking potential...",
+    steel_wraith: "Speaking truth to power",
+  };
 
   return (
     <div className="h-[100dvh] flex text-[#1a1a2e] relative">
       <TechBackground />
 
-      {sidebarOpen && (
-        <div
-          className="fixed inset-0 bg-black/60 z-30 md:hidden"
-          onClick={() => setSidebarOpen(false)}
-        />
-      )}
+      {sidebarOpen && <div className="fixed inset-0 bg-black/60 z-40 lg:hidden" onClick={() => setSidebarOpen(false)} />}
 
       <aside className={cn(
-        "w-[260px] flex flex-col shrink-0 relative z-40 backdrop-blur-none",
-        "fixed h-full md:static md:flex transition-transform duration-200 ease-out",
-        sidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0",
-        "md:flex",
-        !sidebarOpen && "hidden md:flex"
-      )} style={{ background: 'rgba(255,255,255,0.75)', backdropFilter: 'blur(20px)' }}>
-        <div className="h-11 px-4 flex items-center justify-between border-b border-white/30 bg-white/50">
-          <div className="flex items-center gap-2">
+        "w-[240px] flex flex-col shrink-0 relative z-50",
+        "fixed h-full lg:static lg:flex transition-transform duration-200 ease-out",
+        sidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0",
+        "lg:flex",
+        !sidebarOpen && "hidden lg:flex"
+      )} style={{ background: 'rgba(255,255,255,0.8)', backdropFilter: 'blur(20px)' }}>
+        <div className="h-14 px-5 flex items-center justify-between border-b border-white/30">
+          <div className="flex items-center gap-2.5">
             <span className="relative w-7 h-7 flex items-center justify-center">
               <span className="absolute inset-0 rounded-full bg-[#3a3a5a]/15 animate-ping" />
               <span className="relative w-3 h-3 rounded-full bg-[#3a3a5a] shadow-[0_0_8px_rgba(58,58,90,0.4)]" />
             </span>
-            <span className="text-[13px] font-bold text-[#1a1a2e] tracking-tight">MentXr®</span>
+            <div>
+              <span className="text-[13px] font-bold text-[#1a1a2e] tracking-tight">Capital OS</span>
+              <p className="text-[9px] text-[#1a1a2e]/50 tracking-wide">MentXr® Infrastructure</p>
+            </div>
           </div>
-          <button onClick={() => setSidebarOpen(false)} className="md:hidden text-[#1a1a2e]/75 hover:text-[#1a1a2e]/95" data-testid="button-close-sidebar">
+          <button onClick={() => setSidebarOpen(false)} className="lg:hidden text-[#1a1a2e]/60 hover:text-[#1a1a2e]" data-testid="button-close-sidebar">
             <X className="w-4 h-4" />
           </button>
         </div>
 
-        <div className="h-14 px-4 flex items-center gap-3 border-b border-white/30 bg-transparent">
-          <div className="relative shrink-0">
-            <div className="w-9 h-9 rounded-lg bg-white/50 border border-white/30 flex items-center justify-center text-[11px] font-bold text-[#1a1a2e]/90">
-              {(user.displayName || user.email).substring(0, 2).toUpperCase()}
+        <nav className="flex-1 py-3 px-3 space-y-0.5 overflow-y-auto">
+          {NAV_ITEMS.map(item => {
+            const Icon = item.icon;
+            const isActive = activeTab === item.key;
+            return (
+              <button
+                key={item.key}
+                data-testid={`nav-${item.key}`}
+                onClick={() => { setActiveTab(item.key); setSidebarOpen(false); }}
+                className={cn(
+                  "w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[12px] font-medium transition-all text-left",
+                  isActive
+                    ? "bg-white/90 text-[#1a1a2e] shadow-[0_2px_8px_rgba(0,0,0,0.04)] border border-white/60"
+                    : "text-[#1a1a2e]/65 hover:bg-white/50 hover:text-[#1a1a2e]/85"
+                )}
+              >
+                <Icon className="w-4 h-4 shrink-0" />
+                <span className="truncate">{item.label}</span>
+              </button>
+            );
+          })}
+        </nav>
+
+        <div className="px-3 pb-3 border-t border-white/30 pt-3">
+          <div className="flex items-center gap-3 px-3 py-2 mb-2">
+            <div className="relative shrink-0">
+              <div className="w-8 h-8 rounded-lg bg-white/50 border border-white/30 flex items-center justify-center text-[10px] font-bold text-[#1a1a2e]/80">
+                {(user.displayName || user.email).substring(0, 2).toUpperCase()}
+              </div>
+              <div className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-green-500 border-2 border-white/40" />
             </div>
-            <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-green-500 border-2 border-white/40" />
+            <div className="flex-1 min-w-0">
+              <p className="text-[11px] font-semibold text-[#1a1a2e] truncate">{user.displayName || user.email.split("@")[0]}</p>
+              <p className="text-[9px] text-[#1a1a2e]/50">Online</p>
+            </div>
           </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-[12px] font-semibold text-[#1a1a2e] truncate">{user.displayName || user.email.split("@")[0]}</p>
-            <p className="text-[10px] text-[#1a1a2e]/60 italic truncate">Mentorship On Demand</p>
-          </div>
-        </div>
-
-        <div className="h-10 px-4 flex items-center gap-2 border-b border-white/30 bg-transparent">
-          <button
-            data-testid="button-new-chat"
-            onClick={() => { clearChat(); setSelectedMentor(null); setMentorCleared(true); setSidebarOpen(false); setActiveTab("chat"); }}
-            className="flex-1 h-7 text-[11px] rounded-lg bg-white/60 border border-white/30 hover:bg-white/60 active:bg-white/50 text-[#1a1a2e]/90 font-medium transition-colors"
-          >
-            + New Chat
-          </button>
-        </div>
-
-        <div className="flex-1 overflow-y-auto bg-transparent" style={{ scrollbarWidth: 'thin' }}>
-          <div className="border-b border-white/30">
-            <button
-              onClick={() => setBuddyGroups(prev => ({ ...prev, mentors: !prev.mentors }))}
-              className="w-full h-9 flex items-center gap-2 px-4 hover:bg-white/50 text-left transition-colors"
-              data-testid="buddy-group-mentors"
-            >
-              <span className="text-[10px] text-[#1a1a2e]/45 font-mono w-3">{buddyGroups.mentors ? "▾" : "▸"}</span>
-              <span className="text-[11px] font-bold text-[#1a1a2e]/75 uppercase tracking-widest">Mentors</span>
-              <span className="text-[10px] text-[#1a1a2e]/45 ml-auto">(7/7)</span>
-            </button>
-            {buddyGroups.mentors && (
-              <div className="pb-1">
-                {Object.entries(MENTOR_INFO).map(([key, mentor]) => {
-                  const isActive = activeMentorKey === key;
-                  const statusMessages: Record<string, string> = {
-                    nova_sage: "Scaling up! Let's close deals",
-                    alpha_volt: "Analyzing market trends...",
-                    blaze_echo: "Creating content rn",
-                    lunar_peak: "Living my best life",
-                    iron_flux: "Building the next big thing",
-                    zen_cipher: "Unlocking potential...",
-                    steel_wraith: "Speaking truth to power",
-                  };
-                  return (
-                    <button
-                      key={key}
-                      data-testid={`buddy-${key}`}
-                      onClick={() => {
-                        setSelectedMentor(key);
-                        setMentorCleared(false);
-                        setActiveTab("chat");
-                        setSidebarOpen(false);
-                      }}
-                      className={cn(
-                        "w-full h-11 flex items-center gap-3 px-4 text-left transition-all",
-                        isActive
-                          ? "bg-white/50 border-l-2 border-l-[#8a8aa5]"
-                          : "hover:bg-white/50 border-l-2 border-l-transparent"
-                      )}
-                    >
-                      <div className="relative shrink-0">
-                        <div className={cn("w-8 h-8 rounded-lg border border-white/30 flex items-center justify-center text-[#1a1a2e] text-[10px] font-bold", BOT_COLORS[key])}>{mentor.initials}</div>
-                        <div className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-green-500 border-2 border-white/40" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className={cn("text-[12px] font-semibold truncate leading-tight", isActive ? "text-[#1a1a2e]" : "text-[#1a1a2e]/90")}>{mentor.name}</p>
-                        <p className={cn("text-[10px] truncate leading-tight", isActive ? "text-[#1a1a2e]/70" : "text-[#1a1a2e]/55")}>{statusMessages[key] || mentor.tagline}</p>
-                      </div>
-                    </button>
-                  );
-                })}
-              </div>
-            )}
-          </div>
-
-          <div className="border-b border-white/30">
-            <button
-              onClick={() => setBuddyGroups(prev => ({ ...prev, friends: !prev.friends }))}
-              className="w-full h-9 flex items-center gap-2 px-4 hover:bg-white/50 text-left transition-colors"
-              data-testid="buddy-group-friends"
-            >
-              <span className="text-[10px] text-[#1a1a2e]/45 font-mono w-3">{buddyGroups.friends ? "▾" : "▸"}</span>
-              <span className="text-[11px] font-bold text-[#1a1a2e]/75 uppercase tracking-widest">Friends</span>
-              <span className="text-[10px] text-[#1a1a2e]/45 ml-auto">({friendsList.length})</span>
-            </button>
-            {buddyGroups.friends && (
-              <div className="pb-1">
-                <button
-                  onClick={() => setShowAddFriend(true)}
-                  className="w-full h-9 flex items-center gap-3 px-4 hover:bg-white/50 text-left transition-colors"
-                  data-testid="button-add-friend"
-                >
-                  <UserPlus className="w-3.5 h-3.5 text-green-400/50" />
-                  <span className="text-[11px] text-green-400/50 font-medium">Add Friend</span>
-                </button>
-                {pendingRequests.length > 0 && (
-                  <div className="px-4 py-1">
-                    <span className="text-[10px] text-amber-400/50 font-medium">{pendingRequests.length} pending request{pendingRequests.length > 1 ? "s" : ""}</span>
-                  </div>
-                )}
-                {pendingRequests.map((req: any) => (
-                  <div key={req.friendshipId} className="h-11 flex items-center gap-3 px-4 hover:bg-white/50 transition-colors">
-                    <div className="w-7 h-7 rounded-lg bg-amber-500/15 border border-amber-500/20 flex items-center justify-center text-[9px] font-bold text-amber-400">
-                      {(req.displayName || "?").substring(0, 2).toUpperCase()}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-[11px] text-[#1a1a2e]/80 truncate">{req.displayName}</p>
-                    </div>
-                    <div className="flex gap-1">
-                      <button onClick={() => acceptFriend(req.friendshipId)} className="w-6 h-6 rounded-md bg-green-500/15 hover:bg-green-500/25 flex items-center justify-center" data-testid={`accept-friend-${req.id}`}>
-                        <Check className="w-3 h-3 text-green-400" />
-                      </button>
-                      <button onClick={() => rejectFriend(req.friendshipId)} className="w-6 h-6 rounded-md bg-red-500/15 hover:bg-red-500/25 flex items-center justify-center" data-testid={`reject-friend-${req.id}`}>
-                        <X className="w-3 h-3 text-red-400" />
-                      </button>
-                    </div>
-                  </div>
-                ))}
-                {friendsList.map((f: any) => (
-                  <div key={f.friendshipId} className="group h-11 flex items-center gap-3 px-4 hover:bg-white/50 transition-colors cursor-pointer" onClick={() => { openDm(f.id, f.displayName || f.email); setSidebarOpen(false); }}>
-                    <div className="relative shrink-0">
-                      <div className="w-7 h-7 rounded-lg bg-white/50 border border-white/30 flex items-center justify-center text-[9px] font-bold text-[#1a1a2e]/80">
-                        {(f.displayName || "?").substring(0, 2).toUpperCase()}
-                      </div>
-                      <div className="absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full bg-green-500 border-2 border-white/40" />
-                    </div>
-                    <p className="text-[11px] text-[#1a1a2e]/80 truncate flex-1">{f.displayName}</p>
-                    <button onClick={(e) => { e.stopPropagation(); removeFriend(f.friendshipId); }} className="hidden group-hover:flex w-5 h-5 rounded-md bg-red-500/10 hover:bg-red-500/20 items-center justify-center" data-testid={`remove-friend-${f.id}`}>
-                      <UserX className="w-3 h-3 text-red-400/60" />
-                    </button>
-                  </div>
-                ))}
-                {friendsList.length === 0 && pendingRequests.length === 0 && (
-                  <div className="h-9 flex items-center px-4">
-                    <span className="text-[10px] text-[#1a1a2e]/40 italic">No friends yet</span>
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-
-          <div className="border-b border-white/30">
-            <button
-              onClick={() => setBuddyGroups(prev => ({ ...prev, offline: !prev.offline }))}
-              className="w-full h-9 flex items-center gap-2 px-4 hover:bg-white/50 text-left transition-colors"
-              data-testid="buddy-group-offline"
-            >
-              <span className="text-[10px] text-[#1a1a2e]/45 font-mono w-3">{buddyGroups.offline ? "▾" : "▸"}</span>
-              <span className="text-[11px] font-bold text-[#1a1a2e]/75 uppercase tracking-widest">Recent Chats</span>
-            </button>
-            {buddyGroups.offline && (
-              <div className="pb-1">
-                {messages.length > 0 ? (
-                  <div className="h-9 flex items-center gap-3 px-4 hover:bg-white/50 cursor-pointer transition-colors">
-                    <div className="w-2.5 h-2.5 rounded-full bg-green-500 shrink-0" />
-                    <span className="text-[11px] text-[#1a1a2e]/65 truncate flex-1">{messages[0]?.content.substring(0, 35)}...</span>
-                  </div>
-                ) : (
-                  <div className="h-9 flex items-center px-4">
-                    <span className="text-[10px] text-[#1a1a2e]/40 italic">No recent conversations</span>
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-        </div>
-
-        <div className="h-11 px-4 flex items-center gap-3 border-t border-white/30 bg-white/50">
-          <div className="w-2.5 h-2.5 rounded-full bg-green-500 shrink-0" />
-          <span className="text-[10px] text-[#1a1a2e]/65 flex-1 truncate">{user.displayName || user.email}</span>
           <button
             data-testid="button-logout"
             onClick={logout}
-            className="h-7 text-[10px] px-3 rounded-lg bg-white/60 border border-white/30 hover:bg-white/60 text-[#1a1a2e]/65 transition-colors"
+            className="w-full h-8 text-[10px] rounded-lg bg-white/50 border border-white/30 hover:bg-white/60 text-[#1a1a2e]/60 font-medium transition-colors"
           >
             Sign Off
           </button>
@@ -827,347 +758,234 @@ export default function DashboardPage() {
       </aside>
 
       <main className="flex-1 flex flex-col min-w-0 relative z-10 bg-transparent">
-
-        <header className="shrink-0 relative z-10 bg-white/90 backdrop-blur-md border-b border-white/30">
-          <div className="h-14 flex items-center justify-between px-4">
-            <div className="flex items-center gap-3">
-              <button
-                data-testid="button-menu"
-                onClick={() => setSidebarOpen(true)}
-                className="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-white/60 transition-colors md:hidden"
-              >
-                <Menu className="w-5 h-5 text-[#1a1a2e]/80" />
-              </button>
-            </div>
-            <button data-testid="button-new-chat-header" onClick={() => { clearChat(); setSelectedMentor(null); setMentorCleared(true); setActiveTab("chat"); }} className="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-white/60 transition-colors">
-              <Plus className="w-5 h-5 text-[#1a1a2e]/75" />
+        <header className="shrink-0 h-12 flex items-center justify-between px-4 bg-white/80 backdrop-blur-md border-b border-white/30 relative z-10">
+          <div className="flex items-center gap-3">
+            <button
+              data-testid="button-menu"
+              onClick={() => setSidebarOpen(true)}
+              className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white/60 transition-colors lg:hidden"
+            >
+              <Menu className="w-5 h-5 text-[#1a1a2e]/70" />
             </button>
+            <span className="text-[13px] font-semibold text-[#1a1a2e]/80">{NAV_ITEMS.find(n => n.key === activeTab)?.label}</span>
           </div>
-          <div className="flex px-2 sm:px-4 gap-0">
+          <div className="flex items-center gap-2">
             <button
-              data-testid="tab-dashboard"
-              onClick={() => setActiveTab("dashboard")}
-              className={cn(
-                "flex-1 min-w-0 py-2.5 text-[11px] sm:text-[13px] font-semibold text-center transition-colors relative",
-                activeTab === "dashboard" ? "text-[#1a1a2e]" : "text-[#1a1a2e]/65 hover:text-[#1a1a2e]/80"
-              )}
+              data-testid="button-new-chat-header"
+              onClick={() => { clearChat(); setSelectedMentor(null); setMentorCleared(true); setActiveTab("messages"); }}
+              className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white/60 transition-colors"
+              title="New Chat"
             >
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-0.5 sm:gap-1.5">
-                <BarChart3 className="w-4 h-4 sm:w-3.5 sm:h-3.5" />
-                <span className="truncate">Dashboard</span>
-              </div>
-              {activeTab === "dashboard" && <div className="absolute bottom-0 left-1/4 right-1/4 h-[2px] bg-[#3a3a5a] rounded-full" />}
+              <Plus className="w-4 h-4 text-[#1a1a2e]/60" />
             </button>
             <button
-              data-testid="tab-creatorai"
-              onClick={() => setActiveTab("creatorai")}
-              className={cn(
-                "flex-1 min-w-0 py-2.5 text-[11px] sm:text-[13px] font-semibold text-center transition-colors relative",
-                activeTab === "creatorai" ? "text-[#1a1a2e]" : "text-[#1a1a2e]/65 hover:text-[#1a1a2e]/80"
-              )}
+              data-testid="button-toggle-buddy"
+              onClick={() => setBuddyOpen(!buddyOpen)}
+              className={cn("w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white/60 transition-colors", buddyOpen && "bg-white/60")}
+              title="Buddy List"
             >
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-0.5 sm:gap-1.5">
-                <Sparkles className="w-4 h-4 sm:w-3.5 sm:h-3.5" />
-                <span className="truncate">Creators</span>
-              </div>
-              {activeTab === "creatorai" && <div className="absolute bottom-0 left-1/4 right-1/4 h-[2px] bg-purple-400 rounded-full" />}
-            </button>
-            <button
-              data-testid="tab-repair"
-              onClick={() => setActiveTab("repair")}
-              className={cn(
-                "flex-1 min-w-0 py-2.5 text-[11px] sm:text-[13px] font-semibold text-center transition-colors relative",
-                activeTab === "repair" ? "text-[#1a1a2e]" : "text-[#1a1a2e]/65 hover:text-[#1a1a2e]/80"
-              )}
-            >
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-0.5 sm:gap-1.5">
-                <Shield className="w-4 h-4 sm:w-3.5 sm:h-3.5" />
-                <span className="truncate">Repair</span>
-              </div>
-              {activeTab === "repair" && <div className="absolute bottom-0 left-1/4 right-1/4 h-[2px] bg-orange-400 rounded-full" />}
-            </button>
-            <button
-              data-testid="tab-chat"
-              onClick={() => setActiveTab("chat")}
-              className={cn(
-                "flex-1 min-w-0 py-2.5 text-[11px] sm:text-[13px] font-semibold text-center transition-colors relative",
-                activeTab === "chat" ? "text-[#1a1a2e]" : "text-[#1a1a2e]/65 hover:text-[#1a1a2e]/80"
-              )}
-            >
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-0.5 sm:gap-1.5">
-                <MessageSquare className="w-4 h-4 sm:w-3.5 sm:h-3.5" />
-                <span className="truncate">Messages</span>
-              </div>
-              {activeTab === "chat" && <div className="absolute bottom-0 left-1/4 right-1/4 h-[2px] bg-[#3a3a5a] rounded-full" />}
+              <Users className="w-4 h-4 text-[#1a1a2e]/60" />
             </button>
           </div>
         </header>
 
-        <div
-          ref={scrollContainerRef}
-          onScroll={handleScroll}
-          className="flex-1 overflow-y-auto"
-        >
-          {activeTab === "dashboard" ? (
-            <div className="w-full px-5 sm:px-8 py-8 max-w-[1200px] mx-auto">
+        <div ref={scrollContainerRef} onScroll={handleScroll} className="flex-1 overflow-y-auto">
 
-              {fundingLoading ? (
+          {activeTab === "mission_control" && (
+            <div className="w-full px-5 sm:px-8 py-6 max-w-[1200px] mx-auto">
+              {capitalOsLoading ? (
                 <div className="flex items-center justify-center py-20">
-                  <Loader2 className="w-8 h-8 animate-spin text-[#1a1a2e]/65" />
+                  <Loader2 className="w-8 h-8 animate-spin text-[#1a1a2e]/50" />
                 </div>
-              ) : fundingData ? (
+              ) : capitalOsData ? (
                 <>
-                  <div className="mb-8">
-                    <h1 className="text-2xl sm:text-3xl font-light text-[#1a1a2e] tracking-tight" style={{ fontFamily: "'Inter', sans-serif" }} data-testid="text-overview-title">Overview</h1>
-                    <p className="text-sm text-[#1a1a2e]/70 mt-1">Welcome back, {user.displayName || user.email.split("@")[0]}!</p>
-                  </div>
-
-                  <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 mb-4">
-                    <div className="lg:col-span-2 rounded-2xl bg-white/80 backdrop-blur-md border border-white/40 shadow-[0_8px_32px_rgba(0,0,0,0.04),0_2px_8px_rgba(0,0,0,0.02)] p-6" data-testid="funding-score-card">
-                      <p className="text-xs text-[#1a1a2e]/75 mb-1">Capital Readiness Score</p>
-                      <div className="flex items-end gap-1">
-                        <span className="text-4xl sm:text-5xl font-bold text-[#1a1a2e] tracking-tight font-mono" data-testid="text-score">{fundingData.score}</span>
-                        <span className="text-lg text-[#1a1a2e]/60 font-light mb-1">/ 100</span>
-                      </div>
-                      <div className="flex gap-2 mt-5">
-                        <button
-                          onClick={fetchFundingReadiness}
-                          className="flex-1 h-10 rounded-xl bg-white/50 border border-white/30 hover:bg-white/60 text-xs font-medium text-[#1a1a2e]/95 transition-colors flex items-center justify-center gap-2"
-                          data-testid="button-refresh-score"
-                        >
-                          <RefreshCw className="w-3.5 h-3.5" /> REFRESH
-                        </button>
-                        <button
-                          onClick={() => setActiveTab("chat")}
-                          className="flex-1 h-10 rounded-xl bg-white/50 border border-white/30 hover:bg-white/60 text-xs font-medium text-[#1a1a2e]/95 transition-colors flex items-center justify-center gap-2"
-                          data-testid="button-go-chat"
-                        >
-                          <MessageCircle className="w-3.5 h-3.5" /> ANALYZE
-                        </button>
-                      </div>
-                    </div>
-
-                    <div className="lg:col-span-3 rounded-2xl bg-white/80 backdrop-blur-md border border-white/40 shadow-[0_8px_32px_rgba(0,0,0,0.04),0_2px_8px_rgba(0,0,0,0.02)] p-6" data-testid="stats-row">
-                      <div className="grid grid-cols-3 h-full">
-                        <div className="flex flex-col justify-center px-2">
-                          <p className="text-xs text-[#1a1a2e]/70 mb-1">Tier</p>
-                          <p className="text-xl sm:text-2xl font-bold text-[#1a1a2e]" data-testid="text-tier">
-                            {fundingData.tierEligibility ? `Tier ${fundingData.tierEligibility.tier}` : "—"}
-                          </p>
-                          <p className="text-[10px] text-[#1a1a2e]/60 mt-0.5 truncate">{fundingData.tierEligibility?.label || "No data"}</p>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                    <div className="rounded-2xl bg-white/70 backdrop-blur-md border border-white/40 p-5" data-testid="card-readiness">
+                      <p className="text-[10px] text-[#1a1a2e]/60 uppercase tracking-wider mb-3">Capital Readiness</p>
+                      <div className="flex items-center gap-4">
+                        <div className="relative">
+                          <DonutChart value={capitalOsData.readiness.total} max={100} size={72} strokeWidth={7} color={capitalOsData.readiness.gradeColor} />
+                          <div className="absolute inset-0 flex items-center justify-center">
+                            <span className="text-lg font-bold text-[#1a1a2e]" data-testid="text-readiness-score">{capitalOsData.readiness.total}</span>
+                          </div>
                         </div>
-                        <div className="flex flex-col justify-center px-2 border-l border-white/30">
-                          <p className="text-xs text-[#1a1a2e]/70 mb-1">Mode</p>
-                          <p className="text-xl sm:text-2xl font-bold text-[#1a1a2e]" data-testid="text-mode">
-                            {fundingData.operatingMode ? (fundingData.operatingMode.mode === "pre_funding" ? "Pre-Fund" : "Repair") : "—"}
-                          </p>
-                          <p className="text-[10px] text-[#1a1a2e]/60 mt-0.5 truncate">{fundingData.operatingMode?.label || "No data"}</p>
-                        </div>
-                        <div className="flex flex-col justify-center px-2 border-l border-white/30">
-                          <p className="text-xs text-[#1a1a2e]/70 mb-1">Exposure</p>
-                          <p className="text-xl sm:text-2xl font-bold text-[#1a1a2e]" data-testid="text-exposure">
-                            {fundingData.exposureCeiling ? `$${(fundingData.exposureCeiling.ceiling / 1000).toFixed(0)}K` : "—"}
-                          </p>
-                          <p className="text-[10px] text-[#1a1a2e]/60 mt-0.5">
-                            {fundingData.exposureCeiling ? `${fundingData.exposureCeiling.multiplier}x ceiling` : "No data"}
-                          </p>
+                        <div>
+                          <span className="text-2xl font-bold" style={{ color: capitalOsData.readiness.gradeColor }} data-testid="text-readiness-grade">{capitalOsData.readiness.grade}</span>
+                          <p className="text-[10px] text-[#1a1a2e]/50 mt-0.5">of 100 points</p>
                         </div>
                       </div>
                     </div>
+
+                    <div className="rounded-2xl bg-white/70 backdrop-blur-md border border-white/40 p-5" data-testid="card-phase">
+                      <p className="text-[10px] text-[#1a1a2e]/60 uppercase tracking-wider mb-3">Funding Phase</p>
+                      <p className="text-lg font-bold text-[#1a1a2e] mb-3" data-testid="text-phase-label">{capitalOsData.phase.phaseLabel}</p>
+                      <div className="flex gap-1">
+                        {capitalOsData.phase.phases.map((p, i) => (
+                          <div key={p.key} className="flex-1 flex flex-col items-center gap-1">
+                            <div className={cn(
+                              "w-full h-1.5 rounded-full transition-all",
+                              p.completed ? "bg-[#3a3a5a]" : p.active ? "bg-[#3a3a5a]/60" : "bg-[#e0e0ea]"
+                            )} />
+                            <span className={cn("text-[8px]", p.active ? "text-[#1a1a2e] font-medium" : "text-[#1a1a2e]/40")}>{p.label}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="rounded-2xl bg-white/70 backdrop-blur-md border border-white/40 p-5" data-testid="card-exposure">
+                      <p className="text-[10px] text-[#1a1a2e]/60 uppercase tracking-wider mb-3">Safe Exposure</p>
+                      <div className="flex items-center gap-3 mb-2">
+                        <span className="text-lg font-bold text-[#1a1a2e]" data-testid="text-exposure-pct">{capitalOsData.exposure.percentage}%</span>
+                        <span className="text-[10px] px-2 py-0.5 rounded-full font-medium" style={{ backgroundColor: capitalOsData.exposure.zoneColor + '20', color: capitalOsData.exposure.zoneColor }}>{capitalOsData.exposure.zoneLabel}</span>
+                      </div>
+                      <div className="w-full h-2 rounded-full bg-[#e0e0ea] overflow-hidden">
+                        <div className="h-full rounded-full transition-all" style={{ width: `${capitalOsData.exposure.percentage}%`, backgroundColor: capitalOsData.exposure.zoneColor }} />
+                      </div>
+                      <p className="text-[9px] text-[#1a1a2e]/50 mt-2">${capitalOsData.exposure.safeAmount.toLocaleString()} safe capacity</p>
+                    </div>
+
+                    <div className="rounded-2xl bg-white/70 backdrop-blur-md border border-white/40 p-5" data-testid="card-window">
+                      <p className="text-[10px] text-[#1a1a2e]/60 uppercase tracking-wider mb-3">Application Window</p>
+                      {capitalOsData.applicationWindow.currentStatus === "ready" ? (
+                        <div>
+                          <span className="text-lg font-bold text-green-600" data-testid="text-window-status">Ready</span>
+                          <p className="text-[10px] text-[#1a1a2e]/60 mt-1">Optimal window is now</p>
+                        </div>
+                      ) : (
+                        <div>
+                          <span className="text-2xl font-bold text-[#1a1a2e] font-mono" data-testid="text-window-days">{capitalOsData.applicationWindow.daysUntilOptimal}</span>
+                          <span className="text-sm text-[#1a1a2e]/60 ml-1">days</span>
+                          <p className="text-[10px] text-[#1a1a2e]/50 mt-1">until {capitalOsData.applicationWindow.optimalDate}</p>
+                        </div>
+                      )}
+                      <div className="flex gap-1 mt-2">
+                        {capitalOsData.applicationWindow.factors.map((f, i) => (
+                          <div key={i} className={cn("w-2 h-2 rounded-full", f.status === "good" ? "bg-green-500" : f.status === "warning" ? "bg-yellow-500" : "bg-red-500")} title={f.detail} />
+                        ))}
+                      </div>
+                    </div>
                   </div>
 
-                  <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 mb-4">
-                    <div className="lg:col-span-2 space-y-4">
-                      <div className="rounded-2xl bg-white/80 backdrop-blur-md border border-white/40 shadow-[0_8px_32px_rgba(0,0,0,0.04),0_2px_8px_rgba(0,0,0,0.02)] p-6" data-testid="savings-donut-card">
-                        <div className="flex items-center justify-between">
+                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
+                    {capitalOsData.bureauHealth.bureaus.map(b => (
+                      <div key={b.bureau} className={cn("rounded-2xl bg-white/70 backdrop-blur-md border p-5", b.priority ? "border-[#3a3a5a]/30" : "border-white/40")} data-testid={`bureau-${b.bureau.toLowerCase()}`}>
+                        <div className="flex items-center justify-between mb-3">
+                          <span className="text-sm font-semibold text-[#1a1a2e]">{b.bureau}</span>
+                          <span className="text-[10px] px-2 py-0.5 rounded-full font-medium" style={{ backgroundColor: b.riskColor + '18', color: b.riskColor }}>
+                            {b.riskStatus}{b.priority ? " · Priority" : ""}
+                          </span>
+                        </div>
+                        <div className="grid grid-cols-3 gap-3 text-center mb-3">
                           <div>
-                            <p className="text-xs text-[#1a1a2e]/70 mb-1">Funding Range</p>
-                            {fundingData.estimatedRange ? (
-                              <>
-                                <p className="text-2xl font-bold text-[#1a1a2e] font-mono" data-testid="text-range">
-                                  ${fundingData.estimatedRange.min.toLocaleString()}
-                                </p>
-                                <p className="text-xs text-[#1a1a2e]/60 mt-0.5">/ ${fundingData.estimatedRange.max.toLocaleString()}</p>
-                              </>
-                            ) : (
-                              <p className="text-2xl font-bold text-[#1a1a2e]/65 font-mono">—</p>
-                            )}
+                            <p className="text-lg font-bold text-[#1a1a2e]">{b.utilization}%</p>
+                            <p className="text-[9px] text-[#1a1a2e]/50">Utilization</p>
                           </div>
-                          <div className="relative">
-                            <DonutChart value={fundingData.score} max={100} size={80} strokeWidth={8} color={getScoreColor(fundingData.score)} />
-                            <div className="absolute inset-0 flex items-center justify-center">
-                              <span className="text-sm font-bold text-[#1a1a2e]">{fundingData.score}%</span>
-                            </div>
+                          <div>
+                            <p className="text-lg font-bold text-[#1a1a2e]">{b.hardInquiries}</p>
+                            <p className="text-[9px] text-[#1a1a2e]/50">Inquiries</p>
+                          </div>
+                          <div>
+                            <p className="text-lg font-bold text-[#1a1a2e]">{b.derogatoryCount}</p>
+                            <p className="text-[9px] text-[#1a1a2e]/50">Derogatory</p>
                           </div>
                         </div>
+                        <p className="text-[10px] text-[#1a1a2e]/60 leading-relaxed">{b.recommendation}</p>
                       </div>
-
-                      <div className="rounded-2xl bg-white/80 backdrop-blur-md border border-white/40 shadow-[0_8px_32px_rgba(0,0,0,0.04),0_2px_8px_rgba(0,0,0,0.02)] p-6" data-testid="document-upload-card">
-                        <div className="flex items-center justify-between mb-4">
-                          <p className="text-xs text-[#1a1a2e]/75">Document Analysis</p>
-                          <span className="text-[9px] text-[#1a1a2e]/55 bg-white/50 px-2 py-0.5 rounded-full">GPT-4o</span>
-                        </div>
-                        <input
-                          ref={creditReportInputRef}
-                          type="file"
-                          accept=".pdf,.doc,.docx,.txt,.csv"
-                          className="hidden"
-                          data-testid="input-credit-report-upload"
-                          onChange={(e) => {
-                            const file = e.target.files?.[0];
-                            if (file) handleDocumentUpload(file, "credit_report");
-                            e.target.value = "";
-                          }}
-                        />
-                        <input
-                          ref={bankStatementInputRef}
-                          type="file"
-                          accept=".pdf,.doc,.docx,.txt,.csv"
-                          className="hidden"
-                          data-testid="input-bank-statement-upload"
-                          onChange={(e) => {
-                            const file = e.target.files?.[0];
-                            if (file) handleDocumentUpload(file, "bank_statement");
-                            e.target.value = "";
-                          }}
-                        />
-                        <div className="space-y-2">
-                          <button
-                            onClick={() => creditReportInputRef.current?.click()}
-                            disabled={docUploading}
-                            className={cn(
-                              "w-full flex items-center gap-3 p-3 rounded-xl border transition-all text-left",
-                              fundingData.hasCreditReport
-                                ? "border-green-500/20 bg-green-500/[0.04]"
-                                : "border-white/30 bg-white/50 hover:bg-white/60",
-                              docUploading && docUploadType === "credit_report" && "opacity-50"
-                            )}
-                            data-testid="button-upload-credit-report"
-                          >
-                            {docUploading && docUploadType === "credit_report" ? (
-                              <Loader2 className="w-5 h-5 text-[#1a1a2e]/75 animate-spin shrink-0" />
-                            ) : fundingData.hasCreditReport ? (
-                              <CheckCircle2 className="w-5 h-5 text-green-400 shrink-0" />
-                            ) : (
-                              <Upload className="w-5 h-5 text-[#1a1a2e]/65 shrink-0" />
-                            )}
-                            <div>
-                              <p className="text-xs font-medium text-[#1a1a2e]/90">{fundingData.hasCreditReport ? "Credit Report Uploaded" : "Upload Credit Report"}</p>
-                              <p className="text-[10px] text-[#1a1a2e]/55">PDF, DOC, TXT</p>
-                            </div>
-                          </button>
-                          <button
-                            onClick={() => bankStatementInputRef.current?.click()}
-                            disabled={docUploading}
-                            className={cn(
-                              "w-full flex items-center gap-3 p-3 rounded-xl border transition-all text-left",
-                              fundingData.hasBankStatement
-                                ? "border-green-500/20 bg-green-500/[0.04]"
-                                : "border-white/30 bg-white/50 hover:bg-white/60",
-                              docUploading && docUploadType === "bank_statement" && "opacity-50"
-                            )}
-                            data-testid="button-upload-bank-statement"
-                          >
-                            {docUploading && docUploadType === "bank_statement" ? (
-                              <Loader2 className="w-5 h-5 text-[#1a1a2e]/75 animate-spin shrink-0" />
-                            ) : fundingData.hasBankStatement ? (
-                              <CheckCircle2 className="w-5 h-5 text-green-400 shrink-0" />
-                            ) : (
-                              <Upload className="w-5 h-5 text-[#1a1a2e]/65 shrink-0" />
-                            )}
-                            <div>
-                              <p className="text-xs font-medium text-[#1a1a2e]/90">{fundingData.hasBankStatement ? "Bank Statement Uploaded" : "Upload Bank Statement"}</p>
-                              <p className="text-[10px] text-[#1a1a2e]/55">PDF, DOC, TXT</p>
-                            </div>
-                          </button>
-                        </div>
-                        {docUploading && (
-                          <div className="mt-3 flex items-center gap-3 p-3 rounded-xl bg-white/50 border border-white/30">
-                            <Loader2 className="w-4 h-4 text-[#1a1a2e]/75 animate-spin shrink-0" />
-                            <p className="text-[10px] text-[#1a1a2e]/75">Analyzing document...</p>
-                          </div>
-                        )}
-                        {fundingData.analysisSummary && (
-                          <div className="mt-3 p-3 rounded-xl bg-white/50 border border-white/30">
-                            <p className="text-[10px] text-[#1a1a2e]/80 leading-relaxed">{fundingData.analysisSummary}</p>
-                            {fundingData.lastAnalysisDate && (
-                              <p className="text-[9px] text-[#1a1a2e]/55 mt-1.5">{timeAgo(fundingData.lastAnalysisDate)} ago</p>
-                            )}
-                          </div>
-                        )}
-                      </div>
-                    </div>
-
-                    <div className="lg:col-span-3 rounded-2xl bg-white/80 backdrop-blur-md border border-white/40 shadow-[0_8px_32px_rgba(0,0,0,0.04),0_2px_8px_rgba(0,0,0,0.02)] p-6" data-testid="component-breakdown-card">
-                      <div className="flex items-center justify-between mb-5">
-                        <p className="text-xs text-[#1a1a2e]/75">Component Breakdown</p>
-                      </div>
-                      {componentChartData.length > 0 ? (
-                        <div className="h-[200px] mb-4">
-                          <ResponsiveContainer width="100%" height="100%">
-                            <AreaChart data={componentChartData} margin={{ top: 5, right: 10, left: -20, bottom: 0 }}>
-                              <defs>
-                                <linearGradient id="scoreGrad" x1="0" y1="0" x2="0" y2="1">
-                                  <stop offset="5%" stopColor="#3a3a5a" stopOpacity={0.35} />
-                                  <stop offset="95%" stopColor="#3a3a5a" stopOpacity={0} />
-                                </linearGradient>
-                                <linearGradient id="maxGrad" x1="0" y1="0" x2="0" y2="1">
-                                  <stop offset="5%" stopColor="#c0c0d0" stopOpacity={0.25} />
-                                  <stop offset="95%" stopColor="#c0c0d0" stopOpacity={0} />
-                                </linearGradient>
-                              </defs>
-                              <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: 'rgba(58,58,90,0.6)', fontSize: 10 }} />
-                              <YAxis axisLine={false} tickLine={false} tick={{ fill: 'rgba(58,58,90,0.5)', fontSize: 10 }} domain={[0, 20]} />
-                              <Tooltip
-                                contentStyle={{ background: '#f2f2f8', border: '1px solid rgba(58,58,90,0.2)', borderRadius: '12px', fontSize: '11px', color: '#3a3a5a' }}
-                                labelStyle={{ color: 'rgba(58,58,90,0.8)' }}
-                              />
-                              <Area type="monotone" dataKey="max" stroke="rgba(58,58,90,0.2)" fill="url(#maxGrad)" strokeWidth={1} dot={false} />
-                              <Area type="monotone" dataKey="score" stroke="rgba(58,58,90,0.85)" fill="url(#scoreGrad)" strokeWidth={2} dot={{ fill: '#3a3a5a', r: 3, strokeWidth: 0 }} activeDot={{ r: 5, fill: '#3a3a5a' }} />
-                            </AreaChart>
-                          </ResponsiveContainer>
-                        </div>
-                      ) : null}
-                      <div className="space-y-2.5">
-                        {fundingData.componentBreakdown && Object.entries(fundingData.componentBreakdown).map(([key, comp]) => {
-                          const pct = (comp.score / comp.max) * 100;
-                          return (
-                            <div key={key} data-testid={`component-${key}`}>
-                              <div className="flex items-center justify-between mb-1">
-                                <span className="text-[11px] text-[#1a1a2e]/80">{comp.label}</span>
-                                <span className="text-[11px] font-mono text-[#1a1a2e]/70">{comp.score}/{comp.max}</span>
-                              </div>
-                              <div className="w-full h-1.5 rounded-full bg-white/50 overflow-hidden">
-                                <div className="h-full rounded-full transition-all duration-700 bg-[#8a8aa5]/60" style={{ width: `${pct}%` }} />
-                              </div>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </div>
+                    ))}
                   </div>
 
-                  {fundingData.alerts.length > 0 && (
-                    <div className="rounded-2xl bg-white/80 backdrop-blur-md border border-white/40 shadow-[0_8px_32px_rgba(0,0,0,0.04),0_2px_8px_rgba(0,0,0,0.02)] p-6 mb-4" data-testid="risk-alerts-card">
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
+                    <div className="rounded-2xl bg-white/70 backdrop-blur-md border border-white/40 p-6" data-testid="doc-upload-section">
+                      <p className="text-xs text-[#1a1a2e]/70 mb-4">Document Analysis</p>
+                      <input ref={creditReportInputRef} type="file" accept=".pdf,.doc,.docx,.txt,.csv" className="hidden" data-testid="input-credit-report-upload"
+                        onChange={(e) => { const file = e.target.files?.[0]; if (file) handleDocumentUpload(file, "credit_report"); e.target.value = ""; }} />
+                      <input ref={bankStatementInputRef} type="file" accept=".pdf,.doc,.docx,.txt,.csv" className="hidden" data-testid="input-bank-statement-upload"
+                        onChange={(e) => { const file = e.target.files?.[0]; if (file) handleDocumentUpload(file, "bank_statement"); e.target.value = ""; }} />
+                      <div className="space-y-2">
+                        <button onClick={() => creditReportInputRef.current?.click()} disabled={docUploading}
+                          className={cn("w-full flex items-center gap-3 p-3 rounded-xl border transition-all text-left",
+                            fundingData?.hasCreditReport ? "border-green-500/20 bg-green-500/[0.04]" : "border-white/30 bg-white/50 hover:bg-white/60",
+                            docUploading && docUploadType === "credit_report" && "opacity-50"
+                          )} data-testid="button-upload-credit-report">
+                          {docUploading && docUploadType === "credit_report" ? <Loader2 className="w-5 h-5 text-[#1a1a2e]/75 animate-spin shrink-0" /> :
+                            fundingData?.hasCreditReport ? <CheckCircle2 className="w-5 h-5 text-green-400 shrink-0" /> :
+                            <Upload className="w-5 h-5 text-[#1a1a2e]/65 shrink-0" />}
+                          <div>
+                            <p className="text-xs font-medium text-[#1a1a2e]/90">{fundingData?.hasCreditReport ? "Credit Report Uploaded" : "Upload Credit Report"}</p>
+                            <p className="text-[10px] text-[#1a1a2e]/55">PDF, DOC, TXT</p>
+                          </div>
+                        </button>
+                        <button onClick={() => bankStatementInputRef.current?.click()} disabled={docUploading}
+                          className={cn("w-full flex items-center gap-3 p-3 rounded-xl border transition-all text-left",
+                            fundingData?.hasBankStatement ? "border-green-500/20 bg-green-500/[0.04]" : "border-white/30 bg-white/50 hover:bg-white/60",
+                            docUploading && docUploadType === "bank_statement" && "opacity-50"
+                          )} data-testid="button-upload-bank-statement">
+                          {docUploading && docUploadType === "bank_statement" ? <Loader2 className="w-5 h-5 text-[#1a1a2e]/75 animate-spin shrink-0" /> :
+                            fundingData?.hasBankStatement ? <CheckCircle2 className="w-5 h-5 text-green-400 shrink-0" /> :
+                            <Upload className="w-5 h-5 text-[#1a1a2e]/65 shrink-0" />}
+                          <div>
+                            <p className="text-xs font-medium text-[#1a1a2e]/90">{fundingData?.hasBankStatement ? "Bank Statement Uploaded" : "Upload Bank Statement"}</p>
+                            <p className="text-[10px] text-[#1a1a2e]/55">PDF, DOC, TXT</p>
+                          </div>
+                        </button>
+                      </div>
+                      {docUploading && (
+                        <div className="mt-3 flex items-center gap-3 p-3 rounded-xl bg-white/50 border border-white/30">
+                          <Loader2 className="w-4 h-4 text-[#1a1a2e]/75 animate-spin shrink-0" />
+                          <p className="text-[10px] text-[#1a1a2e]/75">Analyzing document...</p>
+                        </div>
+                      )}
+                      {fundingData?.analysisSummary && (
+                        <div className="mt-3 p-3 rounded-xl bg-white/50 border border-white/30">
+                          <p className="text-[10px] text-[#1a1a2e]/80 leading-relaxed">{fundingData.analysisSummary}</p>
+                          {fundingData.lastAnalysisDate && <p className="text-[9px] text-[#1a1a2e]/55 mt-1.5">{timeAgo(fundingData.lastAnalysisDate)} ago</p>}
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="rounded-2xl bg-white/70 backdrop-blur-md border border-white/40 p-6" data-testid="action-plan-card">
                       <div className="flex items-center justify-between mb-4">
-                        <p className="text-xs text-[#1a1a2e]/75">Risk Alerts</p>
-                        <span className="text-[10px] text-[#1a1a2e]/55">{fundingData.alerts.length} alert{fundingData.alerts.length > 1 ? "s" : ""}</span>
+                        <p className="text-xs text-[#1a1a2e]/70">Quick Actions</p>
+                        <button onClick={() => { fetchCapitalOsDashboard(); fetchFundingReadiness(); }} className="text-[10px] text-[#1a1a2e]/50 hover:text-[#1a1a2e]/80 flex items-center gap-1" data-testid="button-refresh-score">
+                          <RefreshCw className="w-3 h-3" /> Refresh
+                        </button>
                       </div>
                       <div className="space-y-2">
+                        <button onClick={() => setActiveTab("messages")} className="w-full flex items-center gap-3 p-3 rounded-xl bg-white/50 border border-white/30 hover:bg-white/60 text-left transition-colors" data-testid="button-go-chat">
+                          <MessageCircle className="w-4 h-4 text-[#1a1a2e]/60" />
+                          <div>
+                            <p className="text-xs font-medium text-[#1a1a2e]/90">Talk to a Mentor</p>
+                            <p className="text-[10px] text-[#1a1a2e]/50">Get personalized guidance</p>
+                          </div>
+                        </button>
+                        <button onClick={() => setActiveTab("repair_engine")} className="w-full flex items-center gap-3 p-3 rounded-xl bg-white/50 border border-white/30 hover:bg-white/60 text-left transition-colors">
+                          <Shield className="w-4 h-4 text-[#1a1a2e]/60" />
+                          <div>
+                            <p className="text-xs font-medium text-[#1a1a2e]/90">Credit Repair</p>
+                            <p className="text-[10px] text-[#1a1a2e]/50">Dispute & resolve issues</p>
+                          </div>
+                        </button>
+                        <button onClick={() => setActiveTab("build_strategy")} className="w-full flex items-center gap-3 p-3 rounded-xl bg-white/50 border border-white/30 hover:bg-white/60 text-left transition-colors">
+                          <Building2 className="w-4 h-4 text-[#1a1a2e]/60" />
+                          <div>
+                            <p className="text-xs font-medium text-[#1a1a2e]/90">Run Simulations</p>
+                            <p className="text-[10px] text-[#1a1a2e]/50">Bank rating & pledge loan</p>
+                          </div>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  {fundingData && fundingData.alerts.length > 0 && (
+                    <div className="rounded-2xl bg-white/70 backdrop-blur-md border border-white/40 p-6 mb-4" data-testid="risk-alerts-card">
+                      <p className="text-xs text-[#1a1a2e]/70 mb-4">Risk Alerts</p>
+                      <div className="space-y-2">
                         {fundingData.alerts.map((alert, idx) => (
-                          <button
-                            key={idx}
-                            onClick={() => setExpandedAlerts(prev => {
-                              const next = new Set(prev);
-                              if (next.has(idx)) next.delete(idx); else next.add(idx);
-                              return next;
-                            })}
-                            className={cn(
-                              "w-full text-left rounded-xl border-l-[3px] bg-white/50 hover:bg-white/60 transition-all p-3.5",
+                          <button key={idx}
+                            onClick={() => setExpandedAlerts(prev => { const next = new Set(prev); if (next.has(idx)) next.delete(idx); else next.add(idx); return next; })}
+                            className={cn("w-full text-left rounded-xl border-l-[3px] bg-white/50 hover:bg-white/60 transition-all p-3.5",
                               alert.severity === "red" ? "border-l-red-500/60" : alert.severity === "yellow" ? "border-l-yellow-500/60" : "border-l-[#c0c0d0]"
-                            )}
-                            data-testid={`alert-${idx}`}
-                          >
+                            )} data-testid={`alert-${idx}`}>
                             <div className="flex items-start gap-3">
                               {alert.severity === "red" ? <AlertCircle className="w-4 h-4 text-red-400/70 shrink-0 mt-0.5" /> :
                                alert.severity === "yellow" ? <AlertTriangle className="w-4 h-4 text-yellow-400/70 shrink-0 mt-0.5" /> :
@@ -1177,8 +995,8 @@ export default function DashboardPage() {
                                 {expandedAlerts.has(idx) && (
                                   <div className="mt-2 space-y-1.5 text-xs">
                                     <p className="text-[#1a1a2e]/75">{alert.explanation}</p>
-                                    <p className="text-[#1a1a2e]/65"><span className="text-[#1a1a2e]/80 font-medium">Impact:</span> {alert.impact}</p>
-                                    <p className="text-green-400/60"><span className="text-green-400/70 font-medium">Fix:</span> {alert.fix}</p>
+                                    <p className="text-[#1a1a2e]/65"><span className="font-medium">Impact:</span> {alert.impact}</p>
+                                    <p className="text-green-600/70"><span className="font-medium">Fix:</span> {alert.fix}</p>
                                   </div>
                                 )}
                               </div>
@@ -1189,38 +1007,117 @@ export default function DashboardPage() {
                       </div>
                     </div>
                   )}
+                </>
+              ) : (
+                <div className="flex flex-col items-center justify-center py-20">
+                  <AlertCircle className="w-8 h-8 text-[#1a1a2e]/45 mb-3" />
+                  <p className="text-sm text-[#1a1a2e]/70">Unable to load dashboard data</p>
+                  <button onClick={fetchCapitalOsDashboard} className="mt-3 text-xs text-[#1a1a2e]/60 hover:text-[#1a1a2e]/80 underline" data-testid="button-retry-dashboard">Retry</button>
+                </div>
+              )}
+            </div>
+          )}
 
-                  {fundingData.denialSimulation && fundingData.denialSimulation.length > 0 && (
-                    <div className="rounded-2xl bg-white/50 backdrop-blur-none border border-red-500/10 p-6 mb-4" data-testid="denial-simulation-card">
-                      <div className="flex items-center justify-between mb-4">
-                        <p className="text-xs text-red-400/60">Denial Simulation</p>
-                        <span className="text-[10px] text-[#1a1a2e]/45">{fundingData.denialSimulation.length} trigger{fundingData.denialSimulation.length > 1 ? "s" : ""}</span>
+          {activeTab === "repair_engine" && (
+            <div className="w-full px-5 sm:px-8 py-6 max-w-[1000px] mx-auto">
+              <div className="flex items-center justify-between mb-6">
+                <div>
+                  <h2 className="text-lg font-semibold text-[#1a1a2e]" data-testid="text-repair-title">Repair Engine</h2>
+                  <p className="text-[11px] text-[#1a1a2e]/60">Detect issues, generate dispute letters, track resolutions</p>
+                </div>
+                <button onClick={runRepairAnalysis} disabled={repairAnalyzing}
+                  className="h-9 px-4 rounded-xl bg-white/70 border border-white/40 hover:bg-white/80 text-xs font-medium text-[#1a1a2e]/80 transition-colors flex items-center gap-2 disabled:opacity-50" data-testid="button-run-repair">
+                  {repairAnalyzing ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <RefreshCw className="w-3.5 h-3.5" />}
+                  {repairAnalyzing ? "Analyzing..." : "Run Analysis"}
+                </button>
+              </div>
+
+              {repairLoading ? (
+                <div className="flex items-center justify-center py-16"><Loader2 className="w-6 h-6 animate-spin text-[#1a1a2e]/50" /></div>
+              ) : !repairData ? (
+                <div className="rounded-2xl bg-white/70 backdrop-blur-md border border-white/40 p-8 text-center">
+                  <Shield className="w-10 h-10 text-[#1a1a2e]/30 mx-auto mb-3" />
+                  <p className="text-sm text-[#1a1a2e]/70 mb-2">No repair data available</p>
+                  <p className="text-[11px] text-[#1a1a2e]/50 mb-4">Upload a credit report from Mission Control, then run analysis</p>
+                  <button onClick={() => setActiveTab("mission_control")} className="text-xs text-[#1a1a2e]/60 hover:text-[#1a1a2e]/80 underline">Go to Mission Control</button>
+                </div>
+              ) : (
+                <>
+                  {repairData.detectedIssues && repairData.detectedIssues.length > 0 && (
+                    <div className="rounded-2xl bg-white/70 backdrop-blur-md border border-white/40 p-6 mb-4" data-testid="detected-issues-card">
+                      <p className="text-xs text-[#1a1a2e]/70 mb-4">Detected Issues ({repairData.detectedIssues.length})</p>
+                      <div className="space-y-2">
+                        {repairData.detectedIssues.map((issue: any, idx: number) => (
+                          <div key={idx} className="flex items-start gap-3 p-3 rounded-xl bg-white/50 border border-white/30" data-testid={`issue-${idx}`}>
+                            <AlertTriangle className="w-4 h-4 text-orange-500/70 shrink-0 mt-0.5" />
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm text-[#1a1a2e]/90">{issue.issue || issue.description || issue}</p>
+                              {issue.bureau && <p className="text-[10px] text-[#1a1a2e]/50 mt-0.5">Bureau: {issue.bureau}</p>}
+                              {issue.impact && <p className="text-[10px] text-[#1a1a2e]/50">Impact: {issue.impact}</p>}
+                            </div>
+                          </div>
+                        ))}
                       </div>
+                    </div>
+                  )}
+
+                  {repairData.letters && repairData.letters.length > 0 && (
+                    <div className="rounded-2xl bg-white/70 backdrop-blur-md border border-white/40 p-6 mb-4" data-testid="dispute-letters-card">
+                      <p className="text-xs text-[#1a1a2e]/70 mb-4">Dispute Letters ({repairData.letters.length})</p>
+                      <div className="space-y-3">
+                        {repairData.letters.map((letter: any, idx: number) => (
+                          <div key={idx} className="rounded-xl bg-white/50 border border-white/30 overflow-hidden" data-testid={`letter-${idx}`}>
+                            <button
+                              onClick={() => setExpandedLetters(prev => { const next = new Set(prev); if (next.has(idx)) next.delete(idx); else next.add(idx); return next; })}
+                              className="w-full flex items-center justify-between p-4 text-left hover:bg-white/60 transition-colors"
+                            >
+                              <div className="flex items-center gap-3">
+                                <FileText className="w-4 h-4 text-[#1a1a2e]/60 shrink-0" />
+                                <div>
+                                  <p className="text-sm font-medium text-[#1a1a2e]/90">{letter.title || letter.bureau || `Letter ${idx + 1}`}</p>
+                                  {letter.bureau && <p className="text-[10px] text-[#1a1a2e]/50">{letter.bureau}</p>}
+                                </div>
+                              </div>
+                              <ChevronRight className={cn("w-4 h-4 text-[#1a1a2e]/40 transition-transform", expandedLetters.has(idx) && "rotate-90")} />
+                            </button>
+                            {expandedLetters.has(idx) && (
+                              <div className="px-4 pb-4 border-t border-white/30">
+                                <pre className="text-[11px] text-[#1a1a2e]/80 leading-relaxed whitespace-pre-wrap mt-3 font-sans">{letter.content || letter.text || letter.body}</pre>
+                                <button
+                                  onClick={() => copyLetterToClipboard(letter.content || letter.text || letter.body, idx)}
+                                  className="mt-3 flex items-center gap-2 h-8 px-3 rounded-lg bg-white/60 border border-white/30 text-[10px] text-[#1a1a2e]/70 hover:bg-white/80 transition-colors"
+                                  data-testid={`copy-letter-${idx}`}
+                                >
+                                  {copiedLetter === idx ? <><Check className="w-3 h-3" /> Copied</> : <><Copy className="w-3 h-3" /> Copy to Clipboard</>}
+                                </button>
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {fundingData && fundingData.denialSimulation && fundingData.denialSimulation.length > 0 && (
+                    <div className="rounded-2xl bg-white/70 backdrop-blur-md border border-white/40 p-6 mb-4" data-testid="denial-simulation-card">
+                      <p className="text-xs text-[#1a1a2e]/70 mb-4">Denial Risk Simulation</p>
                       <div className="space-y-2">
                         {fundingData.denialSimulation.map((denial, idx) => (
-                          <button
-                            key={idx}
-                            onClick={() => setExpandedDenials(prev => {
-                              const next = new Set(prev);
-                              if (next.has(idx)) next.delete(idx); else next.add(idx);
-                              return next;
-                            })}
-                            className="w-full text-left rounded-xl bg-white/50 hover:bg-white/60 transition-all p-3.5"
-                            data-testid={`denial-${idx}`}
-                          >
+                          <button key={idx}
+                            onClick={() => setExpandedDenials(prev => { const next = new Set(prev); if (next.has(idx)) next.delete(idx); else next.add(idx); return next; })}
+                            className="w-full text-left rounded-xl bg-white/50 hover:bg-white/60 transition-all p-3.5" data-testid={`denial-${idx}`}>
                             <div className="flex items-start gap-3">
-                              <span className={cn(
-                                "text-[9px] font-bold uppercase px-2 py-0.5 rounded mt-0.5 shrink-0",
-                                denial.riskLevel === "High" ? "bg-red-500/15 text-red-400/80" :
-                                denial.riskLevel === "Moderate" ? "bg-yellow-500/15 text-yellow-400/80" :
-                                "bg-green-500/15 text-green-400/80"
+                              <span className={cn("text-[9px] font-bold uppercase px-2 py-0.5 rounded mt-0.5 shrink-0",
+                                denial.riskLevel === "High" ? "bg-red-500/15 text-red-500/80" :
+                                denial.riskLevel === "Moderate" ? "bg-yellow-500/15 text-yellow-600/80" :
+                                "bg-green-500/15 text-green-600/80"
                               )}>{denial.riskLevel}</span>
                               <div className="flex-1 min-w-0">
                                 <p className="text-sm text-[#1a1a2e]/90">{denial.trigger}</p>
                                 {expandedDenials.has(idx) && (
                                   <div className="mt-2 space-y-1.5 text-xs">
                                     <p className="text-[#1a1a2e]/70">{denial.explanation}</p>
-                                    <p className="text-green-400/50"><span className="text-green-400/60 font-medium">Fix:</span> {denial.fix}</p>
+                                    <p className="text-green-600/60"><span className="font-medium">Fix:</span> {denial.fix}</p>
                                   </div>
                                 )}
                               </div>
@@ -1231,64 +1128,203 @@ export default function DashboardPage() {
                       </div>
                     </div>
                   )}
+                </>
+              )}
+            </div>
+          )}
 
-                  {fundingData.actionPlan.length > 0 && (
-                    <div className="rounded-2xl bg-white/80 backdrop-blur-md border border-white/40 shadow-[0_8px_32px_rgba(0,0,0,0.04),0_2px_8px_rgba(0,0,0,0.02)] p-6 mb-4" data-testid="action-plan-card">
-                      <p className="text-xs text-[#1a1a2e]/75 mb-4">Action Plan</p>
-                      <div className="space-y-2">
-                        {fundingData.actionPlan.map((step, idx) => (
-                          <div key={idx} className="flex items-start gap-3 p-3 rounded-xl bg-white/50" data-testid={`action-step-${idx}`}>
-                            <div className="w-6 h-6 rounded-full bg-white/50 flex items-center justify-center text-[10px] font-mono text-[#1a1a2e]/75 shrink-0">
-                              {idx + 1}
-                            </div>
-                            <p className="text-sm text-[#1a1a2e]/90 leading-relaxed">{step}</p>
-                          </div>
+          {activeTab === "build_strategy" && (
+            <div className="w-full px-5 sm:px-8 py-6 max-w-[1000px] mx-auto">
+              <div className="mb-6">
+                <h2 className="text-lg font-semibold text-[#1a1a2e]" data-testid="text-build-title">Build Strategy</h2>
+                <p className="text-[11px] text-[#1a1a2e]/60">Simulate bank ratings and pledge loan scenarios</p>
+              </div>
+
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div className="rounded-2xl bg-white/70 backdrop-blur-md border border-white/40 p-6" data-testid="bank-rating-simulator">
+                  <p className="text-xs text-[#1a1a2e]/70 mb-4">Bank Rating Simulator</p>
+                  <div className="space-y-3 mb-4">
+                    <div>
+                      <label className="text-[10px] text-[#1a1a2e]/60 mb-1 block">Avg Monthly Deposits ($)</label>
+                      <input type="number" value={bankRatingForm.avgMonthlyDeposits} onChange={e => setBankRatingForm(p => ({ ...p, avgMonthlyDeposits: Number(e.target.value) }))}
+                        className="w-full h-10 px-3 rounded-xl bg-white/60 border border-white/30 text-sm text-[#1a1a2e] outline-none focus:border-[#c0c0d0]" data-testid="input-monthly-deposits" />
+                    </div>
+                    <div>
+                      <label className="text-[10px] text-[#1a1a2e]/60 mb-1 block">Relationship Years</label>
+                      <input type="number" value={bankRatingForm.relationshipYears} onChange={e => setBankRatingForm(p => ({ ...p, relationshipYears: Number(e.target.value) }))}
+                        className="w-full h-10 px-3 rounded-xl bg-white/60 border border-white/30 text-sm text-[#1a1a2e] outline-none focus:border-[#c0c0d0]" data-testid="input-relationship-years" />
+                    </div>
+                    <div>
+                      <label className="text-[10px] text-[#1a1a2e]/60 mb-1 block">Target Institution</label>
+                      <input type="text" value={bankRatingForm.targetInstitution} onChange={e => setBankRatingForm(p => ({ ...p, targetInstitution: e.target.value }))}
+                        placeholder="e.g., Chase, Wells Fargo"
+                        className="w-full h-10 px-3 rounded-xl bg-white/60 border border-white/30 text-sm text-[#1a1a2e] placeholder:text-[#1a1a2e]/30 outline-none focus:border-[#c0c0d0]" data-testid="input-target-institution" />
+                    </div>
+                  </div>
+                  <button onClick={submitBankRating} disabled={bankRatingLoading}
+                    className="w-full h-10 rounded-xl bg-[#3a3a5a] text-white text-xs font-medium hover:bg-[#2a2a4a] disabled:opacity-50 transition-colors flex items-center justify-center gap-2" data-testid="button-simulate-bank-rating">
+                    {bankRatingLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Gauge className="w-3.5 h-3.5" />}
+                    Simulate Rating
+                  </button>
+                  {bankRatingResult && (
+                    <div className="mt-4 p-4 rounded-xl bg-white/50 border border-white/30" data-testid="bank-rating-result">
+                      <div className="flex items-center gap-3 mb-3">
+                        <div className="flex gap-0.5">
+                          {[1,2,3,4,5].map(n => (
+                            <div key={n} className={cn("w-6 h-6 rounded-md flex items-center justify-center text-[10px] font-bold", n <= Math.round(bankRatingResult.rating) ? "bg-[#3a3a5a] text-white" : "bg-[#e0e0ea] text-[#1a1a2e]/40")}>{n}</div>
+                          ))}
+                        </div>
+                        <span className="text-sm font-semibold text-[#1a1a2e]">{bankRatingResult.label}</span>
+                      </div>
+                      <div className="space-y-1.5">
+                        {bankRatingResult.recommendations?.map((r: string, i: number) => (
+                          <p key={i} className="text-[11px] text-[#1a1a2e]/70 flex items-start gap-2">
+                            <span className="text-[#1a1a2e]/30 mt-0.5">·</span>{r}
+                          </p>
                         ))}
                       </div>
                     </div>
                   )}
+                </div>
 
-                  {fundingData.analysisNextSteps && fundingData.analysisNextSteps.length > 0 && (
-                    <div className="rounded-2xl bg-white/80 backdrop-blur-md border border-white/40 shadow-[0_8px_32px_rgba(0,0,0,0.04),0_2px_8px_rgba(0,0,0,0.02)] p-6 mb-4" data-testid="next-steps-card">
-                      <div className="flex items-center justify-between mb-4">
-                        <p className="text-xs text-[#1a1a2e]/75">Next Steps</p>
-                        <span className="text-[9px] text-[#1a1a2e]/45 bg-white/50 px-2 py-0.5 rounded-full">AI Generated</span>
+                <div className="rounded-2xl bg-white/70 backdrop-blur-md border border-white/40 p-6" data-testid="pledge-loan-simulator">
+                  <p className="text-xs text-[#1a1a2e]/70 mb-4">Pledge Loan Simulator</p>
+                  <div className="space-y-3 mb-4">
+                    <div>
+                      <label className="text-[10px] text-[#1a1a2e]/60 mb-1 block">Loan Amount ($)</label>
+                      <input type="number" value={pledgeLoanForm.loanAmount} onChange={e => setPledgeLoanForm(p => ({ ...p, loanAmount: Number(e.target.value) }))}
+                        className="w-full h-10 px-3 rounded-xl bg-white/60 border border-white/30 text-sm text-[#1a1a2e] outline-none focus:border-[#c0c0d0]" data-testid="input-loan-amount" />
+                    </div>
+                    <div>
+                      <label className="text-[10px] text-[#1a1a2e]/60 mb-1 block">Paydown Percent (%)</label>
+                      <input type="number" value={pledgeLoanForm.paydownPercent} onChange={e => setPledgeLoanForm(p => ({ ...p, paydownPercent: Number(e.target.value) }))}
+                        className="w-full h-10 px-3 rounded-xl bg-white/60 border border-white/30 text-sm text-[#1a1a2e] outline-none focus:border-[#c0c0d0]" data-testid="input-paydown-percent" />
+                    </div>
+                  </div>
+                  <button onClick={submitPledgeLoan} disabled={pledgeLoanLoading}
+                    className="w-full h-10 rounded-xl bg-[#3a3a5a] text-white text-xs font-medium hover:bg-[#2a2a4a] disabled:opacity-50 transition-colors flex items-center justify-center gap-2" data-testid="button-simulate-pledge-loan">
+                    {pledgeLoanLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <TrendingUp className="w-3.5 h-3.5" />}
+                    Simulate Pledge Loan
+                  </button>
+                  {pledgeLoanResult && (
+                    <div className="mt-4 p-4 rounded-xl bg-white/50 border border-white/30" data-testid="pledge-loan-result">
+                      <div className="grid grid-cols-2 gap-4 mb-4">
+                        <div className="text-center p-3 rounded-lg bg-white/60">
+                          <p className="text-[9px] text-[#1a1a2e]/50 uppercase mb-1">Before</p>
+                          <p className="text-xl font-bold text-[#1a1a2e]">{pledgeLoanResult.utilBefore}%</p>
+                          <p className="text-[9px] text-[#1a1a2e]/40">utilization</p>
+                        </div>
+                        <div className="text-center p-3 rounded-lg bg-green-500/[0.06] border border-green-500/10">
+                          <p className="text-[9px] text-green-600/60 uppercase mb-1">After</p>
+                          <p className="text-xl font-bold text-green-600">{pledgeLoanResult.utilAfter}%</p>
+                          <p className="text-[9px] text-green-600/40">utilization</p>
+                        </div>
                       </div>
-                      <div className="space-y-2">
-                        {fundingData.analysisNextSteps.map((step, idx) => (
-                          <div key={idx} className="flex items-start gap-3 p-3 rounded-xl bg-white/50" data-testid={`next-step-${idx}`}>
-                            <Sparkles className="w-4 h-4 text-[#1a1a2e]/55 shrink-0 mt-0.5" />
-                            <p className="text-sm text-[#1a1a2e]/80 leading-relaxed">{step}</p>
-                          </div>
-                        ))}
+                      <div className="flex items-center justify-between text-xs mb-2">
+                        <span className="text-[#1a1a2e]/60">Estimated Score Impact</span>
+                        <span className="font-semibold text-green-600">+{pledgeLoanResult.scoreDelta} pts</span>
                       </div>
+                      <div className="flex items-center justify-between text-xs mb-3">
+                        <span className="text-[#1a1a2e]/60">Timeline</span>
+                        <span className="font-medium text-[#1a1a2e]/80">{pledgeLoanResult.timelineMonths} months</span>
+                      </div>
+                      <p className="text-[11px] text-[#1a1a2e]/70 leading-relaxed">{pledgeLoanResult.recommendation}</p>
                     </div>
                   )}
+                </div>
+              </div>
+            </div>
+          )}
 
-                  <div className="rounded-2xl bg-white/80 backdrop-blur-md border border-white/40 shadow-[0_8px_32px_rgba(0,0,0,0.04),0_2px_8px_rgba(0,0,0,0.02)] p-6 mb-4" data-testid="insights-card">
-                    <p className="text-xs text-[#1a1a2e]/75 mb-4">Insights</p>
-                    <div className="space-y-2">
-                      {INSIGHTS.map((insight, idx) => (
-                        <div key={idx} className="p-3.5 rounded-xl bg-white/50 border border-white/30" data-testid={`insight-${idx}`}>
-                          <p className="text-sm text-[#1a1a2e]/90 mb-1">{insight.title}</p>
-                          <p className="text-[11px] text-[#1a1a2e]/65 leading-relaxed">{insight.summary}</p>
+          {activeTab === "funding_strategy" && (
+            <div className="w-full px-5 sm:px-8 py-6 max-w-[1000px] mx-auto">
+              <div className="mb-6">
+                <h2 className="text-lg font-semibold text-[#1a1a2e]" data-testid="text-funding-title">Funding Strategy</h2>
+                <p className="text-[11px] text-[#1a1a2e]/60">Application timing and capital stack planning</p>
+              </div>
+
+              {capitalOsData && (
+                <div className="rounded-2xl bg-white/70 backdrop-blur-md border border-white/40 p-6 mb-6" data-testid="application-window-detail">
+                  <div className="flex items-center justify-between mb-4">
+                    <p className="text-xs text-[#1a1a2e]/70">Application Window</p>
+                    <span className={cn("text-[10px] px-2 py-0.5 rounded-full font-medium",
+                      capitalOsData.applicationWindow.currentStatus === "ready" ? "bg-green-500/15 text-green-600" :
+                      capitalOsData.applicationWindow.currentStatus === "wait" ? "bg-yellow-500/15 text-yellow-600" :
+                      "bg-red-500/15 text-red-600"
+                    )}>{capitalOsData.applicationWindow.currentStatus === "ready" ? "Ready Now" : capitalOsData.applicationWindow.currentStatus === "wait" ? "Waiting" : "Repair First"}</span>
+                  </div>
+                  {capitalOsData.applicationWindow.daysUntilOptimal > 0 && (
+                    <div className="flex items-baseline gap-2 mb-3">
+                      <span className="text-4xl font-bold text-[#1a1a2e] font-mono">{capitalOsData.applicationWindow.daysUntilOptimal}</span>
+                      <span className="text-sm text-[#1a1a2e]/50">days until optimal window</span>
+                    </div>
+                  )}
+                  <p className="text-[11px] text-[#1a1a2e]/70 mb-4 leading-relaxed">{capitalOsData.applicationWindow.reasoning}</p>
+                  <div className="space-y-2">
+                    {capitalOsData.applicationWindow.factors.map((f, i) => (
+                      <div key={i} className="flex items-center gap-3 p-3 rounded-xl bg-white/50">
+                        <div className={cn("w-2 h-2 rounded-full shrink-0", f.status === "good" ? "bg-green-500" : f.status === "warning" ? "bg-yellow-500" : "bg-red-500")} />
+                        <div className="flex-1 min-w-0">
+                          <p className="text-xs font-medium text-[#1a1a2e]/85">{f.factor}</p>
+                          <p className="text-[10px] text-[#1a1a2e]/55">{f.detail}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              <div className="rounded-2xl bg-white/70 backdrop-blur-md border border-white/40 p-6" data-testid="capital-stack-simulator">
+                <p className="text-xs text-[#1a1a2e]/70 mb-4">Capital Stack Simulator</p>
+                <div className="flex gap-3 mb-4">
+                  <div className="flex-1">
+                    <label className="text-[10px] text-[#1a1a2e]/60 mb-1 block">Target Amount ($)</label>
+                    <input type="number" value={capitalStackAmount} onChange={e => setCapitalStackAmount(Number(e.target.value))}
+                      className="w-full h-10 px-3 rounded-xl bg-white/60 border border-white/30 text-sm text-[#1a1a2e] outline-none focus:border-[#c0c0d0]" data-testid="input-target-amount" />
+                  </div>
+                  <button onClick={submitCapitalStack} disabled={capitalStackLoading}
+                    className="self-end h-10 px-5 rounded-xl bg-[#3a3a5a] text-white text-xs font-medium hover:bg-[#2a2a4a] disabled:opacity-50 transition-colors flex items-center gap-2" data-testid="button-simulate-stack">
+                    {capitalStackLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <BarChart3 className="w-3.5 h-3.5" />}
+                    Simulate
+                  </button>
+                </div>
+
+                {capitalStackResult && (
+                  <div className="mt-2" data-testid="capital-stack-result">
+                    <div className="flex items-center justify-between p-3 rounded-xl bg-white/50 border border-white/30 mb-4">
+                      <div>
+                        <p className="text-[10px] text-[#1a1a2e]/50">Total Estimated</p>
+                        <p className="text-xl font-bold text-[#1a1a2e]">${capitalStackResult.totalEstimated?.toLocaleString()}</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-[10px] text-[#1a1a2e]/50">Timeline</p>
+                        <p className="text-sm font-medium text-[#1a1a2e]">{capitalStackResult.timeline}</p>
+                      </div>
+                    </div>
+                    <div className="space-y-0">
+                      {capitalStackResult.stages?.map((stage: any, i: number) => (
+                        <div key={i} className="flex gap-4" data-testid={`stage-${i}`}>
+                          <div className="flex flex-col items-center">
+                            <div className={cn("w-8 h-8 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0",
+                              i === 0 ? "bg-[#3a3a5a] text-white" : "bg-white/60 border border-white/30 text-[#1a1a2e]/60"
+                            )}>{stage.stage}</div>
+                            {i < (capitalStackResult.stages?.length || 0) - 1 && <div className="w-px flex-1 bg-[#e0e0ea] my-1" />}
+                          </div>
+                          <div className="flex-1 pb-5">
+                            <p className="text-sm font-medium text-[#1a1a2e]/90">{stage.product}</p>
+                            <p className="text-[10px] text-[#1a1a2e]/50">{stage.bureau} · {stage.timing}</p>
+                            <p className="text-xs font-semibold text-[#1a1a2e]/80 mt-1">${stage.estimatedAmount?.toLocaleString()}</p>
+                          </div>
                         </div>
                       ))}
                     </div>
                   </div>
-
-                </>
-              ) : (
-                <div className="flex flex-col items-center justify-center py-20">
-                  <AlertCircle className="w-8 h-8 text-[#1a1a2e]/45 mb-3" />
-                  <p className="text-sm text-[#1a1a2e]/70">Unable to load dashboard</p>
-                  <button onClick={fetchFundingReadiness} className="mt-3 text-xs text-[#1a1a2e]/60 hover:text-[#1a1a2e]/80 underline">
-                    Try again
-                  </button>
-                </div>
-              )}
+                )}
+              </div>
             </div>
-          ) : activeTab === "creatorai" ? (
+          )}
+
+          {activeTab === "creator_connect" && (
             <div className="w-full h-full flex flex-col" style={{ background: 'transparent' }}>
               <div className="flex-1 overflow-y-auto px-5 sm:px-8 py-6 max-w-[900px] mx-auto w-full">
                 <div className="flex items-center gap-3 mb-2">
@@ -1297,7 +1333,7 @@ export default function DashboardPage() {
                   </div>
                   <div>
                     <h2 className="text-lg font-bold text-[#1a1a2e]" data-testid="text-creator-ai-title">Creator Connect</h2>
-                    <p className="text-[11px] text-[#1a1a2e]/70">We connect you with the best YouTube creators for your situation — whether you need credit repair or funding guidance</p>
+                    <p className="text-[11px] text-[#1a1a2e]/70">We connect you with the best YouTube creators for your situation</p>
                   </div>
                 </div>
 
@@ -1306,13 +1342,10 @@ export default function DashboardPage() {
                     <Upload className="w-4 h-4 text-purple-500" />
                     <span className="text-sm font-semibold text-[#1a1a2e]">Step 1: Upload Your Credit Report</span>
                   </div>
-                  <p className="text-[11px] text-[#1a1a2e]/65 mb-3">Upload your report and our AI will analyze your situation, then search all of YouTube to find the best creators to help you — whether that's credit repair experts or funding strategists.</p>
+                  <p className="text-[11px] text-[#1a1a2e]/65 mb-3">Upload your report and our AI will analyze your situation, then search all of YouTube to find the best creators to help you.</p>
                   <div className="flex gap-2">
                     <label className="flex-1">
-                      <input
-                        type="file"
-                        accept=".pdf,.txt,.csv"
-                        className="hidden"
+                      <input type="file" accept=".pdf,.txt,.csv" className="hidden"
                         onChange={async (e) => {
                           const file = e.target.files?.[0];
                           if (!file) return;
@@ -1321,48 +1354,21 @@ export default function DashboardPage() {
                             const fileContent = await new Promise<string>((resolve, reject) => {
                               const reader = new FileReader();
                               const isPdf = file.name.toLowerCase().endsWith(".pdf");
-                              reader.onload = () => {
-                                if (isPdf) {
-                                  const base64 = (reader.result as string).split(",")[1];
-                                  resolve(base64);
-                                } else {
-                                  resolve(reader.result as string);
-                                }
-                              };
+                              reader.onload = () => { if (isPdf) { resolve((reader.result as string).split(",")[1]); } else { resolve(reader.result as string); } };
                               reader.onerror = () => reject(new Error("Failed to read file"));
-                              if (isPdf) reader.readAsDataURL(file);
-                              else reader.readAsText(file);
+                              if (isPdf) reader.readAsDataURL(file); else reader.readAsText(file);
                             });
-                            const res = await fetch("/api/analyze-document", {
-                              method: "POST",
-                              headers: { "Content-Type": "application/json" },
-                              credentials: "include",
-                              body: JSON.stringify({ fileContent, documentType: "credit_report" }),
-                            });
-                            if (res.ok) {
-                              toast({ title: "Report Analyzed", description: "Now click 'Find My Creators' to get matched with the best YouTube creators for your situation." });
-                              await fetchFundingReadiness();
-                            } else {
-                              const data = await res.json();
-                              toast({ title: "Upload Failed", description: data.error || "Could not process report.", variant: "destructive" });
-                            }
-                          } catch {
-                            toast({ title: "Upload Error", description: "Failed to upload. Try again.", variant: "destructive" });
-                          } finally {
-                            setCreatorAiUploading(false);
-                          }
+                            const res = await fetch("/api/analyze-document", { method: "POST", headers: { "Content-Type": "application/json" }, credentials: "include", body: JSON.stringify({ fileContent, documentType: "credit_report" }) });
+                            if (res.ok) { toast({ title: "Report Analyzed", description: "Now click 'Find My Creators' to get matched." }); await fetchFundingReadiness(); }
+                            else { const data = await res.json(); toast({ title: "Upload Failed", description: data.error || "Could not process report.", variant: "destructive" }); }
+                          } catch { toast({ title: "Upload Error", description: "Failed to upload. Try again.", variant: "destructive" }); }
+                          finally { setCreatorAiUploading(false); }
                         }}
                         data-testid="creator-ai-upload-input"
                       />
-                      <div className={cn(
-                        "flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg border border-dashed border-purple-400/30 bg-purple-500/5 cursor-pointer hover:bg-purple-500/10 transition-colors",
-                        creatorAiUploading && "opacity-50 pointer-events-none"
-                      )}>
-                        {creatorAiUploading ? (
-                          <><Loader2 className="w-4 h-4 animate-spin text-purple-500" /><span className="text-xs text-purple-600">Analyzing your report...</span></>
-                        ) : (
-                          <><FileText className="w-4 h-4 text-purple-500" /><span className="text-xs text-purple-600">Choose Credit Report (PDF/TXT)</span></>
-                        )}
+                      <div className={cn("flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg border border-dashed border-purple-400/30 bg-purple-500/5 cursor-pointer hover:bg-purple-500/10 transition-colors", creatorAiUploading && "opacity-50 pointer-events-none")}>
+                        {creatorAiUploading ? <><Loader2 className="w-4 h-4 animate-spin text-purple-500" /><span className="text-xs text-purple-600">Analyzing your report...</span></> :
+                          <><FileText className="w-4 h-4 text-purple-500" /><span className="text-xs text-purple-600">Choose Credit Report (PDF/TXT)</span></>}
                       </div>
                     </label>
                   </div>
@@ -1379,139 +1385,89 @@ export default function DashboardPage() {
                     <Search className="w-4 h-4 text-purple-500" />
                     <span className="text-sm font-semibold text-[#1a1a2e]">Step 2: Find Your Best-Fit Creators</span>
                   </div>
-                  <p className="text-[11px] text-[#1a1a2e]/65 mb-3">AI analyzes your credit profile, determines if you need repair or funding help, then searches all of YouTube to find the creators who specialize in exactly what you need.</p>
+                  <p className="text-[11px] text-[#1a1a2e]/65 mb-3">AI analyzes your credit profile, determines if you need repair or funding help, then searches YouTube for specialists.</p>
                   <button
                     onClick={async () => {
-                      setCreatorMatchLoading(true);
-                      setCreatorMatchResults(null);
+                      setCreatorMatchLoading(true); setCreatorMatchResults(null);
                       try {
-                        const resp = await fetch("/api/creator-match", {
-                          method: "POST",
-                          headers: { "Content-Type": "application/json" },
-                          credentials: "include",
-                        });
+                        const resp = await fetch("/api/creator-match", { method: "POST", headers: { "Content-Type": "application/json" }, credentials: "include" });
                         const data = await resp.json();
                         if (!resp.ok) throw new Error(data.error || "Failed");
                         setCreatorMatchResults(data);
-                      } catch (err: any) {
-                        toast({ title: "Match Error", description: err.message || "Could not find creators.", variant: "destructive" });
-                      } finally {
-                        setCreatorMatchLoading(false);
-                      }
+                      } catch (err: any) { toast({ title: "Match Error", description: err.message || "Could not find creators.", variant: "destructive" }); }
+                      finally { setCreatorMatchLoading(false); }
                     }}
                     disabled={creatorMatchLoading}
                     className="w-full py-3 rounded-xl bg-gradient-to-r from-purple-600 to-blue-600 text-white text-sm font-semibold disabled:opacity-50 hover:from-purple-500 hover:to-blue-500 transition-all flex items-center justify-center gap-2"
                     data-testid="creator-match-btn"
                   >
-                    {creatorMatchLoading ? (
-                      <><Loader2 className="w-4 h-4 animate-spin" /> Searching all of YouTube...</>
-                    ) : (
-                      <><Sparkles className="w-4 h-4" /> Find My Creators</>
-                    )}
+                    {creatorMatchLoading ? <><Loader2 className="w-4 h-4 animate-spin" /> Searching all of YouTube...</> : <><Sparkles className="w-4 h-4" /> Find My Creators</>}
                   </button>
                 </div>
 
                 {creatorMatchResults && (
                   <div className="space-y-4 mb-6">
-                    <div className={cn(
-                      "rounded-xl p-4 border",
-                      creatorMatchResults.mode === "repair"
-                        ? "bg-orange-50/80 border-orange-200/50"
-                        : "bg-emerald-50/80 border-emerald-200/50"
-                    )}>
+                    <div className={cn("rounded-xl p-4 border", creatorMatchResults.mode === "repair" ? "bg-orange-50/80 border-orange-200/50" : "bg-emerald-50/80 border-emerald-200/50")}>
                       <div className="flex items-center gap-2 mb-2">
-                        {creatorMatchResults.mode === "repair" ? (
-                          <AlertTriangle className="w-4 h-4 text-orange-500" />
-                        ) : (
-                          <TrendingUp className="w-4 h-4 text-emerald-500" />
-                        )}
+                        {creatorMatchResults.mode === "repair" ? <AlertTriangle className="w-4 h-4 text-orange-500" /> : <TrendingUp className="w-4 h-4 text-emerald-500" />}
                         <span className={cn("text-sm font-bold", creatorMatchResults.mode === "repair" ? "text-orange-700" : "text-emerald-700")}>
                           {creatorMatchResults.mode === "repair" ? "Credit Repair Mode" : "Funding Ready Mode"}
                         </span>
                       </div>
                       <p className="text-[12px] leading-relaxed text-[#1a1a2e]/80">{creatorMatchResults.summary}</p>
                     </div>
-
                     <div className="flex items-center gap-2 mb-1">
                       <Play className="w-4 h-4 text-red-500" />
                       <h3 className="text-sm font-bold text-[#1a1a2e]">Your Best-Fit YouTube Creators</h3>
-                      <span className="text-[10px] text-[#1a1a2e]/50 ml-auto">{(creatorMatchResults.creators || []).length} creators found</span>
+                      <span className="text-[10px] text-[#1a1a2e]/50 ml-auto">{(creatorMatchResults.creators || []).length} found</span>
                     </div>
-
                     {(!creatorMatchResults.creators || creatorMatchResults.creators.length === 0) ? (
                       <div className="bg-white/50 border border-white/30 rounded-xl p-6 text-center">
-                        <p className="text-sm text-[#1a1a2e]/70">No YouTube creators found. Try uploading your credit report first so the AI can search more accurately.</p>
+                        <p className="text-sm text-[#1a1a2e]/70">No creators found. Try uploading your credit report first.</p>
                       </div>
                     ) : (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                      {creatorMatchResults.creators.map((creator: any, idx: number) => {
-                        const categoryColors: Record<string, string> = {
-                          credit_repair: "from-orange-400 to-red-400",
-                          business_funding: "from-green-400 to-emerald-500",
-                          business_credit: "from-blue-400 to-indigo-500",
-                          financial_literacy: "from-purple-400 to-violet-500",
-                          entrepreneurship: "from-amber-400 to-orange-500",
-                          credit_building: "from-teal-400 to-cyan-500",
-                          investing: "from-pink-400 to-rose-500",
-                        };
-                        const gradient = categoryColors[creator.category] || "from-purple-400 to-blue-400";
-                        return (
-                        <div key={idx} className="bg-white/70 backdrop-blur-sm border border-white/40 rounded-xl p-4 hover:shadow-md transition-all" data-testid={`creator-card-${idx}`}>
-                          <div className="flex items-start gap-3">
-                            <div className={`w-11 h-11 rounded-full bg-gradient-to-br ${gradient} flex items-center justify-center text-white font-bold text-sm shrink-0 shadow-sm`}>
-                              {(creator.channelName || "?")[0]}
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <h4 className="text-[13px] font-bold text-[#1a1a2e] truncate">{creator.channelName}</h4>
-                              <div className="flex items-center gap-2 mt-0.5">
-                                {creator.handle && <span className="text-[10px] text-purple-500 font-medium">{creator.handle}</span>}
-                                {creator.subscriberEstimate && <span className="text-[10px] text-[#1a1a2e]/50">{creator.subscriberEstimate} subs</span>}
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        {creatorMatchResults.creators.map((creator: any, idx: number) => {
+                          const categoryColors: Record<string, string> = { credit_repair: "from-orange-400 to-red-400", business_funding: "from-green-400 to-emerald-500", business_credit: "from-blue-400 to-indigo-500", financial_literacy: "from-purple-400 to-violet-500", entrepreneurship: "from-amber-400 to-orange-500", credit_building: "from-teal-400 to-cyan-500", investing: "from-pink-400 to-rose-500" };
+                          const gradient = categoryColors[creator.category] || "from-purple-400 to-blue-400";
+                          return (
+                            <div key={idx} className="bg-white/70 backdrop-blur-sm border border-white/40 rounded-xl p-4 hover:shadow-md transition-all" data-testid={`creator-card-${idx}`}>
+                              <div className="flex items-start gap-3">
+                                <div className={`w-11 h-11 rounded-full bg-gradient-to-br ${gradient} flex items-center justify-center text-white font-bold text-sm shrink-0 shadow-sm`}>{(creator.channelName || "?")[0]}</div>
+                                <div className="flex-1 min-w-0">
+                                  <h4 className="text-[13px] font-bold text-[#1a1a2e] truncate">{creator.channelName}</h4>
+                                  <div className="flex items-center gap-2 mt-0.5">
+                                    {creator.handle && <span className="text-[10px] text-purple-500 font-medium">{creator.handle}</span>}
+                                    {creator.subscriberEstimate && <span className="text-[10px] text-[#1a1a2e]/50">{creator.subscriberEstimate} subs</span>}
+                                  </div>
+                                </div>
+                              </div>
+                              <p className="text-[11px] text-[#1a1a2e]/70 mt-2 leading-relaxed">{creator.specialty}</p>
+                              {creator.matchReason && (
+                                <p className="text-[10px] text-purple-600/80 mt-1.5 flex items-start gap-1">
+                                  <Sparkles className="w-3 h-3 shrink-0 mt-0.5" /><span className="line-clamp-2">{creator.matchReason}</span>
+                                </p>
+                              )}
+                              <div className="flex items-center gap-2 mt-3">
+                                <a href={creator.channelUrl} target="_blank" rel="noopener noreferrer"
+                                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-500/10 border border-red-300/30 text-red-600 text-[11px] font-medium hover:bg-red-500/20 transition-colors" data-testid={`creator-yt-link-${idx}`}>
+                                  <Play className="w-3 h-3" /> YouTube
+                                </a>
+                                <a href={creator.searchUrl} target="_blank" rel="noopener noreferrer"
+                                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-500/10 border border-blue-300/30 text-blue-600 text-[11px] font-medium hover:bg-blue-500/20 transition-colors" data-testid={`creator-search-link-${idx}`}>
+                                  <Search className="w-3 h-3" /> Search
+                                </a>
                               </div>
                             </div>
-                          </div>
-                          <p className="text-[11px] text-[#1a1a2e]/70 mt-2 leading-relaxed">{creator.specialty}</p>
-                          {creator.matchReason && (
-                            <p className="text-[10px] text-purple-600/80 mt-1.5 flex items-start gap-1">
-                              <Sparkles className="w-3 h-3 shrink-0 mt-0.5" />
-                              <span className="line-clamp-2">{creator.matchReason}</span>
-                            </p>
-                          )}
-                          <div className="flex items-center gap-2 mt-3">
-                            <a
-                              href={creator.channelUrl}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-500/10 border border-red-300/30 text-red-600 text-[11px] font-medium hover:bg-red-500/20 transition-colors"
-                              data-testid={`creator-yt-link-${idx}`}
-                            >
-                              <Play className="w-3 h-3" /> YouTube
-                            </a>
-                            <a
-                              href={creator.searchUrl}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-500/10 border border-blue-300/30 text-blue-600 text-[11px] font-medium hover:bg-blue-500/20 transition-colors"
-                              data-testid={`creator-search-link-${idx}`}
-                            >
-                              <Search className="w-3 h-3" /> Search
-                            </a>
-                          </div>
-                        </div>
-                        );
-                      })}
-                    </div>
+                          );
+                        })}
+                      </div>
                     )}
                   </div>
                 )}
 
                 {creatorMatchResults && (
-                  <button
-                    onClick={() => setCreatorMatchResults(null)}
-                    className="mt-2 mb-4 text-[11px] text-purple-500 hover:text-purple-700 underline transition-colors"
-                    data-testid="creator-match-back"
-                  >
-                    Back to Q&A
-                  </button>
+                  <button onClick={() => setCreatorMatchResults(null)} className="mt-2 mb-4 text-[11px] text-purple-500 hover:text-purple-700 underline transition-colors" data-testid="creator-match-back">Back to Q&A</button>
                 )}
 
                 {!creatorMatchResults && !creatorMatchLoading && (
@@ -1521,9 +1477,8 @@ export default function DashboardPage() {
                         <MessageCircle className="w-4 h-4 text-purple-500" />
                         <span className="text-sm font-semibold text-[#1a1a2e]">Ask Creator-Informed Questions</span>
                       </div>
-                      <p className="text-[11px] text-[#1a1a2e]/60 mb-3">Or ask any financial question — AI draws from 75+ top YouTube creators' frameworks to give you personalized guidance.</p>
+                      <p className="text-[11px] text-[#1a1a2e]/60 mb-3">Ask any financial question — AI draws from 75+ top YouTube creators' frameworks.</p>
                     </div>
-
                     <div className="space-y-4 mb-4">
                       {creatorAiMessages.length === 0 && (
                         <div className="flex flex-col items-center justify-center py-8 text-center">
@@ -1534,38 +1489,21 @@ export default function DashboardPage() {
                           <p className="text-[11px] text-[#1a1a2e]/55 max-w-sm leading-relaxed">AI aggregates perspectives from Graham Stephan, Dave Ramsey, Alex Hormozi, Credit Shifu and 70+ more creators.</p>
                           <div className="flex flex-wrap justify-center gap-2 mt-3">
                             {["How should I improve my credit score?", "What's the best way to build business credit?", "How do I prepare for funding?", "What would top creators say about my report?"].map((q) => (
-                              <button
-                                key={q}
-                                onClick={() => setCreatorAiInput(q)}
+                              <button key={q} onClick={() => setCreatorAiInput(q)}
                                 className="px-3 py-1.5 rounded-full bg-white/60 border border-white/30 text-[10px] text-[#1a1a2e]/70 hover:bg-purple-500/10 hover:border-purple-400/20 hover:text-purple-600 transition-all"
-                                data-testid={`creator-ai-suggestion-${q.slice(0,20)}`}
-                              >
-                                {q}
-                              </button>
+                                data-testid={`creator-ai-suggestion-${q.slice(0,20)}`}>{q}</button>
                             ))}
                           </div>
                         </div>
                       )}
-
                       {creatorAiMessages.map((msg, idx) => (
                         <div key={idx} className={cn("flex", msg.role === "user" ? "justify-end" : "justify-start")}>
-                          <div className={cn(
-                            "max-w-[85%] rounded-xl px-4 py-3",
-                            msg.role === "user"
-                              ? "bg-purple-600/15 border border-purple-400/20 text-[#1a1a2e]"
-                              : "bg-white/60 border border-white/30 text-[#1a1a2e]"
-                          )}>
-                            {msg.role === "assistant" && (
-                              <div className="flex items-center gap-1.5 mb-2 text-[10px] text-purple-500/60">
-                                <Sparkles className="w-3 h-3" />
-                                Creator-Informed Insight
-                              </div>
-                            )}
+                          <div className={cn("max-w-[85%] rounded-xl px-4 py-3", msg.role === "user" ? "bg-purple-600/15 border border-purple-400/20 text-[#1a1a2e]" : "bg-white/60 border border-white/30 text-[#1a1a2e]")}>
+                            {msg.role === "assistant" && <div className="flex items-center gap-1.5 mb-2 text-[10px] text-purple-500/60"><Sparkles className="w-3 h-3" />Creator-Informed Insight</div>}
                             <div className="text-[13px] leading-relaxed whitespace-pre-wrap" data-testid={`creator-ai-msg-${idx}`}>{msg.content}</div>
                           </div>
                         </div>
                       ))}
-
                       {creatorAiLoading && (
                         <div className="flex justify-start">
                           <div className="bg-white/60 border border-white/30 rounded-xl px-4 py-3 flex items-center gap-2">
@@ -1582,59 +1520,38 @@ export default function DashboardPage() {
               {!creatorMatchResults && (
                 <div className="px-5 sm:px-8 py-4 border-t border-white/30 max-w-[900px] mx-auto w-full">
                   <div className="flex gap-2">
-                    <input
-                      value={creatorAiInput}
-                      onChange={(e) => setCreatorAiInput(e.target.value)}
+                    <input value={creatorAiInput} onChange={(e) => setCreatorAiInput(e.target.value)}
                       onKeyDown={async (e) => {
                         if (e.key === "Enter" && creatorAiInput.trim() && !creatorAiLoading) {
                           const question = creatorAiInput.trim();
                           setCreatorAiMessages(prev => [...prev, { role: "user", content: question }]);
-                          setCreatorAiInput("");
-                          setCreatorAiLoading(true);
+                          setCreatorAiInput(""); setCreatorAiLoading(true);
                           try {
-                            const resp = await fetch("/api/creator-insight", {
-                              method: "POST",
-                              headers: { "Content-Type": "application/json" },
-                              credentials: "include",
-                              body: JSON.stringify({ question }),
-                            });
+                            const resp = await fetch("/api/creator-insight", { method: "POST", headers: { "Content-Type": "application/json" }, credentials: "include", body: JSON.stringify({ question }) });
                             const data = await resp.json();
                             if (!resp.ok) throw new Error(data.error || "Failed");
                             setCreatorAiMessages(prev => [...prev, { role: "assistant", content: data.answer }]);
-                          } catch (err: any) {
-                            setCreatorAiMessages(prev => [...prev, { role: "assistant", content: "Error: " + (err.message || "Could not get insight.") }]);
-                          } finally {
-                            setCreatorAiLoading(false);
-                          }
+                          } catch (err: any) { setCreatorAiMessages(prev => [...prev, { role: "assistant", content: "Error: " + (err.message || "Could not get insight.") }]); }
+                          finally { setCreatorAiLoading(false); }
                         }
                       }}
-                      placeholder="Ask any financial question — AI aggregates 75+ creator perspectives..."
+                      placeholder="Ask any financial question..."
                       className="flex-1 bg-white/60 border border-white/30 rounded-xl px-4 py-3 text-sm text-[#1a1a2e] placeholder:text-[#8a8aa5]/50 focus:outline-none focus:border-purple-400/40 transition-colors"
-                      disabled={creatorAiLoading}
-                      data-testid="creator-ai-input"
+                      disabled={creatorAiLoading} data-testid="creator-ai-input"
                     />
                     <button
                       onClick={async () => {
                         if (!creatorAiInput.trim() || creatorAiLoading) return;
                         const question = creatorAiInput.trim();
                         setCreatorAiMessages(prev => [...prev, { role: "user", content: question }]);
-                        setCreatorAiInput("");
-                        setCreatorAiLoading(true);
+                        setCreatorAiInput(""); setCreatorAiLoading(true);
                         try {
-                          const resp = await fetch("/api/creator-insight", {
-                            method: "POST",
-                            headers: { "Content-Type": "application/json" },
-                            credentials: "include",
-                            body: JSON.stringify({ question }),
-                          });
+                          const resp = await fetch("/api/creator-insight", { method: "POST", headers: { "Content-Type": "application/json" }, credentials: "include", body: JSON.stringify({ question }) });
                           const data = await resp.json();
                           if (!resp.ok) throw new Error(data.error || "Failed");
                           setCreatorAiMessages(prev => [...prev, { role: "assistant", content: data.answer }]);
-                        } catch (err: any) {
-                          setCreatorAiMessages(prev => [...prev, { role: "assistant", content: "Error: " + (err.message || "Could not get insight.") }]);
-                        } finally {
-                          setCreatorAiLoading(false);
-                        }
+                        } catch (err: any) { setCreatorAiMessages(prev => [...prev, { role: "assistant", content: "Error: " + (err.message || "Could not get insight.") }]); }
+                        finally { setCreatorAiLoading(false); }
                       }}
                       disabled={!creatorAiInput.trim() || creatorAiLoading}
                       className="px-5 rounded-xl bg-gradient-to-r from-purple-600 to-blue-600 text-white text-sm font-medium disabled:opacity-30 hover:from-purple-500 hover:to-blue-500 transition-all flex items-center gap-1.5"
@@ -1646,7 +1563,9 @@ export default function DashboardPage() {
                 </div>
               )}
             </div>
-          ) : (
+          )}
+
+          {activeTab === "messages" && (
             <div className="w-full h-full flex flex-col" style={{ background: 'transparent' }}>
               {!dmFriendId ? (
                 <div className="flex-1 overflow-y-auto px-5 sm:px-8 py-6 max-w-[600px] mx-auto w-full">
@@ -1660,25 +1579,68 @@ export default function DashboardPage() {
                     </div>
                   </div>
 
+                  {activeMentor && (
+                    <div className="rounded-xl bg-white/50 border border-white/30 p-4 mb-4">
+                      <div className="flex items-center gap-3 mb-3">
+                        <div className={cn("w-10 h-10 rounded-full flex items-center justify-center text-[10px] font-bold border border-white/30", activeMentorKey ? BOT_COLORS[activeMentorKey] : "")}>
+                          {activeMentor.initials}
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium text-[#1a1a2e]">{activeMentor.name}</p>
+                          <p className="text-[10px] text-[#1a1a2e]/60">{activeMentor.specialty}</p>
+                        </div>
+                      </div>
+                      <div className="flex gap-2">
+                        <textarea ref={textareaRef} value={input} onChange={handleTextareaInput} onKeyDown={handleKeyDown}
+                          placeholder={`Ask ${activeMentor.name}...`}
+                          className="flex-1 bg-white/60 border border-white/30 rounded-xl px-3 py-2.5 text-sm text-[#1a1a2e] placeholder:text-[#8a8aa5]/50 resize-none focus:outline-none focus:border-[#c0c0d0]"
+                          rows={1} data-testid="input-mentor-chat" />
+                        <button onClick={handleSend} disabled={isLoading || !input.trim()}
+                          className="w-10 h-10 rounded-xl bg-[#3a3a5a] text-white hover:bg-[#2a2a4a] disabled:opacity-30 flex items-center justify-center transition-colors shrink-0" data-testid="button-send-mentor">
+                          {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                  {messages.length > 0 && (
+                    <div className="rounded-xl bg-white/50 border border-white/30 p-4 mb-4">
+                      <p className="text-[10px] text-[#1a1a2e]/50 uppercase tracking-wider mb-3">Mentor Chat History</p>
+                      <div className="space-y-3 max-h-[300px] overflow-y-auto" style={{ scrollbarWidth: 'thin' }}>
+                        {messages.slice(-10).map((m) => {
+                          const mentorData = m.role === 'assistant' && m.mentor ? MENTOR_INFO[m.mentor] : null;
+                          return (
+                            <div key={m.id} className={cn("flex gap-2.5", m.role === 'user' ? "justify-end" : "justify-start")}>
+                              {m.role !== 'user' && mentorData && (
+                                <div className={cn("w-7 h-7 rounded-full flex items-center justify-center text-[9px] font-bold shrink-0 border border-white/30", m.mentor ? BOT_COLORS[m.mentor] : "")}>
+                                  {mentorData.initials}
+                                </div>
+                              )}
+                              <div className={cn("max-w-[80%] rounded-xl px-3 py-2", m.role === 'user' ? "bg-[#e0e0ea] text-[#1a1a2e]" : "bg-white/60 border border-white/30")}>
+                                <p className="text-[12px] text-[#1a1a2e]/85 leading-relaxed whitespace-pre-wrap line-clamp-4">{m.content}</p>
+                                <p className="text-[9px] text-[#1a1a2e]/40 mt-1">{new Date(m.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+
                   {friendsList.length === 0 ? (
                     <div className="text-center py-16">
                       <UserPlus className="w-10 h-10 text-[#1a1a2e]/40 mx-auto mb-3" />
                       <p className="text-sm text-[#1a1a2e]/70 mb-1">No friends yet</p>
                       <p className="text-[11px] text-[#1a1a2e]/55 mb-4">Add friends from the buddy list to start messaging</p>
                       <button onClick={() => setShowAddFriend(true)} className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white/50 border border-white/30 text-sm text-[#1a1a2e]/80 hover:bg-white/60 transition-colors" data-testid="button-add-friend-dm">
-                        <UserPlus className="w-4 h-4" />
-                        Add Friend
+                        <UserPlus className="w-4 h-4" /> Add Friend
                       </button>
                     </div>
                   ) : (
                     <div className="space-y-2">
                       {friendsList.map((f: any) => (
-                        <button
-                          key={f.id}
-                          onClick={() => openDm(f.id, f.displayName || f.email)}
-                          className="w-full flex items-center gap-3 p-3.5 rounded-xl bg-white/50 border border-white/30 hover:bg-white/50 transition-all text-left"
-                          data-testid={`dm-friend-${f.id}`}
-                        >
+                        <button key={f.id} onClick={() => openDm(f.id, f.displayName || f.email)}
+                          className="w-full flex items-center gap-3 p-3.5 rounded-xl bg-white/50 border border-white/30 hover:bg-white/60 transition-all text-left" data-testid={`dm-friend-${f.id}`}>
                           <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500/30 to-cyan-500/30 border border-white/40 flex items-center justify-center text-sm font-bold text-[#1a1a2e]/80">
                             {(f.displayName || f.email || "?").substring(0, 2).toUpperCase()}
                           </div>
@@ -1718,7 +1680,6 @@ export default function DashboardPage() {
                         <p className="text-[10px] text-[#1a1a2e]/45">Send a message or ask AI together</p>
                       </div>
                     )}
-
                     {dmMessages.map((msg: any) => {
                       const isMe = msg.senderId === user.id;
                       const isAi = msg.isAi;
@@ -1729,8 +1690,7 @@ export default function DashboardPage() {
                               {isAi ? <Sparkles className="w-3.5 h-3.5 text-purple-400/60" /> : <span className="text-[9px] font-bold text-[#1a1a2e]/65">{dmFriendName.substring(0, 2).toUpperCase()}</span>}
                             </div>
                           )}
-                          <div className={cn(
-                            "max-w-[80%] rounded-2xl px-4 py-3",
+                          <div className={cn("max-w-[80%] rounded-2xl px-4 py-3",
                             isAi ? "bg-purple-500/[0.08] border border-purple-500/[0.12]" :
                             isMe ? "bg-white/60 border border-white/30" :
                             "bg-white/50 border border-white/30"
@@ -1738,14 +1698,11 @@ export default function DashboardPage() {
                             {isAi && <p className="text-[9px] text-purple-400/50 font-medium mb-1">MentXr® Team AI</p>}
                             {!isMe && !isAi && <p className="text-[9px] text-[#1a1a2e]/60 font-medium mb-1">{dmFriendName}</p>}
                             <p className="text-[12px] text-[#1a1a2e]/90 leading-relaxed whitespace-pre-wrap">{msg.content}</p>
-                            <p className="text-[9px] text-[#1a1a2e]/45 mt-1.5">
-                              {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                            </p>
+                            <p className="text-[9px] text-[#1a1a2e]/45 mt-1.5">{new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
                           </div>
                         </div>
                       );
                     })}
-
                     {(dmLoading || dmAiLoading) && (
                       <div className="flex gap-2.5 justify-start">
                         <div className={cn("w-7 h-7 rounded-lg flex items-center justify-center shrink-0", dmAiLoading ? "bg-gradient-to-br from-purple-500/20 to-blue-500/20 border border-purple-500/20" : "bg-white/60 border border-white/30")}>
@@ -1764,36 +1721,17 @@ export default function DashboardPage() {
 
                   <div className="shrink-0 px-4 pb-4 pt-2 border-t border-white/30 bg-white/90 backdrop-blur-md">
                     <div className="flex gap-2">
-                      <textarea
-                        data-testid="input-dm"
-                        value={dmInput}
-                        onChange={(e) => setDmInput(e.target.value)}
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter" && !e.shiftKey) {
-                            e.preventDefault();
-                            sendDm();
-                          }
-                        }}
+                      <textarea data-testid="input-dm" value={dmInput} onChange={(e) => setDmInput(e.target.value)}
+                        onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendDm(); } }}
                         placeholder={`Message ${dmFriendName}...`}
                         className="flex-1 bg-white/50 border border-white/30 rounded-xl px-3.5 py-2.5 text-sm text-[#1a1a2e]/95 placeholder:text-[#8a8aa5]/50 resize-none focus:outline-none focus:border-[#c0c0d0] transition-colors"
-                        rows={1}
-                      />
-                      <button
-                        data-testid="button-send-dm"
-                        onClick={sendDm}
-                        disabled={!dmInput.trim() || dmLoading || dmAiLoading}
-                        className="w-10 h-10 rounded-xl bg-white/50 border border-white/30 hover:bg-white/60 disabled:opacity-30 flex items-center justify-center transition-colors shrink-0"
-                        title="Send message"
-                      >
+                        rows={1} />
+                      <button data-testid="button-send-dm" onClick={sendDm} disabled={!dmInput.trim() || dmLoading || dmAiLoading}
+                        className="w-10 h-10 rounded-xl bg-white/50 border border-white/30 hover:bg-white/60 disabled:opacity-30 flex items-center justify-center transition-colors shrink-0" title="Send message">
                         <Send className="w-4 h-4 text-[#1a1a2e]/80" />
                       </button>
-                      <button
-                        data-testid="button-team-ai"
-                        onClick={sendTeamAi}
-                        disabled={!dmInput.trim() || dmLoading || dmAiLoading}
-                        className="h-10 px-3 rounded-xl bg-gradient-to-r from-purple-600/80 to-blue-600/80 border border-purple-500/20 hover:from-purple-500 hover:to-blue-500 disabled:opacity-30 flex items-center gap-1.5 transition-all shrink-0"
-                        title="Ask Team AI"
-                      >
+                      <button data-testid="button-team-ai" onClick={sendTeamAi} disabled={!dmInput.trim() || dmLoading || dmAiLoading}
+                        className="h-10 px-3 rounded-xl bg-gradient-to-r from-purple-600/80 to-blue-600/80 border border-purple-500/20 hover:from-purple-500 hover:to-blue-500 disabled:opacity-30 flex items-center gap-1.5 transition-all shrink-0" title="Ask Team AI">
                         <Sparkles className="w-3.5 h-3.5 text-[#1a1a2e]" />
                         <span className="text-[11px] text-[#1a1a2e] font-medium">AI</span>
                       </button>
@@ -1803,8 +1741,252 @@ export default function DashboardPage() {
               )}
             </div>
           )}
+
+          {activeTab === "progress_tracker" && (
+            <div className="w-full px-5 sm:px-8 py-6 max-w-[1000px] mx-auto">
+              <div className="mb-6">
+                <h2 className="text-lg font-semibold text-[#1a1a2e]" data-testid="text-progress-title">Progress Tracker</h2>
+                <p className="text-[11px] text-[#1a1a2e]/60">Phase progression, category scores, and action items</p>
+              </div>
+
+              {capitalOsData ? (
+                <>
+                  <div className="rounded-2xl bg-white/70 backdrop-blur-md border border-white/40 p-6 mb-6" data-testid="phase-progress-card">
+                    <p className="text-xs text-[#1a1a2e]/70 mb-4">Phase Progress</p>
+                    <div className="flex items-center gap-2 mb-4">
+                      {capitalOsData.phase.phases.map((p, i) => (
+                        <div key={p.key} className="flex-1 flex flex-col items-center">
+                          <div className={cn(
+                            "w-10 h-10 rounded-full flex items-center justify-center text-[11px] font-bold mb-2 transition-all",
+                            p.completed ? "bg-[#3a3a5a] text-white" :
+                            p.active ? "bg-[#3a3a5a]/20 text-[#3a3a5a] ring-2 ring-[#3a3a5a]/30" :
+                            "bg-[#e0e0ea] text-[#1a1a2e]/40"
+                          )}>
+                            {p.completed ? <Check className="w-4 h-4" /> : i + 1}
+                          </div>
+                          <span className={cn("text-[10px] text-center", p.active ? "text-[#1a1a2e] font-semibold" : "text-[#1a1a2e]/50")}>{p.label}</span>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="w-full h-2 rounded-full bg-[#e0e0ea] overflow-hidden mb-3">
+                      <div className="h-full rounded-full bg-[#3a3a5a] transition-all" style={{ width: `${capitalOsData.phase.progress}%` }} />
+                    </div>
+                    <p className="text-[11px] text-[#1a1a2e]/70 leading-relaxed">{capitalOsData.phase.reasoning}</p>
+                  </div>
+
+                  <div className="rounded-2xl bg-white/70 backdrop-blur-md border border-white/40 p-6 mb-6" data-testid="category-breakdown-card">
+                    <div className="flex items-center justify-between mb-4">
+                      <p className="text-xs text-[#1a1a2e]/70">Category Breakdown</p>
+                      <span className="text-lg font-bold" style={{ color: capitalOsData.readiness.gradeColor }}>{capitalOsData.readiness.grade}</span>
+                    </div>
+                    <div className="space-y-4">
+                      {capitalOsData.readiness.categories.map((cat, idx) => (
+                        <div key={idx} data-testid={`category-${idx}`}>
+                          <div className="flex items-center justify-between mb-1.5">
+                            <div className="flex items-center gap-2">
+                              <span className="text-[12px] text-[#1a1a2e]/85">{cat.name}</span>
+                              <span className="text-[9px] text-[#1a1a2e]/40">{cat.weight}% weight</span>
+                            </div>
+                            <span className="text-[12px] font-mono text-[#1a1a2e]/70">{cat.score}/{cat.maxScore}</span>
+                          </div>
+                          <div className="w-full h-2 rounded-full bg-[#e0e0ea] overflow-hidden mb-1">
+                            <div className="h-full rounded-full transition-all duration-700" style={{ width: `${(cat.score / cat.maxScore) * 100}%`, backgroundColor: cat.score / cat.maxScore >= 0.7 ? '#10b981' : cat.score / cat.maxScore >= 0.4 ? '#f59e0b' : '#ef4444' }} />
+                          </div>
+                          <p className="text-[10px] text-[#1a1a2e]/50 leading-relaxed">{cat.tooltip}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="rounded-2xl bg-white/70 backdrop-blur-md border border-white/40 p-6" data-testid="action-items-card">
+                    <p className="text-xs text-[#1a1a2e]/70 mb-4">Action Items</p>
+                    <div className="space-y-2">
+                      {capitalOsData.readiness.categories
+                        .filter(c => c.score / c.maxScore < 0.7)
+                        .map((cat, idx) => (
+                          <div key={idx} className="flex items-start gap-3 p-3 rounded-xl bg-white/50 border border-white/30">
+                            <div className="w-6 h-6 rounded-full bg-[#e0e0ea] flex items-center justify-center text-[10px] font-mono text-[#1a1a2e]/60 shrink-0">{idx + 1}</div>
+                            <div>
+                              <p className="text-xs font-medium text-[#1a1a2e]/85">{cat.name}</p>
+                              <p className="text-[11px] text-[#1a1a2e]/60 leading-relaxed mt-0.5">{cat.tooltip}</p>
+                            </div>
+                          </div>
+                        ))}
+                      {capitalOsData.phase.reasoning && (
+                        <div className="flex items-start gap-3 p-3 rounded-xl bg-white/50 border border-white/30">
+                          <Target className="w-4 h-4 text-[#1a1a2e]/50 shrink-0 mt-0.5" />
+                          <p className="text-[11px] text-[#1a1a2e]/70 leading-relaxed">{capitalOsData.phase.reasoning}</p>
+                        </div>
+                      )}
+                      {capitalOsData.exposure.reasoning && (
+                        <div className="flex items-start gap-3 p-3 rounded-xl bg-white/50 border border-white/30">
+                          <Gauge className="w-4 h-4 text-[#1a1a2e]/50 shrink-0 mt-0.5" />
+                          <p className="text-[11px] text-[#1a1a2e]/70 leading-relaxed">{capitalOsData.exposure.reasoning}</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </>
+              ) : capitalOsLoading ? (
+                <div className="flex items-center justify-center py-20"><Loader2 className="w-6 h-6 animate-spin text-[#1a1a2e]/50" /></div>
+              ) : (
+                <div className="rounded-2xl bg-white/70 backdrop-blur-md border border-white/40 p-8 text-center">
+                  <Activity className="w-10 h-10 text-[#1a1a2e]/30 mx-auto mb-3" />
+                  <p className="text-sm text-[#1a1a2e]/70">No progress data available</p>
+                  <button onClick={fetchCapitalOsDashboard} className="mt-3 text-xs text-[#1a1a2e]/60 hover:text-[#1a1a2e]/80 underline">Load Data</button>
+                </div>
+              )}
+            </div>
+          )}
+
         </div>
       </main>
+
+      {buddyOpen && <div className="fixed inset-0 bg-black/60 z-30 lg:hidden" onClick={() => setBuddyOpen(false)} />}
+
+      {buddyOpen && (
+        <aside className={cn(
+          "w-[260px] flex flex-col shrink-0 relative z-40",
+          "fixed right-0 h-full lg:static lg:flex"
+        )} style={{ background: 'rgba(255,255,255,0.75)', backdropFilter: 'blur(20px)' }}>
+          <div className="h-12 px-4 flex items-center justify-between border-b border-white/30 bg-white/50">
+            <span className="text-[11px] font-bold text-[#1a1a2e]/70 uppercase tracking-widest">Buddy List</span>
+            <button onClick={() => setBuddyOpen(false)} className="lg:hidden text-[#1a1a2e]/60 hover:text-[#1a1a2e]">
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+
+          <div className="h-10 px-4 flex items-center gap-2 border-b border-white/30">
+            <button data-testid="button-new-chat"
+              onClick={() => { clearChat(); setSelectedMentor(null); setMentorCleared(true); setBuddyOpen(false); setActiveTab("messages"); }}
+              className="flex-1 h-7 text-[11px] rounded-lg bg-white/60 border border-white/30 hover:bg-white/70 text-[#1a1a2e]/80 font-medium transition-colors">
+              + New Chat
+            </button>
+          </div>
+
+          <div className="flex-1 overflow-y-auto" style={{ scrollbarWidth: 'thin' }}>
+            <div className="border-b border-white/30">
+              <button onClick={() => setBuddyGroups(prev => ({ ...prev, mentors: !prev.mentors }))}
+                className="w-full h-9 flex items-center gap-2 px-4 hover:bg-white/50 text-left transition-colors" data-testid="buddy-group-mentors">
+                <span className="text-[10px] text-[#1a1a2e]/45 font-mono w-3">{buddyGroups.mentors ? "▾" : "▸"}</span>
+                <span className="text-[11px] font-bold text-[#1a1a2e]/75 uppercase tracking-widest">Mentors</span>
+                <span className="text-[10px] text-[#1a1a2e]/45 ml-auto">(7/7)</span>
+              </button>
+              {buddyGroups.mentors && (
+                <div className="pb-1">
+                  {Object.entries(MENTOR_INFO).map(([key, mentor]) => {
+                    const isActive = activeMentorKey === key;
+                    return (
+                      <button key={key} data-testid={`buddy-${key}`}
+                        onClick={() => { setSelectedMentor(key); setMentorCleared(false); setActiveTab("messages"); setBuddyOpen(false); }}
+                        className={cn("w-full h-11 flex items-center gap-3 px-4 text-left transition-all",
+                          isActive ? "bg-white/50 border-l-2 border-l-[#8a8aa5]" : "hover:bg-white/50 border-l-2 border-l-transparent"
+                        )}>
+                        <div className="relative shrink-0">
+                          <div className={cn("w-8 h-8 rounded-lg border border-white/30 flex items-center justify-center text-[#1a1a2e] text-[10px] font-bold", BOT_COLORS[key])}>{mentor.initials}</div>
+                          <div className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-green-500 border-2 border-white/40" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className={cn("text-[12px] font-semibold truncate leading-tight", isActive ? "text-[#1a1a2e]" : "text-[#1a1a2e]/90")}>{mentor.name}</p>
+                          <p className={cn("text-[10px] truncate leading-tight", isActive ? "text-[#1a1a2e]/70" : "text-[#1a1a2e]/55")}>{statusMessages[key] || mentor.tagline}</p>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+
+            <div className="border-b border-white/30">
+              <button onClick={() => setBuddyGroups(prev => ({ ...prev, friends: !prev.friends }))}
+                className="w-full h-9 flex items-center gap-2 px-4 hover:bg-white/50 text-left transition-colors" data-testid="buddy-group-friends">
+                <span className="text-[10px] text-[#1a1a2e]/45 font-mono w-3">{buddyGroups.friends ? "▾" : "▸"}</span>
+                <span className="text-[11px] font-bold text-[#1a1a2e]/75 uppercase tracking-widest">Friends</span>
+                <span className="text-[10px] text-[#1a1a2e]/45 ml-auto">({friendsList.length})</span>
+              </button>
+              {buddyGroups.friends && (
+                <div className="pb-1">
+                  <button onClick={() => setShowAddFriend(true)}
+                    className="w-full h-9 flex items-center gap-3 px-4 hover:bg-white/50 text-left transition-colors" data-testid="button-add-friend">
+                    <UserPlus className="w-3.5 h-3.5 text-green-400/50" />
+                    <span className="text-[11px] text-green-400/50 font-medium">Add Friend</span>
+                  </button>
+                  {pendingRequests.length > 0 && (
+                    <div className="px-4 py-1">
+                      <span className="text-[10px] text-amber-400/50 font-medium">{pendingRequests.length} pending request{pendingRequests.length > 1 ? "s" : ""}</span>
+                    </div>
+                  )}
+                  {pendingRequests.map((req: any) => (
+                    <div key={req.friendshipId} className="h-11 flex items-center gap-3 px-4 hover:bg-white/50 transition-colors">
+                      <div className="w-7 h-7 rounded-lg bg-amber-500/15 border border-amber-500/20 flex items-center justify-center text-[9px] font-bold text-amber-400">
+                        {(req.displayName || "?").substring(0, 2).toUpperCase()}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-[11px] text-[#1a1a2e]/80 truncate">{req.displayName}</p>
+                      </div>
+                      <div className="flex gap-1">
+                        <button onClick={() => acceptFriend(req.friendshipId)} className="w-6 h-6 rounded-md bg-green-500/15 hover:bg-green-500/25 flex items-center justify-center" data-testid={`accept-friend-${req.id}`}>
+                          <Check className="w-3 h-3 text-green-400" />
+                        </button>
+                        <button onClick={() => rejectFriend(req.friendshipId)} className="w-6 h-6 rounded-md bg-red-500/15 hover:bg-red-500/25 flex items-center justify-center" data-testid={`reject-friend-${req.id}`}>
+                          <X className="w-3 h-3 text-red-400" />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                  {friendsList.map((f: any) => (
+                    <div key={f.friendshipId} className="group h-11 flex items-center gap-3 px-4 hover:bg-white/50 transition-colors cursor-pointer"
+                      onClick={() => { openDm(f.id, f.displayName || f.email); setBuddyOpen(false); }}>
+                      <div className="relative shrink-0">
+                        <div className="w-7 h-7 rounded-lg bg-white/50 border border-white/30 flex items-center justify-center text-[9px] font-bold text-[#1a1a2e]/80">
+                          {(f.displayName || "?").substring(0, 2).toUpperCase()}
+                        </div>
+                        <div className="absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full bg-green-500 border-2 border-white/40" />
+                      </div>
+                      <p className="text-[11px] text-[#1a1a2e]/80 truncate flex-1">{f.displayName}</p>
+                      <button onClick={(e) => { e.stopPropagation(); removeFriend(f.friendshipId); }} className="hidden group-hover:flex w-5 h-5 rounded-md bg-red-500/10 hover:bg-red-500/20 items-center justify-center" data-testid={`remove-friend-${f.id}`}>
+                        <UserX className="w-3 h-3 text-red-400/60" />
+                      </button>
+                    </div>
+                  ))}
+                  {friendsList.length === 0 && pendingRequests.length === 0 && (
+                    <div className="h-9 flex items-center px-4">
+                      <span className="text-[10px] text-[#1a1a2e]/40 italic">No friends yet</span>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+
+            <div className="border-b border-white/30">
+              <button onClick={() => setBuddyGroups(prev => ({ ...prev, offline: !prev.offline }))}
+                className="w-full h-9 flex items-center gap-2 px-4 hover:bg-white/50 text-left transition-colors" data-testid="buddy-group-offline">
+                <span className="text-[10px] text-[#1a1a2e]/45 font-mono w-3">{buddyGroups.offline ? "▾" : "▸"}</span>
+                <span className="text-[11px] font-bold text-[#1a1a2e]/75 uppercase tracking-widest">Recent Chats</span>
+              </button>
+              {buddyGroups.offline && (
+                <div className="pb-1">
+                  {messages.length > 0 ? (
+                    <div className="h-9 flex items-center gap-3 px-4 hover:bg-white/50 cursor-pointer transition-colors">
+                      <div className="w-2.5 h-2.5 rounded-full bg-green-500 shrink-0" />
+                      <span className="text-[11px] text-[#1a1a2e]/65 truncate flex-1">{messages[0]?.content.substring(0, 35)}...</span>
+                    </div>
+                  ) : (
+                    <div className="h-9 flex items-center px-4">
+                      <span className="text-[10px] text-[#1a1a2e]/40 italic">No recent conversations</span>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div className="h-11 px-4 flex items-center gap-3 border-t border-white/30 bg-white/50">
+            <div className="w-2.5 h-2.5 rounded-full bg-green-500 shrink-0" />
+            <span className="text-[10px] text-[#1a1a2e]/65 flex-1 truncate">{user.displayName || user.email}</span>
+          </div>
+        </aside>
+      )}
 
       {showAddFriend && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-none" onClick={() => setShowAddFriend(false)}>
@@ -1817,14 +1999,10 @@ export default function DashboardPage() {
             </div>
             <div className="relative mb-3">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#1a1a2e]/55" />
-              <input
-                data-testid="input-friend-search"
-                type="text"
-                value={friendSearch}
+              <input data-testid="input-friend-search" type="text" value={friendSearch}
                 onChange={e => { setFriendSearch(e.target.value); searchFriends(e.target.value); }}
                 placeholder="Search by name..."
-                className="w-full h-10 pl-10 pr-4 rounded-xl bg-white/60 border border-white/30 text-sm text-[#1a1a2e]/95 placeholder-white/50 outline-none focus:border-[#c0c0d0]"
-              />
+                className="w-full h-10 pl-10 pr-4 rounded-xl bg-white/60 border border-white/30 text-sm text-[#1a1a2e]/95 placeholder-white/50 outline-none focus:border-[#c0c0d0]" />
             </div>
             {friendSearchLoading && <p className="text-[10px] text-[#1a1a2e]/60 text-center py-2">Searching...</p>}
             <div className="space-y-1 max-h-48 overflow-y-auto">
@@ -1834,9 +2012,7 @@ export default function DashboardPage() {
                     {(u.displayName || u.email || "?").substring(0, 2).toUpperCase()}
                   </div>
                   <p className="text-sm text-[#1a1a2e]/80 flex-1 truncate">{u.displayName || u.email}</p>
-                  <button onClick={() => sendFriendRequest(u.id)} className="h-7 px-3 rounded-lg bg-white/50 hover:bg-white/60 text-[10px] text-[#1a1a2e]/80 font-medium transition-colors" data-testid={`add-friend-${u.id}`}>
-                    Add
-                  </button>
+                  <button onClick={() => sendFriendRequest(u.id)} className="h-7 px-3 rounded-lg bg-white/50 hover:bg-white/60 text-[10px] text-[#1a1a2e]/80 font-medium transition-colors" data-testid={`add-friend-${u.id}`}>Add</button>
                 </div>
               ))}
               {friendSearch.length >= 2 && !friendSearchLoading && friendSearchResults.length === 0 && (

@@ -1,72 +1,39 @@
 # MentXr®
 
 ## Overview
-A free AI mentorship platform ("Mentorship On Demand") combining Capital Readiness analytics with AI-powered mentorship. Features a 6-component Capital Readiness evaluation system (Capital Strength, Credit Quality, Management & Structure, Earnings & Cash Flow, Liquidity & Leverage, Risk Signals), 2.5x exposure ceiling calculation, tier eligibility (Prime/Mid-Tier/Alternative), operating mode (Pre-Funding/Repair), denial simulation, AI chat workspace with 7 bot mentors, PDF document upload with OCR, friends list, admin panel, and free membership access.
+A subscription-based AI mentorship platform ("Capital Operating System") combining comprehensive funding phase management (5 phases: Repair→Build→Optimize→Apply→Scale) with AI-powered mentorship. Features weighted 6-category Capital Readiness scoring, Safe Exposure monitoring, Bureau Health tracking (3-bureau map), dispute case management with AI-generated FCRA-compliant letters, bank rating and pledge loan simulators, capital stack planning, application window optimization, AI chat workspace with 7 bot mentors, Creator Connect (AI-powered YouTube creator matching without API key), Credit Report Repair System, Messages/DM system with Team AI, session-based auth, PDF upload with OCR, AOL AIM-style buddy list sidebar, and admin panel.
 
 ## Recent Changes
-- 2026-02-16: Removed Live Feed tab entirely (4 tabs remain: Dashboard, Creators, Repair, Messages)
+- 2026-02-16: **Capital Operating System** - Complete architecture upgrade with 5-phase funding journey
+- 2026-02-16: Left sidebar navigation (7 items): Mission Control, Repair Engine, Build Strategy, Funding Strategy, Creator Connect, Messages, Progress Tracker
+- 2026-02-16: Mission Control dashboard with 4 metric cards (Readiness Score gauge, Phase tracker, Exposure meter, Application Window)
+- 2026-02-16: Bureau Health Map - 3 bureau tiles (Experian, Equifax, TransUnion) with utilization, inquiries, derogatories, risk status
+- 2026-02-16: Weighted Capital Readiness Score: Payment History (30%), Utilization (25%), Exposure Depth (15%), Inquiry Sensitivity (10%), Account Age (10%), Bureau Strength (10%)
+- 2026-02-16: Safe Exposure Meter with safe/caution/denial zones and max safe credit amount calculation
+- 2026-02-16: Funding Phase Engine calculates position in 5-phase journey based on credit metrics
+- 2026-02-16: Build Strategy section with Bank Rating Simulator and Pledge Loan Simulator
+- 2026-02-16: Funding Strategy section with Application Window Timer and Capital Stack Simulator
+- 2026-02-16: Progress Tracker with phase progress bar and 6-category breakdown
+- 2026-02-16: Dispute Case Management with AI-generated FCRA-compliant letters, status tracking, timelines
+- 2026-02-16: System Alerts with read/unread tracking
+- 2026-02-16: Schema extended with fundingPhase, bureau health fields, disputeCases table, systemAlerts table, bank rating fields
+- 2026-02-16: server/capitalEngines.ts - computation engines for all capital metrics
+- 2026-02-16: 15+ new API endpoints under /api/capital-os/*
+- 2026-02-16: Removed Live Feed tab entirely
 - 2026-02-16: Mobile tab optimization - stacked icon/label layout on mobile, responsive text sizing
-- 2026-02-16: Creator Connect uses AI-powered YouTube creator matching (no API key needed) - recommends 8-12 real creators based on user's financial situation
-- 2026-02-16: Creator match determines repair vs funding mode and returns channel names, handles, specialties, subscriber estimates, and direct YouTube links
+- 2026-02-16: Creator Connect uses AI-powered YouTube creator matching (no API key needed)
 - 2026-02-15: Renamed "Creator AI" tab to "Creator Connect" across dashboard
-- 2026-02-14: Creator Connect (formerly Creator AI) is a separate tab alongside Dashboard, Repair, Messages
-- 2026-02-14: Creator Connect tab has its own credit report upload section for personalized analysis
-- 2026-02-14: AI automatically aggregates insights from 75+ creators across 8 categories (finance, business, realestate, credit, stocks, tax, economics, news)
-- 2026-02-14: Multi-Creator Aggregation Mode: AI selects 3-6 most relevant creators per question, synthesizes their frameworks, shows agreements/differences
-- 2026-02-14: CREATOR_INFORMED_PROMPT system prompt for synthesizing creator educational insights with proper @CreatorName attribution
-- 2026-02-14: POST /api/creator-insight endpoint with full financial profile, credit report, repair data, and multi-creator context
-- 2026-02-14: Chat-style Q&A interface with suggested starter questions and message history
-- 2026-02-13: Applied assistance-first system prompt to all Workspace chat (direct answers, no hedging, no refusal) via MASTER_SYSTEM_PROMPT
-- 2026-02-13: Removed separate AI Assist tab - assistance-first behavior now built into all mentor and general chat
-- 2026-02-13: Expanded AI document analysis to extract 14 data fields (exact score, revolving limits, balances, inquiries, derogatories, late payments, collections, open/closed accounts, account age, public records, utilization)
-- 2026-02-13: All financial profile fields force-reset on new report upload (no stale data persistence)
-- 2026-02-13: Added safeInt() type coercion for all AI-extracted numeric values
-- 2026-02-13: Expanded schema with: creditScoreExact, latePayments, collections, openAccounts, closedAccounts, oldestAccountYears, avgAccountAgeYears, publicRecords, utilizationPercent
-- 2026-02-13: Updated scoring engine to use expanded data (late payments, collections, account age, public records affect component scores)
-- 2026-02-13: Auto-triggers credit repair analysis after new credit report upload (reuses existing endpoint via internal HTTP call)
-- 2026-02-13: Added alerts/denial simulation triggers for late payments, collections, public records
-- 2026-02-13: Added Credit Repair System with AI-powered report parsing, issue detection, repair plan, and auto-generated dispute letters
-- 2026-02-13: Added /api/credit-repair-analysis endpoint with GPT-4o parsing of credit report text
-- 2026-02-13: Added /api/credit-repair-data endpoint for retrieving stored repair results
-- 2026-02-13: Dashboard shows Credit Repair section with issues table, action plan timeline, expandable dispute letters with copy functionality
-- 2026-02-13: Auto-generates bureau dispute letters (Experian/Equifax/TransUnion) and creditor dispute letters from report data
-- 2026-02-13: Credit report text stored on upload for re-analysis without re-uploading
-- 2026-02-13: Integrated Master Capital Readiness System Prompt into funding engine and document analysis
-- 2026-02-13: Added 6-component scoring: Capital Strength (0-20), Credit Quality (0-20), Management (0-15), Cash Flow (0-15), Liquidity (0-15), Risk Signals (0-15)
-- 2026-02-13: Added 2.5x exposure ceiling logic with dynamic multiplier adjustments
-- 2026-02-13: Added tier eligibility (Tier 1 Prime, Tier 2 Mid-Tier, Tier 3 Alternative Capital)
-- 2026-02-13: Added operating mode engine (Pre-Funding Mode vs Repair Mode)
-- 2026-02-13: Added denial simulation with triggers, risk levels, and corrective recommendations
-- 2026-02-13: Dashboard UI updated with component breakdown bars, exposure ceiling card, tier/mode cards, denial simulation card
-- 2026-02-13: Document analysis AI prompt updated to Capital Readiness analyst tone
-- 2026-02-13: Added document upload on Dashboard with AI-powered analysis (credit report + bank statement)
-- 2026-02-13: AI extracts financial data from uploaded documents and auto-populates funding score fields
-- 2026-02-13: Added POST /api/analyze-document endpoint with PDF extraction pipeline + OpenAI analysis
-- 2026-02-13: Added Next Steps section to Dashboard showing AI-generated personalized recommendations after analysis
-- 2026-02-13: Added lastAnalysisDate, analysisSummary, analysisNextSteps fields to users table
-- 2026-02-13: Funding score auto-refreshes after document analysis completes
-- 2026-02-13: Replaced social feed with Funding Readiness Dashboard (score, qualification range, risk alerts, action plan, progress tracker, insights)
-- 2026-02-13: Added /api/funding-readiness endpoint calculating score from credit profile data
-- 2026-02-13: Dashboard tab replaces Feed tab - private banking/financial analytics terminal design
-- 2026-02-13: Removed social elements (live feed, community posts, influencer posts, likes, comments on feed)
-- 2026-02-13: Kept friends list sidebar with add/accept/reject/remove friend functionality
-- 2026-02-13: Added friend feature - send/accept/reject friend requests, search users, friends list in AOL buddy list sidebar
-- 2026-02-13: Replaced all 7 real mentors with anonymous bot profiles (NovaSage247, AlphaVolt889, BlazeEcho512, LunarPeak303, IronFlux771, ZenCipher108, SteelWraith666)
-- 2026-02-13: Bot mentors use color-gradient avatars with initials instead of real celebrity photos
-- 2026-02-12: Each mentor has unique system prompt, specialty, tagline, and keyword detection
-- 2026-02-12: Graduated from visual prototype to full-stack working app with PostgreSQL + Drizzle ORM
-- 2026-02-12: Implemented OpenAI AI chat integration via Replit AI Integrations (server-side only)
-- 2026-02-12: Added admin panel with user management (toggle subscriptions, reset usage)
-- 2026-02-12: Added 30 analyses/month usage limiting with proper error messages
+- 2026-02-14: Creator Connect with multi-creator aggregation mode
+- 2026-02-13: Bot mentors with anonymous profiles and color-gradient avatars
+- 2026-02-13: Credit Repair System with AI-powered report parsing and dispute letters
+- 2026-02-13: Document upload with AI analysis (credit report + bank statement)
+- 2026-02-12: Full-stack app with PostgreSQL + Drizzle ORM + OpenAI integration
 
 ## User Preferences
-- Dark theme (#080808 background) with high-contrast anti-glare design
-- All panel backgrounds use solid opaque colors (#1C1C1C, #222222, #282828) instead of translucent white/[0.02-0.06]
-- All borders use solid colors (#2A2A2A, #303030, #363636) for visibility in sunlight
-- Text contrast boosted across all files (minimum ~40% white opacity for any visible text)
-- No backdrop-blur glass effects (removed to prevent sunlight washout)
+- White UI with white-to-lavender gradient background and animated floating deep silver blobs
+- Frosted glass content blocks (bg-white/70 backdrop-blur-md)
 - Inter font for UI, JetBrains Mono for data/metrics
-- "Digital Brutalism/Tech Finance" aesthetic with solid panels and grid backgrounds
+- Minimal fintech aesthetic - clean, infrastructure-focused
 - API key must be stored server-side only, never exposed to frontend
 - Monthly usage limit of 30 analyses per user
 
@@ -81,13 +48,14 @@ A free AI mentorship platform ("Mentorship On Demand") combining Capital Readine
 - State: React Context + TanStack React Query
 
 ### Key Files
-- `shared/schema.ts` - Database schema (users, messages tables) + Zod types
-- `server/routes.ts` - API routes (login, user CRUD, chat/AI analysis)
-- `server/storage.ts` - Drizzle ORM storage interface
+- `shared/schema.ts` - Database schema (users, messages, disputeCases, systemAlerts tables) + Zod types
+- `server/routes.ts` - API routes (login, user CRUD, chat/AI analysis, Capital OS endpoints)
+- `server/capitalEngines.ts` - Capital computation engines (phase, readiness, exposure, bureau health, window, simulators)
+- `server/storage.ts` - Drizzle ORM storage interface with dispute/alert CRUD
 - `server/db.ts` - Database connection
 - `client/src/lib/store.tsx` - Auth context + API client (React Query)
 - `client/src/pages/landing.tsx` - Login page
-- `client/src/pages/dashboard.tsx` - Main member dashboard
+- `client/src/pages/dashboard.tsx` - Main Capital OS dashboard (left nav + 7 sections)
 - `client/src/pages/admin.tsx` - Admin user management
 - `client/src/pages/subscription.tsx` - Subscription activation page
 - `client/src/components/chat-interface.tsx` - AI chat component
@@ -95,11 +63,33 @@ A free AI mentorship platform ("Mentorship On Demand") combining Capital Readine
 - `client/src/components/layout.tsx` - Dashboard sidebar layout
 
 ### Data Model
-- Users: email, password, role, subscriptionStatus, monthlyUsage, maxUsage, credit profile fields, document flags
+- Users: email, password, role, subscriptionStatus, monthlyUsage, maxUsage, credit profile fields, document flags, fundingPhase, bank rating fields
 - Messages: userId, role (user/assistant), content, attachment type, mentor (nullable), timestamp
+- DisputeCases: userId, bureau, accountName, accountNumber, disputeType, disputeMethod, fcraCitation, letterContent, status, sentDate, reminderDate, responseDeadline, resolution
+- SystemAlerts: userId, alertType, severity, title, message, isRead, metadata
+
+### Capital Operating System
+- 5 Funding Phases: Repair → Build → Optimize → Apply → Scale
+- Phase engine determines user position based on credit score, utilization, derogatory items, account age
+- Readiness Score: weighted 6-category model (Payment 30%, Util 25%, Exposure 15%, Inquiry 10%, Age 10%, Bureau 10%)
+- Safe Exposure: calculates max safe credit based on score, utilization, inquiries, account count
+- Bureau Health: 3-bureau comparison with risk status, priority bureau recommendation
+- Application Window: optimal timing based on inquiry density, utilization, negative items, score
+- Bank Rating Simulator: estimates internal bank rating based on deposits, relationship length
+- Pledge Loan Simulator: projects utilization/score improvement from pledge strategies
+- Capital Stack Planner: multi-stage funding roadmap across bureaus
+
+### Navigation Structure (Left Sidebar)
+1. Mission Control - Main dashboard with 4 metric cards + bureau health + document upload
+2. Repair Engine - Credit repair with dispute letters, issues, action plan
+3. Build Strategy - Bank rating + pledge loan simulators
+4. Funding Strategy - Application window timer + capital stack planner
+5. Creator Connect - AI-powered YouTube creator matching
+6. Messages - DM system with friends + Team AI
+7. Progress Tracker - Phase progress bar + category breakdown
 
 ### Messages / DM System
-- Messages tab (formerly Workspace) allows friends to DM each other directly
+- Messages section allows friends to DM each other directly
 - Team AI: Either friend can ask AI a question within the DM, both see the response
 - Team AI uses conversation context + both users' names for collaborative guidance
 - Auto-polls every 5 seconds for new messages when in a conversation
@@ -110,5 +100,5 @@ A free AI mentorship platform ("Mentorship On Demand") combining Capital Readine
 - 7 anonymous bots: NovaSage247 (Sales), AlphaVolt889 (Investing), BlazeEcho512 (Marketing), LunarPeak303 (Leadership), IronFlux771 (Entrepreneurship), ZenCipher108 (Mindset), SteelWraith666 (Youth Advocacy)
 - Each has: color-gradient avatar with initials, system prompt, specialty, tagline, keyword detection
 - Backend: MENTOR_PROFILES in server/routes.ts, /api/mentors endpoint
-- Frontend: MENTOR_INFO + BOT_COLORS in chat-interface.tsx & dashboard.tsx, mentor selection panel with grid UI
+- Frontend: MENTOR_INFO + BOT_COLORS in dashboard.tsx, mentor selection panel with grid UI
 - Priority: explicit UI selection > keyword detection > conversation persistence > default MentXr® AI
