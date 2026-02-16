@@ -91,7 +91,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (data.role === 'admin') {
         setLocation('/admin');
       } else if (!data.username) {
-        setLocation('/subscribe');
+        setLocation('/subscription');
       } else {
         setLocation('/dashboard');
       }
