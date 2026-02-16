@@ -9,7 +9,7 @@ type SafeUser = Omit<User, "password">;
 interface AuthContextType {
   user: SafeUser | null;
   isLoading: boolean;
-  login: (email: string, username?: string, phone?: string) => Promise<void>;
+  login: (email: string) => Promise<void>;
   logout: () => void;
   updateUser: (data: Record<string, any>) => Promise<void>;
   resetUsage: (userId: number) => Promise<void>;
@@ -71,11 +71,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   });
 
   const loginMutation = useMutation({
-    mutationFn: async ({ email, username, phone }: { email: string; username?: string; phone?: string }) => {
+    mutationFn: async (email: string) => {
       const res = await fetch("/api/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, username, phone }),
+        body: JSON.stringify({ email }),
       });
       if (!res.ok) {
         const err = await res.json().catch(() => ({ error: "Login failed" }));
@@ -88,7 +88,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       localStorage.setItem("studio_logged_in", "true");
       queryClient.invalidateQueries({ queryKey: ["/api/me"] });
       toast({ title: "Welcome back", description: `Logged in as ${data.displayName || data.email}` });
-      setLocation(data.role === 'admin' ? '/admin' : '/dashboard');
+      if (data.role === 'admin') {
+        setLocation('/admin');
+      } else if (!data.username) {
+        setLocation('/subscribe');
+      } else {
+        setLocation('/dashboard');
+      }
     },
     onError: (error: Error) => {
       toast({ title: "Error", description: error.message, variant: "destructive" });
@@ -186,7 +192,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     <AuthContext.Provider value={{ 
       user: user || null, 
       isLoading: userLoading,
-      login: (email: string, username?: string, phone?: string) => loginMutation.mutateAsync({ email, username, phone }),
+      login: (email: string) => loginMutation.mutateAsync(email),
       logout,
       updateUser: updateMutation.mutateAsync,
       resetUsage,

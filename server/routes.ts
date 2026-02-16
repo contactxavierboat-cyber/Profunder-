@@ -744,29 +744,17 @@ export async function registerRoutes(
   });
 
   app.post("/api/login", async (req, res) => {
-    const { email, username, phone } = req.body;
+    const { email } = req.body;
     if (!email || typeof email !== "string") {
       return res.status(400).json({ error: "Email is required" });
     }
 
     let user = await storage.getUserByEmail(email);
     if (!user) {
-      if (!username || typeof username !== "string" || username.trim().length < 3) {
-        return res.status(400).json({ error: "Username is required (at least 3 characters)" });
-      }
-      if (!phone || typeof phone !== "string" || phone.replace(/\D/g, "").length < 10) {
-        return res.status(400).json({ error: "A valid phone number is required" });
-      }
-      const existingUsername = await storage.getUserByUsername(username.trim());
-      if (existingUsername) {
-        return res.status(400).json({ error: "That username is already taken" });
-      }
       user = await storage.createUser({
         email,
         password: "placeholder",
-        displayName: username.trim(),
-        username: username.trim(),
-        phone: phone.trim(),
+        displayName: generateAnonName(),
         role: "user",
         subscriptionStatus: "active",
         monthlyUsage: 0,
@@ -779,29 +767,33 @@ export async function registerRoutes(
         hasCreditReport: false,
         hasBankStatement: false,
       });
-    } else {
-      const updates: Record<string, any> = {};
-      if (username && typeof username === "string" && username.trim().length >= 3 && user.username !== username.trim()) {
-        const existingUsername = await storage.getUserByUsername(username.trim());
-        if (existingUsername && existingUsername.id !== user.id) {
-          return res.status(400).json({ error: "That username is already taken" });
-        }
-        updates.username = username.trim();
-        updates.displayName = username.trim();
-      }
-      if (phone && typeof phone === "string") {
-        updates.phone = phone.trim();
-      }
-      if (Object.keys(updates).length > 0) {
-        user = await storage.updateUser(user.id, updates);
-      }
     }
 
     if (!user.displayName) {
-      user = await storage.updateUser(user.id, { displayName: user.username || generateAnonName() });
+      user = await storage.updateUser(user.id, { displayName: generateAnonName() });
     }
 
     req.session.userId = user.id;
+    res.json(stripPassword(user));
+  });
+
+  app.post("/api/profile-setup", requireAuth, async (req, res) => {
+    const { username, phone } = req.body;
+    if (!username || typeof username !== "string" || username.trim().length < 3) {
+      return res.status(400).json({ error: "Username is required (at least 3 characters)" });
+    }
+    if (!phone || typeof phone !== "string" || phone.replace(/\D/g, "").length < 10) {
+      return res.status(400).json({ error: "A valid phone number is required" });
+    }
+    const existingUsername = await storage.getUserByUsername(username.trim());
+    if (existingUsername && existingUsername.id !== req.session.userId) {
+      return res.status(400).json({ error: "That username is already taken" });
+    }
+    const user = await storage.updateUser(req.session.userId!, {
+      username: username.trim(),
+      phone: phone.trim(),
+      displayName: username.trim(),
+    });
     res.json(stripPassword(user));
   });
 

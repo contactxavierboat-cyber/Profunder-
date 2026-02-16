@@ -1,6 +1,6 @@
 import { useAuth } from "@/lib/store";
 import { useLocation, useSearch } from "wouter";
-import { Check, ShieldCheck, CreditCard, Loader2, ExternalLink } from "lucide-react";
+import { Check, ShieldCheck, CreditCard, Loader2, ExternalLink, User, Phone } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useState, useEffect, useRef } from "react";
 import { useQueryClient } from "@tanstack/react-query";
@@ -101,6 +101,10 @@ export default function SubscriptionPage() {
   const [loadingPrice, setLoadingPrice] = useState(true);
   const queryClient = useQueryClient();
   const search = useSearch();
+  const [profileUsername, setProfileUsername] = useState("");
+  const [profilePhone, setProfilePhone] = useState("");
+  const [savingProfile, setSavingProfile] = useState(false);
+  const needsProfile = user && !user.username;
 
   useEffect(() => {
     const params = new URLSearchParams(search);
@@ -152,6 +156,30 @@ export default function SubscriptionPage() {
     finally { setIsProcessing(false); }
   };
 
+  const handleProfileSetup = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!profileUsername.trim() || !profilePhone.trim()) return;
+    setSavingProfile(true);
+    try {
+      const res = await fetch("/api/profile-setup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username: profileUsername.trim(), phone: profilePhone.trim() }),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({ error: "Failed to save profile" }));
+        toast({ variant: "destructive", title: "Error", description: err.error || "Failed to save profile" });
+        setSavingProfile(false);
+        return;
+      }
+      queryClient.invalidateQueries({ queryKey: ["/api/me"] });
+      toast({ title: "Profile saved", description: `Welcome, ${profileUsername.trim()}!` });
+    } catch {
+      toast({ variant: "destructive", title: "Error", description: "Failed to save profile" });
+    }
+    setSavingProfile(false);
+  };
+
   const isActive = user.subscriptionStatus === "active";
 
   const features = [
@@ -198,13 +226,62 @@ export default function SubscriptionPage() {
           </p>
         </div>
 
-        {!isActive && (
+        {needsProfile && (
+          <div className={`${contentBlock} overflow-hidden`}>
+            <div className="w-full h-px bg-gradient-to-r from-transparent via-[#c0c0d0] to-transparent"></div>
+            <div className="px-6 sm:px-8 pt-7 sm:pt-9 pb-3 text-center">
+              <p className="text-[11px] sm:text-[12px] text-[#7a7a9a] uppercase tracking-[0.15em] font-semibold mb-2">Step 1</p>
+              <h2 className="text-[20px] sm:text-[24px] tracking-[-0.02em] text-[#1a1a2e] font-semibold mb-1">Set Up Your Profile</h2>
+              <p className="text-[13px] text-[#6a6a8a]">Choose a username and add your phone number</p>
+            </div>
+            <form onSubmit={handleProfileSetup} className="px-6 sm:px-8 pb-7 sm:pb-9 space-y-4">
+              <div className="relative">
+                <User className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#9a9ab0]" />
+                <input
+                  data-testid="input-profile-username"
+                  type="text"
+                  placeholder="Choose a username"
+                  className="w-full bg-[#f5f5fa] border border-[#e0e0ea] rounded-xl h-[48px] pl-10 pr-4 text-[14px] text-[#1a1a2e] placeholder:text-[#9a9ab0] outline-none focus:border-[#6a6a8a] transition-colors"
+                  value={profileUsername}
+                  onChange={(e) => setProfileUsername(e.target.value)}
+                  required
+                  minLength={3}
+                  disabled={savingProfile}
+                />
+              </div>
+              <div className="relative">
+                <Phone className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#9a9ab0]" />
+                <input
+                  data-testid="input-profile-phone"
+                  type="tel"
+                  placeholder="Phone number"
+                  className="w-full bg-[#f5f5fa] border border-[#e0e0ea] rounded-xl h-[48px] pl-10 pr-4 text-[14px] text-[#1a1a2e] placeholder:text-[#9a9ab0] outline-none focus:border-[#6a6a8a] transition-colors"
+                  value={profilePhone}
+                  onChange={(e) => setProfilePhone(e.target.value)}
+                  required
+                  disabled={savingProfile}
+                />
+              </div>
+              <button
+                data-testid="button-save-profile"
+                type="submit"
+                disabled={savingProfile || !profileUsername.trim() || !profilePhone.trim()}
+                className="w-full h-[48px] sm:h-[52px] rounded-xl text-white text-[13px] sm:text-[14px] font-bold tracking-wide hover:opacity-90 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                style={{ background: 'linear-gradient(135deg, #2a2a2a 0%, #0a0a0a 100%)' }}
+              >
+                {savingProfile ? <Loader2 className="w-4 h-4 animate-spin" /> : "Continue"}
+              </button>
+            </form>
+          </div>
+        )}
+
+        {!isActive && !needsProfile && (
           <div className={`${contentBlock} p-4 text-center`}>
             <p className="text-[12px] sm:text-[13px] text-[#6a6a8a]" data-testid="text-subscription-inactive">Subscription inactive. Activate below to continue.</p>
           </div>
         )}
 
-        <div className={`${contentBlock} overflow-hidden`}>
+        <div className={`${contentBlock} overflow-hidden`} style={{ opacity: needsProfile ? 0.4 : 1, pointerEvents: needsProfile ? 'none' : 'auto' }}>
           <div className="w-full h-px bg-gradient-to-r from-transparent via-[#c0c0d0] to-transparent"></div>
 
           <div className="px-6 sm:px-8 pt-7 sm:pt-9 pb-3 text-center">

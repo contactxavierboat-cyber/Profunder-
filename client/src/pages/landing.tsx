@@ -235,8 +235,6 @@ const proofMessages = [
 
 export default function LandingPage() {
   const [email, setEmail] = useState("");
-  const [username, setUsername] = useState("");
-  const [phone, setPhone] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const { login } = useAuth();
@@ -259,7 +257,7 @@ export default function LandingPage() {
     if (!email) return;
     setIsLoading(true);
     try {
-      await login(email, username || undefined, phone || undefined);
+      await login(email);
     } catch {
       setIsLoading(false);
     }
@@ -325,33 +323,12 @@ export default function LandingPage() {
           </p>
 
           <form onSubmit={handleLogin} className="w-full max-w-[440px] mx-auto mb-8">
-            <div className="flex flex-col gap-3">
-              <input
-                data-testid="input-username"
-                type="text"
-                placeholder="Choose a username"
-                className="w-full bg-[#f5f5fa] border border-[#e0e0ea] rounded-xl h-[48px] px-4 text-[14px] text-[#1a1a2e] placeholder:text-[#9a9ab0] outline-none focus:border-[#6a6a8a] transition-colors"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                required
-                minLength={3}
-                disabled={isLoading}
-              />
-              <input
-                data-testid="input-phone"
-                type="tel"
-                placeholder="Phone number"
-                className="w-full bg-[#f5f5fa] border border-[#e0e0ea] rounded-xl h-[48px] px-4 text-[14px] text-[#1a1a2e] placeholder:text-[#9a9ab0] outline-none focus:border-[#6a6a8a] transition-colors"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                required
-                disabled={isLoading}
-              />
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center bg-[#f5f5fa] border border-[#e0e0ea] rounded-2xl sm:rounded-full sm:h-[52px] sm:pl-5 sm:pr-1.5 overflow-hidden">
               <input
                 data-testid="input-email"
                 type="email"
-                placeholder="Email address"
-                className="w-full bg-[#f5f5fa] border border-[#e0e0ea] rounded-xl h-[48px] px-4 text-[14px] text-[#1a1a2e] placeholder:text-[#9a9ab0] outline-none focus:border-[#6a6a8a] transition-colors"
+                placeholder="Enter your email"
+                className="flex-1 bg-transparent text-[14px] text-[#1a1a2e] placeholder:text-[#9a9ab0] outline-none px-4 py-3.5 sm:px-0 sm:py-0"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
@@ -361,7 +338,7 @@ export default function LandingPage() {
                 data-testid="button-join"
                 type="submit"
                 disabled={isLoading}
-                className="w-full h-[48px] rounded-xl text-white text-[13px] font-bold hover:opacity-90 transition-colors tracking-wide"
+                className="h-[44px] sm:h-[40px] px-6 sm:rounded-full text-white text-[13px] font-bold hover:opacity-90 transition-colors shrink-0 border-t border-[#e0e0ea] sm:border-t-0 mx-1.5 mb-1.5 sm:mb-0 sm:mx-0 rounded-xl sm:rounded-full tracking-wide"
                 style={{ background: 'linear-gradient(135deg, #2a2a2a 0%, #0a0a0a 100%)' }}
               >
                 {isLoading ? "..." : "SUBSCRIBE"}
@@ -798,33 +775,12 @@ export default function LandingPage() {
             Get your Capital Readiness Score, tier eligibility, exposure ceiling, and denial simulation. Subscribe today and unlock the full platform.
           </p>
           <form onSubmit={handleLogin} className="w-full max-w-[440px] mx-auto mb-6">
-            <div className="flex flex-col gap-3">
-              <input
-                data-testid="input-username-bottom"
-                type="text"
-                placeholder="Choose a username"
-                className="w-full bg-[#f5f5fa] border border-[#e0e0ea] rounded-xl h-[48px] px-4 text-[14px] text-[#1a1a2e] placeholder:text-[#9a9ab0] outline-none focus:border-[#6a6a8a] transition-colors"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                required
-                minLength={3}
-                disabled={isLoading}
-              />
-              <input
-                data-testid="input-phone-bottom"
-                type="tel"
-                placeholder="Phone number"
-                className="w-full bg-[#f5f5fa] border border-[#e0e0ea] rounded-xl h-[48px] px-4 text-[14px] text-[#1a1a2e] placeholder:text-[#9a9ab0] outline-none focus:border-[#6a6a8a] transition-colors"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                required
-                disabled={isLoading}
-              />
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center bg-[#f5f5fa] border border-[#e0e0ea] rounded-2xl sm:rounded-full sm:h-[52px] sm:pl-5 sm:pr-1.5 overflow-hidden">
               <input
                 data-testid="input-email-bottom"
                 type="email"
-                placeholder="Email address"
-                className="w-full bg-[#f5f5fa] border border-[#e0e0ea] rounded-xl h-[48px] px-4 text-[14px] text-[#1a1a2e] placeholder:text-[#9a9ab0] outline-none focus:border-[#6a6a8a] transition-colors"
+                placeholder="Enter your email"
+                className="flex-1 bg-transparent text-[14px] text-[#1a1a2e] placeholder:text-[#9a9ab0] outline-none px-4 py-3.5 sm:px-0 sm:py-0"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
@@ -834,7 +790,7 @@ export default function LandingPage() {
                 data-testid="button-join-bottom"
                 type="submit"
                 disabled={isLoading}
-                className="w-full h-[48px] rounded-xl text-white text-[13px] font-bold hover:opacity-90 transition-colors tracking-wide"
+                className="h-[44px] sm:h-[40px] px-6 sm:rounded-full text-white text-[13px] font-bold hover:opacity-90 transition-colors shrink-0 border-t border-[#e0e0ea] sm:border-t-0 mx-1.5 mb-1.5 sm:mb-0 sm:mx-0 rounded-xl sm:rounded-full tracking-wide"
                 style={{ background: 'linear-gradient(135deg, #2a2a2a 0%, #0a0a0a 100%)' }}
               >
                 {isLoading ? "..." : "SUBSCRIBE"}
