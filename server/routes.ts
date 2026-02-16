@@ -15,7 +15,7 @@ import { sql } from "drizzle-orm";
 import { promisify } from "util";
 import { writeFile, readdir, readFile, unlink, mkdir } from "fs/promises";
 import path from "path";
-import { calculateFundingPhase, calculateCapitalReadiness, calculateSafeExposure, calculateBureauHealth, calculateApplicationWindow, simulateBankRating, simulatePledgeLoan, simulateCapitalStack } from "./capitalEngines";
+import { calculateFundingPhase, calculateCapitalReadiness, calculateSafeExposure, calculateBureauHealth, calculateApplicationWindow, simulateBankRating, simulatePledgeLoan, simulateCapitalStack, calculateUnderwriting } from "./capitalEngines";
 import { disputeCases, systemAlerts } from "@shared/schema";
 
 const execFileAsync = promisify(execFile);
@@ -4281,6 +4281,13 @@ IMPORTANT: You MUST respond with ONLY valid JSON matching this exact structure (
   "avgAccountAgeYears": <average account age in years as integer, rounded down. e.g. if "4 years 11 months" = 4>,
   "publicRecords": <number of public records (bankruptcies, judgments, liens) as integer. 0 if none>,
   "utilizationPercent": <credit utilization percentage as integer, e.g. 45 for 45%. Calculate from balances/limits if not stated directly>,
+  "highestCardUtilizationPercent": <utilization of the single highest-utilized card as integer, e.g. 78 for 78%. null if cannot determine>,
+  "chargeoffs": <number of charge-off accounts as integer. 0 if none>,
+  "bankruptcyPresent": <true if any bankruptcy filing detected, false otherwise>,
+  "identityFlagsPresent": <true if any fraud alert, identity theft flag, or ID verification issue detected, false otherwise>,
+  "hardInquiries6mo": <number of hard inquiries in the last 6 months as integer. null if cannot determine separately from 12mo>,
+  "hardInquiries12mo": <number of hard inquiries in the last 12 months as integer. null if cannot determine>,
+  "recentAccounts12mo": <number of accounts opened in the last 12 months as integer. 0 if none>,
   "summary": "<3-4 sentence analytical summary. Reference SPECIFIC numbers from the report: exact score, exact balances, exact limits, number of accounts, late payments, collections. Example: 'FICO score of 733 with 4 open accounts. Total revolving limit of $12,000 against $20 in balances yields 0.17% utilization. No derogatory marks or late payments detected. One account flagged as in dispute under FCBA.' Do NOT be vague.>",
   "nextSteps": ["<step 1>", "<step 2>", "<step 3>", "<step 4>", "<step 5>"]
 }
@@ -4354,6 +4361,13 @@ ${extractedText}
         updateData.avgAccountAgeYears = safeInt(analysisResult.avgAccountAgeYears);
         updateData.publicRecords = safeInt(analysisResult.publicRecords) ?? 0;
         updateData.utilizationPercent = safeInt(analysisResult.utilizationPercent);
+        updateData.highestCardUtilizationPercent = safeInt(analysisResult.highestCardUtilizationPercent);
+        updateData.chargeoffs = safeInt(analysisResult.chargeoffs) ?? 0;
+        updateData.bankruptcyPresent = analysisResult.bankruptcyPresent === true;
+        updateData.identityFlagsPresent = analysisResult.identityFlagsPresent === true;
+        updateData.hardInquiries6mo = safeInt(analysisResult.hardInquiries6mo);
+        updateData.hardInquiries12mo = safeInt(analysisResult.hardInquiries12mo);
+        updateData.recentAccounts12mo = safeInt(analysisResult.recentAccounts12mo) ?? 0;
       } else {
         updateData.hasBankStatement = true;
       }
@@ -4628,10 +4642,11 @@ ${reportText.slice(0, 25000)}
       const exposure = calculateSafeExposure(user);
       const bureauHealth = calculateBureauHealth(user);
       const appWindow = calculateApplicationWindow(user);
+      const underwriting = calculateUnderwriting(user);
 
       await storage.updateUser(user.id, { fundingPhase: phase.phase, lastPhaseUpdate: new Date() });
 
-      res.json({ phase, readiness, exposure, bureauHealth, applicationWindow: appWindow });
+      res.json({ phase, readiness, exposure, bureauHealth, applicationWindow: appWindow, underwriting });
     } catch (error: any) {
       console.error("Capital OS Dashboard Error:", error);
       res.status(500).json({ error: "Failed to calculate capital metrics" });
@@ -4660,6 +4675,12 @@ ${reportText.slice(0, 25000)}
     const user = await storage.getUser(req.session.userId);
     if (!user) return res.status(404).json({ error: "User not found" });
     res.json(calculateBureauHealth(user));
+  });
+
+  app.get("/api/capital-os/underwriting", requireAuth, async (req: any, res) => {
+    const user = await storage.getUser(req.session.userId);
+    if (!user) return res.status(404).json({ error: "User not found" });
+    res.json(calculateUnderwriting(user));
   });
 
   app.get("/api/capital-os/application-window", requireAuth, async (req: any, res) => {

@@ -79,6 +79,16 @@ A subscription-based AI mentorship platform ("Capital Operating System") combini
 - Pledge Loan Simulator: projects utilization/score improvement from pledge strategies
 - Capital Stack Planner: multi-stage funding roadmap across bureaus
 
+### Underwriting Intelligence Engine
+- 18 input variables extracted from credit reports via AI
+- Hard Stop Auto-Repair triggers: bankruptcy, chargeoffs, collections, public records, late payments ≥2 in 24mo, identity flags, utilization ≥70%, highest card ≥90%, inquiries ≥8 in 6mo, oldest account <1yr
+- Credit Score Tiers: EXCELLENT (≥740), STRONG (≥700), BORDERLINE (≥680), WEAK (<680)
+- Final Modes: REPAIR, OPTIMIZATION, FUNDING_READY, WAIT_AND_OPTIMIZE
+- Denial Reason Mapping: all hard-stop triggers + utilization/velocity/age/thin-file/derogatory flags
+- Conditional Funding Calculator: min = revolving limit × 1.5, max = revolving limit × 2.5 (only in FUNDING_READY)
+- Additional fields: chargeoffs, bankruptcyPresent, identityFlagsPresent, issuerRelationshipNegative, highestCardUtilizationPercent, hardInquiries6mo/12mo, recentAccounts12mo
+- API: GET /api/capital-os/underwriting (standalone), also included in GET /api/capital-os/dashboard response
+
 ### Navigation Structure (Left Sidebar)
 1. Mission Control - Main dashboard with 4 metric cards + bureau health + document upload
 2. Repair Engine - Credit repair with dispute letters, issues, action plan

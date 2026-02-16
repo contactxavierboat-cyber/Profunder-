@@ -563,3 +563,238 @@ export function simulateCapitalStack(user: User, targetAmount: number): CapitalS
     timeline: stages.length > 0 ? `${stages[stages.length - 1].timing}` : "N/A",
   };
 }
+
+// ====================================================
+// UNDERWRITING INTELLIGENCE ENGINE
+// ====================================================
+
+export type UnderwritingMode = "REPAIR" | "OPTIMIZATION" | "FUNDING_READY" | "WAIT_AND_OPTIMIZE";
+export type CreditTier = "EXCELLENT" | "STRONG" | "BORDERLINE" | "WEAK";
+
+export interface UnderwritingResult {
+  finalMode: UnderwritingMode;
+  creditTier: CreditTier;
+  fundingEligible: boolean;
+  denialReasons: string[];
+  explanation: string;
+  nextSteps: string[];
+  fundingRange: { minimum: number; maximum: number } | null;
+  flags: {
+    utilizationFlag: boolean;
+    velocityFlag: boolean;
+    ageFlag: boolean;
+    thinFileFlag: boolean;
+    hardStopTriggered: boolean;
+  };
+  inputs: {
+    creditScore: number;
+    totalUtilization: number;
+    highestCardUtilization: number;
+    latePayments24mo: number;
+    collectionsCount: number;
+    chargeoffsCount: number;
+    publicRecordsPresent: boolean;
+    bankruptcyPresent: boolean;
+    oldestAccountYears: number;
+    averageAccountAgeYears: number;
+    hardInquiries6mo: number;
+    hardInquiries12mo: number;
+    openRevolvingAccounts: number;
+    recentAccounts12mo: number;
+    totalRevolvingLimit: number;
+    derogatoryPresent: boolean;
+    identityFlagsPresent: boolean;
+    issuerRelationshipNegative: boolean;
+  };
+}
+
+export function calculateUnderwriting(user: User): UnderwritingResult {
+  const creditScore = user.creditScoreExact || 0;
+  const totalUtilization = user.utilizationPercent ?? (user.totalRevolvingLimit && user.totalRevolvingLimit > 0
+    ? Math.round(((user.totalBalances || 0) / user.totalRevolvingLimit) * 100) : 100);
+  const highestCardUtilization = user.highestCardUtilizationPercent ?? totalUtilization;
+  const latePayments24mo = user.latePayments || 0;
+  const collectionsCount = user.collections || 0;
+  const chargeoffsCount = user.chargeoffs || 0;
+  const publicRecordsPresent = (user.publicRecords || 0) > 0;
+  const bankruptcyPresent = user.bankruptcyPresent || false;
+  const oldestAccountYears = user.oldestAccountYears || 0;
+  const averageAccountAgeYears = user.avgAccountAgeYears || 0;
+  const hardInquiries6mo = user.hardInquiries6mo ?? Math.ceil((user.inquiries || 0) / 2);
+  const hardInquiries12mo = user.hardInquiries12mo ?? (user.inquiries || 0);
+  const openRevolvingAccounts = user.openAccounts || 0;
+  const recentAccounts12mo = user.recentAccounts12mo || 0;
+  const totalRevolvingLimit = user.totalRevolvingLimit || 0;
+  const derogatoryPresent = (user.derogatoryAccounts || 0) > 0;
+  const identityFlagsPresent = user.identityFlagsPresent || false;
+  const issuerRelationshipNegative = user.issuerRelationshipNegative || false;
+
+  const inputs = {
+    creditScore, totalUtilization, highestCardUtilization, latePayments24mo,
+    collectionsCount, chargeoffsCount, publicRecordsPresent, bankruptcyPresent,
+    oldestAccountYears, averageAccountAgeYears, hardInquiries6mo, hardInquiries12mo,
+    openRevolvingAccounts, recentAccounts12mo, totalRevolvingLimit, derogatoryPresent,
+    identityFlagsPresent, issuerRelationshipNegative,
+  };
+
+  let outputMode: "REPAIR_MODE" | null = null;
+  let fundingEligible = true;
+  let utilizationFlag = false;
+  let velocityFlag = false;
+  let ageFlag = false;
+  let thinFileFlag = false;
+  const denialReasons: string[] = [];
+
+  // === HARD STOP — AUTO REPAIR MODE ===
+  if (bankruptcyPresent || chargeoffsCount > 0 || collectionsCount > 0 ||
+      publicRecordsPresent || latePayments24mo >= 2 || identityFlagsPresent) {
+    outputMode = "REPAIR_MODE";
+    fundingEligible = false;
+  }
+
+  // === UTILIZATION RULES ===
+  if (totalUtilization >= 30 || highestCardUtilization >= 50) {
+    utilizationFlag = true;
+  }
+  if (totalUtilization >= 70 || highestCardUtilization >= 90) {
+    outputMode = "REPAIR_MODE";
+    fundingEligible = false;
+  }
+
+  // === INQUIRY / VELOCITY RULES ===
+  if (hardInquiries6mo >= 6 || hardInquiries12mo >= 10) {
+    velocityFlag = true;
+  }
+  if (hardInquiries6mo >= 8) {
+    outputMode = "REPAIR_MODE";
+    fundingEligible = false;
+  }
+
+  // === CREDIT SCORE TIERS ===
+  let creditTier: CreditTier;
+  if (creditScore >= 740) creditTier = "EXCELLENT";
+  else if (creditScore >= 700) creditTier = "STRONG";
+  else if (creditScore >= 680) creditTier = "BORDERLINE";
+  else creditTier = "WEAK";
+
+  if (creditScore < 680) fundingEligible = false;
+
+  // === CREDIT AGE & FILE DEPTH ===
+  if (oldestAccountYears < 2 || averageAccountAgeYears < 1.5) {
+    ageFlag = true;
+  }
+  if (oldestAccountYears < 1) {
+    outputMode = "REPAIR_MODE";
+  }
+  if (openRevolvingAccounts < 3) {
+    thinFileFlag = true;
+  }
+
+  // === ISSUER RELATIONSHIP CHECK ===
+  if (issuerRelationshipNegative) {
+    denialReasons.push("Negative issuer relationship history");
+  }
+
+  // === DENIAL REASON MAPPING ===
+  if (bankruptcyPresent) denialReasons.push("Bankruptcy on file");
+  if (chargeoffsCount > 0) denialReasons.push(`${chargeoffsCount} charge-off(s) present`);
+  if (collectionsCount > 0) denialReasons.push(`${collectionsCount} collection(s) present`);
+  if (publicRecordsPresent) denialReasons.push("Public records present");
+  if (latePayments24mo >= 2) denialReasons.push(`${latePayments24mo} late payment(s) in 24 months`);
+  if (identityFlagsPresent) denialReasons.push("Identity flags detected");
+  if (utilizationFlag) denialReasons.push("High credit utilization");
+  if (velocityFlag) denialReasons.push("Too many recent inquiries");
+  if (ageFlag) denialReasons.push("Insufficient credit history");
+  if (thinFileFlag) denialReasons.push("Thin credit file");
+  if (derogatoryPresent && chargeoffsCount === 0 && collectionsCount === 0) denialReasons.push("Derogatory accounts present");
+
+  // === FINAL MODE DECISION ===
+  let finalMode: UnderwritingMode;
+  if (outputMode === "REPAIR_MODE") {
+    finalMode = "REPAIR";
+  } else if (utilizationFlag || velocityFlag || ageFlag) {
+    finalMode = "OPTIMIZATION";
+  } else if (creditScore >= 700 && totalUtilization < 10 && hardInquiries6mo <= 2 && !derogatoryPresent) {
+    finalMode = "FUNDING_READY";
+  } else {
+    finalMode = "WAIT_AND_OPTIMIZE";
+  }
+
+  // === CONDITIONAL FUNDING CALCULATOR ===
+  let fundingRange: { minimum: number; maximum: number } | null = null;
+  if (finalMode === "FUNDING_READY") {
+    fundingRange = {
+      minimum: Math.round(totalRevolvingLimit * 1.5),
+      maximum: Math.round(totalRevolvingLimit * 2.5),
+    };
+  }
+
+  // === EXPLANATION ===
+  let explanation: string;
+  const nextSteps: string[] = [];
+
+  if (finalMode === "REPAIR") {
+    const triggers: string[] = [];
+    if (bankruptcyPresent) triggers.push("bankruptcy on file");
+    if (chargeoffsCount > 0) triggers.push(`${chargeoffsCount} charge-off(s)`);
+    if (collectionsCount > 0) triggers.push(`${collectionsCount} collection(s)`);
+    if (publicRecordsPresent) triggers.push("public records present");
+    if (latePayments24mo >= 2) triggers.push(`${latePayments24mo} late payments in 24 months`);
+    if (identityFlagsPresent) triggers.push("identity flags detected");
+    if (totalUtilization >= 70) triggers.push(`${totalUtilization}% total utilization`);
+    if (highestCardUtilization >= 90) triggers.push(`${highestCardUtilization}% highest card utilization`);
+    if (hardInquiries6mo >= 8) triggers.push(`${hardInquiries6mo} hard inquiries in 6 months`);
+    if (oldestAccountYears < 1) triggers.push("no accounts older than 1 year");
+    explanation = `Profile is in Repair Mode. Hard stop triggered by: ${triggers.join(", ")}. Funding applications are not recommended until these items are resolved.`;
+    
+    if (collectionsCount > 0 || chargeoffsCount > 0) nextSteps.push("Dispute or negotiate pay-for-delete on all collections and charge-offs.");
+    if (latePayments24mo >= 2) nextSteps.push("Establish 12+ months of consecutive on-time payments.");
+    if (totalUtilization >= 70) nextSteps.push(`Reduce total utilization from ${totalUtilization}% to below 30%.`);
+    if (bankruptcyPresent) nextSteps.push("Allow bankruptcy to age and rebuild with secured credit products.");
+    if (identityFlagsPresent) nextSteps.push("Resolve identity theft or fraud alerts with all three bureaus.");
+    if (hardInquiries6mo >= 8) nextSteps.push("Stop all new credit applications for at least 6 months.");
+    if (oldestAccountYears < 1) nextSteps.push("Keep existing accounts open and active for at least 12 months.");
+    nextSteps.push("Monitor credit reports monthly for changes and accuracy.");
+  } else if (finalMode === "OPTIMIZATION") {
+    const issues: string[] = [];
+    if (utilizationFlag) issues.push(`utilization (${totalUtilization}% total, ${highestCardUtilization}% highest card)`);
+    if (velocityFlag) issues.push(`inquiry density (${hardInquiries6mo} in 6mo, ${hardInquiries12mo} in 12mo)`);
+    if (ageFlag) issues.push(`credit age (${averageAccountAgeYears}yr avg, ${oldestAccountYears}yr oldest)`);
+    explanation = `Profile is in Optimization Mode. Not yet funding-ready due to: ${issues.join("; ")}. Address these factors before applying.`;
+    
+    if (utilizationFlag) nextSteps.push(`Pay down balances to get total utilization under 10% (currently ${totalUtilization}%).`);
+    if (velocityFlag) nextSteps.push("Pause all new credit applications for 6+ months to let inquiries age.");
+    if (ageFlag) nextSteps.push("Allow accounts to season. Avoid closing older accounts.");
+    if (thinFileFlag) nextSteps.push(`Open additional revolving accounts to reach 3+ (currently ${openRevolvingAccounts}).`);
+    nextSteps.push("Re-evaluate profile in 60-90 days after optimizations.");
+  } else if (finalMode === "FUNDING_READY") {
+    explanation = `Profile is Funding Ready. Score: ${creditScore} (${creditTier}). Utilization: ${totalUtilization}%. Estimated funding range: $${fundingRange!.minimum.toLocaleString()} – $${fundingRange!.maximum.toLocaleString()}. This is an estimate based on credit capacity, not a guarantee of approval.`;
+    nextSteps.push("Apply strategically — space applications 14+ days apart.");
+    nextSteps.push("Target lenders that pull from your strongest bureau first.");
+    nextSteps.push("Maintain current utilization and payment habits through the application cycle.");
+    nextSteps.push("Do not open any new accounts until your funding cycle is complete.");
+    nextSteps.push("Keep documentation ready: bank statements, business verification, ID.");
+  } else {
+    explanation = `Profile is in Wait & Optimize mode. Score: ${creditScore} (${creditTier}). Profile metrics are not in hard-stop territory, but conditions for Funding Ready are not yet met. Continue building toward optimal positioning.`;
+    if (creditScore < 700) nextSteps.push(`Improve credit score from ${creditScore} to 700+ through on-time payments and balance reduction.`);
+    if (totalUtilization >= 10) nextSteps.push(`Reduce utilization from ${totalUtilization}% to under 10%.`);
+    if (hardInquiries6mo > 2) nextSteps.push(`Let inquiries age — ${hardInquiries6mo} in last 6 months. Target ≤2.`);
+    if (derogatoryPresent) nextSteps.push("Address any remaining derogatory items through disputes or settlements.");
+    nextSteps.push("Re-evaluate in 30-60 days.");
+  }
+
+  return {
+    finalMode,
+    creditTier,
+    fundingEligible,
+    denialReasons,
+    explanation,
+    nextSteps,
+    fundingRange,
+    flags: {
+      utilizationFlag, velocityFlag, ageFlag, thinFileFlag,
+      hardStopTriggered: outputMode === "REPAIR_MODE",
+    },
+    inputs,
+  };
+}

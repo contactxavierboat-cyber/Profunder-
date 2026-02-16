@@ -170,6 +170,22 @@ interface CapitalOsDashboard {
     reasoning: string;
     factors: { factor: string; status: "good" | "warning" | "bad"; detail: string }[];
   };
+  underwriting?: {
+    finalMode: "REPAIR" | "OPTIMIZATION" | "FUNDING_READY" | "WAIT_AND_OPTIMIZE";
+    creditTier: "EXCELLENT" | "STRONG" | "BORDERLINE" | "WEAK";
+    fundingEligible: boolean;
+    denialReasons: string[];
+    explanation: string;
+    nextSteps: string[];
+    fundingRange: { minimum: number; maximum: number } | null;
+    flags: {
+      utilizationFlag: boolean;
+      velocityFlag: boolean;
+      ageFlag: boolean;
+      thinFileFlag: boolean;
+      hardStopTriggered: boolean;
+    };
+  };
 }
 
 function timeAgo(date: Date | string): string {
@@ -865,6 +881,95 @@ export default function DashboardPage() {
                       </div>
                     </div>
                   </div>
+
+                  {capitalOsData.underwriting && (
+                    <div className="rounded-2xl bg-white/70 backdrop-blur-md border border-white/40 p-6 mb-6" data-testid="card-underwriting">
+                      <div className="flex items-center justify-between mb-4">
+                        <p className="text-[10px] text-[#1a1a2e]/60 uppercase tracking-wider">Underwriting Intelligence</p>
+                        <span className={cn("text-[10px] px-2.5 py-0.5 rounded-full font-medium",
+                          capitalOsData.underwriting.creditTier === "EXCELLENT" ? "bg-green-500/15 text-green-600" :
+                          capitalOsData.underwriting.creditTier === "STRONG" ? "bg-emerald-500/15 text-emerald-600" :
+                          capitalOsData.underwriting.creditTier === "BORDERLINE" ? "bg-yellow-500/15 text-yellow-600" :
+                          "bg-red-500/15 text-red-600"
+                        )} data-testid="badge-credit-tier">{capitalOsData.underwriting.creditTier}</span>
+                      </div>
+
+                      <div className="flex items-center gap-3 mb-4">
+                        <span className={cn("text-sm font-semibold px-3 py-1.5 rounded-xl",
+                          capitalOsData.underwriting.finalMode === "REPAIR" ? "bg-red-500/15 text-red-600" :
+                          capitalOsData.underwriting.finalMode === "OPTIMIZATION" ? "bg-amber-500/15 text-amber-600" :
+                          capitalOsData.underwriting.finalMode === "WAIT_AND_OPTIMIZE" ? "bg-blue-500/15 text-blue-600" :
+                          "bg-green-500/15 text-green-600"
+                        )} data-testid="badge-underwriting-mode">
+                          {capitalOsData.underwriting.finalMode.replace(/_/g, " ")}
+                        </span>
+                        {capitalOsData.underwriting.fundingEligible && (
+                          <span className="text-[10px] px-2 py-0.5 rounded-full bg-green-500/10 text-green-600 font-medium" data-testid="badge-funding-eligible">Eligible</span>
+                        )}
+                      </div>
+
+                      {capitalOsData.underwriting.finalMode === "FUNDING_READY" && capitalOsData.underwriting.fundingRange && (
+                        <div className="rounded-xl bg-green-500/[0.06] border border-green-500/10 p-4 mb-4" data-testid="funding-range-display">
+                          <p className="text-[10px] text-green-600/60 uppercase tracking-wider mb-1">Estimated Funding Range</p>
+                          <p className="text-2xl font-bold text-green-700" data-testid="text-funding-range">
+                            ${capitalOsData.underwriting.fundingRange.minimum.toLocaleString()} – ${capitalOsData.underwriting.fundingRange.maximum.toLocaleString()}
+                          </p>
+                          <p className="text-[10px] text-[#1a1a2e]/45 mt-1">This is an estimate based on current profile data. Actual amounts depend on lender criteria.</p>
+                        </div>
+                      )}
+
+                      <p className="text-[11px] text-[#1a1a2e]/70 leading-relaxed mb-4" data-testid="text-underwriting-explanation">{capitalOsData.underwriting.explanation}</p>
+
+                      {capitalOsData.underwriting.denialReasons.length > 0 && (
+                        <div className="mb-4" data-testid="denial-reasons-list">
+                          <p className="text-[10px] text-[#1a1a2e]/55 uppercase tracking-wider mb-2">Denial Factors</p>
+                          <div className="space-y-1.5">
+                            {capitalOsData.underwriting.denialReasons.map((reason, i) => (
+                              <div key={i} className="flex items-start gap-2 text-[11px] text-[#1a1a2e]/70" data-testid={`denial-reason-${i}`}>
+                                <AlertCircle className="w-3.5 h-3.5 text-red-500/60 shrink-0 mt-0.5" />
+                                <span>{reason}</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {capitalOsData.underwriting.nextSteps.length > 0 && (
+                        <div className="mb-4" data-testid="next-steps-list">
+                          <p className="text-[10px] text-[#1a1a2e]/55 uppercase tracking-wider mb-2">Next Steps</p>
+                          <div className="space-y-1.5">
+                            {capitalOsData.underwriting.nextSteps.map((step, i) => (
+                              <div key={i} className="flex items-start gap-2.5 text-[11px] text-[#1a1a2e]/70" data-testid={`next-step-${i}`}>
+                                <span className="text-[10px] font-semibold text-[#1a1a2e]/40 mt-px w-4 shrink-0">{i + 1}.</span>
+                                <span>{step}</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      <div data-testid="underwriting-flags">
+                        <p className="text-[10px] text-[#1a1a2e]/55 uppercase tracking-wider mb-2">Flags</p>
+                        <div className="flex flex-wrap gap-2">
+                          {[
+                            { key: "utilizationFlag", label: "Utilization", active: capitalOsData.underwriting.flags.utilizationFlag },
+                            { key: "velocityFlag", label: "Velocity", active: capitalOsData.underwriting.flags.velocityFlag },
+                            { key: "ageFlag", label: "Age", active: capitalOsData.underwriting.flags.ageFlag },
+                            { key: "thinFileFlag", label: "Thin File", active: capitalOsData.underwriting.flags.thinFileFlag },
+                            { key: "hardStopTriggered", label: "Hard Stop", active: capitalOsData.underwriting.flags.hardStopTriggered },
+                          ].map(flag => (
+                            <span key={flag.key} className={cn("text-[10px] px-2.5 py-1 rounded-lg font-medium",
+                              flag.active
+                                ? flag.key === "hardStopTriggered" ? "bg-red-500/15 text-red-600" : "bg-amber-500/10 text-amber-600"
+                                : "bg-[#e0e0ea]/50 text-[#1a1a2e]/35"
+                            )} data-testid={`flag-${flag.key}`}>
+                              {flag.label}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  )}
 
                   <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
                     {capitalOsData.bureauHealth.bureaus.map(b => (
