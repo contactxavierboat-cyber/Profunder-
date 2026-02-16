@@ -4,8 +4,11 @@
 A subscription-based AI mentorship platform ("Capital Operating System") combining comprehensive funding phase management (5 phases: Repair→Build→Optimize→Apply→Scale) with AI-powered mentorship. Features weighted 6-category Capital Readiness scoring, Safe Exposure monitoring, Bureau Health tracking (3-bureau map), dispute case management with AI-generated FCRA-compliant letters, bank rating and pledge loan simulators, capital stack planning, application window optimization, AI chat workspace with 7 bot mentors, Creator Connect (AI-powered YouTube creator matching without API key), Credit Report Repair System, Messages/DM system with Team AI, session-based auth, PDF upload with OCR, AOL AIM-style buddy list sidebar, and admin panel.
 
 ## Recent Changes
+- 2026-02-16: **3-Round Dispute Letter System** - Repair Engine generates letters for every derogatory item with 2 angles (inaccurate + fraud), organized in 3 rounds (Day 0, Day 35-40, Day 65-75), bureau fraud dept addresses, mailing service recommendations, user address auto-populated
+- 2026-02-16: User address fields (fullName, streetAddress, city, state, zipCode) with save/load API
+- 2026-02-16: Build Strategy simulators moved from Repair Engine to Mission Control dashboard
 - 2026-02-16: **Capital Operating System** - Complete architecture upgrade with 5-phase funding journey
-- 2026-02-16: Left sidebar navigation (7 items): Mission Control, Repair Engine, Build Strategy, Funding Strategy, Creator Connect, Messages, Progress Tracker
+- 2026-02-16: Left sidebar navigation (6 items): Mission Control, Repair Engine, Funding Strategy, Creator Connect, Messages, Progress Tracker
 - 2026-02-16: Mission Control dashboard with 4 metric cards (Readiness Score gauge, Phase tracker, Exposure meter, Application Window)
 - 2026-02-16: Bureau Health Map - 3 bureau tiles (Experian, Equifax, TransUnion) with utilization, inquiries, derogatories, risk status
 - 2026-02-16: Weighted Capital Readiness Score: Payment History (30%), Utilization (25%), Exposure Depth (15%), Inquiry Sensitivity (10%), Account Age (10%), Bureau Strength (10%)
