@@ -177,7 +177,7 @@ export default function DashboardPage() {
     offline: false,
   });
   const [expandedMessages, setExpandedMessages] = useState<Set<number>>(new Set());
-  const [activeTab, setActiveTab] = useState<"dashboard" | "feed" | "chat" | "creatorai" | "repair">("dashboard");
+  const [activeTab, setActiveTab] = useState<"dashboard" | "chat" | "creatorai" | "repair">("dashboard");
   const [friendsList, setFriendsList] = useState<any[]>([]);
   const [pendingRequests, setPendingRequests] = useState<any[]>([]);
   const [showAddFriend, setShowAddFriend] = useState(false);
@@ -204,23 +204,12 @@ export default function DashboardPage() {
   const qaEndRef = useRef<HTMLDivElement>(null);
   const qaInputRef = useRef<HTMLTextAreaElement>(null);
 
-  const [feedItems, setFeedItems] = useState<any[]>([]);
-  const [feedLoading, setFeedLoading] = useState(false);
-  const [feedLastUpdated, setFeedLastUpdated] = useState<string | null>(null);
-  const [feedFilter, setFeedFilter] = useState<string>("all");
-  const [feedPage, setFeedPage] = useState(0);
-  const [feedHasMore, setFeedHasMore] = useState(false);
-  const [feedTotal, setFeedTotal] = useState(0);
-  const [playingVideo, setPlayingVideo] = useState<string | null>(null);
-  const [currentShortIndex, setCurrentShortIndex] = useState(0);
-  const [shortsAutoplay, setShortsAutoplay] = useState(true);
   const [creatorAiInput, setCreatorAiInput] = useState("");
   const [creatorAiLoading, setCreatorAiLoading] = useState(false);
   const [creatorAiMessages, setCreatorAiMessages] = useState<{role: "user" | "assistant"; content: string}[]>([]);
   const [creatorAiUploading, setCreatorAiUploading] = useState(false);
   const [creatorMatchLoading, setCreatorMatchLoading] = useState(false);
   const [creatorMatchResults, setCreatorMatchResults] = useState<{mode: string; summary: string; searches: any[]; creators: any[]} | null>(null);
-  const shortsContainerRef = useRef<HTMLDivElement>(null);
 
   const [dmFriendId, setDmFriendId] = useState<number | null>(null);
   const [dmFriendName, setDmFriendName] = useState("");
@@ -508,26 +497,6 @@ export default function DashboardPage() {
     });
   };
 
-  const fetchFeed = async (page = 0, filter = "all", append = false) => {
-    try {
-      if (!append) setFeedLoading(true);
-      const params = new URLSearchParams({ page: String(page), limit: "40" });
-      if (filter !== "all") params.set("category", filter);
-      const res = await fetch(`/api/feed?${params}`, { credentials: "include" });
-      if (res.ok) {
-        const data = await res.json();
-        if (append) {
-          setFeedItems(prev => [...prev, ...data.items]);
-        } else {
-          setFeedItems(data.items);
-        }
-        setFeedTotal(data.total);
-        setFeedHasMore(data.hasMore);
-        setFeedLastUpdated(data.lastUpdated);
-      }
-    } catch (err) { console.error("Feed error:", err); }
-    finally { setFeedLoading(false); }
-  };
 
   useEffect(() => {
     if (user) {
@@ -535,16 +504,8 @@ export default function DashboardPage() {
       fetchFundingReadiness();
       fetchRepairData();
       fetchQA();
-      fetchFeed();
     }
   }, [user]);
-
-  useEffect(() => {
-    if (activeTab !== "feed") return;
-    if (feedPage > 0) return;
-    const interval = setInterval(() => { fetchFeed(0, feedFilter); }, 5000);
-    return () => clearInterval(interval);
-  }, [activeTab, feedFilter, feedPage]);
 
   const lastMentorMsg = [...messages].reverse().find(m => m.role === 'assistant' && m.mentor);
   const activeMentorKey = selectedMentor !== null ? selectedMentor : (mentorCleared ? null : (lastMentorMsg?.mentor || null));
@@ -882,46 +843,32 @@ export default function DashboardPage() {
               <Plus className="w-5 h-5 text-[#1a1a2e]/75" />
             </button>
           </div>
-          <div className="flex px-4">
+          <div className="flex px-2 sm:px-4 gap-0">
             <button
               data-testid="tab-dashboard"
               onClick={() => setActiveTab("dashboard")}
               className={cn(
-                "flex-1 py-2.5 text-[13px] font-semibold text-center transition-colors relative",
+                "flex-1 min-w-0 py-2.5 text-[11px] sm:text-[13px] font-semibold text-center transition-colors relative",
                 activeTab === "dashboard" ? "text-[#1a1a2e]" : "text-[#1a1a2e]/65 hover:text-[#1a1a2e]/80"
               )}
             >
-              <div className="flex items-center justify-center gap-1.5">
-                <BarChart3 className="w-3.5 h-3.5" />
-                Dashboard
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-0.5 sm:gap-1.5">
+                <BarChart3 className="w-4 h-4 sm:w-3.5 sm:h-3.5" />
+                <span className="truncate">Dashboard</span>
               </div>
               {activeTab === "dashboard" && <div className="absolute bottom-0 left-1/4 right-1/4 h-[2px] bg-[#3a3a5a] rounded-full" />}
-            </button>
-            <button
-              data-testid="tab-feed"
-              onClick={() => { setActiveTab("feed"); if (feedItems.length === 0) fetchFeed(); }}
-              className={cn(
-                "flex-1 py-2.5 text-[13px] font-semibold text-center transition-colors relative",
-                activeTab === "feed" ? "text-[#1a1a2e]" : "text-[#1a1a2e]/65 hover:text-[#1a1a2e]/80"
-              )}
-            >
-              <div className="flex items-center justify-center gap-1.5">
-                <Radio className="w-3.5 h-3.5" />
-                Live Feed
-              </div>
-              {activeTab === "feed" && <div className="absolute bottom-0 left-1/4 right-1/4 h-[2px] bg-[#3a3a5a] rounded-full" />}
             </button>
             <button
               data-testid="tab-creatorai"
               onClick={() => setActiveTab("creatorai")}
               className={cn(
-                "flex-1 py-2.5 text-[13px] font-semibold text-center transition-colors relative",
+                "flex-1 min-w-0 py-2.5 text-[11px] sm:text-[13px] font-semibold text-center transition-colors relative",
                 activeTab === "creatorai" ? "text-[#1a1a2e]" : "text-[#1a1a2e]/65 hover:text-[#1a1a2e]/80"
               )}
             >
-              <div className="flex items-center justify-center gap-1.5">
-                <Sparkles className="w-3.5 h-3.5" />
-                Creator Connect
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-0.5 sm:gap-1.5">
+                <Sparkles className="w-4 h-4 sm:w-3.5 sm:h-3.5" />
+                <span className="truncate">Creators</span>
               </div>
               {activeTab === "creatorai" && <div className="absolute bottom-0 left-1/4 right-1/4 h-[2px] bg-purple-400 rounded-full" />}
             </button>
@@ -929,13 +876,13 @@ export default function DashboardPage() {
               data-testid="tab-repair"
               onClick={() => setActiveTab("repair")}
               className={cn(
-                "flex-1 py-2.5 text-[13px] font-semibold text-center transition-colors relative",
+                "flex-1 min-w-0 py-2.5 text-[11px] sm:text-[13px] font-semibold text-center transition-colors relative",
                 activeTab === "repair" ? "text-[#1a1a2e]" : "text-[#1a1a2e]/65 hover:text-[#1a1a2e]/80"
               )}
             >
-              <div className="flex items-center justify-center gap-1.5">
-                <Shield className="w-3.5 h-3.5" />
-                Repair
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-0.5 sm:gap-1.5">
+                <Shield className="w-4 h-4 sm:w-3.5 sm:h-3.5" />
+                <span className="truncate">Repair</span>
               </div>
               {activeTab === "repair" && <div className="absolute bottom-0 left-1/4 right-1/4 h-[2px] bg-orange-400 rounded-full" />}
             </button>
@@ -943,13 +890,13 @@ export default function DashboardPage() {
               data-testid="tab-chat"
               onClick={() => setActiveTab("chat")}
               className={cn(
-                "flex-1 py-2.5 text-[13px] font-semibold text-center transition-colors relative",
+                "flex-1 min-w-0 py-2.5 text-[11px] sm:text-[13px] font-semibold text-center transition-colors relative",
                 activeTab === "chat" ? "text-[#1a1a2e]" : "text-[#1a1a2e]/65 hover:text-[#1a1a2e]/80"
               )}
             >
-              <div className="flex items-center justify-center gap-1.5">
-                <MessageSquare className="w-3.5 h-3.5" />
-                Messages
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-0.5 sm:gap-1.5">
+                <MessageSquare className="w-4 h-4 sm:w-3.5 sm:h-3.5" />
+                <span className="truncate">Messages</span>
               </div>
               {activeTab === "chat" && <div className="absolute bottom-0 left-1/4 right-1/4 h-[2px] bg-[#3a3a5a] rounded-full" />}
             </button>
@@ -1340,474 +1287,6 @@ export default function DashboardPage() {
                   </button>
                 </div>
               )}
-            </div>
-          ) : activeTab === "feed" ? (
-            <div className="w-full h-full flex flex-col" style={{ background: '#000' }}>
-              {feedLoading && feedItems.length === 0 ? (
-                <div className="flex-1 flex items-center justify-center">
-                  <div className="flex flex-col items-center gap-3">
-                    <Loader2 className="w-8 h-8 animate-spin text-[#1a1a2e]/65" />
-                    <p className="text-xs text-[#1a1a2e]/65">Loading shorts...</p>
-                  </div>
-                </div>
-              ) : feedItems.length === 0 ? (
-                <div className="flex-1 flex flex-col items-center justify-center">
-                  <Radio className="w-8 h-8 text-[#1a1a2e]/45 mb-3" />
-                  <p className="text-sm text-[#1a1a2e]/70">No content available yet</p>
-                  <button onClick={() => fetchFeed()} className="mt-3 text-xs text-[#1a1a2e]/60 hover:text-[#1a1a2e]/80 underline" data-testid="button-refresh-feed">Refresh</button>
-                </div>
-              ) : (() => {
-                const videoItems = feedItems.filter((item: any) => {
-                  if (item.contentType !== "video") return false;
-                  const vid = item.link?.match(/[?&]v=([^&]+)/)?.[1];
-                  return !!vid;
-                });
-                if (videoItems.length === 0) return (
-                  <div className="flex-1 flex flex-col items-center justify-center">
-                    <Play className="w-8 h-8 text-[#1a1a2e]/45 mb-3" />
-                    <p className="text-sm text-[#1a1a2e]/70">No videos available</p>
-                  </div>
-                );
-
-                return (
-                  <div
-                    ref={shortsContainerRef}
-                    className="flex-1 overflow-y-scroll snap-y snap-mandatory scrollbar-hide"
-                    style={{ scrollBehavior: 'smooth' }}
-                    onScroll={(e) => {
-                      const el = e.currentTarget;
-                      const idx = Math.round(el.scrollTop / el.clientHeight);
-                      if (idx !== currentShortIndex) {
-                        setCurrentShortIndex(idx);
-                        if (idx >= videoItems.length - 3 && feedHasMore) {
-                          const next = feedPage + 1;
-                          setFeedPage(next);
-                          fetchFeed(next, feedFilter, true);
-                        }
-                      }
-                    }}
-                    data-testid="shorts-container"
-                  >
-                    {videoItems.map((item: any, idx: number) => {
-                      const videoId = item.link.match(/[?&]v=([^&]+)/)?.[1];
-                      const isActive = idx === currentShortIndex;
-
-                      return (
-                        <div
-                          key={item.id}
-                          className="snap-start w-full relative flex items-center justify-center"
-                          style={{ height: '100%', minHeight: '100%' }}
-                          data-testid={`short-${item.id}`}
-                        >
-                          <div className="absolute inset-0 bg-black">
-                            {isActive && shortsAutoplay ? (
-                              <iframe
-                                src={`https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0&modestbranding=1&playsinline=1&loop=1&playlist=${videoId}&controls=1`}
-                                className="absolute inset-0 w-full h-full"
-                                allow="autoplay; encrypted-media; picture-in-picture"
-                                allowFullScreen
-                                title={item.title}
-                              />
-                            ) : (
-                              <>
-                                <img
-                                  src={`https://img.youtube.com/vi/${videoId}/hqdefault.jpg`}
-                                  alt={item.title}
-                                  className="absolute inset-0 w-full h-full object-cover"
-                                  loading="lazy"
-                                />
-                                <div className="absolute inset-0 bg-black/40" />
-                                <button
-                                  onClick={() => {
-                                    setCurrentShortIndex(idx);
-                                    setShortsAutoplay(true);
-                                  }}
-                                  className="absolute inset-0 flex items-center justify-center z-10"
-                                  data-testid={`play-short-${idx}`}
-                                >
-                                  <div className="w-16 h-16 rounded-full bg-white/70 backdrop-blur-none flex items-center justify-center border border-white/30">
-                                    <Play className="w-7 h-7 text-[#1a1a2e] ml-1" fill="white" />
-                                  </div>
-                                </button>
-                              </>
-                            )}
-                          </div>
-
-                          <div className="absolute bottom-0 left-0 right-16 p-4 pb-6 z-20" style={{ background: 'linear-gradient(transparent, rgba(0,0,0,0.85))' }}>
-                            <div className="flex items-center gap-2.5 mb-2.5">
-                              <div className="w-9 h-9 rounded-full bg-gradient-to-br from-red-500 via-pink-500 to-purple-500 flex items-center justify-center text-[11px] font-bold text-[#1a1a2e] border-2 border-[#c0c0d0] shadow-lg">
-                                {item.source.charAt(0)}
-                              </div>
-                              <div className="flex-1 min-w-0">
-                                <p className="text-[13px] font-semibold text-[#1a1a2e] truncate">{item.source}</p>
-                                <p className="text-[10px] text-[#1a1a2e]/80">{timeAgo(item.publishedAt)}</p>
-                              </div>
-                              <span className="text-[9px] px-2 py-1 rounded-full bg-white/60 text-[#1a1a2e]/90 border border-white/40 uppercase tracking-wider font-medium">
-                                {item.category}
-                              </span>
-                            </div>
-                            <h3 className="text-[14px] font-medium text-[#1a1a2e] leading-snug line-clamp-2 drop-shadow-lg">{item.title}</h3>
-                            {item.description && (
-                              <p className="text-[11px] text-[#1a1a2e]/80 leading-relaxed line-clamp-1 mt-1">{item.description}</p>
-                            )}
-                          </div>
-
-                          <div className="absolute right-3 bottom-20 z-20 flex flex-col items-center gap-5">
-                            <button
-                              className="flex flex-col items-center gap-1 group"
-                              onClick={() => {
-                                if (item.link) window.open(item.link, '_blank');
-                              }}
-                              data-testid={`link-${item.id}`}
-                            >
-                              <div className="w-10 h-10 rounded-full bg-white/60 backdrop-blur-none flex items-center justify-center border border-white/40 group-hover:bg-white/70 transition-colors">
-                                <ExternalLink className="w-4 h-4 text-[#1a1a2e]" />
-                              </div>
-                              <span className="text-[9px] text-[#1a1a2e]/80">Open</span>
-                            </button>
-                            <button
-                              className="flex flex-col items-center gap-1 group"
-                              onClick={() => {
-                                navigator.clipboard.writeText(item.link || '');
-                                toast({ title: "Link copied!" });
-                              }}
-                            >
-                              <div className="w-10 h-10 rounded-full bg-white/60 backdrop-blur-none flex items-center justify-center border border-white/40 group-hover:bg-white/70 transition-colors">
-                                <Share2 className="w-4 h-4 text-[#1a1a2e]" />
-                              </div>
-                              <span className="text-[9px] text-[#1a1a2e]/80">Share</span>
-                            </button>
-                          </div>
-
-                          <div className="absolute top-4 left-4 right-4 z-20 flex items-center justify-between">
-                            <div className="flex items-center gap-2">
-                              <h1 className="text-[15px] font-bold text-[#1a1a2e] drop-shadow-lg flex items-center gap-1.5" data-testid="text-feed-title">
-                                Shorts
-                                <span className="relative flex h-2 w-2">
-                                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                                  <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
-                                </span>
-                              </h1>
-                              <span className="text-[10px] text-[#1a1a2e]/65 ml-1">{idx + 1}/{videoItems.length}</span>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <div className="flex gap-1 overflow-x-auto scrollbar-hide" data-testid="feed-filters">
-                                {[
-                                  { key: "all", label: "All" },
-                                  { key: "finance", label: "Finance" },
-                                  { key: "business", label: "Business" },
-                                  { key: "realestate", label: "Real Estate" },
-                                  { key: "credit", label: "Credit" },
-                                  { key: "stocks", label: "Stocks" },
-                                ].map(f => (
-                                  <button
-                                    key={f.key}
-                                    data-testid={`filter-${f.key}`}
-                                    onClick={() => { setFeedFilter(f.key); setFeedPage(0); setCurrentShortIndex(0); fetchFeed(0, f.key); }}
-                                    className={cn(
-                                      "px-2.5 py-1 rounded-full text-[9px] font-medium whitespace-nowrap transition-all",
-                                      feedFilter === f.key
-                                        ? "bg-white/70 text-[#1a1a2e]"
-                                        : "bg-white/70 text-[#1a1a2e]/75 hover:bg-white/60"
-                                    )}
-                                  >
-                                    {f.label}
-                                  </button>
-                                ))}
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                );
-              })()}
-
-            </div>
-          ) : activeTab === "repair" ? (
-            <div className="w-full h-full flex flex-col" style={{ background: 'transparent' }}>
-              <div className="flex-1 overflow-y-auto px-5 sm:px-8 py-6 max-w-[800px] mx-auto w-full">
-                <div className="flex items-center gap-3 mb-6">
-                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-600 to-amber-600 flex items-center justify-center">
-                    <Shield className="w-5 h-5 text-[#1a1a2e]" />
-                  </div>
-                  <div>
-                    <h2 className="text-lg font-bold text-[#1a1a2e]" data-testid="text-repair-center-title">Repair Center</h2>
-                    <p className="text-[11px] text-[#1a1a2e]/75">AI-powered credit repair, dispute letters & report Q&A</p>
-                  </div>
-                </div>
-
-                <div className="rounded-2xl bg-white/50 backdrop-blur-none border border-orange-500/10 p-6 mb-4" data-testid="credit-repair-card">
-                  <div className="flex items-center justify-between mb-4">
-                    <p className="text-xs text-orange-400/60">Credit Repair System</p>
-                    <span className="text-[9px] text-[#1a1a2e]/45 bg-white/50 px-2 py-0.5 rounded-full">GPT-4o</span>
-                  </div>
-
-                  {!fundingData?.hasCreditReport ? (
-                    <div className="text-center py-8">
-                      <FileText className="w-8 h-8 text-[#1a1a2e]/40 mx-auto mb-3" />
-                      <p className="text-sm text-[#1a1a2e]/70 mb-1">Upload a credit report first</p>
-                      <p className="text-[10px] text-[#1a1a2e]/55">Go to Dashboard and upload your credit report to enable the repair system.</p>
-                    </div>
-                  ) : !repairData ? (
-                    <div className="text-center py-8">
-                      <p className="text-sm text-[#1a1a2e]/75 mb-4">Credit report uploaded. Run the repair analysis to detect issues.</p>
-                      <button
-                        onClick={runRepairAnalysis}
-                        disabled={repairAnalyzing}
-                        className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white/50 border border-white/30 hover:bg-white/60 text-[#1a1a2e]/90 text-sm font-medium transition-all disabled:opacity-50"
-                        data-testid="button-run-repair"
-                      >
-                        {repairAnalyzing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Zap className="w-4 h-4" />}
-                        {repairAnalyzing ? "Analyzing Report..." : "Run Credit Repair Analysis"}
-                      </button>
-                    </div>
-                  ) : (
-                    <div className="space-y-4">
-                      <div className="flex items-center gap-2">
-                        <span className={cn(
-                          "text-[9px] font-bold uppercase px-2.5 py-1 rounded",
-                          repairData.mode === "repair" ? "bg-amber-500/10 text-amber-400/70" : "bg-emerald-500/10 text-emerald-400/70"
-                        )}>{repairData.mode === "repair" ? "Repair Mode" : "Pre-Funding Mode"}</span>
-                        <button
-                          onClick={runRepairAnalysis}
-                          disabled={repairAnalyzing}
-                          className="ml-auto flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/60 border border-white/30 hover:bg-white/60 text-[10px] text-[#1a1a2e]/70 hover:text-[#1a1a2e]/80 transition-all disabled:opacity-50"
-                          data-testid="button-rerun-repair"
-                        >
-                          {repairAnalyzing ? <Loader2 className="w-3 h-3 animate-spin" /> : <RefreshCw className="w-3 h-3" />}
-                          Re-analyze
-                        </button>
-                      </div>
-
-                      {repairData.summary && (
-                        <div className="p-4 rounded-xl bg-white/50 border border-white/30">
-                          <p className="text-[10px] text-[#1a1a2e]/65 mb-1.5">What's Hurting Your Profile</p>
-                          <p className="text-sm text-[#1a1a2e]/90 leading-relaxed mb-2">{repairData.summary.mainIssues}</p>
-                          <p className="text-[10px] text-orange-400/50 mb-1">Priority Action</p>
-                          <p className="text-sm text-[#1a1a2e]/80 leading-relaxed">{repairData.summary.priorityAction}</p>
-                        </div>
-                      )}
-
-                      {repairData.detectedIssues && repairData.detectedIssues.length > 0 && (
-                        <div>
-                          <p className="text-[10px] text-[#1a1a2e]/60 uppercase tracking-widest mb-3">Detected Issues ({repairData.detectedIssues.length})</p>
-                          <div className="space-y-2">
-                            {repairData.detectedIssues.map((issue: any, idx: number) => (
-                              <div key={idx} className="p-3.5 rounded-xl bg-white/50 border border-white/30" data-testid={`repair-issue-${idx}`}>
-                                <div className="flex items-center gap-2 mb-1.5 flex-wrap">
-                                  <span className={cn(
-                                    "text-[9px] font-bold uppercase px-2 py-0.5 rounded",
-                                    issue.severity === "High" ? "bg-red-500/10 text-red-400/70" :
-                                    issue.severity === "Medium" ? "bg-yellow-500/10 text-yellow-400/70" :
-                                    "bg-green-500/10 text-green-400/70"
-                                  )}>{issue.severity}</span>
-                                  <span className="text-[10px] text-[#1a1a2e]/60">{issue.bureau}</span>
-                                  <span className="text-[10px] text-[#1a1a2e]/45">{'\u00B7'}</span>
-                                  <span className="text-[10px] text-[#1a1a2e]/70">{issue.issueType}</span>
-                                </div>
-                                <p className="text-sm text-[#1a1a2e]/90">{issue.creditor} {issue.accountLast4 !== "N/A" ? `(****${issue.accountLast4})` : ""}</p>
-                                {issue.monthsAffected !== "N/A" && (
-                                  <p className="text-[10px] text-[#1a1a2e]/60 mt-1">Months: {issue.monthsAffected}</p>
-                                )}
-                                <p className="text-[10px] text-[#1a1a2e]/65 mt-1.5">Attach: {issue.proofToAttach}</p>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-
-                      {repairData.actionPlan && repairData.actionPlan.length > 0 && (
-                        <div>
-                          <p className="text-[10px] text-[#1a1a2e]/60 uppercase tracking-widest mb-3">Repair Action Plan</p>
-                          <div className="space-y-2">
-                            {repairData.actionPlan.map((step: any, idx: number) => (
-                              <div key={idx} className="flex items-start gap-3 p-3 rounded-xl bg-white/50" data-testid={`repair-step-${idx}`}>
-                                <div className="w-6 h-6 rounded-full bg-white/50 flex items-center justify-center text-[10px] font-mono text-[#1a1a2e]/65 shrink-0">
-                                  {step.step || idx + 1}
-                                </div>
-                                <div className="flex-1 min-w-0">
-                                  <p className="text-sm text-[#1a1a2e]/90">{step.action}</p>
-                                  <div className="flex items-center gap-3 mt-1">
-                                    <span className="text-[10px] text-orange-400/40 font-mono">{step.timing}</span>
-                                    {step.details && <span className="text-[10px] text-[#1a1a2e]/60">{step.details}</span>}
-                                  </div>
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-
-                      {repairData.letters && repairData.letters.length > 0 && (
-                        <div>
-                          <p className="text-[10px] text-[#1a1a2e]/60 uppercase tracking-widest mb-3">Generated Dispute Letters ({repairData.letters.length})</p>
-                          <div className="space-y-2">
-                            {repairData.letters.map((letter: any, idx: number) => (
-                              <div key={idx} className="rounded-xl bg-white/50 border border-white/30 overflow-hidden" data-testid={`letter-${idx}`}>
-                                <button
-                                  onClick={() => setExpandedLetters(prev => {
-                                    const next = new Set(prev);
-                                    if (next.has(idx)) next.delete(idx); else next.add(idx);
-                                    return next;
-                                  })}
-                                  className="w-full text-left p-3.5 flex items-center gap-3 hover:bg-white/50 transition-colors"
-                                  data-testid={`button-expand-letter-${idx}`}
-                                >
-                                  <FileText className="w-4 h-4 text-orange-400/40 shrink-0" />
-                                  <div className="flex-1 min-w-0">
-                                    <p className="text-sm text-[#1a1a2e]/90 truncate">{letter.subject || `${letter.type === "bureau_dispute" ? "Bureau" : letter.type === "creditor_dispute" ? "Creditor" : "Info Correction"} Letter`}</p>
-                                    <p className="text-[10px] text-[#1a1a2e]/60 truncate">To: {letter.recipientName}</p>
-                                  </div>
-                                  <ChevronRight className={cn("w-4 h-4 text-[#1a1a2e]/40 shrink-0 transition-transform", expandedLetters.has(idx) && "rotate-90")} />
-                                </button>
-                                {expandedLetters.has(idx) && (
-                                  <div className="px-3.5 pb-3.5 border-t border-white/30">
-                                    <div className="flex items-center gap-2 py-2">
-                                      <span className="text-[9px] text-[#1a1a2e]/55">To: {letter.recipientAddress}</span>
-                                      <button
-                                        onClick={() => copyLetterToClipboard(letter.body, idx)}
-                                        className="ml-auto flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/60 border border-white/30 hover:bg-white/60 text-[10px] text-[#1a1a2e]/75 font-medium transition-all"
-                                        data-testid={`button-copy-letter-${idx}`}
-                                      >
-                                        {copiedLetter === idx ? <CheckCircle2 className="w-3 h-3" /> : <Eye className="w-3 h-3" />}
-                                        {copiedLetter === idx ? "Copied!" : "Copy Letter"}
-                                      </button>
-                                    </div>
-                                    <div className="mt-2 p-4 rounded-xl bg-white/60 border border-white/30 font-mono text-[10px] text-[#1a1a2e]/80 leading-relaxed whitespace-pre-wrap max-h-96 overflow-y-auto" style={{ scrollbarWidth: 'thin' }}>
-                                      {letter.body}
-                                    </div>
-                                  </div>
-                                )}
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-
-                      {repairData.disclaimer && (
-                        <p className="text-[9px] text-[#1a1a2e]/45 italic mt-2 px-1">{repairData.disclaimer}</p>
-                      )}
-                    </div>
-                  )}
-                </div>
-
-                <div className="rounded-2xl bg-white/80 backdrop-blur-md border border-white/40 shadow-[0_8px_32px_rgba(0,0,0,0.04),0_2px_8px_rgba(0,0,0,0.02)] overflow-hidden mb-4" data-testid="repair-qa-card">
-                  <div className="px-6 py-4 flex items-center gap-3 border-b border-white/30">
-                    <div className="w-8 h-8 rounded-xl bg-white/60 border border-white/30 flex items-center justify-center">
-                      <MessageCircle className="w-4 h-4 text-orange-400/50" />
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-[#1a1a2e]/95">Ask AI About Your Report</p>
-                      <p className="text-[10px] text-[#1a1a2e]/60">Get personalized answers based on your uploaded financial data</p>
-                    </div>
-                    {qaMessages.length > 0 && (
-                      <span className="ml-auto text-[9px] text-[#1a1a2e]/55 bg-white/50 px-2 py-0.5 rounded-full">{Math.floor(qaMessages.length / 2)} Q&A</span>
-                    )}
-                  </div>
-
-                  <div className="max-h-[500px] overflow-y-auto px-4 py-3 space-y-3" style={{ scrollbarWidth: 'thin' }}>
-                    {qaMessages.length === 0 && !qaLoading && (
-                      <div className="flex flex-col items-center justify-center py-8">
-                        <Sparkles className="w-6 h-6 text-[#1a1a2e]/40 mb-2" />
-                        <p className="text-xs text-[#1a1a2e]/60 text-center">Ask anything about your credit report, funding readiness, or financial profile</p>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-4 w-full max-w-md">
-                          {[
-                            "What's hurting my credit score?",
-                            "Am I ready for funding?",
-                            "How can I lower my balances?",
-                            "What accounts should I dispute?",
-                          ].map((suggestion, i) => (
-                            <button
-                              key={i}
-                              data-testid={`button-qa-suggestion-${i}`}
-                              onClick={() => { setQaInput(suggestion); qaInputRef.current?.focus(); }}
-                              className="text-left px-3 py-2.5 rounded-xl border border-white/30 bg-white/50 hover:bg-white/60 transition-all text-[11px] text-[#1a1a2e]/70 hover:text-[#1a1a2e]/90"
-                            >
-                              {suggestion}
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-
-                    {qaMessages.map((msg: any) => (
-                      <div key={msg.id} className={cn("flex gap-2.5", msg.role === "user" ? "justify-end" : "justify-start")} data-testid={`qa-msg-${msg.id}`}>
-                        {msg.role === "assistant" && (
-                          <div className="w-7 h-7 rounded-lg bg-white/60 border border-white/30 flex items-center justify-center shrink-0 mt-0.5">
-                            <Cpu className="w-3.5 h-3.5 text-[#1a1a2e]/65" />
-                          </div>
-                        )}
-                        <div className={cn(
-                          "max-w-[80%] rounded-2xl px-4 py-3",
-                          msg.role === "user"
-                            ? "bg-white/60 border border-white/30"
-                            : "bg-white/50 border border-white/30"
-                        )}>
-                          <p className="text-[12px] text-[#1a1a2e]/90 leading-relaxed whitespace-pre-wrap">{msg.content}</p>
-                          <p className="text-[9px] text-[#1a1a2e]/45 mt-1.5">
-                            {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                          </p>
-                        </div>
-                      </div>
-                    ))}
-
-                    {qaLoading && (
-                      <div className="flex gap-2.5 justify-start">
-                        <div className="w-7 h-7 rounded-lg bg-white/60 border border-white/30 flex items-center justify-center shrink-0">
-                          <Cpu className="w-3.5 h-3.5 text-[#1a1a2e]/65" />
-                        </div>
-                        <div className="bg-white/50 border border-white/30 rounded-2xl px-4 py-3">
-                          <div className="flex items-center gap-2">
-                            <Loader2 className="w-3.5 h-3.5 animate-spin text-[#1a1a2e]/60" />
-                            <span className="text-[11px] text-[#1a1a2e]/60">Analyzing your data...</span>
-                          </div>
-                        </div>
-                      </div>
-                    )}
-                    <div ref={qaEndRef} />
-                  </div>
-
-                  <div className="px-4 pb-4 pt-2 border-t border-white/30">
-                    <div className="flex gap-2">
-                      <textarea
-                        ref={qaInputRef}
-                        data-testid="input-qa"
-                        value={qaInput}
-                        onChange={(e) => setQaInput(e.target.value)}
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter" && !e.shiftKey) {
-                            e.preventDefault();
-                            sendQA();
-                          }
-                        }}
-                        placeholder="Ask about your report..."
-                        className="flex-1 bg-white/50 border border-white/30 rounded-xl px-3.5 py-2.5 text-sm text-[#1a1a2e]/95 placeholder:text-[#8a8aa5]/50 resize-none focus:outline-none focus:border-[#c0c0d0] transition-colors"
-                        rows={1}
-                      />
-                      <button
-                        data-testid="button-send-qa"
-                        onClick={sendQA}
-                        disabled={!qaInput.trim() || qaLoading}
-                        className="w-10 h-10 rounded-xl bg-white/50 border border-white/30 hover:bg-white/60 disabled:opacity-30 flex items-center justify-center transition-colors shrink-0"
-                      >
-                        <Send className="w-4 h-4 text-[#1a1a2e]/80" />
-                      </button>
-                    </div>
-                    {qaMessages.length > 0 && (
-                      <button
-                        data-testid="button-clear-qa"
-                        onClick={clearQA}
-                        className="mt-2 text-[10px] text-[#1a1a2e]/45 hover:text-[#1a1a2e]/65 transition-colors"
-                      >
-                        Clear conversation
-                      </button>
-                    )}
-                  </div>
-                </div>
-
-              </div>
             </div>
           ) : activeTab === "creatorai" ? (
             <div className="w-full h-full flex flex-col" style={{ background: 'transparent' }}>

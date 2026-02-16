@@ -4,18 +4,18 @@
 A free AI mentorship platform ("Mentorship On Demand") combining Capital Readiness analytics with AI-powered mentorship. Features a 6-component Capital Readiness evaluation system (Capital Strength, Credit Quality, Management & Structure, Earnings & Cash Flow, Liquidity & Leverage, Risk Signals), 2.5x exposure ceiling calculation, tier eligibility (Prime/Mid-Tier/Alternative), operating mode (Pre-Funding/Repair), denial simulation, AI chat workspace with 7 bot mentors, PDF document upload with OCR, friends list, admin panel, and free membership access.
 
 ## Recent Changes
+- 2026-02-16: Removed Live Feed tab entirely (4 tabs remain: Dashboard, Creators, Repair, Messages)
+- 2026-02-16: Mobile tab optimization - stacked icon/label layout on mobile, responsive text sizing
+- 2026-02-16: Creator Connect uses AI-powered YouTube creator matching (no API key needed) - recommends 8-12 real creators based on user's financial situation
+- 2026-02-16: Creator match determines repair vs funding mode and returns channel names, handles, specialties, subscriber estimates, and direct YouTube links
 - 2026-02-15: Renamed "Creator AI" tab to "Creator Connect" across dashboard
-- 2026-02-14: Creator Connect (formerly Creator AI) is a separate 4th tab alongside Dashboard, Live Feed, Workspace
+- 2026-02-14: Creator Connect (formerly Creator AI) is a separate tab alongside Dashboard, Repair, Messages
 - 2026-02-14: Creator Connect tab has its own credit report upload section for personalized analysis
 - 2026-02-14: AI automatically aggregates insights from 75+ creators across 8 categories (finance, business, realestate, credit, stocks, tax, economics, news)
 - 2026-02-14: Multi-Creator Aggregation Mode: AI selects 3-6 most relevant creators per question, synthesizes their frameworks, shows agreements/differences
 - 2026-02-14: CREATOR_INFORMED_PROMPT system prompt for synthesizing creator educational insights with proper @CreatorName attribution
 - 2026-02-14: POST /api/creator-insight endpoint with full financial profile, credit report, repair data, and multi-creator context
 - 2026-02-14: Chat-style Q&A interface with suggested starter questions and message history
-- 2026-02-13: Added Live Feed tab with 72+ curated finance/business/entrepreneurship creators from YouTube, news RSS, and podcasts
-- 2026-02-13: Live Feed auto-refreshes every 5 seconds with real-time content from top creators
-- 2026-02-13: Feed includes embedded YouTube video players (click-to-play), category filters (Finance, Business, Real Estate, Credit, Stocks, Marketing, Tax, Economics, News), load-more pagination
-- 2026-02-13: Backend /api/feed endpoint with RSS caching (30s TTL), parallel feed fetching, and sorted by publish date
 - 2026-02-13: Applied assistance-first system prompt to all Workspace chat (direct answers, no hedging, no refusal) via MASTER_SYSTEM_PROMPT
 - 2026-02-13: Removed separate AI Assist tab - assistance-first behavior now built into all mentor and general chat
 - 2026-02-13: Expanded AI document analysis to extract 14 data fields (exact score, revolving limits, balances, inquiries, derogatories, late payments, collections, open/closed accounts, account age, public records, utilization)
