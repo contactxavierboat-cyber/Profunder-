@@ -570,6 +570,22 @@ export function simulateCapitalStack(user: User, targetAmount: number): CapitalS
 
 export type UnderwritingMode = "REPAIR" | "OPTIMIZATION" | "FUNDING_READY" | "WAIT_AND_OPTIMIZE";
 export type CreditTier = "EXCELLENT" | "STRONG" | "BORDERLINE" | "WEAK";
+export type StackTier = "A" | "B" | null;
+
+export interface CardStackingResult {
+  eligible: boolean;
+  tier: StackTier;
+  maxApps: number;
+  windowDays: string;
+  stopConditions: string[];
+  guidance: string;
+}
+
+export interface CreditUnionIntelligence {
+  cuRecommended: boolean;
+  chexRisk: boolean;
+  guidance: string;
+}
 
 export interface UnderwritingResult {
   finalMode: UnderwritingMode;
@@ -579,6 +595,11 @@ export interface UnderwritingResult {
   explanation: string;
   nextSteps: string[];
   fundingRange: { minimum: number; maximum: number } | null;
+  cardStacking: CardStackingResult;
+  creditUnion: CreditUnionIntelligence;
+  softPreQual: string[];
+  bureauPullAwareness: string[];
+  elevatedRisk: { present: boolean; factors: string[] };
   flags: {
     utilizationFlag: boolean;
     velocityFlag: boolean;
@@ -605,6 +626,7 @@ export interface UnderwritingResult {
     derogatoryPresent: boolean;
     identityFlagsPresent: boolean;
     issuerRelationshipNegative: boolean;
+    chexRiskPresent: boolean;
   };
 }
 
@@ -628,13 +650,14 @@ export function calculateUnderwriting(user: User): UnderwritingResult {
   const derogatoryPresent = (user.derogatoryAccounts || 0) > 0;
   const identityFlagsPresent = user.identityFlagsPresent || false;
   const issuerRelationshipNegative = user.issuerRelationshipNegative || false;
+  const chexRiskPresent = user.chexRiskPresent || false;
 
   const inputs = {
     creditScore, totalUtilization, highestCardUtilization, latePayments24mo,
     collectionsCount, chargeoffsCount, publicRecordsPresent, bankruptcyPresent,
     oldestAccountYears, averageAccountAgeYears, hardInquiries6mo, hardInquiries12mo,
     openRevolvingAccounts, recentAccounts12mo, totalRevolvingLimit, derogatoryPresent,
-    identityFlagsPresent, issuerRelationshipNegative,
+    identityFlagsPresent, issuerRelationshipNegative, chexRiskPresent,
   };
 
   let outputMode: "REPAIR_MODE" | null = null;
@@ -729,6 +752,112 @@ export function calculateUnderwriting(user: User): UnderwritingResult {
     };
   }
 
+  // === EXAMINER-ALIGNED RISK LOGIC ===
+  const elevatedRiskFactors: string[] = [];
+  if (recentAccounts12mo >= 4) elevatedRiskFactors.push("Rapid account growth — " + recentAccounts12mo + " new accounts in 12 months");
+  if (totalUtilization >= 20 && highestCardUtilization >= 50) elevatedRiskFactors.push("Sudden utilization spike — highest card at " + highestCardUtilization + "%");
+  if (hardInquiries6mo >= 4) elevatedRiskFactors.push("Excessive credit seeking — " + hardInquiries6mo + " inquiries in 6 months");
+  if (issuerRelationshipNegative) elevatedRiskFactors.push("Concentration risk — negative issuer relationship detected");
+  const elevatedRisk = { present: elevatedRiskFactors.length > 0, factors: elevatedRiskFactors };
+
+  if (elevatedRisk.present && finalMode === "FUNDING_READY") {
+    finalMode = "OPTIMIZATION";
+  }
+
+  // === CARD STACKING SIMULATOR ===
+  let cardStacking: CardStackingResult;
+  const stackingAllowed = finalMode === "FUNDING_READY" && creditScore >= 700 &&
+    totalUtilization < 10 && hardInquiries6mo <= 2 && !derogatoryPresent;
+
+  if (stackingAllowed) {
+    let tier: StackTier;
+    let maxApps: number;
+    let windowDays: string;
+
+    if (creditScore >= 740 && hardInquiries6mo <= 1 && totalUtilization <= 6) {
+      tier = "A";
+      maxApps = 4;
+      windowDays = "3–7 days";
+    } else {
+      tier = "B";
+      maxApps = 3;
+      windowDays = "5–10 days";
+    }
+
+    cardStacking = {
+      eligible: true,
+      tier,
+      maxApps,
+      windowDays,
+      stopConditions: [
+        "Any denial received",
+        "Two pending applications",
+        "Verification issues encountered",
+        "Projected score drop exceeds 10 points",
+        "Projected utilization exceeds 15%",
+      ],
+      guidance: `Tier ${tier} stacking eligible. Apply for up to ${maxApps} cards within a ${windowDays} window. Always use soft pre-qualification first when available. Stop immediately if any stop condition is triggered.`,
+    };
+  } else {
+    const reasons: string[] = [];
+    if (finalMode !== "FUNDING_READY") reasons.push("profile not in Funding Ready mode");
+    if (creditScore < 700) reasons.push("score below 700");
+    if (totalUtilization >= 10) reasons.push("utilization at or above 10%");
+    if (hardInquiries6mo > 2) reasons.push("too many recent inquiries");
+    if (derogatoryPresent) reasons.push("derogatory items present");
+    cardStacking = {
+      eligible: false,
+      tier: null,
+      maxApps: 0,
+      windowDays: "N/A",
+      stopConditions: [],
+      guidance: `Card stacking is not recommended. Reason(s): ${reasons.join(", ")}. Resolve these before considering a stacking strategy.`,
+    };
+  }
+
+  // === CREDIT UNION INTELLIGENCE ===
+  let creditUnion: CreditUnionIntelligence;
+  if (chexRiskPresent) {
+    creditUnion = {
+      cuRecommended: false,
+      chexRisk: true,
+      guidance: "ChexSystems risk detected. Credit union funding is not recommended at this time. Resolve ChexSystems issues first. Credit unions evaluate deposit behavior and stability — address banking history before applying.",
+    };
+  } else if (finalMode === "REPAIR") {
+    creditUnion = {
+      cuRecommended: false,
+      chexRisk: false,
+      guidance: "Credit union access delayed until credit profile is repaired. Credit unions prioritize stability over speed — focus on building clean banking history first.",
+    };
+  } else {
+    creditUnion = {
+      cuRecommended: true,
+      chexRisk: false,
+      guidance: "Credit unions are relationship-based lenders. They evaluate credit bureaus, ChexSystems, and deposit behavior. Build relationships before requesting credit. Never stack credit unions aggressively — treat access as long-term.",
+    };
+  }
+
+  // === SOFT PRE-QUAL RULES ===
+  const softPreQual: string[] = [];
+  softPreQual.push("Always use soft pre-qualification first when available.");
+  softPreQual.push("If a pre-qual returns no offer, skip that issuer in the hard-pull phase.");
+  if (velocityFlag) {
+    softPreQual.push("Velocity-sensitive profile detected — use pre-quals only and delay hard pulls.");
+  }
+  if (finalMode === "FUNDING_READY") {
+    softPreQual.push("Pre-qualify with target issuers before committing to hard-pull applications.");
+  }
+
+  // === BUREAU PULL AWARENESS ===
+  const bureauPullAwareness: string[] = [
+    "Bureau pulls vary by issuer, state, and product.",
+    "Experian is the most commonly pulled bureau.",
+    "Equifax is second most common.",
+    "TransUnion varies by issuer and region.",
+    "Some issuers may pull multiple bureaus.",
+    "Never assume which bureau will be pulled — plan for all three.",
+  ];
+
   // === EXPLANATION ===
   let explanation: string;
   const nextSteps: string[] = [];
@@ -754,22 +883,27 @@ export function calculateUnderwriting(user: User): UnderwritingResult {
     if (identityFlagsPresent) nextSteps.push("Resolve identity theft or fraud alerts with all three bureaus.");
     if (hardInquiries6mo >= 8) nextSteps.push("Stop all new credit applications for at least 6 months.");
     if (oldestAccountYears < 1) nextSteps.push("Keep existing accounts open and active for at least 12 months.");
+    if (chexRiskPresent) nextSteps.push("Resolve ChexSystems issues to enable credit union access.");
     nextSteps.push("Monitor credit reports monthly for changes and accuracy.");
   } else if (finalMode === "OPTIMIZATION") {
     const issues: string[] = [];
     if (utilizationFlag) issues.push(`utilization (${totalUtilization}% total, ${highestCardUtilization}% highest card)`);
     if (velocityFlag) issues.push(`inquiry density (${hardInquiries6mo} in 6mo, ${hardInquiries12mo} in 12mo)`);
     if (ageFlag) issues.push(`credit age (${averageAccountAgeYears}yr avg, ${oldestAccountYears}yr oldest)`);
+    if (elevatedRisk.present) issues.push("elevated examiner-aligned risk factors");
     explanation = `Profile is in Optimization Mode. Not yet funding-ready due to: ${issues.join("; ")}. Address these factors before applying.`;
     
     if (utilizationFlag) nextSteps.push(`Pay down balances to get total utilization under 10% (currently ${totalUtilization}%).`);
     if (velocityFlag) nextSteps.push("Pause all new credit applications for 6+ months to let inquiries age.");
     if (ageFlag) nextSteps.push("Allow accounts to season. Avoid closing older accounts.");
     if (thinFileFlag) nextSteps.push(`Open additional revolving accounts to reach 3+ (currently ${openRevolvingAccounts}).`);
+    if (elevatedRisk.present) nextSteps.push("Reduce stacking aggressiveness — address elevated risk factors first.");
+    nextSteps.push("Use soft pre-qualification checks to gauge approval odds without hard pulls.");
     nextSteps.push("Re-evaluate profile in 60-90 days after optimizations.");
   } else if (finalMode === "FUNDING_READY") {
-    explanation = `Profile is Funding Ready. Score: ${creditScore} (${creditTier}). Utilization: ${totalUtilization}%. Estimated funding range: $${fundingRange!.minimum.toLocaleString()} – $${fundingRange!.maximum.toLocaleString()}. This is an estimate based on credit capacity, not a guarantee of approval.`;
-    nextSteps.push("Apply strategically — space applications 14+ days apart.");
+    explanation = `Profile is Funding Ready. Score: ${creditScore} (${creditTier}). Utilization: ${totalUtilization}%. Estimated funding range: $${fundingRange!.minimum.toLocaleString()} – $${fundingRange!.maximum.toLocaleString()}. This is an estimate based on credit capacity, not a guarantee of approval. Emphasize disciplined application strategy.`;
+    nextSteps.push("Use soft pre-qualification with target issuers before committing to hard pulls.");
+    nextSteps.push("Apply strategically — space applications within your stacking window.");
     nextSteps.push("Target lenders that pull from your strongest bureau first.");
     nextSteps.push("Maintain current utilization and payment habits through the application cycle.");
     nextSteps.push("Do not open any new accounts until your funding cycle is complete.");
@@ -780,6 +914,7 @@ export function calculateUnderwriting(user: User): UnderwritingResult {
     if (totalUtilization >= 10) nextSteps.push(`Reduce utilization from ${totalUtilization}% to under 10%.`);
     if (hardInquiries6mo > 2) nextSteps.push(`Let inquiries age — ${hardInquiries6mo} in last 6 months. Target ≤2.`);
     if (derogatoryPresent) nextSteps.push("Address any remaining derogatory items through disputes or settlements.");
+    nextSteps.push("Use soft pre-qualification to test approval odds safely.");
     nextSteps.push("Re-evaluate in 30-60 days.");
   }
 
@@ -791,6 +926,11 @@ export function calculateUnderwriting(user: User): UnderwritingResult {
     explanation,
     nextSteps,
     fundingRange,
+    cardStacking,
+    creditUnion,
+    softPreQual,
+    bureauPullAwareness,
+    elevatedRisk,
     flags: {
       utilizationFlag, velocityFlag, ageFlag, thinFileFlag,
       hardStopTriggered: outputMode === "REPAIR_MODE",

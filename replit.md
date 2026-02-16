@@ -86,7 +86,13 @@ A subscription-based AI mentorship platform ("Capital Operating System") combini
 - Final Modes: REPAIR, OPTIMIZATION, FUNDING_READY, WAIT_AND_OPTIMIZE
 - Denial Reason Mapping: all hard-stop triggers + utilization/velocity/age/thin-file/derogatory flags
 - Conditional Funding Calculator: min = revolving limit × 1.5, max = revolving limit × 2.5 (only in FUNDING_READY)
-- Additional fields: chargeoffs, bankruptcyPresent, identityFlagsPresent, issuerRelationshipNegative, highestCardUtilizationPercent, hardInquiries6mo/12mo, recentAccounts12mo
+- Additional fields: chargeoffs, bankruptcyPresent, identityFlagsPresent, issuerRelationshipNegative, chexRiskPresent, highestCardUtilizationPercent, hardInquiries6mo/12mo, recentAccounts12mo
+- Card Stacking Simulator: Tier A (≥740, ≤1 inq, ≤6% util, 4 apps, 3-7 days) / Tier B (3 apps, 5-10 days), with stop conditions
+- Examiner-Aligned Risk Logic: detects rapid account growth, utilization spikes, excessive credit seeking, concentration risk
+- Credit Union Intelligence: ChexSystems awareness, relationship-based guidance, delays CU access if chex_risk or REPAIR mode
+- Soft Pre-Qual Rules: always pre-qualify first, skip issuers with no offer, velocity-sensitive delay
+- Bureau Pull Awareness: Experian most common, Equifax second, TransUnion varies, multi-bureau pulls possible
+- Auto-dispute generation: detected issues auto-create dispute cases with AI-generated FCRA letters
 - API: GET /api/capital-os/underwriting (standalone), also included in GET /api/capital-os/dashboard response
 
 ### Navigation Structure (Left Sidebar)

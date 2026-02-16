@@ -4285,6 +4285,8 @@ IMPORTANT: You MUST respond with ONLY valid JSON matching this exact structure (
   "chargeoffs": <number of charge-off accounts as integer. 0 if none>,
   "bankruptcyPresent": <true if any bankruptcy filing detected, false otherwise>,
   "identityFlagsPresent": <true if any fraud alert, identity theft flag, or ID verification issue detected, false otherwise>,
+  "issuerRelationshipNegative": <true if any negative relationship with a specific issuer is noted (e.g., previous default, closed by issuer), false otherwise>,
+  "chexRiskPresent": <true if any ChexSystems risk, banking negative history, forced account closure, or NSF history detected, false otherwise>,
   "hardInquiries6mo": <number of hard inquiries in the last 6 months as integer. null if cannot determine separately from 12mo>,
   "hardInquiries12mo": <number of hard inquiries in the last 12 months as integer. null if cannot determine>,
   "recentAccounts12mo": <number of accounts opened in the last 12 months as integer. 0 if none>,
@@ -4365,6 +4367,8 @@ ${extractedText}
         updateData.chargeoffs = safeInt(analysisResult.chargeoffs) ?? 0;
         updateData.bankruptcyPresent = analysisResult.bankruptcyPresent === true;
         updateData.identityFlagsPresent = analysisResult.identityFlagsPresent === true;
+        updateData.issuerRelationshipNegative = analysisResult.issuerRelationshipNegative === true;
+        updateData.chexRiskPresent = analysisResult.chexRiskPresent === true;
         updateData.hardInquiries6mo = safeInt(analysisResult.hardInquiries6mo);
         updateData.hardInquiries12mo = safeInt(analysisResult.hardInquiries12mo);
         updateData.recentAccounts12mo = safeInt(analysisResult.recentAccounts12mo) ?? 0;

@@ -178,6 +178,22 @@ interface CapitalOsDashboard {
     explanation: string;
     nextSteps: string[];
     fundingRange: { minimum: number; maximum: number } | null;
+    cardStacking: {
+      eligible: boolean;
+      tier: "A" | "B" | null;
+      maxApps: number;
+      windowDays: string;
+      stopConditions: string[];
+      guidance: string;
+    };
+    creditUnion: {
+      cuRecommended: boolean;
+      chexRisk: boolean;
+      guidance: string;
+    };
+    softPreQual: string[];
+    bureauPullAwareness: string[];
+    elevatedRisk: { present: boolean; factors: string[] };
     flags: {
       utilizationFlag: boolean;
       velocityFlag: boolean;
@@ -982,6 +998,98 @@ export default function DashboardPage() {
                           ))}
                         </div>
                       </div>
+
+                      {capitalOsData.underwriting.elevatedRisk?.present && (
+                        <div className="mt-4 rounded-xl bg-amber-500/[0.06] border border-amber-500/10 p-4" data-testid="elevated-risk-section">
+                          <p className="text-[10px] text-amber-600/70 uppercase tracking-wider mb-2">Elevated Risk Factors</p>
+                          <div className="space-y-1.5">
+                            {capitalOsData.underwriting.elevatedRisk.factors.map((f: string, i: number) => (
+                              <div key={i} className="flex items-start gap-2 text-[11px] text-amber-700/70" data-testid={`risk-factor-${i}`}>
+                                <AlertTriangle className="w-3.5 h-3.5 text-amber-500/60 shrink-0 mt-0.5" />
+                                <span>{f}</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {capitalOsData.underwriting.cardStacking && (
+                        <div className="mt-4 rounded-xl bg-white/50 border border-white/30 p-4" data-testid="card-stacking-section">
+                          <div className="flex items-center justify-between mb-2">
+                            <p className="text-[10px] text-[#1a1a2e]/55 uppercase tracking-wider">Card Stacking Simulator</p>
+                            {capitalOsData.underwriting.cardStacking.eligible ? (
+                              <span className="text-[9px] px-2 py-0.5 rounded-full bg-green-500/15 text-green-600 font-medium" data-testid="stacking-tier">Tier {capitalOsData.underwriting.cardStacking.tier}</span>
+                            ) : (
+                              <span className="text-[9px] px-2 py-0.5 rounded-full bg-red-500/10 text-red-500/70 font-medium">Not Eligible</span>
+                            )}
+                          </div>
+                          <p className="text-[11px] text-[#1a1a2e]/70 leading-relaxed mb-2">{capitalOsData.underwriting.cardStacking.guidance}</p>
+                          {capitalOsData.underwriting.cardStacking.eligible && (
+                            <div className="space-y-2">
+                              <div className="flex items-center gap-4 text-[11px]">
+                                <span className="text-[#1a1a2e]/50">Max Apps:</span>
+                                <span className="font-medium text-[#1a1a2e]/80">{capitalOsData.underwriting.cardStacking.maxApps}</span>
+                                <span className="text-[#1a1a2e]/50">Window:</span>
+                                <span className="font-medium text-[#1a1a2e]/80">{capitalOsData.underwriting.cardStacking.windowDays}</span>
+                              </div>
+                              <div>
+                                <p className="text-[10px] text-red-500/60 uppercase tracking-wider mb-1">Stop Conditions</p>
+                                <div className="space-y-1">
+                                  {capitalOsData.underwriting.cardStacking.stopConditions.map((sc: string, i: number) => (
+                                    <p key={i} className="text-[10px] text-[#1a1a2e]/55 flex items-center gap-1.5" data-testid={`stop-condition-${i}`}>
+                                      <span className="w-1 h-1 rounded-full bg-red-500/40 shrink-0" />
+                                      {sc}
+                                    </p>
+                                  ))}
+                                </div>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      )}
+
+                      {capitalOsData.underwriting.creditUnion && (
+                        <div className="mt-4 rounded-xl bg-white/50 border border-white/30 p-4" data-testid="credit-union-section">
+                          <div className="flex items-center justify-between mb-2">
+                            <p className="text-[10px] text-[#1a1a2e]/55 uppercase tracking-wider">Credit Union Intelligence</p>
+                            {capitalOsData.underwriting.creditUnion.chexRisk && (
+                              <span className="text-[9px] px-2 py-0.5 rounded-full bg-red-500/10 text-red-500/70 font-medium">ChexSystems Risk</span>
+                            )}
+                            {capitalOsData.underwriting.creditUnion.cuRecommended && (
+                              <span className="text-[9px] px-2 py-0.5 rounded-full bg-green-500/15 text-green-600 font-medium">Recommended</span>
+                            )}
+                          </div>
+                          <p className="text-[11px] text-[#1a1a2e]/70 leading-relaxed">{capitalOsData.underwriting.creditUnion.guidance}</p>
+                        </div>
+                      )}
+
+                      {capitalOsData.underwriting.softPreQual && capitalOsData.underwriting.softPreQual.length > 0 && (
+                        <div className="mt-4 rounded-xl bg-white/50 border border-white/30 p-4" data-testid="soft-prequal-section">
+                          <p className="text-[10px] text-[#1a1a2e]/55 uppercase tracking-wider mb-2">Pre-Qualification Strategy</p>
+                          <div className="space-y-1.5">
+                            {capitalOsData.underwriting.softPreQual.map((tip: string, i: number) => (
+                              <p key={i} className="text-[11px] text-[#1a1a2e]/65 flex items-start gap-2" data-testid={`prequal-tip-${i}`}>
+                                <span className="text-[#1a1a2e]/30 shrink-0 mt-px">›</span>
+                                <span>{tip}</span>
+                              </p>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {capitalOsData.underwriting.bureauPullAwareness && capitalOsData.underwriting.bureauPullAwareness.length > 0 && (
+                        <div className="mt-4 rounded-xl bg-white/50 border border-white/30 p-4" data-testid="bureau-pull-section">
+                          <p className="text-[10px] text-[#1a1a2e]/55 uppercase tracking-wider mb-2">Bureau Pull Awareness</p>
+                          <div className="space-y-1">
+                            {capitalOsData.underwriting.bureauPullAwareness.map((info: string, i: number) => (
+                              <p key={i} className="text-[10px] text-[#1a1a2e]/55 flex items-start gap-2" data-testid={`bureau-pull-${i}`}>
+                                <span className="text-[#1a1a2e]/25 shrink-0 mt-px">•</span>
+                                <span>{info}</span>
+                              </p>
+                            ))}
+                          </div>
+                        </div>
+                      )}
                     </div>
                   )}
 
