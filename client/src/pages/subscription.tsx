@@ -134,17 +134,6 @@ export default function SubscriptionPage() {
 
   if (!user) { setLocation("/"); return null; }
 
-  const handleSubscribe = async () => {
-    if (!priceId) return;
-    setIsProcessing(true);
-    try {
-      const res = await fetch("/api/create-checkout-session", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ priceId }) });
-      const data = await res.json();
-      if (data.url) { window.location.href = data.url; }
-      else { toast({ variant: "destructive", title: "Error", description: data.error || "Could not start checkout." }); setIsProcessing(false); }
-    } catch { toast({ variant: "destructive", title: "Error", description: "Could not start checkout." }); setIsProcessing(false); }
-  };
-
   const handleManageBilling = async () => {
     setIsProcessing(true);
     try {
@@ -156,28 +145,44 @@ export default function SubscriptionPage() {
     finally { setIsProcessing(false); }
   };
 
-  const handleProfileSetup = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!profileUsername.trim() || !profilePhone.trim()) return;
-    setSavingProfile(true);
-    try {
-      const res = await fetch("/api/profile-setup", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username: profileUsername.trim(), phone: profilePhone.trim() }),
-      });
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({ error: "Failed to save profile" }));
-        toast({ variant: "destructive", title: "Error", description: err.error || "Failed to save profile" });
+  const handleActivate = async () => {
+    if (!priceId) return;
+    setIsProcessing(true);
+    if (needsProfile) {
+      if (!profileUsername.trim() || profileUsername.trim().length < 3 || !profilePhone.trim()) {
+        toast({ variant: "destructive", title: "Error", description: "Please fill in your username and phone number" });
+        setIsProcessing(false);
+        return;
+      }
+      setSavingProfile(true);
+      try {
+        const profileRes = await fetch("/api/profile-setup", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ username: profileUsername.trim(), phone: profilePhone.trim() }),
+        });
+        if (!profileRes.ok) {
+          const err = await profileRes.json().catch(() => ({ error: "Failed to save profile" }));
+          toast({ variant: "destructive", title: "Error", description: err.error || "Failed to save profile" });
+          setIsProcessing(false);
+          setSavingProfile(false);
+          return;
+        }
+        queryClient.invalidateQueries({ queryKey: ["/api/me"] });
+      } catch {
+        toast({ variant: "destructive", title: "Error", description: "Failed to save profile" });
+        setIsProcessing(false);
         setSavingProfile(false);
         return;
       }
-      queryClient.invalidateQueries({ queryKey: ["/api/me"] });
-      toast({ title: "Profile saved", description: `Welcome, ${profileUsername.trim()}!` });
-    } catch {
-      toast({ variant: "destructive", title: "Error", description: "Failed to save profile" });
+      setSavingProfile(false);
     }
-    setSavingProfile(false);
+    try {
+      const res = await fetch("/api/create-checkout-session", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ priceId }) });
+      const data = await res.json();
+      if (data.url) { window.location.href = data.url; }
+      else { toast({ variant: "destructive", title: "Error", description: data.error || "Could not start checkout." }); setIsProcessing(false); }
+    } catch { toast({ variant: "destructive", title: "Error", description: "Could not start checkout." }); setIsProcessing(false); }
   };
 
   const isActive = user.subscriptionStatus === "active";
@@ -226,62 +231,13 @@ export default function SubscriptionPage() {
           </p>
         </div>
 
-        {needsProfile && (
-          <div className={`${contentBlock} overflow-hidden`}>
-            <div className="w-full h-px bg-gradient-to-r from-transparent via-[#c0c0d0] to-transparent"></div>
-            <div className="px-6 sm:px-8 pt-7 sm:pt-9 pb-3 text-center">
-              <p className="text-[11px] sm:text-[12px] text-[#7a7a9a] uppercase tracking-[0.15em] font-semibold mb-2">Step 1</p>
-              <h2 className="text-[20px] sm:text-[24px] tracking-[-0.02em] text-[#1a1a2e] font-semibold mb-1">Set Up Your Profile</h2>
-              <p className="text-[13px] text-[#6a6a8a]">Choose a username and add your phone number</p>
-            </div>
-            <form onSubmit={handleProfileSetup} className="px-6 sm:px-8 pb-7 sm:pb-9 space-y-4">
-              <div className="relative">
-                <User className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#9a9ab0]" />
-                <input
-                  data-testid="input-profile-username"
-                  type="text"
-                  placeholder="Choose a username"
-                  className="w-full bg-[#f5f5fa] border border-[#e0e0ea] rounded-xl h-[48px] pl-10 pr-4 text-[14px] text-[#1a1a2e] placeholder:text-[#9a9ab0] outline-none focus:border-[#6a6a8a] transition-colors"
-                  value={profileUsername}
-                  onChange={(e) => setProfileUsername(e.target.value)}
-                  required
-                  minLength={3}
-                  disabled={savingProfile}
-                />
-              </div>
-              <div className="relative">
-                <Phone className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#9a9ab0]" />
-                <input
-                  data-testid="input-profile-phone"
-                  type="tel"
-                  placeholder="Phone number"
-                  className="w-full bg-[#f5f5fa] border border-[#e0e0ea] rounded-xl h-[48px] pl-10 pr-4 text-[14px] text-[#1a1a2e] placeholder:text-[#9a9ab0] outline-none focus:border-[#6a6a8a] transition-colors"
-                  value={profilePhone}
-                  onChange={(e) => setProfilePhone(e.target.value)}
-                  required
-                  disabled={savingProfile}
-                />
-              </div>
-              <button
-                data-testid="button-save-profile"
-                type="submit"
-                disabled={savingProfile || !profileUsername.trim() || !profilePhone.trim()}
-                className="w-full h-[48px] sm:h-[52px] rounded-xl text-white text-[13px] sm:text-[14px] font-bold tracking-wide hover:opacity-90 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                style={{ background: 'linear-gradient(135deg, #2a2a2a 0%, #0a0a0a 100%)' }}
-              >
-                {savingProfile ? <Loader2 className="w-4 h-4 animate-spin" /> : "Continue"}
-              </button>
-            </form>
-          </div>
-        )}
-
-        {!isActive && !needsProfile && (
+        {!isActive && (
           <div className={`${contentBlock} p-4 text-center`}>
-            <p className="text-[12px] sm:text-[13px] text-[#6a6a8a]" data-testid="text-subscription-inactive">Subscription inactive. Activate below to continue.</p>
+            <p className="text-[12px] sm:text-[13px] text-[#6a6a8a]" data-testid="text-subscription-inactive">Complete your profile and activate your membership below.</p>
           </div>
         )}
 
-        <div className={`${contentBlock} overflow-hidden`} style={{ opacity: needsProfile ? 0.4 : 1, pointerEvents: needsProfile ? 'none' : 'auto' }}>
+        <div className={`${contentBlock} overflow-hidden`}>
           <div className="w-full h-px bg-gradient-to-r from-transparent via-[#c0c0d0] to-transparent"></div>
 
           <div className="px-6 sm:px-8 pt-7 sm:pt-9 pb-3 text-center">
@@ -297,8 +253,43 @@ export default function SubscriptionPage() {
             <p className="text-[#8a8aa5] text-[12px] sm:text-[13px]">All-in-one fundability platform</p>
           </div>
 
+          {needsProfile && (
+            <div className="px-6 sm:px-8 py-5 sm:py-6">
+              <div className="w-full h-px bg-gradient-to-r from-transparent via-[#d0d0de] to-transparent mb-5 sm:mb-6"></div>
+              <p className="text-[11px] sm:text-[12px] text-[#7a7a9a] uppercase tracking-[0.15em] font-semibold mb-4 text-center">Your Profile</p>
+              <div className="space-y-3">
+                <div className="relative">
+                  <User className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#9a9ab0]" />
+                  <input
+                    data-testid="input-profile-username"
+                    type="text"
+                    placeholder="Choose a username"
+                    className="w-full bg-[#f5f5fa] border border-[#e0e0ea] rounded-xl h-[48px] pl-10 pr-4 text-[14px] text-[#1a1a2e] placeholder:text-[#9a9ab0] outline-none focus:border-[#6a6a8a] transition-colors"
+                    value={profileUsername}
+                    onChange={(e) => setProfileUsername(e.target.value)}
+                    minLength={3}
+                    disabled={savingProfile}
+                  />
+                </div>
+                <div className="relative">
+                  <Phone className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#9a9ab0]" />
+                  <input
+                    data-testid="input-profile-phone"
+                    type="tel"
+                    placeholder="Phone number"
+                    className="w-full bg-[#f5f5fa] border border-[#e0e0ea] rounded-xl h-[48px] pl-10 pr-4 text-[14px] text-[#1a1a2e] placeholder:text-[#9a9ab0] outline-none focus:border-[#6a6a8a] transition-colors"
+                    value={profilePhone}
+                    onChange={(e) => setProfilePhone(e.target.value)}
+                    disabled={savingProfile}
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+
           <div className="px-6 sm:px-8 py-5 sm:py-6">
             <div className="w-full h-px bg-gradient-to-r from-transparent via-[#d0d0de] to-transparent mb-5 sm:mb-6"></div>
+            <p className="text-[11px] sm:text-[12px] text-[#7a7a9a] uppercase tracking-[0.15em] font-semibold mb-4 text-center">What's Included</p>
             <div className="space-y-3.5 sm:space-y-4">
               {features.map((feature, i) => (
                 <div key={i} className="flex items-center gap-3">
@@ -324,12 +315,12 @@ export default function SubscriptionPage() {
             ) : (
               <button
                 data-testid="button-activate"
-                onClick={handleSubscribe}
-                disabled={isProcessing || loadingPrice || !priceId}
+                onClick={handleActivate}
+                disabled={isProcessing || savingProfile || loadingPrice || !priceId || (needsProfile && (!profileUsername.trim() || profileUsername.trim().length < 3 || !profilePhone.trim()))}
                 className="w-full h-[48px] sm:h-[52px] rounded-full text-white text-[13px] sm:text-[14px] font-bold tracking-wide hover:opacity-90 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-[0_4px_20px_rgba(0,0,0,0.12)]"
                 style={{ background: 'linear-gradient(135deg, #2a2a2a 0%, #0a0a0a 100%)' }}
               >
-                {isProcessing ? <Loader2 className="w-4 h-4 animate-spin" /> : <><CreditCard className="w-4 h-4" /> Activate Membership</>}
+                {isProcessing || savingProfile ? <Loader2 className="w-4 h-4 animate-spin" /> : <><CreditCard className="w-4 h-4" /> Activate Membership</>}
               </button>
             )}
           </div>
