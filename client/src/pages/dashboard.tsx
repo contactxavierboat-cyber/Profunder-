@@ -212,7 +212,7 @@ const NAV_ITEMS: { key: TabKey; label: string; icon: any }[] = [
 ];
 
 export default function DashboardPage() {
-  const { user, messages, sendMessage, clearChat, logout } = useAuth();
+  const { user, messages, sendMessage, clearChat, logout, isLoading: authLoading } = useAuth();
   const [, setLocation] = useLocation();
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -638,8 +638,8 @@ export default function DashboardPage() {
   const { toast } = useToast();
 
   useEffect(() => {
-    if (!user) { setLocation("/"); return; }
-  }, [user, setLocation]);
+    if (!authLoading && !user) { setLocation("/"); return; }
+  }, [user, authLoading, setLocation]);
 
   useEffect(() => { scrollToBottom(); }, [messages]);
 
@@ -692,7 +692,7 @@ export default function DashboardPage() {
     el.style.height = Math.min(el.scrollHeight, 200) + "px";
   };
 
-  if (!user) return null;
+  if (authLoading || !user) return null;
 
   const hasMessages = messages.length > 0;
 
