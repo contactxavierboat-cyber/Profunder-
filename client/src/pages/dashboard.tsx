@@ -170,38 +170,6 @@ interface CapitalOsDashboard {
     reasoning: string;
     factors: { factor: string; status: "good" | "warning" | "bad"; detail: string }[];
   };
-  underwriting?: {
-    finalMode: "REPAIR" | "OPTIMIZATION" | "FUNDING_READY" | "WAIT_AND_OPTIMIZE";
-    creditTier: "EXCELLENT" | "STRONG" | "BORDERLINE" | "WEAK";
-    fundingEligible: boolean;
-    denialReasons: string[];
-    explanation: string;
-    nextSteps: string[];
-    fundingRange: { minimum: number; maximum: number } | null;
-    cardStacking: {
-      eligible: boolean;
-      tier: "A" | "B" | null;
-      maxApps: number;
-      windowDays: string;
-      stopConditions: string[];
-      guidance: string;
-    };
-    creditUnion: {
-      cuRecommended: boolean;
-      chexRisk: boolean;
-      guidance: string;
-    };
-    softPreQual: string[];
-    bureauPullAwareness: string[];
-    elevatedRisk: { present: boolean; factors: string[] };
-    flags: {
-      utilizationFlag: boolean;
-      velocityFlag: boolean;
-      ageFlag: boolean;
-      thinFileFlag: boolean;
-      hardStopTriggered: boolean;
-    };
-  };
 }
 
 function timeAgo(date: Date | string): string {
@@ -315,8 +283,6 @@ export default function DashboardPage() {
   const [capitalStackAmount, setCapitalStackAmount] = useState(50000);
   const [capitalStackResult, setCapitalStackResult] = useState<any>(null);
   const [capitalStackLoading, setCapitalStackLoading] = useState(false);
-  const [disputeCases, setDisputeCases] = useState<any[]>([]);
-  const [disputeCasesLoading, setDisputeCasesLoading] = useState(false);
 
   const fetchDmMessages = async (friendId: number) => {
     try {
@@ -403,15 +369,6 @@ export default function DashboardPage() {
       const res = await fetch(`/api/users/search?q=${encodeURIComponent(q)}`, { credentials: "include" });
       if (res.ok) { setFriendSearchResults(await res.json()); }
     } catch (err) { console.error(err); } finally { setFriendSearchLoading(false); }
-  };
-
-  const fetchDisputeCases = async () => {
-    setDisputeCasesLoading(true);
-    try {
-      const res = await fetch("/api/capital-os/disputes", { credentials: "include" });
-      if (res.ok) setDisputeCases(await res.json());
-    } catch (err) { console.error("Failed to fetch dispute cases", err); }
-    finally { setDisputeCasesLoading(false); }
   };
 
   const sendFriendRequest = async (receiverId: number) => {
@@ -527,13 +484,12 @@ export default function DashboardPage() {
       });
       if (res.ok) {
         const data = await res.json();
-        toast({ title: "Analysis Complete", description: "Your document has been analyzed. All dashboard data updated." });
+        toast({ title: "Analysis Complete", description: "Your document has been analyzed and your funding score has been updated." });
         await fetchFundingReadiness();
         await fetchCapitalOsDashboard();
-        await fetchDisputeCases();
         if (data.repairResult) {
           setRepairData(data.repairResult);
-          toast({ title: "Credit Repair Updated", description: `${data.repairResult.detectedIssues?.length || 0} issues detected. ${data.repairResult.newDisputeCount || data.repairResult.letters?.length || 0} dispute letters auto-generated.` });
+          toast({ title: "Credit Repair Updated", description: `${data.repairResult.detectedIssues?.length || 0} issues detected. ${data.repairResult.letters?.length || 0} letters generated.` });
         } else { await fetchRepairData(); }
       } else {
         const data = await res.json();
@@ -568,7 +524,6 @@ export default function DashboardPage() {
       if (res.ok) {
         const data = await res.json();
         setRepairData(data);
-        await fetchDisputeCases();
         toast({ title: "Repair Analysis Complete", description: `${data.detectedIssues?.length || 0} issues detected. ${data.letters?.length || 0} letters generated.` });
       } else {
         const data = await res.json();
@@ -639,7 +594,6 @@ export default function DashboardPage() {
       fetchRepairData();
       fetchQA();
       fetchCapitalOsDashboard();
-      fetchDisputeCases();
     }
   }, [user]);
 
@@ -912,187 +866,6 @@ export default function DashboardPage() {
                     </div>
                   </div>
 
-                  {capitalOsData.underwriting && (
-                    <div className="rounded-2xl bg-white/70 backdrop-blur-md border border-white/40 p-6 mb-6" data-testid="card-underwriting">
-                      <div className="flex items-center justify-between mb-4">
-                        <p className="text-[10px] text-[#1a1a2e]/60 uppercase tracking-wider">Underwriting Intelligence</p>
-                        <span className={cn("text-[10px] px-2.5 py-0.5 rounded-full font-medium",
-                          capitalOsData.underwriting.creditTier === "EXCELLENT" ? "bg-green-500/15 text-green-600" :
-                          capitalOsData.underwriting.creditTier === "STRONG" ? "bg-emerald-500/15 text-emerald-600" :
-                          capitalOsData.underwriting.creditTier === "BORDERLINE" ? "bg-yellow-500/15 text-yellow-600" :
-                          "bg-red-500/15 text-red-600"
-                        )} data-testid="badge-credit-tier">{capitalOsData.underwriting.creditTier}</span>
-                      </div>
-
-                      <div className="flex items-center gap-3 mb-4">
-                        <span className={cn("text-sm font-semibold px-3 py-1.5 rounded-xl",
-                          capitalOsData.underwriting.finalMode === "REPAIR" ? "bg-red-500/15 text-red-600" :
-                          capitalOsData.underwriting.finalMode === "OPTIMIZATION" ? "bg-amber-500/15 text-amber-600" :
-                          capitalOsData.underwriting.finalMode === "WAIT_AND_OPTIMIZE" ? "bg-blue-500/15 text-blue-600" :
-                          "bg-green-500/15 text-green-600"
-                        )} data-testid="badge-underwriting-mode">
-                          {capitalOsData.underwriting.finalMode.replace(/_/g, " ")}
-                        </span>
-                        {capitalOsData.underwriting.fundingEligible && (
-                          <span className="text-[10px] px-2 py-0.5 rounded-full bg-green-500/10 text-green-600 font-medium" data-testid="badge-funding-eligible">Eligible</span>
-                        )}
-                      </div>
-
-                      {capitalOsData.underwriting.finalMode === "FUNDING_READY" && capitalOsData.underwriting.fundingRange && (
-                        <div className="rounded-xl bg-green-500/[0.06] border border-green-500/10 p-4 mb-4" data-testid="funding-range-display">
-                          <p className="text-[10px] text-green-600/60 uppercase tracking-wider mb-1">Estimated Funding Range</p>
-                          <p className="text-2xl font-bold text-green-700" data-testid="text-funding-range">
-                            ${capitalOsData.underwriting.fundingRange.minimum.toLocaleString()} – ${capitalOsData.underwriting.fundingRange.maximum.toLocaleString()}
-                          </p>
-                          <p className="text-[10px] text-[#1a1a2e]/45 mt-1">This is an estimate based on current profile data. Actual amounts depend on lender criteria.</p>
-                        </div>
-                      )}
-
-                      <p className="text-[11px] text-[#1a1a2e]/70 leading-relaxed mb-4" data-testid="text-underwriting-explanation">{capitalOsData.underwriting.explanation}</p>
-
-                      {capitalOsData.underwriting.denialReasons.length > 0 && (
-                        <div className="mb-4" data-testid="denial-reasons-list">
-                          <p className="text-[10px] text-[#1a1a2e]/55 uppercase tracking-wider mb-2">Denial Factors</p>
-                          <div className="space-y-1.5">
-                            {capitalOsData.underwriting.denialReasons.map((reason, i) => (
-                              <div key={i} className="flex items-start gap-2 text-[11px] text-[#1a1a2e]/70" data-testid={`denial-reason-${i}`}>
-                                <AlertCircle className="w-3.5 h-3.5 text-red-500/60 shrink-0 mt-0.5" />
-                                <span>{reason}</span>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-
-                      {capitalOsData.underwriting.nextSteps.length > 0 && (
-                        <div className="mb-4" data-testid="next-steps-list">
-                          <p className="text-[10px] text-[#1a1a2e]/55 uppercase tracking-wider mb-2">Next Steps</p>
-                          <div className="space-y-1.5">
-                            {capitalOsData.underwriting.nextSteps.map((step, i) => (
-                              <div key={i} className="flex items-start gap-2.5 text-[11px] text-[#1a1a2e]/70" data-testid={`next-step-${i}`}>
-                                <span className="text-[10px] font-semibold text-[#1a1a2e]/40 mt-px w-4 shrink-0">{i + 1}.</span>
-                                <span>{step}</span>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-
-                      <div data-testid="underwriting-flags">
-                        <p className="text-[10px] text-[#1a1a2e]/55 uppercase tracking-wider mb-2">Flags</p>
-                        <div className="flex flex-wrap gap-2">
-                          {[
-                            { key: "utilizationFlag", label: "Utilization", active: capitalOsData.underwriting.flags.utilizationFlag },
-                            { key: "velocityFlag", label: "Velocity", active: capitalOsData.underwriting.flags.velocityFlag },
-                            { key: "ageFlag", label: "Age", active: capitalOsData.underwriting.flags.ageFlag },
-                            { key: "thinFileFlag", label: "Thin File", active: capitalOsData.underwriting.flags.thinFileFlag },
-                            { key: "hardStopTriggered", label: "Hard Stop", active: capitalOsData.underwriting.flags.hardStopTriggered },
-                          ].map(flag => (
-                            <span key={flag.key} className={cn("text-[10px] px-2.5 py-1 rounded-lg font-medium",
-                              flag.active
-                                ? flag.key === "hardStopTriggered" ? "bg-red-500/15 text-red-600" : "bg-amber-500/10 text-amber-600"
-                                : "bg-[#e0e0ea]/50 text-[#1a1a2e]/35"
-                            )} data-testid={`flag-${flag.key}`}>
-                              {flag.label}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-
-                      {capitalOsData.underwriting.elevatedRisk?.present && (
-                        <div className="mt-4 rounded-xl bg-amber-500/[0.06] border border-amber-500/10 p-4" data-testid="elevated-risk-section">
-                          <p className="text-[10px] text-amber-600/70 uppercase tracking-wider mb-2">Elevated Risk Factors</p>
-                          <div className="space-y-1.5">
-                            {capitalOsData.underwriting.elevatedRisk.factors.map((f: string, i: number) => (
-                              <div key={i} className="flex items-start gap-2 text-[11px] text-amber-700/70" data-testid={`risk-factor-${i}`}>
-                                <AlertTriangle className="w-3.5 h-3.5 text-amber-500/60 shrink-0 mt-0.5" />
-                                <span>{f}</span>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-
-                      {capitalOsData.underwriting.cardStacking && (
-                        <div className="mt-4 rounded-xl bg-white/50 border border-white/30 p-4" data-testid="card-stacking-section">
-                          <div className="flex items-center justify-between mb-2">
-                            <p className="text-[10px] text-[#1a1a2e]/55 uppercase tracking-wider">Card Stacking Simulator</p>
-                            {capitalOsData.underwriting.cardStacking.eligible ? (
-                              <span className="text-[9px] px-2 py-0.5 rounded-full bg-green-500/15 text-green-600 font-medium" data-testid="stacking-tier">Tier {capitalOsData.underwriting.cardStacking.tier}</span>
-                            ) : (
-                              <span className="text-[9px] px-2 py-0.5 rounded-full bg-red-500/10 text-red-500/70 font-medium">Not Eligible</span>
-                            )}
-                          </div>
-                          <p className="text-[11px] text-[#1a1a2e]/70 leading-relaxed mb-2">{capitalOsData.underwriting.cardStacking.guidance}</p>
-                          {capitalOsData.underwriting.cardStacking.eligible && (
-                            <div className="space-y-2">
-                              <div className="flex items-center gap-4 text-[11px]">
-                                <span className="text-[#1a1a2e]/50">Max Apps:</span>
-                                <span className="font-medium text-[#1a1a2e]/80">{capitalOsData.underwriting.cardStacking.maxApps}</span>
-                                <span className="text-[#1a1a2e]/50">Window:</span>
-                                <span className="font-medium text-[#1a1a2e]/80">{capitalOsData.underwriting.cardStacking.windowDays}</span>
-                              </div>
-                              <div>
-                                <p className="text-[10px] text-red-500/60 uppercase tracking-wider mb-1">Stop Conditions</p>
-                                <div className="space-y-1">
-                                  {capitalOsData.underwriting.cardStacking.stopConditions.map((sc: string, i: number) => (
-                                    <p key={i} className="text-[10px] text-[#1a1a2e]/55 flex items-center gap-1.5" data-testid={`stop-condition-${i}`}>
-                                      <span className="w-1 h-1 rounded-full bg-red-500/40 shrink-0" />
-                                      {sc}
-                                    </p>
-                                  ))}
-                                </div>
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                      )}
-
-                      {capitalOsData.underwriting.creditUnion && (
-                        <div className="mt-4 rounded-xl bg-white/50 border border-white/30 p-4" data-testid="credit-union-section">
-                          <div className="flex items-center justify-between mb-2">
-                            <p className="text-[10px] text-[#1a1a2e]/55 uppercase tracking-wider">Credit Union Intelligence</p>
-                            {capitalOsData.underwriting.creditUnion.chexRisk && (
-                              <span className="text-[9px] px-2 py-0.5 rounded-full bg-red-500/10 text-red-500/70 font-medium">ChexSystems Risk</span>
-                            )}
-                            {capitalOsData.underwriting.creditUnion.cuRecommended && (
-                              <span className="text-[9px] px-2 py-0.5 rounded-full bg-green-500/15 text-green-600 font-medium">Recommended</span>
-                            )}
-                          </div>
-                          <p className="text-[11px] text-[#1a1a2e]/70 leading-relaxed">{capitalOsData.underwriting.creditUnion.guidance}</p>
-                        </div>
-                      )}
-
-                      {capitalOsData.underwriting.softPreQual && capitalOsData.underwriting.softPreQual.length > 0 && (
-                        <div className="mt-4 rounded-xl bg-white/50 border border-white/30 p-4" data-testid="soft-prequal-section">
-                          <p className="text-[10px] text-[#1a1a2e]/55 uppercase tracking-wider mb-2">Pre-Qualification Strategy</p>
-                          <div className="space-y-1.5">
-                            {capitalOsData.underwriting.softPreQual.map((tip: string, i: number) => (
-                              <p key={i} className="text-[11px] text-[#1a1a2e]/65 flex items-start gap-2" data-testid={`prequal-tip-${i}`}>
-                                <span className="text-[#1a1a2e]/30 shrink-0 mt-px">›</span>
-                                <span>{tip}</span>
-                              </p>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-
-                      {capitalOsData.underwriting.bureauPullAwareness && capitalOsData.underwriting.bureauPullAwareness.length > 0 && (
-                        <div className="mt-4 rounded-xl bg-white/50 border border-white/30 p-4" data-testid="bureau-pull-section">
-                          <p className="text-[10px] text-[#1a1a2e]/55 uppercase tracking-wider mb-2">Bureau Pull Awareness</p>
-                          <div className="space-y-1">
-                            {capitalOsData.underwriting.bureauPullAwareness.map((info: string, i: number) => (
-                              <p key={i} className="text-[10px] text-[#1a1a2e]/55 flex items-start gap-2" data-testid={`bureau-pull-${i}`}>
-                                <span className="text-[#1a1a2e]/25 shrink-0 mt-px">•</span>
-                                <span>{info}</span>
-                              </p>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  )}
-
                   <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
                     {capitalOsData.bureauHealth.bureaus.map(b => (
                       <div key={b.bureau} className={cn("rounded-2xl bg-white/70 backdrop-blur-md border p-5", b.priority ? "border-[#3a3a5a]/30" : "border-white/40")} data-testid={`bureau-${b.bureau.toLowerCase()}`}>
@@ -1323,87 +1096,6 @@ export default function DashboardPage() {
                                 >
                                   {copiedLetter === idx ? <><Check className="w-3 h-3" /> Copied</> : <><Copy className="w-3 h-3" /> Copy to Clipboard</>}
                                 </button>
-                              </div>
-                            )}
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {disputeCases.length > 0 && (
-                    <div className="rounded-2xl bg-white/70 backdrop-blur-md border border-white/40 p-6 mb-4" data-testid="dispute-cases-card">
-                      <div className="flex items-center justify-between mb-4">
-                        <p className="text-xs text-[#1a1a2e]/70">Active Dispute Cases ({disputeCases.length})</p>
-                        <button onClick={fetchDisputeCases} className="text-[10px] text-[#1a1a2e]/50 hover:text-[#1a1a2e]/70">
-                          <RefreshCw className="w-3 h-3" />
-                        </button>
-                      </div>
-                      <div className="space-y-3">
-                        {disputeCases.map((dc: any) => (
-                          <div key={dc.id} className="rounded-xl bg-white/50 border border-white/30 overflow-hidden" data-testid={`dispute-case-${dc.id}`}>
-                            <button
-                              onClick={() => setExpandedLetters(prev => { const next = new Set(prev); const key = 1000 + dc.id; if (next.has(key)) next.delete(key); else next.add(key); return next; })}
-                              className="w-full flex items-center justify-between p-4 text-left hover:bg-white/60 transition-colors"
-                            >
-                              <div className="flex items-center gap-3">
-                                <FileText className="w-4 h-4 text-[#1a1a2e]/60 shrink-0" />
-                                <div>
-                                  <p className="text-sm font-medium text-[#1a1a2e]/90">{dc.accountName}</p>
-                                  <div className="flex items-center gap-2 mt-0.5">
-                                    <span className="text-[10px] text-[#1a1a2e]/50">{dc.bureau}</span>
-                                    <span className="text-[10px] text-[#1a1a2e]/40">•</span>
-                                    <span className="text-[10px] text-[#1a1a2e]/50">{dc.disputeType}</span>
-                                    <span className={cn("text-[9px] font-medium px-1.5 py-0.5 rounded",
-                                      dc.status === "draft" ? "bg-yellow-500/15 text-yellow-600/80" :
-                                      dc.status === "sent" ? "bg-blue-500/15 text-blue-600/80" :
-                                      dc.status === "resolved" ? "bg-green-500/15 text-green-600/80" :
-                                      "bg-gray-500/15 text-gray-600/80"
-                                    )}>{dc.status}</span>
-                                  </div>
-                                </div>
-                              </div>
-                              <ChevronRight className={cn("w-4 h-4 text-[#1a1a2e]/40 transition-transform", expandedLetters.has(1000 + dc.id) && "rotate-90")} />
-                            </button>
-                            {expandedLetters.has(1000 + dc.id) && (
-                              <div className="px-4 pb-4 border-t border-white/30">
-                                {dc.fcraCitation && <p className="text-[10px] text-[#1a1a2e]/50 mt-3 mb-2">Citation: {dc.fcraCitation}</p>}
-                                <pre className="text-[11px] text-[#1a1a2e]/80 leading-relaxed whitespace-pre-wrap font-sans">{dc.letterContent}</pre>
-                                <div className="flex items-center gap-2 mt-3">
-                                  <button
-                                    onClick={() => copyLetterToClipboard(dc.letterContent, 1000 + dc.id)}
-                                    className="flex items-center gap-2 h-8 px-3 rounded-lg bg-white/60 border border-white/30 text-[10px] text-[#1a1a2e]/70 hover:bg-white/80 transition-colors"
-                                    data-testid={`copy-dispute-${dc.id}`}
-                                  >
-                                    {copiedLetter === 1000 + dc.id ? <><Check className="w-3 h-3" /> Copied</> : <><Copy className="w-3 h-3" /> Copy Letter</>}
-                                  </button>
-                                  {dc.status === "draft" && (
-                                    <button
-                                      onClick={async () => {
-                                        try {
-                                          await fetch(`/api/capital-os/disputes/${dc.id}`, {
-                                            method: "PATCH",
-                                            headers: { "Content-Type": "application/json" },
-                                            credentials: "include",
-                                            body: JSON.stringify({ status: "sent" }),
-                                          });
-                                          await fetchDisputeCases();
-                                          toast({ title: "Marked as Sent", description: "30-day response deadline set." });
-                                        } catch { toast({ title: "Error", variant: "destructive" }); }
-                                      }}
-                                      className="flex items-center gap-2 h-8 px-3 rounded-lg bg-[#3a3a5a] text-white text-[10px] hover:bg-[#2a2a4a] transition-colors"
-                                      data-testid={`send-dispute-${dc.id}`}
-                                    >
-                                      <Send className="w-3 h-3" /> Mark as Sent
-                                    </button>
-                                  )}
-                                </div>
-                                {dc.sentDate && (
-                                  <div className="mt-2 text-[10px] text-[#1a1a2e]/50">
-                                    Sent: {new Date(dc.sentDate).toLocaleDateString()}
-                                    {dc.responseDeadline && <span> • Deadline: {new Date(dc.responseDeadline).toLocaleDateString()}</span>}
-                                  </div>
-                                )}
                               </div>
                             )}
                           </div>

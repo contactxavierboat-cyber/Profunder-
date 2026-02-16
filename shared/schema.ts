@@ -29,17 +29,6 @@ export const users = pgTable("users", {
   publicRecords: integer("public_records"),
   utilizationPercent: integer("utilization_percent"),
   
-  // Underwriting Intelligence Fields
-  chargeoffs: integer("chargeoffs").default(0),
-  bankruptcyPresent: boolean("bankruptcy_present").default(false),
-  identityFlagsPresent: boolean("identity_flags_present").default(false),
-  issuerRelationshipNegative: boolean("issuer_relationship_negative").default(false),
-  chexRiskPresent: boolean("chex_risk_present").default(false),
-  highestCardUtilizationPercent: integer("highest_card_utilization_percent"),
-  hardInquiries6mo: integer("hard_inquiries_6mo"),
-  hardInquiries12mo: integer("hard_inquiries_12mo"),
-  recentAccounts12mo: integer("recent_accounts_12mo"),
-  
   // Stripe
   stripeCustomerId: text("stripe_customer_id"),
 

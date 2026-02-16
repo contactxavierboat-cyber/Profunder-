@@ -15,7 +15,7 @@ import { sql } from "drizzle-orm";
 import { promisify } from "util";
 import { writeFile, readdir, readFile, unlink, mkdir } from "fs/promises";
 import path from "path";
-import { calculateFundingPhase, calculateCapitalReadiness, calculateSafeExposure, calculateBureauHealth, calculateApplicationWindow, simulateBankRating, simulatePledgeLoan, simulateCapitalStack, calculateUnderwriting } from "./capitalEngines";
+import { calculateFundingPhase, calculateCapitalReadiness, calculateSafeExposure, calculateBureauHealth, calculateApplicationWindow, simulateBankRating, simulatePledgeLoan, simulateCapitalStack } from "./capitalEngines";
 import { disputeCases, systemAlerts } from "@shared/schema";
 
 const execFileAsync = promisify(execFile);
@@ -4281,15 +4281,6 @@ IMPORTANT: You MUST respond with ONLY valid JSON matching this exact structure (
   "avgAccountAgeYears": <average account age in years as integer, rounded down. e.g. if "4 years 11 months" = 4>,
   "publicRecords": <number of public records (bankruptcies, judgments, liens) as integer. 0 if none>,
   "utilizationPercent": <credit utilization percentage as integer, e.g. 45 for 45%. Calculate from balances/limits if not stated directly>,
-  "highestCardUtilizationPercent": <utilization of the single highest-utilized card as integer, e.g. 78 for 78%. null if cannot determine>,
-  "chargeoffs": <number of charge-off accounts as integer. 0 if none>,
-  "bankruptcyPresent": <true if any bankruptcy filing detected, false otherwise>,
-  "identityFlagsPresent": <true if any fraud alert, identity theft flag, or ID verification issue detected, false otherwise>,
-  "issuerRelationshipNegative": <true if any negative relationship with a specific issuer is noted (e.g., previous default, closed by issuer), false otherwise>,
-  "chexRiskPresent": <true if any ChexSystems risk, banking negative history, forced account closure, or NSF history detected, false otherwise>,
-  "hardInquiries6mo": <number of hard inquiries in the last 6 months as integer. null if cannot determine separately from 12mo>,
-  "hardInquiries12mo": <number of hard inquiries in the last 12 months as integer. null if cannot determine>,
-  "recentAccounts12mo": <number of accounts opened in the last 12 months as integer. 0 if none>,
   "summary": "<3-4 sentence analytical summary. Reference SPECIFIC numbers from the report: exact score, exact balances, exact limits, number of accounts, late payments, collections. Example: 'FICO score of 733 with 4 open accounts. Total revolving limit of $12,000 against $20 in balances yields 0.17% utilization. No derogatory marks or late payments detected. One account flagged as in dispute under FCBA.' Do NOT be vague.>",
   "nextSteps": ["<step 1>", "<step 2>", "<step 3>", "<step 4>", "<step 5>"]
 }
@@ -4363,15 +4354,6 @@ ${extractedText}
         updateData.avgAccountAgeYears = safeInt(analysisResult.avgAccountAgeYears);
         updateData.publicRecords = safeInt(analysisResult.publicRecords) ?? 0;
         updateData.utilizationPercent = safeInt(analysisResult.utilizationPercent);
-        updateData.highestCardUtilizationPercent = safeInt(analysisResult.highestCardUtilizationPercent);
-        updateData.chargeoffs = safeInt(analysisResult.chargeoffs) ?? 0;
-        updateData.bankruptcyPresent = analysisResult.bankruptcyPresent === true;
-        updateData.identityFlagsPresent = analysisResult.identityFlagsPresent === true;
-        updateData.issuerRelationshipNegative = analysisResult.issuerRelationshipNegative === true;
-        updateData.chexRiskPresent = analysisResult.chexRiskPresent === true;
-        updateData.hardInquiries6mo = safeInt(analysisResult.hardInquiries6mo);
-        updateData.hardInquiries12mo = safeInt(analysisResult.hardInquiries12mo);
-        updateData.recentAccounts12mo = safeInt(analysisResult.recentAccounts12mo) ?? 0;
       } else {
         updateData.hasBankStatement = true;
       }
@@ -4581,98 +4563,17 @@ ${reportText.slice(0, 25000)}
         lastRepairAnalysisDate: new Date(),
       });
 
-      const existingDisputes = await storage.getDisputeCases(userId);
-      let newDisputeCount = 0;
-
-      if (repairResult.detectedIssues && Array.isArray(repairResult.detectedIssues)) {
-        for (const issue of repairResult.detectedIssues) {
-          const bureau = issue.bureau || "Unknown";
-          const creditor = issue.creditor || "Unknown Account";
-          const accountLast4 = issue.accountLast4 || "";
-          const issueType = issue.issueType || "inaccuracy";
-
-          const alreadyExists = existingDisputes.some(
-            d => d.bureau.toLowerCase() === bureau.toLowerCase() &&
-                 d.accountName.toLowerCase() === creditor.toLowerCase() &&
-                 d.disputeType.toLowerCase() === issueType.toLowerCase() &&
-                 (d.accountNumber || "").toLowerCase() === (accountLast4 || "").toLowerCase()
-          );
-          if (alreadyExists) continue;
-
-          const matchingLetter = repairResult.letters?.find((l: any) =>
-            (l.recipientName || "").toLowerCase().includes(bureau.toLowerCase()) ||
-            (l.body || l.content || l.text || "").toLowerCase().includes(creditor.toLowerCase())
-          );
-
-          const fcraCitations: Record<string, string> = {
-            "late": "FCRA § 611(a)(1)(A) - Duty to investigate disputed information",
-            "status wrong": "FCRA § 623(a)(2) - Duty to correct and update inaccurate information",
-            "balance wrong": "FCRA § 623(a)(2) - Duty to correct and update inaccurate information",
-            "collection": "FCRA § 611(a)(1)(A) - Duty to investigate disputed information",
-            "charge-off": "FCRA § 623(a)(2) - Duty to correct and update inaccurate information",
-            "duplicate": "FCRA § 611(a)(1)(A) - Duty to investigate disputed information",
-            "personal info": "FCRA § 611(a)(1)(A) - Personal information correction",
-            "inaccuracy": "FCRA § 623(a)(2) - Duty to correct and update inaccurate information",
-          };
-          const citation = fcraCitations[issueType.toLowerCase()] || "FCRA § 611(a)(1)(A)";
-
-          let letterContent = matchingLetter?.body || matchingLetter?.content || matchingLetter?.text || "";
-
-          if (!letterContent) {
-            try {
-              const letterResponse = await openai.chat.completions.create({
-                model: "gpt-4o",
-                messages: [
-                  { role: "system", content: "You are a credit repair legal document specialist. Generate professional dispute letters citing specific FCRA provisions. Be direct, formal, and legally precise. No marketing language." },
-                  { role: "user", content: `Generate a bureau_dispute letter for:\nBureau: ${bureau}\nAccount: ${creditor}\nAccount Number: ...${accountLast4}\nDispute Type: ${issueType}\nIssue: ${issue.monthsAffected ? `${issueType} - Months affected: ${issue.monthsAffected}` : issueType}\nFCRA Citation: ${citation}\n\nInclude: sender placeholder [YOUR NAME/ADDRESS], date, bureau address, account details, specific FCRA citation, demand for action, 30-day response requirement. Format as a ready-to-send letter.` },
-                ],
-                max_tokens: 1500,
-              });
-              letterContent = letterResponse.choices[0]?.message?.content || "";
-            } catch (letterErr) {
-              console.error("Auto letter generation failed for", creditor, letterErr);
-              letterContent = `[Letter generation pending - ${issueType} dispute for ${creditor} at ${bureau}]`;
-            }
-          }
-
-          try {
-            await storage.createDisputeCase({
-              userId,
-              bureau,
-              accountName: creditor,
-              accountNumber: accountLast4 || null,
-              disputeType: issueType,
-              disputeMethod: "bureau_dispute",
-              fcraCitation: citation,
-              letterContent,
-              status: "draft",
-              sentDate: null,
-              reminderDate: null,
-              responseDeadline: null,
-              resolution: null,
-            });
-            newDisputeCount++;
-          } catch (disputeErr) {
-            console.error("Failed to create dispute case for", creditor, disputeErr);
-          }
-        }
-      }
-
       await storage.createMessage({
         userId,
         role: "assistant",
-        content: `**Credit Repair Analysis Complete**\n\n${repairResult.summary?.mainIssues || "Analysis complete."}\n\n**Priority:** ${repairResult.summary?.priorityAction || "Review your dashboard for details."}\n\n${repairResult.detectedIssues?.length || 0} issue(s) detected. ${newDisputeCount} new dispute case(s) created with letters.\n\nView full results in your Dashboard under Repair Engine.`,
+        content: `**Credit Repair Analysis Complete**\n\n${repairResult.summary?.mainIssues || "Analysis complete."}\n\n**Priority:** ${repairResult.summary?.priorityAction || "Review your dashboard for details."}\n\n${repairResult.detectedIssues?.length || 0} issue(s) detected. ${repairResult.letters?.length || 0} dispute letter(s) generated.\n\nView full results in your Dashboard under Credit Repair.`,
         attachment: "credit_report",
         mentor: null,
       });
 
-      const allDisputes = await storage.getDisputeCases(userId);
-
       res.json({
         success: true,
         ...repairResult,
-        disputeCases: allDisputes,
-        newDisputeCount,
       });
     } catch (error: any) {
       console.error("Credit repair analysis error:", error);
@@ -4727,11 +4628,10 @@ ${reportText.slice(0, 25000)}
       const exposure = calculateSafeExposure(user);
       const bureauHealth = calculateBureauHealth(user);
       const appWindow = calculateApplicationWindow(user);
-      const underwriting = calculateUnderwriting(user);
 
       await storage.updateUser(user.id, { fundingPhase: phase.phase, lastPhaseUpdate: new Date() });
 
-      res.json({ phase, readiness, exposure, bureauHealth, applicationWindow: appWindow, underwriting });
+      res.json({ phase, readiness, exposure, bureauHealth, applicationWindow: appWindow });
     } catch (error: any) {
       console.error("Capital OS Dashboard Error:", error);
       res.status(500).json({ error: "Failed to calculate capital metrics" });
@@ -4760,12 +4660,6 @@ ${reportText.slice(0, 25000)}
     const user = await storage.getUser(req.session.userId);
     if (!user) return res.status(404).json({ error: "User not found" });
     res.json(calculateBureauHealth(user));
-  });
-
-  app.get("/api/capital-os/underwriting", requireAuth, async (req: any, res) => {
-    const user = await storage.getUser(req.session.userId);
-    if (!user) return res.status(404).json({ error: "User not found" });
-    res.json(calculateUnderwriting(user));
   });
 
   app.get("/api/capital-os/application-window", requireAuth, async (req: any, res) => {

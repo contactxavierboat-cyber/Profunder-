@@ -79,22 +79,6 @@ A subscription-based AI mentorship platform ("Capital Operating System") combini
 - Pledge Loan Simulator: projects utilization/score improvement from pledge strategies
 - Capital Stack Planner: multi-stage funding roadmap across bureaus
 
-### Underwriting Intelligence Engine
-- 18 input variables extracted from credit reports via AI
-- Hard Stop Auto-Repair triggers: bankruptcy, chargeoffs, collections, public records, late payments ≥2 in 24mo, identity flags, utilization ≥70%, highest card ≥90%, inquiries ≥8 in 6mo, oldest account <1yr
-- Credit Score Tiers: EXCELLENT (≥740), STRONG (≥700), BORDERLINE (≥680), WEAK (<680)
-- Final Modes: REPAIR, OPTIMIZATION, FUNDING_READY, WAIT_AND_OPTIMIZE
-- Denial Reason Mapping: all hard-stop triggers + utilization/velocity/age/thin-file/derogatory flags
-- Conditional Funding Calculator: min = revolving limit × 1.5, max = revolving limit × 2.5 (only in FUNDING_READY)
-- Additional fields: chargeoffs, bankruptcyPresent, identityFlagsPresent, issuerRelationshipNegative, chexRiskPresent, highestCardUtilizationPercent, hardInquiries6mo/12mo, recentAccounts12mo
-- Card Stacking Simulator: Tier A (≥740, ≤1 inq, ≤6% util, 4 apps, 3-7 days) / Tier B (3 apps, 5-10 days), with stop conditions
-- Examiner-Aligned Risk Logic: detects rapid account growth, utilization spikes, excessive credit seeking, concentration risk
-- Credit Union Intelligence: ChexSystems awareness, relationship-based guidance, delays CU access if chex_risk or REPAIR mode
-- Soft Pre-Qual Rules: always pre-qualify first, skip issuers with no offer, velocity-sensitive delay
-- Bureau Pull Awareness: Experian most common, Equifax second, TransUnion varies, multi-bureau pulls possible
-- Auto-dispute generation: detected issues auto-create dispute cases with AI-generated FCRA letters
-- API: GET /api/capital-os/underwriting (standalone), also included in GET /api/capital-os/dashboard response
-
 ### Navigation Structure (Left Sidebar)
 1. Mission Control - Main dashboard with 4 metric cards + bureau health + document upload
 2. Repair Engine - Credit repair with dispute letters, issues, action plan
