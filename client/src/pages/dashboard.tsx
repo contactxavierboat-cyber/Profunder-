@@ -1234,26 +1234,54 @@ export default function DashboardPage() {
                     </div>
                   </div>
 
-                  {activeRepairRound === 3 && (
-                    <div className="rounded-2xl bg-red-50/60 backdrop-blur-md border border-red-200/30 p-5 mb-5" data-testid="fraud-addresses">
-                      <p className="text-xs font-medium text-red-800/70 mb-3">Bureau Fraud Department Addresses</p>
-                      <p className="text-[10px] text-red-700/50 mb-4">Round 3 letters are sent to fraud departments, not regular dispute centers</p>
-                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                        <div className="rounded-xl bg-white/70 p-3 border border-red-200/20">
-                          <p className="text-[10px] font-bold text-[#1a1a2e]/80 mb-1">Experian Fraud</p>
-                          <p className="text-[10px] text-[#1a1a2e]/60 leading-relaxed">P.O. Box 9554<br/>Allen, TX 75013</p>
-                        </div>
-                        <div className="rounded-xl bg-white/70 p-3 border border-red-200/20">
-                          <p className="text-[10px] font-bold text-[#1a1a2e]/80 mb-1">Equifax Fraud</p>
-                          <p className="text-[10px] text-[#1a1a2e]/60 leading-relaxed">P.O. Box 105069<br/>Atlanta, GA 30348-5069</p>
-                        </div>
-                        <div className="rounded-xl bg-white/70 p-3 border border-red-200/20">
-                          <p className="text-[10px] font-bold text-[#1a1a2e]/80 mb-1">TransUnion Fraud</p>
-                          <p className="text-[10px] text-[#1a1a2e]/60 leading-relaxed">P.O. Box 2000<br/>Chester, PA 19016</p>
-                        </div>
-                      </div>
+                  <div className={cn("rounded-2xl backdrop-blur-md border p-5 mb-5",
+                    activeRepairRound === 3 ? "bg-red-50/60 border-red-200/30" : "bg-white/70 border-white/40"
+                  )} data-testid="bureau-addresses">
+                    <p className={cn("text-xs font-medium mb-3", activeRepairRound === 3 ? "text-red-800/70" : "text-[#1a1a2e]/70")}>
+                      {activeRepairRound === 3 ? "Bureau Fraud Department Addresses" : "Bureau Dispute Addresses"}
+                    </p>
+                    <p className="text-[10px] text-[#1a1a2e]/50 mb-4">
+                      {activeRepairRound === 1 ? "Round 1 letters are sent to bureau dispute centers via certified mail" :
+                       activeRepairRound === 2 ? "Round 2 letters challenge verification methods at dispute centers" :
+                       "Round 3 letters are sent to fraud departments, not regular dispute centers"}
+                    </p>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                      {activeRepairRound === 3 ? (
+                        <>
+                          <div className="rounded-xl bg-white/70 p-3 border border-red-200/20">
+                            <p className="text-[10px] font-bold text-[#1a1a2e]/80 mb-1">Experian Fraud</p>
+                            <p className="text-[10px] text-[#1a1a2e]/60 leading-relaxed">P.O. Box 9554<br/>Allen, TX 75013</p>
+                            <p className="text-[9px] text-[#1a1a2e]/40 mt-1">1-888-397-3742</p>
+                          </div>
+                          <div className="rounded-xl bg-white/70 p-3 border border-red-200/20">
+                            <p className="text-[10px] font-bold text-[#1a1a2e]/80 mb-1">Equifax Fraud</p>
+                            <p className="text-[10px] text-[#1a1a2e]/60 leading-relaxed">P.O. Box 105069<br/>Atlanta, GA 30348</p>
+                            <p className="text-[9px] text-[#1a1a2e]/40 mt-1">1-800-525-6285</p>
+                          </div>
+                          <div className="rounded-xl bg-white/70 p-3 border border-red-200/20">
+                            <p className="text-[10px] font-bold text-[#1a1a2e]/80 mb-1">TransUnion Fraud</p>
+                            <p className="text-[10px] text-[#1a1a2e]/60 leading-relaxed">P.O. Box 2000<br/>Chester, PA 19016</p>
+                            <p className="text-[9px] text-[#1a1a2e]/40 mt-1">1-800-680-7289</p>
+                          </div>
+                        </>
+                      ) : (
+                        <>
+                          <div className="rounded-xl bg-white/50 p-3 border border-white/30">
+                            <p className="text-[10px] font-bold text-[#1a1a2e]/80 mb-1">Experian</p>
+                            <p className="text-[10px] text-[#1a1a2e]/60 leading-relaxed">P.O. Box 4500<br/>Allen, TX 75013</p>
+                          </div>
+                          <div className="rounded-xl bg-white/50 p-3 border border-white/30">
+                            <p className="text-[10px] font-bold text-[#1a1a2e]/80 mb-1">Equifax</p>
+                            <p className="text-[10px] text-[#1a1a2e]/60 leading-relaxed">P.O. Box 740256<br/>Atlanta, GA 30374-0256</p>
+                          </div>
+                          <div className="rounded-xl bg-white/50 p-3 border border-white/30">
+                            <p className="text-[10px] font-bold text-[#1a1a2e]/80 mb-1">TransUnion</p>
+                            <p className="text-[10px] text-[#1a1a2e]/60 leading-relaxed">P.O. Box 2000<br/>Chester, PA 19016-2000</p>
+                          </div>
+                        </>
+                      )}
                     </div>
-                  )}
+                  </div>
 
                   <div className="rounded-2xl bg-white/70 backdrop-blur-md border border-white/40 p-5 mb-5" data-testid="mailing-services">
                     <p className="text-xs font-medium text-[#1a1a2e]/70 mb-3">Recommended Mailing Services</p>
@@ -1335,28 +1363,57 @@ export default function DashboardPage() {
                           })
                           .map((letter: any) => {
                             const key = `r${letter.round || 1}-${letter._idx}`;
+                            const mailingAddr = letter.recipientAddress || "";
+                            const fraudAddr = letter.fraudDeptAddress || "";
                             return (
                               <div key={key} className="rounded-xl bg-white/50 border border-white/30 overflow-hidden" data-testid={`letter-${key}`}>
                                 <button
                                   onClick={() => setExpandedLetters(prev => { const next = new Set(prev); if (next.has(key)) next.delete(key); else next.add(key); return next; })}
                                   className="w-full flex items-center justify-between p-4 text-left hover:bg-white/60 transition-colors"
                                 >
-                                  <div className="flex items-center gap-3">
+                                  <div className="flex items-center gap-3 flex-1 min-w-0">
                                     <FileText className="w-4 h-4 text-[#1a1a2e]/60 shrink-0" />
-                                    <div>
-                                      <p className="text-sm font-medium text-[#1a1a2e]/90">{letter.title || letter.bureau || `Letter ${letter._idx + 1}`}</p>
-                                      <div className="flex items-center gap-2 mt-0.5">
+                                    <div className="flex-1 min-w-0">
+                                      <p className="text-sm font-medium text-[#1a1a2e]/90 truncate">{letter.title || letter.bureau || `Letter ${letter._idx + 1}`}</p>
+                                      <div className="flex flex-wrap items-center gap-2 mt-0.5">
                                         {letter.bureau && <span className="text-[10px] text-[#1a1a2e]/50">{letter.bureau}</span>}
                                         {letter.disputeType && <span className="text-[9px] bg-[#1a1a2e]/5 text-[#1a1a2e]/50 px-1.5 py-0.5 rounded">{letter.disputeType}</span>}
                                         {letter.fcraCitation && <span className="text-[9px] text-blue-500/60">{letter.fcraCitation}</span>}
                                       </div>
+                                      {mailingAddr && (
+                                        <p className="text-[9px] text-[#1a1a2e]/40 mt-1 flex items-center gap-1">
+                                          <Send className="w-2.5 h-2.5" /> Mail to: {mailingAddr}
+                                        </p>
+                                      )}
                                     </div>
                                   </div>
-                                  <ChevronRight className={cn("w-4 h-4 text-[#1a1a2e]/40 transition-transform", expandedLetters.has(key) && "rotate-90")} />
+                                  <ChevronRight className={cn("w-4 h-4 text-[#1a1a2e]/40 transition-transform shrink-0", expandedLetters.has(key) && "rotate-90")} />
                                 </button>
                                 {expandedLetters.has(key) && (
                                   <div className="px-4 pb-4 border-t border-white/30">
-                                    <pre className="text-[11px] text-[#1a1a2e]/80 leading-relaxed whitespace-pre-wrap mt-3 font-sans">{letter.content || letter.text || letter.body}</pre>
+                                    {(mailingAddr || fraudAddr) && (
+                                      <div className="mt-3 mb-3 p-3 rounded-lg bg-[#f0f0f8]/60 border border-[#e0e0ea]/40">
+                                        {mailingAddr && (
+                                          <div className="flex items-start gap-2 mb-1.5">
+                                            <Send className="w-3 h-3 text-[#1a1a2e]/40 shrink-0 mt-0.5" />
+                                            <div>
+                                              <p className="text-[9px] font-bold text-[#1a1a2e]/50 uppercase">Send To</p>
+                                              <p className="text-[10px] text-[#1a1a2e]/70">{mailingAddr}</p>
+                                            </div>
+                                          </div>
+                                        )}
+                                        {fraudAddr && (
+                                          <div className="flex items-start gap-2">
+                                            <AlertTriangle className="w-3 h-3 text-red-400/60 shrink-0 mt-0.5" />
+                                            <div>
+                                              <p className="text-[9px] font-bold text-red-500/50 uppercase">CC: Fraud Department</p>
+                                              <p className="text-[10px] text-[#1a1a2e]/70">{fraudAddr}</p>
+                                            </div>
+                                          </div>
+                                        )}
+                                      </div>
+                                    )}
+                                    <pre className="text-[11px] text-[#1a1a2e]/80 leading-relaxed whitespace-pre-wrap font-sans">{letter.content || letter.text || letter.body}</pre>
                                     <div className="flex items-center gap-2 mt-3">
                                       <button
                                         onClick={() => copyLetterToClipboard(letter.content || letter.text || letter.body, key)}
