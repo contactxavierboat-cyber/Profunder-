@@ -46,6 +46,13 @@ export const users = pgTable("users", {
   lastRepairAnalysisDate: timestamp("last_repair_analysis_date"),
   lastCreditReportText: text("last_credit_report_text"),
 
+  // User Address (for dispute letters)
+  fullName: text("full_name"),
+  streetAddress: text("street_address"),
+  city: text("city"),
+  state: text("state"),
+  zipCode: text("zip_code"),
+
   // Capital Operating System - Funding Phase
   fundingPhase: text("funding_phase").default("repair"),
   lastPhaseUpdate: timestamp("last_phase_update"),

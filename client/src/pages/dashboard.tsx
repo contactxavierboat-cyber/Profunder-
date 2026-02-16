@@ -245,9 +245,13 @@ export default function DashboardPage() {
   const [repairData, setRepairData] = useState<any>(null);
   const [repairLoading, setRepairLoading] = useState(false);
   const [repairAnalyzing, setRepairAnalyzing] = useState(false);
-  const [expandedLetters, setExpandedLetters] = useState<Set<number>>(new Set());
-  const [copiedLetter, setCopiedLetter] = useState<number | null>(null);
+  const [expandedLetters, setExpandedLetters] = useState<Set<string>>(new Set());
+  const [copiedLetter, setCopiedLetter] = useState<string | null>(null);
   const [expandedDenials, setExpandedDenials] = useState<Set<number>>(new Set());
+  const [activeRepairRound, setActiveRepairRound] = useState(1);
+  const [userAddressForm, setUserAddressForm] = useState({ fullName: "", streetAddress: "", city: "", state: "", zipCode: "" });
+  const [addressSaving, setAddressSaving] = useState(false);
+  const [addressLoaded, setAddressLoaded] = useState(false);
   const [qaMessages, setQaMessages] = useState<any[]>([]);
   const [qaInput, setQaInput] = useState("");
   const [qaLoading, setQaLoading] = useState(false);
@@ -533,12 +537,39 @@ export default function DashboardPage() {
     } finally { setRepairAnalyzing(false); }
   };
 
-  const copyLetterToClipboard = (text: string, idx: number) => {
+  const copyLetterToClipboard = (text: string, key: string) => {
     navigator.clipboard.writeText(text).then(() => {
-      setCopiedLetter(idx);
+      setCopiedLetter(key);
       setTimeout(() => setCopiedLetter(null), 2000);
       toast({ title: "Copied to clipboard" });
     });
+  };
+
+  const loadUserAddress = async () => {
+    try {
+      const res = await fetch("/api/user-address", { credentials: "include" });
+      if (res.ok) {
+        const data = await res.json();
+        setUserAddressForm(data);
+        setAddressLoaded(true);
+      }
+    } catch (err) { console.error("Failed to load address", err); }
+  };
+
+  const saveUserAddress = async () => {
+    setAddressSaving(true);
+    try {
+      const res = await fetch("/api/user-address", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        credentials: "include", body: JSON.stringify(userAddressForm),
+      });
+      if (res.ok) {
+        toast({ title: "Address saved", description: "Your info will appear on all generated letters." });
+      } else {
+        toast({ title: "Error", description: "Please fill in all address fields.", variant: "destructive" });
+      }
+    } catch { toast({ title: "Error", description: "Failed to save address.", variant: "destructive" }); }
+    finally { setAddressSaving(false); }
   };
 
   const submitBankRating = async () => {
@@ -591,6 +622,7 @@ export default function DashboardPage() {
       fetchFriends();
       fetchFundingReadiness();
       fetchRepairData();
+      loadUserAddress();
       fetchQA();
       fetchCapitalOsDashboard();
     }
@@ -975,6 +1007,103 @@ export default function DashboardPage() {
                     </div>
                   </div>
 
+                  <div className="mb-6">
+                    <p className="text-xs text-[#1a1a2e]/70 mb-4">Build Strategy Simulators</p>
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                      <div className="rounded-2xl bg-white/70 backdrop-blur-md border border-white/40 p-6" data-testid="bank-rating-simulator">
+                        <p className="text-xs text-[#1a1a2e]/70 mb-4">Bank Rating Simulator</p>
+                        <div className="space-y-3 mb-4">
+                          <div>
+                            <label className="text-[10px] text-[#1a1a2e]/60 mb-1 block">Avg Monthly Deposits ($)</label>
+                            <input type="number" value={bankRatingForm.avgMonthlyDeposits} onChange={e => setBankRatingForm(p => ({ ...p, avgMonthlyDeposits: Number(e.target.value) }))}
+                              className="w-full h-10 px-3 rounded-xl bg-white/60 border border-white/30 text-sm text-[#1a1a2e] outline-none focus:border-[#c0c0d0]" data-testid="input-monthly-deposits" />
+                          </div>
+                          <div>
+                            <label className="text-[10px] text-[#1a1a2e]/60 mb-1 block">Relationship Years</label>
+                            <input type="number" value={bankRatingForm.relationshipYears} onChange={e => setBankRatingForm(p => ({ ...p, relationshipYears: Number(e.target.value) }))}
+                              className="w-full h-10 px-3 rounded-xl bg-white/60 border border-white/30 text-sm text-[#1a1a2e] outline-none focus:border-[#c0c0d0]" data-testid="input-relationship-years" />
+                          </div>
+                          <div>
+                            <label className="text-[10px] text-[#1a1a2e]/60 mb-1 block">Target Institution</label>
+                            <input type="text" value={bankRatingForm.targetInstitution} onChange={e => setBankRatingForm(p => ({ ...p, targetInstitution: e.target.value }))}
+                              placeholder="e.g., Chase, Wells Fargo"
+                              className="w-full h-10 px-3 rounded-xl bg-white/60 border border-white/30 text-sm text-[#1a1a2e] placeholder:text-[#1a1a2e]/30 outline-none focus:border-[#c0c0d0]" data-testid="input-target-institution" />
+                          </div>
+                        </div>
+                        <button onClick={submitBankRating} disabled={bankRatingLoading}
+                          className="w-full h-10 rounded-xl bg-[#3a3a5a] text-white text-xs font-medium hover:bg-[#2a2a4a] disabled:opacity-50 transition-colors flex items-center justify-center gap-2" data-testid="button-simulate-bank-rating">
+                          {bankRatingLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Gauge className="w-3.5 h-3.5" />}
+                          Simulate Rating
+                        </button>
+                        {bankRatingResult && (
+                          <div className="mt-4 p-4 rounded-xl bg-white/50 border border-white/30" data-testid="bank-rating-result">
+                            <div className="flex items-center gap-3 mb-3">
+                              <div className="flex gap-0.5">
+                                {[1,2,3,4,5].map(n => (
+                                  <div key={n} className={cn("w-6 h-6 rounded-md flex items-center justify-center text-[10px] font-bold", n <= Math.round(bankRatingResult.rating) ? "bg-[#3a3a5a] text-white" : "bg-[#e0e0ea] text-[#1a1a2e]/40")}>{n}</div>
+                                ))}
+                              </div>
+                              <span className="text-sm font-semibold text-[#1a1a2e]">{bankRatingResult.label}</span>
+                            </div>
+                            <div className="space-y-1.5">
+                              {bankRatingResult.recommendations?.map((r: string, i: number) => (
+                                <p key={i} className="text-[11px] text-[#1a1a2e]/70 flex items-start gap-2">
+                                  <span className="text-[#1a1a2e]/30 mt-0.5">·</span>{r}
+                                </p>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="rounded-2xl bg-white/70 backdrop-blur-md border border-white/40 p-6" data-testid="pledge-loan-simulator">
+                        <p className="text-xs text-[#1a1a2e]/70 mb-4">Pledge Loan Simulator</p>
+                        <div className="space-y-3 mb-4">
+                          <div>
+                            <label className="text-[10px] text-[#1a1a2e]/60 mb-1 block">Loan Amount ($)</label>
+                            <input type="number" value={pledgeLoanForm.loanAmount} onChange={e => setPledgeLoanForm(p => ({ ...p, loanAmount: Number(e.target.value) }))}
+                              className="w-full h-10 px-3 rounded-xl bg-white/60 border border-white/30 text-sm text-[#1a1a2e] outline-none focus:border-[#c0c0d0]" data-testid="input-loan-amount" />
+                          </div>
+                          <div>
+                            <label className="text-[10px] text-[#1a1a2e]/60 mb-1 block">Paydown Percent (%)</label>
+                            <input type="number" value={pledgeLoanForm.paydownPercent} onChange={e => setPledgeLoanForm(p => ({ ...p, paydownPercent: Number(e.target.value) }))}
+                              className="w-full h-10 px-3 rounded-xl bg-white/60 border border-white/30 text-sm text-[#1a1a2e] outline-none focus:border-[#c0c0d0]" data-testid="input-paydown-percent" />
+                          </div>
+                        </div>
+                        <button onClick={submitPledgeLoan} disabled={pledgeLoanLoading}
+                          className="w-full h-10 rounded-xl bg-[#3a3a5a] text-white text-xs font-medium hover:bg-[#2a2a4a] disabled:opacity-50 transition-colors flex items-center justify-center gap-2" data-testid="button-simulate-pledge-loan">
+                          {pledgeLoanLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <TrendingUp className="w-3.5 h-3.5" />}
+                          Simulate Pledge Loan
+                        </button>
+                        {pledgeLoanResult && (
+                          <div className="mt-4 p-4 rounded-xl bg-white/50 border border-white/30" data-testid="pledge-loan-result">
+                            <div className="grid grid-cols-2 gap-4 mb-4">
+                              <div className="text-center p-3 rounded-lg bg-white/60">
+                                <p className="text-[9px] text-[#1a1a2e]/50 uppercase mb-1">Before</p>
+                                <p className="text-xl font-bold text-[#1a1a2e]">{pledgeLoanResult.utilBefore}%</p>
+                                <p className="text-[9px] text-[#1a1a2e]/40">utilization</p>
+                              </div>
+                              <div className="text-center p-3 rounded-lg bg-green-500/[0.06] border border-green-500/10">
+                                <p className="text-[9px] text-green-600/60 uppercase mb-1">After</p>
+                                <p className="text-xl font-bold text-green-600">{pledgeLoanResult.utilAfter}%</p>
+                                <p className="text-[9px] text-green-600/40">utilization</p>
+                              </div>
+                            </div>
+                            <div className="flex items-center justify-between text-xs mb-2">
+                              <span className="text-[#1a1a2e]/60">Estimated Score Impact</span>
+                              <span className="font-semibold text-green-600">+{pledgeLoanResult.scoreDelta} pts</span>
+                            </div>
+                            <div className="flex items-center justify-between text-xs mb-3">
+                              <span className="text-[#1a1a2e]/60">Timeline</span>
+                              <span className="font-medium text-[#1a1a2e]/80">{pledgeLoanResult.timelineMonths} months</span>
+                            </div>
+                            <p className="text-[11px] text-[#1a1a2e]/70 leading-relaxed">{pledgeLoanResult.recommendation}</p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
                   {fundingData && fundingData.alerts.length > 0 && (
                     <div className="rounded-2xl bg-white/70 backdrop-blur-md border border-white/40 p-6 mb-4" data-testid="risk-alerts-card">
                       <p className="text-xs text-[#1a1a2e]/70 mb-4">Risk Alerts</p>
@@ -1022,12 +1151,12 @@ export default function DashboardPage() {
               <div className="flex items-center justify-between mb-6">
                 <div>
                   <h2 className="text-lg font-semibold text-[#1a1a2e]" data-testid="text-repair-title">Repair Engine</h2>
-                  <p className="text-[11px] text-[#1a1a2e]/60">Detect issues, generate dispute letters, track resolutions</p>
+                  <p className="text-[11px] text-[#1a1a2e]/60">3-round dispute system with FCRA-compliant letters for every derogatory item</p>
                 </div>
                 <button onClick={runRepairAnalysis} disabled={repairAnalyzing}
                   className="h-9 px-4 rounded-xl bg-white/70 border border-white/40 hover:bg-white/80 text-xs font-medium text-[#1a1a2e]/80 transition-colors flex items-center gap-2 disabled:opacity-50" data-testid="button-run-repair">
                   {repairAnalyzing ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <RefreshCw className="w-3.5 h-3.5" />}
-                  {repairAnalyzing ? "Analyzing..." : "Run Analysis"}
+                  {repairAnalyzing ? "Generating Letters..." : "Generate Dispute Letters"}
                 </button>
               </div>
 
@@ -1037,28 +1166,146 @@ export default function DashboardPage() {
                 <div className="rounded-2xl bg-white/70 backdrop-blur-md border border-white/40 p-8 text-center">
                   <Shield className="w-10 h-10 text-[#1a1a2e]/30 mx-auto mb-3" />
                   <p className="text-sm text-[#1a1a2e]/70 mb-2">No repair data available</p>
-                  <p className="text-[11px] text-[#1a1a2e]/50 mb-4">Upload a credit report from Mission Control, then run analysis</p>
-                  <button onClick={() => setActiveTab("mission_control")} className="text-xs text-[#1a1a2e]/60 hover:text-[#1a1a2e]/80 underline">Go to Mission Control</button>
+                  <p className="text-[11px] text-[#1a1a2e]/50 mb-4">Upload a credit report from Mission Control, then generate dispute letters</p>
+                  <button onClick={() => setActiveTab("mission_control")} className="text-xs text-[#1a1a2e]/60 hover:text-[#1a1a2e]/80 underline" data-testid="link-go-to-mission-control">Go to Mission Control</button>
                 </div>
               ) : (
                 <>
+                  <div className="rounded-2xl bg-white/70 backdrop-blur-md border border-white/40 p-5 mb-5" data-testid="user-address-form">
+                    <div className="flex items-center justify-between mb-3">
+                      <p className="text-xs font-medium text-[#1a1a2e]/70">Your Mailing Address</p>
+                      <p className="text-[10px] text-[#1a1a2e]/40">Auto-populated on all letters</p>
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
+                      <div className="sm:col-span-2">
+                        <input type="text" placeholder="Full Name" value={userAddressForm.fullName} onChange={e => setUserAddressForm(p => ({ ...p, fullName: e.target.value }))}
+                          className="w-full h-9 px-3 rounded-xl bg-white/60 border border-white/30 text-sm text-[#1a1a2e] placeholder:text-[#1a1a2e]/30 outline-none focus:border-[#c0c0d0]" data-testid="input-full-name" />
+                      </div>
+                      <div className="sm:col-span-2">
+                        <input type="text" placeholder="Street Address" value={userAddressForm.streetAddress} onChange={e => setUserAddressForm(p => ({ ...p, streetAddress: e.target.value }))}
+                          className="w-full h-9 px-3 rounded-xl bg-white/60 border border-white/30 text-sm text-[#1a1a2e] placeholder:text-[#1a1a2e]/30 outline-none focus:border-[#c0c0d0]" data-testid="input-street-address" />
+                      </div>
+                      <input type="text" placeholder="City" value={userAddressForm.city} onChange={e => setUserAddressForm(p => ({ ...p, city: e.target.value }))}
+                        className="w-full h-9 px-3 rounded-xl bg-white/60 border border-white/30 text-sm text-[#1a1a2e] placeholder:text-[#1a1a2e]/30 outline-none focus:border-[#c0c0d0]" data-testid="input-city" />
+                      <div className="flex gap-3">
+                        <input type="text" placeholder="State" value={userAddressForm.state} onChange={e => setUserAddressForm(p => ({ ...p, state: e.target.value }))}
+                          className="w-1/2 h-9 px-3 rounded-xl bg-white/60 border border-white/30 text-sm text-[#1a1a2e] placeholder:text-[#1a1a2e]/30 outline-none focus:border-[#c0c0d0]" data-testid="input-state" />
+                        <input type="text" placeholder="ZIP Code" value={userAddressForm.zipCode} onChange={e => setUserAddressForm(p => ({ ...p, zipCode: e.target.value }))}
+                          className="w-1/2 h-9 px-3 rounded-xl bg-white/60 border border-white/30 text-sm text-[#1a1a2e] placeholder:text-[#1a1a2e]/30 outline-none focus:border-[#c0c0d0]" data-testid="input-zip" />
+                      </div>
+                    </div>
+                    <button onClick={saveUserAddress} disabled={addressSaving}
+                      className="h-8 px-4 rounded-xl bg-[#3a3a5a] text-white text-[11px] font-medium hover:bg-[#2a2a4a] disabled:opacity-50 transition-colors flex items-center gap-2" data-testid="button-save-address">
+                      {addressSaving ? <Loader2 className="w-3 h-3 animate-spin" /> : <Check className="w-3 h-3" />}
+                      Save Address
+                    </button>
+                  </div>
+
+                  <div className="rounded-2xl bg-white/70 backdrop-blur-md border border-white/40 p-5 mb-5" data-testid="dispute-timeline">
+                    <p className="text-xs font-medium text-[#1a1a2e]/70 mb-4">3-Round Dispute Timeline</p>
+                    <div className="flex gap-2 mb-4">
+                      {[1, 2, 3].map(round => (
+                        <button key={round} onClick={() => setActiveRepairRound(round)}
+                          className={cn("flex-1 h-10 rounded-xl text-xs font-medium transition-all flex items-center justify-center gap-2",
+                            activeRepairRound === round
+                              ? "bg-[#3a3a5a] text-white shadow-lg"
+                              : "bg-white/50 border border-white/30 text-[#1a1a2e]/60 hover:bg-white/70"
+                          )} data-testid={`button-round-${round}`}>
+                          Round {round}
+                        </button>
+                      ))}
+                    </div>
+                    <div className="grid grid-cols-3 gap-3 text-center">
+                      <div className={cn("rounded-xl p-3 border", activeRepairRound === 1 ? "bg-blue-50/80 border-blue-200/50" : "bg-white/40 border-white/30")}>
+                        <p className="text-[9px] font-bold text-[#1a1a2e]/50 uppercase mb-1">Round 1</p>
+                        <p className="text-[10px] text-[#1a1a2e]/70 font-medium">Day 0</p>
+                        <p className="text-[9px] text-[#1a1a2e]/40 mt-1">Inaccurate / Unverifiable</p>
+                      </div>
+                      <div className={cn("rounded-xl p-3 border", activeRepairRound === 2 ? "bg-purple-50/80 border-purple-200/50" : "bg-white/40 border-white/30")}>
+                        <p className="text-[9px] font-bold text-[#1a1a2e]/50 uppercase mb-1">Round 2</p>
+                        <p className="text-[10px] text-[#1a1a2e]/70 font-medium">Day 35-40</p>
+                        <p className="text-[9px] text-[#1a1a2e]/40 mt-1">Verification Challenge</p>
+                      </div>
+                      <div className={cn("rounded-xl p-3 border", activeRepairRound === 3 ? "bg-red-50/80 border-red-200/50" : "bg-white/40 border-white/30")}>
+                        <p className="text-[9px] font-bold text-[#1a1a2e]/50 uppercase mb-1">Round 3</p>
+                        <p className="text-[10px] text-[#1a1a2e]/70 font-medium">Day 65-75</p>
+                        <p className="text-[9px] text-[#1a1a2e]/40 mt-1">Fraud Escalation</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {activeRepairRound === 3 && (
+                    <div className="rounded-2xl bg-red-50/60 backdrop-blur-md border border-red-200/30 p-5 mb-5" data-testid="fraud-addresses">
+                      <p className="text-xs font-medium text-red-800/70 mb-3">Bureau Fraud Department Addresses</p>
+                      <p className="text-[10px] text-red-700/50 mb-4">Round 3 letters are sent to fraud departments, not regular dispute centers</p>
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        <div className="rounded-xl bg-white/70 p-3 border border-red-200/20">
+                          <p className="text-[10px] font-bold text-[#1a1a2e]/80 mb-1">Experian Fraud</p>
+                          <p className="text-[10px] text-[#1a1a2e]/60 leading-relaxed">P.O. Box 9554<br/>Allen, TX 75013</p>
+                        </div>
+                        <div className="rounded-xl bg-white/70 p-3 border border-red-200/20">
+                          <p className="text-[10px] font-bold text-[#1a1a2e]/80 mb-1">Equifax Fraud</p>
+                          <p className="text-[10px] text-[#1a1a2e]/60 leading-relaxed">P.O. Box 105069<br/>Atlanta, GA 30348-5069</p>
+                        </div>
+                        <div className="rounded-xl bg-white/70 p-3 border border-red-200/20">
+                          <p className="text-[10px] font-bold text-[#1a1a2e]/80 mb-1">TransUnion Fraud</p>
+                          <p className="text-[10px] text-[#1a1a2e]/60 leading-relaxed">P.O. Box 2000<br/>Chester, PA 19016</p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="rounded-2xl bg-white/70 backdrop-blur-md border border-white/40 p-5 mb-5" data-testid="mailing-services">
+                    <p className="text-xs font-medium text-[#1a1a2e]/70 mb-3">Recommended Mailing Services</p>
+                    <p className="text-[10px] text-[#1a1a2e]/40 mb-3">Always send dispute letters via certified mail with return receipt</p>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div className="flex items-start gap-3 p-3 rounded-xl bg-white/50 border border-white/30">
+                        <div className="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center shrink-0"><Send className="w-4 h-4 text-blue-500/70" /></div>
+                        <div>
+                          <p className="text-[11px] font-medium text-[#1a1a2e]/80">USPS Certified Mail</p>
+                          <p className="text-[10px] text-[#1a1a2e]/50">usps.com - Best for proof of delivery</p>
+                        </div>
+                      </div>
+                      <div className="flex items-start gap-3 p-3 rounded-xl bg-white/50 border border-white/30">
+                        <div className="w-8 h-8 rounded-lg bg-green-500/10 flex items-center justify-center shrink-0"><Send className="w-4 h-4 text-green-500/70" /></div>
+                        <div>
+                          <p className="text-[11px] font-medium text-[#1a1a2e]/80">LetterStream</p>
+                          <p className="text-[10px] text-[#1a1a2e]/50">letterstream.com - Online certified mail service</p>
+                        </div>
+                      </div>
+                      <div className="flex items-start gap-3 p-3 rounded-xl bg-white/50 border border-white/30">
+                        <div className="w-8 h-8 rounded-lg bg-purple-500/10 flex items-center justify-center shrink-0"><Send className="w-4 h-4 text-purple-500/70" /></div>
+                        <div>
+                          <p className="text-[11px] font-medium text-[#1a1a2e]/80">Click2Mail</p>
+                          <p className="text-[10px] text-[#1a1a2e]/50">click2mail.com - Print & mail from your browser</p>
+                        </div>
+                      </div>
+                      <div className="flex items-start gap-3 p-3 rounded-xl bg-white/50 border border-white/30">
+                        <div className="w-8 h-8 rounded-lg bg-orange-500/10 flex items-center justify-center shrink-0"><Send className="w-4 h-4 text-orange-500/70" /></div>
+                        <div>
+                          <p className="text-[11px] font-medium text-[#1a1a2e]/80">Lob</p>
+                          <p className="text-[10px] text-[#1a1a2e]/50">lob.com - Automated mail with tracking</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
                   {repairData.detectedIssues && repairData.detectedIssues.length > 0 && (
-                    <div className="rounded-2xl bg-white/70 backdrop-blur-md border border-white/40 p-6 mb-4" data-testid="detected-issues-card">
-                      <p className="text-xs text-[#1a1a2e]/70 mb-4">Detected Issues ({repairData.detectedIssues.length})</p>
+                    <div className="rounded-2xl bg-white/70 backdrop-blur-md border border-white/40 p-5 mb-5" data-testid="detected-issues-card">
+                      <p className="text-xs font-medium text-[#1a1a2e]/70 mb-3">Detected Derogatory Items ({repairData.detectedIssues.length})</p>
                       <div className="space-y-2">
                         {repairData.detectedIssues.map((issue: any, idx: number) => (
                           <div key={idx} className="flex items-start gap-3 p-3 rounded-xl bg-white/50 border border-white/30" data-testid={`issue-${idx}`}>
                             <AlertTriangle className="w-4 h-4 text-orange-500/70 shrink-0 mt-0.5" />
                             <div className="flex-1 min-w-0">
                               <p className="text-sm text-[#1a1a2e]/90">
-                                {typeof issue === "string" ? issue : (issue.issue || issue.description || issue.issueType || issue.creditor || `Issue ${idx + 1}`)}
+                                {typeof issue === "string" ? issue : (issue.issue || issue.description || issue.issueType || issue.creditor || `Item ${idx + 1}`)}
                               </p>
                               {issue.creditor && <p className="text-[10px] text-[#1a1a2e]/50 mt-0.5">Creditor: {issue.creditor}</p>}
                               {issue.accountLast4 && <p className="text-[10px] text-[#1a1a2e]/50">Account: ...{issue.accountLast4}</p>}
                               {issue.bureau && <p className="text-[10px] text-[#1a1a2e]/50 mt-0.5">Bureau: {issue.bureau}</p>}
                               {issue.severity && <p className="text-[10px] text-[#1a1a2e]/50">Severity: {issue.severity}</p>}
                               {issue.impact && <p className="text-[10px] text-[#1a1a2e]/50">Impact: {issue.impact}</p>}
-                              {issue.monthsAffected && <p className="text-[10px] text-[#1a1a2e]/50">Months Affected: {issue.monthsAffected}</p>}
                             </div>
                           </div>
                         ))}
@@ -1067,171 +1314,85 @@ export default function DashboardPage() {
                   )}
 
                   {repairData.letters && repairData.letters.length > 0 && (
-                    <div className="rounded-2xl bg-white/70 backdrop-blur-md border border-white/40 p-6 mb-4" data-testid="dispute-letters-card">
-                      <p className="text-xs text-[#1a1a2e]/70 mb-4">Dispute Letters ({repairData.letters.length})</p>
+                    <div className="rounded-2xl bg-white/70 backdrop-blur-md border border-white/40 p-5 mb-5" data-testid="dispute-letters-card">
+                      <div className="flex items-center justify-between mb-4">
+                        <p className="text-xs font-medium text-[#1a1a2e]/70">
+                          Round {activeRepairRound} Dispute Letters
+                        </p>
+                        <span className="text-[10px] bg-[#3a3a5a]/10 text-[#3a3a5a] px-2 py-0.5 rounded-full font-medium">
+                          {repairData.letters.filter((l: any) => {
+                            const r = l.round || 1;
+                            return r === activeRepairRound;
+                          }).length} letters
+                        </span>
+                      </div>
                       <div className="space-y-3">
-                        {repairData.letters.map((letter: any, idx: number) => (
-                          <div key={idx} className="rounded-xl bg-white/50 border border-white/30 overflow-hidden" data-testid={`letter-${idx}`}>
-                            <button
-                              onClick={() => setExpandedLetters(prev => { const next = new Set(prev); if (next.has(idx)) next.delete(idx); else next.add(idx); return next; })}
-                              className="w-full flex items-center justify-between p-4 text-left hover:bg-white/60 transition-colors"
-                            >
-                              <div className="flex items-center gap-3">
-                                <FileText className="w-4 h-4 text-[#1a1a2e]/60 shrink-0" />
-                                <div>
-                                  <p className="text-sm font-medium text-[#1a1a2e]/90">{letter.title || letter.bureau || `Letter ${idx + 1}`}</p>
-                                  {letter.bureau && <p className="text-[10px] text-[#1a1a2e]/50">{letter.bureau}</p>}
-                                </div>
-                              </div>
-                              <ChevronRight className={cn("w-4 h-4 text-[#1a1a2e]/40 transition-transform", expandedLetters.has(idx) && "rotate-90")} />
-                            </button>
-                            {expandedLetters.has(idx) && (
-                              <div className="px-4 pb-4 border-t border-white/30">
-                                <pre className="text-[11px] text-[#1a1a2e]/80 leading-relaxed whitespace-pre-wrap mt-3 font-sans">{letter.content || letter.text || letter.body}</pre>
+                        {repairData.letters
+                          .map((letter: any, idx: number) => ({ ...letter, _idx: idx }))
+                          .filter((letter: any) => {
+                            const r = letter.round || 1;
+                            return r === activeRepairRound;
+                          })
+                          .map((letter: any) => {
+                            const key = `r${letter.round || 1}-${letter._idx}`;
+                            return (
+                              <div key={key} className="rounded-xl bg-white/50 border border-white/30 overflow-hidden" data-testid={`letter-${key}`}>
                                 <button
-                                  onClick={() => copyLetterToClipboard(letter.content || letter.text || letter.body, idx)}
-                                  className="mt-3 flex items-center gap-2 h-8 px-3 rounded-lg bg-white/60 border border-white/30 text-[10px] text-[#1a1a2e]/70 hover:bg-white/80 transition-colors"
-                                  data-testid={`copy-letter-${idx}`}
+                                  onClick={() => setExpandedLetters(prev => { const next = new Set(prev); if (next.has(key)) next.delete(key); else next.add(key); return next; })}
+                                  className="w-full flex items-center justify-between p-4 text-left hover:bg-white/60 transition-colors"
                                 >
-                                  {copiedLetter === idx ? <><Check className="w-3 h-3" /> Copied</> : <><Copy className="w-3 h-3" /> Copy to Clipboard</>}
+                                  <div className="flex items-center gap-3">
+                                    <FileText className="w-4 h-4 text-[#1a1a2e]/60 shrink-0" />
+                                    <div>
+                                      <p className="text-sm font-medium text-[#1a1a2e]/90">{letter.title || letter.bureau || `Letter ${letter._idx + 1}`}</p>
+                                      <div className="flex items-center gap-2 mt-0.5">
+                                        {letter.bureau && <span className="text-[10px] text-[#1a1a2e]/50">{letter.bureau}</span>}
+                                        {letter.disputeType && <span className="text-[9px] bg-[#1a1a2e]/5 text-[#1a1a2e]/50 px-1.5 py-0.5 rounded">{letter.disputeType}</span>}
+                                        {letter.fcraCitation && <span className="text-[9px] text-blue-500/60">{letter.fcraCitation}</span>}
+                                      </div>
+                                    </div>
+                                  </div>
+                                  <ChevronRight className={cn("w-4 h-4 text-[#1a1a2e]/40 transition-transform", expandedLetters.has(key) && "rotate-90")} />
                                 </button>
+                                {expandedLetters.has(key) && (
+                                  <div className="px-4 pb-4 border-t border-white/30">
+                                    <pre className="text-[11px] text-[#1a1a2e]/80 leading-relaxed whitespace-pre-wrap mt-3 font-sans">{letter.content || letter.text || letter.body}</pre>
+                                    <div className="flex items-center gap-2 mt-3">
+                                      <button
+                                        onClick={() => copyLetterToClipboard(letter.content || letter.text || letter.body, key)}
+                                        className="flex items-center gap-2 h-8 px-3 rounded-lg bg-white/60 border border-white/30 text-[10px] text-[#1a1a2e]/70 hover:bg-white/80 transition-colors"
+                                        data-testid={`copy-letter-${key}`}
+                                      >
+                                        {copiedLetter === key ? <><Check className="w-3 h-3" /> Copied</> : <><Copy className="w-3 h-3" /> Copy to Clipboard</>}
+                                      </button>
+                                    </div>
+                                  </div>
+                                )}
                               </div>
-                            )}
+                            );
+                          })}
+                        {repairData.letters.filter((l: any) => (l.round || 1) === activeRepairRound).length === 0 && (
+                          <div className="text-center py-6">
+                            <p className="text-xs text-[#1a1a2e]/50">No Round {activeRepairRound} letters generated yet.</p>
+                            <p className="text-[10px] text-[#1a1a2e]/30 mt-1">
+                              {activeRepairRound === 1 ? "Click 'Generate Dispute Letters' above to start" :
+                               activeRepairRound === 2 ? "Send after Day 35 if Round 1 disputes are not resolved" :
+                               "Send to fraud departments after Day 65 for unresolved items"}
+                            </p>
                           </div>
-                        ))}
+                        )}
                       </div>
                     </div>
                   )}
 
-                  {fundingData && fundingData.denialSimulation && fundingData.denialSimulation.length > 0 && (
-                    <div className="rounded-2xl bg-white/70 backdrop-blur-md border border-white/40 p-6 mb-4" data-testid="denial-simulation-card">
-                      <p className="text-xs text-[#1a1a2e]/70 mb-4">Denial Risk Simulation</p>
-                      <div className="space-y-2">
-                        {fundingData.denialSimulation.map((denial, idx) => (
-                          <button key={idx}
-                            onClick={() => setExpandedDenials(prev => { const next = new Set(prev); if (next.has(idx)) next.delete(idx); else next.add(idx); return next; })}
-                            className="w-full text-left rounded-xl bg-white/50 hover:bg-white/60 transition-all p-3.5" data-testid={`denial-${idx}`}>
-                            <div className="flex items-start gap-3">
-                              <span className={cn("text-[9px] font-bold uppercase px-2 py-0.5 rounded mt-0.5 shrink-0",
-                                denial.riskLevel === "High" ? "bg-red-500/15 text-red-500/80" :
-                                denial.riskLevel === "Moderate" ? "bg-yellow-500/15 text-yellow-600/80" :
-                                "bg-green-500/15 text-green-600/80"
-                              )}>{denial.riskLevel}</span>
-                              <div className="flex-1 min-w-0">
-                                <p className="text-sm text-[#1a1a2e]/90">{denial.trigger}</p>
-                                {expandedDenials.has(idx) && (
-                                  <div className="mt-2 space-y-1.5 text-xs">
-                                    <p className="text-[#1a1a2e]/70">{denial.explanation}</p>
-                                    <p className="text-green-600/60"><span className="font-medium">Fix:</span> {denial.fix}</p>
-                                  </div>
-                                )}
-                              </div>
-                              <ChevronRight className={cn("w-4 h-4 text-[#1a1a2e]/40 shrink-0 transition-transform mt-0.5", expandedDenials.has(idx) && "rotate-90")} />
-                            </div>
-                          </button>
-                        ))}
-                      </div>
+                  {repairData.actionPlan && (
+                    <div className="rounded-2xl bg-white/70 backdrop-blur-md border border-white/40 p-5 mb-5" data-testid="action-plan-card">
+                      <p className="text-xs font-medium text-[#1a1a2e]/70 mb-3">Action Plan</p>
+                      <div className="text-[11px] text-[#1a1a2e]/70 leading-relaxed whitespace-pre-wrap">{typeof repairData.actionPlan === "string" ? repairData.actionPlan : JSON.stringify(repairData.actionPlan, null, 2)}</div>
                     </div>
                   )}
                 </>
               )}
-
-              <div className="mt-6">
-                <p className="text-xs text-[#1a1a2e]/70 mb-4">Build Strategy Simulators</p>
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                  <div className="rounded-2xl bg-white/70 backdrop-blur-md border border-white/40 p-6" data-testid="bank-rating-simulator">
-                    <p className="text-xs text-[#1a1a2e]/70 mb-4">Bank Rating Simulator</p>
-                    <div className="space-y-3 mb-4">
-                      <div>
-                        <label className="text-[10px] text-[#1a1a2e]/60 mb-1 block">Avg Monthly Deposits ($)</label>
-                        <input type="number" value={bankRatingForm.avgMonthlyDeposits} onChange={e => setBankRatingForm(p => ({ ...p, avgMonthlyDeposits: Number(e.target.value) }))}
-                          className="w-full h-10 px-3 rounded-xl bg-white/60 border border-white/30 text-sm text-[#1a1a2e] outline-none focus:border-[#c0c0d0]" data-testid="input-monthly-deposits" />
-                      </div>
-                      <div>
-                        <label className="text-[10px] text-[#1a1a2e]/60 mb-1 block">Relationship Years</label>
-                        <input type="number" value={bankRatingForm.relationshipYears} onChange={e => setBankRatingForm(p => ({ ...p, relationshipYears: Number(e.target.value) }))}
-                          className="w-full h-10 px-3 rounded-xl bg-white/60 border border-white/30 text-sm text-[#1a1a2e] outline-none focus:border-[#c0c0d0]" data-testid="input-relationship-years" />
-                      </div>
-                      <div>
-                        <label className="text-[10px] text-[#1a1a2e]/60 mb-1 block">Target Institution</label>
-                        <input type="text" value={bankRatingForm.targetInstitution} onChange={e => setBankRatingForm(p => ({ ...p, targetInstitution: e.target.value }))}
-                          placeholder="e.g., Chase, Wells Fargo"
-                          className="w-full h-10 px-3 rounded-xl bg-white/60 border border-white/30 text-sm text-[#1a1a2e] placeholder:text-[#1a1a2e]/30 outline-none focus:border-[#c0c0d0]" data-testid="input-target-institution" />
-                      </div>
-                    </div>
-                    <button onClick={submitBankRating} disabled={bankRatingLoading}
-                      className="w-full h-10 rounded-xl bg-[#3a3a5a] text-white text-xs font-medium hover:bg-[#2a2a4a] disabled:opacity-50 transition-colors flex items-center justify-center gap-2" data-testid="button-simulate-bank-rating">
-                      {bankRatingLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Gauge className="w-3.5 h-3.5" />}
-                      Simulate Rating
-                    </button>
-                    {bankRatingResult && (
-                      <div className="mt-4 p-4 rounded-xl bg-white/50 border border-white/30" data-testid="bank-rating-result">
-                        <div className="flex items-center gap-3 mb-3">
-                          <div className="flex gap-0.5">
-                            {[1,2,3,4,5].map(n => (
-                              <div key={n} className={cn("w-6 h-6 rounded-md flex items-center justify-center text-[10px] font-bold", n <= Math.round(bankRatingResult.rating) ? "bg-[#3a3a5a] text-white" : "bg-[#e0e0ea] text-[#1a1a2e]/40")}>{n}</div>
-                            ))}
-                          </div>
-                          <span className="text-sm font-semibold text-[#1a1a2e]">{bankRatingResult.label}</span>
-                        </div>
-                        <div className="space-y-1.5">
-                          {bankRatingResult.recommendations?.map((r: string, i: number) => (
-                            <p key={i} className="text-[11px] text-[#1a1a2e]/70 flex items-start gap-2">
-                              <span className="text-[#1a1a2e]/30 mt-0.5">·</span>{r}
-                            </p>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="rounded-2xl bg-white/70 backdrop-blur-md border border-white/40 p-6" data-testid="pledge-loan-simulator">
-                    <p className="text-xs text-[#1a1a2e]/70 mb-4">Pledge Loan Simulator</p>
-                    <div className="space-y-3 mb-4">
-                      <div>
-                        <label className="text-[10px] text-[#1a1a2e]/60 mb-1 block">Loan Amount ($)</label>
-                        <input type="number" value={pledgeLoanForm.loanAmount} onChange={e => setPledgeLoanForm(p => ({ ...p, loanAmount: Number(e.target.value) }))}
-                          className="w-full h-10 px-3 rounded-xl bg-white/60 border border-white/30 text-sm text-[#1a1a2e] outline-none focus:border-[#c0c0d0]" data-testid="input-loan-amount" />
-                      </div>
-                      <div>
-                        <label className="text-[10px] text-[#1a1a2e]/60 mb-1 block">Paydown Percent (%)</label>
-                        <input type="number" value={pledgeLoanForm.paydownPercent} onChange={e => setPledgeLoanForm(p => ({ ...p, paydownPercent: Number(e.target.value) }))}
-                          className="w-full h-10 px-3 rounded-xl bg-white/60 border border-white/30 text-sm text-[#1a1a2e] outline-none focus:border-[#c0c0d0]" data-testid="input-paydown-percent" />
-                      </div>
-                    </div>
-                    <button onClick={submitPledgeLoan} disabled={pledgeLoanLoading}
-                      className="w-full h-10 rounded-xl bg-[#3a3a5a] text-white text-xs font-medium hover:bg-[#2a2a4a] disabled:opacity-50 transition-colors flex items-center justify-center gap-2" data-testid="button-simulate-pledge-loan">
-                      {pledgeLoanLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <TrendingUp className="w-3.5 h-3.5" />}
-                      Simulate Pledge Loan
-                    </button>
-                    {pledgeLoanResult && (
-                      <div className="mt-4 p-4 rounded-xl bg-white/50 border border-white/30" data-testid="pledge-loan-result">
-                        <div className="grid grid-cols-2 gap-4 mb-4">
-                          <div className="text-center p-3 rounded-lg bg-white/60">
-                            <p className="text-[9px] text-[#1a1a2e]/50 uppercase mb-1">Before</p>
-                            <p className="text-xl font-bold text-[#1a1a2e]">{pledgeLoanResult.utilBefore}%</p>
-                            <p className="text-[9px] text-[#1a1a2e]/40">utilization</p>
-                          </div>
-                          <div className="text-center p-3 rounded-lg bg-green-500/[0.06] border border-green-500/10">
-                            <p className="text-[9px] text-green-600/60 uppercase mb-1">After</p>
-                            <p className="text-xl font-bold text-green-600">{pledgeLoanResult.utilAfter}%</p>
-                            <p className="text-[9px] text-green-600/40">utilization</p>
-                          </div>
-                        </div>
-                        <div className="flex items-center justify-between text-xs mb-2">
-                          <span className="text-[#1a1a2e]/60">Estimated Score Impact</span>
-                          <span className="font-semibold text-green-600">+{pledgeLoanResult.scoreDelta} pts</span>
-                        </div>
-                        <div className="flex items-center justify-between text-xs mb-3">
-                          <span className="text-[#1a1a2e]/60">Timeline</span>
-                          <span className="font-medium text-[#1a1a2e]/80">{pledgeLoanResult.timelineMonths} months</span>
-                        </div>
-                        <p className="text-[11px] text-[#1a1a2e]/70 leading-relaxed">{pledgeLoanResult.recommendation}</p>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
             </div>
           )}
 

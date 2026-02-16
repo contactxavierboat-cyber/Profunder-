@@ -4422,6 +4422,31 @@ ${extractedText}
     }
   });
 
+  app.post("/api/user-address", requireAuth, async (req: any, res) => {
+    const body = z.object({
+      fullName: z.string().min(1),
+      streetAddress: z.string().min(1),
+      city: z.string().min(1),
+      state: z.string().min(1),
+      zipCode: z.string().min(1),
+    }).safeParse(req.body);
+    if (!body.success) return res.status(400).json({ error: "All address fields are required" });
+    const updated = await storage.updateUser(req.session.userId, body.data);
+    res.json({ success: true, user: updated });
+  });
+
+  app.get("/api/user-address", requireAuth, async (req: any, res) => {
+    const user = await storage.getUser(req.session.userId);
+    if (!user) return res.status(404).json({ error: "User not found" });
+    res.json({
+      fullName: user.fullName || "",
+      streetAddress: user.streetAddress || "",
+      city: user.city || "",
+      state: user.state || "",
+      zipCode: user.zipCode || "",
+    });
+  });
+
   app.post("/api/credit-repair-analysis", requireAuth, async (req: any, res) => {
     try {
       const userId = req.session.userId;
@@ -4450,24 +4475,28 @@ ${extractedText}
         return res.status(400).json({ error: "No credit report text available. Upload a credit report first." });
       }
 
-      const userName = user.displayName || user.email.split("@")[0];
+      const userName = user.fullName || user.displayName || user.email.split("@")[0];
+      const userAddress = user.streetAddress ? `${user.streetAddress}, ${user.city || ""}, ${user.state || ""} ${user.zipCode || ""}`.trim() : "[YOUR ADDRESS]";
 
       const repairPrompt = `You are a Credit Report Repair & Funding Readiness System embedded inside MentXr®, a business funding app.
 
-Your job is to read the user's uploaded credit report text, identify negative or inaccurate items, and produce:
-1. A clear action plan (what to do first, second, third)
-2. Auto-filled dispute letters to the correct bureau(s)
-3. Optional direct dispute letters to the furnisher/creditor
+Your job is to read the user's uploaded credit report text, identify ALL negative, derogatory, or potentially inaccurate items, and produce a COMPREHENSIVE 3-ROUND dispute letter system.
 
-You must use plain language that the average business owner understands.
-You must not hype. You must not guarantee removals or approvals.
+CRITICAL RULES:
+- Generate letters for EVERY derogatory item, collection, charge-off, late payment, and questionable entry found
+- For EACH item, generate TWO dispute angles: one claiming "inaccurate/unverifiable" and one claiming "potential fraud/unauthorized"
+- Produce 3 ROUNDS of letters with specific timelines
+- Auto-fill the user's name and address on every letter
+- Include bureau fraud department addresses on every letter
+- Include online mailing service recommendations
+
+You must use plain language. No hype. No guaranteed removals.
 Your tone must feel like a private capital analyst reviewing a file.
 
-COMPLIANCE & ETHICS (STRICT):
-- Only generate dispute letters for items that appear inaccurate, inconsistent, incomplete, or unverifiable.
-- Do NOT advise disputing accurate late payments just to remove them.
-- Do NOT suggest fraud, "credit sweep," false identity claims, or fake documents.
-- If late payments exist but no evidence they are incorrect, use "request verification / investigate accuracy" language and recommend user attach proof.
+USER INFO FOR LETTERS:
+- Name: ${userName}
+- Address: ${userAddress}
+- Use these on every letter. If address is [YOUR ADDRESS], keep the placeholder.
 
 RESPOND WITH ONLY VALID JSON matching this exact structure (no markdown, no code blocks):
 
@@ -4475,17 +4504,20 @@ RESPOND WITH ONLY VALID JSON matching this exact structure (no markdown, no code
   "mode": "repair" | "pre_funding",
   "summary": {
     "mainIssues": "<What's hurting the profile most>",
-    "priorityAction": "<What needs to be corrected first>"
+    "priorityAction": "<What needs to be corrected first>",
+    "totalDerogatories": <number>,
+    "totalLettersGenerated": <number>
   },
   "detectedIssues": [
     {
-      "bureau": "<Experian/Equifax/TransUnion/Unknown>",
+      "bureau": "<Experian/Equifax/TransUnion/All>",
       "creditor": "<creditor or agency name>",
       "accountLast4": "<last 4 digits if shown, or 'N/A'>",
-      "issueType": "<Late | Status Wrong | Balance Wrong | Duplicate | Personal Info | Collection | Charge-Off>",
+      "issueType": "<Late | Status Wrong | Balance Wrong | Duplicate | Personal Info | Collection | Charge-Off | Inquiry>",
       "monthsAffected": "<e.g. 'Jan 2024, Feb 2024' or 'N/A'>",
       "severity": "High" | "Medium" | "Low",
-      "proofToAttach": "<what documentation to include>"
+      "proofToAttach": "<what documentation to include>",
+      "disputeAngles": ["inaccurate", "fraud"]
     }
   ],
   "actionPlan": [
@@ -4496,42 +4528,122 @@ RESPOND WITH ONLY VALID JSON matching this exact structure (no markdown, no code
       "details": "<additional context>"
     }
   ],
-  "letters": [
+  "rounds": [
     {
-      "type": "bureau_dispute" | "creditor_dispute" | "personal_info_correction",
-      "recipientName": "<Bureau name or Creditor name>",
-      "recipientAddress": "<Full mailing address>",
-      "subject": "<Letter subject line>",
-      "body": "<Full letter text with user info filled in where possible, using [FULL NAME], [ADDRESS], [DOB], [LAST4 SSN] as placeholders for missing info. Include date, disputed items list, request language, attachment checklist, and signature line.>"
+      "round": 1,
+      "title": "Round 1: Initial Dispute - Inaccuracy & Verification",
+      "sendBy": "Immediately (Day 0)",
+      "description": "First contact disputing items as inaccurate/unverifiable. Bureau has 30 days to investigate.",
+      "expectedResponse": "Bureau must respond within 30-45 days with investigation results.",
+      "letters": [
+        {
+          "type": "bureau_dispute",
+          "disputeAngle": "inaccurate",
+          "recipientName": "<Bureau name>",
+          "recipientAddress": "<Bureau dispute address>",
+          "fraudDeptAddress": "<Bureau fraud department address>",
+          "subject": "<Letter subject line>",
+          "body": "<Full letter body with ${userName} and ${userAddress} filled in. Include today's date, SSN last 4 placeholder [LAST4 SSN], DOB placeholder [DOB], disputed items with account details, FCRA citation, request for investigation, attachment checklist, and signature line for ${userName}.>"
+        }
+      ]
+    },
+    {
+      "round": 2,
+      "title": "Round 2: Secondary Dispute - Bureau Confirmed Data Challenge",
+      "sendBy": "Day 35-40 (after Round 1 response)",
+      "description": "If bureau confirms items, challenge their verification method. Request method of verification documentation.",
+      "expectedResponse": "Bureau must provide method of verification within 15 days per FCRA §611(a)(7).",
+      "letters": [
+        {
+          "type": "bureau_dispute",
+          "disputeAngle": "verification_method",
+          "recipientName": "<Bureau name>",
+          "recipientAddress": "<Bureau dispute address>",
+          "fraudDeptAddress": "<Bureau fraud department address>",
+          "subject": "<Letter subject line>",
+          "body": "<Full letter challenging bureau's verification. Reference Round 1 dispute. Request proof of investigation method, name of person who verified, documentation used. Cite FCRA §611(a)(6)(B)(iii) and §611(a)(7). Fill in ${userName} and ${userAddress}.>"
+        }
+      ]
+    },
+    {
+      "round": 3,
+      "title": "Round 3: Final Escalation - Fraud & Compliance",
+      "sendBy": "Day 65-75 (after Round 2 response)",
+      "description": "Final escalation citing potential fraud/unauthorized accounts. Sent to both dispute AND fraud departments.",
+      "expectedResponse": "Bureau must block reported fraudulent items within 4 business days per FCRA §605B.",
+      "letters": [
+        {
+          "type": "fraud_dispute",
+          "disputeAngle": "fraud",
+          "recipientName": "<Bureau Fraud Department>",
+          "recipientAddress": "<Bureau fraud department address>",
+          "fraudDeptAddress": "<Bureau fraud department address>",
+          "subject": "<Letter subject line>",
+          "body": "<Full letter reporting items as potentially fraudulent/unauthorized. Reference previous disputes. Cite FCRA §605B, §623. Request immediate blocking. Fill in ${userName} and ${userAddress}. Include FTC Identity Theft Report reference placeholder.>"
+        }
+      ]
     }
   ],
-  "disclaimer": "I'm not a lawyer. Dispute only information you believe is inaccurate. Keep copies of everything you send."
+  "mailingServices": [
+    {
+      "name": "USPS Certified Mail",
+      "url": "https://www.usps.com/ship/insurance-extra-services.htm",
+      "description": "Send certified mail with return receipt ($4-6). Required for proof of delivery. Go to your local post office.",
+      "recommended": true
+    },
+    {
+      "name": "LetterStream",
+      "url": "https://www.letterstream.com",
+      "description": "Online certified mail service. Upload letter, they print, mail, and track. From $2.99/letter.",
+      "recommended": true
+    },
+    {
+      "name": "Click2Mail",
+      "url": "https://www.click2mail.com",
+      "description": "USPS-approved online mailing. Upload PDF, select certified mail option. From $1.50/letter.",
+      "recommended": false
+    },
+    {
+      "name": "Lob",
+      "url": "https://www.lob.com",
+      "description": "Automated mail API. Good for sending multiple letters at once. Certified mail available.",
+      "recommended": false
+    }
+  ],
+  "bureauFraudAddresses": {
+    "Experian": "Experian Fraud Department, P.O. Box 9554, Allen, TX 75013",
+    "Equifax": "Equifax Fraud Department, P.O. Box 105069, Atlanta, GA 30348",
+    "TransUnion": "TransUnion Fraud Victim Assistance, P.O. Box 2000, Chester, PA 19016"
+  },
+  "disclaimer": "I'm not a lawyer. Dispute only information you believe is inaccurate. Keep copies of everything you send. Send all letters via certified mail with return receipt."
 }
 
-BUREAU ADDRESSES TO USE:
-- Experian: P.O. Box 4500, Allen, TX 75013
+BUREAU DISPUTE ADDRESSES:
+- Experian: Experian, P.O. Box 4500, Allen, TX 75013
 - Equifax: Equifax Information Services LLC, P.O. Box 740256, Atlanta, GA 30374-0256
 - TransUnion: TransUnion Consumer Solutions, P.O. Box 2000, Chester, PA 19016-2000
 
-DISPUTE REASON WORDING (use one per item):
-- "Inaccurate payment status"
-- "Incorrect delinquency month(s)"
-- "Account status is incorrect"
-- "Balance/limit is incorrect"
-- "Duplicate reporting"
-- "Information cannot be verified / incomplete"
-- "Personal information is inaccurate"
+BUREAU FRAUD DEPARTMENT ADDRESSES (ALWAYS INCLUDE ON EVERY LETTER):
+- Experian Fraud: P.O. Box 9554, Allen, TX 75013 | Phone: 1-888-397-3742
+- Equifax Fraud: P.O. Box 105069, Atlanta, GA 30348 | Phone: 1-800-525-6285
+- TransUnion Fraud: P.O. Box 2000, Chester, PA 19016 | Phone: 1-800-680-7289
 
-LETTER RULES:
-- Every letter must include: Date, user identifying info (or placeholders), report number if found, clear list of disputed items, plain-language request, attachment checklist, signature line
-- Tone: firm, professional, short. No legal threats. No complex statutes.
-- Use "${userName}" as the user name where available, or [FULL NAME] as placeholder
+LETTER GENERATION RULES:
+- For EACH derogatory/negative item, generate letters to ALL 3 bureaus (Experian, Equifax, TransUnion)
+- Round 1: "Inaccurate/unverifiable" angle for every item. Cite FCRA §611(a)(1)(A).
+- Round 2: "Method of verification" challenge for items bureaus confirmed. Cite FCRA §611(a)(6)(B)(iii) and §611(a)(7).
+- Round 3: "Fraud/unauthorized" angle for persistent items. Cite FCRA §605B and §623. Send to fraud departments.
+- Every letter header must include: "${userName}", "${userAddress}", today's date, [LAST4 SSN], [DOB]
+- Every letter footer: "Enclosures: Copy of government-issued ID, Proof of address, Copy of credit report page showing disputed item"
+- Every letter must reference the bureau fraud department address in a CC line
+- Tone: firm, professional. Reference FCRA sections. No legal threats.
 
 EDGE CASES:
-- If bankruptcy, fraud alerts, or active disputes are noted: flag in summary, generate conservative plan
-- If no issues found: set mode to "pre_funding" and return empty detectedIssues/letters arrays with a summary noting the report is clean
+- If no negative items found: set mode to "pre_funding", return empty rounds
+- Include ALL collections, charge-offs, late payments, inquiries, and status errors
+- Generate separate letters for each unique creditor/account per bureau
 
-Parse the following credit report text and generate the complete analysis:
+Parse the following credit report and generate the COMPLETE 3-round dispute system:
 
 --- START OF CREDIT REPORT ---
 ${reportText.slice(0, 25000)}
@@ -4542,7 +4654,7 @@ ${reportText.slice(0, 25000)}
         messages: [
           { role: "system", content: repairPrompt }
         ],
-        max_tokens: 4096,
+        max_tokens: 16000,
         temperature: 0.1,
       });
 
@@ -4555,6 +4667,22 @@ ${reportText.slice(0, 25000)}
       } catch (parseErr) {
         console.error("Failed to parse credit repair response:", aiContent);
         return res.status(500).json({ error: "AI analysis returned invalid format. Please try again." });
+      }
+
+      if (!repairResult.bureauFraudAddresses) {
+        repairResult.bureauFraudAddresses = {
+          "Experian": "Experian Fraud Department, P.O. Box 9554, Allen, TX 75013 | Phone: 1-888-397-3742",
+          "Equifax": "Equifax Fraud Department, P.O. Box 105069, Atlanta, GA 30348 | Phone: 1-800-525-6285",
+          "TransUnion": "TransUnion Fraud Victim Assistance, P.O. Box 2000, Chester, PA 19016 | Phone: 1-800-680-7289"
+        };
+      }
+      if (!repairResult.mailingServices) {
+        repairResult.mailingServices = [
+          { name: "USPS Certified Mail", url: "https://www.usps.com/ship/insurance-extra-services.htm", description: "Send certified mail with return receipt ($4-6). Go to your local post office.", recommended: true },
+          { name: "LetterStream", url: "https://www.letterstream.com", description: "Online certified mail service. Upload letter, they print & mail. From $2.99/letter.", recommended: true },
+          { name: "Click2Mail", url: "https://www.click2mail.com", description: "USPS-approved online mailing. Upload PDF, select certified mail. From $1.50/letter.", recommended: false },
+          { name: "Lob", url: "https://www.lob.com", description: "Automated mail API for sending multiple letters at once.", recommended: false }
+        ];
       }
 
       await storage.updateUser(userId, {
