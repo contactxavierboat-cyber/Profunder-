@@ -348,23 +348,14 @@ export default function LandingPage() {
             <a href="#faq" className="text-[13px] font-medium text-[#5a5a7a] hover:text-[#111111] transition-colors" data-testid="link-faq">FAQ</a>
           </div>
 
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => setShowLogin(true)}
-              className="rounded-full px-5 py-2 text-[12.5px] font-semibold text-[#3a3a5a] border border-[#d0d0de] bg-white/80 hover:bg-white transition-all duration-200"
-              data-testid="button-login"
-            >
-              Log In
-            </button>
-            <button
-              onClick={() => document.querySelector<HTMLInputElement>('[data-testid="input-email"]')?.focus()}
-              className="rounded-full px-5 py-2 text-[12.5px] font-semibold text-white transition-all duration-200 hover:scale-[1.02] shadow-sm"
-              style={{ background: 'linear-gradient(135deg, #2a2a2a 0%, #0a0a0a 100%)' }}
-              data-testid="button-get-started"
-            >
-              Subscribe
-            </button>
-          </div>
+          <button
+            onClick={() => setShowLogin(true)}
+            className="rounded-full px-5 py-2 text-[12.5px] font-semibold text-white transition-all duration-200 hover:scale-[1.02] shadow-sm"
+            style={{ background: 'linear-gradient(135deg, #2a2a2a 0%, #0a0a0a 100%)' }}
+            data-testid="button-login"
+          >
+            Log In
+          </button>
         </nav>
       </div>
 
