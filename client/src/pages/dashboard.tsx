@@ -1387,8 +1387,25 @@ export default function DashboardPage() {
 
                   {repairData.actionPlan && (
                     <div className="rounded-2xl bg-white/70 backdrop-blur-md border border-white/40 p-5 mb-5" data-testid="action-plan-card">
-                      <p className="text-xs font-medium text-[#1a1a2e]/70 mb-3">Action Plan</p>
-                      <div className="text-[11px] text-[#1a1a2e]/70 leading-relaxed whitespace-pre-wrap">{typeof repairData.actionPlan === "string" ? repairData.actionPlan : JSON.stringify(repairData.actionPlan, null, 2)}</div>
+                      <p className="text-xs font-medium text-[#1a1a2e]/70 mb-4">Action Plan</p>
+                      {Array.isArray(repairData.actionPlan) ? (
+                        <div className="space-y-3">
+                          {repairData.actionPlan.map((step: any, idx: number) => (
+                            <div key={idx} className="flex gap-3 p-3 rounded-xl bg-white/50 border border-white/30" data-testid={`action-step-${idx}`}>
+                              <div className="w-7 h-7 rounded-lg bg-[#3a3a5a]/10 flex items-center justify-center shrink-0">
+                                <span className="text-[11px] font-bold text-[#3a3a5a]">{step.step || idx + 1}</span>
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <p className="text-sm font-medium text-[#1a1a2e]/90">{step.action || step}</p>
+                                {step.timing && <p className="text-[10px] text-[#1a1a2e]/50 mt-0.5 flex items-center gap-1"><Clock className="w-3 h-3" />{step.timing}</p>}
+                                {step.details && <p className="text-[11px] text-[#1a1a2e]/60 mt-1.5 leading-relaxed">{step.details}</p>}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="text-[11px] text-[#1a1a2e]/70 leading-relaxed whitespace-pre-wrap">{repairData.actionPlan}</div>
+                      )}
                     </div>
                   )}
                 </>
