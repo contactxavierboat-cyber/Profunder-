@@ -235,7 +235,9 @@ const proofMessages = [
 
 export default function LandingPage() {
   const [email, setEmail] = useState("");
+  const [loginEmail, setLoginEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [showLogin, setShowLogin] = useState(false);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const { login } = useAuth();
   const [proofIndex, setProofIndex] = useState(0);
@@ -263,9 +265,60 @@ export default function LandingPage() {
     }
   };
 
+  const handleLoginModal = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!loginEmail) return;
+    setIsLoading(true);
+    try {
+      await login(loginEmail);
+    } catch {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <div className="relative min-h-screen text-[#1a1a2e] overflow-x-hidden" style={{ fontFamily: "'Inter', sans-serif", background: 'linear-gradient(180deg, #ffffff 0%, #f5f5fc 12%, #eef0fa 25%, #f8f8ff 40%, #f2f0fb 55%, #f6f5fc 70%, #f0eff8 85%, #eceaf5 100%)' }}>
       <SpaceBackground />
+
+      {showLogin && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-sm" onClick={() => !isLoading && setShowLogin(false)}>
+          <div className="w-full max-w-[400px] mx-4 bg-white rounded-2xl shadow-2xl p-8 animate-in fade-in zoom-in-95 duration-200" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-2">
+                <div className="w-[22px] h-[22px] rounded-full bg-gradient-to-br from-[#2a2a2a] to-[#0a0a0a] flex items-center justify-center">
+                  <span className="w-1.5 h-1.5 rounded-full bg-white"></span>
+                </div>
+                <span className="text-[14px] font-bold tracking-[0.03em] text-[#1a1a1a]">MentXr<span className="text-[8px] align-super">&reg;</span></span>
+              </div>
+              <button onClick={() => setShowLogin(false)} className="text-[#9a9ab0] hover:text-[#3a3a5a] transition-colors text-[18px] leading-none" data-testid="button-close-login">&times;</button>
+            </div>
+            <h2 className="text-[22px] font-semibold tracking-[-0.02em] text-[#1a1a2e] mb-1">Welcome back</h2>
+            <p className="text-[13px] text-[#6a6a8a] mb-6">Log in with your email to continue</p>
+            <form onSubmit={handleLoginModal}>
+              <input
+                data-testid="input-login-email"
+                type="email"
+                placeholder="Email address"
+                className="w-full bg-[#f5f5fa] border border-[#e0e0ea] rounded-xl h-[48px] px-4 text-[14px] text-[#1a1a2e] placeholder:text-[#9a9ab0] outline-none focus:border-[#6a6a8a] transition-colors mb-4"
+                value={loginEmail}
+                onChange={(e) => setLoginEmail(e.target.value)}
+                required
+                disabled={isLoading}
+                autoFocus
+              />
+              <button
+                data-testid="button-login-submit"
+                type="submit"
+                disabled={isLoading}
+                className="w-full h-[48px] rounded-xl text-white text-[13px] font-bold hover:opacity-90 transition-colors tracking-wide disabled:opacity-50"
+                style={{ background: 'linear-gradient(135deg, #2a2a2a 0%, #0a0a0a 100%)' }}
+              >
+                {isLoading ? "..." : "Log In"}
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
 
       <div
         className="fixed bottom-6 left-6 z-50 flex items-center gap-2.5 px-4 py-2.5 rounded-xl bg-white border border-[#e0e0e8] shadow-lg shadow-black/8"
@@ -295,14 +348,23 @@ export default function LandingPage() {
             <a href="#faq" className="text-[13px] font-medium text-[#5a5a7a] hover:text-[#111111] transition-colors" data-testid="link-faq">FAQ</a>
           </div>
 
-          <button
-            onClick={() => document.querySelector<HTMLInputElement>('[data-testid="input-email"]')?.focus()}
-            className="rounded-full px-5 py-2 text-[12.5px] font-semibold text-white transition-all duration-200 hover:scale-[1.02] shadow-sm"
-            style={{ background: 'linear-gradient(135deg, #2a2a2a 0%, #0a0a0a 100%)' }}
-            data-testid="button-get-started"
-          >
-            Subscribe
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setShowLogin(true)}
+              className="rounded-full px-5 py-2 text-[12.5px] font-semibold text-[#3a3a5a] border border-[#d0d0de] bg-white/80 hover:bg-white transition-all duration-200"
+              data-testid="button-login"
+            >
+              Log In
+            </button>
+            <button
+              onClick={() => document.querySelector<HTMLInputElement>('[data-testid="input-email"]')?.focus()}
+              className="rounded-full px-5 py-2 text-[12.5px] font-semibold text-white transition-all duration-200 hover:scale-[1.02] shadow-sm"
+              style={{ background: 'linear-gradient(135deg, #2a2a2a 0%, #0a0a0a 100%)' }}
+              data-testid="button-get-started"
+            >
+              Subscribe
+            </button>
+          </div>
         </nav>
       </div>
 
