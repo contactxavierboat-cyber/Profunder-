@@ -4577,17 +4577,98 @@ ${reportText.slice(0, 25000)}
         lastRepairAnalysisDate: new Date(),
       });
 
+      const existingDisputes = await storage.getDisputeCases(userId);
+      let newDisputeCount = 0;
+
+      if (repairResult.detectedIssues && Array.isArray(repairResult.detectedIssues)) {
+        for (const issue of repairResult.detectedIssues) {
+          const bureau = issue.bureau || "Unknown";
+          const creditor = issue.creditor || "Unknown Account";
+          const accountLast4 = issue.accountLast4 || "";
+          const issueType = issue.issueType || "inaccuracy";
+
+          const alreadyExists = existingDisputes.some(
+            d => d.bureau.toLowerCase() === bureau.toLowerCase() &&
+                 d.accountName.toLowerCase() === creditor.toLowerCase() &&
+                 d.disputeType.toLowerCase() === issueType.toLowerCase() &&
+                 (d.accountNumber || "").toLowerCase() === (accountLast4 || "").toLowerCase()
+          );
+          if (alreadyExists) continue;
+
+          const matchingLetter = repairResult.letters?.find((l: any) =>
+            (l.recipientName || "").toLowerCase().includes(bureau.toLowerCase()) ||
+            (l.body || l.content || l.text || "").toLowerCase().includes(creditor.toLowerCase())
+          );
+
+          const fcraCitations: Record<string, string> = {
+            "late": "FCRA § 611(a)(1)(A) - Duty to investigate disputed information",
+            "status wrong": "FCRA § 623(a)(2) - Duty to correct and update inaccurate information",
+            "balance wrong": "FCRA § 623(a)(2) - Duty to correct and update inaccurate information",
+            "collection": "FCRA § 611(a)(1)(A) - Duty to investigate disputed information",
+            "charge-off": "FCRA § 623(a)(2) - Duty to correct and update inaccurate information",
+            "duplicate": "FCRA § 611(a)(1)(A) - Duty to investigate disputed information",
+            "personal info": "FCRA § 611(a)(1)(A) - Personal information correction",
+            "inaccuracy": "FCRA § 623(a)(2) - Duty to correct and update inaccurate information",
+          };
+          const citation = fcraCitations[issueType.toLowerCase()] || "FCRA § 611(a)(1)(A)";
+
+          let letterContent = matchingLetter?.body || matchingLetter?.content || matchingLetter?.text || "";
+
+          if (!letterContent) {
+            try {
+              const letterResponse = await openai.chat.completions.create({
+                model: "gpt-4o",
+                messages: [
+                  { role: "system", content: "You are a credit repair legal document specialist. Generate professional dispute letters citing specific FCRA provisions. Be direct, formal, and legally precise. No marketing language." },
+                  { role: "user", content: `Generate a bureau_dispute letter for:\nBureau: ${bureau}\nAccount: ${creditor}\nAccount Number: ...${accountLast4}\nDispute Type: ${issueType}\nIssue: ${issue.monthsAffected ? `${issueType} - Months affected: ${issue.monthsAffected}` : issueType}\nFCRA Citation: ${citation}\n\nInclude: sender placeholder [YOUR NAME/ADDRESS], date, bureau address, account details, specific FCRA citation, demand for action, 30-day response requirement. Format as a ready-to-send letter.` },
+                ],
+                max_tokens: 1500,
+              });
+              letterContent = letterResponse.choices[0]?.message?.content || "";
+            } catch (letterErr) {
+              console.error("Auto letter generation failed for", creditor, letterErr);
+              letterContent = `[Letter generation pending - ${issueType} dispute for ${creditor} at ${bureau}]`;
+            }
+          }
+
+          try {
+            await storage.createDisputeCase({
+              userId,
+              bureau,
+              accountName: creditor,
+              accountNumber: accountLast4 || null,
+              disputeType: issueType,
+              disputeMethod: "bureau_dispute",
+              fcraCitation: citation,
+              letterContent,
+              status: "draft",
+              sentDate: null,
+              reminderDate: null,
+              responseDeadline: null,
+              resolution: null,
+            });
+            newDisputeCount++;
+          } catch (disputeErr) {
+            console.error("Failed to create dispute case for", creditor, disputeErr);
+          }
+        }
+      }
+
       await storage.createMessage({
         userId,
         role: "assistant",
-        content: `**Credit Repair Analysis Complete**\n\n${repairResult.summary?.mainIssues || "Analysis complete."}\n\n**Priority:** ${repairResult.summary?.priorityAction || "Review your dashboard for details."}\n\n${repairResult.detectedIssues?.length || 0} issue(s) detected. ${repairResult.letters?.length || 0} dispute letter(s) generated.\n\nView full results in your Dashboard under Credit Repair.`,
+        content: `**Credit Repair Analysis Complete**\n\n${repairResult.summary?.mainIssues || "Analysis complete."}\n\n**Priority:** ${repairResult.summary?.priorityAction || "Review your dashboard for details."}\n\n${repairResult.detectedIssues?.length || 0} issue(s) detected. ${newDisputeCount} new dispute case(s) created with letters.\n\nView full results in your Dashboard under Repair Engine.`,
         attachment: "credit_report",
         mentor: null,
       });
 
+      const allDisputes = await storage.getDisputeCases(userId);
+
       res.json({
         success: true,
         ...repairResult,
+        disputeCases: allDisputes,
+        newDisputeCount,
       });
     } catch (error: any) {
       console.error("Credit repair analysis error:", error);

@@ -299,6 +299,8 @@ export default function DashboardPage() {
   const [capitalStackAmount, setCapitalStackAmount] = useState(50000);
   const [capitalStackResult, setCapitalStackResult] = useState<any>(null);
   const [capitalStackLoading, setCapitalStackLoading] = useState(false);
+  const [disputeCases, setDisputeCases] = useState<any[]>([]);
+  const [disputeCasesLoading, setDisputeCasesLoading] = useState(false);
 
   const fetchDmMessages = async (friendId: number) => {
     try {
@@ -385,6 +387,15 @@ export default function DashboardPage() {
       const res = await fetch(`/api/users/search?q=${encodeURIComponent(q)}`, { credentials: "include" });
       if (res.ok) { setFriendSearchResults(await res.json()); }
     } catch (err) { console.error(err); } finally { setFriendSearchLoading(false); }
+  };
+
+  const fetchDisputeCases = async () => {
+    setDisputeCasesLoading(true);
+    try {
+      const res = await fetch("/api/capital-os/disputes", { credentials: "include" });
+      if (res.ok) setDisputeCases(await res.json());
+    } catch (err) { console.error("Failed to fetch dispute cases", err); }
+    finally { setDisputeCasesLoading(false); }
   };
 
   const sendFriendRequest = async (receiverId: number) => {
@@ -500,12 +511,13 @@ export default function DashboardPage() {
       });
       if (res.ok) {
         const data = await res.json();
-        toast({ title: "Analysis Complete", description: "Your document has been analyzed and your funding score has been updated." });
+        toast({ title: "Analysis Complete", description: "Your document has been analyzed. All dashboard data updated." });
         await fetchFundingReadiness();
         await fetchCapitalOsDashboard();
+        await fetchDisputeCases();
         if (data.repairResult) {
           setRepairData(data.repairResult);
-          toast({ title: "Credit Repair Updated", description: `${data.repairResult.detectedIssues?.length || 0} issues detected. ${data.repairResult.letters?.length || 0} letters generated.` });
+          toast({ title: "Credit Repair Updated", description: `${data.repairResult.detectedIssues?.length || 0} issues detected. ${data.repairResult.newDisputeCount || data.repairResult.letters?.length || 0} dispute letters auto-generated.` });
         } else { await fetchRepairData(); }
       } else {
         const data = await res.json();
@@ -540,6 +552,7 @@ export default function DashboardPage() {
       if (res.ok) {
         const data = await res.json();
         setRepairData(data);
+        await fetchDisputeCases();
         toast({ title: "Repair Analysis Complete", description: `${data.detectedIssues?.length || 0} issues detected. ${data.letters?.length || 0} letters generated.` });
       } else {
         const data = await res.json();
@@ -610,6 +623,7 @@ export default function DashboardPage() {
       fetchRepairData();
       fetchQA();
       fetchCapitalOsDashboard();
+      fetchDisputeCases();
     }
   }, [user]);
 
@@ -1201,6 +1215,87 @@ export default function DashboardPage() {
                                 >
                                   {copiedLetter === idx ? <><Check className="w-3 h-3" /> Copied</> : <><Copy className="w-3 h-3" /> Copy to Clipboard</>}
                                 </button>
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {disputeCases.length > 0 && (
+                    <div className="rounded-2xl bg-white/70 backdrop-blur-md border border-white/40 p-6 mb-4" data-testid="dispute-cases-card">
+                      <div className="flex items-center justify-between mb-4">
+                        <p className="text-xs text-[#1a1a2e]/70">Active Dispute Cases ({disputeCases.length})</p>
+                        <button onClick={fetchDisputeCases} className="text-[10px] text-[#1a1a2e]/50 hover:text-[#1a1a2e]/70">
+                          <RefreshCw className="w-3 h-3" />
+                        </button>
+                      </div>
+                      <div className="space-y-3">
+                        {disputeCases.map((dc: any) => (
+                          <div key={dc.id} className="rounded-xl bg-white/50 border border-white/30 overflow-hidden" data-testid={`dispute-case-${dc.id}`}>
+                            <button
+                              onClick={() => setExpandedLetters(prev => { const next = new Set(prev); const key = 1000 + dc.id; if (next.has(key)) next.delete(key); else next.add(key); return next; })}
+                              className="w-full flex items-center justify-between p-4 text-left hover:bg-white/60 transition-colors"
+                            >
+                              <div className="flex items-center gap-3">
+                                <FileText className="w-4 h-4 text-[#1a1a2e]/60 shrink-0" />
+                                <div>
+                                  <p className="text-sm font-medium text-[#1a1a2e]/90">{dc.accountName}</p>
+                                  <div className="flex items-center gap-2 mt-0.5">
+                                    <span className="text-[10px] text-[#1a1a2e]/50">{dc.bureau}</span>
+                                    <span className="text-[10px] text-[#1a1a2e]/40">•</span>
+                                    <span className="text-[10px] text-[#1a1a2e]/50">{dc.disputeType}</span>
+                                    <span className={cn("text-[9px] font-medium px-1.5 py-0.5 rounded",
+                                      dc.status === "draft" ? "bg-yellow-500/15 text-yellow-600/80" :
+                                      dc.status === "sent" ? "bg-blue-500/15 text-blue-600/80" :
+                                      dc.status === "resolved" ? "bg-green-500/15 text-green-600/80" :
+                                      "bg-gray-500/15 text-gray-600/80"
+                                    )}>{dc.status}</span>
+                                  </div>
+                                </div>
+                              </div>
+                              <ChevronRight className={cn("w-4 h-4 text-[#1a1a2e]/40 transition-transform", expandedLetters.has(1000 + dc.id) && "rotate-90")} />
+                            </button>
+                            {expandedLetters.has(1000 + dc.id) && (
+                              <div className="px-4 pb-4 border-t border-white/30">
+                                {dc.fcraCitation && <p className="text-[10px] text-[#1a1a2e]/50 mt-3 mb-2">Citation: {dc.fcraCitation}</p>}
+                                <pre className="text-[11px] text-[#1a1a2e]/80 leading-relaxed whitespace-pre-wrap font-sans">{dc.letterContent}</pre>
+                                <div className="flex items-center gap-2 mt-3">
+                                  <button
+                                    onClick={() => copyLetterToClipboard(dc.letterContent, 1000 + dc.id)}
+                                    className="flex items-center gap-2 h-8 px-3 rounded-lg bg-white/60 border border-white/30 text-[10px] text-[#1a1a2e]/70 hover:bg-white/80 transition-colors"
+                                    data-testid={`copy-dispute-${dc.id}`}
+                                  >
+                                    {copiedLetter === 1000 + dc.id ? <><Check className="w-3 h-3" /> Copied</> : <><Copy className="w-3 h-3" /> Copy Letter</>}
+                                  </button>
+                                  {dc.status === "draft" && (
+                                    <button
+                                      onClick={async () => {
+                                        try {
+                                          await fetch(`/api/capital-os/disputes/${dc.id}`, {
+                                            method: "PATCH",
+                                            headers: { "Content-Type": "application/json" },
+                                            credentials: "include",
+                                            body: JSON.stringify({ status: "sent" }),
+                                          });
+                                          await fetchDisputeCases();
+                                          toast({ title: "Marked as Sent", description: "30-day response deadline set." });
+                                        } catch { toast({ title: "Error", variant: "destructive" }); }
+                                      }}
+                                      className="flex items-center gap-2 h-8 px-3 rounded-lg bg-[#3a3a5a] text-white text-[10px] hover:bg-[#2a2a4a] transition-colors"
+                                      data-testid={`send-dispute-${dc.id}`}
+                                    >
+                                      <Send className="w-3 h-3" /> Mark as Sent
+                                    </button>
+                                  )}
+                                </div>
+                                {dc.sentDate && (
+                                  <div className="mt-2 text-[10px] text-[#1a1a2e]/50">
+                                    Sent: {new Date(dc.sentDate).toLocaleDateString()}
+                                    {dc.responseDeadline && <span> • Deadline: {new Date(dc.responseDeadline).toLocaleDateString()}</span>}
+                                  </div>
+                                )}
                               </div>
                             )}
                           </div>
