@@ -4685,6 +4685,38 @@ ${reportText.slice(0, 25000)}
         ];
       }
 
+      if (!repairResult.letters || repairResult.letters.length === 0) {
+        const flatLetters: any[] = [];
+        if (repairResult.rounds && Array.isArray(repairResult.rounds)) {
+          for (const round of repairResult.rounds) {
+            const roundNum = round.round || 1;
+            if (round.letters && Array.isArray(round.letters)) {
+              for (const letter of round.letters) {
+                flatLetters.push({
+                  round: roundNum,
+                  title: letter.subject || letter.title || `${letter.recipientName || "Bureau"} - ${letter.disputeAngle || "Dispute"}`,
+                  bureau: letter.recipientName || letter.bureau || "",
+                  content: letter.body || letter.content || letter.text || "",
+                  disputeType: letter.disputeAngle || letter.type || "",
+                  fcraCitation: letter.fcraCitation || "",
+                  recipientAddress: letter.recipientAddress || "",
+                  fraudDeptAddress: letter.fraudDeptAddress || "",
+                });
+              }
+            }
+          }
+        }
+        repairResult.letters = flatLetters;
+      } else {
+        repairResult.letters = repairResult.letters.map((l: any, i: number) => ({
+          ...l,
+          round: l.round || 1,
+          content: l.content || l.body || l.text || "",
+        }));
+      }
+
+      const totalLetters = repairResult.letters?.length || 0;
+
       await storage.updateUser(userId, {
         monthlyUsage: user.monthlyUsage + 1,
         creditRepairData: JSON.stringify(repairResult),
@@ -4694,7 +4726,7 @@ ${reportText.slice(0, 25000)}
       await storage.createMessage({
         userId,
         role: "assistant",
-        content: `**Credit Repair Analysis Complete**\n\n${repairResult.summary?.mainIssues || "Analysis complete."}\n\n**Priority:** ${repairResult.summary?.priorityAction || "Review your dashboard for details."}\n\n${repairResult.detectedIssues?.length || 0} issue(s) detected. ${repairResult.letters?.length || 0} dispute letter(s) generated.\n\nView full results in your Dashboard under Credit Repair.`,
+        content: `**Credit Repair Analysis Complete**\n\n${repairResult.summary?.mainIssues || "Analysis complete."}\n\n**Priority:** ${repairResult.summary?.priorityAction || "Review your dashboard for details."}\n\n${repairResult.detectedIssues?.length || 0} issue(s) detected. ${totalLetters} dispute letter(s) generated across 3 rounds.\n\nView full results in your Dashboard under Repair Engine.`,
         attachment: "credit_report",
         mentor: null,
       });
@@ -4721,6 +4753,27 @@ ${reportText.slice(0, 25000)}
 
       try {
         const data = JSON.parse(user.creditRepairData);
+        if ((!data.letters || data.letters.length === 0) && data.rounds && Array.isArray(data.rounds)) {
+          const flatLetters: any[] = [];
+          for (const round of data.rounds) {
+            const roundNum = round.round || 1;
+            if (round.letters && Array.isArray(round.letters)) {
+              for (const letter of round.letters) {
+                flatLetters.push({
+                  round: roundNum,
+                  title: letter.subject || letter.title || `${letter.recipientName || "Bureau"} - ${letter.disputeAngle || "Dispute"}`,
+                  bureau: letter.recipientName || letter.bureau || "",
+                  content: letter.body || letter.content || letter.text || "",
+                  disputeType: letter.disputeAngle || letter.type || "",
+                  fcraCitation: letter.fcraCitation || "",
+                  recipientAddress: letter.recipientAddress || "",
+                  fraudDeptAddress: letter.fraudDeptAddress || "",
+                });
+              }
+            }
+          }
+          data.letters = flatLetters;
+        }
         res.json({
           hasData: true,
           lastAnalysisDate: user.lastRepairAnalysisDate,
