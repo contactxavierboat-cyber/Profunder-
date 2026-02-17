@@ -365,7 +365,7 @@ export default function LandingPage() {
         <div className="relative max-w-[900px] mx-auto">
           <p className="text-[11px] tracking-[0.2em] uppercase text-[#6a6a8a] mb-6" data-testid="text-hero-label">Digital Underwriting Engine</p>
           <h1
-            className="text-[56px] sm:text-[80px] md:text-[110px] lg:text-[140px] uppercase italic leading-[0.85] mb-8"
+            className="text-[80px] sm:text-[100px] md:text-[120px] lg:text-[140px] uppercase italic leading-[0.85] mb-8"
             style={{ fontFamily: "'Satoshi', sans-serif", fontWeight: 400, letterSpacing: '-0.06em', backgroundImage: 'linear-gradient(180deg, #000000 0%, #3a3a5a 50%, #7a7a9a 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}
             data-testid="text-hero-headline"
           >
