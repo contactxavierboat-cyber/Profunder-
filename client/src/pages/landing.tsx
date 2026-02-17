@@ -28,6 +28,7 @@ function SpaceBackground() {
     }
 
     let blobs: Blob[] = [];
+    let blobTextures: HTMLCanvasElement[] = [];
     let time = 0;
 
     const resize = () => {
@@ -100,8 +101,6 @@ function SpaceBackground() {
         return off;
       });
     };
-
-    let blobTextures: HTMLCanvasElement[] = [];
 
     const draw = () => {
       const w = window.innerWidth;
