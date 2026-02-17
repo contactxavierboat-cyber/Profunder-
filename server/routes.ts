@@ -315,7 +315,7 @@ ANSWER FIRST.
 REDIRECT SAFELY IF NEEDED.
 NEVER STONEWALL.`;
 
-const CREATOR_INFORMED_PROMPT = `You are an assistance-first AI intelligence system operating within the "Creator-Informed Analysis" section of MentXr®.
+const CREATOR_INFORMED_PROMPT = `You are an assistance-first AI intelligence system operating within the "Creator-Informed Analysis" section of baalio.
 
 Your role is to help users understand credit, funding, finance, and related decisions by drawing from the publicly available educational content of well-known YouTube creators and financial educators.
 
@@ -369,7 +369,7 @@ Response structure: 1) Lead with "According to @PrimaryCreator..." addressing th
 
 Always assist. Always name creators. Always stay lawful. Always move the user forward.`;
 
-const MENTXR_SYSTEM_PROMPT = MASTER_SYSTEM_PROMPT + `\n\nYou are MentXr® — an AI-powered mentorship platform that lets users converse with digital versions of influential mentors.
+const MENTXR_SYSTEM_PROMPT = MASTER_SYSTEM_PROMPT + `\n\nYou are baalio — an AI-powered mentorship platform that lets users converse with digital versions of influential mentors.
 
 Your role is to provide thoughtful, personalized mentorship conversations. You embody the wisdom, communication style, and strategic thinking of world-class mentors across business, finance, leadership, branding, marketing, real estate, and entrepreneurship.
 
@@ -426,7 +426,7 @@ const MENTOR_PROFILES: Record<string, { name: string; keywords: string[]; system
     tagline: "Scale Everything",
     specialty: "Sales & Business Growth",
     keywords: ["nova", "novasage", "sage", "sales", "scaling"],
-    systemPrompt: `You are NovaSage247, an AI mentor bot on the MentXr® platform specializing in sales mastery and business growth.
+    systemPrompt: `You are NovaSage247, an AI mentor bot on the baalio platform specializing in sales mastery and business growth.
 
 PERSONALITY & VOICE:
 - High energy, bold, and direct
@@ -456,7 +456,7 @@ Always respond AS NovaSage247.`
     tagline: "Patient Capital",
     specialty: "Investing & Value",
     keywords: ["alpha", "alphavolt", "volt", "investing", "value investing", "stocks"],
-    systemPrompt: `You are AlphaVolt889, an AI mentor bot on the MentXr® platform specializing in investing and long-term value creation.
+    systemPrompt: `You are AlphaVolt889, an AI mentor bot on the baalio platform specializing in investing and long-term value creation.
 
 PERSONALITY & VOICE:
 - Calm, patient wisdom with sharp intelligence
@@ -487,7 +487,7 @@ Always respond AS AlphaVolt889.`
     tagline: "Hustle & Heart",
     specialty: "Marketing & Social Media",
     keywords: ["blaze", "blazeecho", "echo", "marketing", "social media", "content"],
-    systemPrompt: `You are BlazeEcho512, an AI mentor bot on the MentXr® platform specializing in marketing, social media, and brand building.
+    systemPrompt: `You are BlazeEcho512, an AI mentor bot on the baalio platform specializing in marketing, social media, and brand building.
 
 PERSONALITY & VOICE:
 - Raw, authentic, and brutally honest
@@ -518,7 +518,7 @@ Always respond AS BlazeEcho512.`
     tagline: "Live Your Best Life",
     specialty: "Leadership & Growth",
     keywords: ["lunar", "lunarpeak", "peak", "leadership", "growth", "mindset"],
-    systemPrompt: `You are LunarPeak303, an AI mentor bot on the MentXr® platform specializing in leadership development and personal growth.
+    systemPrompt: `You are LunarPeak303, an AI mentor bot on the baalio platform specializing in leadership development and personal growth.
 
 PERSONALITY & VOICE:
 - Warm, empathetic, deeply insightful, and empowering
@@ -549,7 +549,7 @@ Always respond AS LunarPeak303.`
     tagline: "Fearless Innovation",
     specialty: "Entrepreneurship & Product",
     keywords: ["iron", "ironflux", "flux", "startup", "entrepreneur", "product"],
-    systemPrompt: `You are IronFlux771, an AI mentor bot on the MentXr® platform specializing in entrepreneurship and product innovation.
+    systemPrompt: `You are IronFlux771, an AI mentor bot on the baalio platform specializing in entrepreneurship and product innovation.
 
 PERSONALITY & VOICE:
 - Fun, approachable, with iron determination underneath
@@ -580,7 +580,7 @@ Always respond AS IronFlux771.`
     tagline: "Unlock Your Potential",
     specialty: "Mindset & Financial Literacy",
     keywords: ["zen", "zencipher", "cipher", "mindset", "financial literacy", "mental"],
-    systemPrompt: `You are ZenCipher108, an AI mentor bot on the MentXr® platform specializing in mindset engineering and financial literacy.
+    systemPrompt: `You are ZenCipher108, an AI mentor bot on the baalio platform specializing in mindset engineering and financial literacy.
 
 PERSONALITY & VOICE:
 - Deeply thoughtful, grounded, and empowering
@@ -613,7 +613,7 @@ Always respond AS ZenCipher108.`
     tagline: "Real Talk, Real Change",
     specialty: "Youth Advocacy & Transformation",
     keywords: ["steel", "steelwraith", "wraith", "youth", "advocacy", "transformation", "real talk"],
-    systemPrompt: `You are SteelWraith666, an AI mentor bot on the MentXr® platform specializing in youth advocacy and personal transformation.
+    systemPrompt: `You are SteelWraith666, an AI mentor bot on the baalio platform specializing in youth advocacy and personal transformation.
 
 PERSONALITY & VOICE:
 - Brutally honest, raw, unapologetic, and direct
@@ -1215,7 +1215,7 @@ export async function registerRoutes(
       content: q.content,
     }));
 
-    const systemPrompt = MASTER_SYSTEM_PROMPT + `\n\nYou are the MentXr® Dashboard AI Assistant. The user is asking a question directly from their financial dashboard. You have full access to their uploaded credit report, analysis data, and financial profile. Use this data to give specific, personalized answers — not generic advice. Reference actual numbers, accounts, and details from their report when relevant.
+    const systemPrompt = MASTER_SYSTEM_PROMPT + `\n\nYou are the baalio Dashboard AI Assistant. The user is asking a question directly from their financial dashboard. You have full access to their uploaded credit report, analysis data, and financial profile. Use this data to give specific, personalized answers — not generic advice. Reference actual numbers, accounts, and details from their report when relevant.
 
 Be concise but thorough. Use bullet points and formatting for readability. If the user asks about something not in their data, let them know what information you'd need.${financialContext}`;
 
@@ -1578,16 +1578,16 @@ If the user has uploaded a credit report, reference specific data points when ap
       const recentMessages = await storage.getDirectMessages(convKey);
       const last20 = recentMessages.slice(-20);
       const chatContext = last20.map(m => {
-        const name = m.senderId === userId ? userName : (m.isAi ? "MentXr® AI" : friendName);
+        const name = m.senderId === userId ? userName : (m.isAi ? "baalio AI" : friendName);
         return `${name}: ${m.content}`;
       }).join("\n");
 
-      const teamPrompt = MASTER_SYSTEM_PROMPT + `\n\nYou are MentXr® Team AI — an AI assistant participating in a group conversation between friends on the MentXr® platform.
+      const teamPrompt = MASTER_SYSTEM_PROMPT + `\n\nYou are baalio Team AI — an AI assistant participating in a group conversation between friends on the baalio platform.
 
 PARTICIPANTS IN THIS CONVERSATION:
 - ${userName} (asking the question)
 - ${friendName} (their friend)
-- You (MentXr® AI — the team's AI advisor)
+- You (baalio AI — the team's AI advisor)
 
 BEHAVIOR:
 - Address both participants naturally — you're part of their team
@@ -1650,7 +1650,7 @@ Respond to the latest question as the team's AI mentor. Be direct, helpful, and 
 
   const rssParser = new Parser({
     timeout: 3000,
-    headers: { 'User-Agent': 'Mozilla/5.0 (compatible; MentXr-Feed/1.0)' },
+    headers: { 'User-Agent': 'Mozilla/5.0 (compatible; baalio-Feed/1.0)' },
   });
 
   const YT = (id: string, source: string, category: string) => ({
@@ -3765,7 +3765,7 @@ Respond to the latest question as the team's AI mentor. Be direct, helpful, and 
   const BOT_POST_TEMPLATES = [
     "Just finished reading 'Think and Grow Rich' for the 5th time. Every read reveals something new. Never stop learning 📚",
     "The difference between a dreamer and a doer is action. What did you DO today to get closer to your goals?",
-    "Closed my first real estate deal today! MentXr® helped me build the confidence. Grateful for this community 🏠",
+    "Closed my first real estate deal today! baalio helped me build the confidence. Grateful for this community 🏠",
     "Stop waiting for the perfect moment. Start now, adjust later. Progress > perfection.",
     "Had an amazing session with the AI mentors today. The advice on scaling my business was exactly what I needed.",
     "Your network is your net worth. Who are you surrounding yourself with?",
@@ -3774,7 +3774,7 @@ Respond to the latest question as the team's AI mentor. Be direct, helpful, and 
     "Just uploaded my credit report and got actionable insights in seconds. This platform is incredible.",
     "The best investment you can make is in yourself. Period.",
     "Failed 3 times before getting it right. Failure isn't the opposite of success—it's part of it.",
-    "Morning routine: Wake up, gratitude journal, MentXr® session, then attack the day. What's yours?",
+    "Morning routine: Wake up, gratitude journal, baalio session, then attack the day. What's yours?",
     "If you're the smartest person in the room, you're in the wrong room.",
     "Started my LLC today! One step closer to financial freedom 🎯",
     "Cash flow > salary. Learn the difference and change your life.",
@@ -3798,7 +3798,7 @@ Respond to the latest question as the team's AI mentor. Be direct, helpful, and 
     "AlphaVolt889's compound interest lesson on here changed my perspective forever.",
     "Accountability partners > motivation. Find someone who won't let you slack.",
     "Launched my e-commerce store. First sale within 48 hours!",
-    "Financial literacy should be taught in every school. Spreading the word through MentXr®",
+    "Financial literacy should be taught in every school. Spreading the word through baalio",
     "Woke up to $500 in passive income. Systems over effort.",
     "IronFlux771's session on overcoming fear of failure was exactly what I needed today.",
     "Don't save what's left after spending. Spend what's left after saving.",
@@ -3808,7 +3808,7 @@ Respond to the latest question as the team's AI mentor. Be direct, helpful, and 
     "The ZenCipher108 session on financial literacy opened my eyes. Knowledge truly is the key 🔑",
     "Stop trading time for money. Build systems that work while you sleep.",
     "Invested in Bitcoin at $30K. Patience is a superpower in investing.",
-    "Just hit 100 sessions on MentXr®. The growth has been insane.",
+    "Just hit 100 sessions on baalio. The growth has been insane.",
     "Real estate, stocks, crypto, business—diversify your income streams.",
     "SteelWraith666's real talk session was the wake-up call I needed. No more excuses.",
     "Budgeting isn't restricting. It's telling your money where to go instead of wondering where it went.",
@@ -3871,7 +3871,7 @@ Respond to the latest question as the team's AI mentor. Be direct, helpful, and 
       }
       const postsWithUsers = recentPosts.map(p => ({
         ...p,
-        userEmail: userMap[p.userId]?.email || "anonymous@mentxr.com",
+        userEmail: userMap[p.userId]?.email || "anonymous@baalio.com",
       }));
       res.json({ posts: postsWithUsers });
     } catch (error) {
@@ -4274,7 +4274,7 @@ Respond to the latest question as the team's AI mentor. Be direct, helpful, and 
 
       const docLabel = documentType === "bank_statement" ? "bank statement" : "credit report";
 
-      const analysisPrompt = `You are a Capital Readiness and Funding Strategy Evaluation System for MentXr®.
+      const analysisPrompt = `You are a Capital Readiness and Funding Strategy Evaluation System for baalio.
 
 Your purpose is to analyze uploaded financial documents and extract EVERY piece of data available.
 
@@ -4498,7 +4498,7 @@ ${extractedText}
       const userName = user.fullName || user.displayName || user.email.split("@")[0];
       const userAddress = user.streetAddress ? `${user.streetAddress}, ${user.city || ""}, ${user.state || ""} ${user.zipCode || ""}`.trim() : "[YOUR ADDRESS]";
 
-      const repairPrompt = `You are a Credit Report Repair & Funding Readiness System embedded inside MentXr®, a business funding app.
+      const repairPrompt = `You are a Credit Report Repair & Funding Readiness System embedded inside baalio, a business funding app.
 
 Your job is to read the user's uploaded credit report text, identify ALL negative, derogatory, or potentially inaccurate items, and produce a COMPREHENSIVE 3-ROUND dispute letter system.
 

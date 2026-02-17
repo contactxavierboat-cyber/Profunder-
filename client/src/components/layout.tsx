@@ -43,12 +43,12 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
       )}>
         <div className="p-4 sm:p-6 border-b border-white/40 flex items-center justify-between">
           <div>
-            <h1 className="font-sans font-bold text-lg sm:text-xl tracking-tighter flex items-center gap-2 text-[#1a1a2e]">
+            <h1 className="font-sans font-bold text-lg sm:text-xl tracking-tighter flex items-center gap-2 text-[#1a1a2e]" style={{ fontFamily: "'Dancing Script', cursive" }}>
               <span className="relative w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center">
                 <span className="absolute inset-0 rounded-full bg-[#8a8aa5]/15 animate-ping" />
                 <span className="relative w-3 h-3 sm:w-3.5 sm:h-3.5 rounded-full bg-[#8a8aa5] shadow-[0_0_8px_rgba(138,138,165,0.4)]" />
               </span>
-              MentXr®
+              baalio
             </h1>
             <p className="text-[10px] sm:text-xs text-[#8a8aa5] mt-1">Mentorship, On Demand</p>
           </div>
@@ -102,7 +102,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
           >
             <Menu className="w-5 h-5 text-[#6a6a8a]" />
           </button>
-          <h1 className="text-sm font-bold text-[#1a1a2e]">MentXr®</h1>
+          <h1 className="text-sm font-bold text-[#1a1a2e]" style={{ fontFamily: "'Dancing Script', cursive" }}>baalio</h1>
           <div className="w-8" />
         </header>
 

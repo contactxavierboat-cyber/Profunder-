@@ -1,4 +1,4 @@
-# MentXr®
+# baalio
 
 ## Overview
 A subscription-based AI mentorship platform ("Capital Operating System") combining comprehensive funding phase management (5 phases: Repair→Build→Optimize→Apply→Scale) with AI-powered mentorship. Features weighted 6-category Capital Readiness scoring, Safe Exposure monitoring, Bureau Health tracking (3-bureau map), dispute case management with AI-generated FCRA-compliant letters, bank rating and pledge loan simulators, capital stack planning, application window optimization, AI chat workspace with 7 bot mentors, Creator Connect (AI-powered YouTube creator matching without API key), Credit Report Repair System, Messages/DM system with Team AI, session-based auth, PDF upload with OCR, AOL AIM-style buddy list sidebar, and admin panel.

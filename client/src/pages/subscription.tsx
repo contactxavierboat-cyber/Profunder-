@@ -114,7 +114,7 @@ export default function SubscriptionPage() {
         .then((data) => {
           if (data.active) {
             queryClient.invalidateQueries({ queryKey: ["/api/me"] });
-            toast({ title: "Subscription Activated!", description: "Welcome to MentXr\u00ae." });
+            toast({ title: "Subscription Activated!", description: "Welcome to baalio." });
             setTimeout(() => setLocation("/dashboard"), 1500);
           }
         });
@@ -210,7 +210,7 @@ export default function SubscriptionPage() {
             <div className="w-8 h-8 rounded-full border-2 border-[#c0c0d0] flex items-center justify-center">
               <span className="w-2 h-2 rounded-full bg-[#8a8aa5]"></span>
             </div>
-            <span className="text-[14px] font-bold tracking-[0.08em] text-[#1a1a2e] uppercase">MentXr</span>
+            <span className="text-[14px] font-bold tracking-[0.08em] text-[#1a1a2e] uppercase" style={{ fontFamily: "'Dancing Script', cursive" }}>baalio</span>
           </div>
 
           <p className="text-[11px] tracking-[0.2em] uppercase text-[#7a7a9a] mb-4">
@@ -227,7 +227,7 @@ export default function SubscriptionPage() {
           <p className="text-[13px] sm:text-[15px] text-[#6a6a8a] leading-[1.7] max-w-[400px]">
             {isActive
               ? "Your membership is active. Manage your billing below."
-              : "Unlock the full power of MentXr\u00ae — AI-powered underwriting intelligence, credit repair, and mentorship."}
+              : "Unlock the full power of baalio — AI-powered underwriting intelligence, credit repair, and mentorship."}
           </p>
         </div>
 
@@ -241,7 +241,7 @@ export default function SubscriptionPage() {
           <div className="w-full h-px bg-gradient-to-r from-transparent via-[#c0c0d0] to-transparent"></div>
 
           <div className="px-6 sm:px-8 pt-7 sm:pt-9 pb-3 text-center">
-            <p className="text-[11px] sm:text-[12px] text-[#7a7a9a] uppercase tracking-[0.15em] font-semibold mb-4">MentXr® Monthly</p>
+            <p className="text-[11px] sm:text-[12px] text-[#7a7a9a] uppercase tracking-[0.15em] font-semibold mb-4">baalio Monthly</p>
             <div className="mb-2">
               <span
                 className="text-[44px] sm:text-[56px] tracking-tight"
