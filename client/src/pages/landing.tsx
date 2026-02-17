@@ -17,27 +17,25 @@ function SpaceBackground() {
       >
         <source src="/marble-bg.mp4" type="video/mp4" />
       </video>
-      <div className="absolute inset-0 bg-black/35" />
     </div>
   );
 }
 
 const gradientText = (dir = '180deg', _from = 0.85, _to = 0.5) => ({
-  backgroundImage: `linear-gradient(${dir}, #ffffff 0%, #d0d0e0 45%, #a0a0c0 100%)`,
+  backgroundImage: `linear-gradient(${dir}, #000000 0%, #2a2a4a 45%, #6a6a8a 100%)`,
   WebkitBackgroundClip: 'text' as const,
   WebkitTextFillColor: 'transparent' as const,
   backgroundClip: 'text' as const,
   fontStyle: 'italic' as const,
   lineHeight: '0.95',
-  filter: 'drop-shadow(0 2px 8px rgba(0,0,0,0.4))' as const,
 });
 
 const sectionBg = { background: 'transparent' };
 
-const contentBlockStyle = "relative z-30 rounded-2xl bg-black/40 backdrop-blur-md border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.3),0_2px_8px_rgba(0,0,0,0.15)] p-6 sm:p-8";
+const contentBlockStyle = "relative z-30 rounded-2xl bg-white/80 backdrop-blur-md border border-white/40 shadow-[0_8px_32px_rgba(0,0,0,0.04),0_2px_8px_rgba(0,0,0,0.02)] p-6 sm:p-8";
 
 const SectionLabel = ({ children }: { children: string }) => (
-  <p className="text-[11px] tracking-[0.2em] uppercase mb-6 sm:mb-8 text-[#8a8aaa]">{children}</p>
+  <p className="text-[11px] tracking-[0.2em] uppercase mb-6 sm:mb-8 text-[#7a7a9a]">{children}</p>
 );
 
 const SubscribeButton = ({ className = "" }: { className?: string }) => (
@@ -58,9 +56,9 @@ const ScrollArrow = ({ targetId }: { targetId: string }) => (
     aria-label="Scroll to next section"
     data-testid={`arrow-to-${targetId}`}
   >
-    <div className="w-10 h-10 flex items-center justify-center rounded-full border border-white/20 bg-white/10 hover:bg-white/20 transition-colors shadow-sm animate-bounce-slow">
+    <div className="w-10 h-10 flex items-center justify-center rounded-full border border-[#d0d0de] bg-white/80 hover:bg-white transition-colors shadow-sm animate-bounce-slow">
       <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M9 3.5V14.5M9 14.5L4 9.5M9 14.5L14 9.5" stroke="#a0a0c0" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M9 3.5V14.5M9 14.5L4 9.5M9 14.5L14 9.5" stroke="#7a7a9a" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
       </svg>
     </div>
   </button>
@@ -146,7 +144,7 @@ export default function LandingPage() {
   };
 
   return (
-    <div className="relative min-h-screen text-[#e0e0f0] overflow-x-hidden" style={{ fontFamily: "'Inter', sans-serif" }}>
+    <div className="relative min-h-screen text-[#1a1a2e] overflow-x-hidden" style={{ fontFamily: "'Inter', sans-serif" }}>
       <SpaceBackground />
 
       {showLogin && (
@@ -159,10 +157,10 @@ export default function LandingPage() {
                 </div>
                 <BaalioLogo size="sm" className="text-[#1a1a1a]" />
               </div>
-              <button onClick={() => setShowLogin(false)} className="text-[#9a9ab0] hover:text-[#c0c0e0] transition-colors text-[18px] leading-none" data-testid="button-close-login">&times;</button>
+              <button onClick={() => setShowLogin(false)} className="text-[#9a9ab0] hover:text-[#3a3a5a] transition-colors text-[18px] leading-none" data-testid="button-close-login">&times;</button>
             </div>
             <h2 className="text-[22px] font-semibold tracking-[-0.02em] text-[#1a1a2e] mb-1">Welcome back</h2>
-            <p className="text-[13px] text-[#8a8ab0] mb-6">Log in with your email to continue</p>
+            <p className="text-[13px] text-[#6a6a8a] mb-6">Log in with your email to continue</p>
             <form onSubmit={handleLoginModal}>
               <input
                 data-testid="input-login-email"
@@ -190,31 +188,31 @@ export default function LandingPage() {
       )}
 
       <div
-        className="fixed bottom-6 left-6 z-50 flex items-center gap-2.5 px-4 py-2.5 rounded-xl bg-black/60 backdrop-blur-md border border-white/10 shadow-lg shadow-black/30"
+        className="fixed bottom-6 left-6 z-50 flex items-center gap-2.5 px-4 py-2.5 rounded-xl bg-white border border-[#e0e0e8] shadow-lg shadow-black/8"
         style={{
           transition: "opacity 0.5s ease, transform 0.5s ease",
           opacity: proofVisible ? 1 : 0,
           transform: proofVisible ? "translateY(0)" : "translateY(8px)",
         }}
       >
-        <span className="w-2 h-2 rounded-full bg-[#6ee7b7] animate-pulse shrink-0"></span>
-        <span className="text-[12px] sm:text-[13px] text-[#c0c0d8] font-medium whitespace-nowrap">{proofMessages[proofIndex]}</span>
+        <span className="w-2 h-2 rounded-full bg-[#2a2a2a] animate-pulse shrink-0"></span>
+        <span className="text-[12px] sm:text-[13px] text-[#3a3a5a] font-medium whitespace-nowrap">{proofMessages[proofIndex]}</span>
       </div>
 
       <div className="sticky top-0 z-50 w-full flex justify-center px-6 sm:px-10 pt-4" data-testid="nav-top">
-        <nav className="flex items-center justify-between w-full max-w-[900px] h-[52px] bg-black/50 backdrop-blur-md rounded-full px-2.5 pl-3 shadow-lg shadow-black/30 border border-white/10">
+        <nav className="flex items-center justify-between w-full max-w-[900px] h-[52px] bg-white/95 rounded-full px-2.5 pl-3 shadow-lg shadow-black/15">
           <div className="flex items-center gap-2 px-2" data-testid="nav-logo">
             <div className="w-[18px] h-[18px] rounded-full bg-gradient-to-br from-[#2a2a2a] to-[#0a0a0a] flex items-center justify-center animate-logo-pulse">
               <span className="w-1.5 h-1.5 rounded-full bg-white"></span>
             </div>
-            <span className="text-[19px] tracking-[-0.06em] text-white" style={{ fontFamily: "'Satoshi', sans-serif" }}><span className="font-normal">Pro</span><span className="italic">Fundr</span></span>
+            <span className="text-[19px] tracking-[-0.06em] text-[#1a1a1a]" style={{ fontFamily: "'Satoshi', sans-serif" }}><span className="font-normal">Pro</span><span className="italic">Fundr</span></span>
           </div>
 
           <div className="hidden md:flex items-center gap-8">
-            <a href="#how-it-works" className="text-[13px] font-medium text-[#a0a0c0] hover:text-white transition-colors" data-testid="link-how-it-works">How It Works</a>
-            <a href="#features" className="text-[13px] font-medium text-[#a0a0c0] hover:text-white transition-colors" data-testid="link-features">Features</a>
-            <a href="#results" className="text-[13px] font-medium text-[#a0a0c0] hover:text-white transition-colors" data-testid="link-results">Results</a>
-            <a href="#faq" className="text-[13px] font-medium text-[#a0a0c0] hover:text-white transition-colors" data-testid="link-faq">FAQ</a>
+            <a href="#how-it-works" className="text-[13px] font-medium text-[#5a5a7a] hover:text-[#111111] transition-colors" data-testid="link-how-it-works">How It Works</a>
+            <a href="#features" className="text-[13px] font-medium text-[#5a5a7a] hover:text-[#111111] transition-colors" data-testid="link-features">Features</a>
+            <a href="#results" className="text-[13px] font-medium text-[#5a5a7a] hover:text-[#111111] transition-colors" data-testid="link-results">Results</a>
+            <a href="#faq" className="text-[13px] font-medium text-[#5a5a7a] hover:text-[#111111] transition-colors" data-testid="link-faq">FAQ</a>
           </div>
 
           <button
@@ -230,27 +228,27 @@ export default function LandingPage() {
 
       {/* ═══════════════ 1. HERO ═══════════════ */}
       <section id="sec-hero" className="relative z-20 min-h-[90vh] flex flex-col items-center justify-center px-6 sm:px-12 md:px-20 lg:px-28 py-20 text-center">
-        <div className="absolute inset-0" style={{ background: 'radial-gradient(ellipse 90% 80% at 50% 50%, rgba(0,0,0,0.5) 0%, rgba(0,0,0,0.3) 50%, transparent 100%)' }} />
+        <div className="absolute inset-0" style={{ background: 'radial-gradient(ellipse 90% 80% at 50% 50%, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0.1) 50%, transparent 100%)' }} />
         <div className="relative max-w-[900px] mx-auto">
-          <p className="text-[11px] tracking-[0.2em] uppercase text-[#8a8ab0] mb-6" data-testid="text-hero-label">Digital Underwriting Engine</p>
+          <p className="text-[11px] tracking-[0.2em] uppercase text-[#6a6a8a] mb-6" data-testid="text-hero-label">Digital Underwriting Engine</p>
           <h1
             className="text-[72px] sm:text-[68px] md:text-[88px] lg:text-[108px] uppercase italic leading-[0.85] mb-8 text-center"
-            style={{ fontFamily: "'Satoshi', sans-serif", fontWeight: 400, letterSpacing: '-0.06em', backgroundImage: 'linear-gradient(180deg, #ffffff 0%, #d0d0e8 50%, #9090b8 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text', filter: 'drop-shadow(0 2px 12px rgba(0,0,0,0.5))' }}
+            style={{ fontFamily: "'Satoshi', sans-serif", fontWeight: 400, letterSpacing: '-0.06em', backgroundImage: 'linear-gradient(180deg, #000000 0%, #3a3a5a 50%, #7a7a9a 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}
             data-testid="text-hero-headline"
           >
             Qualify<br />Before<br />You Apply
           </h1>
-          <p className="text-[13px] sm:text-[17px] text-[#c8c8e0] leading-[1.7] sm:leading-[1.8] max-w-[560px] mx-auto mb-10" style={{ textShadow: '0 1px 8px rgba(0,0,0,0.5)' }}>
+          <p className="text-[13px] sm:text-[17px] text-[#5a5a7a] leading-[1.7] sm:leading-[1.8] max-w-[560px] mx-auto mb-10">
             Know exactly where you stand before you submit a single funding application. We analyze your profile using real underwriting logic to determine your funding potential — before lenders ever see you. Stop guessing. Start qualifying.
           </p>
 
           <form onSubmit={handleLogin} className="w-full max-w-[440px] mx-auto mb-8">
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center bg-white/8 border border-white/15 rounded-2xl sm:rounded-full sm:h-[52px] sm:pl-5 sm:pr-1.5 overflow-hidden backdrop-blur-sm">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center bg-[#f5f5fa] border border-[#e0e0ea] rounded-2xl sm:rounded-full sm:h-[52px] sm:pl-5 sm:pr-1.5 overflow-hidden">
               <input
                 data-testid="input-email"
                 type="email"
                 placeholder="Enter your email"
-                className="flex-1 bg-transparent text-[14px] text-white placeholder:text-[#8a8ab0] outline-none px-4 py-3.5 sm:px-0 sm:py-0"
+                className="flex-1 bg-transparent text-[14px] text-[#1a1a2e] placeholder:text-[#9a9ab0] outline-none px-4 py-3.5 sm:px-0 sm:py-0"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
@@ -260,15 +258,15 @@ export default function LandingPage() {
                 data-testid="button-join"
                 type="submit"
                 disabled={isLoading}
-                className="h-[44px] sm:h-[40px] px-6 sm:rounded-full text-white text-[13px] font-bold hover:opacity-90 transition-colors shrink-0 border-t border-white/10 sm:border-t-0 mx-1.5 mb-1.5 sm:mb-0 sm:mx-0 rounded-xl sm:rounded-full tracking-wide"
-                style={{ background: 'linear-gradient(135deg, #4a4a6a 0%, #2a2a4a 100%)' }}
+                className="h-[44px] sm:h-[40px] px-6 sm:rounded-full text-white text-[13px] font-bold hover:opacity-90 transition-colors shrink-0 border-t border-[#e0e0ea] sm:border-t-0 mx-1.5 mb-1.5 sm:mb-0 sm:mx-0 rounded-xl sm:rounded-full tracking-wide"
+                style={{ background: 'linear-gradient(135deg, #2a2a2a 0%, #0a0a0a 100%)' }}
               >
                 {isLoading ? "..." : "SUBSCRIBE"}
               </button>
             </div>
           </form>
 
-          <div className="flex flex-wrap items-center justify-center gap-6 text-[11px] text-[#9a9ac0] tracking-wide">
+          <div className="flex flex-wrap items-center justify-center gap-6 text-[11px] text-[#7a7a9a] tracking-wide">
             <span>Full platform access</span>
             <span className="w-1 h-1 rounded-full bg-[#c0c0d0]"></span>
             <span>Cancel anytime</span>
@@ -280,7 +278,7 @@ export default function LandingPage() {
       </section>
 
       {/* ═══════════════ 2. PROBLEM / PAIN ═══════════════ */}
-      <section id="sec-problem" className="relative z-20 px-6 sm:px-12 md:px-20 py-20 sm:py-28 border-t border-white/10 text-center">
+      <section id="sec-problem" className="relative z-20 px-6 sm:px-12 md:px-20 py-20 sm:py-28 border-t border-[#e8e8f0] text-center">
         <div className="absolute inset-0" style={sectionBg} />
         <div className="relative max-w-[800px] mx-auto">
           <SectionLabel>The Problem</SectionLabel>
@@ -296,7 +294,7 @@ export default function LandingPage() {
             ].map((item) => (
               <div key={item.num} className="flex gap-4 items-start p-5 rounded-xl bg-[#f8f8fc] border border-[#e0e0ea]">
                 <span className="text-[11px] font-mono text-[#8a8aa5] shrink-0 mt-0.5">{item.num}</span>
-                <p className="text-[11px] sm:text-[14px] text-[#b0b0d0] leading-[1.6] sm:leading-[1.7] text-justify-smart">{item.text}</p>
+                <p className="text-[11px] sm:text-[14px] text-[#5a5a7a] leading-[1.6] sm:leading-[1.7] text-justify-smart">{item.text}</p>
               </div>
             ))}
           </div></div>
@@ -306,14 +304,14 @@ export default function LandingPage() {
       </section>
 
       {/* ═══════════════ 3. SOLUTION OVERVIEW ═══════════════ */}
-      <section id="sec-solution" className="relative z-20 px-6 sm:px-12 md:px-20 py-20 sm:py-28 border-t border-white/10 text-center">
+      <section id="sec-solution" className="relative z-20 px-6 sm:px-12 md:px-20 py-20 sm:py-28 border-t border-[#e8e8f0] text-center">
         <div className="absolute inset-0" style={sectionBg} />
         <div className="relative max-w-[800px] mx-auto">
           <SectionLabel>The Solution</SectionLabel>
           <h2 className="text-[26px] sm:text-[36px] md:text-[44px] leading-[0.9] mb-6 tracking-[-0.03em]" style={gradientText('180deg', 0.95, 0.55)}>
             AI-powered underwriting intelligence that tells you exactly what to fix — before you apply.
           </h2>
-          <p className="text-[12px] sm:text-[16px] text-[#8a8ab0] leading-[1.6] sm:leading-[1.8] mb-12 max-w-[640px] mx-auto text-justify-smart-center">
+          <p className="text-[12px] sm:text-[16px] text-[#6a6a8a] leading-[1.6] sm:leading-[1.8] mb-12 max-w-[640px] mx-auto text-justify-smart-center">
             We analyze your credit report and bank statements using the same 6-component framework real lenders use. You get a Capital Readiness Score, tier placement, exposure ceiling, denial simulation, and a step-by-step action plan — all powered by AI.
           </p>
           <div className={contentBlockStyle}><div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
@@ -326,7 +324,7 @@ export default function LandingPage() {
               { label: "Credit Repair", val: "Auto Letters" },
             ].map((item) => (
               <div key={item.label} className="p-4 sm:p-5 rounded-xl bg-[#f8f8fc]/60 border border-[#e0e0ea]/50">
-                <p className="text-[20px] sm:text-[24px] font-mono text-[#c0c0e0] mb-2" style={{ fontFamily: "'JetBrains Mono', monospace" }}>{item.val}</p>
+                <p className="text-[20px] sm:text-[24px] font-mono text-[#3a3a5a] mb-2" style={{ fontFamily: "'JetBrains Mono', monospace" }}>{item.val}</p>
                 <p className="text-[11px] text-[#8a8aa5] tracking-wide uppercase">{item.label}</p>
               </div>
             ))}
@@ -337,7 +335,7 @@ export default function LandingPage() {
       </section>
 
       {/* ═══════════════ 4. HOW IT WORKS ═══════════════ */}
-      <section id="how-it-works" className="relative z-20 px-6 sm:px-12 md:px-20 py-20 sm:py-28 border-t border-white/10 text-center">
+      <section id="how-it-works" className="relative z-20 px-6 sm:px-12 md:px-20 py-20 sm:py-28 border-t border-[#e8e8f0] text-center">
         <div className="absolute inset-0" style={sectionBg} />
         <div className="relative max-w-[800px] mx-auto">
           <SectionLabel>How It Works</SectionLabel>
@@ -353,10 +351,10 @@ export default function LandingPage() {
             ].map((item) => (
               <div key={item.step} className="flex flex-col items-center text-center p-6 rounded-xl bg-[#f8f8fc]/60 border border-[#e0e0ea]/50">
                 <div className="w-12 h-12 rounded-full bg-[#f2f2f8] border border-[#e0e0ea] flex items-center justify-center mb-4">
-                  <span className="text-[13px] font-mono text-[#b0b0d0]">{item.step}</span>
+                  <span className="text-[13px] font-mono text-[#5a5a7a]">{item.step}</span>
                 </div>
                 <h3 className="text-[16px] sm:text-[18px] text-[#1a1a2e] font-medium mb-2">{item.title}</h3>
-                <p className="text-[11px] sm:text-[14px] text-[#c0c0e0] leading-[1.6] sm:leading-[1.7] text-justify-smart-center">{item.desc}</p>
+                <p className="text-[11px] sm:text-[14px] text-[#3a3a5a] leading-[1.6] sm:leading-[1.7] text-justify-smart-center">{item.desc}</p>
               </div>
             ))}
           </div></div>
@@ -366,7 +364,7 @@ export default function LandingPage() {
       </section>
 
       {/* ═══════════════ 5. FUNDING OUTCOMES ═══════════════ */}
-      <section id="features" className="relative z-20 px-6 sm:px-12 md:px-20 py-20 sm:py-28 border-t border-white/10 text-center">
+      <section id="features" className="relative z-20 px-6 sm:px-12 md:px-20 py-20 sm:py-28 border-t border-[#e8e8f0] text-center">
         <div className="absolute inset-0" style={sectionBg} />
         <div className="relative max-w-[900px] mx-auto">
           <SectionLabel>What You Get</SectionLabel>
@@ -388,7 +386,7 @@ export default function LandingPage() {
               <div key={item.title} className="p-5 sm:p-6 rounded-xl bg-[#f8f8fc]/60 border border-[#e0e0ea]/50 group hover:bg-[#f2f2f8]/70 transition-colors">
                 <span className="text-[20px] text-[#8a8aa5] mb-4 block">{item.icon}</span>
                 <h3 className="text-[14px] sm:text-[15px] text-[#1a1a2e] font-medium mb-2">{item.title}</h3>
-                <p className="text-[11px] sm:text-[13px] text-[#c0c0e0] leading-[1.6] sm:leading-[1.7] text-justify-smart">{item.desc}</p>
+                <p className="text-[11px] sm:text-[13px] text-[#3a3a5a] leading-[1.6] sm:leading-[1.7] text-justify-smart">{item.desc}</p>
               </div>
             ))}
           </div></div>
@@ -398,7 +396,7 @@ export default function LandingPage() {
       </section>
 
       {/* ═══════════════ 6. SOCIAL PROOF ═══════════════ */}
-      <section id="results" className="relative z-20 px-6 sm:px-12 md:px-20 py-20 sm:py-28 border-t border-white/10 text-center">
+      <section id="results" className="relative z-20 px-6 sm:px-12 md:px-20 py-20 sm:py-28 border-t border-[#e8e8f0] text-center">
         <div className="absolute inset-0" style={sectionBg} />
         <div className="relative max-w-[900px] mx-auto">
           <SectionLabel>Results</SectionLabel>
@@ -414,7 +412,7 @@ export default function LandingPage() {
               { val: "6.2x", label: "Avg Score Improvement" },
             ].map((s) => (
               <div key={s.label} className="text-center p-5 rounded-xl bg-[#f8f8fc]/60 border border-[#e0e0ea]/50">
-                <p className="text-[24px] sm:text-[30px] font-mono text-[#c0c0e0] mb-1" style={{ fontFamily: "'JetBrains Mono', monospace" }}>{s.val}</p>
+                <p className="text-[24px] sm:text-[30px] font-mono text-[#3a3a5a] mb-1" style={{ fontFamily: "'JetBrains Mono', monospace" }}>{s.val}</p>
                 <p className="text-[10px] sm:text-[11px] text-[#8a8aa5] tracking-wide uppercase">{s.label}</p>
               </div>
             ))}
@@ -427,9 +425,9 @@ export default function LandingPage() {
               { name: "David L.", role: "SaaS Startup CEO", quote: "They showed me I was Mid-Tier when I thought I was Prime. After following the repair plan, I moved up and saved 4% on rates." },
             ].map((t) => (
               <div key={t.name} className="p-6 rounded-xl bg-[#f8f8fc]/60 border border-[#e0e0ea]/50">
-                <p className="text-[11px] sm:text-[13px] text-[#8a8ab0] leading-[1.6] sm:leading-[1.8] mb-5 italic text-justify-smart">"{t.quote}"</p>
+                <p className="text-[11px] sm:text-[13px] text-[#6a6a8a] leading-[1.6] sm:leading-[1.8] mb-5 italic text-justify-smart">"{t.quote}"</p>
                 <div>
-                  <p className="text-[13px] text-[#c0c0e0] font-medium">{t.name}</p>
+                  <p className="text-[13px] text-[#3a3a5a] font-medium">{t.name}</p>
                   <p className="text-[11px] text-[#8a8aa5]">{t.role}</p>
                 </div>
               </div>
@@ -441,14 +439,14 @@ export default function LandingPage() {
       </section>
 
       {/* ═══════════════ 7. RISK REVERSAL ═══════════════ */}
-      <section id="sec-risk" className="relative z-20 px-6 sm:px-12 md:px-20 py-20 sm:py-28 border-t border-white/10 text-center">
+      <section id="sec-risk" className="relative z-20 px-6 sm:px-12 md:px-20 py-20 sm:py-28 border-t border-[#e8e8f0] text-center">
         <div className="absolute inset-0" style={sectionBg} />
         <div className="relative max-w-[800px] mx-auto">
           <SectionLabel>No More Guessing</SectionLabel>
           <h2 className="text-[26px] sm:text-[36px] md:text-[44px] leading-[0.9] mb-6 tracking-[-0.03em]" style={gradientText('180deg', 0.95, 0.55)}>
             Stop applying blind. Start applying ready.
           </h2>
-          <p className="text-[12px] sm:text-[15px] text-[#8a8ab0] leading-[1.6] sm:leading-[1.8] mb-12 max-w-[600px] mx-auto text-justify-smart-center">
+          <p className="text-[12px] sm:text-[15px] text-[#6a6a8a] leading-[1.6] sm:leading-[1.8] mb-12 max-w-[600px] mx-auto text-justify-smart-center">
             Every denied application costs you: hard inquiries, wasted time, damaged confidence. We eliminate the guesswork by showing you exactly what a lender sees — before you ever submit.
           </p>
           <div className={contentBlockStyle}><div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
@@ -456,18 +454,18 @@ export default function LandingPage() {
               <p className="text-[11px] tracking-[0.15em] uppercase text-red-400/30 mb-4">Without Us</p>
               <ul className="space-y-3">
                 {["Guess at eligibility", "Apply to multiple lenders", "Accumulate hard inquiries", "Get denied without explanation", "Repeat the cycle"].map((t) => (
-                  <li key={t} className="flex items-start gap-3 text-[13px] text-[#c0c0e0] leading-[1.6]">
+                  <li key={t} className="flex items-start gap-3 text-[13px] text-[#3a3a5a] leading-[1.6]">
                     <span className="text-red-400/25 mt-0.5 shrink-0">✕</span>{t}
                   </li>
                 ))}
               </ul>
             </div>
             <div className="p-6 rounded-xl border border-[#e0e0ea]/50 bg-[#f8f8fc]/60">
-              <p className="text-[11px] tracking-[0.15em] uppercase text-[#8a8ab0] mb-4">With Us</p>
+              <p className="text-[11px] tracking-[0.15em] uppercase text-[#6a6a8a] mb-4">With Us</p>
               <ul className="space-y-3">
                 {["Know your exact tier & ceiling", "Fix issues before applying", "Apply once, with confidence", "Get approved on first submission", "Build on momentum"].map((t) => (
-                  <li key={t} className="flex items-start gap-3 text-[13px] text-[#b0b0d0] leading-[1.6]">
-                    <span className="text-[#8a8ab0] mt-0.5 shrink-0">→</span>{t}
+                  <li key={t} className="flex items-start gap-3 text-[13px] text-[#5a5a7a] leading-[1.6]">
+                    <span className="text-[#6a6a8a] mt-0.5 shrink-0">→</span>{t}
                   </li>
                 ))}
               </ul>
@@ -479,7 +477,7 @@ export default function LandingPage() {
       </section>
 
       {/* ═══════════════ 8. FEATURE BREAKDOWN ═══════════════ */}
-      <section id="sec-breakdown" className="relative z-20 px-6 sm:px-12 md:px-20 py-20 sm:py-28 border-t border-white/10 text-center">
+      <section id="sec-breakdown" className="relative z-20 px-6 sm:px-12 md:px-20 py-20 sm:py-28 border-t border-[#e8e8f0] text-center">
         <div className="absolute inset-0" style={sectionBg} />
         <div className="relative max-w-[900px] mx-auto">
           <SectionLabel>Feature Breakdown</SectionLabel>
@@ -497,9 +495,9 @@ export default function LandingPage() {
             ].map((c) => (
               <div key={c.name} className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-6 p-5 rounded-xl bg-[#f8f8fc]/60 border border-[#e0e0ea]/50">
                 <div className="flex items-center gap-4 sm:w-[200px] shrink-0">
-                  <span className="text-[14px] sm:text-[15px] text-[#c0c0e0] font-medium">{c.name}</span>
+                  <span className="text-[14px] sm:text-[15px] text-[#3a3a5a] font-medium">{c.name}</span>
                 </div>
-                <span className="text-[12px] font-mono text-[#c0c0e0] sm:w-[80px] shrink-0" style={{ fontFamily: "'JetBrains Mono', monospace" }}>{c.weight}</span>
+                <span className="text-[12px] font-mono text-[#3a3a5a] sm:w-[80px] shrink-0" style={{ fontFamily: "'JetBrains Mono', monospace" }}>{c.weight}</span>
                 <p className="text-[10px] sm:text-[13px] text-[#8a8aa5] leading-[1.5] sm:leading-[1.6] text-justify-smart">{c.desc}</p>
               </div>
             ))}
@@ -516,7 +514,7 @@ export default function LandingPage() {
       </section>
 
       {/* ═══════════════ 9. MODE DIFFERENTIATION ═══════════════ */}
-      <section id="sec-modes" className="relative z-20 px-6 sm:px-12 md:px-20 py-20 sm:py-28 border-t border-white/10 text-center">
+      <section id="sec-modes" className="relative z-20 px-6 sm:px-12 md:px-20 py-20 sm:py-28 border-t border-[#e8e8f0] text-center">
         <div className="absolute inset-0" style={sectionBg} />
         <div className="relative max-w-[900px] mx-auto">
           <SectionLabel>Operating Modes</SectionLabel>
@@ -527,15 +525,15 @@ export default function LandingPage() {
             <div className="p-6 sm:p-8 rounded-xl bg-[#f8f8fc]/60 border border-[#e0e0ea]/50">
               <div className="flex items-center gap-3 mb-6">
                 <div className="w-3 h-3 rounded-full bg-white/20"></div>
-                <span className="text-[11px] tracking-[0.15em] uppercase text-[#8a8ab0]">Pre-Funding Mode</span>
+                <span className="text-[11px] tracking-[0.15em] uppercase text-[#6a6a8a]">Pre-Funding Mode</span>
               </div>
               <h3 className="text-[20px] sm:text-[24px] text-[#1a1a2e] font-light mb-4 tracking-[-0.02em]">Score 60+</h3>
-              <p className="text-[11px] sm:text-[13px] text-[#c0c0e0] leading-[1.6] sm:leading-[1.8] mb-6 text-justify-smart">
+              <p className="text-[11px] sm:text-[13px] text-[#3a3a5a] leading-[1.6] sm:leading-[1.8] mb-6 text-justify-smart">
                 You're fundable. This mode focuses on optimization — maximizing your ceiling, refining your tier placement, and identifying the best products for your profile.
               </p>
               <ul className="space-y-2.5">
                 {["Tier 1–2 product matching", "Exposure ceiling maximization", "Application timing strategy", "Rate optimization guidance"].map((t) => (
-                  <li key={t} className="flex items-center gap-3 text-[12px] text-[#8a8ab0]">
+                  <li key={t} className="flex items-center gap-3 text-[12px] text-[#6a6a8a]">
                     <span className="w-1 h-1 rounded-full bg-white/15"></span>{t}
                   </li>
                 ))}
@@ -544,15 +542,15 @@ export default function LandingPage() {
             <div className="p-6 sm:p-8 rounded-xl bg-[#f8f8fc]/60 border border-[#e0e0ea]/50">
               <div className="flex items-center gap-3 mb-6">
                 <div className="w-3 h-3 rounded-full bg-[#c0c0d0] border border-white/20"></div>
-                <span className="text-[11px] tracking-[0.15em] uppercase text-[#8a8ab0]">Repair Mode</span>
+                <span className="text-[11px] tracking-[0.15em] uppercase text-[#6a6a8a]">Repair Mode</span>
               </div>
               <h3 className="text-[20px] sm:text-[24px] text-[#1a1a2e] font-light mb-4 tracking-[-0.02em]">Score &lt;60</h3>
-              <p className="text-[11px] sm:text-[13px] text-[#c0c0e0] leading-[1.6] sm:leading-[1.8] mb-6 text-justify-smart">
+              <p className="text-[11px] sm:text-[13px] text-[#3a3a5a] leading-[1.6] sm:leading-[1.8] mb-6 text-justify-smart">
                 You need work before applying. This mode focuses on fixing issues — dispute letters, payment optimization, structure corrections, and timeline to fundability.
               </p>
               <ul className="space-y-2.5">
                 {["Auto-generated dispute letters", "Credit issue prioritization", "90-day repair timeline", "Score impact projections"].map((t) => (
-                  <li key={t} className="flex items-center gap-3 text-[12px] text-[#8a8ab0]">
+                  <li key={t} className="flex items-center gap-3 text-[12px] text-[#6a6a8a]">
                     <span className="w-1 h-1 rounded-full bg-white/15"></span>{t}
                   </li>
                 ))}
@@ -565,7 +563,7 @@ export default function LandingPage() {
       </section>
 
       {/* ═══════════════ 10. TIER POSITIONING ═══════════════ */}
-      <section id="sec-tiers" className="relative z-20 px-6 sm:px-12 md:px-20 py-20 sm:py-28 border-t border-white/10 text-center">
+      <section id="sec-tiers" className="relative z-20 px-6 sm:px-12 md:px-20 py-20 sm:py-28 border-t border-[#e8e8f0] text-center">
         <div className="absolute inset-0" style={sectionBg} />
         <div className="relative max-w-[900px] mx-auto">
           <SectionLabel>Tier Eligibility</SectionLabel>
@@ -581,7 +579,7 @@ export default function LandingPage() {
               <div key={t.tier} className={`p-6 rounded-xl bg-[#f8f8fc]/60 border ${t.color}`}>
                 <span className="text-[10px] font-mono text-[#8a8aa5] tracking-wider uppercase">{t.tier}</span>
                 <h3 className="text-[18px] sm:text-[20px] text-[#1a1a2e] font-medium mt-2 mb-1">{t.name}</h3>
-                <p className="text-[13px] font-mono text-[#8a8ab0] mb-5" style={{ fontFamily: "'JetBrains Mono', monospace" }}>Score: {t.score}</p>
+                <p className="text-[13px] font-mono text-[#6a6a8a] mb-5" style={{ fontFamily: "'JetBrains Mono', monospace" }}>Score: {t.score}</p>
                 <p className="text-[10px] sm:text-[12px] text-[#8a8aa5] leading-[1.5] sm:leading-[1.7] text-justify-smart">{t.products}</p>
               </div>
             ))}
@@ -592,7 +590,7 @@ export default function LandingPage() {
       </section>
 
       {/* ═══════════════ 11. CASE STUDY ═══════════════ */}
-      <section id="sec-case" className="relative z-20 px-6 sm:px-12 md:px-20 py-20 sm:py-28 border-t border-white/10 text-center">
+      <section id="sec-case" className="relative z-20 px-6 sm:px-12 md:px-20 py-20 sm:py-28 border-t border-[#e8e8f0] text-center">
         <div className="absolute inset-0" style={sectionBg} />
         <div className="relative max-w-[800px] mx-auto">
           <SectionLabel>Example Walkthrough</SectionLabel>
@@ -607,13 +605,13 @@ export default function LandingPage() {
               { day: "Day 30", title: "First Checkpoint", detail: "Score: 52/100. Moved to Tier 2. 1 collection removed. Utilization down to 45%. Business structure improved. Exposure ceiling: $85K." },
               { day: "Day 67", title: "Funding Ready", detail: "Score: 71/100. Tier 2 (upper). 0 denial triggers. Utilization: 22%. Clean business file. Exposure ceiling: $210K. Applied for $175K LOC — approved in 5 days." },
             ].map((step) => (
-              <div key={step.day} className="flex gap-6 sm:gap-8 py-7 border-t border-white/10 first:border-t-0">
+              <div key={step.day} className="flex gap-6 sm:gap-8 py-7 border-t border-[#e8e8f0] first:border-t-0">
                 <div className="w-[70px] shrink-0">
-                  <span className="text-[12px] font-mono text-[#8a8ab0]" style={{ fontFamily: "'JetBrains Mono', monospace" }}>{step.day}</span>
+                  <span className="text-[12px] font-mono text-[#6a6a8a]" style={{ fontFamily: "'JetBrains Mono', monospace" }}>{step.day}</span>
                 </div>
                 <div>
                   <h3 className="text-[15px] text-[#1a1a2e] font-medium mb-2">{step.title}</h3>
-                  <p className="text-[11px] sm:text-[13px] text-[#c0c0e0] leading-[1.6] sm:leading-[1.7] text-justify-smart">{step.detail}</p>
+                  <p className="text-[11px] sm:text-[13px] text-[#3a3a5a] leading-[1.6] sm:leading-[1.7] text-justify-smart">{step.detail}</p>
                 </div>
               </div>
             ))}
@@ -624,7 +622,7 @@ export default function LandingPage() {
       </section>
 
       {/* ═══════════════ 12. FAQ / OBJECTION HANDLING ═══════════════ */}
-      <section id="faq" className="relative z-20 px-6 sm:px-12 md:px-20 py-20 sm:py-28 border-t border-white/10 text-center">
+      <section id="faq" className="relative z-20 px-6 sm:px-12 md:px-20 py-20 sm:py-28 border-t border-[#e8e8f0] text-center">
         <div className="absolute inset-0" style={sectionBg} />
         <div className="relative max-w-[700px] mx-auto">
           <SectionLabel>FAQ</SectionLabel>
@@ -639,12 +637,12 @@ export default function LandingPage() {
                   className="w-full flex items-center justify-between py-5 text-left group"
                   onClick={() => setOpenFaq(openFaq === i ? null : i)}
                 >
-                  <span className="text-[14px] sm:text-[15px] font-medium text-[#c0c0e0] group-hover:text-[#1a1a2e] transition-colors pr-4">{item.q}</span>
+                  <span className="text-[14px] sm:text-[15px] font-medium text-[#3a3a5a] group-hover:text-[#1a1a2e] transition-colors pr-4">{item.q}</span>
                   <span className="text-[18px] text-[#9a9ab0] shrink-0 leading-none transition-transform duration-200" style={{ transform: openFaq === i ? 'rotate(45deg)' : 'rotate(0deg)' }}>+</span>
                 </button>
                 {openFaq === i && (
                   <div className="pb-5">
-                    <p className="text-[11px] sm:text-[13px] text-[#c0c0e0] leading-[1.6] sm:leading-[1.8] text-justify-smart">{item.a}</p>
+                    <p className="text-[11px] sm:text-[13px] text-[#3a3a5a] leading-[1.6] sm:leading-[1.8] text-justify-smart">{item.a}</p>
                   </div>
                 )}
               </div>
@@ -656,7 +654,7 @@ export default function LandingPage() {
       </section>
 
       {/* ═══════════════ 13. TRUST & COMPLIANCE ═══════════════ */}
-      <section id="sec-trust" className="relative z-20 px-6 sm:px-12 md:px-20 py-20 sm:py-28 border-t border-white/10 text-center">
+      <section id="sec-trust" className="relative z-20 px-6 sm:px-12 md:px-20 py-20 sm:py-28 border-t border-[#e8e8f0] text-center">
         <div className="absolute inset-0" style={sectionBg} />
         <div className="relative max-w-[800px] mx-auto">
           <SectionLabel>Trust & Security</SectionLabel>
@@ -672,7 +670,7 @@ export default function LandingPage() {
             ].map((item) => (
               <div key={item.title} className="p-5 rounded-xl bg-[#f8f8fc] border border-[#e0e0ea]">
                 <span className="text-[18px] text-[#8a8aa5] mb-3 block">{item.icon}</span>
-                <h3 className="text-[13px] text-[#c0c0e0] font-medium mb-1.5">{item.title}</h3>
+                <h3 className="text-[13px] text-[#3a3a5a] font-medium mb-1.5">{item.title}</h3>
                 <p className="text-[10px] sm:text-[11px] text-[#8a8aa5] leading-[1.5] sm:leading-[1.6] text-justify-smart">{item.desc}</p>
               </div>
             ))}
@@ -683,7 +681,7 @@ export default function LandingPage() {
       </section>
 
       {/* ═══════════════ 14. FINAL CTA ═══════════════ */}
-      <section id="sec-cta" className="relative z-20 px-6 sm:px-12 md:px-20 py-24 sm:py-36 border-t border-white/10">
+      <section id="sec-cta" className="relative z-20 px-6 sm:px-12 md:px-20 py-24 sm:py-36 border-t border-[#e8e8f0]">
         <div className="absolute inset-0" style={sectionBg} />
         <div className="relative max-w-[700px] mx-auto text-center">
           <h2
@@ -693,16 +691,16 @@ export default function LandingPage() {
           >
             Stop guessing.<br />Start knowing.
           </h2>
-          <p className="text-[12px] sm:text-[15px] text-[#8a8ab0] leading-[1.6] sm:leading-[1.8] mb-10 max-w-[480px] mx-auto text-justify-smart-center">
+          <p className="text-[12px] sm:text-[15px] text-[#6a6a8a] leading-[1.6] sm:leading-[1.8] mb-10 max-w-[480px] mx-auto text-justify-smart-center">
             Get your Capital Readiness Score, tier eligibility, exposure ceiling, and denial simulation. Subscribe today and unlock the full platform.
           </p>
           <form onSubmit={handleLogin} className="w-full max-w-[440px] mx-auto mb-6">
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center bg-white/8 border border-white/15 rounded-2xl sm:rounded-full sm:h-[52px] sm:pl-5 sm:pr-1.5 overflow-hidden backdrop-blur-sm">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center bg-[#f5f5fa] border border-[#e0e0ea] rounded-2xl sm:rounded-full sm:h-[52px] sm:pl-5 sm:pr-1.5 overflow-hidden">
               <input
                 data-testid="input-email-bottom"
                 type="email"
                 placeholder="Enter your email"
-                className="flex-1 bg-transparent text-[14px] text-white placeholder:text-[#8a8ab0] outline-none px-4 py-3.5 sm:px-0 sm:py-0"
+                className="flex-1 bg-transparent text-[14px] text-[#1a1a2e] placeholder:text-[#9a9ab0] outline-none px-4 py-3.5 sm:px-0 sm:py-0"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
@@ -712,8 +710,8 @@ export default function LandingPage() {
                 data-testid="button-join-bottom"
                 type="submit"
                 disabled={isLoading}
-                className="h-[44px] sm:h-[40px] px-6 sm:rounded-full text-white text-[13px] font-bold hover:opacity-90 transition-colors shrink-0 border-t border-white/10 sm:border-t-0 mx-1.5 mb-1.5 sm:mb-0 sm:mx-0 rounded-xl sm:rounded-full tracking-wide"
-                style={{ background: 'linear-gradient(135deg, #4a4a6a 0%, #2a2a4a 100%)' }}
+                className="h-[44px] sm:h-[40px] px-6 sm:rounded-full text-white text-[13px] font-bold hover:opacity-90 transition-colors shrink-0 border-t border-[#e0e0ea] sm:border-t-0 mx-1.5 mb-1.5 sm:mb-0 sm:mx-0 rounded-xl sm:rounded-full tracking-wide"
+                style={{ background: 'linear-gradient(135deg, #2a2a2a 0%, #0a0a0a 100%)' }}
               >
                 {isLoading ? "..." : "SUBSCRIBE"}
               </button>
@@ -727,7 +725,7 @@ export default function LandingPage() {
       </section>
 
       {/* ═══════════════ 15. FOOTER ═══════════════ */}
-      <footer className="relative z-20 border-t border-white/10 px-6 sm:px-12 md:px-20 py-10 sm:py-14 text-center">
+      <footer className="relative z-20 border-t border-[#e8e8f0] px-6 sm:px-12 md:px-20 py-10 sm:py-14 text-center">
         <div className="absolute inset-0" style={sectionBg} />
         <div className="relative max-w-[900px] mx-auto">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-8 mb-10">
@@ -739,11 +737,11 @@ export default function LandingPage() {
             </div>
             <div className="flex flex-wrap gap-6 sm:gap-8">
               {["Privacy Policy", "Terms of Service", "Contact", "Support"].map((link) => (
-                <span key={link} className="text-[11px] text-[#8a8aa5] tracking-wide uppercase cursor-pointer hover:text-[#b0b0d0] transition-colors">{link}</span>
+                <span key={link} className="text-[11px] text-[#8a8aa5] tracking-wide uppercase cursor-pointer hover:text-[#5a5a7a] transition-colors">{link}</span>
               ))}
             </div>
           </div>
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-6 border-t border-white/10">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-6 border-t border-[#e8e8f0]">
             <p className="text-[11px] text-[#9a9ab0]">
               &copy; 2026 <span className="text-[#8a8aa5] font-medium">CMD Supply</span>. All rights reserved.
             </p>
