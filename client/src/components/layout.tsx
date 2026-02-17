@@ -100,7 +100,10 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
           >
             <Menu className="w-5 h-5 text-[#6a6a8a]" />
           </button>
-          <h1><BaalioLogo size="sm" className="text-[#1a1a2e]" /></h1>
+          <span className="relative w-6 h-6 flex items-center justify-center">
+            <span className="absolute inset-0 rounded-full bg-[#8a8aa5]/15 animate-ping" />
+            <span className="relative w-2.5 h-2.5 rounded-full bg-[#8a8aa5] shadow-[0_0_8px_rgba(138,138,165,0.4)]" />
+          </span>
           <div className="w-8" />
         </header>
 
