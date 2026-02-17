@@ -4,10 +4,10 @@ interface BaalioLogoProps {
 }
 
 const SIZES = {
-  xs: { fontSize: "12px", aaOffset: "-4px" },
-  sm: { fontSize: "14px", aaOffset: "-4.5px" },
-  md: { fontSize: "18px", aaOffset: "-6px" },
-  lg: { fontSize: "24px", aaOffset: "-8px" },
+  xs: { fontSize: "12px", tmSize: "5px" },
+  sm: { fontSize: "14px", tmSize: "6px" },
+  md: { fontSize: "18px", tmSize: "7px" },
+  lg: { fontSize: "24px", tmSize: "9px" },
 };
 
 export function BaalioLogo({ size = "sm", className = "" }: BaalioLogoProps) {
@@ -19,16 +19,19 @@ export function BaalioLogo({ size = "sm", className = "" }: BaalioLogoProps) {
         fontFamily: "'Inter', sans-serif",
         fontWeight: 900,
         fontSize: s.fontSize,
-        letterSpacing: "-0.08em",
+        letterSpacing: "-0.04em",
         lineHeight: 1,
         textTransform: "lowercase",
       }}
       aria-label="baalio"
     >
-      b
-      <span style={{ display: "inline-block" }}>a</span>
-      <span style={{ display: "inline-block", marginLeft: s.aaOffset }}>a</span>
-      lio
+      <span style={{ color: "#2563eb" }}>b</span>
+      <span style={{ color: "#2563eb" }}>a</span>
+      <span style={{ color: "#0a0a2e" }}>a</span>
+      <span style={{ color: "#0a0a2e" }}>l</span>
+      <span style={{ color: "#0a0a2e" }}>i</span>
+      <span style={{ color: "#0a0a2e" }}>o</span>
+      <span style={{ fontSize: s.tmSize, verticalAlign: "super", marginLeft: "1px", color: "#0a0a2e", fontWeight: 400 }}>®</span>
     </span>
   );
 }

@@ -165,7 +165,7 @@ export function ChatInterface() {
             </button>
           )}
           <div>
-            <CardTitle className="text-sm font-bold text-[#3a3a5a]">{activeMentor ? activeMentor.name : "baalio AI"}</CardTitle>
+            <CardTitle className="text-sm font-bold text-[#3a3a5a]">{activeMentor ? activeMentor.name : "baalio® AI"}</CardTitle>
             <p className="text-[10px] text-[#6a6a8a] uppercase tracking-widest">{activeMentor ? activeMentor.specialty : "Mentorship On Demand"}</p>
           </div>
         </div>

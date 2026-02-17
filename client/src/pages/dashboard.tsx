@@ -734,7 +734,7 @@ export default function DashboardPage() {
             </span>
             <div>
               <span className="text-[13px] font-bold text-[#1a1a2e] tracking-tight">Capital OS</span>
-              <p className="text-[9px] text-[#1a1a2e]/50 tracking-wide">baalio Infrastructure</p>
+              <p className="text-[9px] text-[#1a1a2e]/50 tracking-wide">baalio® Infrastructure</p>
             </div>
           </div>
           <button onClick={() => setSidebarOpen(false)} className="lg:hidden text-[#1a1a2e]/60 hover:text-[#1a1a2e]" data-testid="button-close-sidebar">
@@ -1929,7 +1929,7 @@ export default function DashboardPage() {
                             isMe ? "bg-white/60 border border-white/30" :
                             "bg-white/50 border border-white/30"
                           )}>
-                            {isAi && <p className="text-[9px] text-purple-400/50 font-medium mb-1">baalio Team AI</p>}
+                            {isAi && <p className="text-[9px] text-purple-400/50 font-medium mb-1">baalio® Team AI</p>}
                             {!isMe && !isAi && <p className="text-[9px] text-[#1a1a2e]/60 font-medium mb-1">{dmFriendName}</p>}
                             <p className="text-[12px] text-[#1a1a2e]/90 leading-relaxed whitespace-pre-wrap">{msg.content}</p>
                             <p className="text-[9px] text-[#1a1a2e]/45 mt-1.5">{new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
