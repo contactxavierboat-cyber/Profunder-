@@ -22,16 +22,17 @@ export function BaalioLogo({ size = "sm", className = "" }: BaalioLogoProps) {
         letterSpacing: "-0.04em",
         lineHeight: 1,
         textTransform: "lowercase",
+        color: "#1a1a2e",
       }}
       aria-label="baalio"
     >
-      <span style={{ color: "#2563eb" }}>b</span>
-      <span style={{ color: "#2563eb" }}>a</span>
-      <span style={{ color: "#0a0a2e" }}>a</span>
-      <span style={{ color: "#0a0a2e" }}>l</span>
-      <span style={{ color: "#0a0a2e" }}>i</span>
-      <span style={{ color: "#0a0a2e" }}>o</span>
-      <span style={{ fontSize: s.tmSize, verticalAlign: "super", marginLeft: "1px", color: "#0a0a2e", fontWeight: 400 }}>®</span>
+      <span style={{ color: "#1a1a2e" }}>b</span>
+      <span style={{ color: "#1a1a2e" }}>a</span>
+      <span style={{ color: "#4a4a6a" }}>a</span>
+      <span style={{ color: "#4a4a6a" }}>l</span>
+      <span style={{ color: "#4a4a6a" }}>i</span>
+      <span style={{ color: "#4a4a6a" }}>o</span>
+      <span style={{ fontSize: s.tmSize, verticalAlign: "super", marginLeft: "1px", color: "#4a4a6a", fontWeight: 400 }}>®</span>
     </span>
   );
 }
