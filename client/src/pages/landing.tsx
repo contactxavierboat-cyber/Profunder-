@@ -44,25 +44,25 @@ function SpaceBackground() {
       const w = window.innerWidth;
       const h = document.documentElement.scrollHeight;
 
-      const blobCount = Math.min(Math.floor((w * h) / 40000), 50);
+      const blobCount = Math.min(Math.floor((w * h) / 120000), 20);
       blobs = [];
       for (let i = 0; i < blobCount; i++) {
-        const speed = Math.random() * 1.0 + 0.5;
+        const speed = Math.random() * 0.6 + 0.2;
         const angle = Math.random() * Math.PI * 2;
         blobs.push({
           x: Math.random() * w,
           y: Math.random() * h,
           vx: Math.cos(angle) * speed,
           vy: Math.sin(angle) * speed,
-          radius: Math.random() * 100 + 50,
-          opacity: Math.random() * 0.18 + 0.1,
+          radius: Math.random() * 280 + 180,
+          opacity: Math.random() * 0.22 + 0.12,
           phase: Math.random() * Math.PI * 2,
-          wobbleSpeed: Math.random() * 1.2 + 0.5,
-          wobbleAmp: Math.random() * 0.35 + 0.15,
-          points: Math.floor(Math.random() * 4) + 6,
+          wobbleSpeed: Math.random() * 0.8 + 0.3,
+          wobbleAmp: Math.random() * 0.25 + 0.1,
+          points: Math.floor(Math.random() * 3) + 7,
           squeezePhase: Math.random() * Math.PI * 2,
-          squeezeSpeed: Math.random() * 1.5 + 0.6,
-          squeezeAmount: Math.random() * 0.4 + 0.25,
+          squeezeSpeed: Math.random() * 1.0 + 0.4,
+          squeezeAmount: Math.random() * 0.3 + 0.15,
         });
       }
     };
@@ -97,19 +97,33 @@ function SpaceBackground() {
       }
       ctx.closePath();
 
-      const grad = ctx.createRadialGradient(b.x, b.y, 0, b.x, b.y, r * 1.3);
-      grad.addColorStop(0, `rgba(155, 155, 172, ${b.opacity * 1.5})`);
-      grad.addColorStop(0.35, `rgba(145, 145, 165, ${b.opacity * 1.1})`);
-      grad.addColorStop(0.65, `rgba(135, 135, 155, ${b.opacity * 0.55})`);
-      grad.addColorStop(1, `rgba(125, 125, 145, 0)`);
+      const highlightX = b.x - r * 0.3;
+      const highlightY = b.y - r * 0.3;
+      const grad = ctx.createRadialGradient(highlightX, highlightY, 0, b.x, b.y, r * 1.4);
+      grad.addColorStop(0, `rgba(210, 210, 225, ${b.opacity * 2.2})`);
+      grad.addColorStop(0.2, `rgba(185, 185, 205, ${b.opacity * 1.8})`);
+      grad.addColorStop(0.5, `rgba(155, 155, 175, ${b.opacity * 1.2})`);
+      grad.addColorStop(0.75, `rgba(135, 135, 158, ${b.opacity * 0.6})`);
+      grad.addColorStop(1, `rgba(120, 120, 145, 0)`);
       ctx.fillStyle = grad;
       ctx.fill();
 
-      const edgeGrad = ctx.createRadialGradient(b.x, b.y, r * 0.6, b.x, b.y, r * 1.1);
-      edgeGrad.addColorStop(0, `rgba(170, 170, 185, 0)`);
-      edgeGrad.addColorStop(0.7, `rgba(165, 165, 182, ${b.opacity * 0.45})`);
-      edgeGrad.addColorStop(1, `rgba(165, 165, 182, 0)`);
-      ctx.fillStyle = edgeGrad;
+      const shadowX = b.x + r * 0.15;
+      const shadowY = b.y + r * 0.15;
+      const shadowGrad = ctx.createRadialGradient(shadowX, shadowY, r * 0.3, shadowX, shadowY, r * 1.2);
+      shadowGrad.addColorStop(0, `rgba(100, 100, 130, ${b.opacity * 0.5})`);
+      shadowGrad.addColorStop(0.5, `rgba(110, 110, 140, ${b.opacity * 0.25})`);
+      shadowGrad.addColorStop(1, `rgba(120, 120, 150, 0)`);
+      ctx.fillStyle = shadowGrad;
+      ctx.fill();
+
+      const rimX = b.x - r * 0.4;
+      const rimY = b.y - r * 0.4;
+      const rimGrad = ctx.createRadialGradient(rimX, rimY, r * 0.1, b.x, b.y, r * 1.1);
+      rimGrad.addColorStop(0, `rgba(230, 230, 245, ${b.opacity * 0.9})`);
+      rimGrad.addColorStop(0.3, `rgba(200, 200, 220, ${b.opacity * 0.4})`);
+      rimGrad.addColorStop(1, `rgba(180, 180, 200, 0)`);
+      ctx.fillStyle = rimGrad;
       ctx.fill();
     };
 
