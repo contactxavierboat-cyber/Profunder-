@@ -1,123 +1,25 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/lib/store";
 import { BaalioLogo } from "@/components/baalio-logo";
 
 function SpaceBackground() {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-
-    let animationId: number;
-    let time = 0;
-    let lastTs = 0;
-    const dpr = Math.min(window.devicePixelRatio, 1.5);
-
-    const resize = () => {
-      const w = window.innerWidth;
-      const h = window.innerHeight;
-      canvas.style.width = w + 'px';
-      canvas.style.height = h + 'px';
-      canvas.width = Math.floor(w * dpr);
-      canvas.height = Math.floor(h * dpr);
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    };
-
-    const noise = (x: number, y: number, t: number): number => {
-      const s1 = Math.sin(x * 0.008 + t * 0.3) * Math.cos(y * 0.006 + t * 0.2);
-      const s2 = Math.sin(x * 0.012 - t * 0.15 + y * 0.01) * Math.cos(y * 0.009 + t * 0.25);
-      const s3 = Math.sin((x + y) * 0.005 + t * 0.18) * 0.5;
-      return (s1 + s2 + s3) / 2.5;
-    };
-
-    const noise2 = (x: number, y: number, t: number): number => {
-      const s1 = Math.cos(x * 0.007 - t * 0.22) * Math.sin(y * 0.011 + t * 0.28);
-      const s2 = Math.sin(x * 0.015 + t * 0.12 - y * 0.008) * Math.cos(y * 0.013 - t * 0.18);
-      const s3 = Math.cos((x - y) * 0.006 + t * 0.15) * 0.4;
-      return (s1 + s2 + s3) / 2.4;
-    };
-
-    let imgW = 0, imgH = 0;
-    let imgData: ImageData | null = null;
-
-    const initImage = () => {
-      imgW = canvas.width;
-      imgH = canvas.height;
-      imgData = ctx.createImageData(imgW, imgH);
-    };
-
-    const draw = (ts: number) => {
-      const dt = lastTs ? (ts - lastTs) / 1000 : 0.016;
-      lastTs = ts;
-      time += dt * 0.35;
-
-      if (!imgData || canvas.width !== imgW || canvas.height !== imgH) initImage();
-      if (!imgData) { animationId = requestAnimationFrame(draw); return; }
-
-      const data = imgData.data;
-      const w = imgW;
-      const h = imgH;
-      const step = 4;
-
-      for (let py = 0; py < h; py += step) {
-        for (let px = 0; px < w; px += step) {
-          const sx = px / dpr;
-          const sy = py / dpr;
-
-          const n1 = noise(sx, sy, time);
-          const n2 = noise2(sx, sy, time);
-          const combined = (n1 + n2) * 0.5;
-
-          const swirl = Math.sin(n1 * 3.0 + time * 0.2) * 0.5 + 0.5;
-          const ridge = Math.abs(Math.sin(combined * 4.0 + time * 0.15));
-
-          const sw3 = swirl * 0.3;
-          const rf = ridge * ridge * 0.35;
-
-          const r = (230 + combined * 20) * (1 - sw3) + (195 + swirl * 30) * sw3;
-          const g = (228 + combined * 18) * (1 - sw3) + (190 + swirl * 28) * sw3;
-          const b = (240 + n1 * 12) * (1 - sw3) + (215 + swirl * 20) * sw3;
-
-          const fr = (r + (255 - r) * rf) | 0;
-          const fg = (g + (255 - g) * rf) | 0;
-          const fb = (b + (255 - b) * rf) | 0;
-
-          for (let dy = 0; dy < step && py + dy < h; dy++) {
-            const rowOff = ((py + dy) * w + px) * 4;
-            for (let dx = 0; dx < step && px + dx < w; dx++) {
-              const off = rowOff + dx * 4;
-              data[off] = fr;
-              data[off + 1] = fg;
-              data[off + 2] = fb;
-              data[off + 3] = 255;
-            }
-          }
-        }
-      }
-
-      ctx.putImageData(imgData, 0, 0);
-      animationId = requestAnimationFrame(draw);
-    };
-
-    resize();
-    animationId = requestAnimationFrame(draw);
-
-    window.addEventListener('resize', resize);
-    return () => {
-      cancelAnimationFrame(animationId);
-      window.removeEventListener('resize', resize);
-    };
-  }, []);
-
   return (
-    <canvas
-      ref={canvasRef}
-      className="fixed top-0 left-0 pointer-events-none"
-      style={{ zIndex: 1 }}
-    />
+    <div className="fixed inset-0 pointer-events-none overflow-hidden" style={{ zIndex: 1 }}>
+      <video
+        autoPlay
+        loop
+        muted
+        playsInline
+        className="absolute top-1/2 left-1/2 min-w-full min-h-full object-cover"
+        style={{
+          transform: 'translate(-50%, -50%)',
+          filter: 'brightness(1.6) saturate(0.3) contrast(0.7) hue-rotate(220deg)',
+          opacity: 0.35,
+        }}
+      >
+        <source src="/marble-bg.mp4" type="video/mp4" />
+      </video>
+    </div>
   );
 }
 
