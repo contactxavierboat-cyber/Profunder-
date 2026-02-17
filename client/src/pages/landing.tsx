@@ -286,7 +286,7 @@ export default function LandingPage() {
   };
 
   return (
-    <div className="relative min-h-screen text-[#1a1a2e] overflow-x-hidden" style={{ fontFamily: "'Inter', sans-serif", background: 'linear-gradient(180deg, #ffffff 0%, #f5f5fc 12%, #eef0fa 25%, #f8f8ff 40%, #f2f0fb 55%, #f6f5fc 70%, #f0eff8 85%, #eceaf5 100%)' }}>
+    <div className="relative min-h-screen text-[#1a1a2e] overflow-x-hidden" style={{ fontFamily: "'Inter', sans-serif" }}>
       <SpaceBackground />
 
       {showLogin && (
