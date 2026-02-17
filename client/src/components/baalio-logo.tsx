@@ -22,13 +22,24 @@ export function BaalioLogo({ size = "sm", className = "" }: BaalioLogoProps) {
         letterSpacing: "-0.04em",
         lineHeight: 1,
         textTransform: "lowercase",
-        color: "#1a1a2e",
+        background: "linear-gradient(135deg, #1a1a2e 0%, #4a4a6a 50%, #8a8aa5 100%)",
+        WebkitBackgroundClip: "text",
+        WebkitTextFillColor: "transparent",
+        backgroundClip: "text",
       }}
       aria-label="baalio"
     >
-      <span>baa</span>
-      <span style={{ color: "#4a4a6a" }}>lio</span>
-      <span style={{ fontSize: s.tmSize, verticalAlign: "super", marginLeft: "1px", color: "#4a4a6a", fontWeight: 400 }}>®</span>
+      baalio
+      <span style={{
+        fontSize: s.tmSize,
+        verticalAlign: "super",
+        marginLeft: "1px",
+        fontWeight: 400,
+        background: "linear-gradient(135deg, #4a4a6a, #8a8aa5)",
+        WebkitBackgroundClip: "text",
+        WebkitTextFillColor: "transparent",
+        backgroundClip: "text",
+      }}>®</span>
     </span>
   );
 }
