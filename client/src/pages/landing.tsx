@@ -17,6 +17,7 @@ function SpaceBackground() {
       >
         <source src="/marble-bg.mp4" type="video/mp4" />
       </video>
+      <div className="absolute inset-0 bg-black/35" />
     </div>
   );
 }
@@ -28,6 +29,7 @@ const gradientText = (dir = '180deg', _from = 0.85, _to = 0.5) => ({
   backgroundClip: 'text' as const,
   fontStyle: 'italic' as const,
   lineHeight: '0.95',
+  filter: 'drop-shadow(0 2px 8px rgba(0,0,0,0.4))' as const,
 });
 
 const sectionBg = { background: 'transparent' };
@@ -228,27 +230,27 @@ export default function LandingPage() {
 
       {/* ═══════════════ 1. HERO ═══════════════ */}
       <section id="sec-hero" className="relative z-20 min-h-[90vh] flex flex-col items-center justify-center px-6 sm:px-12 md:px-20 lg:px-28 py-20 text-center">
-        <div className="absolute inset-0" style={{ background: 'radial-gradient(ellipse 90% 80% at 50% 50%, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0.1) 50%, transparent 100%)' }} />
+        <div className="absolute inset-0" style={{ background: 'radial-gradient(ellipse 90% 80% at 50% 50%, rgba(0,0,0,0.5) 0%, rgba(0,0,0,0.3) 50%, transparent 100%)' }} />
         <div className="relative max-w-[900px] mx-auto">
           <p className="text-[11px] tracking-[0.2em] uppercase text-[#8a8ab0] mb-6" data-testid="text-hero-label">Digital Underwriting Engine</p>
           <h1
             className="text-[72px] sm:text-[68px] md:text-[88px] lg:text-[108px] uppercase italic leading-[0.85] mb-8 text-center"
-            style={{ fontFamily: "'Satoshi', sans-serif", fontWeight: 400, letterSpacing: '-0.06em', backgroundImage: 'linear-gradient(180deg, #000000 0%, #3a3a5a 50%, #7a7a9a 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}
+            style={{ fontFamily: "'Satoshi', sans-serif", fontWeight: 400, letterSpacing: '-0.06em', backgroundImage: 'linear-gradient(180deg, #ffffff 0%, #d0d0e8 50%, #9090b8 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text', filter: 'drop-shadow(0 2px 12px rgba(0,0,0,0.5))' }}
             data-testid="text-hero-headline"
           >
             Qualify<br />Before<br />You Apply
           </h1>
-          <p className="text-[13px] sm:text-[17px] text-[#b0b0d0] leading-[1.7] sm:leading-[1.8] max-w-[560px] mx-auto mb-10">
+          <p className="text-[13px] sm:text-[17px] text-[#c8c8e0] leading-[1.7] sm:leading-[1.8] max-w-[560px] mx-auto mb-10" style={{ textShadow: '0 1px 8px rgba(0,0,0,0.5)' }}>
             Know exactly where you stand before you submit a single funding application. We analyze your profile using real underwriting logic to determine your funding potential — before lenders ever see you. Stop guessing. Start qualifying.
           </p>
 
           <form onSubmit={handleLogin} className="w-full max-w-[440px] mx-auto mb-8">
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center bg-[#f5f5fa] border border-[#e0e0ea] rounded-2xl sm:rounded-full sm:h-[52px] sm:pl-5 sm:pr-1.5 overflow-hidden">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center bg-white/8 border border-white/15 rounded-2xl sm:rounded-full sm:h-[52px] sm:pl-5 sm:pr-1.5 overflow-hidden backdrop-blur-sm">
               <input
                 data-testid="input-email"
                 type="email"
                 placeholder="Enter your email"
-                className="flex-1 bg-transparent text-[14px] text-[#1a1a2e] placeholder:text-[#9a9ab0] outline-none px-4 py-3.5 sm:px-0 sm:py-0"
+                className="flex-1 bg-transparent text-[14px] text-white placeholder:text-[#8a8ab0] outline-none px-4 py-3.5 sm:px-0 sm:py-0"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
@@ -258,15 +260,15 @@ export default function LandingPage() {
                 data-testid="button-join"
                 type="submit"
                 disabled={isLoading}
-                className="h-[44px] sm:h-[40px] px-6 sm:rounded-full text-white text-[13px] font-bold hover:opacity-90 transition-colors shrink-0 border-t border-[#e0e0ea] sm:border-t-0 mx-1.5 mb-1.5 sm:mb-0 sm:mx-0 rounded-xl sm:rounded-full tracking-wide"
-                style={{ background: 'linear-gradient(135deg, #2a2a2a 0%, #0a0a0a 100%)' }}
+                className="h-[44px] sm:h-[40px] px-6 sm:rounded-full text-white text-[13px] font-bold hover:opacity-90 transition-colors shrink-0 border-t border-white/10 sm:border-t-0 mx-1.5 mb-1.5 sm:mb-0 sm:mx-0 rounded-xl sm:rounded-full tracking-wide"
+                style={{ background: 'linear-gradient(135deg, #4a4a6a 0%, #2a2a4a 100%)' }}
               >
                 {isLoading ? "..." : "SUBSCRIBE"}
               </button>
             </div>
           </form>
 
-          <div className="flex flex-wrap items-center justify-center gap-6 text-[11px] text-[#8a8aa5] tracking-wide">
+          <div className="flex flex-wrap items-center justify-center gap-6 text-[11px] text-[#9a9ac0] tracking-wide">
             <span>Full platform access</span>
             <span className="w-1 h-1 rounded-full bg-[#c0c0d0]"></span>
             <span>Cancel anytime</span>
@@ -695,12 +697,12 @@ export default function LandingPage() {
             Get your Capital Readiness Score, tier eligibility, exposure ceiling, and denial simulation. Subscribe today and unlock the full platform.
           </p>
           <form onSubmit={handleLogin} className="w-full max-w-[440px] mx-auto mb-6">
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center bg-[#f5f5fa] border border-[#e0e0ea] rounded-2xl sm:rounded-full sm:h-[52px] sm:pl-5 sm:pr-1.5 overflow-hidden">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center bg-white/8 border border-white/15 rounded-2xl sm:rounded-full sm:h-[52px] sm:pl-5 sm:pr-1.5 overflow-hidden backdrop-blur-sm">
               <input
                 data-testid="input-email-bottom"
                 type="email"
                 placeholder="Enter your email"
-                className="flex-1 bg-transparent text-[14px] text-[#1a1a2e] placeholder:text-[#9a9ab0] outline-none px-4 py-3.5 sm:px-0 sm:py-0"
+                className="flex-1 bg-transparent text-[14px] text-white placeholder:text-[#8a8ab0] outline-none px-4 py-3.5 sm:px-0 sm:py-0"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
@@ -710,8 +712,8 @@ export default function LandingPage() {
                 data-testid="button-join-bottom"
                 type="submit"
                 disabled={isLoading}
-                className="h-[44px] sm:h-[40px] px-6 sm:rounded-full text-white text-[13px] font-bold hover:opacity-90 transition-colors shrink-0 border-t border-[#e0e0ea] sm:border-t-0 mx-1.5 mb-1.5 sm:mb-0 sm:mx-0 rounded-xl sm:rounded-full tracking-wide"
-                style={{ background: 'linear-gradient(135deg, #2a2a2a 0%, #0a0a0a 100%)' }}
+                className="h-[44px] sm:h-[40px] px-6 sm:rounded-full text-white text-[13px] font-bold hover:opacity-90 transition-colors shrink-0 border-t border-white/10 sm:border-t-0 mx-1.5 mb-1.5 sm:mb-0 sm:mx-0 rounded-xl sm:rounded-full tracking-wide"
+                style={{ background: 'linear-gradient(135deg, #4a4a6a 0%, #2a2a4a 100%)' }}
               >
                 {isLoading ? "..." : "SUBSCRIBE"}
               </button>
