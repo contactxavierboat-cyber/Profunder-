@@ -129,8 +129,7 @@ section[id] {
   }
   body {
     @apply font-sans antialiased text-foreground selection:bg-primary/20 selection:text-primary;
-    background: linear-gradient(180deg, #ffffff 0%, #f5f5fc 12%, #eef0fa 25%, #f8f8ff 40%, #f2f0fb 55%, #f6f5fc 70%, #f0eff8 85%, #eceaf5 100%);
-    background-attachment: fixed;
+    background: #000000;
   }
 }
 
