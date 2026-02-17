@@ -33,7 +33,7 @@ function SpaceBackground() {
 
     const resize = () => {
       const w = window.innerWidth;
-      const h = document.documentElement.scrollHeight;
+      const h = window.innerHeight;
       canvas.style.width = w + 'px';
       canvas.style.height = h + 'px';
       canvas.width = w * window.devicePixelRatio;
@@ -43,9 +43,9 @@ function SpaceBackground() {
 
     const init = () => {
       const w = window.innerWidth;
-      const h = document.documentElement.scrollHeight;
+      const h = window.innerHeight;
 
-      const blobCount = Math.min(Math.floor((w * h) / 200000), 12);
+      const blobCount = Math.min(Math.floor((w * h) / 80000), 10);
       blobs = [];
       for (let i = 0; i < blobCount; i++) {
         const speed = Math.random() * 0.8 + 0.4;
@@ -104,7 +104,7 @@ function SpaceBackground() {
 
     const draw = () => {
       const w = window.innerWidth;
-      const h = document.documentElement.scrollHeight;
+      const h = window.innerHeight;
       ctx.clearRect(0, 0, w, h);
       time += 0.016;
 
@@ -120,7 +120,8 @@ function SpaceBackground() {
         const breathe = Math.sin(time * 0.4 + b.phase) * 0.06 + 1;
         const tex = blobTextures[i];
         if (!tex) return;
-        const drawSize = tex.width * breathe;
+        const drawSize = b.radius * 3 * breathe;
+        ctx.globalAlpha = 1;
         ctx.drawImage(tex, b.x - drawSize / 2, b.y - drawSize / 2, drawSize, drawSize);
       });
 
@@ -272,7 +273,7 @@ export default function LandingPage() {
   };
 
   return (
-    <div className="relative min-h-screen text-[#1a1a2e] overflow-x-hidden" style={{ fontFamily: "'Inter', sans-serif", background: 'linear-gradient(180deg, #ffffff 0%, #f5f5fc 12%, #eef0fa 25%, #f8f8ff 40%, #f2f0fb 55%, #f6f5fc 70%, #f0eff8 85%, #eceaf5 100%)' }}>
+    <div className="relative min-h-screen text-[#1a1a2e] overflow-x-hidden" style={{ fontFamily: "'Inter', sans-serif" }}>
       <SpaceBackground />
 
       {showLogin && (
