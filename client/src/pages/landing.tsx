@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useAuth } from "@/lib/store";
+import { BaalioLogo } from "@/components/baalio-logo";
 
 function SpaceBackground() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -288,7 +289,7 @@ export default function LandingPage() {
                 <div className="w-[22px] h-[22px] rounded-full bg-gradient-to-br from-[#2a2a2a] to-[#0a0a0a] flex items-center justify-center">
                   <span className="w-1.5 h-1.5 rounded-full bg-white"></span>
                 </div>
-                <span className="text-[14px] font-bold tracking-[0.03em] text-[#1a1a1a]" style={{ fontFamily: "'Dancing Script', cursive" }}>baalio</span>
+                <BaalioLogo size="sm" className="text-[#1a1a1a]" />
               </div>
               <button onClick={() => setShowLogin(false)} className="text-[#9a9ab0] hover:text-[#3a3a5a] transition-colors text-[18px] leading-none" data-testid="button-close-login">&times;</button>
             </div>
@@ -338,7 +339,7 @@ export default function LandingPage() {
             <div className="w-[18px] h-[18px] rounded-full bg-gradient-to-br from-[#2a2a2a] to-[#0a0a0a] flex items-center justify-center animate-logo-pulse">
               <span className="w-1.5 h-1.5 rounded-full bg-white"></span>
             </div>
-            <span className="text-[12.5px] font-semibold tracking-[0.03em] text-[#1a1a1a]" style={{ fontFamily: "'Dancing Script', cursive" }}>baalio</span>
+            <BaalioLogo size="xs" className="text-[#1a1a1a]" />
           </div>
 
           <div className="hidden md:flex items-center gap-8">
@@ -866,7 +867,7 @@ export default function LandingPage() {
               <div className="w-6 h-6 rounded-full border-2 border-[#c0c0d0] flex items-center justify-center">
                 <span className="w-1.5 h-1.5 rounded-full bg-[#8a8aa5]"></span>
               </div>
-              <span className="text-[13px] font-bold tracking-[0.08em] text-[#1a1a2e] uppercase" style={{ fontFamily: "'Dancing Script', cursive" }}>baalio</span>
+              <BaalioLogo size="sm" className="text-[#1a1a2e]" />
             </div>
             <div className="flex flex-wrap gap-6 sm:gap-8">
               {["Privacy Policy", "Terms of Service", "Contact", "Support"].map((link) => (

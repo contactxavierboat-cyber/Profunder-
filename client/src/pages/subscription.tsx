@@ -1,4 +1,5 @@
 import { useAuth } from "@/lib/store";
+import { BaalioLogo } from "@/components/baalio-logo";
 import { useLocation, useSearch } from "wouter";
 import { Check, ShieldCheck, CreditCard, Loader2, ExternalLink, User, Phone } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
@@ -210,7 +211,7 @@ export default function SubscriptionPage() {
             <div className="w-8 h-8 rounded-full border-2 border-[#c0c0d0] flex items-center justify-center">
               <span className="w-2 h-2 rounded-full bg-[#8a8aa5]"></span>
             </div>
-            <span className="text-[14px] font-bold tracking-[0.08em] text-[#1a1a2e] uppercase" style={{ fontFamily: "'Dancing Script', cursive" }}>baalio</span>
+            <BaalioLogo size="sm" className="text-[#1a1a2e]" />
           </div>
 
           <p className="text-[11px] tracking-[0.2em] uppercase text-[#7a7a9a] mb-4">
