@@ -4,10 +4,10 @@ interface BaalioLogoProps {
 }
 
 const SIZES = {
-  xs: { fontSize: "11px", aaSize: "12px", aaOffset: "-3px" },
-  sm: { fontSize: "13px", aaSize: "14px", aaOffset: "-3.5px" },
-  md: { fontSize: "16px", aaSize: "17px", aaOffset: "-4.5px" },
-  lg: { fontSize: "22px", aaSize: "24px", aaOffset: "-6px" },
+  xs: { fontSize: "12px", aaOffset: "-4px" },
+  sm: { fontSize: "14px", aaOffset: "-4.5px" },
+  md: { fontSize: "18px", aaOffset: "-6px" },
+  lg: { fontSize: "24px", aaOffset: "-8px" },
 };
 
 export function BaalioLogo({ size = "sm", className = "" }: BaalioLogoProps) {
@@ -17,29 +17,18 @@ export function BaalioLogo({ size = "sm", className = "" }: BaalioLogoProps) {
       className={`inline-flex items-baseline select-none ${className}`}
       style={{
         fontFamily: "'Inter', sans-serif",
-        fontWeight: 800,
+        fontWeight: 900,
         fontSize: s.fontSize,
-        letterSpacing: "-0.06em",
+        letterSpacing: "-0.08em",
         lineHeight: 1,
         textTransform: "lowercase",
       }}
       aria-label="baalio"
     >
-      <span>b</span>
-      <span style={{ position: "relative", display: "inline-block" }}>
-        <span>a</span>
-        <span
-          style={{
-            position: "relative",
-            marginLeft: s.aaOffset,
-            fontSize: s.aaSize,
-            opacity: 0.7,
-          }}
-        >
-          a
-        </span>
-      </span>
-      <span>lio</span>
+      b
+      <span style={{ display: "inline-block" }}>a</span>
+      <span style={{ display: "inline-block", marginLeft: s.aaOffset }}>a</span>
+      lio
     </span>
   );
 }
