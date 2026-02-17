@@ -372,9 +372,11 @@ export default function LandingPage() {
           >
             Qualify<br />Before<br />You Apply
           </h1>
-          <p className="text-[13px] sm:text-[17px] text-[#5a5a7a] leading-[1.7] sm:leading-[1.8] max-w-[560px] mx-auto mb-10 text-justify-smart-center">
-            baalio® runs your financial profile through real underwriting logic — the same criteria banks use to approve or deny you. Get your Capital Readiness Score, exposure ceiling, tier eligibility, and denial risk before you ever submit an application.
-          </p>
+          <div className="text-[13px] sm:text-[17px] text-[#5a5a7a] leading-[1.7] sm:leading-[1.8] max-w-[560px] mx-auto mb-10">
+            <p className="mb-4">Know exactly where you stand before you submit a single funding application.</p>
+            <p className="mb-4">ProFundr analyzes your profile using real underwriting logic to determine your funding potential — before lenders ever see you.</p>
+            <p>Stop guessing. Start qualifying.</p>
+          </div>
 
           <form onSubmit={handleLogin} className="w-full max-w-[440px] mx-auto mb-8">
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center bg-[#f5f5fa] border border-[#e0e0ea] rounded-2xl sm:rounded-full sm:h-[52px] sm:pl-5 sm:pr-1.5 overflow-hidden">
