@@ -335,10 +335,11 @@ export default function LandingPage() {
 
       <div className="sticky top-0 z-50 w-full flex justify-center px-6 sm:px-10 pt-4" data-testid="nav-top">
         <nav className="flex items-center justify-between w-full max-w-[900px] h-[52px] bg-white/95 rounded-full px-2.5 pl-3 shadow-lg shadow-black/15">
-          <div className="flex items-center bg-[#f0f0f8] rounded-full px-3 py-1.5" data-testid="nav-logo">
+          <div className="flex items-center gap-2 bg-[#f0f0f8] rounded-full px-3 py-1.5" data-testid="nav-logo">
             <div className="w-[18px] h-[18px] rounded-full bg-gradient-to-br from-[#2a2a2a] to-[#0a0a0a] flex items-center justify-center animate-logo-pulse">
               <span className="w-1.5 h-1.5 rounded-full bg-white"></span>
             </div>
+            <span className="text-[15px] tracking-[-0.06em] text-[#1a1a1a]" style={{ fontFamily: "'Satoshi', sans-serif" }}><span className="font-normal">Pro</span><span className="italic">Fundr</span></span>
           </div>
 
           <div className="hidden md:flex items-center gap-8">
