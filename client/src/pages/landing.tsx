@@ -1,152 +1,56 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/lib/store";
 import { BaalioLogo } from "@/components/baalio-logo";
 
 function SpaceBackground() {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-
-    let animationId: number;
-
-    interface Blob {
-      x: number; y: number;
-      vx: number; vy: number;
-      radius: number;
-      opacity: number;
-      phase: number;
-      wobbleSpeed: number;
-      wobbleAmp: number;
-      points: number;
-      squeezePhase: number;
-      squeezeSpeed: number;
-      squeezeAmount: number;
-    }
-
-    let blobs: Blob[] = [];
-    let blobTextures: HTMLCanvasElement[] = [];
-    let time = 0;
-
-    const resize = () => {
-      const w = window.innerWidth;
-      const h = window.innerHeight;
-      canvas.style.width = w + 'px';
-      canvas.style.height = h + 'px';
-      canvas.width = w * window.devicePixelRatio;
-      canvas.height = h * window.devicePixelRatio;
-      ctx.setTransform(window.devicePixelRatio, 0, 0, window.devicePixelRatio, 0, 0);
-    };
-
-    const init = () => {
-      const w = window.innerWidth;
-      const h = window.innerHeight;
-
-      const blobCount = Math.min(Math.floor((w * h) / 80000), 10);
-      blobs = [];
-      for (let i = 0; i < blobCount; i++) {
-        const speed = Math.random() * 0.8 + 0.4;
-        const angle = Math.random() * Math.PI * 2;
-        blobs.push({
-          x: Math.random() * w,
-          y: Math.random() * h,
-          vx: Math.cos(angle) * speed,
-          vy: Math.sin(angle) * speed,
-          radius: Math.random() * 250 + 180,
-          opacity: Math.random() * 0.2 + 0.12,
-          phase: Math.random() * Math.PI * 2,
-          wobbleSpeed: Math.random() * 0.8 + 0.3,
-          wobbleAmp: Math.random() * 0.25 + 0.1,
-          points: Math.floor(Math.random() * 3) + 7,
-          squeezePhase: Math.random() * Math.PI * 2,
-          squeezeSpeed: Math.random() * 1.0 + 0.4,
-          squeezeAmount: Math.random() * 0.3 + 0.15,
-        });
-      }
-
-      blobTextures = blobs.map(b => {
-        const size = Math.ceil(b.radius * 3);
-        const off = document.createElement('canvas');
-        off.width = size;
-        off.height = size;
-        const oc = off.getContext('2d')!;
-        const cx = size / 2;
-        const cy = size / 2;
-        const r = b.radius;
-
-        const grad = oc.createRadialGradient(cx - r * 0.25, cy - r * 0.25, 0, cx, cy, r * 1.3);
-        grad.addColorStop(0, `rgba(210, 210, 225, ${b.opacity * 2.2})`);
-        grad.addColorStop(0.25, `rgba(185, 185, 205, ${b.opacity * 1.6})`);
-        grad.addColorStop(0.55, `rgba(155, 155, 175, ${b.opacity * 1.0})`);
-        grad.addColorStop(0.8, `rgba(135, 135, 158, ${b.opacity * 0.4})`);
-        grad.addColorStop(1, `rgba(120, 120, 145, 0)`);
-
-        oc.beginPath();
-        oc.arc(cx, cy, r * 1.3, 0, Math.PI * 2);
-        oc.fillStyle = grad;
-        oc.fill();
-
-        const rimGrad = oc.createRadialGradient(cx - r * 0.35, cy - r * 0.35, r * 0.05, cx, cy, r * 1.0);
-        rimGrad.addColorStop(0, `rgba(235, 235, 250, ${b.opacity * 1.0})`);
-        rimGrad.addColorStop(0.35, `rgba(210, 210, 230, ${b.opacity * 0.3})`);
-        rimGrad.addColorStop(1, `rgba(190, 190, 210, 0)`);
-        oc.beginPath();
-        oc.arc(cx, cy, r * 1.0, 0, Math.PI * 2);
-        oc.fillStyle = rimGrad;
-        oc.fill();
-
-        return off;
-      });
-    };
-
-    const draw = () => {
-      const w = window.innerWidth;
-      const h = window.innerHeight;
-      ctx.clearRect(0, 0, w, h);
-      time += 0.016;
-
-      blobs.forEach((b, i) => {
-        b.x += b.vx;
-        b.y += b.vy;
-        const margin = b.radius * 2;
-        if (b.x < -margin) b.x = w + margin;
-        if (b.x > w + margin) b.x = -margin;
-        if (b.y < -margin) b.y = h + margin;
-        if (b.y > h + margin) b.y = -margin;
-
-        const breathe = Math.sin(time * 0.4 + b.phase) * 0.06 + 1;
-        const tex = blobTextures[i];
-        if (!tex) return;
-        const drawSize = b.radius * 3 * breathe;
-        ctx.globalAlpha = 1;
-        ctx.drawImage(tex, b.x - drawSize / 2, b.y - drawSize / 2, drawSize, drawSize);
-      });
-
-      animationId = requestAnimationFrame(draw);
-    };
-
-    resize();
-    init();
-    draw();
-
-    const resizeHandler = () => { resize(); init(); };
-    window.addEventListener('resize', resizeHandler);
-
-    return () => {
-      cancelAnimationFrame(animationId);
-      window.removeEventListener('resize', resizeHandler);
-    };
-  }, []);
-
   return (
-    <canvas
-      ref={canvasRef}
-      className="fixed top-0 left-0 pointer-events-none"
-      style={{ zIndex: 15 }}
-    />
+    <div className="fixed inset-0 pointer-events-none overflow-hidden" style={{ zIndex: 1 }}>
+      <div
+        className="absolute rounded-full animate-blob-1"
+        style={{
+          width: '600px', height: '600px',
+          background: 'radial-gradient(circle, rgba(180,170,220,0.35) 0%, rgba(160,150,210,0.15) 40%, transparent 70%)',
+          filter: 'blur(80px)',
+          top: '-5%', left: '-10%',
+        }}
+      />
+      <div
+        className="absolute rounded-full animate-blob-2"
+        style={{
+          width: '500px', height: '500px',
+          background: 'radial-gradient(circle, rgba(150,160,210,0.3) 0%, rgba(140,150,200,0.12) 40%, transparent 70%)',
+          filter: 'blur(70px)',
+          top: '20%', right: '-8%',
+        }}
+      />
+      <div
+        className="absolute rounded-full animate-blob-3"
+        style={{
+          width: '700px', height: '700px',
+          background: 'radial-gradient(circle, rgba(190,180,230,0.25) 0%, rgba(170,165,215,0.1) 40%, transparent 70%)',
+          filter: 'blur(90px)',
+          bottom: '10%', left: '20%',
+        }}
+      />
+      <div
+        className="absolute rounded-full animate-blob-4"
+        style={{
+          width: '450px', height: '450px',
+          background: 'radial-gradient(circle, rgba(165,175,215,0.3) 0%, rgba(155,160,205,0.12) 40%, transparent 70%)',
+          filter: 'blur(60px)',
+          top: '50%', right: '15%',
+        }}
+      />
+      <div
+        className="absolute rounded-full animate-blob-5"
+        style={{
+          width: '550px', height: '550px',
+          background: 'radial-gradient(circle, rgba(175,165,225,0.28) 0%, rgba(160,155,210,0.1) 40%, transparent 70%)',
+          filter: 'blur(75px)',
+          top: '70%', left: '-5%',
+        }}
+      />
+    </div>
   );
 }
 
