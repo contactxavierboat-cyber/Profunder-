@@ -13,8 +13,8 @@ function SpaceBackground() {
         className="absolute top-1/2 left-1/2 min-w-full min-h-full object-cover"
         style={{
           transform: 'translate(-50%, -50%)',
-          filter: 'brightness(1.6) saturate(0.3) contrast(0.7) hue-rotate(220deg)',
-          opacity: 0.35,
+          filter: 'saturate(0.4) hue-rotate(220deg)',
+          opacity: 0.18,
         }}
       >
         <source src="/marble-bg.mp4" type="video/mp4" />
