@@ -12,145 +12,103 @@ function SpaceBackground() {
     if (!ctx) return;
 
     let animationId: number;
-
-    interface Blob {
-      x: number; y: number;
-      vx: number; vy: number;
-      radius: number;
-      opacity: number;
-      phase: number;
-      squeezePhase: number;
-      squeezeSpeed: number;
-      squeezeAmount: number;
-      texture: HTMLCanvasElement;
-    }
-
-    let blobs: Blob[] = [];
-    let lastTime = 0;
     let time = 0;
-
-    const makeTexture = (radius: number, opacity: number): HTMLCanvasElement => {
-      const size = Math.ceil(radius * 3);
-      const off = document.createElement('canvas');
-      off.width = size;
-      off.height = size;
-      const oc = off.getContext('2d')!;
-      const cx = size / 2;
-      const cy = size / 2;
-      const r = radius;
-
-      const grad = oc.createRadialGradient(cx - r * 0.25, cy - r * 0.25, 0, cx, cy, r * 1.3);
-      grad.addColorStop(0, `rgba(210, 210, 225, ${opacity * 2.2})`);
-      grad.addColorStop(0.2, `rgba(185, 185, 205, ${opacity * 1.8})`);
-      grad.addColorStop(0.5, `rgba(155, 155, 175, ${opacity * 1.2})`);
-      grad.addColorStop(0.75, `rgba(135, 135, 158, ${opacity * 0.6})`);
-      grad.addColorStop(1, `rgba(120, 120, 145, 0)`);
-      oc.beginPath();
-      oc.arc(cx, cy, r * 1.3, 0, Math.PI * 2);
-      oc.fillStyle = grad;
-      oc.fill();
-
-      const shadowGrad = oc.createRadialGradient(cx + r * 0.15, cy + r * 0.15, r * 0.3, cx + r * 0.15, cy + r * 0.15, r * 1.2);
-      shadowGrad.addColorStop(0, `rgba(100, 100, 130, ${opacity * 0.5})`);
-      shadowGrad.addColorStop(0.5, `rgba(110, 110, 140, ${opacity * 0.25})`);
-      shadowGrad.addColorStop(1, `rgba(120, 120, 150, 0)`);
-      oc.beginPath();
-      oc.arc(cx, cy, r * 1.2, 0, Math.PI * 2);
-      oc.fillStyle = shadowGrad;
-      oc.fill();
-
-      const rimGrad = oc.createRadialGradient(cx - r * 0.35, cy - r * 0.35, r * 0.05, cx, cy, r * 1.1);
-      rimGrad.addColorStop(0, `rgba(230, 230, 245, ${opacity * 0.9})`);
-      rimGrad.addColorStop(0.3, `rgba(200, 200, 220, ${opacity * 0.4})`);
-      rimGrad.addColorStop(1, `rgba(180, 180, 200, 0)`);
-      oc.beginPath();
-      oc.arc(cx, cy, r * 1.1, 0, Math.PI * 2);
-      oc.fillStyle = rimGrad;
-      oc.fill();
-
-      return off;
-    };
+    let lastTs = 0;
+    const dpr = Math.min(window.devicePixelRatio, 1.5);
 
     const resize = () => {
       const w = window.innerWidth;
-      const h = document.documentElement.scrollHeight;
+      const h = window.innerHeight;
       canvas.style.width = w + 'px';
       canvas.style.height = h + 'px';
-      canvas.width = w * window.devicePixelRatio;
-      canvas.height = h * window.devicePixelRatio;
-      ctx.setTransform(window.devicePixelRatio, 0, 0, window.devicePixelRatio, 0, 0);
+      canvas.width = Math.floor(w * dpr);
+      canvas.height = Math.floor(h * dpr);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     };
 
-    const init = () => {
-      const w = window.innerWidth;
-      const h = document.documentElement.scrollHeight;
-      const blobCount = Math.min(Math.floor((w * h) / 200000), 8);
-      blobs = [];
-      for (let i = 0; i < blobCount; i++) {
-        const speed = Math.random() * 1.2 + 0.5;
-        const angle = Math.random() * Math.PI * 2;
-        const radius = Math.random() * 250 + 160;
-        const opacity = Math.random() * 0.22 + 0.12;
-        blobs.push({
-          x: Math.random() * w,
-          y: Math.random() * h,
-          vx: Math.cos(angle) * speed,
-          vy: Math.sin(angle) * speed,
-          radius,
-          opacity,
-          phase: Math.random() * Math.PI * 2,
-          squeezePhase: Math.random() * Math.PI * 2,
-          squeezeSpeed: Math.random() * 0.8 + 0.3,
-          squeezeAmount: Math.random() * 0.2 + 0.08,
-          texture: makeTexture(radius, opacity),
-        });
+    const noise = (x: number, y: number, t: number): number => {
+      const s1 = Math.sin(x * 0.008 + t * 0.3) * Math.cos(y * 0.006 + t * 0.2);
+      const s2 = Math.sin(x * 0.012 - t * 0.15 + y * 0.01) * Math.cos(y * 0.009 + t * 0.25);
+      const s3 = Math.sin((x + y) * 0.005 + t * 0.18) * 0.5;
+      return (s1 + s2 + s3) / 2.5;
+    };
+
+    const noise2 = (x: number, y: number, t: number): number => {
+      const s1 = Math.cos(x * 0.007 - t * 0.22) * Math.sin(y * 0.011 + t * 0.28);
+      const s2 = Math.sin(x * 0.015 + t * 0.12 - y * 0.008) * Math.cos(y * 0.013 - t * 0.18);
+      const s3 = Math.cos((x - y) * 0.006 + t * 0.15) * 0.4;
+      return (s1 + s2 + s3) / 2.4;
+    };
+
+    let imgW = 0, imgH = 0;
+    let imgData: ImageData | null = null;
+
+    const initImage = () => {
+      imgW = canvas.width;
+      imgH = canvas.height;
+      imgData = ctx.createImageData(imgW, imgH);
+    };
+
+    const draw = (ts: number) => {
+      const dt = lastTs ? (ts - lastTs) / 1000 : 0.016;
+      lastTs = ts;
+      time += dt * 0.35;
+
+      if (!imgData || canvas.width !== imgW || canvas.height !== imgH) initImage();
+      if (!imgData) { animationId = requestAnimationFrame(draw); return; }
+
+      const data = imgData.data;
+      const w = imgW;
+      const h = imgH;
+      const step = 4;
+
+      for (let py = 0; py < h; py += step) {
+        for (let px = 0; px < w; px += step) {
+          const sx = px / dpr;
+          const sy = py / dpr;
+
+          const n1 = noise(sx, sy, time);
+          const n2 = noise2(sx, sy, time);
+          const combined = (n1 + n2) * 0.5;
+
+          const swirl = Math.sin(n1 * 3.0 + time * 0.2) * 0.5 + 0.5;
+          const ridge = Math.abs(Math.sin(combined * 4.0 + time * 0.15));
+
+          const sw3 = swirl * 0.3;
+          const rf = ridge * ridge * 0.35;
+
+          const r = (230 + combined * 20) * (1 - sw3) + (195 + swirl * 30) * sw3;
+          const g = (228 + combined * 18) * (1 - sw3) + (190 + swirl * 28) * sw3;
+          const b = (240 + n1 * 12) * (1 - sw3) + (215 + swirl * 20) * sw3;
+
+          const fr = (r + (255 - r) * rf) | 0;
+          const fg = (g + (255 - g) * rf) | 0;
+          const fb = (b + (255 - b) * rf) | 0;
+
+          for (let dy = 0; dy < step && py + dy < h; dy++) {
+            const rowOff = ((py + dy) * w + px) * 4;
+            for (let dx = 0; dx < step && px + dx < w; dx++) {
+              const off = rowOff + dx * 4;
+              data[off] = fr;
+              data[off + 1] = fg;
+              data[off + 2] = fb;
+              data[off + 3] = 255;
+            }
+          }
+        }
       }
-    };
 
-    const draw = (timestamp: number) => {
-      const dt = lastTime ? (timestamp - lastTime) / 16.667 : 1;
-      lastTime = timestamp;
-      time += dt * 0.016;
-
-      const w = window.innerWidth;
-      const h = document.documentElement.scrollHeight;
-      ctx.clearRect(0, 0, w, h);
-
-      blobs.forEach(b => {
-        b.x += b.vx * dt;
-        b.y += b.vy * dt;
-        const margin = b.radius * 2;
-        if (b.x < -margin) b.x = w + margin;
-        if (b.x > w + margin) b.x = -margin;
-        if (b.y < -margin) b.y = h + margin;
-        if (b.y > h + margin) b.y = -margin;
-
-        const breathe = Math.sin(time * 0.6 + b.phase) * 0.1 + 1;
-        const sqz = Math.sin(time * b.squeezeSpeed + b.squeezePhase) * b.squeezeAmount;
-        const scaleX = breathe * (1 + sqz);
-        const scaleY = breathe * (1 - sqz);
-        const texSize = b.radius * 3;
-
-        ctx.save();
-        ctx.translate(b.x, b.y);
-        ctx.scale(scaleX, scaleY);
-        ctx.drawImage(b.texture, -texSize / 2, -texSize / 2, texSize, texSize);
-        ctx.restore();
-      });
-
+      ctx.putImageData(imgData, 0, 0);
       animationId = requestAnimationFrame(draw);
     };
 
     resize();
-    init();
     animationId = requestAnimationFrame(draw);
 
-    const resizeHandler = () => { resize(); init(); };
-    window.addEventListener('resize', resizeHandler);
-
+    window.addEventListener('resize', resize);
     return () => {
       cancelAnimationFrame(animationId);
-      window.removeEventListener('resize', resizeHandler);
+      window.removeEventListener('resize', resize);
     };
   }, []);
 
@@ -158,7 +116,7 @@ function SpaceBackground() {
     <canvas
       ref={canvasRef}
       className="fixed top-0 left-0 pointer-events-none"
-      style={{ zIndex: 15 }}
+      style={{ zIndex: 1 }}
     />
   );
 }
