@@ -48,7 +48,6 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
               <span className="absolute inset-0 rounded-full bg-[#8a8aa5]/15 animate-ping" />
               <span className="relative w-3 h-3 sm:w-3.5 sm:h-3.5 rounded-full bg-[#8a8aa5] shadow-[0_0_8px_rgba(138,138,165,0.4)]" />
             </span>
-            <p className="text-[10px] sm:text-xs text-[#8a8aa5] mt-1">Mentorship, On Demand</p>
           </div>
           <button
             className="md:hidden w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white/50"

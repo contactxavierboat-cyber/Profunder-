@@ -732,10 +732,6 @@ export default function DashboardPage() {
               <span className="absolute inset-0 rounded-full bg-[#3a3a5a]/15 animate-ping" />
               <span className="relative w-3 h-3 rounded-full bg-[#3a3a5a] shadow-[0_0_8px_rgba(58,58,90,0.4)]" />
             </span>
-            <div>
-              <span className="text-[13px] font-bold text-[#1a1a2e] tracking-tight">Capital OS</span>
-              <p className="text-[9px] text-[#1a1a2e]/50 tracking-wide">baalio® Infrastructure</p>
-            </div>
           </div>
           <button onClick={() => setSidebarOpen(false)} className="lg:hidden text-[#1a1a2e]/60 hover:text-[#1a1a2e]" data-testid="button-close-sidebar">
             <X className="w-4 h-4" />
