@@ -199,13 +199,13 @@ const ScrollArrow = ({ targetId }: { targetId: string }) => (
 );
 
 const faqItems = [
-  { q: "Do I need perfect credit to use baalio®?", a: "No. baalio® works for all credit profiles — from thin files to complex portfolios. Our engine evaluates 6 capital components and places you in the right tier with a clear action plan, whether you're Prime-eligible or in Repair mode." },
-  { q: "How is this different from a credit monitoring app?", a: "Credit monitoring shows you a score. baalio® tells you what that score means to a lender, what products you actually qualify for, what will get you denied, and exactly how to fix it. It's underwriting intelligence, not a dashboard." },
+  { q: "Do I need perfect credit to use ProFundr?", a: "No. ProFundr works for all credit profiles — from thin files to complex portfolios. Our engine evaluates 6 capital components and places you in the right tier with a clear action plan, whether you're Prime-eligible or in Repair mode." },
+  { q: "How is this different from a credit monitoring app?", a: "Credit monitoring shows you a score. ProFundr tells you what that score means to a lender, what products you actually qualify for, what will get you denied, and exactly how to fix it. It's underwriting intelligence, not a dashboard." },
   { q: "What documents do I need to upload?", a: "Start with your credit report (from any bureau) and your most recent bank statement. Our AI extracts over 40 data points automatically — no manual entry required." },
   { q: "How accurate is the denial simulation?", a: "Our denial engine uses real underwriting triggers from SBA, conventional, and alternative lenders. It catches issues that cause 73% of funding denials before you ever submit an application." },
   { q: "Is my financial data secure?", a: "All data is encrypted in transit and at rest. We never share your financial information with lenders, brokers, or third parties. Your data is used solely to generate your Capital Readiness analysis." },
   { q: "What's included with a subscription?", a: "Your subscription includes your full Capital Readiness Score, 6-component breakdown, tier eligibility, operating mode analysis, denial simulation, AI mentor chat, and credit repair recommendations — all 30 analyses per month." },
-  { q: "Can I use this to prepare for an SBA loan?", a: "Absolutely. baalio® evaluates you against SBA 7(a) and 504 underwriting criteria. You'll see exactly where you stand, what flags exist, and what to fix before applying." },
+  { q: "Can I use this to prepare for an SBA loan?", a: "Absolutely. ProFundr evaluates you against SBA 7(a) and 504 underwriting criteria. You'll see exactly where you stand, what flags exist, and what to fix before applying." },
 ];
 
 const proofMessages = [
@@ -373,7 +373,7 @@ export default function LandingPage() {
             Qualify<br />Before<br />You Apply
           </h1>
           <p className="text-[13px] sm:text-[17px] text-[#5a5a7a] leading-[1.7] sm:leading-[1.8] max-w-[560px] mx-auto mb-10">
-            Know exactly where you stand before you submit a single funding application. ProFundr analyzes your profile using real underwriting logic to determine your funding potential — before lenders ever see you. Stop guessing. Start qualifying.
+            Know exactly where you stand before you submit a single funding application. <span style={{ fontFamily: "'Satoshi', sans-serif", letterSpacing: '-0.06em' }}><span>Pro</span><span className="italic">Fundr</span></span> analyzes your profile using real underwriting logic to determine your funding potential — before lenders ever see you. Stop guessing. Start qualifying.
           </p>
 
           <form onSubmit={handleLogin} className="w-full max-w-[440px] mx-auto mb-8">
@@ -446,7 +446,7 @@ export default function LandingPage() {
             AI-powered underwriting intelligence that tells you exactly what to fix — before you apply.
           </h2>
           <p className="text-[12px] sm:text-[16px] text-[#6a6a8a] leading-[1.6] sm:leading-[1.8] mb-12 max-w-[640px] mx-auto text-justify-smart-center">
-            baalio® analyzes your credit report and bank statements using the same 6-component framework real lenders use. You get a Capital Readiness Score, tier placement, exposure ceiling, denial simulation, and a step-by-step action plan — all powered by AI.
+            <span style={{ fontFamily: "'Satoshi', sans-serif", letterSpacing: '-0.06em' }}><span>Pro</span><span className="italic">Fundr</span></span> analyzes your credit report and bank statements using the same 6-component framework real lenders use. You get a Capital Readiness Score, tier placement, exposure ceiling, denial simulation, and a step-by-step action plan — all powered by AI.
           </p>
           <div className={contentBlockStyle}><div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
             {[
@@ -556,7 +556,7 @@ export default function LandingPage() {
             {[
               { name: "Marcus T.", role: "E-commerce Founder", quote: "I went from a 42 to a 78 Capital Readiness Score in 60 days. Got approved for a $250K line of credit on the first try." },
               { name: "Aisha K.", role: "Real Estate Investor", quote: "The denial simulation caught 3 triggers I didn't know existed. Fixed them all before applying — approved same week." },
-              { name: "David L.", role: "SaaS Startup CEO", quote: "baalio® showed me I was Mid-Tier when I thought I was Prime. After following the repair plan, I moved up and saved 4% on rates." },
+              { name: "David L.", role: "SaaS Startup CEO", quote: "ProFundr showed me I was Mid-Tier when I thought I was Prime. After following the repair plan, I moved up and saved 4% on rates." },
             ].map((t) => (
               <div key={t.name} className="p-6 rounded-xl bg-[#f8f8fc]/60 border border-[#e0e0ea]/50">
                 <p className="text-[11px] sm:text-[13px] text-[#6a6a8a] leading-[1.6] sm:leading-[1.8] mb-5 italic text-justify-smart">"{t.quote}"</p>
@@ -581,11 +581,11 @@ export default function LandingPage() {
             Stop applying blind. Start applying ready.
           </h2>
           <p className="text-[12px] sm:text-[15px] text-[#6a6a8a] leading-[1.6] sm:leading-[1.8] mb-12 max-w-[600px] mx-auto text-justify-smart-center">
-            Every denied application costs you: hard inquiries, wasted time, damaged confidence. baalio® eliminates the guesswork by showing you exactly what a lender sees — before you ever submit.
+            Every denied application costs you: hard inquiries, wasted time, damaged confidence. <span style={{ fontFamily: "'Satoshi', sans-serif", letterSpacing: '-0.06em' }}><span>Pro</span><span className="italic">Fundr</span></span> eliminates the guesswork by showing you exactly what a lender sees — before you ever submit.
           </p>
           <div className={contentBlockStyle}><div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
             <div className="p-6 rounded-xl border border-red-500/10 bg-red-500/[0.02]">
-              <p className="text-[11px] tracking-[0.15em] uppercase text-red-400/30 mb-4">Without baalio®</p>
+              <p className="text-[11px] tracking-[0.15em] uppercase text-red-400/30 mb-4">Without <span style={{ fontFamily: "'Satoshi', sans-serif", letterSpacing: '-0.06em' }}><span>Pro</span><span className="italic">Fundr</span></span></p>
               <ul className="space-y-3">
                 {["Guess at eligibility", "Apply to multiple lenders", "Accumulate hard inquiries", "Get denied without explanation", "Repeat the cycle"].map((t) => (
                   <li key={t} className="flex items-start gap-3 text-[13px] text-[#3a3a5a] leading-[1.6]">
@@ -595,7 +595,7 @@ export default function LandingPage() {
               </ul>
             </div>
             <div className="p-6 rounded-xl border border-[#e0e0ea]/50 bg-[#f8f8fc]/60">
-              <p className="text-[11px] tracking-[0.15em] uppercase text-[#6a6a8a] mb-4">With baalio®</p>
+              <p className="text-[11px] tracking-[0.15em] uppercase text-[#6a6a8a] mb-4">With <span style={{ fontFamily: "'Satoshi', sans-serif", letterSpacing: '-0.06em' }}><span>Pro</span><span className="italic">Fundr</span></span></p>
               <ul className="space-y-3">
                 {["Know your exact tier & ceiling", "Fix issues before applying", "Apply once, with confidence", "Get approved on first submission", "Build on momentum"].map((t) => (
                   <li key={t} className="flex items-start gap-3 text-[13px] text-[#5a5a7a] leading-[1.6]">
@@ -735,7 +735,7 @@ export default function LandingPage() {
           <div className={contentBlockStyle}><div className="space-y-0">
             {[
               { day: "Day 1", title: "Initial Analysis", detail: "Score: 38/100. Tier 3 (Alternative). 4 denial triggers flagged: high utilization (78%), 2 collections, thin business file, no EIN separation." },
-              { day: "Day 3", title: "Repair Plan Generated", detail: "baalio® auto-generated 6 dispute letters (2 per bureau), created a 90-day utilization reduction plan, and recommended EIN registration + business bank account." },
+              { day: "Day 3", title: "Repair Plan Generated", detail: "ProFundr auto-generated 6 dispute letters (2 per bureau), created a 90-day utilization reduction plan, and recommended EIN registration + business bank account." },
               { day: "Day 30", title: "First Checkpoint", detail: "Score: 52/100. Moved to Tier 2. 1 collection removed. Utilization down to 45%. Business structure improved. Exposure ceiling: $85K." },
               { day: "Day 67", title: "Funding Ready", detail: "Score: 71/100. Tier 2 (upper). 0 denial triggers. Utilization: 22%. Clean business file. Exposure ceiling: $210K. Applied for $175K LOC — approved in 5 days." },
             ].map((step) => (
@@ -852,7 +852,7 @@ export default function LandingPage() {
             </div>
           </form>
           <p className="text-[11px] text-[#b0b0c0] tracking-wide">
-            Join 12,500+ founders already using baalio®
+            Join 12,500+ founders already using <span style={{ fontFamily: "'Satoshi', sans-serif", letterSpacing: '-0.06em' }}><span>Pro</span><span className="italic">Fundr</span></span>
           </p>
           <SubscribeButton className="mt-6" />
         </div>
@@ -877,10 +877,10 @@ export default function LandingPage() {
           </div>
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-6 border-t border-[#e8e8f0]">
             <p className="text-[11px] text-[#9a9ab0]">
-              &copy; 2026 baalio® by <span className="text-[#8a8aa5] font-medium">CMD Supply</span>. All rights reserved.
+              &copy; 2026 <span style={{ fontFamily: "'Satoshi', sans-serif", letterSpacing: '-0.06em' }}><span>Pro</span><span className="italic">Fundr</span></span> by <span className="text-[#8a8aa5] font-medium">CMD Supply</span>. All rights reserved.
             </p>
             <p className="text-[10px] text-[#b0b0c0] max-w-[400px] leading-[1.6]">
-              baalio® is not a lender, broker, or financial advisor. All analyses are for informational purposes only and do not constitute financial advice or guaranteed lending outcomes.
+              <span style={{ fontFamily: "'Satoshi', sans-serif", letterSpacing: '-0.06em' }}><span>Pro</span><span className="italic">Fundr</span></span> is not a lender, broker, or financial advisor. All analyses are for informational purposes only and do not constitute financial advice or guaranteed lending outcomes.
           
             </p>
           </div>
