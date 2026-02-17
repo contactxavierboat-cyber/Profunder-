@@ -365,12 +365,11 @@ export default function LandingPage() {
         <div className="relative max-w-[900px] mx-auto">
           <p className="text-[11px] tracking-[0.2em] uppercase text-[#6a6a8a] mb-6" data-testid="text-hero-label">Digital Underwriting Engine</p>
           <h1
-            className="uppercase italic leading-[0.85] mb-8 whitespace-nowrap"
+            className="text-[38px] sm:text-[56px] md:text-[72px] lg:text-[88px] uppercase italic leading-[0.85] mb-8"
             style={{ fontFamily: "'Satoshi', sans-serif", fontWeight: 400, letterSpacing: '-0.06em', backgroundImage: 'linear-gradient(180deg, #000000 0%, #3a3a5a 50%, #7a7a9a 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}
             data-testid="text-hero-headline"
           >
-            <span className="block text-[12vw] sm:text-[80px] md:text-[100px] lg:text-[130px]">Qualify Before</span>
-            <span className="block text-[12vw] sm:text-[80px] md:text-[100px] lg:text-[130px]">You Apply</span>
+            Qualify Before<br />You Apply
           </h1>
           <p className="text-[13px] sm:text-[17px] text-[#5a5a7a] leading-[1.7] sm:leading-[1.8] max-w-[560px] mx-auto mb-10 text-justify-smart-center">
             baalio® runs your financial profile through real underwriting logic — the same criteria banks use to approve or deny you. Get your Capital Readiness Score, exposure ceiling, tier eligibility, and denial risk before you ever submit an application.
