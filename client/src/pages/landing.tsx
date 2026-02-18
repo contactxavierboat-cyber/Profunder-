@@ -217,7 +217,7 @@ export default function LandingPage() {
             <div className="w-[18px] h-[18px] rounded-full bg-gradient-to-br from-[#2a2a2a] to-[#0a0a0a] flex items-center justify-center animate-logo-pulse">
               <span className="w-1.5 h-1.5 rounded-full bg-white"></span>
             </div>
-            <span className="text-[16px] sm:text-[19px] tracking-[-0.06em] text-[#1a1a1a]" style={{ fontFamily: "'Satoshi', sans-serif" }}><span className="font-normal">Pro</span><span className="italic">Fundr</span></span>
+            <BaalioLogo size="md" />
           </div>
 
           <div className="hidden md:flex items-center gap-8">

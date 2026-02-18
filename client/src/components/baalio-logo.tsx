@@ -16,20 +16,19 @@ export function BaalioLogo({ size = "sm", className = "" }: BaalioLogoProps) {
     <span
       className={`inline-flex items-baseline select-none ${className}`}
       style={{
-        fontFamily: "'Inter', sans-serif",
-        fontWeight: 900,
+        fontFamily: "'Satoshi', sans-serif",
         fontSize: s.fontSize,
-        letterSpacing: "-0.04em",
+        letterSpacing: "-0.06em",
         lineHeight: 1,
-        textTransform: "lowercase",
         background: "linear-gradient(135deg, #1a1a2e 0%, #4a4a6a 50%, #8a8aa5 100%)",
         WebkitBackgroundClip: "text",
         WebkitTextFillColor: "transparent",
         backgroundClip: "text",
       }}
-      aria-label="baalio"
+      aria-label="ProFundr"
     >
-      baalio
+      <span style={{ fontWeight: 400 }}>Pro</span>
+      <span style={{ fontWeight: 400, fontStyle: 'italic' }}>Fundr</span>
       <span style={{
         fontSize: s.tmSize,
         verticalAlign: "super",
