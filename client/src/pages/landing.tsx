@@ -237,7 +237,7 @@ export default function LandingPage() {
             style={{ fontFamily: "'Satoshi', sans-serif", fontWeight: 400, letterSpacing: '-0.06em', backgroundImage: 'linear-gradient(180deg, #000000 0%, #3a3a5a 50%, #7a7a9a 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}
             data-testid="text-hero-headline"
           >
-            Qualify<br />Before<br />You Apply
+            <span className="hidden sm:inline">Qualify<br />Before<br />You Apply</span><span className="sm:hidden">Qualify Before<br />You Apply</span>
           </h1>
           <p className="text-[13px] sm:text-[17px] text-[#5a5a7a] leading-[1.7] sm:leading-[1.8] max-w-[560px] mx-auto mb-10">
             Know exactly where you stand before you submit a single funding application. We analyze your profile using real underwriting logic to determine your funding potential — before lenders ever see you. Stop guessing. Start qualifying.
