@@ -4,10 +4,10 @@ interface BaalioLogoProps {
 }
 
 const SIZES = {
-  xs: { fontSize: "14px" },
-  sm: { fontSize: "18px" },
-  md: { fontSize: "22px" },
-  lg: { fontSize: "30px" },
+  xs: { fontSize: "11px" },
+  sm: { fontSize: "14px" },
+  md: { fontSize: "17px" },
+  lg: { fontSize: "24px" },
 };
 
 export function BaalioLogo({ size = "sm", className = "" }: BaalioLogoProps) {
