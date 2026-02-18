@@ -4,10 +4,10 @@ interface BaalioLogoProps {
 }
 
 const SIZES = {
-  xs: { fontSize: "14px", tmSize: "5px" },
-  sm: { fontSize: "18px", tmSize: "6px" },
-  md: { fontSize: "22px", tmSize: "7px" },
-  lg: { fontSize: "30px", tmSize: "9px" },
+  xs: { fontSize: "14px" },
+  sm: { fontSize: "18px" },
+  md: { fontSize: "22px" },
+  lg: { fontSize: "30px" },
 };
 
 export function BaalioLogo({ size = "sm", className = "" }: BaalioLogoProps) {
@@ -16,13 +16,17 @@ export function BaalioLogo({ size = "sm", className = "" }: BaalioLogoProps) {
     <span
       className={`inline-flex items-baseline select-none ${className}`}
       style={{
-        fontFamily: "'Pacifico', cursive",
+        fontFamily: "'Inter', sans-serif",
         fontSize: s.fontSize,
-        letterSpacing: "-0.03em",
+        fontWeight: 800,
+        letterSpacing: "-0.05em",
         lineHeight: 1,
-        color: "#1a1a2e",
+        background: "linear-gradient(135deg, #1a1a2e 0%, #4a4a6a 50%, #8a8aa5 100%)",
+        WebkitBackgroundClip: "text",
+        WebkitTextFillColor: "transparent",
+        backgroundClip: "text",
       }}
-      aria-label="ProFundr"
+      aria-label="profundr"
     >
       profundr
     </span>
