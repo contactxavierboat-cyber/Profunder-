@@ -248,7 +248,7 @@ export default function LandingPage() {
           >
             <span className="hidden sm:inline">Is Your<br />Business<br />Fundable?</span><span className="sm:hidden">Is Your Business<br />Fundable?</span>
           </h1>
-          <p className="text-[13px] sm:text-[17px] uppercase tracking-[0.15em] text-[#5a5a7a] leading-[1.6] sm:leading-[1.8] max-w-[560px] mx-auto mb-8 sm:mb-10 px-1 sm:px-0">
+          <p className="text-[13px] sm:text-[17px] tracking-[0.05em] text-[#5a5a7a] leading-[1.6] sm:leading-[1.8] max-w-[560px] mx-auto mb-8 sm:mb-10 px-1 sm:px-0">
             Find Out Before You Apply.
           </p>
           <p className="text-[12px] sm:text-[17px] text-[#5a5a7a] leading-[1.6] sm:leading-[1.8] max-w-[560px] mx-auto mb-8 sm:mb-10 px-1 sm:px-0">
