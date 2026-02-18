@@ -239,7 +239,7 @@ export default function LandingPage() {
       <section id="sec-hero" className="relative z-20 min-h-[90vh] flex flex-col items-center justify-center px-4 sm:px-12 md:px-20 lg:px-28 py-16 sm:py-20 text-center">
 
         <div className="relative max-w-[900px] mx-auto">
-          <div className="rounded-2xl sm:rounded-3xl bg-white/50 backdrop-blur-sm px-4 sm:px-12 py-8 sm:py-14 shadow-[0_4px_40px_rgba(255,255,255,0.3)] hover:bg-white/60 hover:shadow-[0_8px_60px_rgba(255,255,255,0.4)] transition-all duration-500">
+          <div className="rounded-2xl sm:rounded-3xl bg-white/50 backdrop-blur-sm px-4 sm:px-12 py-8 sm:py-14 shadow-lg shadow-black/8 hover:bg-white/60 hover:shadow-xl hover:shadow-black/12 transition-all duration-500">
           <p className="text-[11px] tracking-[0.2em] uppercase text-[#6a6a8a] mb-6" data-testid="text-hero-label">Digital Underwriting Engine</p>
           <h1
             className="text-[48px] min-[400px]:text-[58px] sm:text-[68px] md:text-[88px] lg:text-[108px] uppercase italic leading-[0.85] mb-6 sm:mb-8 text-center"
@@ -295,7 +295,7 @@ export default function LandingPage() {
       <section id="sec-problem" className="relative z-20 px-6 sm:px-12 md:px-20 py-20 sm:py-28 text-center">
 
         <div className="relative max-w-[800px] mx-auto">
-          <div className="rounded-2xl bg-white/50 backdrop-blur-sm px-4 sm:px-10 py-8 sm:py-10 mb-8 shadow-[0_4px_40px_rgba(255,255,255,0.3)]">
+          <div className="rounded-2xl bg-white/50 backdrop-blur-sm px-4 sm:px-10 py-8 sm:py-10 mb-8 shadow-lg shadow-black/8">
           <SectionLabel>The Problem</SectionLabel>
           <h2 className="text-[26px] sm:text-[36px] md:text-[44px] leading-[0.9] mb-0 tracking-[-0.03em]" style={gradientText('180deg', 0.95, 0.55)}>
             73% of funding applications get denied. Most founders never find out why until it's too late.
@@ -323,7 +323,7 @@ export default function LandingPage() {
       <section id="sec-solution" className="relative z-20 px-6 sm:px-12 md:px-20 py-20 sm:py-28 text-center">
 
         <div className="relative max-w-[800px] mx-auto">
-          <div className="rounded-2xl bg-white/50 backdrop-blur-sm px-4 sm:px-10 py-8 sm:py-10 mb-8 shadow-[0_4px_40px_rgba(255,255,255,0.3)]">
+          <div className="rounded-2xl bg-white/50 backdrop-blur-sm px-4 sm:px-10 py-8 sm:py-10 mb-8 shadow-lg shadow-black/8">
           <SectionLabel>The Solution</SectionLabel>
           <h2 className="text-[26px] sm:text-[36px] md:text-[44px] leading-[0.9] mb-6 tracking-[-0.03em]" style={gradientText('180deg', 0.95, 0.55)}>
             AI-powered underwriting intelligence that tells you exactly what to fix — before you apply.
@@ -356,7 +356,7 @@ export default function LandingPage() {
       <section id="how-it-works" className="relative z-20 px-6 sm:px-12 md:px-20 py-20 sm:py-28 text-center">
 
         <div className="relative max-w-[800px] mx-auto">
-          <div className="rounded-2xl bg-white/50 backdrop-blur-sm px-4 sm:px-10 py-8 sm:py-10 mb-8 shadow-[0_4px_40px_rgba(255,255,255,0.3)]">
+          <div className="rounded-2xl bg-white/50 backdrop-blur-sm px-4 sm:px-10 py-8 sm:py-10 mb-8 shadow-lg shadow-black/8">
           <SectionLabel>How It Works</SectionLabel>
           <h2 className="text-[26px] sm:text-[36px] md:text-[44px] leading-[0.9] mb-0 tracking-[-0.03em]" style={gradientText('180deg', 0.9, 0.5)}>
             Four steps from unknown to underwriting-ready.
@@ -387,7 +387,7 @@ export default function LandingPage() {
       <section id="features" className="relative z-20 px-6 sm:px-12 md:px-20 py-20 sm:py-28 text-center">
 
         <div className="relative max-w-[900px] mx-auto">
-          <div className="rounded-2xl bg-white/50 backdrop-blur-sm px-4 sm:px-10 py-8 sm:py-10 mb-8 shadow-[0_4px_40px_rgba(255,255,255,0.3)]">
+          <div className="rounded-2xl bg-white/50 backdrop-blur-sm px-4 sm:px-10 py-8 sm:py-10 mb-8 shadow-lg shadow-black/8">
           <SectionLabel>What You Get</SectionLabel>
           <h2 className="text-[26px] sm:text-[36px] md:text-[44px] leading-[0.9] mb-0 tracking-[-0.03em]" style={gradientText('180deg', 0.9, 0.5)}>
             Everything you need to walk into a lender's office with confidence.
@@ -421,7 +421,7 @@ export default function LandingPage() {
       <section id="results" className="relative z-20 px-6 sm:px-12 md:px-20 py-20 sm:py-28 text-center">
 
         <div className="relative max-w-[900px] mx-auto">
-          <div className="rounded-2xl bg-white/50 backdrop-blur-sm px-4 sm:px-10 py-8 sm:py-10 mb-8 shadow-[0_4px_40px_rgba(255,255,255,0.3)]">
+          <div className="rounded-2xl bg-white/50 backdrop-blur-sm px-4 sm:px-10 py-8 sm:py-10 mb-8 shadow-lg shadow-black/8">
           <SectionLabel>Results</SectionLabel>
           <h2 className="text-[26px] sm:text-[36px] md:text-[44px] leading-[0.9] mb-0 tracking-[-0.03em]" style={gradientText('180deg', 0.9, 0.5)}>
             Founders are getting funded with clarity, not luck.
@@ -466,7 +466,7 @@ export default function LandingPage() {
       <section id="sec-risk" className="relative z-20 px-6 sm:px-12 md:px-20 py-20 sm:py-28 text-center">
 
         <div className="relative max-w-[800px] mx-auto">
-          <div className="rounded-2xl bg-white/50 backdrop-blur-sm px-4 sm:px-10 py-8 sm:py-10 mb-8 shadow-[0_4px_40px_rgba(255,255,255,0.3)]">
+          <div className="rounded-2xl bg-white/50 backdrop-blur-sm px-4 sm:px-10 py-8 sm:py-10 mb-8 shadow-lg shadow-black/8">
           <SectionLabel>No More Guessing</SectionLabel>
           <h2 className="text-[26px] sm:text-[36px] md:text-[44px] leading-[0.9] mb-6 tracking-[-0.03em]" style={gradientText('180deg', 0.95, 0.55)}>
             Stop applying blind. Start applying ready.
@@ -506,7 +506,7 @@ export default function LandingPage() {
       <section id="sec-breakdown" className="relative z-20 px-6 sm:px-12 md:px-20 py-20 sm:py-28 text-center">
 
         <div className="relative max-w-[900px] mx-auto">
-          <div className="rounded-2xl bg-white/50 backdrop-blur-sm px-4 sm:px-10 py-8 sm:py-10 mb-8 shadow-[0_4px_40px_rgba(255,255,255,0.3)]">
+          <div className="rounded-2xl bg-white/50 backdrop-blur-sm px-4 sm:px-10 py-8 sm:py-10 mb-8 shadow-lg shadow-black/8">
           <SectionLabel>Feature Breakdown</SectionLabel>
           <h2 className="text-[26px] sm:text-[36px] md:text-[44px] leading-[0.9] mb-0 tracking-[-0.03em]" style={gradientText('180deg', 0.9, 0.5)}>
             Six components. One score. Complete clarity.
@@ -545,7 +545,7 @@ export default function LandingPage() {
       <section id="sec-modes" className="relative z-20 px-6 sm:px-12 md:px-20 py-20 sm:py-28 text-center">
 
         <div className="relative max-w-[900px] mx-auto">
-          <div className="rounded-2xl bg-white/50 backdrop-blur-sm px-4 sm:px-10 py-8 sm:py-10 mb-8 shadow-[0_4px_40px_rgba(255,255,255,0.3)]">
+          <div className="rounded-2xl bg-white/50 backdrop-blur-sm px-4 sm:px-10 py-8 sm:py-10 mb-8 shadow-lg shadow-black/8">
           <SectionLabel>Operating Modes</SectionLabel>
           <h2 className="text-[26px] sm:text-[36px] md:text-[44px] leading-[0.9] mb-0 tracking-[-0.03em]" style={gradientText('180deg', 0.9, 0.5)}>
             Two modes. One goal: get you funded.
@@ -596,7 +596,7 @@ export default function LandingPage() {
       <section id="sec-tiers" className="relative z-20 px-6 sm:px-12 md:px-20 py-20 sm:py-28 text-center">
 
         <div className="relative max-w-[900px] mx-auto">
-          <div className="rounded-2xl bg-white/50 backdrop-blur-sm px-4 sm:px-10 py-8 sm:py-10 mb-8 shadow-[0_4px_40px_rgba(255,255,255,0.3)]">
+          <div className="rounded-2xl bg-white/50 backdrop-blur-sm px-4 sm:px-10 py-8 sm:py-10 mb-8 shadow-lg shadow-black/8">
           <SectionLabel>Tier Eligibility</SectionLabel>
           <h2 className="text-[26px] sm:text-[36px] md:text-[44px] leading-[0.9] mb-0 tracking-[-0.03em]" style={gradientText('180deg', 0.9, 0.5)}>
             Three tiers. Know which one you belong to.
@@ -625,7 +625,7 @@ export default function LandingPage() {
       <section id="sec-case" className="relative z-20 px-6 sm:px-12 md:px-20 py-20 sm:py-28 text-center">
 
         <div className="relative max-w-[800px] mx-auto">
-          <div className="rounded-2xl bg-white/50 backdrop-blur-sm px-4 sm:px-10 py-8 sm:py-10 mb-8 shadow-[0_4px_40px_rgba(255,255,255,0.3)]">
+          <div className="rounded-2xl bg-white/50 backdrop-blur-sm px-4 sm:px-10 py-8 sm:py-10 mb-8 shadow-lg shadow-black/8">
           <SectionLabel>Example Walkthrough</SectionLabel>
           <h2 className="text-[26px] sm:text-[36px] md:text-[44px] leading-[0.9] mb-0 tracking-[-0.03em]" style={gradientText('180deg', 0.9, 0.5)}>
             How a 38-score founder became funding-ready in 67 days.
@@ -659,7 +659,7 @@ export default function LandingPage() {
       <section id="faq" className="relative z-20 px-6 sm:px-12 md:px-20 py-20 sm:py-28 text-center">
 
         <div className="relative max-w-[700px] mx-auto">
-          <div className="rounded-2xl bg-white/50 backdrop-blur-sm px-4 sm:px-10 py-8 sm:py-10 mb-8 shadow-[0_4px_40px_rgba(255,255,255,0.3)]">
+          <div className="rounded-2xl bg-white/50 backdrop-blur-sm px-4 sm:px-10 py-8 sm:py-10 mb-8 shadow-lg shadow-black/8">
           <SectionLabel>FAQ</SectionLabel>
           <h2 className="text-[26px] sm:text-[36px] md:text-[44px] leading-[0.9] mb-0 tracking-[-0.03em]" style={gradientText('180deg', 0.9, 0.5)}>
             Common questions, straight answers.
@@ -693,7 +693,7 @@ export default function LandingPage() {
       <section id="sec-trust" className="relative z-20 px-6 sm:px-12 md:px-20 py-20 sm:py-28 text-center">
 
         <div className="relative max-w-[800px] mx-auto">
-          <div className="rounded-2xl bg-white/50 backdrop-blur-sm px-4 sm:px-10 py-8 sm:py-10 mb-8 shadow-[0_4px_40px_rgba(255,255,255,0.3)]">
+          <div className="rounded-2xl bg-white/50 backdrop-blur-sm px-4 sm:px-10 py-8 sm:py-10 mb-8 shadow-lg shadow-black/8">
           <SectionLabel>Trust & Security</SectionLabel>
           <h2 className="text-[26px] sm:text-[36px] md:text-[44px] leading-[0.9] mb-0 tracking-[-0.03em]" style={gradientText('180deg', 0.9, 0.5)}>
             Your data. Your control. Always.
@@ -722,7 +722,7 @@ export default function LandingPage() {
       <section id="sec-cta" className="relative z-20 px-6 sm:px-12 md:px-20 py-24 sm:py-36">
 
         <div className="relative max-w-[700px] mx-auto text-center">
-          <div className="rounded-2xl bg-white/50 backdrop-blur-sm px-4 sm:px-10 py-8 sm:py-10 mb-8 shadow-[0_4px_40px_rgba(255,255,255,0.3)]">
+          <div className="rounded-2xl bg-white/50 backdrop-blur-sm px-4 sm:px-10 py-8 sm:py-10 mb-8 shadow-lg shadow-black/8">
           <h2
             className="text-[30px] sm:text-[44px] md:text-[56px] leading-[0.9] mb-6 tracking-[-0.04em]"
             style={{ fontFamily: "'Satoshi', sans-serif", fontWeight: 400, ...gradientText('180deg', 1, 0.55) }}
@@ -768,7 +768,7 @@ export default function LandingPage() {
       <footer className="relative z-20 px-4 sm:px-12 md:px-20 py-8 sm:py-14 text-center">
 
         <div className="relative max-w-[900px] mx-auto">
-          <div className="rounded-2xl bg-white/50 backdrop-blur-sm px-4 sm:px-10 py-8 sm:py-10 shadow-[0_4px_40px_rgba(255,255,255,0.3)]">
+          <div className="rounded-2xl bg-white/50 backdrop-blur-sm px-4 sm:px-10 py-8 sm:py-10 shadow-lg shadow-black/8">
             <div className="flex flex-col items-center gap-6 sm:flex-row sm:justify-between sm:gap-8 mb-8">
               <div className="flex items-center gap-2.5">
                 <div className="w-6 h-6 rounded-full border-2 border-[#c0c0d0] flex items-center justify-center">
