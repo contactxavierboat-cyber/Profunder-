@@ -233,7 +233,7 @@ export default function LandingPage() {
           <div className="rounded-3xl bg-white/50 backdrop-blur-sm px-6 sm:px-12 py-10 sm:py-14 shadow-[0_4px_40px_rgba(255,255,255,0.3)] hover:bg-white/60 hover:shadow-[0_8px_60px_rgba(255,255,255,0.4)] transition-all duration-500">
           <p className="text-[11px] tracking-[0.2em] uppercase text-[#6a6a8a] mb-6" data-testid="text-hero-label">Digital Underwriting Engine</p>
           <h1
-            className="text-[72px] sm:text-[68px] md:text-[88px] lg:text-[108px] uppercase italic leading-[0.85] mb-8 text-center"
+            className="text-[72px] sm:text-[68px] md:text-[88px] lg:text-[108px] sm:uppercase italic leading-[0.85] mb-8 text-center"
             style={{ fontFamily: "'Satoshi', sans-serif", fontWeight: 400, letterSpacing: '-0.06em', backgroundImage: 'linear-gradient(180deg, #000000 0%, #3a3a5a 50%, #7a7a9a 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}
             data-testid="text-hero-headline"
           >
