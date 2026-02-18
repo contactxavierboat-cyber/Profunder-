@@ -199,13 +199,13 @@ export default function LandingPage() {
         <span className="text-[12px] sm:text-[13px] text-[#3a3a5a] font-medium whitespace-nowrap">{proofMessages[proofIndex]}</span>
       </div>
 
-      <div className="sticky top-0 z-50 w-full flex justify-center px-6 sm:px-10 pt-4" data-testid="nav-top">
-        <nav className="flex items-center justify-between w-full max-w-[900px] h-[52px] bg-white/80 backdrop-blur-md rounded-full px-2.5 pl-3 shadow-lg shadow-black/10 hover:bg-white/90 hover:shadow-xl hover:shadow-black/15 transition-all duration-300">
+      <div className="sticky top-0 z-50 w-full flex justify-center px-3 sm:px-10 pt-3 sm:pt-4" data-testid="nav-top">
+        <nav className="flex items-center justify-between w-full max-w-[900px] h-[46px] sm:h-[52px] bg-white/80 backdrop-blur-md rounded-full px-2 sm:px-2.5 pl-2.5 sm:pl-3 shadow-lg shadow-black/10 hover:bg-white/90 hover:shadow-xl hover:shadow-black/15 transition-all duration-300">
           <div className="flex items-center gap-2 px-2" data-testid="nav-logo">
             <div className="w-[18px] h-[18px] rounded-full bg-gradient-to-br from-[#2a2a2a] to-[#0a0a0a] flex items-center justify-center animate-logo-pulse">
               <span className="w-1.5 h-1.5 rounded-full bg-white"></span>
             </div>
-            <span className="text-[19px] tracking-[-0.06em] text-[#1a1a1a]" style={{ fontFamily: "'Satoshi', sans-serif" }}><span className="font-normal">Pro</span><span className="italic">Fundr</span></span>
+            <span className="text-[16px] sm:text-[19px] tracking-[-0.06em] text-[#1a1a1a]" style={{ fontFamily: "'Satoshi', sans-serif" }}><span className="font-normal">Pro</span><span className="italic">Fundr</span></span>
           </div>
 
           <div className="hidden md:flex items-center gap-8">
@@ -217,7 +217,7 @@ export default function LandingPage() {
 
           <button
             onClick={() => setShowLogin(true)}
-            className="rounded-full px-5 py-2 text-[12.5px] font-semibold text-white transition-all duration-200 hover:scale-[1.02] shadow-sm"
+            className="rounded-full px-4 sm:px-5 py-1.5 sm:py-2 text-[11px] sm:text-[12.5px] font-semibold text-white transition-all duration-200 hover:scale-[1.02] shadow-sm"
             style={{ background: 'linear-gradient(135deg, #2a2a2a 0%, #0a0a0a 100%)' }}
             data-testid="button-login"
           >
@@ -227,19 +227,19 @@ export default function LandingPage() {
       </div>
 
       {/* ═══════════════ 1. HERO ═══════════════ */}
-      <section id="sec-hero" className="relative z-20 min-h-[90vh] flex flex-col items-center justify-center px-6 sm:px-12 md:px-20 lg:px-28 py-20 text-center">
+      <section id="sec-hero" className="relative z-20 min-h-[90vh] flex flex-col items-center justify-center px-4 sm:px-12 md:px-20 lg:px-28 py-16 sm:py-20 text-center">
         <div className="absolute inset-0" style={{ background: 'radial-gradient(ellipse 90% 80% at 50% 50%, rgba(255,255,255,0.35) 0%, rgba(255,255,255,0.15) 50%, transparent 100%)' }} />
         <div className="relative max-w-[900px] mx-auto">
-          <div className="rounded-3xl bg-white/50 backdrop-blur-sm px-6 sm:px-12 py-10 sm:py-14 shadow-[0_4px_40px_rgba(255,255,255,0.3)] hover:bg-white/60 hover:shadow-[0_8px_60px_rgba(255,255,255,0.4)] transition-all duration-500">
+          <div className="rounded-2xl sm:rounded-3xl bg-white/50 backdrop-blur-sm px-4 sm:px-12 py-8 sm:py-14 shadow-[0_4px_40px_rgba(255,255,255,0.3)] hover:bg-white/60 hover:shadow-[0_8px_60px_rgba(255,255,255,0.4)] transition-all duration-500">
           <p className="text-[11px] tracking-[0.2em] uppercase text-[#6a6a8a] mb-6" data-testid="text-hero-label">Digital Underwriting Engine</p>
           <h1
-            className="text-[72px] sm:text-[68px] md:text-[88px] lg:text-[108px] uppercase italic leading-[0.85] mb-8 text-center"
+            className="text-[48px] min-[400px]:text-[58px] sm:text-[68px] md:text-[88px] lg:text-[108px] uppercase italic leading-[0.85] mb-6 sm:mb-8 text-center"
             style={{ fontFamily: "'Satoshi', sans-serif", fontWeight: 400, letterSpacing: '-0.06em', backgroundImage: 'linear-gradient(180deg, #000000 0%, #3a3a5a 50%, #7a7a9a 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}
             data-testid="text-hero-headline"
           >
             <span className="hidden sm:inline">Qualify<br />Before<br />You Apply</span><span className="sm:hidden">Qualify Before<br />You Apply</span>
           </h1>
-          <p className="text-[13px] sm:text-[17px] text-[#5a5a7a] leading-[1.7] sm:leading-[1.8] max-w-[560px] mx-auto mb-10">
+          <p className="text-[12px] sm:text-[17px] text-[#5a5a7a] leading-[1.6] sm:leading-[1.8] max-w-[560px] mx-auto mb-8 sm:mb-10 px-1 sm:px-0">
             Know exactly where you stand before you submit a single funding application. We analyze your profile using real underwriting logic to determine your funding potential — before lenders ever see you. Stop guessing. Start qualifying.
           </p>
 
@@ -267,7 +267,7 @@ export default function LandingPage() {
             </div>
           </form>
 
-          <div className="flex flex-wrap items-center justify-center gap-6 text-[11px] text-[#7a7a9a] tracking-wide">
+          <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-6 text-[10px] sm:text-[11px] text-[#7a7a9a] tracking-wide">
             <span>Full platform access</span>
             <span className="w-1 h-1 rounded-full bg-[#c0c0d0]"></span>
             <span>Cancel anytime</span>
