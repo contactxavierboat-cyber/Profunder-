@@ -6,7 +6,18 @@ function SpaceBackground() {
   return (
     <div className="fixed inset-0 pointer-events-none overflow-hidden" style={{ zIndex: 1 }}>
       <video
-        ref={(el) => { if (el) el.playbackRate = 0.4; }}
+        ref={(el) => {
+          if (el) {
+            el.playbackRate = 1.0;
+            const ease = () => {
+              if (el.playbackRate > 0.4) {
+                el.playbackRate = Math.max(0.4, el.playbackRate - 0.008);
+                requestAnimationFrame(ease);
+              }
+            };
+            requestAnimationFrame(ease);
+          }
+        }}
         autoPlay
         loop
         muted
