@@ -248,11 +248,11 @@ export default function LandingPage() {
           <div className="rounded-2xl sm:rounded-3xl bg-white/50 backdrop-blur-sm px-4 sm:px-12 py-8 sm:py-14 shadow-lg shadow-black/8 hover:bg-white/60 hover:shadow-xl hover:shadow-black/12 transition-all duration-500">
           <p className="text-[11px] tracking-[0.2em] uppercase text-[#6a6a8a] mb-6" data-testid="text-hero-label">Digital Underwriting Engine</p>
           <h1
-            className="text-[48px] min-[400px]:text-[58px] sm:text-[68px] md:text-[88px] lg:text-[108px] uppercase italic leading-[0.85] mb-6 sm:mb-8 text-center"
+            className="text-[48px] min-[400px]:text-[58px] sm:text-[64px] md:text-[80px] lg:text-[100px] uppercase italic leading-[0.88] mb-6 sm:mb-8 text-center whitespace-nowrap"
             style={{ fontFamily: "'Satoshi', sans-serif", fontWeight: 400, letterSpacing: '-0.06em', backgroundImage: 'linear-gradient(180deg, #000000 0%, #3a3a5a 50%, #7a7a9a 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}
             data-testid="text-hero-headline"
           >
-            <span className="hidden sm:inline">Is Your<br />Business<br />Fundable?</span><span className="sm:hidden">Is Your Business<br />Fundable?</span>
+            <span className="hidden md:inline">Is Your Business<br />Fundable?</span><span className="hidden sm:inline md:hidden">Is Your<br />Business<br />Fundable?</span><span className="sm:hidden">Is Your<br />Business<br />Fundable?</span>
           </h1>
           <p className="text-[13px] sm:text-[17px] tracking-[0.05em] text-[#5a5a7a] leading-[1.6] sm:leading-[1.8] max-w-[560px] mx-auto mb-8 sm:mb-10 px-1 sm:px-0">
             Find Out Before You Apply.
