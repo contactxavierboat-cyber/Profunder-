@@ -217,7 +217,7 @@ export default function LandingPage() {
 
           <button
             onClick={() => setShowLogin(true)}
-            className="rounded-full px-5 py-2 text-[12.5px] font-semibold text-[#1a1a2e] transition-all duration-200 hover:scale-[1.02] shadow-sm"
+            className="rounded-full px-5 py-2 text-[12.5px] font-semibold text-white transition-all duration-200 hover:scale-[1.02] shadow-sm"
             style={{ background: 'linear-gradient(135deg, #2a2a2a 0%, #0a0a0a 100%)' }}
             data-testid="button-login"
           >
