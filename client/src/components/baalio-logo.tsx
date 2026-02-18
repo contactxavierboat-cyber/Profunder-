@@ -28,7 +28,7 @@ export function BaalioLogo({ size = "sm", className = "" }: BaalioLogoProps) {
       }}
       aria-label="profundr."
     >
-      profundr<span style={{ letterSpacing: "-0.12em" }}>.</span>
+      profundr<span style={{ marginLeft: "-0.15em" }}>.</span>
     </span>
   );
 }
