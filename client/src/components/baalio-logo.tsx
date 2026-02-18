@@ -4,10 +4,10 @@ interface BaalioLogoProps {
 }
 
 const SIZES = {
-  xs: { fontSize: "12px" },
-  sm: { fontSize: "15px" },
-  md: { fontSize: "19px" },
-  lg: { fontSize: "26px" },
+  xs: { fontSize: "13px" },
+  sm: { fontSize: "16px" },
+  md: { fontSize: "20px" },
+  lg: { fontSize: "28px" },
 };
 
 export function BaalioLogo({ size = "sm", className = "" }: BaalioLogoProps) {
@@ -28,7 +28,7 @@ export function BaalioLogo({ size = "sm", className = "" }: BaalioLogoProps) {
       }}
       aria-label="profundr."
     >
-      profundr.
+      profundr<span style={{ letterSpacing: "-0.12em" }}>.</span>
     </span>
   );
 }
