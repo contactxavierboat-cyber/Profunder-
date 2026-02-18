@@ -1,23 +1,29 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useAuth } from "@/lib/store";
 import { BaalioLogo } from "@/components/baalio-logo";
 
 function SpaceBackground() {
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+    video.playbackRate = 1.0;
+    let rafId: number;
+    const ease = () => {
+      if (video.playbackRate > 0.4) {
+        video.playbackRate = Math.max(0.4, video.playbackRate - 0.005);
+        rafId = requestAnimationFrame(ease);
+      }
+    };
+    rafId = requestAnimationFrame(ease);
+    return () => cancelAnimationFrame(rafId);
+  }, []);
+
   return (
     <div className="fixed inset-0 pointer-events-none overflow-hidden" style={{ zIndex: 1 }}>
       <video
-        ref={(el) => {
-          if (el) {
-            el.playbackRate = 1.0;
-            const ease = () => {
-              if (el.playbackRate > 0.4) {
-                el.playbackRate = Math.max(0.4, el.playbackRate - 0.008);
-                requestAnimationFrame(ease);
-              }
-            };
-            requestAnimationFrame(ease);
-          }
-        }}
+        ref={videoRef}
         autoPlay
         loop
         muted
