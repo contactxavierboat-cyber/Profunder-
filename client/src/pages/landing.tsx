@@ -30,9 +30,9 @@ const gradientText = (dir = '180deg', _from = 0.85, _to = 0.5) => ({
   lineHeight: '0.95',
 });
 
-const sectionBg = { background: 'linear-gradient(180deg, rgba(255,255,255,0.85) 0%, rgba(255,255,255,0.7) 50%, rgba(255,255,255,0.85) 100%)' };
+const sectionBg = { background: 'linear-gradient(180deg, rgba(255,255,255,0.45) 0%, rgba(255,255,255,0.3) 50%, rgba(255,255,255,0.45) 100%)' };
 
-const contentBlockStyle = "relative z-30 rounded-2xl bg-white/80 backdrop-blur-md border border-white/40 shadow-[0_8px_32px_rgba(0,0,0,0.04),0_2px_8px_rgba(0,0,0,0.02)] p-6 sm:p-8";
+const contentBlockStyle = "relative z-30 rounded-2xl bg-white/50 backdrop-blur-sm border border-white/30 shadow-[0_8px_32px_rgba(0,0,0,0.04),0_2px_8px_rgba(0,0,0,0.02)] p-6 sm:p-8";
 
 const SectionLabel = ({ children }: { children: string }) => (
   <p className="text-[11px] tracking-[0.2em] uppercase mb-6 sm:mb-8 text-[#7a7a9a]">{children}</p>
@@ -228,9 +228,9 @@ export default function LandingPage() {
 
       {/* ═══════════════ 1. HERO ═══════════════ */}
       <section id="sec-hero" className="relative z-20 min-h-[90vh] flex flex-col items-center justify-center px-6 sm:px-12 md:px-20 lg:px-28 py-20 text-center">
-        <div className="absolute inset-0" style={{ background: 'radial-gradient(ellipse 90% 80% at 50% 50%, rgba(255,255,255,0.7) 0%, rgba(255,255,255,0.4) 50%, transparent 100%)' }} />
+        <div className="absolute inset-0" style={{ background: 'radial-gradient(ellipse 90% 80% at 50% 50%, rgba(255,255,255,0.35) 0%, rgba(255,255,255,0.15) 50%, transparent 100%)' }} />
         <div className="relative max-w-[900px] mx-auto">
-          <div className="rounded-3xl bg-white/70 backdrop-blur-lg px-6 sm:px-12 py-10 sm:py-14 shadow-[0_4px_40px_rgba(255,255,255,0.5)]">
+          <div className="rounded-3xl bg-white/50 backdrop-blur-sm px-6 sm:px-12 py-10 sm:py-14 shadow-[0_4px_40px_rgba(255,255,255,0.3)]">
           <p className="text-[11px] tracking-[0.2em] uppercase text-[#6a6a8a] mb-6" data-testid="text-hero-label">Digital Underwriting Engine</p>
           <h1
             className="text-[72px] sm:text-[68px] md:text-[88px] lg:text-[108px] uppercase italic leading-[0.85] mb-8 text-center"
