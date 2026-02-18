@@ -228,7 +228,7 @@ export default function LandingPage() {
 
       {/* ═══════════════ 1. HERO ═══════════════ */}
       <section id="sec-hero" className="relative z-20 min-h-[90vh] flex flex-col items-center justify-center px-4 sm:px-12 md:px-20 lg:px-28 py-16 sm:py-20 text-center">
-        <div className="absolute inset-0" style={{ background: 'radial-gradient(ellipse 90% 80% at 50% 50%, rgba(255,255,255,0.35) 0%, rgba(255,255,255,0.15) 50%, transparent 100%)' }} />
+
         <div className="relative max-w-[900px] mx-auto">
           <div className="rounded-2xl sm:rounded-3xl bg-white/50 backdrop-blur-sm px-4 sm:px-12 py-8 sm:py-14 shadow-[0_4px_40px_rgba(255,255,255,0.3)] hover:bg-white/60 hover:shadow-[0_8px_60px_rgba(255,255,255,0.4)] transition-all duration-500">
           <p className="text-[11px] tracking-[0.2em] uppercase text-[#6a6a8a] mb-6" data-testid="text-hero-label">Digital Underwriting Engine</p>
