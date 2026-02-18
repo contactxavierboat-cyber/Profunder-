@@ -200,7 +200,7 @@ export default function LandingPage() {
       </div>
 
       <div className="sticky top-0 z-50 w-full flex justify-center px-6 sm:px-10 pt-4" data-testid="nav-top">
-        <nav className="flex items-center justify-between w-full max-w-[900px] h-[52px] bg-white/95 rounded-full px-2.5 pl-3 shadow-lg shadow-black/15">
+        <nav className="flex items-center justify-between w-full max-w-[900px] h-[52px] bg-white/80 backdrop-blur-md rounded-full px-2.5 pl-3 shadow-lg shadow-black/10 hover:bg-white/90 hover:shadow-xl hover:shadow-black/15 transition-all duration-300">
           <div className="flex items-center gap-2 px-2" data-testid="nav-logo">
             <div className="w-[18px] h-[18px] rounded-full bg-gradient-to-br from-[#2a2a2a] to-[#0a0a0a] flex items-center justify-center animate-logo-pulse">
               <span className="w-1.5 h-1.5 rounded-full bg-white"></span>
@@ -230,7 +230,7 @@ export default function LandingPage() {
       <section id="sec-hero" className="relative z-20 min-h-[90vh] flex flex-col items-center justify-center px-6 sm:px-12 md:px-20 lg:px-28 py-20 text-center">
         <div className="absolute inset-0" style={{ background: 'radial-gradient(ellipse 90% 80% at 50% 50%, rgba(255,255,255,0.35) 0%, rgba(255,255,255,0.15) 50%, transparent 100%)' }} />
         <div className="relative max-w-[900px] mx-auto">
-          <div className="rounded-3xl bg-white/50 backdrop-blur-sm px-6 sm:px-12 py-10 sm:py-14 shadow-[0_4px_40px_rgba(255,255,255,0.3)]">
+          <div className="rounded-3xl bg-white/50 backdrop-blur-sm px-6 sm:px-12 py-10 sm:py-14 shadow-[0_4px_40px_rgba(255,255,255,0.3)] hover:bg-white/60 hover:shadow-[0_8px_60px_rgba(255,255,255,0.4)] transition-all duration-500">
           <p className="text-[11px] tracking-[0.2em] uppercase text-[#6a6a8a] mb-6" data-testid="text-hero-label">Digital Underwriting Engine</p>
           <h1
             className="text-[72px] sm:text-[68px] md:text-[88px] lg:text-[108px] uppercase italic leading-[0.85] mb-8 text-center"
