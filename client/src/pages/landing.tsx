@@ -281,7 +281,7 @@ export default function LandingPage() {
 
       {/* ═══════════════ 2. PROBLEM / PAIN ═══════════════ */}
       <section id="sec-problem" className="relative z-20 px-6 sm:px-12 md:px-20 py-20 sm:py-28 text-center">
-        <div className="absolute inset-0" style={sectionBg} />
+
         <div className="relative max-w-[800px] mx-auto">
           <div className="rounded-2xl bg-white/50 backdrop-blur-sm px-4 sm:px-10 py-8 sm:py-10 mb-8 shadow-[0_4px_40px_rgba(255,255,255,0.3)]">
           <SectionLabel>The Problem</SectionLabel>
@@ -309,7 +309,7 @@ export default function LandingPage() {
 
       {/* ═══════════════ 3. SOLUTION OVERVIEW ═══════════════ */}
       <section id="sec-solution" className="relative z-20 px-6 sm:px-12 md:px-20 py-20 sm:py-28 text-center">
-        <div className="absolute inset-0" style={sectionBg} />
+
         <div className="relative max-w-[800px] mx-auto">
           <div className="rounded-2xl bg-white/50 backdrop-blur-sm px-4 sm:px-10 py-8 sm:py-10 mb-8 shadow-[0_4px_40px_rgba(255,255,255,0.3)]">
           <SectionLabel>The Solution</SectionLabel>
@@ -342,7 +342,7 @@ export default function LandingPage() {
 
       {/* ═══════════════ 4. HOW IT WORKS ═══════════════ */}
       <section id="how-it-works" className="relative z-20 px-6 sm:px-12 md:px-20 py-20 sm:py-28 text-center">
-        <div className="absolute inset-0" style={sectionBg} />
+
         <div className="relative max-w-[800px] mx-auto">
           <div className="rounded-2xl bg-white/50 backdrop-blur-sm px-4 sm:px-10 py-8 sm:py-10 mb-8 shadow-[0_4px_40px_rgba(255,255,255,0.3)]">
           <SectionLabel>How It Works</SectionLabel>
@@ -373,7 +373,7 @@ export default function LandingPage() {
 
       {/* ═══════════════ 5. FUNDING OUTCOMES ═══════════════ */}
       <section id="features" className="relative z-20 px-6 sm:px-12 md:px-20 py-20 sm:py-28 text-center">
-        <div className="absolute inset-0" style={sectionBg} />
+
         <div className="relative max-w-[900px] mx-auto">
           <div className="rounded-2xl bg-white/50 backdrop-blur-sm px-4 sm:px-10 py-8 sm:py-10 mb-8 shadow-[0_4px_40px_rgba(255,255,255,0.3)]">
           <SectionLabel>What You Get</SectionLabel>
@@ -407,7 +407,7 @@ export default function LandingPage() {
 
       {/* ═══════════════ 6. SOCIAL PROOF ═══════════════ */}
       <section id="results" className="relative z-20 px-6 sm:px-12 md:px-20 py-20 sm:py-28 text-center">
-        <div className="absolute inset-0" style={sectionBg} />
+
         <div className="relative max-w-[900px] mx-auto">
           <div className="rounded-2xl bg-white/50 backdrop-blur-sm px-4 sm:px-10 py-8 sm:py-10 mb-8 shadow-[0_4px_40px_rgba(255,255,255,0.3)]">
           <SectionLabel>Results</SectionLabel>
@@ -452,7 +452,7 @@ export default function LandingPage() {
 
       {/* ═══════════════ 7. RISK REVERSAL ═══════════════ */}
       <section id="sec-risk" className="relative z-20 px-6 sm:px-12 md:px-20 py-20 sm:py-28 text-center">
-        <div className="absolute inset-0" style={sectionBg} />
+
         <div className="relative max-w-[800px] mx-auto">
           <div className="rounded-2xl bg-white/50 backdrop-blur-sm px-4 sm:px-10 py-8 sm:py-10 mb-8 shadow-[0_4px_40px_rgba(255,255,255,0.3)]">
           <SectionLabel>No More Guessing</SectionLabel>
@@ -492,7 +492,7 @@ export default function LandingPage() {
 
       {/* ═══════════════ 8. FEATURE BREAKDOWN ═══════════════ */}
       <section id="sec-breakdown" className="relative z-20 px-6 sm:px-12 md:px-20 py-20 sm:py-28 text-center">
-        <div className="absolute inset-0" style={sectionBg} />
+
         <div className="relative max-w-[900px] mx-auto">
           <div className="rounded-2xl bg-white/50 backdrop-blur-sm px-4 sm:px-10 py-8 sm:py-10 mb-8 shadow-[0_4px_40px_rgba(255,255,255,0.3)]">
           <SectionLabel>Feature Breakdown</SectionLabel>
@@ -531,7 +531,7 @@ export default function LandingPage() {
 
       {/* ═══════════════ 9. MODE DIFFERENTIATION ═══════════════ */}
       <section id="sec-modes" className="relative z-20 px-6 sm:px-12 md:px-20 py-20 sm:py-28 text-center">
-        <div className="absolute inset-0" style={sectionBg} />
+
         <div className="relative max-w-[900px] mx-auto">
           <div className="rounded-2xl bg-white/50 backdrop-blur-sm px-4 sm:px-10 py-8 sm:py-10 mb-8 shadow-[0_4px_40px_rgba(255,255,255,0.3)]">
           <SectionLabel>Operating Modes</SectionLabel>
@@ -582,7 +582,7 @@ export default function LandingPage() {
 
       {/* ═══════════════ 10. TIER POSITIONING ═══════════════ */}
       <section id="sec-tiers" className="relative z-20 px-6 sm:px-12 md:px-20 py-20 sm:py-28 text-center">
-        <div className="absolute inset-0" style={sectionBg} />
+
         <div className="relative max-w-[900px] mx-auto">
           <div className="rounded-2xl bg-white/50 backdrop-blur-sm px-4 sm:px-10 py-8 sm:py-10 mb-8 shadow-[0_4px_40px_rgba(255,255,255,0.3)]">
           <SectionLabel>Tier Eligibility</SectionLabel>
@@ -611,7 +611,7 @@ export default function LandingPage() {
 
       {/* ═══════════════ 11. CASE STUDY ═══════════════ */}
       <section id="sec-case" className="relative z-20 px-6 sm:px-12 md:px-20 py-20 sm:py-28 text-center">
-        <div className="absolute inset-0" style={sectionBg} />
+
         <div className="relative max-w-[800px] mx-auto">
           <div className="rounded-2xl bg-white/50 backdrop-blur-sm px-4 sm:px-10 py-8 sm:py-10 mb-8 shadow-[0_4px_40px_rgba(255,255,255,0.3)]">
           <SectionLabel>Example Walkthrough</SectionLabel>
@@ -645,7 +645,7 @@ export default function LandingPage() {
 
       {/* ═══════════════ 12. FAQ / OBJECTION HANDLING ═══════════════ */}
       <section id="faq" className="relative z-20 px-6 sm:px-12 md:px-20 py-20 sm:py-28 text-center">
-        <div className="absolute inset-0" style={sectionBg} />
+
         <div className="relative max-w-[700px] mx-auto">
           <div className="rounded-2xl bg-white/50 backdrop-blur-sm px-4 sm:px-10 py-8 sm:py-10 mb-8 shadow-[0_4px_40px_rgba(255,255,255,0.3)]">
           <SectionLabel>FAQ</SectionLabel>
@@ -679,7 +679,7 @@ export default function LandingPage() {
 
       {/* ═══════════════ 13. TRUST & COMPLIANCE ═══════════════ */}
       <section id="sec-trust" className="relative z-20 px-6 sm:px-12 md:px-20 py-20 sm:py-28 text-center">
-        <div className="absolute inset-0" style={sectionBg} />
+
         <div className="relative max-w-[800px] mx-auto">
           <div className="rounded-2xl bg-white/50 backdrop-blur-sm px-4 sm:px-10 py-8 sm:py-10 mb-8 shadow-[0_4px_40px_rgba(255,255,255,0.3)]">
           <SectionLabel>Trust & Security</SectionLabel>
@@ -708,7 +708,7 @@ export default function LandingPage() {
 
       {/* ═══════════════ 14. FINAL CTA ═══════════════ */}
       <section id="sec-cta" className="relative z-20 px-6 sm:px-12 md:px-20 py-24 sm:py-36">
-        <div className="absolute inset-0" style={sectionBg} />
+
         <div className="relative max-w-[700px] mx-auto text-center">
           <div className="rounded-2xl bg-white/50 backdrop-blur-sm px-4 sm:px-10 py-8 sm:py-10 mb-8 shadow-[0_4px_40px_rgba(255,255,255,0.3)]">
           <h2
@@ -754,7 +754,7 @@ export default function LandingPage() {
 
       {/* ═══════════════ 15. FOOTER ═══════════════ */}
       <footer className="relative z-20 px-6 sm:px-12 md:px-20 py-10 sm:py-14 text-center">
-        <div className="absolute inset-0" style={sectionBg} />
+
         <div className="relative max-w-[900px] mx-auto">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-8 mb-10">
             <div className="flex items-center gap-2.5">
