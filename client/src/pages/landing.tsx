@@ -765,30 +765,31 @@ export default function LandingPage() {
       </section>
 
       {/* ═══════════════ 15. FOOTER ═══════════════ */}
-      <footer className="relative z-20 px-6 sm:px-12 md:px-20 py-10 sm:py-14 text-center">
+      <footer className="relative z-20 px-4 sm:px-12 md:px-20 py-8 sm:py-14 text-center">
 
         <div className="relative max-w-[900px] mx-auto">
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-8 mb-10">
-            <div className="flex items-center gap-2.5">
-              <div className="w-6 h-6 rounded-full border-2 border-[#c0c0d0] flex items-center justify-center">
-                <span className="w-1.5 h-1.5 rounded-full bg-[#8a8aa5]"></span>
+          <div className="rounded-2xl bg-white/50 backdrop-blur-sm px-4 sm:px-10 py-8 sm:py-10 shadow-[0_4px_40px_rgba(255,255,255,0.3)]">
+            <div className="flex flex-col items-center gap-6 sm:flex-row sm:justify-between sm:gap-8 mb-8">
+              <div className="flex items-center gap-2.5">
+                <div className="w-6 h-6 rounded-full border-2 border-[#c0c0d0] flex items-center justify-center">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#8a8aa5]"></span>
+                </div>
+                <BaalioLogo size="sm" className="text-[#1a1a2e]" />
               </div>
-              <BaalioLogo size="sm" className="text-[#1a1a2e]" />
+              <div className="flex flex-wrap justify-center gap-4 sm:gap-8">
+                {["Privacy Policy", "Terms of Service", "Contact", "Support"].map((link) => (
+                  <span key={link} className="text-[10px] sm:text-[11px] text-[#8a8aa5] tracking-wide uppercase cursor-pointer hover:text-[#5a5a7a] transition-colors">{link}</span>
+                ))}
+              </div>
             </div>
-            <div className="flex flex-wrap gap-6 sm:gap-8">
-              {["Privacy Policy", "Terms of Service", "Contact", "Support"].map((link) => (
-                <span key={link} className="text-[11px] text-[#8a8aa5] tracking-wide uppercase cursor-pointer hover:text-[#5a5a7a] transition-colors">{link}</span>
-              ))}
+            <div className="flex flex-col items-center gap-3 sm:flex-row sm:justify-between sm:gap-4 pt-5 border-t border-[#e0e0ea]/50">
+              <p className="text-[10px] sm:text-[11px] text-[#9a9ab0]">
+                &copy; 2026 <span className="text-[#8a8aa5] font-medium">CMD Supply</span>. All rights reserved.
+              </p>
+              <p className="text-[9px] sm:text-[10px] text-[#b0b0c0] max-w-[400px] leading-[1.5] sm:leading-[1.6]">
+                This platform is not a lender, broker, or financial advisor. All analyses are for informational purposes only and do not constitute financial advice or guaranteed lending outcomes.
+              </p>
             </div>
-          </div>
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-6">
-            <p className="text-[11px] text-[#9a9ab0]">
-              &copy; 2026 <span className="text-[#8a8aa5] font-medium">CMD Supply</span>. All rights reserved.
-            </p>
-            <p className="text-[10px] text-[#b0b0c0] max-w-[400px] leading-[1.6]">
-              This platform is not a lender, broker, or financial advisor. All analyses are for informational purposes only and do not constitute financial advice or guaranteed lending outcomes.
-          
-            </p>
           </div>
         </div>
       </footer>
