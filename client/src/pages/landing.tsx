@@ -283,10 +283,12 @@ export default function LandingPage() {
       <section id="sec-problem" className="relative z-20 px-6 sm:px-12 md:px-20 py-20 sm:py-28 border-t border-[#e8e8f0] text-center">
         <div className="absolute inset-0" style={sectionBg} />
         <div className="relative max-w-[800px] mx-auto">
+          <div className="rounded-2xl bg-white/50 backdrop-blur-sm px-4 sm:px-10 py-8 sm:py-10 mb-8 shadow-[0_4px_40px_rgba(255,255,255,0.3)]">
           <SectionLabel>The Problem</SectionLabel>
-          <h2 className="text-[26px] sm:text-[36px] md:text-[44px] leading-[0.9] mb-10 tracking-[-0.03em]" style={gradientText('180deg', 0.95, 0.55)}>
+          <h2 className="text-[26px] sm:text-[36px] md:text-[44px] leading-[0.9] mb-0 tracking-[-0.03em]" style={gradientText('180deg', 0.95, 0.55)}>
             73% of funding applications get denied. Most founders never find out why until it's too late.
           </h2>
+          </div>
           <div className={`${contentBlockStyle} !p-5 sm:!p-6`}><div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
             {[
               { num: "01", text: "You apply for funding with no idea how a lender actually evaluates you" },
@@ -309,13 +311,15 @@ export default function LandingPage() {
       <section id="sec-solution" className="relative z-20 px-6 sm:px-12 md:px-20 py-20 sm:py-28 border-t border-[#e8e8f0] text-center">
         <div className="absolute inset-0" style={sectionBg} />
         <div className="relative max-w-[800px] mx-auto">
+          <div className="rounded-2xl bg-white/50 backdrop-blur-sm px-4 sm:px-10 py-8 sm:py-10 mb-8 shadow-[0_4px_40px_rgba(255,255,255,0.3)]">
           <SectionLabel>The Solution</SectionLabel>
           <h2 className="text-[26px] sm:text-[36px] md:text-[44px] leading-[0.9] mb-6 tracking-[-0.03em]" style={gradientText('180deg', 0.95, 0.55)}>
             AI-powered underwriting intelligence that tells you exactly what to fix — before you apply.
           </h2>
-          <p className="text-[12px] sm:text-[16px] text-[#6a6a8a] leading-[1.6] sm:leading-[1.8] mb-12 max-w-[640px] mx-auto text-justify-smart-center">
+          <p className="text-[12px] sm:text-[16px] text-[#6a6a8a] leading-[1.6] sm:leading-[1.8] mb-0 max-w-[640px] mx-auto text-justify-smart-center">
             We analyze your credit report and bank statements using the same 6-component framework real lenders use. You get a Capital Readiness Score, tier placement, exposure ceiling, denial simulation, and a step-by-step action plan — all powered by AI.
           </p>
+          </div>
           <div className={contentBlockStyle}><div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
             {[
               { label: "Capital Readiness Score", val: "0–100" },
@@ -340,10 +344,12 @@ export default function LandingPage() {
       <section id="how-it-works" className="relative z-20 px-6 sm:px-12 md:px-20 py-20 sm:py-28 border-t border-[#e8e8f0] text-center">
         <div className="absolute inset-0" style={sectionBg} />
         <div className="relative max-w-[800px] mx-auto">
+          <div className="rounded-2xl bg-white/50 backdrop-blur-sm px-4 sm:px-10 py-8 sm:py-10 mb-8 shadow-[0_4px_40px_rgba(255,255,255,0.3)]">
           <SectionLabel>How It Works</SectionLabel>
-          <h2 className="text-[26px] sm:text-[36px] md:text-[44px] leading-[0.9] mb-14 tracking-[-0.03em]" style={gradientText('180deg', 0.9, 0.5)}>
+          <h2 className="text-[26px] sm:text-[36px] md:text-[44px] leading-[0.9] mb-0 tracking-[-0.03em]" style={gradientText('180deg', 0.9, 0.5)}>
             Four steps from unknown to underwriting-ready.
           </h2>
+          </div>
           <div className={contentBlockStyle}><div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
             {[
               { step: "01", title: "Upload Your Documents", desc: "Drop in your credit report and bank statement. Our AI extracts 40+ data points automatically — no manual entry." },
@@ -369,10 +375,12 @@ export default function LandingPage() {
       <section id="features" className="relative z-20 px-6 sm:px-12 md:px-20 py-20 sm:py-28 border-t border-[#e8e8f0] text-center">
         <div className="absolute inset-0" style={sectionBg} />
         <div className="relative max-w-[900px] mx-auto">
+          <div className="rounded-2xl bg-white/50 backdrop-blur-sm px-4 sm:px-10 py-8 sm:py-10 mb-8 shadow-[0_4px_40px_rgba(255,255,255,0.3)]">
           <SectionLabel>What You Get</SectionLabel>
-          <h2 className="text-[26px] sm:text-[36px] md:text-[44px] leading-[0.9] mb-14 tracking-[-0.03em]" style={gradientText('180deg', 0.9, 0.5)}>
+          <h2 className="text-[26px] sm:text-[36px] md:text-[44px] leading-[0.9] mb-0 tracking-[-0.03em]" style={gradientText('180deg', 0.9, 0.5)}>
             Everything you need to walk into a lender's office with confidence.
           </h2>
+          </div>
           <div className={contentBlockStyle}><div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {[
               { icon: "◎", title: "Capital Readiness Score", desc: "A 0–100 composite score based on 6 weighted underwriting components" },
@@ -401,10 +409,12 @@ export default function LandingPage() {
       <section id="results" className="relative z-20 px-6 sm:px-12 md:px-20 py-20 sm:py-28 border-t border-[#e8e8f0] text-center">
         <div className="absolute inset-0" style={sectionBg} />
         <div className="relative max-w-[900px] mx-auto">
+          <div className="rounded-2xl bg-white/50 backdrop-blur-sm px-4 sm:px-10 py-8 sm:py-10 mb-8 shadow-[0_4px_40px_rgba(255,255,255,0.3)]">
           <SectionLabel>Results</SectionLabel>
-          <h2 className="text-[26px] sm:text-[36px] md:text-[44px] leading-[0.9] mb-14 tracking-[-0.03em]" style={gradientText('180deg', 0.9, 0.5)}>
+          <h2 className="text-[26px] sm:text-[36px] md:text-[44px] leading-[0.9] mb-0 tracking-[-0.03em]" style={gradientText('180deg', 0.9, 0.5)}>
             Founders are getting funded with clarity, not luck.
           </h2>
+          </div>
 
           <div className={`${contentBlockStyle} mb-14`}><div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
             {[
@@ -444,13 +454,15 @@ export default function LandingPage() {
       <section id="sec-risk" className="relative z-20 px-6 sm:px-12 md:px-20 py-20 sm:py-28 border-t border-[#e8e8f0] text-center">
         <div className="absolute inset-0" style={sectionBg} />
         <div className="relative max-w-[800px] mx-auto">
+          <div className="rounded-2xl bg-white/50 backdrop-blur-sm px-4 sm:px-10 py-8 sm:py-10 mb-8 shadow-[0_4px_40px_rgba(255,255,255,0.3)]">
           <SectionLabel>No More Guessing</SectionLabel>
           <h2 className="text-[26px] sm:text-[36px] md:text-[44px] leading-[0.9] mb-6 tracking-[-0.03em]" style={gradientText('180deg', 0.95, 0.55)}>
             Stop applying blind. Start applying ready.
           </h2>
-          <p className="text-[12px] sm:text-[15px] text-[#6a6a8a] leading-[1.6] sm:leading-[1.8] mb-12 max-w-[600px] mx-auto text-justify-smart-center">
+          <p className="text-[12px] sm:text-[15px] text-[#6a6a8a] leading-[1.6] sm:leading-[1.8] mb-0 max-w-[600px] mx-auto text-justify-smart-center">
             Every denied application costs you: hard inquiries, wasted time, damaged confidence. We eliminate the guesswork by showing you exactly what a lender sees — before you ever submit.
           </p>
+          </div>
           <div className={contentBlockStyle}><div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
             <div className="p-6 rounded-xl border border-red-500/10 bg-red-500/[0.02]">
               <p className="text-[11px] tracking-[0.15em] uppercase text-red-400/30 mb-4">Without Us</p>
@@ -482,10 +494,12 @@ export default function LandingPage() {
       <section id="sec-breakdown" className="relative z-20 px-6 sm:px-12 md:px-20 py-20 sm:py-28 border-t border-[#e8e8f0] text-center">
         <div className="absolute inset-0" style={sectionBg} />
         <div className="relative max-w-[900px] mx-auto">
+          <div className="rounded-2xl bg-white/50 backdrop-blur-sm px-4 sm:px-10 py-8 sm:py-10 mb-8 shadow-[0_4px_40px_rgba(255,255,255,0.3)]">
           <SectionLabel>Feature Breakdown</SectionLabel>
-          <h2 className="text-[26px] sm:text-[36px] md:text-[44px] leading-[0.9] mb-14 tracking-[-0.03em]" style={gradientText('180deg', 0.9, 0.5)}>
+          <h2 className="text-[26px] sm:text-[36px] md:text-[44px] leading-[0.9] mb-0 tracking-[-0.03em]" style={gradientText('180deg', 0.9, 0.5)}>
             Six components. One score. Complete clarity.
           </h2>
+          </div>
           <div className={contentBlockStyle}><div className="space-y-3">
             {[
               { name: "Capital Strength", weight: "0–20 pts", desc: "Revenue, assets, collateral position, and business capitalization" },
@@ -519,10 +533,12 @@ export default function LandingPage() {
       <section id="sec-modes" className="relative z-20 px-6 sm:px-12 md:px-20 py-20 sm:py-28 border-t border-[#e8e8f0] text-center">
         <div className="absolute inset-0" style={sectionBg} />
         <div className="relative max-w-[900px] mx-auto">
+          <div className="rounded-2xl bg-white/50 backdrop-blur-sm px-4 sm:px-10 py-8 sm:py-10 mb-8 shadow-[0_4px_40px_rgba(255,255,255,0.3)]">
           <SectionLabel>Operating Modes</SectionLabel>
-          <h2 className="text-[26px] sm:text-[36px] md:text-[44px] leading-[0.9] mb-14 tracking-[-0.03em]" style={gradientText('180deg', 0.9, 0.5)}>
+          <h2 className="text-[26px] sm:text-[36px] md:text-[44px] leading-[0.9] mb-0 tracking-[-0.03em]" style={gradientText('180deg', 0.9, 0.5)}>
             Two modes. One goal: get you funded.
           </h2>
+          </div>
           <div className={contentBlockStyle}><div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
             <div className="p-6 sm:p-8 rounded-xl bg-[#f8f8fc] border border-[#e0e0ea]">
               <div className="flex items-center gap-3 mb-6">
@@ -568,10 +584,12 @@ export default function LandingPage() {
       <section id="sec-tiers" className="relative z-20 px-6 sm:px-12 md:px-20 py-20 sm:py-28 border-t border-[#e8e8f0] text-center">
         <div className="absolute inset-0" style={sectionBg} />
         <div className="relative max-w-[900px] mx-auto">
+          <div className="rounded-2xl bg-white/50 backdrop-blur-sm px-4 sm:px-10 py-8 sm:py-10 mb-8 shadow-[0_4px_40px_rgba(255,255,255,0.3)]">
           <SectionLabel>Tier Eligibility</SectionLabel>
-          <h2 className="text-[26px] sm:text-[36px] md:text-[44px] leading-[0.9] mb-14 tracking-[-0.03em]" style={gradientText('180deg', 0.9, 0.5)}>
+          <h2 className="text-[26px] sm:text-[36px] md:text-[44px] leading-[0.9] mb-0 tracking-[-0.03em]" style={gradientText('180deg', 0.9, 0.5)}>
             Three tiers. Know which one you belong to.
           </h2>
+          </div>
           <div className={contentBlockStyle}><div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             {[
               { tier: "Tier 1", name: "Prime Capital", score: "75–100", products: "SBA 7(a) & 504, Conventional LOC, Term Loans, Equipment Finance", color: "border-[#3C3C3C]/30" },
@@ -595,10 +613,12 @@ export default function LandingPage() {
       <section id="sec-case" className="relative z-20 px-6 sm:px-12 md:px-20 py-20 sm:py-28 border-t border-[#e8e8f0] text-center">
         <div className="absolute inset-0" style={sectionBg} />
         <div className="relative max-w-[800px] mx-auto">
+          <div className="rounded-2xl bg-white/50 backdrop-blur-sm px-4 sm:px-10 py-8 sm:py-10 mb-8 shadow-[0_4px_40px_rgba(255,255,255,0.3)]">
           <SectionLabel>Example Walkthrough</SectionLabel>
-          <h2 className="text-[26px] sm:text-[36px] md:text-[44px] leading-[0.9] mb-14 tracking-[-0.03em]" style={gradientText('180deg', 0.9, 0.5)}>
+          <h2 className="text-[26px] sm:text-[36px] md:text-[44px] leading-[0.9] mb-0 tracking-[-0.03em]" style={gradientText('180deg', 0.9, 0.5)}>
             How a 38-score founder became funding-ready in 67 days.
           </h2>
+          </div>
 
           <div className={contentBlockStyle}><div className="space-y-0">
             {[
@@ -627,10 +647,12 @@ export default function LandingPage() {
       <section id="faq" className="relative z-20 px-6 sm:px-12 md:px-20 py-20 sm:py-28 border-t border-[#e8e8f0] text-center">
         <div className="absolute inset-0" style={sectionBg} />
         <div className="relative max-w-[700px] mx-auto">
+          <div className="rounded-2xl bg-white/50 backdrop-blur-sm px-4 sm:px-10 py-8 sm:py-10 mb-8 shadow-[0_4px_40px_rgba(255,255,255,0.3)]">
           <SectionLabel>FAQ</SectionLabel>
-          <h2 className="text-[26px] sm:text-[36px] md:text-[44px] leading-[0.9] mb-12 tracking-[-0.03em]" style={gradientText('180deg', 0.9, 0.5)}>
+          <h2 className="text-[26px] sm:text-[36px] md:text-[44px] leading-[0.9] mb-0 tracking-[-0.03em]" style={gradientText('180deg', 0.9, 0.5)}>
             Common questions, straight answers.
           </h2>
+          </div>
           <div className={contentBlockStyle}><div className="space-y-0">
             {faqItems.map((item, i) => (
               <div key={i} className="border-b border-[#e0e0ea]">
@@ -659,10 +681,12 @@ export default function LandingPage() {
       <section id="sec-trust" className="relative z-20 px-6 sm:px-12 md:px-20 py-20 sm:py-28 border-t border-[#e8e8f0] text-center">
         <div className="absolute inset-0" style={sectionBg} />
         <div className="relative max-w-[800px] mx-auto">
+          <div className="rounded-2xl bg-white/50 backdrop-blur-sm px-4 sm:px-10 py-8 sm:py-10 mb-8 shadow-[0_4px_40px_rgba(255,255,255,0.3)]">
           <SectionLabel>Trust & Security</SectionLabel>
-          <h2 className="text-[26px] sm:text-[36px] md:text-[44px] leading-[0.9] mb-12 tracking-[-0.03em]" style={gradientText('180deg', 0.9, 0.5)}>
+          <h2 className="text-[26px] sm:text-[36px] md:text-[44px] leading-[0.9] mb-0 tracking-[-0.03em]" style={gradientText('180deg', 0.9, 0.5)}>
             Your data. Your control. Always.
           </h2>
+          </div>
           <div className={contentBlockStyle}><div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {[
               { icon: "⬡", title: "Encrypted", desc: "AES-256 encryption at rest and TLS 1.3 in transit" },
@@ -686,6 +710,7 @@ export default function LandingPage() {
       <section id="sec-cta" className="relative z-20 px-6 sm:px-12 md:px-20 py-24 sm:py-36 border-t border-[#e8e8f0]">
         <div className="absolute inset-0" style={sectionBg} />
         <div className="relative max-w-[700px] mx-auto text-center">
+          <div className="rounded-2xl bg-white/50 backdrop-blur-sm px-4 sm:px-10 py-8 sm:py-10 mb-8 shadow-[0_4px_40px_rgba(255,255,255,0.3)]">
           <h2
             className="text-[30px] sm:text-[44px] md:text-[56px] leading-[0.9] mb-6 tracking-[-0.04em]"
             style={{ fontFamily: "'Satoshi', sans-serif", fontWeight: 400, ...gradientText('180deg', 1, 0.55) }}
@@ -693,9 +718,10 @@ export default function LandingPage() {
           >
             Stop guessing.<br />Start knowing.
           </h2>
-          <p className="text-[12px] sm:text-[15px] text-[#6a6a8a] leading-[1.6] sm:leading-[1.8] mb-10 max-w-[480px] mx-auto text-justify-smart-center">
+          <p className="text-[12px] sm:text-[15px] text-[#6a6a8a] leading-[1.6] sm:leading-[1.8] mb-0 max-w-[480px] mx-auto text-justify-smart-center">
             Get your Capital Readiness Score, tier eligibility, exposure ceiling, and denial simulation. Subscribe today and unlock the full platform.
           </p>
+          </div>
           <form onSubmit={handleLogin} className="w-full max-w-[440px] mx-auto mb-6">
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center bg-[#f5f5fa] border border-[#e0e0ea] rounded-2xl sm:rounded-full sm:h-[52px] sm:pl-5 sm:pr-1.5 overflow-hidden">
               <input
