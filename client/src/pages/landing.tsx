@@ -213,10 +213,7 @@ export default function LandingPage() {
 
       <div className="sticky top-0 z-50 w-full flex justify-center px-3 sm:px-10 pt-3 sm:pt-4" data-testid="nav-top">
         <nav className="flex items-center justify-between w-full max-w-[900px] h-[46px] sm:h-[52px] bg-white/80 backdrop-blur-md rounded-full px-2 sm:px-2.5 pl-2.5 sm:pl-3 shadow-lg shadow-black/10 hover:bg-white/90 hover:shadow-xl hover:shadow-black/15 transition-all duration-300">
-          <div className="flex items-center gap-2 px-2" data-testid="nav-logo">
-            <div className="w-[18px] h-[18px] rounded-full bg-gradient-to-br from-[#2a2a2a] to-[#0a0a0a] flex items-center justify-center animate-logo-pulse">
-              <span className="w-1.5 h-1.5 rounded-full bg-white"></span>
-            </div>
+          <div className="flex items-center px-2" data-testid="nav-logo">
             <BaalioLogo size="md" />
           </div>
 
