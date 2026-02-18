@@ -34,13 +34,11 @@ function SpaceBackground() {
 }
 
 const gradientText = (dir = '180deg', _from = 0.85, _to = 0.5) => ({
-  backgroundImage: `linear-gradient(135deg, #1a1a2e 0%, #4a4a6a 50%, #8a8aa5 100%)`,
+  backgroundImage: `linear-gradient(${dir}, #000000 0%, #2a2a4a 45%, #6a6a8a 100%)`,
   WebkitBackgroundClip: 'text' as const,
   WebkitTextFillColor: 'transparent' as const,
   backgroundClip: 'text' as const,
-  fontFamily: "'Inter', sans-serif",
-  fontWeight: 800 as const,
-  letterSpacing: '-0.05em',
+  fontStyle: 'italic' as const,
   lineHeight: '0.95',
 });
 
@@ -244,8 +242,8 @@ export default function LandingPage() {
           <div className="rounded-2xl sm:rounded-3xl bg-white/50 backdrop-blur-sm px-4 sm:px-12 py-8 sm:py-14 shadow-[0_4px_40px_rgba(255,255,255,0.3)] hover:bg-white/60 hover:shadow-[0_8px_60px_rgba(255,255,255,0.4)] transition-all duration-500">
           <p className="text-[11px] tracking-[0.2em] uppercase text-[#6a6a8a] mb-6" data-testid="text-hero-label">Digital Underwriting Engine</p>
           <h1
-            className="text-[48px] min-[400px]:text-[58px] sm:text-[68px] md:text-[88px] lg:text-[108px] uppercase leading-[0.85] mb-6 sm:mb-8 text-center"
-            style={{ fontFamily: "'Inter', sans-serif", fontWeight: 800, letterSpacing: '-0.05em', backgroundImage: 'linear-gradient(135deg, #1a1a2e 0%, #4a4a6a 50%, #8a8aa5 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}
+            className="text-[48px] min-[400px]:text-[58px] sm:text-[68px] md:text-[88px] lg:text-[108px] uppercase italic leading-[0.85] mb-6 sm:mb-8 text-center"
+            style={{ fontFamily: "'Satoshi', sans-serif", fontWeight: 400, letterSpacing: '-0.06em', backgroundImage: 'linear-gradient(180deg, #000000 0%, #3a3a5a 50%, #7a7a9a 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}
             data-testid="text-hero-headline"
           >
             <span className="hidden sm:inline">Qualify<br />Before<br />You Apply</span><span className="sm:hidden">Qualify Before<br />You Apply</span>
