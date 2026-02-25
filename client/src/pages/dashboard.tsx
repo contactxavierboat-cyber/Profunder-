@@ -501,12 +501,12 @@ export default function DashboardPage() {
         toast({ title: "Analysis Complete", description: "Your document has been analyzed and your funding score has been updated." });
         queryClient.invalidateQueries({ queryKey: ["/api/me"] });
         queryClient.invalidateQueries({ queryKey: ["/api/chat"] });
-        await fetchFundingReadiness();
-        await fetchCapitalOsDashboard();
+        await Promise.all([fetchFundingReadiness(), fetchCapitalOsDashboard()]);
         if (data.repairResult) {
           setRepairData(data.repairResult);
           toast({ title: "Credit Repair Updated", description: `${data.repairResult.detectedIssues?.length || 0} issues detected. ${data.repairResult.letters?.length || 0} letters generated.` });
-        } else { await fetchRepairData(); }
+        }
+        await fetchRepairData();
       } else {
         const data = await res.json();
         toast({ title: "Analysis Failed", description: data.error || "Could not analyze document.", variant: "destructive" });
@@ -613,9 +613,15 @@ export default function DashboardPage() {
   }, [user]);
 
   useEffect(() => {
-    if (user && activeTab === "mission_control") {
-      fetchFundingReadiness();
-      fetchCapitalOsDashboard();
+    if (user) {
+      if (activeTab === "mission_control" || activeTab === "funding_strategy" || activeTab === "progress_tracker") {
+        fetchFundingReadiness();
+        fetchCapitalOsDashboard();
+      }
+      if (activeTab === "repair_engine") {
+        fetchRepairData();
+        fetchFundingReadiness();
+      }
     }
   }, [activeTab]);
 
