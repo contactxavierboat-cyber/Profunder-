@@ -4679,6 +4679,12 @@ ${extractedText}
             accountMix: analysisResult.accountMix || null,
             balanceTrend: analysisResult.balanceTrend || null,
             velocityRisk: analysisResult.velocityRisk || null,
+            newAccountsLast6Months: safeInt(analysisResult.newAccountsLast6Months) ?? 0,
+            newAccountsLast12Months: safeInt(analysisResult.newAccountsLast12Months) ?? 0,
+            newAccountsLast24Months: safeInt(analysisResult.newAccountsLast24Months) ?? 0,
+            avgOpenAccountAgeYears: safeInt(analysisResult.avgOpenAccountAgeYears) ?? 0,
+            accountsOlderThan5Years: safeInt(analysisResult.accountsOlderThan5Years) ?? 0,
+            closedAccounts: safeInt(analysisResult.closedAccounts) ?? 0,
           };
           updateData.bureauHealthData = JSON.stringify(existingBureauData);
         }
@@ -4707,7 +4713,7 @@ ${extractedText}
               "Content-Type": "application/json",
               "Cookie": req.headers.cookie || "",
             },
-            body: JSON.stringify({ reportText: extractedText.slice(0, 25000) }),
+            body: JSON.stringify({ reportText: extractedText.slice(0, 25000), bureau: bureau || null }),
           });
           if (internalRepairRes.ok) {
             const repairJson = await internalRepairRes.json();
@@ -4788,11 +4794,14 @@ ${extractedText}
       const bodySchema = z.object({
         reportText: z.string().optional(),
         useStored: z.boolean().optional(),
+        bureau: z.string().nullable().optional(),
       });
       const parsed = bodySchema.safeParse(req.body);
       if (!parsed.success) {
         return res.status(400).json({ error: "Invalid request." });
       }
+
+      const targetBureau = parsed.data.bureau || null;
 
       let reportText = parsed.data.reportText || "";
       if (parsed.data.useStored && !reportText && user.lastCreditReportText) {
@@ -4806,10 +4815,12 @@ ${extractedText}
       const userName = user.fullName || user.displayName || user.email.split("@")[0];
       const userAddress = user.streetAddress ? `${user.streetAddress}, ${user.city || ""}, ${user.state || ""} ${user.zipCode || ""}`.trim() : "[YOUR ADDRESS]";
 
+      const bureauContext = targetBureau ? `\n\nIMPORTANT: This credit report is from ${targetBureau}. Generate ALL dispute letters addressed specifically to ${targetBureau}. Use ${targetBureau}'s mailing address and fraud department address on every letter. The detected issues and letters should be specific to what ${targetBureau} is reporting.\n` : "";
+
       const repairPrompt = `You are a Credit Report Repair & Funding Readiness System embedded inside Profundr, a business funding app.
 
 Your job is to read the user's uploaded credit report text, identify ALL negative, derogatory, or potentially inaccurate items, and produce a COMPREHENSIVE 3-ROUND dispute letter system.
-
+${bureauContext}
 CRITICAL RULES:
 - Generate letters for EVERY derogatory item, collection, charge-off, late payment, and questionable entry found
 - For EACH item, generate TWO dispute angles: one claiming "inaccurate/unverifiable" and one claiming "potential fraud/unauthorized"
@@ -5045,16 +5056,51 @@ ${reportText.slice(0, 25000)}
 
       const totalLetters = repairResult.letters?.length || 0;
 
+      let finalRepairData: any;
+      if (targetBureau) {
+        let existingRepair: any = {};
+        try {
+          if (user.creditRepairData) existingRepair = JSON.parse(user.creditRepairData);
+        } catch {}
+
+        if (!existingRepair.perBureau) existingRepair.perBureau = {};
+        existingRepair.perBureau[targetBureau] = repairResult;
+
+        const allIssues: any[] = [];
+        const allLetters: any[] = [];
+        const allRounds: any[] = [];
+        for (const bName of ["Experian", "Equifax", "TransUnion"]) {
+          const bData = existingRepair.perBureau[bName];
+          if (!bData) continue;
+          if (bData.detectedIssues) allIssues.push(...bData.detectedIssues.map((i: any) => ({ ...i, bureau: i.bureau || bName })));
+          if (bData.letters) allLetters.push(...bData.letters.map((l: any) => ({ ...l, bureau: l.bureau || bName })));
+          if (bData.rounds) allRounds.push(...bData.rounds);
+        }
+        existingRepair.detectedIssues = allIssues;
+        existingRepair.letters = allLetters;
+        existingRepair.rounds = allRounds;
+        existingRepair.mode = repairResult.mode;
+        existingRepair.summary = repairResult.summary;
+        existingRepair.actionPlan = repairResult.actionPlan;
+        existingRepair.bureauFraudAddresses = repairResult.bureauFraudAddresses || existingRepair.bureauFraudAddresses;
+        existingRepair.mailingServices = repairResult.mailingServices || existingRepair.mailingServices;
+        existingRepair.disclaimer = repairResult.disclaimer || existingRepair.disclaimer;
+        finalRepairData = existingRepair;
+      } else {
+        finalRepairData = repairResult;
+      }
+
       await storage.updateUser(userId, {
         monthlyUsage: user.monthlyUsage + 1,
-        creditRepairData: JSON.stringify(repairResult),
+        creditRepairData: JSON.stringify(finalRepairData),
         lastRepairAnalysisDate: new Date(),
       });
 
+      const bureauLabel = targetBureau ? ` (${targetBureau})` : "";
       await storage.createMessage({
         userId,
         role: "assistant",
-        content: `**Credit Repair Analysis Complete**\n\n${repairResult.summary?.mainIssues || "Analysis complete."}\n\n**Priority:** ${repairResult.summary?.priorityAction || "Review your dashboard for details."}\n\n${repairResult.detectedIssues?.length || 0} issue(s) detected. ${totalLetters} dispute letter(s) generated across 3 rounds.\n\nView full results in your Dashboard under Repair Engine.`,
+        content: `**Credit Repair Analysis Complete${bureauLabel}**\n\n${repairResult.summary?.mainIssues || "Analysis complete."}\n\n**Priority:** ${repairResult.summary?.priorityAction || "Review your dashboard for details."}\n\n${repairResult.detectedIssues?.length || 0} issue(s) detected. ${totalLetters} dispute letter(s) generated across 3 rounds.\n\nView full results in your Dashboard under Repair Engine.`,
         attachment: "credit_report",
         mentor: null,
       });

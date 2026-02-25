@@ -366,6 +366,10 @@ export interface BureauGuidance {
   paymentRecency: string | null;
   accountMix: string | null;
   balanceTrend: string | null;
+  newAccountsLast6Months: number;
+  newAccountsLast12Months: number;
+  avgOpenAccountAgeYears: number;
+  accountsOlderThan5Years: number;
   velocityRisk: {
     portfolioExpansionGrade: string;
     velocityTier: string;
@@ -449,10 +453,11 @@ export function calculateBureauHealth(user: User): { bureaus: BureauHealth[]; pr
     const denialTriggers: string[] = [];
 
     if (util > 45) {
-      actionItems.push(`Reduce ${name} utilization from ${util}% to below 30%`);
+      actionItems.push(`Reduce ${name} utilization from ${util}% to below 10%`);
       denialTriggers.push(`High utilization (${util}%)`);
-    } else if (util > 30) {
-      actionItems.push(`Lower ${name} utilization from ${util}% toward 10% for optimal positioning`);
+    } else if (util > 10) {
+      actionItems.push(`Lower ${name} utilization from ${util}% to below 10% before applying`);
+      denialTriggers.push(`Utilization above 10% threshold (${util}%)`);
     }
     if (latePayments > 0) {
       actionItems.push(`Address ${latePayments} late payment(s) on ${name} — dispute or request goodwill removal`);
@@ -488,18 +493,46 @@ export function calculateBureauHealth(user: User): { bureaus: BureauHealth[]; pr
     if (revolvingLimit > 0 && revolvingLimit < 5000) {
       denialTriggers.push(`Thin revolving depth ($${revolvingLimit.toLocaleString()})`);
     }
+
+    const newAccts6 = data.newAccountsLast6Months || 0;
+    const newAccts12 = data.newAccountsLast12Months || 0;
+    const newAccts24 = data.newAccountsLast24Months || 0;
+    const avgOpenAge = data.avgOpenAccountAgeYears || 0;
+    const accts5yr = data.accountsOlderThan5Years || 0;
+
+    if (newAccts6 >= 3) {
+      actionItems.push(`${newAccts6} new accounts opened in last 6 months on ${name} — too many for approval consideration`);
+      denialTriggers.push(`Excessive new accounts (${newAccts6} in 6 months)`);
+    } else if (newAccts6 >= 2) {
+      actionItems.push(`${newAccts6} new accounts in last 6 months on ${name} — avoid opening more`);
+    }
+    if (newAccts12 >= 5) {
+      actionItems.push(`${newAccts12} new accounts opened in last 12 months on ${name} — shows aggressive credit seeking`);
+      if (newAccts6 < 3) denialTriggers.push(`High new account volume (${newAccts12} in 12 months)`);
+    }
+    if (avgOpenAge > 0 && avgOpenAge < 1) {
+      actionItems.push(`Average account age on ${name} is under 1 year — accounts need seasoning before approval`);
+      denialTriggers.push(`Insufficient account seasoning (avg ${avgOpenAge < 0.5 ? "under 6 months" : `${Math.round(avgOpenAge * 12)} months`})`);
+    } else if (avgOpenAge >= 1 && avgOpenAge < 2) {
+      actionItems.push(`Average account age on ${name} is ${Math.round(avgOpenAge * 12)} months — allow accounts to season further`);
+    }
+    if (openAccounts >= 3 && accts5yr === 0 && age < 5) {
+      actionItems.push(`No established accounts older than 5 years on ${name} — keep oldest accounts open`);
+    }
+
     if (actionItems.length === 0) {
       actionItems.push(`${name} profile is clean — maintain current habits and monitor`);
     }
 
     let riskTier: string;
-    const lowUtil = util < 30;
+    const optimalUtil = util <= 10;
     const noLates = latePayments === 0;
     const noColl = coll === 0;
     const lowInq = inq <= 3;
     const solidDepth = openAccounts >= 3;
-    if (lowUtil && noLates && noColl && derogAccounts === 0 && lowInq && solidDepth) riskTier = "PRIME";
-    else if (util < 50 && latePayments <= 2 && inq <= 4 && derog <= 1) riskTier = "STANDARD";
+    const seasonedAccounts = avgOpenAge >= 1 && newAccts6 <= 1;
+    if (optimalUtil && noLates && noColl && derogAccounts === 0 && lowInq && solidDepth && seasonedAccounts) riskTier = "PRIME";
+    else if (util < 50 && latePayments <= 2 && inq <= 4 && derog <= 1 && newAccts6 <= 2) riskTier = "STANDARD";
     else if (util < 70 && derog <= 2) riskTier = "SUBPRIME";
     else riskTier = "DECLINE_LIKELY";
 
@@ -562,6 +595,10 @@ export function calculateBureauHealth(user: User): { bureaus: BureauHealth[]; pr
       paymentRecency: data.paymentRecency || null,
       accountMix: data.accountMix || null,
       balanceTrend: data.balanceTrend || null,
+      newAccountsLast6Months: newAccts6,
+      newAccountsLast12Months: newAccts12,
+      avgOpenAccountAgeYears: avgOpenAge,
+      accountsOlderThan5Years: accts5yr,
       velocityRisk: velocityRiskParsed,
     };
 

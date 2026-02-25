@@ -264,6 +264,7 @@ export default function DashboardPage() {
   const [copiedLetter, setCopiedLetter] = useState<string | null>(null);
   const [expandedDenials, setExpandedDenials] = useState<Set<number>>(new Set());
   const [activeRepairRound, setActiveRepairRound] = useState(1);
+  const [repairBureauFilter, setRepairBureauFilter] = useState<string>("All");
   const [userAddressForm, setUserAddressForm] = useState({ fullName: "", streetAddress: "", city: "", state: "", zipCode: "" });
   const [addressSaving, setAddressSaving] = useState(false);
   const [addressLoaded, setAddressLoaded] = useState(false);
@@ -1560,23 +1561,35 @@ export default function DashboardPage() {
 
                   {repairData.letters && repairData.letters.length > 0 && (
                     <div className="rounded-2xl bg-white/70 backdrop-blur-md border border-white/40 p-5 mb-5" data-testid="dispute-letters-card">
-                      <div className="flex items-center justify-between mb-4">
+                      <div className="flex items-center justify-between mb-3">
                         <p className="text-xs font-medium text-[#1a1a2e]/70">
                           Round {activeRepairRound} Dispute Letters
                         </p>
                         <span className="text-[10px] bg-[#3a3a5a]/10 text-[#3a3a5a] px-2 py-0.5 rounded-full font-medium">
                           {repairData.letters.filter((l: any) => {
                             const r = l.round || 1;
-                            return r === activeRepairRound;
+                            const matchRound = r === activeRepairRound;
+                            const matchBureau = repairBureauFilter === "All" || (l.bureau || "").toLowerCase().includes(repairBureauFilter.toLowerCase());
+                            return matchRound && matchBureau;
                           }).length} letters
                         </span>
+                      </div>
+                      <div className="flex gap-1 mb-4 p-1 rounded-lg bg-white/40">
+                        {["All", "Experian", "Equifax", "TransUnion"].map(bf => (
+                          <button key={bf} onClick={() => setRepairBureauFilter(bf)}
+                            className={cn("flex-1 py-1.5 px-2 rounded-md text-[10px] font-medium transition-all",
+                              repairBureauFilter === bf ? "bg-white shadow-sm text-[#1a1a2e]" : "text-[#1a1a2e]/40 hover:text-[#1a1a2e]/60"
+                            )} data-testid={`filter-repair-bureau-${bf.toLowerCase()}`}>{bf}</button>
+                        ))}
                       </div>
                       <div className="space-y-3">
                         {repairData.letters
                           .map((letter: any, idx: number) => ({ ...letter, _idx: idx }))
                           .filter((letter: any) => {
                             const r = letter.round || 1;
-                            return r === activeRepairRound;
+                            const matchRound = r === activeRepairRound;
+                            const matchBureau = repairBureauFilter === "All" || (letter.bureau || "").toLowerCase().includes(repairBureauFilter.toLowerCase());
+                            return matchRound && matchBureau;
                           })
                           .map((letter: any) => {
                             const key = `r${letter.round || 1}-${letter._idx}`;
@@ -1645,7 +1658,12 @@ export default function DashboardPage() {
                               </div>
                             );
                           })}
-                        {repairData.letters.filter((l: any) => (l.round || 1) === activeRepairRound).length === 0 && (
+                        {repairData.letters.filter((l: any) => {
+                            const r = l.round || 1;
+                            const matchRound = r === activeRepairRound;
+                            const matchBureau = repairBureauFilter === "All" || (l.bureau || "").toLowerCase().includes(repairBureauFilter.toLowerCase());
+                            return matchRound && matchBureau;
+                          }).length === 0 && (
                           <div className="text-center py-6">
                             <p className="text-xs text-[#1a1a2e]/50">No Round {activeRepairRound} letters generated yet.</p>
                             <p className="text-[10px] text-[#1a1a2e]/30 mt-1">
@@ -2428,6 +2446,28 @@ export default function DashboardPage() {
                               <div className="p-2 rounded-lg bg-white/60 text-center">
                                 <p className="text-[8px] text-[#1a1a2e]/40 uppercase">Account Mix</p>
                                 <p className={cn("text-[11px] font-semibold", g.accountMix === "Strong Mix" || g.accountMix === "Adequate Mix" ? "text-green-600" : g.accountMix === "Limited Mix" ? "text-yellow-600" : "text-red-600")}>{g.accountMix || "—"}</p>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div>
+                            <p className="text-[10px] text-[#1a1a2e]/50 uppercase mb-2">Account Seasoning</p>
+                            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                              <div className="p-2 rounded-lg bg-white/60 text-center">
+                                <p className="text-[8px] text-[#1a1a2e]/40 uppercase">New (6mo)</p>
+                                <p className={cn("text-sm font-bold font-mono", (g as any).newAccountsLast6Months > 2 ? "text-red-600" : (g as any).newAccountsLast6Months > 1 ? "text-yellow-600" : "text-green-600")}>{(g as any).newAccountsLast6Months ?? "—"}</p>
+                              </div>
+                              <div className="p-2 rounded-lg bg-white/60 text-center">
+                                <p className="text-[8px] text-[#1a1a2e]/40 uppercase">New (12mo)</p>
+                                <p className={cn("text-sm font-bold font-mono", (g as any).newAccountsLast12Months > 4 ? "text-red-600" : (g as any).newAccountsLast12Months > 2 ? "text-yellow-600" : "text-green-600")}>{(g as any).newAccountsLast12Months ?? "—"}</p>
+                              </div>
+                              <div className="p-2 rounded-lg bg-white/60 text-center">
+                                <p className="text-[8px] text-[#1a1a2e]/40 uppercase">Avg Age</p>
+                                <p className={cn("text-[11px] font-semibold", (g as any).avgOpenAccountAgeYears < 1 ? "text-red-600" : (g as any).avgOpenAccountAgeYears < 2 ? "text-yellow-600" : "text-green-600")}>{(g as any).avgOpenAccountAgeYears ? `${(g as any).avgOpenAccountAgeYears}yr` : "—"}</p>
+                              </div>
+                              <div className="p-2 rounded-lg bg-white/60 text-center">
+                                <p className="text-[8px] text-[#1a1a2e]/40 uppercase">5yr+ Accts</p>
+                                <p className="text-sm font-bold font-mono text-[#1a1a2e]/80">{(g as any).accountsOlderThan5Years ?? "—"}</p>
                               </div>
                             </div>
                           </div>
