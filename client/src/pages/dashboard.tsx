@@ -214,6 +214,12 @@ const NAV_ITEMS: { key: TabKey; label: string; icon: any }[] = [
 export default function DashboardPage() {
   const { user, messages, sendMessage, clearChat, logout, isLoading: authLoading } = useAuth();
   const [, setLocation] = useLocation();
+
+  useEffect(() => {
+    if (!authLoading && user && user.subscriptionStatus !== 'active' && user.role !== 'admin') {
+      setLocation('/subscription');
+    }
+  }, [user, authLoading, setLocation]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [showScrollBtn, setShowScrollBtn] = useState(false);

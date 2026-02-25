@@ -756,7 +756,7 @@ export async function registerRoutes(
         password: "placeholder",
         displayName: generateAnonName(),
         role: "user",
-        subscriptionStatus: "active",
+        subscriptionStatus: "inactive",
         monthlyUsage: 0,
         maxUsage: 30,
         creditScoreRange: null,

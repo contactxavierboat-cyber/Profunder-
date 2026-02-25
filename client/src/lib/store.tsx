@@ -90,8 +90,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       toast({ title: "Welcome back", description: `Logged in as ${data.displayName || data.email}` });
       if (data.role === 'admin') {
         setLocation('/admin');
-      } else {
+      } else if (data.subscriptionStatus === 'active') {
         setLocation('/dashboard');
+      } else {
+        setLocation('/subscription');
       }
     },
     onError: (error: Error) => {
