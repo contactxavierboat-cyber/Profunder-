@@ -941,6 +941,24 @@ export default function DashboardPage() {
                                 ))}
                               </div>
                             )}
+                            <div className="mt-3 pt-3 border-t border-white/30">
+                              <input
+                                ref={(el) => { bureauUploadRefs.current[b.bureau] = el; }}
+                                type="file" accept=".pdf,.doc,.docx,.txt,.csv" className="hidden"
+                                data-testid={`input-bureau-reupload-${b.bureau.toLowerCase()}`}
+                                onChange={(e) => { const file = e.target.files?.[0]; if (file) handleDocumentUpload(file, "credit_report", b.bureau); e.target.value = ""; }}
+                              />
+                              <button
+                                onClick={() => bureauUploadRefs.current[b.bureau]?.click()}
+                                disabled={docUploading}
+                                className={cn("w-full px-3 py-2 rounded-xl bg-white/50 border border-white/30 hover:bg-white/70 text-[11px] font-medium text-[#1a1a2e]/60 transition-colors flex items-center justify-center gap-2",
+                                  docUploading && bureauUploading === b.bureau && "opacity-50")}
+                                data-testid={`button-reupload-bureau-${b.bureau.toLowerCase()}`}
+                              >
+                                {docUploading && bureauUploading === b.bureau ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Upload className="w-3.5 h-3.5" />}
+                                {docUploading && bureauUploading === b.bureau ? "Analyzing..." : "Update Report"}
+                              </button>
+                            </div>
                           </>
                         ) : (
                           <div className="flex flex-col items-center justify-center py-4">
