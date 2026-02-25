@@ -265,6 +265,9 @@ export default function DashboardPage() {
   const [expandedDenials, setExpandedDenials] = useState<Set<number>>(new Set());
   const [activeRepairRound, setActiveRepairRound] = useState(1);
   const [repairBureauFilter, setRepairBureauFilter] = useState<string>("All");
+  const [showWelcome, setShowWelcome] = useState(() => {
+    return !localStorage.getItem("profundr_welcome_seen");
+  });
   const [userAddressForm, setUserAddressForm] = useState({ fullName: "", streetAddress: "", city: "", state: "", zipCode: "" });
   const [addressSaving, setAddressSaving] = useState(false);
   const [addressLoaded, setAddressLoaded] = useState(false);
@@ -2740,6 +2743,80 @@ export default function DashboardPage() {
               {friendSearch.length >= 2 && !friendSearchLoading && friendSearchResults.length === 0 && (
                 <p className="text-[10px] text-[#1a1a2e]/55 text-center py-3">No users found</p>
               )}
+            </div>
+          </div>
+        </div>
+      )}
+      {showWelcome && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[100] flex items-center justify-center p-4" onClick={() => { setShowWelcome(false); localStorage.setItem("profundr_welcome_seen", "1"); }}>
+          <div className="w-full max-w-lg rounded-2xl bg-white/95 backdrop-blur-xl border border-white/40 shadow-2xl overflow-hidden" onClick={e => e.stopPropagation()} data-testid="welcome-modal">
+            <div className="relative px-8 pt-8 pb-4">
+              <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#1a1a2e] via-[#4a4a6a] to-[#8a8aa5]" />
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#1a1a2e] to-[#4a4a6a] flex items-center justify-center">
+                  <Shield className="w-5 h-5 text-white" />
+                </div>
+                <div>
+                  <h2 className="text-lg font-bold text-[#1a1a2e]" style={{ fontFamily: "Inter, sans-serif" }}>Welcome to profundr.</h2>
+                  <p className="text-[11px] text-[#1a1a2e]/50">Your Capital Operating System</p>
+                </div>
+              </div>
+              <p className="text-[13px] text-[#1a1a2e]/70 leading-relaxed mb-5">
+                Profundr is an AI-powered fundability platform that evaluates your credit profile using commercial bank-grade underwriting. No composite scores — we analyze 8 independent risk metrics the way real underwriters do.
+              </p>
+            </div>
+
+            <div className="px-8 pb-4 space-y-3">
+              <div className="flex items-start gap-3 p-3 rounded-xl bg-[#f8f8fc] border border-[#e8e8f0]">
+                <div className="w-7 h-7 rounded-lg bg-[#1a1a2e]/5 flex items-center justify-center shrink-0 mt-0.5">
+                  <Upload className="w-3.5 h-3.5 text-[#1a1a2e]/60" />
+                </div>
+                <div>
+                  <p className="text-[12px] font-semibold text-[#1a1a2e]/80">1. Upload Your Credit Reports</p>
+                  <p className="text-[11px] text-[#1a1a2e]/50 leading-relaxed">Go to Mission Control and upload a report for each bureau (Experian, Equifax, TransUnion). PDF format works best.</p>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-3 p-3 rounded-xl bg-[#f8f8fc] border border-[#e8e8f0]">
+                <div className="w-7 h-7 rounded-lg bg-[#1a1a2e]/5 flex items-center justify-center shrink-0 mt-0.5">
+                  <BarChart3 className="w-3.5 h-3.5 text-[#1a1a2e]/60" />
+                </div>
+                <div>
+                  <p className="text-[12px] font-semibold text-[#1a1a2e]/80">2. Review Your Underwriting</p>
+                  <p className="text-[11px] text-[#1a1a2e]/50 leading-relaxed">Your dashboard will show risk tier, exposure ceiling, denial triggers, and action items per bureau. Check the Progress Tracker for detailed breakdowns.</p>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-3 p-3 rounded-xl bg-[#f8f8fc] border border-[#e8e8f0]">
+                <div className="w-7 h-7 rounded-lg bg-[#1a1a2e]/5 flex items-center justify-center shrink-0 mt-0.5">
+                  <FileText className="w-3.5 h-3.5 text-[#1a1a2e]/60" />
+                </div>
+                <div>
+                  <p className="text-[12px] font-semibold text-[#1a1a2e]/80">3. Repair and Optimize</p>
+                  <p className="text-[11px] text-[#1a1a2e]/50 leading-relaxed">Use the Repair Engine to generate FCRA-compliant dispute letters. Your AI mentors in the chat can help you strategize your next moves.</p>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-3 p-3 rounded-xl bg-[#f8f8fc] border border-[#e8e8f0]">
+                <div className="w-7 h-7 rounded-lg bg-[#1a1a2e]/5 flex items-center justify-center shrink-0 mt-0.5">
+                  <Target className="w-3.5 h-3.5 text-[#1a1a2e]/60" />
+                </div>
+                <div>
+                  <p className="text-[12px] font-semibold text-[#1a1a2e]/80">4. Apply When Ready</p>
+                  <p className="text-[11px] text-[#1a1a2e]/50 leading-relaxed">Your application readiness status tells you when your profile meets underwriting thresholds. Utilization must be below 10% and accounts need at least 6 months of seasoning.</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="px-8 pb-8 pt-4">
+              <button
+                onClick={() => { setShowWelcome(false); localStorage.setItem("profundr_welcome_seen", "1"); }}
+                className="w-full h-11 rounded-xl bg-gradient-to-r from-[#1a1a2e] to-[#3a3a5a] text-white text-sm font-semibold hover:opacity-90 transition-opacity"
+                data-testid="button-dismiss-welcome"
+              >
+                Get Started
+              </button>
+              <p className="text-[10px] text-[#1a1a2e]/30 text-center mt-3">You can find help anytime in the AI chat workspace</p>
             </div>
           </div>
         </div>
