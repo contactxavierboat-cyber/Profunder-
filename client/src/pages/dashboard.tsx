@@ -241,6 +241,7 @@ export default function DashboardPage() {
   });
   const [expandedMessages, setExpandedMessages] = useState<Set<number>>(new Set());
   const [activeTab, setActiveTab] = useState<TabKey>("mission_control");
+  const [progressBureauTab, setProgressBureauTab] = useState("Experian");
   const [friendsList, setFriendsList] = useState<any[]>([]);
   const [pendingRequests, setPendingRequests] = useState<any[]>([]);
   const [showAddFriend, setShowAddFriend] = useState(false);
@@ -2259,7 +2260,7 @@ export default function DashboardPage() {
             <div className="w-full px-5 sm:px-8 py-6 max-w-[1000px] mx-auto">
               <div className="mb-6">
                 <h2 className="text-lg font-semibold text-[#1a1a2e]" data-testid="text-progress-title">Progress Tracker</h2>
-                <p className="text-[11px] text-[#1a1a2e]/60">Phase progression, category scores, and action items</p>
+                <p className="text-[11px] text-[#1a1a2e]/60">Phase progression, bureau-level underwriting, and exposure analysis</p>
               </div>
 
               {capitalOsData ? (
@@ -2287,83 +2288,218 @@ export default function DashboardPage() {
                     <p className="text-[11px] text-[#1a1a2e]/70 leading-relaxed">{capitalOsData.phase.reasoning}</p>
                   </div>
 
-                  <div className="rounded-2xl bg-white/70 backdrop-blur-md border border-white/40 p-6 mb-6" data-testid="risk-metrics-card">
-                    <div className="flex items-center justify-between mb-4">
-                      <p className="text-xs text-[#1a1a2e]/70">Risk Metrics</p>
-                      <span className="text-sm font-bold" style={{ color: capitalOsData.readiness.riskTierColor }}>{capitalOsData.readiness.riskTier.replace("_", " ")}</span>
-                    </div>
-                    <div className="space-y-3">
-                      {capitalOsData.readiness.metrics.map((metric, idx) => {
-                        const sevColor = metric.severity === "optimal" ? "#10b981" : metric.severity === "acceptable" ? "#22c55e" : metric.severity === "elevated" ? "#eab308" : metric.severity === "high" ? "#f97316" : metric.severity === "severe" ? "#ef4444" : "#dc2626";
-                        return (
-                          <div key={idx} className="p-3 rounded-xl bg-white/50 border border-white/30" data-testid={`metric-${idx}`}>
-                            <div className="flex items-center justify-between mb-1">
-                              <span className="text-[12px] font-medium text-[#1a1a2e]/85">{metric.name}</span>
-                              <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full" style={{ color: sevColor, backgroundColor: sevColor + "15" }}>{metric.status}</span>
-                            </div>
-                            <p className="text-[10px] text-[#1a1a2e]/50">{metric.detail}</p>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-
-                  {capitalOsData.bureauHealth.bureaus.some(b => b.uploaded && b.guidance) && (
-                    <div className="rounded-2xl bg-white/70 backdrop-blur-md border border-white/40 p-6 mb-6" data-testid="bureau-progress-card">
-                      <p className="text-xs text-[#1a1a2e]/70 mb-4">Per-Bureau Progress</p>
-                      <div className="space-y-3">
-                        {capitalOsData.bureauHealth.bureaus.filter(b => b.uploaded && b.guidance).map(b => (
-                          <div key={b.bureau} className="p-3 rounded-xl bg-white/50 border border-white/30">
-                            <div className="flex items-center justify-between mb-2">
-                              <div className="flex items-center gap-2">
-                                <span className="text-[12px] font-medium text-[#1a1a2e]/85">{b.bureau}</span>
-                                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ backgroundColor: b.guidance!.riskTierColor + '15', color: b.guidance!.riskTierColor }}>{b.guidance!.riskTier.replace("_", " ")}</span>
-                              </div>
-                              <span className="text-[10px] text-[#1a1a2e]/50">{b.guidance!.fundingPhase} Phase</span>
-                            </div>
-                            <div className="grid grid-cols-4 gap-2 text-center text-[9px] mb-2">
-                              <div><span className="text-[#1a1a2e]/50">Util</span><p className="font-semibold text-[#1a1a2e]/80">{b.utilization}%</p></div>
-                              <div><span className="text-[#1a1a2e]/50">Inq</span><p className="font-semibold text-[#1a1a2e]/80">{b.hardInquiries}</p></div>
-                              <div><span className="text-[#1a1a2e]/50">Derog</span><p className="font-semibold text-[#1a1a2e]/80">{b.derogatoryCount}</p></div>
-                              <div><span className="text-[#1a1a2e]/50">Ceiling</span><p className="font-semibold text-[#1a1a2e]/80 font-mono">${b.guidance!.exposureCeiling.toLocaleString()}</p></div>
-                            </div>
-                            {b.guidance!.actionItems.length > 0 && (
-                              <p className="text-[10px] text-[#1a1a2e]/60 leading-relaxed">{b.guidance!.actionItems[0]}</p>
+                  <div className="rounded-2xl bg-white/70 backdrop-blur-md border border-white/40 p-6 mb-6" data-testid="bureau-tabs-progress">
+                    <p className="text-xs text-[#1a1a2e]/70 mb-4">Bureau Underwriting Review</p>
+                    <div className="flex gap-1 mb-5 p-1 rounded-xl bg-white/50">
+                      {capitalOsData.bureauHealth.bureaus.map(b => (
+                        <button
+                          key={b.bureau}
+                          onClick={() => setProgressBureauTab(b.bureau)}
+                          className={cn(
+                            "flex-1 py-2.5 px-3 rounded-lg text-[11px] font-medium transition-all",
+                            progressBureauTab === b.bureau
+                              ? "bg-white shadow-sm text-[#1a1a2e]"
+                              : "text-[#1a1a2e]/50 hover:text-[#1a1a2e]/70"
+                          )}
+                          data-testid={`tab-progress-bureau-${b.bureau.toLowerCase()}`}
+                        >
+                          <div className="flex flex-col items-center gap-1">
+                            <span>{b.bureau}</span>
+                            {b.uploaded && b.guidance ? (
+                              <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full" style={{ backgroundColor: b.guidance.riskTierColor + '15', color: b.guidance.riskTierColor }}>{b.guidance.riskTier.replace("_", " ")}</span>
+                            ) : (
+                              <span className="text-[9px] text-[#1a1a2e]/30">Not Uploaded</span>
                             )}
                           </div>
-                        ))}
-                      </div>
+                        </button>
+                      ))}
                     </div>
-                  )}
 
-                  <div className="rounded-2xl bg-white/70 backdrop-blur-md border border-white/40 p-6 mb-6" data-testid="exposure-policy-card">
-                    <p className="text-xs text-[#1a1a2e]/70 mb-4">Exposure Policy</p>
-                    <div className="grid grid-cols-2 gap-3 mb-4">
-                      <div className="p-3 rounded-xl bg-white/50 border border-white/30 text-center">
-                        <p className="text-[9px] text-[#1a1a2e]/50 uppercase mb-1">Exposure Ceiling</p>
-                        <p className="text-lg font-bold text-[#1a1a2e] font-mono">${capitalOsData.readiness.exposureCeiling.toLocaleString()}</p>
-                      </div>
-                      <div className="p-3 rounded-xl bg-white/50 border border-white/30 text-center">
-                        <p className="text-[9px] text-[#1a1a2e]/50 uppercase mb-1">Remaining Capacity</p>
-                        <p className={cn("text-lg font-bold font-mono", capitalOsData.readiness.remainingSafeCapacity >= 0 ? "text-[#10b981]" : "text-[#ef4444]")}>
-                          {capitalOsData.readiness.remainingSafeCapacity < 0 ? "-" : ""}${Math.abs(capitalOsData.readiness.remainingSafeCapacity).toLocaleString()}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex items-center justify-between p-3 rounded-xl bg-white/50 border border-white/30 mb-3">
-                      <span className="text-[11px] text-[#1a1a2e]/60">Recommended Approval</span>
-                      <span className="text-[12px] font-semibold text-[#1a1a2e]">{capitalOsData.readiness.recommendedApproval}</span>
-                    </div>
-                    {capitalOsData.readiness.primaryDenialTriggers.length > 0 && (
-                      <div className="p-3 rounded-xl bg-red-500/[0.04] border border-red-500/10">
-                        <p className="text-[10px] text-red-600/70 uppercase mb-2">Primary Denial Drivers</p>
-                        {capitalOsData.readiness.primaryDenialTriggers.map((trigger, idx) => (
-                          <p key={idx} className="text-[11px] text-[#1a1a2e]/70 flex items-start gap-2 mb-1">
-                            <AlertTriangle className="w-3 h-3 text-red-500/60 shrink-0 mt-0.5" />{trigger}
-                          </p>
-                        ))}
-                      </div>
-                    )}
+                    {(() => {
+                      const activeBureau = capitalOsData.bureauHealth.bureaus.find(b => b.bureau === progressBureauTab);
+                      if (!activeBureau) return null;
+                      if (!activeBureau.uploaded || !activeBureau.guidance) {
+                        return (
+                          <div className="text-center py-8">
+                            <Upload className="w-8 h-8 text-[#1a1a2e]/20 mx-auto mb-3" />
+                            <p className="text-[12px] text-[#1a1a2e]/50 mb-1">No {activeBureau.bureau} report uploaded</p>
+                            <p className="text-[10px] text-[#1a1a2e]/40">Upload from Mission Control to see bureau analysis</p>
+                          </div>
+                        );
+                      }
+                      const g = activeBureau.guidance;
+                      return (
+                        <div className="space-y-4">
+                          <div className="flex items-center justify-between p-3 rounded-xl bg-white/50 border border-white/30">
+                            <div className="flex items-center gap-3">
+                              <div className="w-10 h-10 rounded-lg flex items-center justify-center" style={{ backgroundColor: g.riskTierColor + '15' }}>
+                                <Shield className="w-5 h-5" style={{ color: g.riskTierColor }} />
+                              </div>
+                              <div>
+                                <p className="text-sm font-bold" style={{ color: g.riskTierColor }}>{g.riskTier.replace("_", " ")}</p>
+                                <p className="text-[10px] text-[#1a1a2e]/50">{g.fundingPhase} Phase</p>
+                              </div>
+                            </div>
+                            <div className="text-right">
+                              {g.score && <p className="text-lg font-bold text-[#1a1a2e] font-mono">{g.score}</p>}
+                              <span className={cn("text-[10px] px-2 py-0.5 rounded-full font-medium", g.applicationReady ? "bg-green-500/15 text-green-600" : "bg-red-500/15 text-red-600")}>{g.applicationReady ? "Application Ready" : "Not Ready"}</span>
+                            </div>
+                          </div>
+
+                          <div>
+                            <p className="text-[10px] text-[#1a1a2e]/50 uppercase mb-2">Exposure — 2.5x Highest Limit</p>
+                            <div className="grid grid-cols-3 gap-2">
+                              <div className="p-3 rounded-xl bg-white/50 border border-white/30 text-center">
+                                <p className="text-[8px] text-[#1a1a2e]/40 uppercase mb-1">Highest Limit</p>
+                                <p className="text-sm font-bold text-[#1a1a2e] font-mono">${(g.exposureCeiling / 2.5).toLocaleString(undefined, {maximumFractionDigits: 0})}</p>
+                              </div>
+                              <div className="p-3 rounded-xl bg-white/50 border border-white/30 text-center">
+                                <p className="text-[8px] text-[#1a1a2e]/40 uppercase mb-1">Exposure Ceiling</p>
+                                <p className="text-sm font-bold text-[#1a1a2e] font-mono">${g.exposureCeiling.toLocaleString()}</p>
+                              </div>
+                              <div className="p-3 rounded-xl bg-white/50 border border-white/30 text-center">
+                                <p className="text-[8px] text-[#1a1a2e]/40 uppercase mb-1">Remaining</p>
+                                <p className={cn("text-sm font-bold font-mono", (g.exposureCeiling - g.totalRevolvingLimit) >= 0 ? "text-green-600" : "text-red-600")}>
+                                  {(g.exposureCeiling - g.totalRevolvingLimit) < 0 ? "-" : ""}${Math.abs(g.exposureCeiling - g.totalRevolvingLimit).toLocaleString()}
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div>
+                            <p className="text-[10px] text-[#1a1a2e]/50 uppercase mb-2">Revolving Utilization</p>
+                            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                              <div className="p-2 rounded-lg bg-white/60 text-center">
+                                <p className="text-[8px] text-[#1a1a2e]/40 uppercase">Aggregate</p>
+                                <p className={cn("text-sm font-bold font-mono", activeBureau.utilization > 50 ? "text-red-600" : activeBureau.utilization > 30 ? "text-yellow-600" : "text-green-600")}>{activeBureau.utilization}%</p>
+                              </div>
+                              <div className="p-2 rounded-lg bg-white/60 text-center">
+                                <p className="text-[8px] text-[#1a1a2e]/40 uppercase">Highest Card</p>
+                                <p className={cn("text-sm font-bold font-mono", (g.highestSingleCardUtil || 0) > 75 ? "text-red-600" : (g.highestSingleCardUtil || 0) > 50 ? "text-yellow-600" : "text-green-600")}>{g.highestSingleCardUtil ?? "—"}%</p>
+                              </div>
+                              <div className="p-2 rounded-lg bg-white/60 text-center">
+                                <p className="text-[8px] text-[#1a1a2e]/40 uppercase">Cards &gt;75%</p>
+                                <p className={cn("text-sm font-bold font-mono", g.revolvingAccountsOver75Util > 0 ? "text-red-600" : "text-green-600")}>{g.revolvingAccountsOver75Util}</p>
+                              </div>
+                              <div className="p-2 rounded-lg bg-white/60 text-center">
+                                <p className="text-[8px] text-[#1a1a2e]/40 uppercase">Zero-Balance</p>
+                                <p className="text-sm font-bold font-mono text-[#1a1a2e]/80">{g.zeroBalanceRevolvingAccounts}</p>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div>
+                            <p className="text-[10px] text-[#1a1a2e]/50 uppercase mb-2">Payment &amp; Derogatory</p>
+                            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                              <div className="p-2 rounded-lg bg-white/60 text-center">
+                                <p className="text-[8px] text-[#1a1a2e]/40 uppercase">Late Payments</p>
+                                <p className={cn("text-sm font-bold font-mono", g.latePayments > 0 ? "text-red-600" : "text-green-600")}>{g.latePayments}</p>
+                              </div>
+                              <div className="p-2 rounded-lg bg-white/60 text-center">
+                                <p className="text-[8px] text-[#1a1a2e]/40 uppercase">Recency</p>
+                                <p className={cn("text-[11px] font-semibold", g.paymentRecency === "No Lates" || !g.paymentRecency ? "text-green-600" : g.paymentRecency === "Within 6 Months" ? "text-red-600" : "text-yellow-600")}>{g.paymentRecency || "No Lates"}</p>
+                              </div>
+                              <div className="p-2 rounded-lg bg-white/60 text-center">
+                                <p className="text-[8px] text-[#1a1a2e]/40 uppercase">Collections</p>
+                                <p className={cn("text-sm font-bold font-mono", g.collections > 0 ? "text-red-600" : "text-green-600")}>{g.collections}{g.collectionsBalance > 0 ? ` ($${g.collectionsBalance.toLocaleString()})` : ""}</p>
+                              </div>
+                              <div className="p-2 rounded-lg bg-white/60 text-center">
+                                <p className="text-[8px] text-[#1a1a2e]/40 uppercase">Charge-offs</p>
+                                <p className={cn("text-sm font-bold font-mono", g.chargeOffs > 0 ? "text-red-600" : "text-green-600")}>{g.chargeOffs}</p>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div>
+                            <p className="text-[10px] text-[#1a1a2e]/50 uppercase mb-2">Tradeline Profile</p>
+                            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                              <div className="p-2 rounded-lg bg-white/60 text-center">
+                                <p className="text-[8px] text-[#1a1a2e]/40 uppercase">Open Accounts</p>
+                                <p className="text-sm font-bold font-mono text-[#1a1a2e]/80">{g.openAccounts}</p>
+                              </div>
+                              <div className="p-2 rounded-lg bg-white/60 text-center">
+                                <p className="text-[8px] text-[#1a1a2e]/40 uppercase">Installment</p>
+                                <p className="text-sm font-bold font-mono text-[#1a1a2e]/80">{g.totalInstallmentAccounts}</p>
+                              </div>
+                              <div className="p-2 rounded-lg bg-white/60 text-center">
+                                <p className="text-[8px] text-[#1a1a2e]/40 uppercase">Mortgage</p>
+                                <p className={cn("text-sm font-bold", g.hasMortgage ? "text-green-600" : "text-[#1a1a2e]/40")}>{g.hasMortgage ? "Yes" : "No"}</p>
+                              </div>
+                              <div className="p-2 rounded-lg bg-white/60 text-center">
+                                <p className="text-[8px] text-[#1a1a2e]/40 uppercase">Account Mix</p>
+                                <p className={cn("text-[11px] font-semibold", g.accountMix === "Strong Mix" || g.accountMix === "Adequate Mix" ? "text-green-600" : g.accountMix === "Limited Mix" ? "text-yellow-600" : "text-red-600")}>{g.accountMix || "—"}</p>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div>
+                            <p className="text-[10px] text-[#1a1a2e]/50 uppercase mb-2">Balance &amp; Depth</p>
+                            <div className="grid grid-cols-3 gap-2">
+                              <div className="p-2 rounded-lg bg-white/60 text-center">
+                                <p className="text-[8px] text-[#1a1a2e]/40 uppercase">Total Limits</p>
+                                <p className="text-sm font-bold font-mono text-[#1a1a2e]/80">${g.totalRevolvingLimit.toLocaleString()}</p>
+                              </div>
+                              <div className="p-2 rounded-lg bg-white/60 text-center">
+                                <p className="text-[8px] text-[#1a1a2e]/40 uppercase">Balance Trend</p>
+                                <p className={cn("text-[11px] font-semibold", g.balanceTrend === "Improving" ? "text-green-600" : g.balanceTrend === "Stable" ? "text-[#1a1a2e]/70" : "text-red-600")}>{g.balanceTrend || "—"}</p>
+                              </div>
+                              <div className="p-2 rounded-lg bg-white/60 text-center">
+                                <p className="text-[8px] text-[#1a1a2e]/40 uppercase">Inquiries</p>
+                                <p className={cn("text-sm font-bold font-mono", activeBureau.hardInquiries > 4 ? "text-red-600" : activeBureau.hardInquiries > 2 ? "text-yellow-600" : "text-green-600")}>{activeBureau.hardInquiries}</p>
+                              </div>
+                            </div>
+                          </div>
+
+                          {g.authorizedUserAccounts > 0 && (
+                            <div className="p-3 rounded-xl bg-yellow-500/[0.06] border border-yellow-500/15">
+                              <p className="text-[10px] text-yellow-600/80"><span className="font-medium">AU Alert:</span> {g.authorizedUserAccounts} authorized user account(s) — reduced weight in underwriting</p>
+                            </div>
+                          )}
+
+                          {g.velocityRisk && (
+                            <div className="p-3 rounded-xl bg-white/50 border border-white/30">
+                              <div className="flex items-center justify-between mb-2">
+                                <p className="text-[10px] text-[#1a1a2e]/50 uppercase">Velocity Risk</p>
+                                <span className={cn("text-[10px] font-bold px-2 py-0.5 rounded-full",
+                                  g.velocityRisk.velocityTier === "A" ? "bg-green-500/15 text-green-600" :
+                                  g.velocityRisk.velocityTier === "B" ? "bg-yellow-500/15 text-yellow-600" :
+                                  g.velocityRisk.velocityTier === "C" ? "bg-orange-500/15 text-orange-600" :
+                                  "bg-red-500/15 text-red-600"
+                                )}>Tier {g.velocityRisk.velocityTier} — {g.velocityRisk.velocityTierLabel}</span>
+                              </div>
+                              <div className="grid grid-cols-2 gap-2 text-[10px]">
+                                <div className="flex justify-between"><span className="text-[#1a1a2e]/50">Expansion</span><span className="font-medium">{g.velocityRisk.portfolioExpansionGrade}</span></div>
+                                <div className="flex justify-between"><span className="text-[#1a1a2e]/50">Adj. Ceiling</span><span className="font-mono font-semibold">${g.velocityRisk.adjustedExposureCeiling.toLocaleString()}</span></div>
+                              </div>
+                              {g.velocityRisk.mandatoryWaitingMonths > 0 && (
+                                <p className="text-[9px] text-red-500/70 mt-1">Mandatory {g.velocityRisk.mandatoryWaitingMonths}-month wait before new applications</p>
+                              )}
+                            </div>
+                          )}
+
+                          {g.denialTriggers.length > 0 && (
+                            <div className="p-3 rounded-xl bg-red-500/[0.04] border border-red-500/10">
+                              <p className="text-[10px] text-red-600/70 uppercase mb-2">Denial Triggers</p>
+                              {g.denialTriggers.map((t, i) => (
+                                <p key={i} className="text-[11px] text-[#1a1a2e]/70 flex items-start gap-2 mb-1"><AlertTriangle className="w-3 h-3 text-red-500/60 shrink-0 mt-0.5" />{t}</p>
+                              ))}
+                            </div>
+                          )}
+
+                          <div>
+                            <p className="text-[10px] text-[#1a1a2e]/50 uppercase mb-2">Action Items</p>
+                            <div className="space-y-1.5">
+                              {g.actionItems.map((item, i) => (
+                                <div key={i} className="flex items-start gap-2">
+                                  <div className="w-1.5 h-1.5 rounded-full bg-[#3a3a5a]/40 mt-1.5 shrink-0" />
+                                  <p className="text-[11px] text-[#1a1a2e]/70 leading-relaxed">{item}</p>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })()}
                   </div>
 
                   {capitalOsData.readiness.riskDepartmentNotes && (

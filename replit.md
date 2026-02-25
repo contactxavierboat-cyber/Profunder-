@@ -8,7 +8,8 @@ A subscription-based ($50/month via Stripe) AI-powered fundability platform ("Ca
 - 2026-02-25: **BASE44 Master Prompt V2** - Metric-based underwriting, NO composite score. 8 risk metrics evaluated independently: Utilization, Payment Performance, Payment Recency, Derogatory Events, Inquiry Velocity, Credit Depth, Account Mix, Balance Trend
 - 2026-02-25: Risk Tiers by concentration: PRIME (clean across all metrics), STANDARD (minor flags), SUBPRIME (multiple flags), DECLINE LIKELY (severe triggers)
 - 2026-02-25: New DB columns: utilizationLevel, paymentPerformance, derogatoryStatus, inquiryVelocity, creditDepthAssessment (text metric statuses)
-- 2026-02-25: Exposure Ceiling Model: PRIME 2.5x, STANDARD 2.0x, SUBPRIME 1.5x largest existing card
+- 2026-02-25: Exposure Ceiling Model: Always 2.5x highest limit reporting on each bureau (universal, not tier-dependent)
+- 2026-02-25: Progress Tracker revamped with bureau tabs (Experian/Equifax/TransUnion) — each bureau shows full underwriting breakdown: exposure (2.5x highest limit), revolving utilization, payment/derogatory, tradeline profile, balance/depth, velocity risk, denial triggers, action items
 - 2026-02-25: Removed Build Strategy Simulators (Bank Rating + Pledge Loan) from dashboard
 - 2026-02-25: Dashboard shows Risk Tier card instead of score gauge, Risk Metrics panel with severity badges, Exposure Policy panel with denial triggers
 - 2026-02-25: **Per-Bureau Credit Report Uploads** — Bureau Health section now shows "Not Uploaded" with upload button for each bureau (Experian, Equifax, TransUnion). Each bureau stores its own extracted data in bureauHealthData JSON. Only uploaded bureaus show metrics.

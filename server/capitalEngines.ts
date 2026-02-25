@@ -301,15 +301,7 @@ export function calculateSafeExposure(user: User): SafeExposure {
   if (user.exposureCeiling && user.exposureCeiling > 0) {
     maxSafe = user.exposureCeiling;
   } else {
-    const riskTier = user.riskTier;
-    if (riskTier === "PRIME") maxSafe = largestLimit * 2.5;
-    else if (riskTier === "STANDARD") maxSafe = largestLimit * 2.0;
-    else if (riskTier === "SUBPRIME") maxSafe = largestLimit * 1.5;
-    else if (creditScore >= 750) maxSafe = largestLimit * 2.5;
-    else if (creditScore >= 700) maxSafe = largestLimit * 2.0;
-    else if (creditScore >= 650) maxSafe = largestLimit * 1.5;
-    else if (creditScore >= 600) maxSafe = largestLimit * 1.0;
-    else maxSafe = largestLimit * 0.5;
+    maxSafe = largestLimit * 2.5;
   }
 
   maxSafe = Math.round(maxSafe);
@@ -519,11 +511,7 @@ export function calculateBureauHealth(user: User): { bureaus: BureauHealth[]; pr
       default: riskTierColor = "#ef4444";
     }
 
-    let exposureMultiplier: number;
-    if (riskTier === "PRIME") exposureMultiplier = 2.5;
-    else if (riskTier === "STANDARD") exposureMultiplier = 2.0;
-    else if (riskTier === "SUBPRIME") exposureMultiplier = 1.5;
-    else exposureMultiplier = 0.5;
+    const exposureMultiplier = 2.5;
     const exposureCeiling = Math.round(largestLimit * exposureMultiplier);
 
     let fundingPhase: string;

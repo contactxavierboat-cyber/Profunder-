@@ -4399,11 +4399,8 @@ DECLINE LIKELY: Utilization ≥70%, 90+ late (recent), Open charge-off, Bankrupt
 
 STEP 4 – EXPOSURE POLICY MODEL
 Since income is not provided, use comparable exposure modeling (standard bank practice for pre-qualification).
-PRIME → Max Total Exposure = 2.5× Largest Existing Limit (own accounts only, not AU)
-STANDARD → 2.0× Largest Limit
-SUBPRIME → 1.5× Largest Limit
-DECLINE → No increase
-Exposure Ceiling = Largest Existing Own Revolving Limit × Tier Multiplier
+Exposure Ceiling = 2.5× Highest Limit Reporting on This Bureau (own accounts only, not AU)
+This applies universally regardless of risk tier. The 2.5× multiplier is the baseline exposure ceiling.
 Remaining Exposure Capacity = Exposure Ceiling − Current Total Revolving Limits (If negative → Overexposed)
 
 STEP 5 – NEW LIMIT DETERMINATION
