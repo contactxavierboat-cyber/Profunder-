@@ -3,7 +3,7 @@ import { useAuth } from "@/lib/store";
 import { LayoutDashboard, Shield, LogOut, FileText, Users, BarChart3, Menu, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
-import { BaalioLogo } from "@/components/baalio-logo";
+import { ProfundrLogo } from "@/components/profundr-logo";
 
 export function DashboardLayout({ children }: { children: React.ReactNode }) {
   const { user, logout } = useAuth();

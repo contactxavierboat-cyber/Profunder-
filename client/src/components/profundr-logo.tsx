@@ -1,4 +1,4 @@
-interface BaalioLogoProps {
+interface ProfundrLogoProps {
   size?: "xs" | "sm" | "md" | "lg";
   className?: string;
 }
@@ -10,7 +10,7 @@ const SIZES = {
   lg: { fontSize: "28px" },
 };
 
-export function BaalioLogo({ size = "sm", className = "" }: BaalioLogoProps) {
+export function ProfundrLogo({ size = "sm", className = "" }: ProfundrLogoProps) {
   const s = SIZES[size];
   return (
     <span

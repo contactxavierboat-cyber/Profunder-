@@ -143,7 +143,7 @@ export function ChatInterface() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = 'baalio-Session.txt';
+    a.download = 'profundr-Session.txt';
     a.click();
     toast({ title: "Summary Downloaded" });
   };
@@ -165,7 +165,7 @@ export function ChatInterface() {
             </button>
           )}
           <div>
-            <CardTitle className="text-sm font-bold text-[#3a3a5a]">{activeMentor ? activeMentor.name : "baalio® AI"}</CardTitle>
+            <CardTitle className="text-sm font-bold text-[#3a3a5a]">{activeMentor ? activeMentor.name : "Profundr AI"}</CardTitle>
             <p className="text-[10px] text-[#6a6a8a] uppercase tracking-widest">{activeMentor ? activeMentor.specialty : "Mentorship On Demand"}</p>
           </div>
         </div>
@@ -207,7 +207,7 @@ export function ChatInterface() {
               <div className="w-10 h-10 rounded-full bg-white/50 border border-white/30 flex items-center justify-center">
                 <Bot className="w-5 h-5 text-[#5a5a7a]" />
               </div>
-              <p className="text-[11px] font-semibold text-[#2a2a4a] leading-tight">baalio AI</p>
+              <p className="text-[11px] font-semibold text-[#2a2a4a] leading-tight">Profundr AI</p>
               <p className="text-[9px] text-[#6a6a8a] leading-tight">General Mentor</p>
             </button>
             {Object.entries(MENTOR_INFO).map(([key, mentor]) => (

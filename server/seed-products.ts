@@ -3,7 +3,7 @@ import { getUncachableStripeClient } from './stripeClient';
 async function createProducts() {
   const stripe = await getUncachableStripeClient();
 
-  const products = await stripe.products.search({ query: "name:'baalio Monthly'" });
+  const products = await stripe.products.search({ query: "name:'Profundr Monthly'" });
   if (products.data.length > 0) {
     console.log('Product already exists:', products.data[0].id);
     const prices = await stripe.prices.list({ product: products.data[0].id, active: true });
@@ -14,8 +14,8 @@ async function createProducts() {
   }
 
   const product = await stripe.products.create({
-    name: 'baalio Monthly',
-    description: 'baalio Monthly Access — AI-powered fundability analysis, bank-level underwriting logic, document verification, and priority support.',
+    name: 'Profundr Monthly',
+    description: 'Profundr Monthly Access — AI-powered fundability analysis, bank-level underwriting logic, document verification, and priority support.',
   });
   console.log('Created product:', product.id);
 

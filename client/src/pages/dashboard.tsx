@@ -1931,7 +1931,7 @@ export default function DashboardPage() {
                             isMe ? "bg-white/60 border border-white/30" :
                             "bg-white/50 border border-white/30"
                           )}>
-                            {isAi && <p className="text-[9px] text-purple-400/50 font-medium mb-1">baalio® Team AI</p>}
+                            {isAi && <p className="text-[9px] text-purple-400/50 font-medium mb-1">Profundr Team AI</p>}
                             {!isMe && !isAi && <p className="text-[9px] text-[#1a1a2e]/60 font-medium mb-1">{dmFriendName}</p>}
                             <p className="text-[12px] text-[#1a1a2e]/90 leading-relaxed whitespace-pre-wrap">{msg.content}</p>
                             <p className="text-[9px] text-[#1a1a2e]/45 mt-1.5">{new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
