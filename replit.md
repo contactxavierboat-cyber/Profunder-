@@ -10,6 +10,7 @@ A subscription-based ($50/month via Stripe) AI-powered fundability platform ("Ca
 - 2026-02-25: Exposure Ceiling Model: PRIME 2.5x, STANDARD 2.0x, SUBPRIME 1.5x largest existing card
 - 2026-02-25: Removed Build Strategy Simulators (Bank Rating + Pledge Loan) from dashboard
 - 2026-02-25: Dashboard shows Risk Tier card instead of score gauge, Risk Metrics panel with severity badges, Exposure Policy panel with denial triggers
+- 2026-02-25: **Per-Bureau Credit Report Uploads** — Bureau Health section now shows "Not Uploaded" with upload button for each bureau (Experian, Equifax, TransUnion). Each bureau stores its own extracted data in bureauHealthData JSON. Only uploaded bureaus show metrics.
 - 2026-02-25: **Rebranded from baalio to Profundr** — all text, imports, meta tags, AI prompts, component names updated
 - 2026-02-25: **$50/month Stripe subscription paywall** — new users start as inactive, login redirects to subscription page, dashboard guards against unsubscribed users
 - 2026-02-25: Logo component renamed from baalio-logo.tsx to profundr-logo.tsx

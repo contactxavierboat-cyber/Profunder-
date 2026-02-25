@@ -328,36 +328,46 @@ export function calculateSafeExposure(user: User): SafeExposure {
 
 export interface BureauHealth {
   bureau: string;
+  uploaded: boolean;
   utilization: number;
   hardInquiries: number;
   derogatoryCount: number;
   oldestAccountAge: number;
-  riskStatus: "Strong" | "Moderate" | "Weak";
+  riskStatus: "Strong" | "Moderate" | "Weak" | "Not Uploaded";
   riskColor: string;
   priority: boolean;
   recommendation: string;
 }
 
 export function calculateBureauHealth(user: User): { bureaus: BureauHealth[]; priorityBureau: string } {
-  const utilization = user.utilizationPercent ?? 50;
-  const inquiries = user.inquiries || 0;
-  const derogatories = user.derogatoryAccounts || 0;
-  const collections = user.collections || 0;
-  const oldestAge = user.oldestAccountYears || 0;
-  const latePayments = user.latePayments || 0;
+  let bureauData: any = {};
+  try {
+    if ((user as any).bureauHealthData) bureauData = JSON.parse((user as any).bureauHealthData as string);
+  } catch {}
 
-  const totalNeg = derogatories + collections;
+  const bureauNames = ["Experian", "Equifax", "TransUnion"];
 
-  const bureauVariance = (base: number, seed: number) => {
-    const variance = Math.round((seed % 7) - 3);
-    return Math.max(0, base + variance);
-  };
+  const bureaus: BureauHealth[] = bureauNames.map(name => {
+    const data = bureauData[name];
+    if (!data || !data.uploaded) {
+      return {
+        bureau: name,
+        uploaded: false,
+        utilization: 0,
+        hardInquiries: 0,
+        derogatoryCount: 0,
+        oldestAccountAge: 0,
+        riskStatus: "Not Uploaded" as const,
+        riskColor: "#6b7280",
+        priority: false,
+        recommendation: `Upload your ${name} credit report to see bureau-specific data.`,
+      };
+    }
 
-  const makeBureau = (name: string, seed: number): BureauHealth => {
-    const util = bureauVariance(utilization, seed);
-    const inq = bureauVariance(inquiries, seed + 3);
-    const derog = bureauVariance(totalNeg, seed + 5);
-    const age = Math.max(0, oldestAge + (seed % 3) - 1);
+    const util = data.utilizationPercent || 0;
+    const inq = data.inquiries || 0;
+    const derog = (data.derogatoryAccounts || 0) + (data.collections || 0);
+    const age = data.oldestAccountYears || 0;
 
     let status: "Strong" | "Moderate" | "Weak";
     let riskColor: string;
@@ -374,25 +384,23 @@ export function calculateBureauHealth(user: User): { bureaus: BureauHealth[]; pr
     else if (status === "Moderate") recommendation = `${name} needs optimization. Address ${derog > 0 ? "derogatory items" : util > 30 ? "utilization" : "inquiry density"} first.`;
     else recommendation = `${name} requires repair. Focus dispute efforts here before applying.`;
 
-    return { bureau: name, utilization: util, hardInquiries: inq, derogatoryCount: derog, oldestAccountAge: age, riskStatus: status, riskColor, priority: false, recommendation };
-  };
-
-  const bureaus = [
-    makeBureau("Experian", 2),
-    makeBureau("Equifax", 5),
-    makeBureau("TransUnion", 8),
-  ];
-
-  const strongest = bureaus.reduce((best, b) => {
-    const score = (b.riskStatus === "Strong" ? 3 : b.riskStatus === "Moderate" ? 2 : 1) * 10
-      - b.derogatoryCount * 5 - b.utilization * 0.1 - b.hardInquiries * 2;
-    const bestScore = (best.riskStatus === "Strong" ? 3 : best.riskStatus === "Moderate" ? 2 : 1) * 10
-      - best.derogatoryCount * 5 - best.utilization * 0.1 - best.hardInquiries * 2;
-    return score > bestScore ? b : best;
+    return { bureau: name, uploaded: true, utilization: util, hardInquiries: inq, derogatoryCount: derog, oldestAccountAge: age, riskStatus: status, riskColor, priority: false, recommendation };
   });
-  strongest.priority = true;
 
-  return { bureaus, priorityBureau: strongest.bureau };
+  const uploadedBureaus = bureaus.filter(b => b.uploaded);
+  if (uploadedBureaus.length > 0) {
+    const strongest = uploadedBureaus.reduce((best, b) => {
+      const score = (b.riskStatus === "Strong" ? 3 : b.riskStatus === "Moderate" ? 2 : 1) * 10
+        - b.derogatoryCount * 5 - b.utilization * 0.1 - b.hardInquiries * 2;
+      const bestScore = (best.riskStatus === "Strong" ? 3 : best.riskStatus === "Moderate" ? 2 : 1) * 10
+        - best.derogatoryCount * 5 - best.utilization * 0.1 - best.hardInquiries * 2;
+      return score > bestScore ? b : best;
+    });
+    strongest.priority = true;
+    return { bureaus, priorityBureau: strongest.bureau };
+  }
+
+  return { bureaus, priorityBureau: "None" };
 }
 
 export interface ApplicationWindow {

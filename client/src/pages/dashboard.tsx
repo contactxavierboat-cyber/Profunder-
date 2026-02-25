@@ -166,7 +166,7 @@ interface CapitalOsDashboard {
     limits: { safe: number; caution: number; denial: number };
   };
   bureauHealth: {
-    bureaus: { bureau: string; utilization: number; hardInquiries: number; derogatoryCount: number; oldestAccountAge: number; riskStatus: string; riskColor: string; priority: boolean; recommendation: string }[];
+    bureaus: { bureau: string; uploaded: boolean; utilization: number; hardInquiries: number; derogatoryCount: number; oldestAccountAge: number; riskStatus: string; riskColor: string; priority: boolean; recommendation: string }[];
     priorityBureau: string;
   };
   applicationWindow: {
@@ -254,6 +254,8 @@ export default function DashboardPage() {
   const [docUploadType, setDocUploadType] = useState<"credit_report" | "bank_statement" | null>(null);
   const creditReportInputRef = useRef<HTMLInputElement>(null);
   const bankStatementInputRef = useRef<HTMLInputElement>(null);
+  const bureauUploadRefs = useRef<{ [key: string]: HTMLInputElement | null }>({});
+  const [bureauUploading, setBureauUploading] = useState<string | null>(null);
   const [repairData, setRepairData] = useState<any>(null);
   const [repairLoading, setRepairLoading] = useState(false);
   const [repairAnalyzing, setRepairAnalyzing] = useState(false);
@@ -468,9 +470,10 @@ export default function DashboardPage() {
     finally { setCapitalOsLoading(false); }
   };
 
-  const handleDocumentUpload = async (file: File, documentType: "credit_report" | "bank_statement") => {
+  const handleDocumentUpload = async (file: File, documentType: "credit_report" | "bank_statement", bureau?: string) => {
     setDocUploading(true);
     setDocUploadType(documentType);
+    if (bureau) setBureauUploading(bureau);
     try {
       const fileContent = await new Promise<string>((resolve, reject) => {
         const reader = new FileReader();
@@ -485,11 +488,13 @@ export default function DashboardPage() {
         if (isPdf) reader.readAsDataURL(file);
         else reader.readAsText(file);
       });
+      const body: any = { fileContent, documentType };
+      if (bureau) body.bureau = bureau;
       const res = await fetch("/api/analyze-document", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify({ fileContent, documentType }),
+        body: JSON.stringify(body),
       });
       if (res.ok) {
         const data = await res.json();
@@ -508,7 +513,7 @@ export default function DashboardPage() {
       }
     } catch (err) {
       toast({ title: "Upload Error", description: "Failed to upload document. Please try again.", variant: "destructive" });
-    } finally { setDocUploading(false); setDocUploadType(null); }
+    } finally { setDocUploading(false); setDocUploadType(null); setBureauUploading(null); }
   };
 
   const fetchRepairData = async () => {
@@ -883,24 +888,49 @@ export default function DashboardPage() {
                         <div className="flex items-center justify-between mb-3">
                           <span className="text-sm font-semibold text-[#1a1a2e]">{b.bureau}</span>
                           <span className="text-[10px] px-2 py-0.5 rounded-full font-medium" style={{ backgroundColor: b.riskColor + '18', color: b.riskColor }}>
-                            {b.riskStatus}{b.priority ? " · Priority" : ""}
+                            {b.riskStatus}{b.uploaded && b.priority ? " · Priority" : ""}
                           </span>
                         </div>
-                        <div className="grid grid-cols-3 gap-3 text-center mb-3">
-                          <div>
-                            <p className="text-lg font-bold text-[#1a1a2e]">{b.utilization}%</p>
-                            <p className="text-[9px] text-[#1a1a2e]/50">Utilization</p>
+                        {b.uploaded ? (
+                          <>
+                            <div className="grid grid-cols-3 gap-3 text-center mb-3">
+                              <div>
+                                <p className="text-lg font-bold text-[#1a1a2e]">{b.utilization}%</p>
+                                <p className="text-[9px] text-[#1a1a2e]/50">Utilization</p>
+                              </div>
+                              <div>
+                                <p className="text-lg font-bold text-[#1a1a2e]">{b.hardInquiries}</p>
+                                <p className="text-[9px] text-[#1a1a2e]/50">Inquiries</p>
+                              </div>
+                              <div>
+                                <p className="text-lg font-bold text-[#1a1a2e]">{b.derogatoryCount}</p>
+                                <p className="text-[9px] text-[#1a1a2e]/50">Derogatory</p>
+                              </div>
+                            </div>
+                            <p className="text-[10px] text-[#1a1a2e]/60 leading-relaxed">{b.recommendation}</p>
+                          </>
+                        ) : (
+                          <div className="flex flex-col items-center justify-center py-4">
+                            <Upload className="w-6 h-6 text-[#1a1a2e]/30 mb-2" />
+                            <p className="text-[11px] text-[#1a1a2e]/50 mb-3 text-center">No report uploaded</p>
+                            <input
+                              ref={(el) => { bureauUploadRefs.current[b.bureau] = el; }}
+                              type="file" accept=".pdf,.doc,.docx,.txt,.csv" className="hidden"
+                              data-testid={`input-bureau-upload-${b.bureau.toLowerCase()}`}
+                              onChange={(e) => { const file = e.target.files?.[0]; if (file) handleDocumentUpload(file, "credit_report", b.bureau); e.target.value = ""; }}
+                            />
+                            <button
+                              onClick={() => bureauUploadRefs.current[b.bureau]?.click()}
+                              disabled={docUploading}
+                              className={cn("px-4 py-2 rounded-xl bg-[#3a3a5a] text-white text-[11px] font-medium hover:bg-[#2a2a4a] transition-colors flex items-center gap-2",
+                                docUploading && bureauUploading === b.bureau && "opacity-50")}
+                              data-testid={`button-upload-bureau-${b.bureau.toLowerCase()}`}
+                            >
+                              {docUploading && bureauUploading === b.bureau ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Upload className="w-3.5 h-3.5" />}
+                              Upload {b.bureau}
+                            </button>
                           </div>
-                          <div>
-                            <p className="text-lg font-bold text-[#1a1a2e]">{b.hardInquiries}</p>
-                            <p className="text-[9px] text-[#1a1a2e]/50">Inquiries</p>
-                          </div>
-                          <div>
-                            <p className="text-lg font-bold text-[#1a1a2e]">{b.derogatoryCount}</p>
-                            <p className="text-[9px] text-[#1a1a2e]/50">Derogatory</p>
-                          </div>
-                        </div>
-                        <p className="text-[10px] text-[#1a1a2e]/60 leading-relaxed">{b.recommendation}</p>
+                        )}
                       </div>
                     ))}
                   </div>
@@ -908,24 +938,19 @@ export default function DashboardPage() {
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
                     <div className="rounded-2xl bg-white/70 backdrop-blur-md border border-white/40 p-6" data-testid="doc-upload-section">
                       <p className="text-xs text-[#1a1a2e]/70 mb-4">Document Analysis</p>
-                      <input ref={creditReportInputRef} type="file" accept=".pdf,.doc,.docx,.txt,.csv" className="hidden" data-testid="input-credit-report-upload"
-                        onChange={(e) => { const file = e.target.files?.[0]; if (file) handleDocumentUpload(file, "credit_report"); e.target.value = ""; }} />
                       <input ref={bankStatementInputRef} type="file" accept=".pdf,.doc,.docx,.txt,.csv" className="hidden" data-testid="input-bank-statement-upload"
                         onChange={(e) => { const file = e.target.files?.[0]; if (file) handleDocumentUpload(file, "bank_statement"); e.target.value = ""; }} />
                       <div className="space-y-2">
-                        <button onClick={() => creditReportInputRef.current?.click()} disabled={docUploading}
-                          className={cn("w-full flex items-center gap-3 p-3 rounded-xl border transition-all text-left",
-                            fundingData?.hasCreditReport ? "border-green-500/20 bg-green-500/[0.04]" : "border-white/30 bg-white/50 hover:bg-white/60",
-                            docUploading && docUploadType === "credit_report" && "opacity-50"
-                          )} data-testid="button-upload-credit-report">
-                          {docUploading && docUploadType === "credit_report" ? <Loader2 className="w-5 h-5 text-[#1a1a2e]/75 animate-spin shrink-0" /> :
-                            fundingData?.hasCreditReport ? <CheckCircle2 className="w-5 h-5 text-green-400 shrink-0" /> :
-                            <Upload className="w-5 h-5 text-[#1a1a2e]/65 shrink-0" />}
+                        <p className="text-[10px] text-[#1a1a2e]/50 mb-1">Upload bureau reports from the Bureau Health section above</p>
+                        <div className="flex items-center gap-3 p-3 rounded-xl border border-white/30 bg-white/50">
+                          {fundingData?.hasCreditReport ? <CheckCircle2 className="w-5 h-5 text-green-400 shrink-0" /> : <Upload className="w-5 h-5 text-[#1a1a2e]/65 shrink-0" />}
                           <div>
-                            <p className="text-xs font-medium text-[#1a1a2e]/90">{fundingData?.hasCreditReport ? "Credit Report Uploaded" : "Upload Credit Report"}</p>
-                            <p className="text-[10px] text-[#1a1a2e]/55">PDF, DOC, TXT</p>
+                            <p className="text-xs font-medium text-[#1a1a2e]/90">
+                              {capitalOsData ? `${capitalOsData.bureauHealth.bureaus.filter(b => b.uploaded).length}/3 Bureau Reports Uploaded` : "No Bureau Reports Uploaded"}
+                            </p>
+                            <p className="text-[10px] text-[#1a1a2e]/55">Upload each bureau separately above</p>
                           </div>
-                        </button>
+                        </div>
                         <button onClick={() => bankStatementInputRef.current?.click()} disabled={docUploading}
                           className={cn("w-full flex items-center gap-3 p-3 rounded-xl border transition-all text-left",
                             fundingData?.hasBankStatement ? "border-green-500/20 bg-green-500/[0.04]" : "border-white/30 bg-white/50 hover:bg-white/60",

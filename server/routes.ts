@@ -4235,13 +4235,14 @@ Respond to the latest question as the team's AI mentor. Be direct, helpful, and 
       const bodySchema = z.object({
         fileContent: z.string().min(1),
         documentType: z.enum(["credit_report", "bank_statement"]),
+        bureau: z.enum(["Experian", "Equifax", "TransUnion"]).optional(),
       });
       const parsed = bodySchema.safeParse(req.body);
       if (!parsed.success) {
         return res.status(400).json({ error: "Invalid request. Provide fileContent and documentType." });
       }
 
-      const { fileContent, documentType } = parsed.data;
+      const { fileContent, documentType, bureau } = parsed.data;
 
       let extractedText = "";
       let extractionMethod = "";
@@ -4496,6 +4497,37 @@ ${extractedText}
         updateData.approvalProbability = analysisResult.approvalProbability || null;
         updateData.primaryDenialTriggers = analysisResult.primaryDenialTriggers ? JSON.stringify(analysisResult.primaryDenialTriggers) : null;
         updateData.riskDepartmentNotes = analysisResult.riskDepartmentNotes || null;
+
+        if (bureau) {
+          let existingBureauData: any = {};
+          try {
+            if (user.bureauHealthData) existingBureauData = JSON.parse(user.bureauHealthData as string);
+          } catch {}
+          existingBureauData[bureau] = {
+            uploaded: true,
+            uploadDate: new Date().toISOString(),
+            utilizationPercent: safeInt(analysisResult.utilizationPercent) ?? 0,
+            inquiries: safeInt(analysisResult.inquiries) ?? 0,
+            inquiriesLast6Months: safeInt(analysisResult.inquiriesLast6Months) ?? 0,
+            derogatoryAccounts: safeInt(analysisResult.derogatoryAccounts) ?? 0,
+            collections: safeInt(analysisResult.collections) ?? 0,
+            latePayments: safeInt(analysisResult.latePayments) ?? 0,
+            oldestAccountYears: safeInt(analysisResult.oldestAccountYears) ?? 0,
+            openAccounts: safeInt(analysisResult.openAccounts) ?? 0,
+            totalRevolvingLimit: safeInt(analysisResult.totalRevolvingLimit) ?? 0,
+            totalBalances: safeInt(analysisResult.totalBalances) ?? 0,
+            creditScoreExact: safeInt(analysisResult.creditScoreExact),
+            riskTier: analysisResult.riskTier || null,
+            utilizationLevel: analysisResult.utilizationLevel || null,
+            paymentPerformance: analysisResult.paymentPerformance || null,
+            derogatoryStatus: analysisResult.derogatoryStatus || null,
+            inquiryVelocity: analysisResult.inquiryVelocity || null,
+            creditDepth: analysisResult.creditDepth || null,
+            chargeOffs: safeInt(analysisResult.chargeOffs) ?? 0,
+            largestRevolvingLimit: safeInt(analysisResult.largestRevolvingLimit),
+          };
+          updateData.bureauHealthData = JSON.stringify(existingBureauData);
+        }
       } else {
         updateData.hasBankStatement = true;
       }
