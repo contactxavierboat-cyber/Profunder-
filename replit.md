@@ -1,9 +1,16 @@
-# baalio
+# Profundr
 
 ## Overview
-A subscription-based AI mentorship platform ("Capital Operating System") combining comprehensive funding phase management (5 phases: Repair→Build→Optimize→Apply→Scale) with AI-powered mentorship. Features weighted 6-category Capital Readiness scoring, Safe Exposure monitoring, Bureau Health tracking (3-bureau map), dispute case management with AI-generated FCRA-compliant letters, bank rating and pledge loan simulators, capital stack planning, application window optimization, AI chat workspace with 7 bot mentors, Creator Connect (AI-powered YouTube creator matching without API key), Credit Report Repair System, Messages/DM system with Team AI, session-based auth, PDF upload with OCR, AOL AIM-style buddy list sidebar, and admin panel.
+A subscription-based ($50/month via Stripe) AI-powered fundability platform ("Capital Operating System") combining comprehensive funding phase management (5 phases: Repair→Build→Optimize→Apply→Scale) with commercial bank-grade credit underwriting. Features BASE44 Master Prompt (7-step commercial bank underwriting engine with 0-100 scoring, 4 risk tiers, exposure ceiling model, per-card approval logic), Safe Exposure monitoring, Bureau Health tracking (3-bureau map), dispute case management with AI-generated FCRA-compliant letters, bank rating and pledge loan simulators, capital stack planning, application window optimization, AI chat workspace with 7 bot mentors, Creator Connect (AI-powered YouTube creator matching without API key), Credit Report Repair System, Messages/DM system with Team AI, session-based auth, PDF upload with OCR, AOL AIM-style buddy list sidebar, and admin panel. Subscription paywall enforced — users must pay before accessing dashboard.
 
 ## Recent Changes
+- 2026-02-25: **BASE44 Master Prompt** - Commercial Bank Personal Credit Underwriting Engine with 7-step analysis (Extract → Credit Quality 0-50 → Utilization & Exposure 0-25 → Depth & Stability 0-15 → Velocity & Risk Flags 0-10 → Exposure Ceiling Model → Per-Card Approval Logic)
+- 2026-02-25: Risk Tiers: PRIME (80-100), STANDARD (65-79), SUBPRIME (50-64), DECLINE LIKELY (<50)
+- 2026-02-25: Exposure Ceiling Model: PRIME 2.5x, STANDARD 2.0x, SUBPRIME 1.5x largest existing card
+- 2026-02-25: 21 new database columns for underwriting data (largestRevolvingLimit, underwritingScore, riskTier, exposureCeiling, remainingSafeCapacity, approvalProbability, etc.)
+- 2026-02-25: **Rebranded from baalio to Profundr** — all text, imports, meta tags, AI prompts, component names updated
+- 2026-02-25: **$50/month Stripe subscription paywall** — new users start as inactive, login redirects to subscription page, dashboard guards against unsubscribed users
+- 2026-02-25: Logo component renamed from baalio-logo.tsx to profundr-logo.tsx
 - 2026-02-16: **3-Round Dispute Letter System** - Repair Engine generates letters for every derogatory item with 2 angles (inaccurate + fraud), organized in 3 rounds (Day 0, Day 35-40, Day 65-75), bureau fraud dept addresses, mailing service recommendations, user address auto-populated
 - 2026-02-16: User address fields (fullName, streetAddress, city, state, zipCode) with save/load API
 - 2026-02-16: Build Strategy simulators moved from Repair Engine to Mission Control dashboard
