@@ -81,145 +81,175 @@ export function calculateFundingPhase(user: User): PhaseResult {
   };
 }
 
+export interface RiskMetric {
+  name: string;
+  status: string;
+  severity: "optimal" | "acceptable" | "elevated" | "high" | "severe" | "decline";
+  detail: string;
+}
+
 export interface ReadinessScore {
-  total: number;
-  categories: {
-    name: string;
-    weight: number;
-    score: number;
-    maxScore: number;
-    weightedScore: number;
-    tooltip: string;
-  }[];
-  grade: string;
-  gradeColor: string;
+  riskTier: string;
+  riskTierColor: string;
+  metrics: RiskMetric[];
+  exposureCeiling: number;
+  remainingSafeCapacity: number;
+  recommendedApproval: string;
+  approvalProbability: string;
+  primaryDenialTriggers: string[];
+  riskDepartmentNotes: string;
+}
+
+function severityFromStatus(status: string): "optimal" | "acceptable" | "elevated" | "high" | "severe" | "decline" {
+  const s = status.toLowerCase();
+  if (s.includes("optimal") || s.includes("clean") || s.includes("none") || s.includes("normal") || s.includes("strong")) return "optimal";
+  if (s.includes("acceptable") || s.includes("stable")) return "acceptable";
+  if (s.includes("elevated") || s.includes("moderate") || s.includes("minor")) return "elevated";
+  if (s.includes("high risk") || s.includes("high credit")) return "high";
+  if (s.includes("severe") || s.includes("major")) return "severe";
+  if (s.includes("decline") || s.includes("near decline") || s.includes("thin")) return "decline";
+  return "elevated";
+}
+
+function severityColor(severity: string): string {
+  switch (severity) {
+    case "optimal": return "#10b981";
+    case "acceptable": return "#22c55e";
+    case "elevated": return "#eab308";
+    case "high": return "#f97316";
+    case "severe": return "#ef4444";
+    case "decline": return "#dc2626";
+    default: return "#6b7280";
+  }
 }
 
 export function calculateCapitalReadiness(user: User): ReadinessScore {
-  const underwritingScore = user.underwritingScore;
-  const riskTier = user.riskTier;
+  const riskTier = (user as any).riskTier || null;
+  const utilizationLevel = (user as any).utilizationLevel || null;
+  const paymentPerformance = (user as any).paymentPerformance || null;
+  const derogatoryStatus = (user as any).derogatoryStatus || null;
+  const inquiryVelocity = (user as any).inquiryVelocity || null;
+  const creditDepth = (user as any).creditDepthAssessment || null;
 
-  if (underwritingScore !== null && underwritingScore !== undefined && riskTier) {
-    const creditScore = user.creditScoreExact || 0;
-    const utilization = user.utilizationPercent ?? 0;
-    const inquiries = user.inquiries || 0;
-    const avgAge = user.avgAccountAgeYears || 0;
-    const revolvingLimit = user.totalRevolvingLimit || 0;
-    const latePayments = user.latePayments || 0;
-    const collections = user.collections || 0;
-    const derogatories = user.derogatoryAccounts || 0;
-    const openAccounts = user.openAccounts || 0;
-
-    const cqScore = user.creditQualityScore ?? 0;
-    const ueScore = user.utilizationExposureScore ?? 0;
-    const dsScore = user.depthStabilityScore ?? 0;
-    const vrScore = user.velocityRiskScore ?? 0;
-
-    const total = underwritingScore;
-
-    let grade: string;
-    let gradeColor: string;
-    if (total >= 80) { grade = "A+"; gradeColor = "#10b981"; }
-    else if (total >= 70) { grade = "A"; gradeColor = "#22c55e"; }
-    else if (total >= 65) { grade = "B+"; gradeColor = "#84cc16"; }
-    else if (total >= 55) { grade = "B"; gradeColor = "#eab308"; }
-    else if (total >= 45) { grade = "C"; gradeColor = "#f97316"; }
-    else if (total >= 30) { grade = "D"; gradeColor = "#ef4444"; }
-    else { grade = "F"; gradeColor = "#dc2626"; }
-
-    const cqTooltip = creditScore > 0
-      ? `FICO ${creditScore} — ${riskTier} tier. ${latePayments > 0 ? latePayments + ' late payment(s), ' : ''}${collections > 0 ? collections + ' collection(s), ' : ''}${derogatories > 0 ? derogatories + ' derogatory item(s).' : 'No negative marks.'}`
-      : `Risk tier: ${riskTier}. Score reflects payment history and derogatory items.`;
-    const ueTooltip = `Utilization at ${utilization}%. ${inquiries > 0 ? inquiries + ' hard inquiries.' : 'No recent inquiries.'}`;
-    const dsTooltip = `Average account age: ${avgAge} years. ${openAccounts} open accounts. $${revolvingLimit.toLocaleString()} total limits.`;
-    const vrTooltip = `Velocity & risk flags assessment. ${derogatories > 0 ? 'Active derogatories detected.' : 'No major risk flags.'}`;
-
-    return {
-      total,
-      categories: [
-        { name: "Credit Quality", weight: 50, score: cqScore, maxScore: 50, weightedScore: cqScore, tooltip: cqTooltip },
-        { name: "Utilization & Exposure", weight: 25, score: ueScore, maxScore: 25, weightedScore: ueScore, tooltip: ueTooltip },
-        { name: "Depth & Stability", weight: 15, score: dsScore, maxScore: 15, weightedScore: dsScore, tooltip: dsTooltip },
-        { name: "Velocity & Risk", weight: 10, score: vrScore, maxScore: 10, weightedScore: vrScore, tooltip: vrTooltip },
-      ],
-      grade,
-      gradeColor,
-    };
-  }
-
-  const creditScore = user.creditScoreExact || 0;
+  const utilization = user.utilizationPercent ?? (user.totalRevolvingLimit && user.totalRevolvingLimit > 0
+    ? Math.round(((user.totalBalances || 0) / user.totalRevolvingLimit) * 100) : null);
   const latePayments = user.latePayments || 0;
   const collections = user.collections || 0;
   const derogatories = user.derogatoryAccounts || 0;
-  const publicRecords = user.publicRecords || 0;
-  const utilization = user.utilizationPercent ?? (user.totalRevolvingLimit && user.totalRevolvingLimit > 0
-    ? Math.round(((user.totalBalances || 0) / user.totalRevolvingLimit) * 100) : 100);
-  const revolvingLimit = user.totalRevolvingLimit || 0;
-  const inquiries = user.inquiries || 0;
-  const avgAge = user.avgAccountAgeYears || 0;
-  const openAccounts = user.openAccounts || 0;
-  const hasCR = user.hasCreditReport || false;
-  const hasBS = user.hasBankStatement || false;
-
-  let scoreRaw = 0;
-  if (creditScore >= 760) scoreRaw = 50;
-  else if (creditScore >= 720) scoreRaw = 44;
-  else if (creditScore >= 680) scoreRaw = 36;
-  else if (creditScore >= 640) scoreRaw = 26;
-  else if (creditScore >= 600) scoreRaw = 16;
-  else if (creditScore > 0) scoreRaw = 8;
-  if (latePayments > 0) scoreRaw = Math.max(0, scoreRaw - Math.min(15, latePayments * 5));
-  if (collections > 0) scoreRaw = Math.max(0, scoreRaw - Math.min(15, collections * 10));
-  if (derogatories > 0) scoreRaw = Math.max(0, scoreRaw - Math.min(10, derogatories * 5));
-  if (publicRecords > 0) scoreRaw = Math.max(0, scoreRaw - Math.min(10, publicRecords * 10));
-
-  let utilRaw = 0;
-  if (utilization <= 9) utilRaw = 25;
-  else if (utilization <= 29) utilRaw = 20;
-  else if (utilization <= 49) utilRaw = 15;
-  else if (utilization <= 69) utilRaw = 8;
-  else utilRaw = 3;
-  if (inquiries > 5) utilRaw = Math.max(0, utilRaw - 5);
-  else if (inquiries > 3) utilRaw = Math.max(0, utilRaw - 3);
-
+  const inquiries6m = (user as any).inquiriesLast6Months || 0;
   const oldestAge = user.oldestAccountYears || 0;
-  let depthRaw = 0;
-  if (oldestAge >= 10) depthRaw = 15;
-  else if (oldestAge >= 5) depthRaw = 12;
-  else if (oldestAge >= 2) depthRaw = 8;
-  else depthRaw = 4;
-  if (openAccounts < 3) depthRaw = Math.min(depthRaw, 6);
+  const openAccounts = user.openAccounts || 0;
+  const creditScore = user.creditScoreExact || 0;
 
-  let velocityRaw = 10;
-  if (derogatories > 1) velocityRaw = Math.min(velocityRaw, 4);
-  if (collections > 0) velocityRaw = Math.min(velocityRaw, 4);
+  const hasMetrics = riskTier !== null;
 
-  const total = Math.min(100, scoreRaw + utilRaw + depthRaw + velocityRaw);
+  let tier = riskTier || "UNKNOWN";
+  let utilizationStatus = utilizationLevel || "Unknown";
+  let paymentStatus = paymentPerformance || "Unknown";
+  let derogStatus = derogatoryStatus || "Unknown";
+  let inquiryStatus = inquiryVelocity || "Unknown";
+  let depthStatus = creditDepth || "Unknown";
 
-  let grade: string;
-  let gradeColor: string;
-  if (total >= 80) { grade = "A+"; gradeColor = "#10b981"; }
-  else if (total >= 70) { grade = "A"; gradeColor = "#22c55e"; }
-  else if (total >= 65) { grade = "B+"; gradeColor = "#84cc16"; }
-  else if (total >= 55) { grade = "B"; gradeColor = "#eab308"; }
-  else if (total >= 45) { grade = "C"; gradeColor = "#f97316"; }
-  else if (total >= 30) { grade = "D"; gradeColor = "#ef4444"; }
-  else { grade = "F"; gradeColor = "#dc2626"; }
+  if (!hasMetrics && user.hasCreditReport) {
+    if (utilization !== null) {
+      if (utilization < 10) utilizationStatus = "Optimal";
+      else if (utilization < 30) utilizationStatus = "Acceptable";
+      else if (utilization < 50) utilizationStatus = "Elevated Risk";
+      else if (utilization < 70) utilizationStatus = "High Risk";
+      else if (utilization < 85) utilizationStatus = "Severe Risk";
+      else utilizationStatus = "Near Decline Threshold";
+    }
 
-  const cqTooltip = creditScore > 0
-    ? `FICO ${creditScore}. ${latePayments > 0 ? latePayments + ' late payment(s). ' : ''}${collections > 0 ? collections + ' collection(s). ' : ''}${derogatories === 0 ? 'No derogatory marks.' : derogatories + ' derogatory item(s).'}`
-    : "No credit score data available.";
+    if (latePayments === 0) paymentStatus = "Clean";
+    else if (latePayments <= 2) paymentStatus = "Elevated";
+    else paymentStatus = "High Risk";
+
+    if (derogatories === 0 && collections === 0) derogStatus = "None";
+    else if (collections > 1) derogStatus = "Severe Risk";
+    else if (collections > 0 || derogatories > 0) derogStatus = "Major Risk";
+
+    if (inquiries6m <= 2) inquiryStatus = "Normal";
+    else if (inquiries6m <= 4) inquiryStatus = "Elevated";
+    else inquiryStatus = "High Credit Seeking";
+
+    if (oldestAge >= 10) depthStatus = "Strong";
+    else if (oldestAge >= 5) depthStatus = "Stable";
+    else if (oldestAge >= 2) depthStatus = "Moderate";
+    else depthStatus = "Thin";
+
+    const hasNoLates = latePayments === 0;
+    const hasNoCollections = collections === 0;
+    const lowUtil = (utilization ?? 100) < 30;
+    const lowInquiries = inquiries6m <= 3;
+    const solidDepth = openAccounts >= 3;
+
+    if (lowUtil && hasNoLates && hasNoCollections && lowInquiries && solidDepth) tier = "PRIME";
+    else if ((utilization ?? 100) < 50 && latePayments <= 2 && inquiries6m <= 4) tier = "STANDARD";
+    else if ((utilization ?? 100) < 70 && derogatories <= 2) tier = "SUBPRIME";
+    else tier = "DECLINE_LIKELY";
+  }
+
+  let tierColor: string;
+  switch (tier) {
+    case "PRIME": tierColor = "#10b981"; break;
+    case "STANDARD": tierColor = "#eab308"; break;
+    case "SUBPRIME": tierColor = "#f97316"; break;
+    case "DECLINE_LIKELY": tierColor = "#ef4444"; break;
+    default: tierColor = "#6b7280";
+  }
+
+  const metrics: RiskMetric[] = [
+    {
+      name: "Utilization",
+      status: utilizationStatus,
+      severity: severityFromStatus(utilizationStatus),
+      detail: utilization !== null ? `${utilization}% revolving utilization` : "No utilization data",
+    },
+    {
+      name: "Payment Performance",
+      status: paymentStatus,
+      severity: severityFromStatus(paymentStatus),
+      detail: latePayments === 0 ? "No late payments detected" : `${latePayments} late payment(s) on record`,
+    },
+    {
+      name: "Derogatory Events",
+      status: derogStatus,
+      severity: severityFromStatus(derogStatus),
+      detail: derogatories === 0 && collections === 0 ? "No derogatory items" : `${derogatories} derogatory, ${collections} collection(s)`,
+    },
+    {
+      name: "Inquiry Velocity",
+      status: inquiryStatus,
+      severity: severityFromStatus(inquiryStatus),
+      detail: `${inquiries6m} inquiries (6 months)`,
+    },
+    {
+      name: "Credit Depth",
+      status: depthStatus,
+      severity: severityFromStatus(depthStatus),
+      detail: `Oldest account: ${oldestAge} years. ${openAccounts} revolving accounts.`,
+    },
+  ];
+
+  const exposureCeiling = (user as any).exposureCeiling || 0;
+  const remainingSafeCapacity = (user as any).remainingSafeCapacity || 0;
+  const recommendedApproval = (user as any).recommendedNewApprovalRange || "No data";
+  const approvalProbability = (user as any).approvalProbability || "Unknown";
+  const denialTriggers = (user as any).primaryDenialTriggers
+    ? (typeof (user as any).primaryDenialTriggers === "string" ? JSON.parse((user as any).primaryDenialTriggers) : (user as any).primaryDenialTriggers)
+    : [];
+  const riskNotes = (user as any).riskDepartmentNotes || "";
 
   return {
-    total,
-    categories: [
-      { name: "Credit Quality", weight: 50, score: scoreRaw, maxScore: 50, weightedScore: scoreRaw, tooltip: cqTooltip },
-      { name: "Utilization & Exposure", weight: 25, score: utilRaw, maxScore: 25, weightedScore: utilRaw, tooltip: `Utilization at ${utilization}%. ${inquiries} inquiries.` },
-      { name: "Depth & Stability", weight: 15, score: depthRaw, maxScore: 15, weightedScore: depthRaw, tooltip: `Oldest account: ${oldestAge} years. ${openAccounts} open accounts.` },
-      { name: "Velocity & Risk", weight: 10, score: velocityRaw, maxScore: 10, weightedScore: velocityRaw, tooltip: `${derogatories > 0 ? 'Active derogatories detected.' : 'No major risk flags.'}` },
-    ],
-    grade,
-    gradeColor,
+    riskTier: tier,
+    riskTierColor: tierColor,
+    metrics,
+    exposureCeiling,
+    remainingSafeCapacity,
+    recommendedApproval,
+    approvalProbability,
+    primaryDenialTriggers: denialTriggers,
+    riskDepartmentNotes: riskNotes,
   };
 }
 

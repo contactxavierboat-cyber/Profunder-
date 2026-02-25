@@ -51,6 +51,11 @@ export const users = pgTable("users", {
   approvalProbability: text("approval_probability"),
   primaryDenialTriggers: text("primary_denial_triggers"),
   riskDepartmentNotes: text("risk_department_notes"),
+  utilizationLevel: text("utilization_level"),
+  paymentPerformance: text("payment_performance"),
+  derogatoryStatus: text("derogatory_status"),
+  inquiryVelocity: text("inquiry_velocity"),
+  creditDepthAssessment: text("credit_depth_assessment"),
   
   // Stripe
   stripeCustomerId: text("stripe_customer_id"),

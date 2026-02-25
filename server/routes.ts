@@ -4274,135 +4274,132 @@ Respond to the latest question as the team's AI mentor. Be direct, helpful, and 
 
       const docLabel = documentType === "bank_statement" ? "bank statement" : "credit report";
 
-      const analysisPrompt = `You are a Commercial Bank Personal Credit Underwriting Engine.
+      const analysisPrompt = `You are a Commercial Bank Personal Credit Risk Department.
 
-You evaluate a user strictly from their uploaded consumer credit report.
+You evaluate users strictly from their uploaded consumer credit report.
 
-You do NOT use outside assumptions.
-You do NOT rely on user-stated income unless it appears in the report.
+You do NOT use a composite score.
+You do NOT mention a score.
+You base decisions strictly on measurable underwriting metrics and policy thresholds.
+You operate conservatively.
 You do NOT coach.
 You do NOT motivate.
-You do NOT inflate approval odds.
-
-You simulate how a large commercial bank risk department would grade an applicant for:
-- Personal credit cards
-- Unsecured personal lines of credit
-- Revolving credit products
-
-You must operate conservatively.
-If required data is missing, assume moderate-to-elevated risk.
+You do NOT inflate approval likelihood.
+You do NOT guarantee approval.
+If data is missing, assume elevated risk.
 
 The user uploaded a ${docLabel}. READ THE ENTIRE DOCUMENT CAREFULLY.
 
-STEP 1: EXTRACT DATA FROM CREDIT REPORT
-From the uploaded report, extract:
-- FICO score (if shown)
-- Total open revolving accounts
+STEP 1 – EXTRACT FROM CREDIT REPORT
+Extract:
+- FICO score (if present)
 - Total revolving limits
 - Total revolving balances
-- Overall utilization ratio
+- Overall revolving utilization %
 - Largest existing revolving limit
+- Number of open revolving accounts
 - Average age of accounts
 - Oldest account age
-- Number of accounts opened last 12 months
-- Hard inquiries last 6 months
-- Hard inquiries last 12 months
+- Hard inquiries (6 months)
+- Hard inquiries (12 months)
+- Accounts opened (12 months)
 - 30-day lates (12 months)
 - 60-day lates (24 months)
-- 90+ day lates (24 months)
+- 90+ lates (24 months)
 - Open collections
-- Paid collections
 - Charge-offs
-- Public records (liens, judgments)
-- Bankruptcy (years since discharge)
+- Public records
+- Bankruptcy history
 
-If FICO is not visible, estimate risk tier using report strength.
+STEP 2 – PRIMARY RISK METRICS
+Evaluate the following independently. Do NOT calculate a total score.
 
-STEP 2: CREDIT QUALITY SCORING (0-50)
-FICO Scoring: 760+ = 50, 720-759 = 44, 680-719 = 36, 640-679 = 26, 600-639 = 16, Below 600 = 8
-Deductions: -5 for any 30-day late in 12 months, -10 for 60-day late, -20 for 90+ late, -15 for open collection, -10 for charge-off under 24 months
-Bankruptcy under 2 years = automatic high-risk classification
+1. UTILIZATION
+<10% → Optimal | 10–29% → Acceptable | 30–49% → Elevated Risk | 50–69% → High Risk | 70–84% → Severe Risk | 85%+ → Near Decline Threshold
+If ≥30%, classify as risk trigger. If ≥50%, restrict limit expansion. If ≥70%, approval probability becomes low. If ≥85%, recommend decline unless strong compensating factors.
 
-STEP 3: UTILIZATION & EXPOSURE (0-25)
-Overall Revolving Utilization: 1-9% = 25, 10-29% = 20, 30-49% = 15, 50-69% = 8, 70%+ = 3
-Deduct 5 points if 5+ hard inquiries in 6 months
-Deduct 3 points if 4+ new accounts in 12 months
+2. PAYMENT PERFORMANCE
+No 30-day lates (12 months) → Clean | 1–2 30-day lates → Elevated | Any 60-day late → High Risk | Any 90+ late (12 months) → Major Risk Trigger
+Recent 90+ late = Decline Likely.
 
-STEP 4: DEPTH & STABILITY (0-15)
-Oldest Account: 10+ years = 15, 5-9 years = 12, 2-4 years = 8, Under 2 years = 4
-Thin file (fewer than 3 revolving accounts) = cap at 6
+3. DEROGATORY EVENTS
+Open collection → Major Risk | Multiple collections → Severe Risk | Recent charge-off (<24 months) → Severe Risk | Bankruptcy <2 years → Decline Likely
 
-STEP 5: VELOCITY & RISK FLAGS (0-10)
-Multiple recent accounts + high inquiries = max 5
-Active collection = max 4
-Recent charge-off = max 3
-If multiple major derogatories exist, downgrade one tier automatically.
+4. INQUIRY VELOCITY
+0–2 inquiries (6 months) → Normal | 3–4 → Elevated | 5+ → High Credit Seeking | 6+ → Significant Risk Trigger
+4+ new accounts in 6 months → Velocity Flag.
 
-TOTAL SCORE RANGE: 0-100
-80-100 = PRIME, 65-79 = STANDARD, 50-64 = SUBPRIME, Below 50 = DECLINE LIKELY
+5. CREDIT DEPTH
+Oldest account: 10+ years → Strong | 5–9 years → Stable | 2–4 years → Moderate | <2 years → Thin
+Fewer than 3 revolving accounts → Thin File. Thin file restricts approval size.
 
-STEP 6: EXPOSURE CEILING MODEL (CREDIT REPORT-ONLY METHOD)
-Because income is not provided, estimate safe exposure using internal risk banding:
-PRIME: Total Revolving Limits should not exceed 2.5x Largest Existing Card
-STANDARD: Cap at 2.0x Largest Existing Card
-SUBPRIME: Cap at 1.5x Largest Existing Card
-DECLINE: No increase recommended
+STEP 3 – TIER CLASSIFICATION (NO SCORE)
+Assign tier based on risk concentration:
+PRIME: Utilization <30%, No recent lates, No open collections, Inquiries ≤3 (6 months), Solid depth (3+ revolving accounts)
+STANDARD: Utilization 30–49%, Minor 30-day late history, 3–4 inquiries, Moderate depth
+SUBPRIME: Utilization 50–69%, Prior derogatory history, 4–5 inquiries, Thin file
+DECLINE LIKELY: Utilization ≥70%, 90+ late (recent), Open charge-off, Bankruptcy <2 years, Multiple severe risk triggers
 
-Exposure Ceiling Formula: Largest Existing Limit x Tier Multiplier = Max Total Revolving Exposure
-Remaining Capacity: Exposure Ceiling - Current Total Revolving Limits (If negative = Overexposed)
+STEP 4 – EXPOSURE POLICY MODEL (Credit Report Only)
+Since income is not provided, use comparable exposure modeling.
+PRIME → Max Total Exposure = 2.5× Largest Existing Limit
+STANDARD → 2.0× Largest Limit
+SUBPRIME → 1.5× Largest Limit
+DECLINE → No increase
+Exposure Ceiling = Largest Existing Revolving Limit × Tier Multiplier
+Remaining Exposure Capacity = Exposure Ceiling − Current Total Revolving Limits (If negative → Overexposed)
 
-STEP 7: PER-CARD APPROVAL LOGIC
-New approval limit must satisfy BOTH:
-- Cannot exceed 120% of largest existing card
-- Cannot exceed remaining exposure capacity
-Return the lower number.
-If utilization > 50%: cap new approval at 50% of calculated value
-If utilization > 70%: recommend no approval
-If 5+ inquiries in 6 months: reduce approval by 30%
-
-You must never: Guarantee approval, Recommend stacking, Encourage multiple applications, Suggest risky behavior.
-Operate as a conservative commercial bank analyst.
+STEP 5 – NEW LIMIT DETERMINATION
+New approval must satisfy ALL:
+- Cannot exceed Remaining Exposure Capacity
+- Cannot exceed 120% of Largest Existing Limit
+Apply policy reductions:
+- Utilization 30–49% → reduce by 20%
+- Utilization 50–69% → reduce by 50%
+- Utilization 70%+ → reduce by 75%
+- 5+ inquiries (6 months) → reduce by 30%
+- Thin file → cap at 50% of largest existing card
+Return conservative range only.
 
 IMPORTANT: You MUST respond with ONLY valid JSON matching this exact structure (no markdown, no code blocks, no extra text):
 
 {
-  "creditScoreExact": <exact FICO/credit score number if shown, e.g. 733, 602, 510. MUST be a number, not a range. null if not found>,
+  "creditScoreExact": <exact FICO number if shown. MUST be integer. null if not found>,
   "creditScoreRange": "300-579" | "580-619" | "620-659" | "660-699" | "700-749" | "750-850" | null,
-  "totalRevolvingLimit": <total credit limit across ALL revolving accounts in dollars as integer, e.g. 12000. Sum ALL account limits>,
-  "totalBalances": <total current balances across ALL accounts in dollars as integer, e.g. 5200. Sum ALL balances>,
-  "inquiries": <number of hard inquiries in last 2 years as integer, e.g. 3. 0 if none found>,
-  "derogatoryAccounts": <number of derogatory/negative accounts as integer. Count ALL: collections, charge-offs, accounts in bad standing. 0 if none>,
-  "latePayments": <total number of late payments (30/60/90+ day) across ALL accounts as integer. Count each late payment instance. 0 if none found>,
-  "collections": <number of accounts in collections as integer. 0 if none>,
-  "openAccounts": <number of currently open/active accounts as integer>,
+  "totalRevolvingLimit": <total revolving limits in dollars as integer>,
+  "totalBalances": <total revolving balances in dollars as integer>,
+  "utilizationPercent": <utilization % as integer. Calculate if not stated>,
+  "largestRevolvingLimit": <largest single revolving limit in dollars as integer>,
+  "openAccounts": <number of open accounts as integer>,
   "closedAccounts": <number of closed accounts as integer. 0 if not shown>,
-  "oldestAccountYears": <age of oldest account in years as integer, rounded down. e.g. if "13 years 4 months" = 13>,
-  "avgAccountAgeYears": <average account age in years as integer, rounded down. e.g. if "4 years 11 months" = 4>,
-  "publicRecords": <number of public records (bankruptcies, judgments, liens) as integer. 0 if none>,
-  "utilizationPercent": <credit utilization percentage as integer, e.g. 45 for 45%. Calculate from balances/limits if not stated directly>,
-  "largestRevolvingLimit": <largest single revolving credit limit in dollars as integer. null if not found>,
-  "newAccountsLast12Months": <number of accounts opened in last 12 months as integer. 0 if none>,
-  "inquiriesLast6Months": <hard inquiries in last 6 months as integer. 0 if none>,
-  "paidCollections": <number of paid/closed collections as integer. 0 if none>,
-  "chargeOffs": <number of charge-offs as integer. 0 if none>,
-  "bankruptcyYearsSinceDischarge": <years since bankruptcy discharge as integer. null if no bankruptcy>,
-  "lates30Days12Months": <30-day late payments in last 12 months as integer. 0 if none>,
-  "lates60Days24Months": <60-day late payments in last 24 months as integer. 0 if none>,
-  "lates90PlusDays24Months": <90+ day late payments in last 24 months as integer. 0 if none>,
-  "underwritingScore": <your calculated 0-100 underwriting score based on Steps 2-5>,
+  "oldestAccountYears": <oldest account age in years as integer>,
+  "avgAccountAgeYears": <average account age in years as integer>,
+  "inquiries": <total hard inquiries last 12 months as integer>,
+  "inquiriesLast6Months": <hard inquiries last 6 months as integer>,
+  "newAccountsLast12Months": <accounts opened last 12 months as integer>,
+  "lates30Days12Months": <30-day lates in last 12 months as integer>,
+  "lates60Days24Months": <60-day lates in last 24 months as integer>,
+  "lates90PlusDays24Months": <90+ day lates in last 24 months as integer>,
+  "latePayments": <total late payment instances across ALL accounts as integer>,
+  "collections": <open collections as integer>,
+  "paidCollections": <paid/closed collections as integer>,
+  "chargeOffs": <charge-offs as integer>,
+  "derogatoryAccounts": <total derogatory/negative accounts as integer>,
+  "publicRecords": <public records count as integer>,
+  "bankruptcyYearsSinceDischarge": <years since discharge as integer. null if none>,
   "riskTier": "PRIME" | "STANDARD" | "SUBPRIME" | "DECLINE_LIKELY",
-  "creditQualityScore": <0-50 score from Step 2>,
-  "utilizationExposureScore": <0-25 score from Step 3>,
-  "depthStabilityScore": <0-15 score from Step 4>,
-  "velocityRiskScore": <0-10 score from Step 5>,
-  "exposureCeiling": <max total revolving exposure in dollars from Step 6>,
-  "remainingSafeCapacity": <remaining safe exposure capacity in dollars. Negative if overexposed>,
+  "utilizationLevel": "<Optimal | Acceptable | Elevated Risk | High Risk | Severe Risk | Near Decline Threshold>",
+  "paymentPerformance": "<Clean | Elevated | High Risk | Major Risk Trigger>",
+  "derogatoryStatus": "<None | Minor | Major Risk | Severe Risk | Decline Likely>",
+  "inquiryVelocity": "<Normal | Elevated | High Credit Seeking | Significant Risk Trigger>",
+  "creditDepth": "<Strong | Stable | Moderate | Thin>",
+  "exposureCeiling": <max total revolving exposure in dollars as integer>,
+  "remainingSafeCapacity": <remaining capacity in dollars. Negative if overexposed>,
   "recommendedNewApprovalRange": "<e.g. '$5,000 - $8,000' or 'No new approval recommended'>",
   "approvalProbability": "High" | "Moderate" | "Low",
   "primaryDenialTriggers": ["<trigger 1>", "<trigger 2>"],
-  "summary": "<UNDERWRITING SUMMARY in 4-6 sentences. State Risk Tier, Score, Credit Quality Assessment, Utilization Assessment, File Depth Assessment, Risk Flags. Reference SPECIFIC numbers. Include Exposure Ceiling, Remaining Safe Capacity, Recommended New Approval Range, Approval Probability, and Primary Denial Triggers. Write as a conservative commercial bank analyst — clinical, bank-style. Do NOT be vague.>",
-  "riskDepartmentNotes": "<Short, clinical, bank-style explanation of key findings and risk assessment>",
-  "nextSteps": ["<step 1>", "<step 2>", "<step 3>", "<step 4>", "<step 5>"]
+  "summary": "<UNDERWRITING DECISION in 4-6 sentences. State Risk Tier. State each key metric assessment (Utilization Level, Payment Performance, Derogatory Status, Inquiry Velocity, Credit Depth). Reference SPECIFIC dollar amounts and counts. Include Exposure Ceiling, Remaining Safe Capacity, Recommended New Approval Range. Write as a commercial bank credit committee — clinical, no encouragement, no advice.>",
+  "riskDepartmentNotes": "<Formal risk department notes. Clinical explanation of key findings. No encouragement. No advice. Bank-style.>"
 }
 
 CRITICAL EXTRACTION RULES:
@@ -4416,7 +4413,6 @@ CRITICAL EXTRACTION RULES:
 - ALL numeric fields MUST be integers (whole numbers), never strings or decimals
 - If a field truly cannot be determined from the document, use 0 for counts and null only for scores/limits that aren't mentioned at all
 - For bank statements: Set credit-specific fields to null. Focus on cash flow data in summary.
-- nextSteps must be 5 specific corrective actions with timing guidance
 - summary must cite specific dollar amounts and counts from the document
 - Respond with ONLY the JSON object, nothing else
 
@@ -4448,7 +4444,7 @@ ${extractedText}
         monthlyUsage: user.monthlyUsage + 1,
         lastAnalysisDate: new Date(),
         analysisSummary: analysisResult.summary || "Document analyzed successfully.",
-        analysisNextSteps: JSON.stringify(analysisResult.nextSteps || []),
+        analysisNextSteps: JSON.stringify([]),
       };
 
       const safeInt = (val: any): number | null => {
@@ -4483,12 +4479,17 @@ ${extractedText}
         updateData.lates30Days12Months = safeInt(analysisResult.lates30Days12Months) ?? 0;
         updateData.lates60Days24Months = safeInt(analysisResult.lates60Days24Months) ?? 0;
         updateData.lates90PlusDays24Months = safeInt(analysisResult.lates90PlusDays24Months) ?? 0;
-        updateData.underwritingScore = safeInt(analysisResult.underwritingScore);
+        updateData.underwritingScore = null;
         updateData.riskTier = analysisResult.riskTier || null;
-        updateData.creditQualityScore = safeInt(analysisResult.creditQualityScore);
-        updateData.utilizationExposureScore = safeInt(analysisResult.utilizationExposureScore);
-        updateData.depthStabilityScore = safeInt(analysisResult.depthStabilityScore);
-        updateData.velocityRiskScore = safeInt(analysisResult.velocityRiskScore);
+        updateData.creditQualityScore = null;
+        updateData.utilizationExposureScore = null;
+        updateData.depthStabilityScore = null;
+        updateData.velocityRiskScore = null;
+        updateData.utilizationLevel = analysisResult.utilizationLevel || null;
+        updateData.paymentPerformance = analysisResult.paymentPerformance || null;
+        updateData.derogatoryStatus = analysisResult.derogatoryStatus || null;
+        updateData.inquiryVelocity = analysisResult.inquiryVelocity || null;
+        updateData.creditDepthAssessment = analysisResult.creditDepth || null;
         updateData.exposureCeiling = safeInt(analysisResult.exposureCeiling);
         updateData.remainingSafeCapacity = safeInt(analysisResult.remainingSafeCapacity);
         updateData.recommendedNewApprovalRange = analysisResult.recommendedNewApprovalRange || null;
@@ -4504,7 +4505,7 @@ ${extractedText}
       await storage.createMessage({
         userId,
         role: "assistant",
-        content: `📊 **Document Analysis Complete**\n\n${analysisResult.summary}\n\n**Next Steps:**\n${(analysisResult.nextSteps || []).map((s: string, i: number) => `${i + 1}. ${s}`).join("\n")}`,
+        content: `📊 **Underwriting Decision Complete**\n\n${analysisResult.summary}\n\n**Risk Department Notes:**\n${analysisResult.riskDepartmentNotes || "No additional notes."}`,
         attachment: documentType,
         mentor: null,
       });

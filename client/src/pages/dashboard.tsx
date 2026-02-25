@@ -144,10 +144,15 @@ interface CapitalOsDashboard {
     reasoning: string;
   };
   readiness: {
-    total: number;
-    categories: { name: string; weight: number; score: number; maxScore: number; weightedScore: number; tooltip: string }[];
-    grade: string;
-    gradeColor: string;
+    riskTier: string;
+    riskTierColor: string;
+    metrics: { name: string; status: string; severity: string; detail: string }[];
+    exposureCeiling: number;
+    remainingSafeCapacity: number;
+    recommendedApproval: string;
+    approvalProbability: string;
+    primaryDenialTriggers: string[];
+    riskDepartmentNotes: string;
   };
   exposure: {
     safeAmount: number;
@@ -284,12 +289,6 @@ export default function DashboardPage() {
   const [capitalOsData, setCapitalOsData] = useState<CapitalOsDashboard | null>(null);
   const [capitalOsLoading, setCapitalOsLoading] = useState(false);
 
-  const [bankRatingForm, setBankRatingForm] = useState({ avgMonthlyDeposits: 10000, relationshipYears: 2, targetInstitution: "" });
-  const [bankRatingResult, setBankRatingResult] = useState<any>(null);
-  const [bankRatingLoading, setBankRatingLoading] = useState(false);
-  const [pledgeLoanForm, setPledgeLoanForm] = useState({ loanAmount: 5000, paydownPercent: 50 });
-  const [pledgeLoanResult, setPledgeLoanResult] = useState<any>(null);
-  const [pledgeLoanLoading, setPledgeLoanLoading] = useState(false);
   const [capitalStackAmount, setCapitalStackAmount] = useState(50000);
   const [capitalStackResult, setCapitalStackResult] = useState<any>(null);
   const [capitalStackLoading, setCapitalStackLoading] = useState(false);
@@ -581,35 +580,6 @@ export default function DashboardPage() {
     finally { setAddressSaving(false); }
   };
 
-  const submitBankRating = async () => {
-    setBankRatingLoading(true);
-    try {
-      const res = await fetch("/api/capital-os/bank-rating", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify(bankRatingForm),
-      });
-      if (res.ok) setBankRatingResult(await res.json());
-      else toast({ title: "Error", description: "Failed to simulate bank rating.", variant: "destructive" });
-    } catch { toast({ title: "Error", description: "Failed to simulate bank rating.", variant: "destructive" }); }
-    finally { setBankRatingLoading(false); }
-  };
-
-  const submitPledgeLoan = async () => {
-    setPledgeLoanLoading(true);
-    try {
-      const res = await fetch("/api/capital-os/pledge-loan", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify(pledgeLoanForm),
-      });
-      if (res.ok) setPledgeLoanResult(await res.json());
-      else toast({ title: "Error", description: "Failed to simulate pledge loan.", variant: "destructive" });
-    } catch { toast({ title: "Error", description: "Failed to simulate pledge loan.", variant: "destructive" }); }
-    finally { setPledgeLoanLoading(false); }
-  };
 
   const submitCapitalStack = async () => {
     setCapitalStackLoading(true);
@@ -845,17 +815,14 @@ export default function DashboardPage() {
                 <>
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
                     <div className="rounded-2xl bg-white/70 backdrop-blur-md border border-white/40 p-5" data-testid="card-readiness">
-                      <p className="text-[10px] text-[#1a1a2e]/60 uppercase tracking-wider mb-3">Capital Readiness</p>
-                      <div className="flex items-center gap-4">
-                        <div className="relative">
-                          <DonutChart value={capitalOsData.readiness.total} max={100} size={72} strokeWidth={7} color={capitalOsData.readiness.gradeColor} />
-                          <div className="absolute inset-0 flex items-center justify-center">
-                            <span className="text-lg font-bold text-[#1a1a2e]" data-testid="text-readiness-score">{capitalOsData.readiness.total}</span>
-                          </div>
+                      <p className="text-[10px] text-[#1a1a2e]/60 uppercase tracking-wider mb-3">Risk Tier</p>
+                      <div className="flex items-center gap-3">
+                        <div className="w-14 h-14 rounded-xl flex items-center justify-center" style={{ backgroundColor: capitalOsData.readiness.riskTierColor + "18" }}>
+                          <Shield className="w-6 h-6" style={{ color: capitalOsData.readiness.riskTierColor }} />
                         </div>
                         <div>
-                          <span className="text-2xl font-bold" style={{ color: capitalOsData.readiness.gradeColor }} data-testid="text-readiness-grade">{capitalOsData.readiness.grade}</span>
-                          <p className="text-[10px] text-[#1a1a2e]/50 mt-0.5">of 100 points</p>
+                          <span className="text-lg font-bold" style={{ color: capitalOsData.readiness.riskTierColor }} data-testid="text-risk-tier">{capitalOsData.readiness.riskTier.replace("_", " ")}</span>
+                          <p className="text-[10px] text-[#1a1a2e]/50 mt-0.5">{capitalOsData.readiness.approvalProbability} approval probability</p>
                         </div>
                       </div>
                     </div>
@@ -1925,58 +1892,63 @@ export default function DashboardPage() {
                     <p className="text-[11px] text-[#1a1a2e]/70 leading-relaxed">{capitalOsData.phase.reasoning}</p>
                   </div>
 
-                  <div className="rounded-2xl bg-white/70 backdrop-blur-md border border-white/40 p-6 mb-6" data-testid="category-breakdown-card">
+                  <div className="rounded-2xl bg-white/70 backdrop-blur-md border border-white/40 p-6 mb-6" data-testid="risk-metrics-card">
                     <div className="flex items-center justify-between mb-4">
-                      <p className="text-xs text-[#1a1a2e]/70">Category Breakdown</p>
-                      <span className="text-lg font-bold" style={{ color: capitalOsData.readiness.gradeColor }}>{capitalOsData.readiness.grade}</span>
+                      <p className="text-xs text-[#1a1a2e]/70">Risk Metrics</p>
+                      <span className="text-sm font-bold" style={{ color: capitalOsData.readiness.riskTierColor }}>{capitalOsData.readiness.riskTier.replace("_", " ")}</span>
                     </div>
-                    <div className="space-y-4">
-                      {capitalOsData.readiness.categories.map((cat, idx) => (
-                        <div key={idx} data-testid={`category-${idx}`}>
-                          <div className="flex items-center justify-between mb-1.5">
-                            <div className="flex items-center gap-2">
-                              <span className="text-[12px] text-[#1a1a2e]/85">{cat.name}</span>
-                              <span className="text-[9px] text-[#1a1a2e]/40">{cat.weight}% weight</span>
+                    <div className="space-y-3">
+                      {capitalOsData.readiness.metrics.map((metric, idx) => {
+                        const sevColor = metric.severity === "optimal" ? "#10b981" : metric.severity === "acceptable" ? "#22c55e" : metric.severity === "elevated" ? "#eab308" : metric.severity === "high" ? "#f97316" : metric.severity === "severe" ? "#ef4444" : "#dc2626";
+                        return (
+                          <div key={idx} className="p-3 rounded-xl bg-white/50 border border-white/30" data-testid={`metric-${idx}`}>
+                            <div className="flex items-center justify-between mb-1">
+                              <span className="text-[12px] font-medium text-[#1a1a2e]/85">{metric.name}</span>
+                              <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full" style={{ color: sevColor, backgroundColor: sevColor + "15" }}>{metric.status}</span>
                             </div>
-                            <span className="text-[12px] font-mono text-[#1a1a2e]/70">{cat.score}/{cat.maxScore}</span>
+                            <p className="text-[10px] text-[#1a1a2e]/50">{metric.detail}</p>
                           </div>
-                          <div className="w-full h-2 rounded-full bg-[#e0e0ea] overflow-hidden mb-1">
-                            <div className="h-full rounded-full transition-all duration-700" style={{ width: `${(cat.score / cat.maxScore) * 100}%`, backgroundColor: cat.score / cat.maxScore >= 0.7 ? '#10b981' : cat.score / cat.maxScore >= 0.4 ? '#f59e0b' : '#ef4444' }} />
-                          </div>
-                          <p className="text-[10px] text-[#1a1a2e]/50 leading-relaxed">{cat.tooltip}</p>
-                        </div>
-                      ))}
+                        );
+                      })}
                     </div>
                   </div>
 
-                  <div className="rounded-2xl bg-white/70 backdrop-blur-md border border-white/40 p-6" data-testid="action-items-card">
-                    <p className="text-xs text-[#1a1a2e]/70 mb-4">Action Items</p>
-                    <div className="space-y-2">
-                      {capitalOsData.readiness.categories
-                        .filter(c => c.score / c.maxScore < 0.7)
-                        .map((cat, idx) => (
-                          <div key={idx} className="flex items-start gap-3 p-3 rounded-xl bg-white/50 border border-white/30">
-                            <div className="w-6 h-6 rounded-full bg-[#e0e0ea] flex items-center justify-center text-[10px] font-mono text-[#1a1a2e]/60 shrink-0">{idx + 1}</div>
-                            <div>
-                              <p className="text-xs font-medium text-[#1a1a2e]/85">{cat.name}</p>
-                              <p className="text-[11px] text-[#1a1a2e]/60 leading-relaxed mt-0.5">{cat.tooltip}</p>
-                            </div>
-                          </div>
-                        ))}
-                      {capitalOsData.phase.reasoning && (
-                        <div className="flex items-start gap-3 p-3 rounded-xl bg-white/50 border border-white/30">
-                          <Target className="w-4 h-4 text-[#1a1a2e]/50 shrink-0 mt-0.5" />
-                          <p className="text-[11px] text-[#1a1a2e]/70 leading-relaxed">{capitalOsData.phase.reasoning}</p>
-                        </div>
-                      )}
-                      {capitalOsData.exposure.reasoning && (
-                        <div className="flex items-start gap-3 p-3 rounded-xl bg-white/50 border border-white/30">
-                          <Gauge className="w-4 h-4 text-[#1a1a2e]/50 shrink-0 mt-0.5" />
-                          <p className="text-[11px] text-[#1a1a2e]/70 leading-relaxed">{capitalOsData.exposure.reasoning}</p>
-                        </div>
-                      )}
+                  <div className="rounded-2xl bg-white/70 backdrop-blur-md border border-white/40 p-6 mb-6" data-testid="exposure-policy-card">
+                    <p className="text-xs text-[#1a1a2e]/70 mb-4">Exposure Policy</p>
+                    <div className="grid grid-cols-2 gap-3 mb-4">
+                      <div className="p-3 rounded-xl bg-white/50 border border-white/30 text-center">
+                        <p className="text-[9px] text-[#1a1a2e]/50 uppercase mb-1">Exposure Ceiling</p>
+                        <p className="text-lg font-bold text-[#1a1a2e] font-mono">${capitalOsData.readiness.exposureCeiling.toLocaleString()}</p>
+                      </div>
+                      <div className="p-3 rounded-xl bg-white/50 border border-white/30 text-center">
+                        <p className="text-[9px] text-[#1a1a2e]/50 uppercase mb-1">Remaining Capacity</p>
+                        <p className={cn("text-lg font-bold font-mono", capitalOsData.readiness.remainingSafeCapacity >= 0 ? "text-[#10b981]" : "text-[#ef4444]")}>
+                          {capitalOsData.readiness.remainingSafeCapacity < 0 ? "-" : ""}${Math.abs(capitalOsData.readiness.remainingSafeCapacity).toLocaleString()}
+                        </p>
+                      </div>
                     </div>
+                    <div className="flex items-center justify-between p-3 rounded-xl bg-white/50 border border-white/30 mb-3">
+                      <span className="text-[11px] text-[#1a1a2e]/60">Recommended Approval</span>
+                      <span className="text-[12px] font-semibold text-[#1a1a2e]">{capitalOsData.readiness.recommendedApproval}</span>
+                    </div>
+                    {capitalOsData.readiness.primaryDenialTriggers.length > 0 && (
+                      <div className="p-3 rounded-xl bg-red-500/[0.04] border border-red-500/10">
+                        <p className="text-[10px] text-red-600/70 uppercase mb-2">Primary Denial Drivers</p>
+                        {capitalOsData.readiness.primaryDenialTriggers.map((trigger, idx) => (
+                          <p key={idx} className="text-[11px] text-[#1a1a2e]/70 flex items-start gap-2 mb-1">
+                            <AlertTriangle className="w-3 h-3 text-red-500/60 shrink-0 mt-0.5" />{trigger}
+                          </p>
+                        ))}
+                      </div>
+                    )}
                   </div>
+
+                  {capitalOsData.readiness.riskDepartmentNotes && (
+                    <div className="rounded-2xl bg-white/70 backdrop-blur-md border border-white/40 p-6" data-testid="risk-notes-card">
+                      <p className="text-xs text-[#1a1a2e]/70 mb-3">Risk Department Notes</p>
+                      <p className="text-[11px] text-[#1a1a2e]/70 leading-relaxed">{capitalOsData.readiness.riskDepartmentNotes}</p>
+                    </div>
+                  )}
                 </>
               ) : capitalOsLoading ? (
                 <div className="flex items-center justify-center py-20"><Loader2 className="w-6 h-6 animate-spin text-[#1a1a2e]/50" /></div>
