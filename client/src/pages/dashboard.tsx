@@ -5,6 +5,7 @@ import { Send, Plus, Paperclip, Loader2, ArrowDown, FileText, X, Menu, MessageCi
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
+import { useQueryClient } from "@tanstack/react-query";
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, RadialBarChart, RadialBar } from "recharts";
 
 function TechBackground() {
@@ -494,6 +495,8 @@ export default function DashboardPage() {
       if (res.ok) {
         const data = await res.json();
         toast({ title: "Analysis Complete", description: "Your document has been analyzed and your funding score has been updated." });
+        queryClient.invalidateQueries({ queryKey: ["/api/me"] });
+        queryClient.invalidateQueries({ queryKey: ["/api/chat"] });
         await fetchFundingReadiness();
         await fetchCapitalOsDashboard();
         if (data.repairResult) {
@@ -634,6 +637,13 @@ export default function DashboardPage() {
     }
   }, [user]);
 
+  useEffect(() => {
+    if (user && activeTab === "mission_control") {
+      fetchFundingReadiness();
+      fetchCapitalOsDashboard();
+    }
+  }, [activeTab]);
+
   const lastMentorMsg = [...messages].reverse().find(m => m.role === 'assistant' && m.mentor);
   const activeMentorKey = selectedMentor !== null ? selectedMentor : (mentorCleared ? null : (lastMentorMsg?.mentor || null));
   const activeMentor = activeMentorKey ? MENTOR_INFO[activeMentorKey] : null;
@@ -642,6 +652,7 @@ export default function DashboardPage() {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   useEffect(() => {
     if (!authLoading && !user) { setLocation("/"); return; }
