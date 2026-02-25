@@ -96,6 +96,57 @@ export interface ReadinessScore {
 }
 
 export function calculateCapitalReadiness(user: User): ReadinessScore {
+  const underwritingScore = user.underwritingScore;
+  const riskTier = user.riskTier;
+
+  if (underwritingScore !== null && underwritingScore !== undefined && riskTier) {
+    const creditScore = user.creditScoreExact || 0;
+    const utilization = user.utilizationPercent ?? 0;
+    const inquiries = user.inquiries || 0;
+    const avgAge = user.avgAccountAgeYears || 0;
+    const revolvingLimit = user.totalRevolvingLimit || 0;
+    const latePayments = user.latePayments || 0;
+    const collections = user.collections || 0;
+    const derogatories = user.derogatoryAccounts || 0;
+    const openAccounts = user.openAccounts || 0;
+
+    const cqScore = user.creditQualityScore ?? 0;
+    const ueScore = user.utilizationExposureScore ?? 0;
+    const dsScore = user.depthStabilityScore ?? 0;
+    const vrScore = user.velocityRiskScore ?? 0;
+
+    const total = underwritingScore;
+
+    let grade: string;
+    let gradeColor: string;
+    if (total >= 80) { grade = "A+"; gradeColor = "#10b981"; }
+    else if (total >= 70) { grade = "A"; gradeColor = "#22c55e"; }
+    else if (total >= 65) { grade = "B+"; gradeColor = "#84cc16"; }
+    else if (total >= 55) { grade = "B"; gradeColor = "#eab308"; }
+    else if (total >= 45) { grade = "C"; gradeColor = "#f97316"; }
+    else if (total >= 30) { grade = "D"; gradeColor = "#ef4444"; }
+    else { grade = "F"; gradeColor = "#dc2626"; }
+
+    const cqTooltip = creditScore > 0
+      ? `FICO ${creditScore} — ${riskTier} tier. ${latePayments > 0 ? latePayments + ' late payment(s), ' : ''}${collections > 0 ? collections + ' collection(s), ' : ''}${derogatories > 0 ? derogatories + ' derogatory item(s).' : 'No negative marks.'}`
+      : `Risk tier: ${riskTier}. Score reflects payment history and derogatory items.`;
+    const ueTooltip = `Utilization at ${utilization}%. ${inquiries > 0 ? inquiries + ' hard inquiries.' : 'No recent inquiries.'}`;
+    const dsTooltip = `Average account age: ${avgAge} years. ${openAccounts} open accounts. $${revolvingLimit.toLocaleString()} total limits.`;
+    const vrTooltip = `Velocity & risk flags assessment. ${derogatories > 0 ? 'Active derogatories detected.' : 'No major risk flags.'}`;
+
+    return {
+      total,
+      categories: [
+        { name: "Credit Quality", weight: 50, score: cqScore, maxScore: 50, weightedScore: cqScore, tooltip: cqTooltip },
+        { name: "Utilization & Exposure", weight: 25, score: ueScore, maxScore: 25, weightedScore: ueScore, tooltip: ueTooltip },
+        { name: "Depth & Stability", weight: 15, score: dsScore, maxScore: 15, weightedScore: dsScore, tooltip: dsTooltip },
+        { name: "Velocity & Risk", weight: 10, score: vrScore, maxScore: 10, weightedScore: vrScore, tooltip: vrTooltip },
+      ],
+      grade,
+      gradeColor,
+    };
+  }
+
   const creditScore = user.creditScoreExact || 0;
   const latePayments = user.latePayments || 0;
   const collections = user.collections || 0;
@@ -106,111 +157,66 @@ export function calculateCapitalReadiness(user: User): ReadinessScore {
   const revolvingLimit = user.totalRevolvingLimit || 0;
   const inquiries = user.inquiries || 0;
   const avgAge = user.avgAccountAgeYears || 0;
-  const oldestAge = user.oldestAccountYears || 0;
   const openAccounts = user.openAccounts || 0;
   const hasCR = user.hasCreditReport || false;
   const hasBS = user.hasBankStatement || false;
 
-  // Payment History (30%)
-  let paymentRaw = 100;
-  if (latePayments > 0) paymentRaw -= Math.min(40, latePayments * 10);
-  if (collections > 0) paymentRaw -= Math.min(30, collections * 15);
-  if (derogatories > 0) paymentRaw -= Math.min(20, derogatories * 10);
-  if (publicRecords > 0) paymentRaw -= Math.min(20, publicRecords * 10);
-  paymentRaw = Math.max(0, paymentRaw);
-  const paymentWeighted = (paymentRaw / 100) * 30;
-  const paymentTooltip = latePayments === 0 && collections === 0 && derogatories === 0
-    ? "Clean payment history. No derogatory items detected."
-    : `${latePayments} late payment(s), ${collections} collection(s), ${derogatories} derogatory item(s) reducing score.`;
+  let scoreRaw = 0;
+  if (creditScore >= 760) scoreRaw = 50;
+  else if (creditScore >= 720) scoreRaw = 44;
+  else if (creditScore >= 680) scoreRaw = 36;
+  else if (creditScore >= 640) scoreRaw = 26;
+  else if (creditScore >= 600) scoreRaw = 16;
+  else if (creditScore > 0) scoreRaw = 8;
+  if (latePayments > 0) scoreRaw = Math.max(0, scoreRaw - Math.min(15, latePayments * 5));
+  if (collections > 0) scoreRaw = Math.max(0, scoreRaw - Math.min(15, collections * 10));
+  if (derogatories > 0) scoreRaw = Math.max(0, scoreRaw - Math.min(10, derogatories * 5));
+  if (publicRecords > 0) scoreRaw = Math.max(0, scoreRaw - Math.min(10, publicRecords * 10));
 
-  // Utilization (25%)
   let utilRaw = 0;
-  if (utilization <= 5) utilRaw = 100;
-  else if (utilization <= 10) utilRaw = 95;
-  else if (utilization <= 20) utilRaw = 85;
-  else if (utilization <= 30) utilRaw = 70;
-  else if (utilization <= 45) utilRaw = 50;
-  else if (utilization <= 60) utilRaw = 30;
-  else if (utilization <= 80) utilRaw = 15;
-  else utilRaw = 5;
-  const utilWeighted = (utilRaw / 100) * 25;
-  const utilTooltip = utilization <= 10
-    ? `Excellent utilization at ${utilization}%. Optimal for approvals.`
-    : utilization <= 30
-      ? `Utilization at ${utilization}%. Target under 10% for maximum impact.`
-      : `Utilization at ${utilization}% is elevated. Pay down balances to improve.`;
+  if (utilization <= 9) utilRaw = 25;
+  else if (utilization <= 29) utilRaw = 20;
+  else if (utilization <= 49) utilRaw = 15;
+  else if (utilization <= 69) utilRaw = 8;
+  else utilRaw = 3;
+  if (inquiries > 5) utilRaw = Math.max(0, utilRaw - 5);
+  else if (inquiries > 3) utilRaw = Math.max(0, utilRaw - 3);
 
-  // Exposure Depth (15%)
-  let exposureRaw = 0;
-  if (revolvingLimit >= 100000) exposureRaw = 100;
-  else if (revolvingLimit >= 50000) exposureRaw = 85;
-  else if (revolvingLimit >= 25000) exposureRaw = 70;
-  else if (revolvingLimit >= 10000) exposureRaw = 50;
-  else if (revolvingLimit >= 5000) exposureRaw = 30;
-  else if (revolvingLimit > 0) exposureRaw = 15;
-  const exposureWeighted = (exposureRaw / 100) * 15;
-  const exposureTooltip = revolvingLimit >= 50000
-    ? `Strong exposure at $${revolvingLimit.toLocaleString()}. Demonstrates capacity.`
-    : `Total limits at $${revolvingLimit.toLocaleString()}. Higher limits signal lender confidence.`;
+  const oldestAge = user.oldestAccountYears || 0;
+  let depthRaw = 0;
+  if (oldestAge >= 10) depthRaw = 15;
+  else if (oldestAge >= 5) depthRaw = 12;
+  else if (oldestAge >= 2) depthRaw = 8;
+  else depthRaw = 4;
+  if (openAccounts < 3) depthRaw = Math.min(depthRaw, 6);
 
-  // Inquiry Sensitivity (10%)
-  let inquiryRaw = 100;
-  if (inquiries > 6) inquiryRaw = 10;
-  else if (inquiries > 4) inquiryRaw = 30;
-  else if (inquiries > 2) inquiryRaw = 60;
-  else if (inquiries > 0) inquiryRaw = 80;
-  const inquiryWeighted = (inquiryRaw / 100) * 10;
-  const inquiryTooltip = inquiries === 0
-    ? "No recent hard inquiries. Clean application signal."
-    : inquiries <= 2
-      ? `${inquiries} inquiry(ies). Minimal impact but monitor timing.`
-      : `${inquiries} inquiries detected. High density may signal desperation to lenders.`;
+  let velocityRaw = 10;
+  if (derogatories > 1) velocityRaw = Math.min(velocityRaw, 4);
+  if (collections > 0) velocityRaw = Math.min(velocityRaw, 4);
 
-  // Account Age (10%)
-  let ageRaw = 0;
-  if (avgAge >= 7) ageRaw = 100;
-  else if (avgAge >= 5) ageRaw = 80;
-  else if (avgAge >= 3) ageRaw = 60;
-  else if (avgAge >= 2) ageRaw = 40;
-  else if (avgAge >= 1) ageRaw = 25;
-  else ageRaw = 10;
-  const ageWeighted = (ageRaw / 100) * 10;
-  const ageTooltip = avgAge >= 5
-    ? `Strong account age at ${avgAge} years average. Mature credit profile.`
-    : `Average account age ${avgAge} years. Time and seasoning will improve this.`;
-
-  // Bureau Strength Distribution (10%)
-  let bureauRaw = 0;
-  const profileScore = (hasCR ? 30 : 0) + (hasBS ? 20 : 0)
-    + (openAccounts >= 5 ? 25 : openAccounts >= 3 ? 15 : 5)
-    + (creditScore >= 700 ? 25 : creditScore >= 650 ? 15 : 5);
-  bureauRaw = Math.min(100, profileScore);
-  const bureauWeighted = (bureauRaw / 100) * 10;
-  const bureauTooltip = hasCR && hasBS
-    ? "Full documentation submitted. Strong bureau verification."
-    : "Submit both credit report and bank statement for maximum bureau strength.";
-
-  const total = Math.round(paymentWeighted + utilWeighted + exposureWeighted + inquiryWeighted + ageWeighted + bureauWeighted);
+  const total = Math.min(100, scoreRaw + utilRaw + depthRaw + velocityRaw);
 
   let grade: string;
   let gradeColor: string;
-  if (total >= 85) { grade = "A+"; gradeColor = "#10b981"; }
-  else if (total >= 75) { grade = "A"; gradeColor = "#22c55e"; }
+  if (total >= 80) { grade = "A+"; gradeColor = "#10b981"; }
+  else if (total >= 70) { grade = "A"; gradeColor = "#22c55e"; }
   else if (total >= 65) { grade = "B+"; gradeColor = "#84cc16"; }
   else if (total >= 55) { grade = "B"; gradeColor = "#eab308"; }
   else if (total >= 45) { grade = "C"; gradeColor = "#f97316"; }
   else if (total >= 30) { grade = "D"; gradeColor = "#ef4444"; }
   else { grade = "F"; gradeColor = "#dc2626"; }
 
+  const cqTooltip = creditScore > 0
+    ? `FICO ${creditScore}. ${latePayments > 0 ? latePayments + ' late payment(s). ' : ''}${collections > 0 ? collections + ' collection(s). ' : ''}${derogatories === 0 ? 'No derogatory marks.' : derogatories + ' derogatory item(s).'}`
+    : "No credit score data available.";
+
   return {
     total,
     categories: [
-      { name: "Payment History", weight: 30, score: paymentRaw, maxScore: 100, weightedScore: Math.round(paymentWeighted * 10) / 10, tooltip: paymentTooltip },
-      { name: "Utilization", weight: 25, score: utilRaw, maxScore: 100, weightedScore: Math.round(utilWeighted * 10) / 10, tooltip: utilTooltip },
-      { name: "Exposure Depth", weight: 15, score: exposureRaw, maxScore: 100, weightedScore: Math.round(exposureWeighted * 10) / 10, tooltip: exposureTooltip },
-      { name: "Inquiry Sensitivity", weight: 10, score: inquiryRaw, maxScore: 100, weightedScore: Math.round(inquiryWeighted * 10) / 10, tooltip: inquiryTooltip },
-      { name: "Account Age", weight: 10, score: ageRaw, maxScore: 100, weightedScore: Math.round(ageWeighted * 10) / 10, tooltip: ageTooltip },
-      { name: "Bureau Strength", weight: 10, score: bureauRaw, maxScore: 100, weightedScore: Math.round(bureauWeighted * 10) / 10, tooltip: bureauTooltip },
+      { name: "Credit Quality", weight: 50, score: scoreRaw, maxScore: 50, weightedScore: scoreRaw, tooltip: cqTooltip },
+      { name: "Utilization & Exposure", weight: 25, score: utilRaw, maxScore: 25, weightedScore: utilRaw, tooltip: `Utilization at ${utilization}%. ${inquiries} inquiries.` },
+      { name: "Depth & Stability", weight: 15, score: depthRaw, maxScore: 15, weightedScore: depthRaw, tooltip: `Oldest account: ${oldestAge} years. ${openAccounts} open accounts.` },
+      { name: "Velocity & Risk", weight: 10, score: velocityRaw, maxScore: 10, weightedScore: velocityRaw, tooltip: `${derogatories > 0 ? 'Active derogatories detected.' : 'No major risk flags.'}` },
     ],
     grade,
     gradeColor,
@@ -235,26 +241,29 @@ export function calculateSafeExposure(user: User): SafeExposure {
   const utilization = user.utilizationPercent ?? (revolvingLimit > 0 ? Math.round((balances / revolvingLimit) * 100) : 100);
   const inquiries = user.inquiries || 0;
   const openAccounts = user.openAccounts || 0;
-  const avgLimitPerTradeline = openAccounts > 0 ? revolvingLimit / openAccounts : 0;
   const creditScore = user.creditScoreExact || 650;
+  const largestLimit = user.largestRevolvingLimit || revolvingLimit;
 
   let maxSafe = 0;
-  if (creditScore >= 750) maxSafe = revolvingLimit * 2.5;
-  else if (creditScore >= 700) maxSafe = revolvingLimit * 2.0;
-  else if (creditScore >= 650) maxSafe = revolvingLimit * 1.5;
-  else if (creditScore >= 600) maxSafe = revolvingLimit * 1.0;
-  else maxSafe = revolvingLimit * 0.5;
 
-  if (inquiries > 4) maxSafe *= 0.7;
-  else if (inquiries > 2) maxSafe *= 0.85;
-
-  if (utilization > 50) maxSafe *= 0.6;
-  else if (utilization > 30) maxSafe *= 0.8;
-
-  if (openAccounts < 3) maxSafe *= 0.75;
+  if (user.exposureCeiling && user.exposureCeiling > 0) {
+    maxSafe = user.exposureCeiling;
+  } else {
+    const riskTier = user.riskTier;
+    if (riskTier === "PRIME") maxSafe = largestLimit * 2.5;
+    else if (riskTier === "STANDARD") maxSafe = largestLimit * 2.0;
+    else if (riskTier === "SUBPRIME") maxSafe = largestLimit * 1.5;
+    else if (creditScore >= 750) maxSafe = largestLimit * 2.5;
+    else if (creditScore >= 700) maxSafe = largestLimit * 2.0;
+    else if (creditScore >= 650) maxSafe = largestLimit * 1.5;
+    else if (creditScore >= 600) maxSafe = largestLimit * 1.0;
+    else maxSafe = largestLimit * 0.5;
+  }
 
   maxSafe = Math.round(maxSafe);
-  const safeAmount = Math.max(0, maxSafe - revolvingLimit);
+  const safeAmount = user.remainingSafeCapacity !== null && user.remainingSafeCapacity !== undefined
+    ? Math.max(0, user.remainingSafeCapacity)
+    : Math.max(0, maxSafe - revolvingLimit);
   const cautionThreshold = maxSafe * 0.7;
   const denialThreshold = maxSafe * 0.9;
 
