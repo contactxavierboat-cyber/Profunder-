@@ -341,6 +341,15 @@ export interface BureauGuidance {
   chargeOffs: number;
   openAccounts: number;
   totalRevolvingLimit: number;
+  velocityRisk: {
+    portfolioExpansionGrade: string;
+    velocityTier: string;
+    velocityTierLabel: string;
+    adjustedExposureCeiling: number;
+    mandatoryWaitingMonths: number;
+    velocityDenialTriggers: string[];
+    velocityNotes: string;
+  } | null;
 }
 
 export interface BureauHealth {
@@ -493,11 +502,35 @@ export function calculateBureauHealth(user: User): { bureaus: BureauHealth[]; pr
 
     const applicationReady = denialTriggers.length === 0 && riskTier !== "DECLINE_LIKELY" && riskTier !== "SUBPRIME";
 
+    let velocityRiskParsed: BureauGuidance["velocityRisk"] = null;
+    if (data.velocityRisk) {
+      const vr = data.velocityRisk;
+      velocityRiskParsed = {
+        portfolioExpansionGrade: vr.portfolioExpansionGrade || "Unknown",
+        velocityTier: vr.velocityTier || "A",
+        velocityTierLabel: vr.velocityTierLabel || "Strong",
+        adjustedExposureCeiling: vr.adjustedExposureCeiling || exposureCeiling,
+        mandatoryWaitingMonths: vr.mandatoryWaitingMonths || 0,
+        velocityDenialTriggers: vr.velocityDenialTriggers || [],
+        velocityNotes: vr.velocityNotes || "",
+      };
+      if (vr.velocityDenialTriggers && vr.velocityDenialTriggers.length > 0) {
+        vr.velocityDenialTriggers.forEach((t: string) => denialTriggers.push(t));
+      }
+      if (vr.mandatoryWaitingMonths > 0) {
+        actionItems.push(`Mandatory ${vr.mandatoryWaitingMonths}-month seasoning period before new applications on ${name}`);
+      }
+      if (vr.velocityTier === "C" || vr.velocityTier === "D") {
+        actionItems.push(`${name} shows ${vr.velocityTierLabel} velocity risk — avoid opening new accounts`);
+      }
+    }
+
     const guidance: BureauGuidance = {
       riskTier, riskTierColor, exposureCeiling, exposureMultiplier,
       actionItems, denialTriggers, fundingPhase, applicationReady,
       score: creditScore || null, latePayments, collections: coll, chargeOffs,
       openAccounts, totalRevolvingLimit: revolvingLimit,
+      velocityRisk: velocityRiskParsed,
     };
 
     return { bureau: name, uploaded: true, utilization: util, hardInquiries: inq, derogatoryCount: derog, oldestAccountAge: age, riskStatus: status, riskColor, priority: false, recommendation, guidance };

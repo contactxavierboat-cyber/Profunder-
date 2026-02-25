@@ -45,6 +45,7 @@ export const users = pgTable("users", {
   utilizationExposureScore: integer("utilization_exposure_score"),
   depthStabilityScore: integer("depth_stability_score"),
   velocityRiskScore: integer("velocity_risk_score"),
+  velocityRiskData: text("velocity_risk_data"),
   exposureCeiling: integer("exposure_ceiling"),
   remainingSafeCapacity: integer("remaining_safe_capacity"),
   recommendedNewApprovalRange: text("recommended_new_approval_range"),

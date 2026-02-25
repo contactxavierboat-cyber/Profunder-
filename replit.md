@@ -18,6 +18,12 @@ A subscription-based ($50/month via Stripe) AI-powered fundability platform ("Ca
 - 2026-02-25: Funding Strategy "Bureau Funding Readiness" panel — per-bureau application readiness, ceiling, multiplier, denial triggers, priority bureau flag
 - 2026-02-25: Progress Tracker "Per-Bureau Progress" panel — compact bureau comparison with util/inq/derog/ceiling per bureau and top action item
 - 2026-02-25: All dashboard tabs refresh data on tab switch (not just Mission Control)
+- 2026-02-25: **Velocity Risk Model (STEP 6)** — Portfolio Expansion Rate, Exposure Growth Rate, Inquiry Density, Auto Velocity Denial Triggers, Velocity Approval Tiers (A/B/C/D), Funding Ceiling Velocity Adjustment, Mandatory Waiting Periods
+- 2026-02-25: Velocity Risk JSON output in AI analysis: portfolioExpansionGrade, velocityTier/Label, adjustedExposureCeiling, mandatoryWaitingMonths, velocityDenialTriggers, velocityNotes
+- 2026-02-25: New DB column: velocityRiskData (text JSON); per-bureau bureauHealthData includes velocityRisk object
+- 2026-02-25: Mission Control "Velocity Risk Model" panel — per-bureau velocity tier badges, portfolio expansion grade, adjusted ceiling, mandatory wait periods, velocity denial triggers
+- 2026-02-25: Bureau cards show velocity tier with adjusted ceiling; Funding Strategy shows velocity info per bureau
+- 2026-02-25: capitalEngines.ts BureauGuidance interface extended with velocityRisk field; velocity denial triggers and action items auto-integrated
 - 2026-02-25: **Rebranded from baalio to Profundr** — all text, imports, meta tags, AI prompts, component names updated
 - 2026-02-25: **$50/month Stripe subscription paywall** — new users start as inactive, login redirects to subscription page, dashboard guards against unsubscribed users
 - 2026-02-25: Logo component renamed from baalio-logo.tsx to profundr-logo.tsx

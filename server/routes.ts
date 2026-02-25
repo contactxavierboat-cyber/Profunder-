@@ -4301,9 +4301,13 @@ Extract:
 - Number of open revolving accounts
 - Average age of accounts
 - Oldest account age
+- Hard inquiries (3 months)
 - Hard inquiries (6 months)
 - Hard inquiries (12 months)
+- Accounts opened (3 months)
+- Accounts opened (6 months)
 - Accounts opened (12 months)
+- Accounts opened (24 months)
 - 30-day lates (12 months)
 - 60-day lates (24 months)
 - 90+ lates (24 months)
@@ -4362,6 +4366,38 @@ Apply policy reductions:
 - Thin file → cap at 50% of largest existing card
 Return conservative range only.
 
+STEP 6 – VELOCITY RISK ANALYSIS (Excessive New Accounts & Credit Velocity)
+
+A. Portfolio Expansion Rate
+Calculate: Portfolio Expansion % = (New Accounts Last 12 Months ÷ Total Accounts) × 100
+Grade: 0–20% → Low velocity | 21–35% → Moderate velocity | 36–50% → High velocity | 50%+ → Aggressive expansion
+
+B. Exposure Growth Rate
+If prior limits available: Exposure Growth % = (Current Total Limits − Prior Total Limits) ÷ Prior Limits × 100
+Grade: 0–25% → Normal growth | 26–50% → Elevated | 51–100% → Aggressive | 100%+ → Stacking behavior indicator
+If prior limits unavailable, infer from number of new accounts × average limit.
+
+C. Inquiry Density
+Calculate inquiries per 90 days and per 6 months.
+Grade: 0–2 in 6 months → Normal | 3–5 → Elevated | 6+ → High risk | 8+ → Auto-denial risk tier
+
+D. Automatic Velocity Denial Triggers — flag if ANY:
+• 5+ revolving accounts opened in 12 months
+• 4+ accounts opened in 6 months
+• 6+ inquiries in 6 months
+• Average age of accounts drops below 18 months due to velocity
+• Exposure growth > 100% in 12 months
+If triggered: "Velocity-Based Decline — Insufficient seasoning since recent credit extension."
+
+E. Velocity Approval Tier
+Tier A — Strong (Low Velocity) | Tier B — Caution (Moderate Velocity) | Tier C — High Risk (Elevated Velocity) | Tier D — Decline (Aggressive / Stacking Behavior)
+
+F. Funding Ceiling Velocity Adjustment
+Tier A → 100% of calculated ceiling | Tier B → 70% of ceiling | Tier C → 40% of ceiling | Tier D → 0% — Must season
+
+G. Mandatory Waiting Period
+Moderate velocity → 3–6 months | High velocity → 6–9 months | Aggressive expansion → 9–12 months
+
 IMPORTANT: You MUST respond with ONLY valid JSON matching this exact structure (no markdown, no code blocks, no extra text):
 
 {
@@ -4376,8 +4412,12 @@ IMPORTANT: You MUST respond with ONLY valid JSON matching this exact structure (
   "oldestAccountYears": <oldest account age in years as integer>,
   "avgAccountAgeYears": <average account age in years as integer>,
   "inquiries": <total hard inquiries last 12 months as integer>,
+  "inquiriesLast3Months": <hard inquiries last 3 months as integer>,
   "inquiriesLast6Months": <hard inquiries last 6 months as integer>,
+  "newAccountsLast3Months": <accounts opened last 3 months as integer>,
+  "newAccountsLast6Months": <accounts opened last 6 months as integer>,
   "newAccountsLast12Months": <accounts opened last 12 months as integer>,
+  "newAccountsLast24Months": <accounts opened last 24 months as integer>,
   "lates30Days12Months": <30-day lates in last 12 months as integer>,
   "lates60Days24Months": <60-day lates in last 24 months as integer>,
   "lates90PlusDays24Months": <90+ day lates in last 24 months as integer>,
@@ -4399,8 +4439,24 @@ IMPORTANT: You MUST respond with ONLY valid JSON matching this exact structure (
   "recommendedNewApprovalRange": "<e.g. '$5,000 - $8,000' or 'No new approval recommended'>",
   "approvalProbability": "High" | "Moderate" | "Low",
   "primaryDenialTriggers": ["<trigger 1>", "<trigger 2>"],
-  "summary": "<UNDERWRITING DECISION in 4-6 sentences. State Risk Tier. State each key metric assessment (Utilization Level, Payment Performance, Derogatory Status, Inquiry Velocity, Credit Depth). Reference SPECIFIC dollar amounts and counts. Include Exposure Ceiling, Remaining Safe Capacity, Recommended New Approval Range. Write as a commercial bank credit committee — clinical, no encouragement, no advice.>",
-  "riskDepartmentNotes": "<Formal risk department notes. Clinical explanation of key findings. No encouragement. No advice. Bank-style.>"
+  "velocityRisk": {
+    "portfolioExpansionPercent": <integer: (newAccountsLast12Months / totalAccounts) * 100>,
+    "portfolioExpansionGrade": "Low" | "Moderate" | "High" | "Aggressive",
+    "exposureGrowthPercent": <integer or null if not calculable>,
+    "exposureGrowthGrade": "Normal" | "Elevated" | "Aggressive" | "Stacking" | null,
+    "inquiryDensity3Months": <integer>,
+    "inquiryDensity6Months": <integer>,
+    "inquiryDensityGrade": "Normal" | "Elevated" | "High Risk" | "Auto-Denial Risk",
+    "velocityTier": "A" | "B" | "C" | "D",
+    "velocityTierLabel": "Strong" | "Caution" | "High Risk" | "Decline",
+    "fundingCeilingAdjustmentPercent": <100 | 70 | 40 | 0>,
+    "adjustedExposureCeiling": <integer: exposureCeiling * adjustment%>,
+    "mandatoryWaitingMonths": <0 | 3 | 6 | 9 as integer>,
+    "velocityDenialTriggers": ["<specific velocity triggers detected>"],
+    "velocityNotes": "<1-2 sentence clinical velocity assessment>"
+  },
+  "summary": "<UNDERWRITING DECISION in 4-6 sentences. State Risk Tier. State each key metric assessment (Utilization Level, Payment Performance, Derogatory Status, Inquiry Velocity, Credit Depth). Include Velocity Tier and any velocity flags. Reference SPECIFIC dollar amounts and counts. Include Exposure Ceiling (velocity-adjusted if applicable), Remaining Safe Capacity, Recommended New Approval Range. Write as a commercial bank credit committee — clinical, no encouragement, no advice.>",
+  "riskDepartmentNotes": "<Formal risk department notes. Clinical explanation of key findings including velocity risk assessment. No encouragement. No advice. Bank-style.>"
 }
 
 CRITICAL EXTRACTION RULES:
@@ -4497,6 +4553,9 @@ ${extractedText}
         updateData.approvalProbability = analysisResult.approvalProbability || null;
         updateData.primaryDenialTriggers = analysisResult.primaryDenialTriggers ? JSON.stringify(analysisResult.primaryDenialTriggers) : null;
         updateData.riskDepartmentNotes = analysisResult.riskDepartmentNotes || null;
+        if (analysisResult.velocityRisk) {
+          updateData.velocityRiskData = JSON.stringify(analysisResult.velocityRisk);
+        }
 
         if (bureau) {
           let existingBureauData: any = {};
@@ -4525,6 +4584,7 @@ ${extractedText}
             creditDepth: analysisResult.creditDepth || null,
             chargeOffs: safeInt(analysisResult.chargeOffs) ?? 0,
             largestRevolvingLimit: safeInt(analysisResult.largestRevolvingLimit),
+            velocityRisk: analysisResult.velocityRisk || null,
           };
           updateData.bureauHealthData = JSON.stringify(existingBureauData);
         }

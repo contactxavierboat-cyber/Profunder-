@@ -932,6 +932,29 @@ export default function DashboardPage() {
                                 </div>
                               </div>
                             )}
+                            {b.guidance && b.guidance.velocityRisk && (
+                              <div className="mb-3 p-2 rounded-lg bg-white/50">
+                                <div className="flex items-center justify-between text-[9px] mb-1">
+                                  <span className="text-[#1a1a2e]/50">Velocity Tier</span>
+                                  <span className={cn("font-semibold px-1.5 py-0.5 rounded-full text-[9px]",
+                                    b.guidance.velocityRisk.velocityTier === "A" ? "bg-green-500/15 text-green-600" :
+                                    b.guidance.velocityRisk.velocityTier === "B" ? "bg-yellow-500/15 text-yellow-600" :
+                                    b.guidance.velocityRisk.velocityTier === "C" ? "bg-orange-500/15 text-orange-600" :
+                                    "bg-red-500/15 text-red-600"
+                                  )}>{b.guidance.velocityRisk.velocityTier} — {b.guidance.velocityRisk.velocityTierLabel}</span>
+                                </div>
+                                {b.guidance.velocityRisk.mandatoryWaitingMonths > 0 && (
+                                  <div className="flex items-center justify-between text-[9px]">
+                                    <span className="text-[#1a1a2e]/50">Seasoning Period</span>
+                                    <span className="font-mono text-red-500/70">{b.guidance.velocityRisk.mandatoryWaitingMonths} months</span>
+                                  </div>
+                                )}
+                                <div className="flex items-center justify-between text-[9px] mt-1">
+                                  <span className="text-[#1a1a2e]/50">Adjusted Ceiling</span>
+                                  <span className="font-mono font-semibold text-[#1a1a2e]/80">${b.guidance.velocityRisk.adjustedExposureCeiling.toLocaleString()}</span>
+                                </div>
+                              </div>
+                            )}
                             <p className="text-[10px] text-[#1a1a2e]/60 leading-relaxed">{b.recommendation}</p>
                             {b.guidance && b.guidance.denialTriggers.length > 0 && (
                               <div className="mt-2 pt-2 border-t border-white/30">
@@ -1027,6 +1050,57 @@ export default function DashboardPage() {
                             </div>
                           </div>
                         ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {capitalOsData.bureauHealth.bureaus.some(b => b.uploaded && b.guidance?.velocityRisk) && (
+                    <div className="rounded-2xl bg-white/70 backdrop-blur-md border border-white/40 p-6 mb-6" data-testid="velocity-risk-panel">
+                      <p className="text-xs text-[#1a1a2e]/70 mb-4">Velocity Risk Model</p>
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        {capitalOsData.bureauHealth.bureaus.filter(b => b.uploaded && b.guidance?.velocityRisk).map(b => {
+                          const vr = b.guidance!.velocityRisk!;
+                          return (
+                            <div key={b.bureau} className="p-4 rounded-xl bg-white/50 border border-white/30">
+                              <div className="flex items-center justify-between mb-3">
+                                <span className="text-sm font-semibold text-[#1a1a2e]">{b.bureau}</span>
+                                <span className={cn("text-[10px] font-bold px-2 py-0.5 rounded-full",
+                                  vr.velocityTier === "A" ? "bg-green-500/15 text-green-600" :
+                                  vr.velocityTier === "B" ? "bg-yellow-500/15 text-yellow-600" :
+                                  vr.velocityTier === "C" ? "bg-orange-500/15 text-orange-600" :
+                                  "bg-red-500/15 text-red-600"
+                                )}>Tier {vr.velocityTier} — {vr.velocityTierLabel}</span>
+                              </div>
+                              <div className="space-y-2">
+                                <div className="flex justify-between text-[10px]">
+                                  <span className="text-[#1a1a2e]/50">Portfolio Expansion</span>
+                                  <span className="font-medium text-[#1a1a2e]/70">{vr.portfolioExpansionGrade}</span>
+                                </div>
+                                <div className="flex justify-between text-[10px]">
+                                  <span className="text-[#1a1a2e]/50">Adjusted Ceiling</span>
+                                  <span className="font-mono font-semibold text-[#1a1a2e]/80">${vr.adjustedExposureCeiling.toLocaleString()}</span>
+                                </div>
+                                {vr.mandatoryWaitingMonths > 0 && (
+                                  <div className="flex justify-between text-[10px]">
+                                    <span className="text-[#1a1a2e]/50">Mandatory Wait</span>
+                                    <span className="font-mono text-red-500 font-semibold">{vr.mandatoryWaitingMonths} months</span>
+                                  </div>
+                                )}
+                                {vr.velocityNotes && (
+                                  <p className="text-[10px] text-[#1a1a2e]/60 leading-relaxed mt-2 pt-2 border-t border-white/30">{vr.velocityNotes}</p>
+                                )}
+                                {vr.velocityDenialTriggers.length > 0 && (
+                                  <div className="mt-2 pt-2 border-t border-white/30">
+                                    <p className="text-[9px] text-red-500/70 font-medium mb-1">Velocity Triggers</p>
+                                    {vr.velocityDenialTriggers.map((t: string, i: number) => (
+                                      <p key={i} className="text-[9px] text-[#1a1a2e]/50">• {t}</p>
+                                    ))}
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          );
+                        })}
                       </div>
                     </div>
                   )}
@@ -1607,6 +1681,22 @@ export default function DashboardPage() {
                               {g.denialTriggers.map((t, i) => (
                                 <p key={i} className="text-[10px] text-red-500/70 leading-relaxed">• {t}</p>
                               ))}
+                            </div>
+                          )}
+                          {g.velocityRisk && (
+                            <div className="mt-2 pt-2 border-t border-white/40">
+                              <div className="flex items-center justify-between text-[10px]">
+                                <span className="text-[#1a1a2e]/50">Velocity</span>
+                                <span className={cn("font-semibold px-1.5 py-0.5 rounded-full text-[9px]",
+                                  g.velocityRisk.velocityTier === "A" ? "bg-green-500/15 text-green-600" :
+                                  g.velocityRisk.velocityTier === "B" ? "bg-yellow-500/15 text-yellow-600" :
+                                  g.velocityRisk.velocityTier === "C" ? "bg-orange-500/15 text-orange-600" :
+                                  "bg-red-500/15 text-red-600"
+                                )}>Tier {g.velocityRisk.velocityTier} — Ceiling ${g.velocityRisk.adjustedExposureCeiling.toLocaleString()}</span>
+                              </div>
+                              {g.velocityRisk.mandatoryWaitingMonths > 0 && (
+                                <p className="text-[9px] text-red-500/70 mt-1">Wait {g.velocityRisk.mandatoryWaitingMonths} months before applying</p>
+                              )}
                             </div>
                           )}
                           {g.applicationReady && (
