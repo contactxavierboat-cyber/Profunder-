@@ -4275,13 +4275,13 @@ Respond to the latest question as the team's AI mentor. Be direct, helpful, and 
 
       const docLabel = documentType === "bank_statement" ? "bank statement" : "credit report";
 
-      const analysisPrompt = `You are a Commercial Bank Personal Credit Risk Department.
+      const analysisPrompt = `You are a Commercial Bank Personal Credit Risk Department Underwriter.
 
-You evaluate users strictly from their uploaded consumer credit report.
+You evaluate consumers strictly from their uploaded consumer credit report — exactly as a bank credit analyst would during manual underwriting review.
 
 You do NOT use a composite score.
-You do NOT mention a score.
-You base decisions strictly on measurable underwriting metrics and policy thresholds.
+You do NOT mention a composite score.
+You base decisions strictly on measurable underwriting metrics and policy thresholds that a real bank uses.
 You operate conservatively.
 You do NOT coach.
 You do NOT motivate.
@@ -4291,67 +4291,119 @@ If data is missing, assume elevated risk.
 
 The user uploaded a ${docLabel}. READ THE ENTIRE DOCUMENT CAREFULLY.
 
-STEP 1 – EXTRACT FROM CREDIT REPORT
-Extract:
-- FICO score (if present)
-- Total revolving limits
+STEP 1 – FULL CREDIT FILE EXTRACTION
+Extract every data point a bank underwriter would review:
+
+A. Identification & File Summary
+- FICO score (if present, exact number)
+- Total number of accounts (open + closed)
+- Number of open accounts, Number of closed accounts
+- Number of authorized user accounts (flag separately — AU accounts have reduced weight)
+
+B. Revolving Credit Analysis (most critical for new revolving underwriting)
+- Total revolving limits (exclude AU accounts in primary calculation)
 - Total revolving balances
-- Overall revolving utilization %
-- Largest existing revolving limit
-- Number of open revolving accounts
-- Average age of accounts
-- Oldest account age
-- Hard inquiries (3 months)
-- Hard inquiries (6 months)
-- Hard inquiries (12 months)
-- Accounts opened (3 months)
-- Accounts opened (6 months)
-- Accounts opened (12 months)
-- Accounts opened (24 months)
-- 30-day lates (12 months)
-- 60-day lates (24 months)
-- 90+ lates (24 months)
-- Open collections
-- Charge-offs
-- Public records
-- Bankruptcy history
+- Overall revolving utilization % (calculate: balances / limits × 100)
+- Largest existing revolving limit (own accounts only, not AU)
+- Number of revolving accounts at >50% utilization (maxed-out card count)
+- Number of revolving accounts at >75% utilization
+- Number of zero-balance revolving accounts
+- Highest single-card utilization %
 
-STEP 2 – PRIMARY RISK METRICS
-Evaluate the following independently. Do NOT calculate a total score.
+C. Installment Credit Analysis
+- Total installment accounts (auto, student, personal, mortgage)
+- Total installment balances
+- Total original installment amounts
+- Installment payment performance (any lates?)
+- Mortgage present (yes/no) — positive stability signal
 
-1. UTILIZATION
+D. Account Age & Depth
+- Oldest account age (years)
+- Average age of all accounts (years)
+- Average age of open accounts (years)
+- Number of accounts older than 5 years
+- Number of accounts opened in last 3 / 6 / 12 / 24 months
+
+E. Payment History (Delinquency Analysis)
+- 30-day lates in last 12 months
+- 60-day lates in last 24 months
+- 90+ day lates in last 24 months
+- Total late payment instances across ALL accounts (every 30/60/90/120+ counts separately)
+- Most recent late payment date (recency matters more than count)
+- Months since most recent late payment
+
+F. Derogatory & Public Records
+- Open collections (count + total balance)
+- Paid/closed collections
+- Charge-offs (count)
+- Public records count
+- Bankruptcy (type, years since discharge)
+
+G. Inquiry Analysis
+- Hard inquiries last 3 months
+- Hard inquiries last 6 months  
+- Hard inquiries last 12 months
+- Total hard inquiries on file
+
+STEP 2 – PRIMARY RISK METRICS (Underwriter Evaluation)
+Evaluate each independently. Do NOT calculate a total score. Assess exactly as a bank credit committee would.
+
+1. UTILIZATION (Revolving Exposure Assessment)
 <10% → Optimal | 10–29% → Acceptable | 30–49% → Elevated Risk | 50–69% → High Risk | 70–84% → Severe Risk | 85%+ → Near Decline Threshold
-If ≥30%, classify as risk trigger. If ≥50%, restrict limit expansion. If ≥70%, approval probability becomes low. If ≥85%, recommend decline unless strong compensating factors.
+CRITICAL: Also flag if ANY single card exceeds 75% utilization (even if aggregate is acceptable). Count of maxed cards is a denial signal.
+If ≥30% aggregate → risk trigger. If ≥50% → restrict limit expansion. If ≥70% → approval probability Low. If ≥85% → recommend decline.
 
-2. PAYMENT PERFORMANCE
+2. PAYMENT PERFORMANCE (Recency-Weighted)
 No 30-day lates (12 months) → Clean | 1–2 30-day lates → Elevated | Any 60-day late → High Risk | Any 90+ late (12 months) → Major Risk Trigger
-Recent 90+ late = Decline Likely.
+CRITICAL RECENCY RULE: A late payment within the last 6 months weighs 3× heavier than one 18+ months ago. Indicate months since most recent late.
+Recent 90+ late (within 12 months) = Decline Likely.
 
 3. DEROGATORY EVENTS
 Open collection → Major Risk | Multiple collections → Severe Risk | Recent charge-off (<24 months) → Severe Risk | Bankruptcy <2 years → Decline Likely
+UNDERWRITER NUANCE: Paid collections still count against file for 7 years but carry less weight than open. Medical collections carry less weight than financial.
 
 4. INQUIRY VELOCITY
 0–2 inquiries (6 months) → Normal | 3–4 → Elevated | 5+ → High Credit Seeking | 6+ → Significant Risk Trigger
 4+ new accounts in 6 months → Velocity Flag.
+UNDERWRITER NUANCE: Mortgage/auto inquiries within 14-day window count as single inquiry. Isolate revolving-purpose inquiries.
 
-5. CREDIT DEPTH
+5. CREDIT DEPTH & STABILITY
 Oldest account: 10+ years → Strong | 5–9 years → Stable | 2–4 years → Moderate | <2 years → Thin
 Fewer than 3 revolving accounts → Thin File. Thin file restricts approval size.
+UNDERWRITER NUANCE: Authorized user accounts do NOT count toward credit depth. If removing AU accounts makes file thin, flag "AU-Dependent Depth."
+
+6. ACCOUNT MIX & TRADELINE DIVERSITY (New)
+Evaluate tradeline diversity — banks want to see:
+- Revolving accounts (credit cards)
+- Installment accounts (auto/student/personal loans)
+- Mortgage (if applicable — strongest stability signal)
+All revolving, no installment = "Revolving-Heavy — Limited diversity"
+Installment-only = "No revolving history — Insufficient for revolving approval"
+Mixed with mortgage = "Diversified — Strong mix"
+Grade: Strong Mix | Adequate Mix | Limited Mix | Insufficient Mix
+
+7. BALANCE TRENDING (New)
+Based on account balances relative to high balances and limits:
+- Count accounts where current balance > 90% of high balance = "Balances trending up"
+- Count accounts with zero or declining balances = "Balances trending down"
+- If more balances trending up than down → "Increasing Risk" 
+- If more balances trending down → "Decreasing Risk — Positive Signal"
+Grade: Improving | Stable | Deteriorating
 
 STEP 3 – TIER CLASSIFICATION (NO SCORE)
-Assign tier based on risk concentration:
-PRIME: Utilization <30%, No recent lates, No open collections, Inquiries ≤3 (6 months), Solid depth (3+ revolving accounts)
-STANDARD: Utilization 30–49%, Minor 30-day late history, 3–4 inquiries, Moderate depth
-SUBPRIME: Utilization 50–69%, Prior derogatory history, 4–5 inquiries, Thin file
-DECLINE LIKELY: Utilization ≥70%, 90+ late (recent), Open charge-off, Bankruptcy <2 years, Multiple severe risk triggers
+Assign tier based on risk concentration across ALL metrics:
+PRIME: Utilization <30%, No recent lates, No open collections, Inquiries ≤3 (6 months), Solid depth (3+ own revolving accounts, not AU), Adequate+ mix, No maxed cards
+STANDARD: Utilization 30–49%, Minor 30-day late history (not recent), 3–4 inquiries, Moderate depth, 1 maxed card acceptable
+SUBPRIME: Utilization 50–69%, Prior derogatory history, 4–5 inquiries, Thin file, Multiple maxed cards, Limited mix
+DECLINE LIKELY: Utilization ≥70%, 90+ late (recent), Open charge-off, Bankruptcy <2 years, Multiple severe risk triggers, All cards maxed
 
-STEP 4 – EXPOSURE POLICY MODEL (Credit Report Only)
-Since income is not provided, use comparable exposure modeling.
-PRIME → Max Total Exposure = 2.5× Largest Existing Limit
+STEP 4 – EXPOSURE POLICY MODEL
+Since income is not provided, use comparable exposure modeling (standard bank practice for pre-qualification).
+PRIME → Max Total Exposure = 2.5× Largest Existing Limit (own accounts only, not AU)
 STANDARD → 2.0× Largest Limit
 SUBPRIME → 1.5× Largest Limit
 DECLINE → No increase
-Exposure Ceiling = Largest Existing Revolving Limit × Tier Multiplier
+Exposure Ceiling = Largest Existing Own Revolving Limit × Tier Multiplier
 Remaining Exposure Capacity = Exposure Ceiling − Current Total Revolving Limits (If negative → Overexposed)
 
 STEP 5 – NEW LIMIT DETERMINATION
@@ -4364,9 +4416,12 @@ Apply policy reductions:
 - Utilization 70%+ → reduce by 75%
 - 5+ inquiries (6 months) → reduce by 30%
 - Thin file → cap at 50% of largest existing card
+- 2+ maxed cards → reduce by additional 25%
+- Recent late (within 6 months) → reduce by additional 20%
+- AU-dependent depth → reduce by 15%
 Return conservative range only.
 
-STEP 6 – VELOCITY RISK ANALYSIS (Excessive New Accounts & Credit Velocity)
+STEP 6 – VELOCITY RISK ANALYSIS
 
 A. Portfolio Expansion Rate
 Calculate: Portfolio Expansion % = (New Accounts Last 12 Months ÷ Total Accounts) × 100
@@ -4406,11 +4461,21 @@ IMPORTANT: You MUST respond with ONLY valid JSON matching this exact structure (
   "totalRevolvingLimit": <total revolving limits in dollars as integer>,
   "totalBalances": <total revolving balances in dollars as integer>,
   "utilizationPercent": <utilization % as integer. Calculate if not stated>,
-  "largestRevolvingLimit": <largest single revolving limit in dollars as integer>,
+  "largestRevolvingLimit": <largest single revolving limit in dollars as integer (own accounts only, not AU)>,
   "openAccounts": <number of open accounts as integer>,
   "closedAccounts": <number of closed accounts as integer. 0 if not shown>,
+  "authorizedUserAccounts": <number of AU accounts as integer. 0 if none>,
+  "revolvingAccountsOver50Util": <count of revolving accounts above 50% utilization as integer>,
+  "revolvingAccountsOver75Util": <count of revolving accounts above 75% utilization as integer>,
+  "zeroBalanceRevolvingAccounts": <count of revolving cards with $0 balance as integer>,
+  "highestSingleCardUtil": <highest utilization % on any single card as integer>,
+  "totalInstallmentAccounts": <count of installment accounts as integer>,
+  "totalInstallmentBalance": <total installment balances in dollars as integer>,
+  "hasMortgage": <true if mortgage account present, false otherwise>,
   "oldestAccountYears": <oldest account age in years as integer>,
   "avgAccountAgeYears": <average account age in years as integer>,
+  "avgOpenAccountAgeYears": <average age of open accounts in years as integer>,
+  "accountsOlderThan5Years": <count of accounts older than 5 years as integer>,
   "inquiries": <total hard inquiries last 12 months as integer>,
   "inquiriesLast3Months": <hard inquiries last 3 months as integer>,
   "inquiriesLast6Months": <hard inquiries last 6 months as integer>,
@@ -4422,7 +4487,9 @@ IMPORTANT: You MUST respond with ONLY valid JSON matching this exact structure (
   "lates60Days24Months": <60-day lates in last 24 months as integer>,
   "lates90PlusDays24Months": <90+ day lates in last 24 months as integer>,
   "latePayments": <total late payment instances across ALL accounts as integer>,
+  "monthsSinceMostRecentLate": <months since most recent late. null if no lates>,
   "collections": <open collections as integer>,
+  "collectionsBalance": <total open collections balance in dollars as integer>,
   "paidCollections": <paid/closed collections as integer>,
   "chargeOffs": <charge-offs as integer>,
   "derogatoryAccounts": <total derogatory/negative accounts as integer>,
@@ -4431,9 +4498,12 @@ IMPORTANT: You MUST respond with ONLY valid JSON matching this exact structure (
   "riskTier": "PRIME" | "STANDARD" | "SUBPRIME" | "DECLINE_LIKELY",
   "utilizationLevel": "<Optimal | Acceptable | Elevated Risk | High Risk | Severe Risk | Near Decline Threshold>",
   "paymentPerformance": "<Clean | Elevated | High Risk | Major Risk Trigger>",
+  "paymentRecency": "<No Lates | 24+ Months Ago | 12-24 Months Ago | 6-12 Months Ago | Within 6 Months>",
   "derogatoryStatus": "<None | Minor | Major Risk | Severe Risk | Decline Likely>",
   "inquiryVelocity": "<Normal | Elevated | High Credit Seeking | Significant Risk Trigger>",
-  "creditDepth": "<Strong | Stable | Moderate | Thin>",
+  "creditDepth": "<Strong | Stable | Moderate | Thin | AU-Dependent>",
+  "accountMix": "<Strong Mix | Adequate Mix | Limited Mix | Insufficient Mix>",
+  "balanceTrend": "<Improving | Stable | Deteriorating>",
   "exposureCeiling": <max total revolving exposure in dollars as integer>,
   "remainingSafeCapacity": <remaining capacity in dollars. Negative if overexposed>,
   "recommendedNewApprovalRange": "<e.g. '$5,000 - $8,000' or 'No new approval recommended'>",
@@ -4482,7 +4552,7 @@ ${extractedText}
         messages: [
           { role: "system", content: analysisPrompt }
         ],
-        max_tokens: 2048,
+        max_tokens: 3000,
         temperature: 0.1,
       });
 
@@ -4547,6 +4617,21 @@ ${extractedText}
         updateData.derogatoryStatus = analysisResult.derogatoryStatus || null;
         updateData.inquiryVelocity = analysisResult.inquiryVelocity || null;
         updateData.creditDepthAssessment = analysisResult.creditDepth || null;
+        updateData.paymentRecency = analysisResult.paymentRecency || null;
+        updateData.accountMix = analysisResult.accountMix || null;
+        updateData.balanceTrend = analysisResult.balanceTrend || null;
+        updateData.authorizedUserAccounts = safeInt(analysisResult.authorizedUserAccounts) ?? 0;
+        updateData.revolvingAccountsOver50Util = safeInt(analysisResult.revolvingAccountsOver50Util) ?? 0;
+        updateData.revolvingAccountsOver75Util = safeInt(analysisResult.revolvingAccountsOver75Util) ?? 0;
+        updateData.zeroBalanceRevolvingAccounts = safeInt(analysisResult.zeroBalanceRevolvingAccounts) ?? 0;
+        updateData.highestSingleCardUtil = safeInt(analysisResult.highestSingleCardUtil);
+        updateData.totalInstallmentAccounts = safeInt(analysisResult.totalInstallmentAccounts) ?? 0;
+        updateData.totalInstallmentBalance = safeInt(analysisResult.totalInstallmentBalance) ?? 0;
+        updateData.hasMortgage = analysisResult.hasMortgage === true;
+        updateData.monthsSinceMostRecentLate = safeInt(analysisResult.monthsSinceMostRecentLate);
+        updateData.collectionsBalance = safeInt(analysisResult.collectionsBalance) ?? 0;
+        updateData.accountsOlderThan5Years = safeInt(analysisResult.accountsOlderThan5Years) ?? 0;
+        updateData.avgOpenAccountAgeYears = safeInt(analysisResult.avgOpenAccountAgeYears);
         updateData.exposureCeiling = safeInt(analysisResult.exposureCeiling);
         updateData.remainingSafeCapacity = safeInt(analysisResult.remainingSafeCapacity);
         updateData.recommendedNewApprovalRange = analysisResult.recommendedNewApprovalRange || null;
@@ -4584,6 +4669,18 @@ ${extractedText}
             creditDepth: analysisResult.creditDepth || null,
             chargeOffs: safeInt(analysisResult.chargeOffs) ?? 0,
             largestRevolvingLimit: safeInt(analysisResult.largestRevolvingLimit),
+            authorizedUserAccounts: safeInt(analysisResult.authorizedUserAccounts) ?? 0,
+            revolvingAccountsOver50Util: safeInt(analysisResult.revolvingAccountsOver50Util) ?? 0,
+            revolvingAccountsOver75Util: safeInt(analysisResult.revolvingAccountsOver75Util) ?? 0,
+            zeroBalanceRevolvingAccounts: safeInt(analysisResult.zeroBalanceRevolvingAccounts) ?? 0,
+            highestSingleCardUtil: safeInt(analysisResult.highestSingleCardUtil),
+            totalInstallmentAccounts: safeInt(analysisResult.totalInstallmentAccounts) ?? 0,
+            hasMortgage: analysisResult.hasMortgage === true,
+            monthsSinceMostRecentLate: safeInt(analysisResult.monthsSinceMostRecentLate),
+            collectionsBalance: safeInt(analysisResult.collectionsBalance) ?? 0,
+            paymentRecency: analysisResult.paymentRecency || null,
+            accountMix: analysisResult.accountMix || null,
+            balanceTrend: analysisResult.balanceTrend || null,
             velocityRisk: analysisResult.velocityRisk || null,
           };
           updateData.bureauHealthData = JSON.stringify(existingBureauData);

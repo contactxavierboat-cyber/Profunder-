@@ -1010,6 +1010,84 @@ export default function DashboardPage() {
                   </div>
 
                   {capitalOsData.bureauHealth.bureaus.some(b => b.uploaded && b.guidance) && (
+                    <div className="rounded-2xl bg-white/70 backdrop-blur-md border border-white/40 p-6 mb-6" data-testid="underwriter-file-summary">
+                      <p className="text-xs text-[#1a1a2e]/70 mb-4">Underwriter File Summary</p>
+                      <div className="space-y-4">
+                        {capitalOsData.bureauHealth.bureaus.filter(b => b.uploaded && b.guidance).map(b => {
+                          const g = b.guidance!;
+                          return (
+                            <div key={b.bureau} className="p-4 rounded-xl bg-white/50 border border-white/30">
+                              <div className="flex items-center gap-2 mb-3">
+                                <span className="text-sm font-semibold text-[#1a1a2e]">{b.bureau}</span>
+                                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ backgroundColor: g.riskTierColor + '15', color: g.riskTierColor }}>{g.riskTier.replace("_", " ")}</span>
+                              </div>
+                              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-3">
+                                <div className="p-2 rounded-lg bg-white/60 text-center">
+                                  <p className="text-[8px] text-[#1a1a2e]/40 uppercase">Revolving Util</p>
+                                  <p className={cn("text-sm font-bold font-mono", b.utilization > 50 ? "text-red-600" : b.utilization > 30 ? "text-yellow-600" : "text-green-600")}>{b.utilization}%</p>
+                                </div>
+                                <div className="p-2 rounded-lg bg-white/60 text-center">
+                                  <p className="text-[8px] text-[#1a1a2e]/40 uppercase">Highest Card</p>
+                                  <p className={cn("text-sm font-bold font-mono", (g.highestSingleCardUtil || 0) > 75 ? "text-red-600" : (g.highestSingleCardUtil || 0) > 50 ? "text-yellow-600" : "text-green-600")}>{g.highestSingleCardUtil ?? "—"}%</p>
+                                </div>
+                                <div className="p-2 rounded-lg bg-white/60 text-center">
+                                  <p className="text-[8px] text-[#1a1a2e]/40 uppercase">Cards &gt;75%</p>
+                                  <p className={cn("text-sm font-bold font-mono", g.revolvingAccountsOver75Util > 0 ? "text-red-600" : "text-green-600")}>{g.revolvingAccountsOver75Util}</p>
+                                </div>
+                                <div className="p-2 rounded-lg bg-white/60 text-center">
+                                  <p className="text-[8px] text-[#1a1a2e]/40 uppercase">Zero-Bal Cards</p>
+                                  <p className="text-sm font-bold font-mono text-[#1a1a2e]/80">{g.zeroBalanceRevolvingAccounts}</p>
+                                </div>
+                              </div>
+                              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-3">
+                                <div className="p-2 rounded-lg bg-white/60 text-center">
+                                  <p className="text-[8px] text-[#1a1a2e]/40 uppercase">Late Pmts</p>
+                                  <p className={cn("text-sm font-bold font-mono", g.latePayments > 0 ? "text-red-600" : "text-green-600")}>{g.latePayments}</p>
+                                </div>
+                                <div className="p-2 rounded-lg bg-white/60 text-center">
+                                  <p className="text-[8px] text-[#1a1a2e]/40 uppercase">Recency</p>
+                                  <p className={cn("text-[11px] font-semibold", g.paymentRecency === "No Lates" || !g.paymentRecency ? "text-green-600" : g.paymentRecency === "Within 6 Months" ? "text-red-600" : "text-yellow-600")}>{g.paymentRecency || "No Lates"}</p>
+                                </div>
+                                <div className="p-2 rounded-lg bg-white/60 text-center">
+                                  <p className="text-[8px] text-[#1a1a2e]/40 uppercase">Collections</p>
+                                  <p className={cn("text-sm font-bold font-mono", g.collections > 0 ? "text-red-600" : "text-green-600")}>{g.collections}{g.collectionsBalance > 0 ? ` ($${g.collectionsBalance.toLocaleString()})` : ""}</p>
+                                </div>
+                                <div className="p-2 rounded-lg bg-white/60 text-center">
+                                  <p className="text-[8px] text-[#1a1a2e]/40 uppercase">Charge-offs</p>
+                                  <p className={cn("text-sm font-bold font-mono", g.chargeOffs > 0 ? "text-red-600" : "text-green-600")}>{g.chargeOffs}</p>
+                                </div>
+                              </div>
+                              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                                <div className="p-2 rounded-lg bg-white/60 text-center">
+                                  <p className="text-[8px] text-[#1a1a2e]/40 uppercase">Account Mix</p>
+                                  <p className={cn("text-[11px] font-semibold", g.accountMix === "Strong Mix" ? "text-green-600" : g.accountMix === "Adequate Mix" ? "text-green-600/80" : g.accountMix === "Limited Mix" ? "text-yellow-600" : "text-red-600")}>{g.accountMix || "—"}</p>
+                                </div>
+                                <div className="p-2 rounded-lg bg-white/60 text-center">
+                                  <p className="text-[8px] text-[#1a1a2e]/40 uppercase">Installment</p>
+                                  <p className="text-sm font-bold font-mono text-[#1a1a2e]/80">{g.totalInstallmentAccounts}</p>
+                                </div>
+                                <div className="p-2 rounded-lg bg-white/60 text-center">
+                                  <p className="text-[8px] text-[#1a1a2e]/40 uppercase">Mortgage</p>
+                                  <p className={cn("text-sm font-bold", g.hasMortgage ? "text-green-600" : "text-[#1a1a2e]/40")}>{g.hasMortgage ? "Yes" : "No"}</p>
+                                </div>
+                                <div className="p-2 rounded-lg bg-white/60 text-center">
+                                  <p className="text-[8px] text-[#1a1a2e]/40 uppercase">Balance Trend</p>
+                                  <p className={cn("text-[11px] font-semibold", g.balanceTrend === "Improving" ? "text-green-600" : g.balanceTrend === "Stable" ? "text-[#1a1a2e]/70" : "text-red-600")}>{g.balanceTrend || "—"}</p>
+                                </div>
+                              </div>
+                              {g.authorizedUserAccounts > 0 && (
+                                <div className="mt-2 pt-2 border-t border-white/30">
+                                  <p className="text-[10px] text-yellow-600/80"><span className="font-medium">AU Alert:</span> {g.authorizedUserAccounts} authorized user account(s) detected — reduced underwriting weight applied</p>
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+
+                  {capitalOsData.bureauHealth.bureaus.some(b => b.uploaded && b.guidance) && (
                     <div className="rounded-2xl bg-white/70 backdrop-blur-md border border-white/40 p-6 mb-6" data-testid="bureau-guidance-panel">
                       <p className="text-xs text-[#1a1a2e]/70 mb-4">Bureau-Specific Action Plan</p>
                       <div className="space-y-4">

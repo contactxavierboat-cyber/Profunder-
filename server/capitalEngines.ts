@@ -102,12 +102,12 @@ export interface ReadinessScore {
 
 function severityFromStatus(status: string): "optimal" | "acceptable" | "elevated" | "high" | "severe" | "decline" {
   const s = status.toLowerCase();
-  if (s.includes("optimal") || s.includes("clean") || s.includes("none") || s.includes("normal") || s.includes("strong")) return "optimal";
-  if (s.includes("acceptable") || s.includes("stable")) return "acceptable";
-  if (s.includes("elevated") || s.includes("moderate") || s.includes("minor")) return "elevated";
-  if (s.includes("high risk") || s.includes("high credit")) return "high";
-  if (s.includes("severe") || s.includes("major")) return "severe";
-  if (s.includes("decline") || s.includes("near decline") || s.includes("thin")) return "decline";
+  if (s.includes("optimal") || s.includes("clean") || s.includes("none") || s.includes("normal") || s.includes("strong") || s.includes("improving") || s.includes("no lates")) return "optimal";
+  if (s.includes("acceptable") || s.includes("stable") || s.includes("adequate") || s.includes("24+ months")) return "acceptable";
+  if (s.includes("elevated") || s.includes("moderate") || s.includes("minor") || s.includes("limited") || s.includes("12-24 months")) return "elevated";
+  if (s.includes("high risk") || s.includes("high credit") || s.includes("deteriorating") || s.includes("6-12 months")) return "high";
+  if (s.includes("severe") || s.includes("major") || s.includes("within 6 months")) return "severe";
+  if (s.includes("decline") || s.includes("near decline") || s.includes("thin") || s.includes("insufficient") || s.includes("au-dependent")) return "decline";
   return "elevated";
 }
 
@@ -227,7 +227,29 @@ export function calculateCapitalReadiness(user: User): ReadinessScore {
       name: "Credit Depth",
       status: depthStatus,
       severity: severityFromStatus(depthStatus),
-      detail: `Oldest account: ${oldestAge} years. ${openAccounts} revolving accounts.`,
+      detail: `Oldest account: ${oldestAge} years. ${openAccounts} revolving accounts.${(user as any).authorizedUserAccounts > 0 ? ` (${(user as any).authorizedUserAccounts} AU)` : ""}`,
+    },
+    {
+      name: "Account Mix",
+      status: (user as any).accountMix || "Unknown",
+      severity: severityFromStatus((user as any).accountMix || "Unknown"),
+      detail: `${(user as any).totalInstallmentAccounts || 0} installment, ${openAccounts} revolving${(user as any).hasMortgage ? ", mortgage present" : ""}`,
+    },
+    {
+      name: "Payment Recency",
+      status: (user as any).paymentRecency || "Unknown",
+      severity: (user as any).paymentRecency === "No Lates" || !(user as any).paymentRecency ? "optimal" 
+        : (user as any).paymentRecency === "24+ Months Ago" ? "acceptable"
+        : (user as any).paymentRecency === "12-24 Months Ago" ? "elevated"
+        : (user as any).paymentRecency === "6-12 Months Ago" ? "high"
+        : (user as any).paymentRecency === "Within 6 Months" ? "severe" : "elevated",
+      detail: (user as any).monthsSinceMostRecentLate ? `${(user as any).monthsSinceMostRecentLate} months since last late payment` : "No late payments on file",
+    },
+    {
+      name: "Balance Trend",
+      status: (user as any).balanceTrend || "Unknown",
+      severity: (user as any).balanceTrend === "Improving" ? "optimal" : (user as any).balanceTrend === "Stable" ? "acceptable" : (user as any).balanceTrend === "Deteriorating" ? "high" : "elevated",
+      detail: `${(user as any).revolvingAccountsOver75Util || 0} cards above 75% utilization. ${(user as any).zeroBalanceRevolvingAccounts || 0} zero-balance cards.`,
     },
   ];
 
@@ -341,6 +363,17 @@ export interface BureauGuidance {
   chargeOffs: number;
   openAccounts: number;
   totalRevolvingLimit: number;
+  authorizedUserAccounts: number;
+  revolvingAccountsOver75Util: number;
+  zeroBalanceRevolvingAccounts: number;
+  highestSingleCardUtil: number | null;
+  totalInstallmentAccounts: number;
+  hasMortgage: boolean;
+  monthsSinceMostRecentLate: number | null;
+  collectionsBalance: number;
+  paymentRecency: string | null;
+  accountMix: string | null;
+  balanceTrend: string | null;
   velocityRisk: {
     portfolioExpansionGrade: string;
     velocityTier: string;
@@ -530,6 +563,17 @@ export function calculateBureauHealth(user: User): { bureaus: BureauHealth[]; pr
       actionItems, denialTriggers, fundingPhase, applicationReady,
       score: creditScore || null, latePayments, collections: coll, chargeOffs,
       openAccounts, totalRevolvingLimit: revolvingLimit,
+      authorizedUserAccounts: data.authorizedUserAccounts || 0,
+      revolvingAccountsOver75Util: data.revolvingAccountsOver75Util || 0,
+      zeroBalanceRevolvingAccounts: data.zeroBalanceRevolvingAccounts || 0,
+      highestSingleCardUtil: data.highestSingleCardUtil || null,
+      totalInstallmentAccounts: data.totalInstallmentAccounts || 0,
+      hasMortgage: data.hasMortgage || false,
+      monthsSinceMostRecentLate: data.monthsSinceMostRecentLate || null,
+      collectionsBalance: data.collectionsBalance || 0,
+      paymentRecency: data.paymentRecency || null,
+      accountMix: data.accountMix || null,
+      balanceTrend: data.balanceTrend || null,
       velocityRisk: velocityRiskParsed,
     };
 
