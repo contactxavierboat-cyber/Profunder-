@@ -326,6 +326,23 @@ export function calculateSafeExposure(user: User): SafeExposure {
   };
 }
 
+export interface BureauGuidance {
+  riskTier: string;
+  riskTierColor: string;
+  exposureCeiling: number;
+  exposureMultiplier: number;
+  actionItems: string[];
+  denialTriggers: string[];
+  fundingPhase: string;
+  applicationReady: boolean;
+  score: number | null;
+  latePayments: number;
+  collections: number;
+  chargeOffs: number;
+  openAccounts: number;
+  totalRevolvingLimit: number;
+}
+
 export interface BureauHealth {
   bureau: string;
   uploaded: boolean;
@@ -337,6 +354,7 @@ export interface BureauHealth {
   riskColor: string;
   priority: boolean;
   recommendation: string;
+  guidance: BureauGuidance | null;
 }
 
 export function calculateBureauHealth(user: User): { bureaus: BureauHealth[]; priorityBureau: string } {
@@ -361,13 +379,22 @@ export function calculateBureauHealth(user: User): { bureaus: BureauHealth[]; pr
         riskColor: "#6b7280",
         priority: false,
         recommendation: `Upload your ${name} credit report to see bureau-specific data.`,
+        guidance: null,
       };
     }
 
     const util = data.utilizationPercent || 0;
     const inq = data.inquiries || 0;
-    const derog = (data.derogatoryAccounts || 0) + (data.collections || 0);
+    const derogAccounts = data.derogatoryAccounts || 0;
+    const coll = data.collections || 0;
+    const derog = derogAccounts + coll;
     const age = data.oldestAccountYears || 0;
+    const latePayments = data.latePayments || 0;
+    const chargeOffs = data.chargeOffs || 0;
+    const openAccounts = data.openAccounts || 0;
+    const creditScore = data.creditScoreExact || 0;
+    const revolvingLimit = data.totalRevolvingLimit || 0;
+    const largestLimit = data.largestRevolvingLimit || revolvingLimit;
 
     let status: "Strong" | "Moderate" | "Weak";
     let riskColor: string;
@@ -384,7 +411,96 @@ export function calculateBureauHealth(user: User): { bureaus: BureauHealth[]; pr
     else if (status === "Moderate") recommendation = `${name} needs optimization. Address ${derog > 0 ? "derogatory items" : util > 30 ? "utilization" : "inquiry density"} first.`;
     else recommendation = `${name} requires repair. Focus dispute efforts here before applying.`;
 
-    return { bureau: name, uploaded: true, utilization: util, hardInquiries: inq, derogatoryCount: derog, oldestAccountAge: age, riskStatus: status, riskColor, priority: false, recommendation };
+    const actionItems: string[] = [];
+    const denialTriggers: string[] = [];
+
+    if (util > 45) {
+      actionItems.push(`Reduce ${name} utilization from ${util}% to below 30%`);
+      denialTriggers.push(`High utilization (${util}%)`);
+    } else if (util > 30) {
+      actionItems.push(`Lower ${name} utilization from ${util}% toward 10% for optimal positioning`);
+    }
+    if (latePayments > 0) {
+      actionItems.push(`Address ${latePayments} late payment(s) on ${name} — dispute or request goodwill removal`);
+      if (latePayments > 2) denialTriggers.push(`${latePayments} late payments`);
+    }
+    if (coll > 0) {
+      actionItems.push(`Resolve ${coll} collection(s) on ${name} — negotiate pay-for-delete`);
+      denialTriggers.push(`${coll} active collection(s)`);
+    }
+    if (derogAccounts > 0) {
+      actionItems.push(`Dispute ${derogAccounts} derogatory account(s) on ${name}`);
+      denialTriggers.push(`${derogAccounts} derogatory account(s)`);
+    }
+    if (chargeOffs > 0) {
+      actionItems.push(`Address ${chargeOffs} charge-off(s) on ${name} report`);
+      denialTriggers.push(`${chargeOffs} charge-off(s)`);
+    }
+    if (inq > 4) {
+      actionItems.push(`${inq} inquiries on ${name} — avoid new applications for 45+ days`);
+      denialTriggers.push(`Excessive inquiries (${inq})`);
+    } else if (inq > 2) {
+      actionItems.push(`${inq} inquiries on ${name} — limit new applications`);
+    }
+    if (age < 2) {
+      actionItems.push(`${name} credit history is thin (${age}yr). Keep accounts open to build depth`);
+    }
+    if (openAccounts < 3) {
+      actionItems.push(`Only ${openAccounts} open account(s) on ${name}. Consider adding a secured card for depth`);
+    }
+    if (creditScore > 0 && creditScore < 620) {
+      denialTriggers.push(`Score below minimum threshold (${creditScore})`);
+    }
+    if (revolvingLimit > 0 && revolvingLimit < 5000) {
+      denialTriggers.push(`Thin revolving depth ($${revolvingLimit.toLocaleString()})`);
+    }
+    if (actionItems.length === 0) {
+      actionItems.push(`${name} profile is clean — maintain current habits and monitor`);
+    }
+
+    let riskTier: string;
+    const lowUtil = util < 30;
+    const noLates = latePayments === 0;
+    const noColl = coll === 0;
+    const lowInq = inq <= 3;
+    const solidDepth = openAccounts >= 3;
+    if (lowUtil && noLates && noColl && derogAccounts === 0 && lowInq && solidDepth) riskTier = "PRIME";
+    else if (util < 50 && latePayments <= 2 && inq <= 4 && derog <= 1) riskTier = "STANDARD";
+    else if (util < 70 && derog <= 2) riskTier = "SUBPRIME";
+    else riskTier = "DECLINE_LIKELY";
+
+    let riskTierColor: string;
+    switch (riskTier) {
+      case "PRIME": riskTierColor = "#10b981"; break;
+      case "STANDARD": riskTierColor = "#eab308"; break;
+      case "SUBPRIME": riskTierColor = "#f97316"; break;
+      default: riskTierColor = "#ef4444";
+    }
+
+    let exposureMultiplier: number;
+    if (riskTier === "PRIME") exposureMultiplier = 2.5;
+    else if (riskTier === "STANDARD") exposureMultiplier = 2.0;
+    else if (riskTier === "SUBPRIME") exposureMultiplier = 1.5;
+    else exposureMultiplier = 0.5;
+    const exposureCeiling = Math.round(largestLimit * exposureMultiplier);
+
+    let fundingPhase: string;
+    if (derog > 0 || latePayments > 2 || util > 70 || (creditScore > 0 && creditScore < 580)) fundingPhase = "Repair";
+    else if ((creditScore > 0 && creditScore < 650) || util > 40 || age < 2 || openAccounts < 3) fundingPhase = "Build";
+    else if ((creditScore > 0 && creditScore < 700) || util > 25 || inq > 3) fundingPhase = "Optimize";
+    else if ((creditScore > 0 && creditScore < 750) || revolvingLimit < 50000) fundingPhase = "Apply";
+    else fundingPhase = "Scale";
+
+    const applicationReady = denialTriggers.length === 0 && riskTier !== "DECLINE_LIKELY" && riskTier !== "SUBPRIME";
+
+    const guidance: BureauGuidance = {
+      riskTier, riskTierColor, exposureCeiling, exposureMultiplier,
+      actionItems, denialTriggers, fundingPhase, applicationReady,
+      score: creditScore || null, latePayments, collections: coll, chargeOffs,
+      openAccounts, totalRevolvingLimit: revolvingLimit,
+    };
+
+    return { bureau: name, uploaded: true, utilization: util, hardInquiries: inq, derogatoryCount: derog, oldestAccountAge: age, riskStatus: status, riskColor, priority: false, recommendation, guidance };
   });
 
   const uploadedBureaus = bureaus.filter(b => b.uploaded);

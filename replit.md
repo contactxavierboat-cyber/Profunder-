@@ -11,6 +11,13 @@ A subscription-based ($50/month via Stripe) AI-powered fundability platform ("Ca
 - 2026-02-25: Removed Build Strategy Simulators (Bank Rating + Pledge Loan) from dashboard
 - 2026-02-25: Dashboard shows Risk Tier card instead of score gauge, Risk Metrics panel with severity badges, Exposure Policy panel with denial triggers
 - 2026-02-25: **Per-Bureau Credit Report Uploads** — Bureau Health section now shows "Not Uploaded" with upload button for each bureau (Experian, Equifax, TransUnion). Each bureau stores its own extracted data in bureauHealthData JSON. Only uploaded bureaus show metrics.
+- 2026-02-25: **Per-Bureau Guidance System** — Each uploaded bureau report generates independent guidance: risk tier (PRIME/STANDARD/SUBPRIME/DECLINE_LIKELY), funding phase, exposure ceiling with multiplier, denial triggers, action items, application readiness. BureauGuidance interface in capitalEngines.ts.
+- 2026-02-25: Mission Control bureau cards now show per-bureau risk tier badge, funding phase, score, exposure ceiling/multiplier, and denial triggers
+- 2026-02-25: Mission Control "Bureau-Specific Action Plan" panel — per-bureau action items, phase, ceiling, late payments, collections with application readiness badges
+- 2026-02-25: Repair Engine "Per-Bureau Repair Status" panel — shows derogatory, late payments, collections, charge-offs, utilization per bureau with red/green indicators and repair actions
+- 2026-02-25: Funding Strategy "Bureau Funding Readiness" panel — per-bureau application readiness, ceiling, multiplier, denial triggers, priority bureau flag
+- 2026-02-25: Progress Tracker "Per-Bureau Progress" panel — compact bureau comparison with util/inq/derog/ceiling per bureau and top action item
+- 2026-02-25: All dashboard tabs refresh data on tab switch (not just Mission Control)
 - 2026-02-25: **Rebranded from baalio to Profundr** — all text, imports, meta tags, AI prompts, component names updated
 - 2026-02-25: **$50/month Stripe subscription paywall** — new users start as inactive, login redirects to subscription page, dashboard guards against unsubscribed users
 - 2026-02-25: Logo component renamed from baalio-logo.tsx to profundr-logo.tsx

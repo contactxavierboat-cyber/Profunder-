@@ -899,6 +899,13 @@ export default function DashboardPage() {
                         </div>
                         {b.uploaded ? (
                           <>
+                            {b.guidance && (
+                              <div className="flex items-center gap-2 mb-3">
+                                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ backgroundColor: b.guidance.riskTierColor + '15', color: b.guidance.riskTierColor }}>{b.guidance.riskTier.replace("_", " ")}</span>
+                                <span className="text-[9px] text-[#1a1a2e]/50">{b.guidance.fundingPhase} Phase</span>
+                                {b.guidance.score && <span className="text-[9px] text-[#1a1a2e]/40 ml-auto font-mono">{b.guidance.score}</span>}
+                              </div>
+                            )}
                             <div className="grid grid-cols-3 gap-3 text-center mb-3">
                               <div>
                                 <p className="text-lg font-bold text-[#1a1a2e]">{b.utilization}%</p>
@@ -913,7 +920,27 @@ export default function DashboardPage() {
                                 <p className="text-[9px] text-[#1a1a2e]/50">Derogatory</p>
                               </div>
                             </div>
+                            {b.guidance && (
+                              <div className="mb-3">
+                                <div className="flex items-center justify-between text-[9px] mb-1">
+                                  <span className="text-[#1a1a2e]/50">Exposure Ceiling</span>
+                                  <span className="font-mono font-semibold text-[#1a1a2e]/80">${b.guidance.exposureCeiling.toLocaleString()}</span>
+                                </div>
+                                <div className="flex items-center justify-between text-[9px]">
+                                  <span className="text-[#1a1a2e]/50">Multiplier</span>
+                                  <span className="font-mono text-[#1a1a2e]/60">{b.guidance.exposureMultiplier}x</span>
+                                </div>
+                              </div>
+                            )}
                             <p className="text-[10px] text-[#1a1a2e]/60 leading-relaxed">{b.recommendation}</p>
+                            {b.guidance && b.guidance.denialTriggers.length > 0 && (
+                              <div className="mt-2 pt-2 border-t border-white/30">
+                                <p className="text-[9px] text-red-500/70 font-medium mb-1">Denial Triggers</p>
+                                {b.guidance.denialTriggers.map((t, ti) => (
+                                  <p key={ti} className="text-[9px] text-[#1a1a2e]/50 leading-relaxed">• {t}</p>
+                                ))}
+                              </div>
+                            )}
                           </>
                         ) : (
                           <div className="flex flex-col items-center justify-center py-4">
@@ -940,6 +967,51 @@ export default function DashboardPage() {
                       </div>
                     ))}
                   </div>
+
+                  {capitalOsData.bureauHealth.bureaus.some(b => b.uploaded && b.guidance) && (
+                    <div className="rounded-2xl bg-white/70 backdrop-blur-md border border-white/40 p-6 mb-6" data-testid="bureau-guidance-panel">
+                      <p className="text-xs text-[#1a1a2e]/70 mb-4">Bureau-Specific Action Plan</p>
+                      <div className="space-y-4">
+                        {capitalOsData.bureauHealth.bureaus.filter(b => b.uploaded && b.guidance).map(b => (
+                          <div key={b.bureau} className="p-4 rounded-xl bg-white/50 border border-white/30">
+                            <div className="flex items-center justify-between mb-3">
+                              <div className="flex items-center gap-2">
+                                <span className="text-sm font-semibold text-[#1a1a2e]">{b.bureau}</span>
+                                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ backgroundColor: b.guidance!.riskTierColor + '15', color: b.guidance!.riskTierColor }}>{b.guidance!.riskTier.replace("_", " ")}</span>
+                              </div>
+                              <span className={cn("text-[10px] px-2 py-0.5 rounded-full font-medium", b.guidance!.applicationReady ? "bg-green-500/15 text-green-600" : "bg-red-500/15 text-red-600")}>{b.guidance!.applicationReady ? "Application Ready" : "Not Ready"}</span>
+                            </div>
+                            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-3">
+                              <div className="text-center p-2 rounded-lg bg-white/60">
+                                <p className="text-[9px] text-[#1a1a2e]/50 uppercase">Phase</p>
+                                <p className="text-xs font-semibold text-[#1a1a2e]/80">{b.guidance!.fundingPhase}</p>
+                              </div>
+                              <div className="text-center p-2 rounded-lg bg-white/60">
+                                <p className="text-[9px] text-[#1a1a2e]/50 uppercase">Ceiling</p>
+                                <p className="text-xs font-semibold text-[#1a1a2e]/80 font-mono">${b.guidance!.exposureCeiling.toLocaleString()}</p>
+                              </div>
+                              <div className="text-center p-2 rounded-lg bg-white/60">
+                                <p className="text-[9px] text-[#1a1a2e]/50 uppercase">Late Pmts</p>
+                                <p className="text-xs font-semibold text-[#1a1a2e]/80">{b.guidance!.latePayments}</p>
+                              </div>
+                              <div className="text-center p-2 rounded-lg bg-white/60">
+                                <p className="text-[9px] text-[#1a1a2e]/50 uppercase">Collections</p>
+                                <p className="text-xs font-semibold text-[#1a1a2e]/80">{b.guidance!.collections}</p>
+                              </div>
+                            </div>
+                            <div className="space-y-1">
+                              {b.guidance!.actionItems.map((item, i) => (
+                                <div key={i} className="flex items-start gap-2">
+                                  <div className="w-1.5 h-1.5 rounded-full bg-[#3a3a5a]/40 mt-1.5 shrink-0" />
+                                  <p className="text-[11px] text-[#1a1a2e]/70 leading-relaxed">{item}</p>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
 
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
                     <div className="rounded-2xl bg-white/70 backdrop-blur-md border border-white/40 p-6" data-testid="doc-upload-section">
@@ -1115,6 +1187,65 @@ export default function DashboardPage() {
                       Save Address
                     </button>
                   </div>
+
+                  {capitalOsData && capitalOsData.bureauHealth.bureaus.some(b => b.uploaded && b.guidance) && (
+                    <div className="rounded-2xl bg-white/70 backdrop-blur-md border border-white/40 p-5 mb-5" data-testid="bureau-repair-overview">
+                      <p className="text-xs font-medium text-[#1a1a2e]/70 mb-4">Per-Bureau Repair Status</p>
+                      <div className="space-y-3">
+                        {capitalOsData.bureauHealth.bureaus.filter(b => b.uploaded && b.guidance).map(b => {
+                          const g = b.guidance!;
+                          const needsRepair = g.denialTriggers.length > 0 || b.derogatoryCount > 0 || g.latePayments > 0 || g.collections > 0 || g.chargeOffs > 0;
+                          return (
+                            <div key={b.bureau} className={cn("p-4 rounded-xl border", needsRepair ? "bg-red-50/40 border-red-200/30" : "bg-green-50/40 border-green-200/30")}>
+                              <div className="flex items-center justify-between mb-3">
+                                <div className="flex items-center gap-2">
+                                  <span className="text-sm font-semibold text-[#1a1a2e]">{b.bureau}</span>
+                                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ backgroundColor: g.riskTierColor + '15', color: g.riskTierColor }}>{g.riskTier.replace("_", " ")}</span>
+                                </div>
+                                <span className={cn("text-[10px] px-2 py-0.5 rounded-full font-medium", needsRepair ? "bg-red-500/15 text-red-600" : "bg-green-500/15 text-green-600")}>{needsRepair ? "Repair Needed" : "Clean"}</span>
+                              </div>
+                              <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 mb-3">
+                                <div className="text-center p-2 rounded-lg bg-white/60">
+                                  <p className="text-[9px] text-[#1a1a2e]/50">Derogatory</p>
+                                  <p className={cn("text-sm font-bold", b.derogatoryCount > 0 ? "text-red-600" : "text-green-600")}>{b.derogatoryCount}</p>
+                                </div>
+                                <div className="text-center p-2 rounded-lg bg-white/60">
+                                  <p className="text-[9px] text-[#1a1a2e]/50">Late Pmts</p>
+                                  <p className={cn("text-sm font-bold", g.latePayments > 0 ? "text-red-600" : "text-green-600")}>{g.latePayments}</p>
+                                </div>
+                                <div className="text-center p-2 rounded-lg bg-white/60">
+                                  <p className="text-[9px] text-[#1a1a2e]/50">Collections</p>
+                                  <p className={cn("text-sm font-bold", g.collections > 0 ? "text-red-600" : "text-green-600")}>{g.collections}</p>
+                                </div>
+                                <div className="text-center p-2 rounded-lg bg-white/60">
+                                  <p className="text-[9px] text-[#1a1a2e]/50">Charge-Offs</p>
+                                  <p className={cn("text-sm font-bold", g.chargeOffs > 0 ? "text-red-600" : "text-green-600")}>{g.chargeOffs}</p>
+                                </div>
+                                <div className="text-center p-2 rounded-lg bg-white/60">
+                                  <p className="text-[9px] text-[#1a1a2e]/50">Utilization</p>
+                                  <p className={cn("text-sm font-bold", b.utilization > 45 ? "text-red-600" : b.utilization > 30 ? "text-yellow-600" : "text-green-600")}>{b.utilization}%</p>
+                                </div>
+                              </div>
+                              {needsRepair && g.actionItems.length > 0 && (
+                                <div className="space-y-1 pt-2 border-t border-white/40">
+                                  <p className="text-[9px] text-[#1a1a2e]/50 uppercase mb-1">Repair Actions</p>
+                                  {g.actionItems.filter(a => a.includes("Dispute") || a.includes("Resolve") || a.includes("Address") || a.includes("Reduce")).map((item, i) => (
+                                    <div key={i} className="flex items-start gap-2">
+                                      <div className="w-1.5 h-1.5 rounded-full bg-red-400/50 mt-1.5 shrink-0" />
+                                      <p className="text-[11px] text-[#1a1a2e]/70 leading-relaxed">{item}</p>
+                                    </div>
+                                  ))}
+                                </div>
+                              )}
+                              {!needsRepair && (
+                                <p className="text-[10px] text-green-600/70 leading-relaxed">No repair actions needed for {b.bureau}. Profile is clean.</p>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
 
                   <div className="rounded-2xl bg-white/70 backdrop-blur-md border border-white/40 p-5 mb-5" data-testid="dispute-timeline">
                     <p className="text-xs font-medium text-[#1a1a2e]/70 mb-4">3-Round Dispute Timeline</p>
@@ -1419,6 +1550,53 @@ export default function DashboardPage() {
                         </div>
                       </div>
                     ))}
+                  </div>
+                </div>
+              )}
+
+              {capitalOsData && capitalOsData.bureauHealth.bureaus.some(b => b.uploaded && b.guidance) && (
+                <div className="rounded-2xl bg-white/70 backdrop-blur-md border border-white/40 p-6 mb-6" data-testid="bureau-funding-readiness">
+                  <p className="text-xs text-[#1a1a2e]/70 mb-4">Bureau Funding Readiness</p>
+                  <div className="space-y-3">
+                    {capitalOsData.bureauHealth.bureaus.filter(b => b.uploaded && b.guidance).map(b => {
+                      const g = b.guidance!;
+                      return (
+                        <div key={b.bureau} className={cn("p-4 rounded-xl border", g.applicationReady ? "bg-green-50/40 border-green-200/30" : "bg-white/50 border-white/30")}>
+                          <div className="flex items-center justify-between mb-2">
+                            <div className="flex items-center gap-2">
+                              <span className="text-[12px] font-semibold text-[#1a1a2e]">{b.bureau}</span>
+                              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ backgroundColor: g.riskTierColor + '15', color: g.riskTierColor }}>{g.riskTier.replace("_", " ")}</span>
+                              {b.priority && <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-[#3a3a5a]/10 text-[#3a3a5a] font-medium">Priority</span>}
+                            </div>
+                            <span className={cn("text-[10px] px-2 py-0.5 rounded-full font-medium", g.applicationReady ? "bg-green-500/15 text-green-600" : "bg-yellow-500/15 text-yellow-600")}>{g.applicationReady ? "Ready to Apply" : g.fundingPhase + " Phase"}</span>
+                          </div>
+                          <div className="grid grid-cols-3 gap-2 text-center text-[9px] mb-2">
+                            <div className="p-1.5 rounded-lg bg-white/60">
+                              <span className="text-[#1a1a2e]/50">Ceiling</span>
+                              <p className="font-semibold text-[#1a1a2e]/80 font-mono">${g.exposureCeiling.toLocaleString()}</p>
+                            </div>
+                            <div className="p-1.5 rounded-lg bg-white/60">
+                              <span className="text-[#1a1a2e]/50">Multiplier</span>
+                              <p className="font-semibold text-[#1a1a2e]/80 font-mono">{g.exposureMultiplier}x</p>
+                            </div>
+                            <div className="p-1.5 rounded-lg bg-white/60">
+                              <span className="text-[#1a1a2e]/50">Triggers</span>
+                              <p className={cn("font-semibold", g.denialTriggers.length > 0 ? "text-red-600" : "text-green-600")}>{g.denialTriggers.length}</p>
+                            </div>
+                          </div>
+                          {g.denialTriggers.length > 0 && (
+                            <div className="pt-2 border-t border-white/40">
+                              {g.denialTriggers.map((t, i) => (
+                                <p key={i} className="text-[10px] text-red-500/70 leading-relaxed">• {t}</p>
+                              ))}
+                            </div>
+                          )}
+                          {g.applicationReady && (
+                            <p className="text-[10px] text-green-600/70 mt-1">Apply through {b.bureau} for best approval odds at this bureau.</p>
+                          )}
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
               )}
@@ -1943,6 +2121,34 @@ export default function DashboardPage() {
                       })}
                     </div>
                   </div>
+
+                  {capitalOsData.bureauHealth.bureaus.some(b => b.uploaded && b.guidance) && (
+                    <div className="rounded-2xl bg-white/70 backdrop-blur-md border border-white/40 p-6 mb-6" data-testid="bureau-progress-card">
+                      <p className="text-xs text-[#1a1a2e]/70 mb-4">Per-Bureau Progress</p>
+                      <div className="space-y-3">
+                        {capitalOsData.bureauHealth.bureaus.filter(b => b.uploaded && b.guidance).map(b => (
+                          <div key={b.bureau} className="p-3 rounded-xl bg-white/50 border border-white/30">
+                            <div className="flex items-center justify-between mb-2">
+                              <div className="flex items-center gap-2">
+                                <span className="text-[12px] font-medium text-[#1a1a2e]/85">{b.bureau}</span>
+                                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ backgroundColor: b.guidance!.riskTierColor + '15', color: b.guidance!.riskTierColor }}>{b.guidance!.riskTier.replace("_", " ")}</span>
+                              </div>
+                              <span className="text-[10px] text-[#1a1a2e]/50">{b.guidance!.fundingPhase} Phase</span>
+                            </div>
+                            <div className="grid grid-cols-4 gap-2 text-center text-[9px] mb-2">
+                              <div><span className="text-[#1a1a2e]/50">Util</span><p className="font-semibold text-[#1a1a2e]/80">{b.utilization}%</p></div>
+                              <div><span className="text-[#1a1a2e]/50">Inq</span><p className="font-semibold text-[#1a1a2e]/80">{b.hardInquiries}</p></div>
+                              <div><span className="text-[#1a1a2e]/50">Derog</span><p className="font-semibold text-[#1a1a2e]/80">{b.derogatoryCount}</p></div>
+                              <div><span className="text-[#1a1a2e]/50">Ceiling</span><p className="font-semibold text-[#1a1a2e]/80 font-mono">${b.guidance!.exposureCeiling.toLocaleString()}</p></div>
+                            </div>
+                            {b.guidance!.actionItems.length > 0 && (
+                              <p className="text-[10px] text-[#1a1a2e]/60 leading-relaxed">{b.guidance!.actionItems[0]}</p>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
 
                   <div className="rounded-2xl bg-white/70 backdrop-blur-md border border-white/40 p-6 mb-6" data-testid="exposure-policy-card">
                     <p className="text-xs text-[#1a1a2e]/70 mb-4">Exposure Policy</p>
