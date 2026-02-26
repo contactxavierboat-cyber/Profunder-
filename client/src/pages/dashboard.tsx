@@ -243,6 +243,7 @@ export default function DashboardPage() {
   const [expandedMessages, setExpandedMessages] = useState<Set<number>>(new Set());
   const [activeTab, setActiveTab] = useState<TabKey>("mission_control");
   const [progressBureauTab, setProgressBureauTab] = useState("Experian");
+  const [mcBureauTab, setMcBureauTab] = useState("Experian");
   const [friendsList, setFriendsList] = useState<any[]>([]);
   const [pendingRequests, setPendingRequests] = useState<any[]>([]);
   const [showAddFriend, setShowAddFriend] = useState(false);
@@ -831,474 +832,382 @@ export default function DashboardPage() {
                 </div>
               ) : capitalOsData ? (
                 <>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-                    <div className="rounded-2xl bg-white/70 backdrop-blur-md border border-white/40 p-5" data-testid="card-readiness">
-                      <p className="text-[10px] text-[#1a1a2e]/60 uppercase tracking-wider mb-3">Risk Tier</p>
-                      <div className="flex items-center gap-3">
-                        <div className="w-14 h-14 rounded-xl flex items-center justify-center" style={{ backgroundColor: capitalOsData.readiness.riskTierColor + "18" }}>
-                          <Shield className="w-6 h-6" style={{ color: capitalOsData.readiness.riskTierColor }} />
-                        </div>
-                        <div>
-                          <span className="text-lg font-bold" style={{ color: capitalOsData.readiness.riskTierColor }} data-testid="text-risk-tier">{capitalOsData.readiness.riskTier.replace("_", " ")}</span>
-                          <p className="text-[10px] text-[#1a1a2e]/50 mt-0.5">{capitalOsData.readiness.approvalProbability} approval probability</p>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="rounded-2xl bg-white/70 backdrop-blur-md border border-white/40 p-5" data-testid="card-phase">
-                      <p className="text-[10px] text-[#1a1a2e]/60 uppercase tracking-wider mb-3">Funding Phase</p>
-                      <p className="text-lg font-bold text-[#1a1a2e] mb-3" data-testid="text-phase-label">{capitalOsData.phase.phaseLabel}</p>
-                      <div className="flex gap-1">
-                        {capitalOsData.phase.phases.map((p, i) => (
-                          <div key={p.key} className="flex-1 flex flex-col items-center gap-1">
-                            <div className={cn(
-                              "w-full h-1.5 rounded-full transition-all",
-                              p.completed ? "bg-[#3a3a5a]" : p.active ? "bg-[#3a3a5a]/60" : "bg-[#e0e0ea]"
-                            )} />
-                            <span className={cn("text-[8px]", p.active ? "text-[#1a1a2e] font-medium" : "text-[#1a1a2e]/40")}>{p.label}</span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-
-                    <div className="rounded-2xl bg-white/70 backdrop-blur-md border border-white/40 p-5" data-testid="card-exposure">
-                      <p className="text-[10px] text-[#1a1a2e]/60 uppercase tracking-wider mb-3">Safe Exposure</p>
-                      <div className="flex items-center gap-3 mb-2">
-                        <span className="text-lg font-bold text-[#1a1a2e]" data-testid="text-exposure-pct">{capitalOsData.exposure.percentage}%</span>
-                        <span className="text-[10px] px-2 py-0.5 rounded-full font-medium" style={{ backgroundColor: capitalOsData.exposure.zoneColor + '20', color: capitalOsData.exposure.zoneColor }}>{capitalOsData.exposure.zoneLabel}</span>
-                      </div>
-                      <div className="w-full h-2 rounded-full bg-[#e0e0ea] overflow-hidden">
-                        <div className="h-full rounded-full transition-all" style={{ width: `${capitalOsData.exposure.percentage}%`, backgroundColor: capitalOsData.exposure.zoneColor }} />
-                      </div>
-                      <p className="text-[9px] text-[#1a1a2e]/50 mt-2">${capitalOsData.exposure.safeAmount.toLocaleString()} safe capacity</p>
-                    </div>
-
-                    <div className="rounded-2xl bg-white/70 backdrop-blur-md border border-white/40 p-5" data-testid="card-window">
-                      <p className="text-[10px] text-[#1a1a2e]/60 uppercase tracking-wider mb-3">Application Window</p>
-                      {capitalOsData.applicationWindow.currentStatus === "ready" ? (
-                        <div>
-                          <span className="text-lg font-bold text-green-600" data-testid="text-window-status">Ready</span>
-                          <p className="text-[10px] text-[#1a1a2e]/60 mt-1">Optimal window is now</p>
-                        </div>
-                      ) : (
-                        <div>
-                          <span className="text-2xl font-bold text-[#1a1a2e] font-mono" data-testid="text-window-days">{capitalOsData.applicationWindow.daysUntilOptimal}</span>
-                          <span className="text-sm text-[#1a1a2e]/60 ml-1">days</span>
-                          <p className="text-[10px] text-[#1a1a2e]/50 mt-1">until {capitalOsData.applicationWindow.optimalDate}</p>
-                        </div>
-                      )}
-                      <div className="flex gap-1 mt-2">
-                        {capitalOsData.applicationWindow.factors.map((f, i) => (
-                          <div key={i} className={cn("w-2 h-2 rounded-full", f.status === "good" ? "bg-green-500" : f.status === "warning" ? "bg-yellow-500" : "bg-red-500")} title={f.detail} />
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
-                    {capitalOsData.bureauHealth.bureaus.map(b => (
-                      <div key={b.bureau} className={cn("rounded-2xl bg-white/70 backdrop-blur-md border p-5", b.priority ? "border-[#3a3a5a]/30" : "border-white/40")} data-testid={`bureau-${b.bureau.toLowerCase()}`}>
-                        <div className="flex items-center justify-between mb-3">
-                          <span className="text-sm font-semibold text-[#1a1a2e]">{b.bureau}</span>
-                          <span className="text-[10px] px-2 py-0.5 rounded-full font-medium" style={{ backgroundColor: b.riskColor + '18', color: b.riskColor }}>
-                            {b.riskStatus}{b.uploaded && b.priority ? " · Priority" : ""}
-                          </span>
-                        </div>
-                        {b.uploaded ? (
-                          <>
-                            {b.guidance && (
-                              <div className="flex items-center gap-2 mb-3">
-                                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ backgroundColor: b.guidance.riskTierColor + '15', color: b.guidance.riskTierColor }}>{b.guidance.riskTier.replace("_", " ")}</span>
-                                <span className="text-[9px] text-[#1a1a2e]/50">{b.guidance.fundingPhase} Phase</span>
-                                {b.guidance.score && <span className="text-[9px] text-[#1a1a2e]/40 ml-auto font-mono">{b.guidance.score}</span>}
-                              </div>
-                            )}
-                            <div className="grid grid-cols-3 gap-3 text-center mb-3">
-                              <div>
-                                <p className="text-lg font-bold text-[#1a1a2e]">{b.utilization}%</p>
-                                <p className="text-[9px] text-[#1a1a2e]/50">Utilization</p>
-                              </div>
-                              <div>
-                                <p className="text-lg font-bold text-[#1a1a2e]">{b.hardInquiries}</p>
-                                <p className="text-[9px] text-[#1a1a2e]/50">Inquiries</p>
-                              </div>
-                              <div>
-                                <p className="text-lg font-bold text-[#1a1a2e]">{b.derogatoryCount}</p>
-                                <p className="text-[9px] text-[#1a1a2e]/50">Derogatory</p>
-                              </div>
+                  {(() => {
+                    const phaseDescriptions: Record<string, string> = {
+                      "Repair": "Your credit has issues that need fixing before you can get approved. Focus on removing negative items like late payments, collections, or charge-offs. This is the first step to building a strong credit profile.",
+                      "Build": "Your credit is clean but still young. You need more time and more accounts to show lenders you can be trusted. Keep making on-time payments and let your accounts age.",
+                      "Optimize": "You're getting close! Your credit is decent but needs fine-tuning. Pay down balances, reduce how much of your credit you're using, and avoid opening new accounts for now.",
+                      "Apply": "You're almost ready to apply for funding. Your credit is in good shape — just make sure your balances are low and you haven't applied for anything recently. Timing matters here.",
+                      "Scale": "You're in great shape! Your credit profile is strong and you're ready to grow your funding. Focus on strategic applications and maintaining what you've built."
+                    };
+                    const nextStepsByPhase: Record<string, string[]> = {
+                      "Repair": ["Dispute any errors or negative items using the Repair Engine", "Pay off collections if possible", "Make all payments on time going forward", "Don't apply for any new credit right now"],
+                      "Build": ["Keep all accounts in good standing", "Consider a secured credit card if you have few accounts", "Wait for accounts to age — at least 6 months", "Avoid unnecessary hard inquiries"],
+                      "Optimize": ["Pay down credit card balances to below 10% of your limit", "Don't close old accounts — they help your average age", "Avoid opening new accounts", "Check for any remaining negative items to dispute"],
+                      "Apply": ["Get all card balances under 10% before applying", "Make sure you haven't applied for credit in the last 90 days", "Check your application window status below", "Target the type of funding that matches your profile"],
+                      "Scale": ["Maintain low utilization across all accounts", "Strategically apply for higher-limit products", "Monitor your profile for any changes", "Consider diversifying your account types"]
+                    };
+                    const mcBureau = capitalOsData.bureauHealth.bureaus.find(b => b.bureau === mcBureauTab)!;
+                    const mcBureauG = mcBureau.guidance;
+                    const currentPhase = mcBureauG?.fundingPhase || capitalOsData.phase.phaseLabel.split(":")[0]?.trim() || "Repair";
+                    return (
+                      <>
+                        <div className="rounded-2xl bg-white/70 backdrop-blur-md border border-white/40 p-6 mb-6" data-testid="doc-upload-section">
+                          <div className="flex items-center justify-between mb-4">
+                            <div className="flex items-center gap-2">
+                              <BookOpen className="w-4 h-4 text-[#1a1a2e]/60" />
+                              <p className="text-sm font-semibold text-[#1a1a2e]">Your Analysis</p>
                             </div>
-                            {b.guidance && (
-                              <div className="mb-3">
-                                <div className="flex items-center justify-between text-[9px] mb-1">
-                                  <span className="text-[#1a1a2e]/50">Exposure Ceiling</span>
-                                  <span className="font-mono font-semibold text-[#1a1a2e]/80">${b.guidance.exposureCeiling.toLocaleString()}</span>
-                                </div>
-                                <div className="flex items-center justify-between text-[9px]">
-                                  <span className="text-[#1a1a2e]/50">Multiplier</span>
-                                  <span className="font-mono text-[#1a1a2e]/60">{b.guidance.exposureMultiplier}x</span>
-                                </div>
-                              </div>
-                            )}
-                            {b.guidance && b.guidance.velocityRisk && (
-                              <div className="mb-3 p-2 rounded-lg bg-white/50">
-                                <div className="flex items-center justify-between text-[9px] mb-1">
-                                  <span className="text-[#1a1a2e]/50">Velocity Tier</span>
-                                  <span className={cn("font-semibold px-1.5 py-0.5 rounded-full text-[9px]",
-                                    b.guidance.velocityRisk.velocityTier === "A" ? "bg-green-500/15 text-green-600" :
-                                    b.guidance.velocityRisk.velocityTier === "B" ? "bg-yellow-500/15 text-yellow-600" :
-                                    b.guidance.velocityRisk.velocityTier === "C" ? "bg-orange-500/15 text-orange-600" :
-                                    "bg-red-500/15 text-red-600"
-                                  )}>{b.guidance.velocityRisk.velocityTier} — {b.guidance.velocityRisk.velocityTierLabel}</span>
-                                </div>
-                                {b.guidance.velocityRisk.mandatoryWaitingMonths > 0 && (
-                                  <div className="flex items-center justify-between text-[9px]">
-                                    <span className="text-[#1a1a2e]/50">Seasoning Period</span>
-                                    <span className="font-mono text-red-500/70">{b.guidance.velocityRisk.mandatoryWaitingMonths} months</span>
-                                  </div>
-                                )}
-                                <div className="flex items-center justify-between text-[9px] mt-1">
-                                  <span className="text-[#1a1a2e]/50">Adjusted Ceiling</span>
-                                  <span className="font-mono font-semibold text-[#1a1a2e]/80">${b.guidance.velocityRisk.adjustedExposureCeiling.toLocaleString()}</span>
-                                </div>
-                              </div>
-                            )}
-                            <p className="text-[10px] text-[#1a1a2e]/60 leading-relaxed">{b.recommendation}</p>
-                            {b.guidance && b.guidance.denialTriggers.length > 0 && (
-                              <div className="mt-2 pt-2 border-t border-white/30">
-                                <p className="text-[9px] text-red-500/70 font-medium mb-1">Denial Triggers</p>
-                                {b.guidance.denialTriggers.map((t, ti) => (
-                                  <p key={ti} className="text-[9px] text-[#1a1a2e]/50 leading-relaxed">• {t}</p>
-                                ))}
-                              </div>
-                            )}
-                            <div className="mt-3 pt-3 border-t border-white/30">
-                              <input
-                                ref={(el) => { bureauUploadRefs.current[b.bureau] = el; }}
-                                type="file" accept=".pdf,.doc,.docx,.txt,.csv" className="hidden"
-                                data-testid={`input-bureau-reupload-${b.bureau.toLowerCase()}`}
-                                onChange={(e) => { const file = e.target.files?.[0]; if (file) handleDocumentUpload(file, "credit_report", b.bureau); e.target.value = ""; }}
-                              />
-                              <button
-                                onClick={() => bureauUploadRefs.current[b.bureau]?.click()}
-                                disabled={docUploading}
-                                className={cn("w-full px-3 py-2 rounded-xl bg-white/50 border border-white/30 hover:bg-white/70 text-[11px] font-medium text-[#1a1a2e]/60 transition-colors flex items-center justify-center gap-2",
-                                  docUploading && bureauUploading === b.bureau && "opacity-50")}
-                                data-testid={`button-reupload-bureau-${b.bureau.toLowerCase()}`}
-                              >
-                                {docUploading && bureauUploading === b.bureau ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Upload className="w-3.5 h-3.5" />}
-                                {docUploading && bureauUploading === b.bureau ? "Analyzing..." : "Update Report"}
-                              </button>
-                            </div>
-                          </>
-                        ) : (
-                          <div className="flex flex-col items-center justify-center py-4">
-                            <Upload className="w-6 h-6 text-[#1a1a2e]/30 mb-2" />
-                            <p className="text-[11px] text-[#1a1a2e]/50 mb-3 text-center">No report uploaded</p>
-                            <input
-                              ref={(el) => { bureauUploadRefs.current[b.bureau] = el; }}
-                              type="file" accept=".pdf,.doc,.docx,.txt,.csv" className="hidden"
-                              data-testid={`input-bureau-upload-${b.bureau.toLowerCase()}`}
-                              onChange={(e) => { const file = e.target.files?.[0]; if (file) handleDocumentUpload(file, "credit_report", b.bureau); e.target.value = ""; }}
-                            />
-                            <button
-                              onClick={() => bureauUploadRefs.current[b.bureau]?.click()}
-                              disabled={docUploading}
-                              className={cn("px-4 py-2 rounded-xl bg-[#3a3a5a] text-white text-[11px] font-medium hover:bg-[#2a2a4a] transition-colors flex items-center gap-2",
-                                docUploading && bureauUploading === b.bureau && "opacity-50")}
-                              data-testid={`button-upload-bureau-${b.bureau.toLowerCase()}`}
-                            >
-                              {docUploading && bureauUploading === b.bureau ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Upload className="w-3.5 h-3.5" />}
-                              Upload {b.bureau}
+                            <button onClick={() => { fetchCapitalOsDashboard(); fetchFundingReadiness(); }} className="text-[10px] text-[#1a1a2e]/50 hover:text-[#1a1a2e]/80 flex items-center gap-1" data-testid="button-refresh-score">
+                              <RefreshCw className="w-3 h-3" /> Refresh
                             </button>
                           </div>
-                        )}
-                      </div>
-                    ))}
-                  </div>
 
-                  {capitalOsData.bureauHealth.bureaus.some(b => b.uploaded && b.guidance) && (
-                    <div className="rounded-2xl bg-white/70 backdrop-blur-md border border-white/40 p-6 mb-6" data-testid="underwriter-file-summary">
-                      <p className="text-xs text-[#1a1a2e]/70 mb-4">Underwriter File Summary</p>
-                      <div className="space-y-4">
-                        {capitalOsData.bureauHealth.bureaus.filter(b => b.uploaded && b.guidance).map(b => {
-                          const g = b.guidance!;
-                          return (
-                            <div key={b.bureau} className="p-4 rounded-xl bg-white/50 border border-white/30">
-                              <div className="flex items-center gap-2 mb-3">
-                                <span className="text-sm font-semibold text-[#1a1a2e]">{b.bureau}</span>
-                                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ backgroundColor: g.riskTierColor + '15', color: g.riskTierColor }}>{g.riskTier.replace("_", " ")}</span>
-                              </div>
-                              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-3">
-                                <div className="p-2 rounded-lg bg-white/60 text-center">
-                                  <p className="text-[8px] text-[#1a1a2e]/40 uppercase">Revolving Util</p>
-                                  <p className={cn("text-sm font-bold font-mono", b.utilization > 50 ? "text-red-600" : b.utilization > 30 ? "text-yellow-600" : "text-green-600")}>{b.utilization}%</p>
-                                </div>
-                                <div className="p-2 rounded-lg bg-white/60 text-center">
-                                  <p className="text-[8px] text-[#1a1a2e]/40 uppercase">Highest Card</p>
-                                  <p className={cn("text-sm font-bold font-mono", (g.highestSingleCardUtil || 0) > 75 ? "text-red-600" : (g.highestSingleCardUtil || 0) > 50 ? "text-yellow-600" : "text-green-600")}>{g.highestSingleCardUtil ?? "—"}%</p>
-                                </div>
-                                <div className="p-2 rounded-lg bg-white/60 text-center">
-                                  <p className="text-[8px] text-[#1a1a2e]/40 uppercase">Cards &gt;75%</p>
-                                  <p className={cn("text-sm font-bold font-mono", g.revolvingAccountsOver75Util > 0 ? "text-red-600" : "text-green-600")}>{g.revolvingAccountsOver75Util}</p>
-                                </div>
-                                <div className="p-2 rounded-lg bg-white/60 text-center">
-                                  <p className="text-[8px] text-[#1a1a2e]/40 uppercase">Zero-Bal Cards</p>
-                                  <p className="text-sm font-bold font-mono text-[#1a1a2e]/80">{g.zeroBalanceRevolvingAccounts}</p>
-                                </div>
-                              </div>
-                              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-3">
-                                <div className="p-2 rounded-lg bg-white/60 text-center">
-                                  <p className="text-[8px] text-[#1a1a2e]/40 uppercase">Late Pmts</p>
-                                  <p className={cn("text-sm font-bold font-mono", g.latePayments > 0 ? "text-red-600" : "text-green-600")}>{g.latePayments}</p>
-                                </div>
-                                <div className="p-2 rounded-lg bg-white/60 text-center">
-                                  <p className="text-[8px] text-[#1a1a2e]/40 uppercase">Recency</p>
-                                  <p className={cn("text-[11px] font-semibold", g.paymentRecency === "No Lates" || !g.paymentRecency ? "text-green-600" : g.paymentRecency === "Within 6 Months" ? "text-red-600" : "text-yellow-600")}>{g.paymentRecency || "No Lates"}</p>
-                                </div>
-                                <div className="p-2 rounded-lg bg-white/60 text-center">
-                                  <p className="text-[8px] text-[#1a1a2e]/40 uppercase">Collections</p>
-                                  <p className={cn("text-sm font-bold font-mono", g.collections > 0 ? "text-red-600" : "text-green-600")}>{g.collections}{g.collectionsBalance > 0 ? ` ($${g.collectionsBalance.toLocaleString()})` : ""}</p>
-                                </div>
-                                <div className="p-2 rounded-lg bg-white/60 text-center">
-                                  <p className="text-[8px] text-[#1a1a2e]/40 uppercase">Charge-offs</p>
-                                  <p className={cn("text-sm font-bold font-mono", g.chargeOffs > 0 ? "text-red-600" : "text-green-600")}>{g.chargeOffs}</p>
-                                </div>
-                              </div>
-                              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                                <div className="p-2 rounded-lg bg-white/60 text-center">
-                                  <p className="text-[8px] text-[#1a1a2e]/40 uppercase">Account Mix</p>
-                                  <p className={cn("text-[11px] font-semibold", g.accountMix === "Strong Mix" ? "text-green-600" : g.accountMix === "Adequate Mix" ? "text-green-600/80" : g.accountMix === "Limited Mix" ? "text-yellow-600" : "text-red-600")}>{g.accountMix || "—"}</p>
-                                </div>
-                                <div className="p-2 rounded-lg bg-white/60 text-center">
-                                  <p className="text-[8px] text-[#1a1a2e]/40 uppercase">Installment</p>
-                                  <p className="text-sm font-bold font-mono text-[#1a1a2e]/80">{g.totalInstallmentAccounts}</p>
-                                </div>
-                                <div className="p-2 rounded-lg bg-white/60 text-center">
-                                  <p className="text-[8px] text-[#1a1a2e]/40 uppercase">Mortgage</p>
-                                  <p className={cn("text-sm font-bold", g.hasMortgage ? "text-green-600" : "text-[#1a1a2e]/40")}>{g.hasMortgage ? "Yes" : "No"}</p>
-                                </div>
-                                <div className="p-2 rounded-lg bg-white/60 text-center">
-                                  <p className="text-[8px] text-[#1a1a2e]/40 uppercase">Balance Trend</p>
-                                  <p className={cn("text-[11px] font-semibold", g.balanceTrend === "Improving" ? "text-green-600" : g.balanceTrend === "Stable" ? "text-[#1a1a2e]/70" : "text-red-600")}>{g.balanceTrend || "—"}</p>
-                                </div>
-                              </div>
-                              {g.authorizedUserAccounts > 0 && (
-                                <div className="mt-2 pt-2 border-t border-white/30">
-                                  <p className="text-[10px] text-yellow-600/80"><span className="font-medium">AU Alert:</span> {g.authorizedUserAccounts} authorized user account(s) detected — reduced underwriting weight applied</p>
-                                </div>
-                              )}
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  )}
-
-                  {capitalOsData.bureauHealth.bureaus.some(b => b.uploaded && b.guidance) && (
-                    <div className="rounded-2xl bg-white/70 backdrop-blur-md border border-white/40 p-6 mb-6" data-testid="bureau-guidance-panel">
-                      <p className="text-xs text-[#1a1a2e]/70 mb-4">Bureau-Specific Action Plan</p>
-                      <div className="space-y-4">
-                        {capitalOsData.bureauHealth.bureaus.filter(b => b.uploaded && b.guidance).map(b => (
-                          <div key={b.bureau} className="p-4 rounded-xl bg-white/50 border border-white/30">
-                            <div className="flex items-center justify-between mb-3">
-                              <div className="flex items-center gap-2">
-                                <span className="text-sm font-semibold text-[#1a1a2e]">{b.bureau}</span>
-                                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ backgroundColor: b.guidance!.riskTierColor + '15', color: b.guidance!.riskTierColor }}>{b.guidance!.riskTier.replace("_", " ")}</span>
-                              </div>
-                              <span className={cn("text-[10px] px-2 py-0.5 rounded-full font-medium", b.guidance!.applicationReady ? "bg-green-500/15 text-green-600" : "bg-red-500/15 text-red-600")}>{b.guidance!.applicationReady ? "Application Ready" : "Not Ready"}</span>
-                            </div>
-                            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-3">
-                              <div className="text-center p-2 rounded-lg bg-white/60">
-                                <p className="text-[9px] text-[#1a1a2e]/50 uppercase">Phase</p>
-                                <p className="text-xs font-semibold text-[#1a1a2e]/80">{b.guidance!.fundingPhase}</p>
-                              </div>
-                              <div className="text-center p-2 rounded-lg bg-white/60">
-                                <p className="text-[9px] text-[#1a1a2e]/50 uppercase">Ceiling</p>
-                                <p className="text-xs font-semibold text-[#1a1a2e]/80 font-mono">${b.guidance!.exposureCeiling.toLocaleString()}</p>
-                              </div>
-                              <div className="text-center p-2 rounded-lg bg-white/60">
-                                <p className="text-[9px] text-[#1a1a2e]/50 uppercase">Late Pmts</p>
-                                <p className="text-xs font-semibold text-[#1a1a2e]/80">{b.guidance!.latePayments}</p>
-                              </div>
-                              <div className="text-center p-2 rounded-lg bg-white/60">
-                                <p className="text-[9px] text-[#1a1a2e]/50 uppercase">Collections</p>
-                                <p className="text-xs font-semibold text-[#1a1a2e]/80">{b.guidance!.collections}</p>
-                              </div>
-                            </div>
-                            <div className="space-y-1">
-                              {b.guidance!.actionItems.map((item, i) => (
-                                <div key={i} className="flex items-start gap-2">
-                                  <div className="w-1.5 h-1.5 rounded-full bg-[#3a3a5a]/40 mt-1.5 shrink-0" />
-                                  <p className="text-[11px] text-[#1a1a2e]/70 leading-relaxed">{item}</p>
-                                </div>
-                              ))}
+                          <div className="flex items-center gap-3 p-4 rounded-xl bg-white/60 border border-white/30 mb-4">
+                            {fundingData?.hasCreditReport ? <CheckCircle2 className="w-6 h-6 text-green-400 shrink-0" /> : <Upload className="w-6 h-6 text-[#1a1a2e]/40 shrink-0" />}
+                            <div className="flex-1">
+                              <p className="text-sm font-medium text-[#1a1a2e]/90">
+                                {capitalOsData ? `${capitalOsData.bureauHealth.bureaus.filter(b => b.uploaded).length} of 3 Bureau Reports Uploaded` : "No Reports Uploaded Yet"}
+                              </p>
+                              <p className="text-[11px] text-[#1a1a2e]/55">Upload each bureau below to see your full picture</p>
                             </div>
                           </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
 
-                  {capitalOsData.bureauHealth.bureaus.some(b => b.uploaded && b.guidance?.velocityRisk) && (
-                    <div className="rounded-2xl bg-white/70 backdrop-blur-md border border-white/40 p-6 mb-6" data-testid="velocity-risk-panel">
-                      <p className="text-xs text-[#1a1a2e]/70 mb-4">Velocity Risk Model</p>
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        {capitalOsData.bureauHealth.bureaus.filter(b => b.uploaded && b.guidance?.velocityRisk).map(b => {
-                          const vr = b.guidance!.velocityRisk!;
-                          return (
-                            <div key={b.bureau} className="p-4 rounded-xl bg-white/50 border border-white/30">
-                              <div className="flex items-center justify-between mb-3">
-                                <span className="text-sm font-semibold text-[#1a1a2e]">{b.bureau}</span>
-                                <span className={cn("text-[10px] font-bold px-2 py-0.5 rounded-full",
-                                  vr.velocityTier === "A" ? "bg-green-500/15 text-green-600" :
-                                  vr.velocityTier === "B" ? "bg-yellow-500/15 text-yellow-600" :
-                                  vr.velocityTier === "C" ? "bg-orange-500/15 text-orange-600" :
-                                  "bg-red-500/15 text-red-600"
-                                )}>Tier {vr.velocityTier} — {vr.velocityTierLabel}</span>
+                          {fundingData?.analysisSummary && (
+                            <div className="p-4 rounded-xl bg-[#f8f8fc] border border-[#e8e8f0] mb-4">
+                              <p className="text-[11px] text-[#1a1a2e]/80 leading-relaxed">{fundingData.analysisSummary}</p>
+                              {fundingData.lastAnalysisDate && <p className="text-[9px] text-[#1a1a2e]/45 mt-2">{timeAgo(fundingData.lastAnalysisDate)} ago</p>}
+                            </div>
+                          )}
+
+                          {mcBureauG && (
+                            <div className="p-4 rounded-xl bg-gradient-to-br from-white/80 to-[#f8f8fc] border border-[#e0e0ea]">
+                              <div className="flex items-center gap-2 mb-2">
+                                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ backgroundColor: mcBureauG.riskTierColor + '15', color: mcBureauG.riskTierColor }}>{mcBureauG.fundingPhase} Phase</span>
+                                <span className="text-[10px] text-[#1a1a2e]/40">on {mcBureauTab}</span>
                               </div>
-                              <div className="space-y-2">
-                                <div className="flex justify-between text-[10px]">
-                                  <span className="text-[#1a1a2e]/50">Portfolio Expansion</span>
-                                  <span className="font-medium text-[#1a1a2e]/70">{vr.portfolioExpansionGrade}</span>
+                              <p className="text-[12px] text-[#1a1a2e]/70 leading-relaxed mb-3">{phaseDescriptions[currentPhase] || phaseDescriptions["Repair"]}</p>
+                              <p className="text-[10px] font-semibold text-[#1a1a2e]/60 uppercase tracking-wider mb-2">What to do next</p>
+                              <div className="space-y-1.5">
+                                {(nextStepsByPhase[currentPhase] || nextStepsByPhase["Repair"]).map((step, i) => (
+                                  <div key={i} className="flex items-start gap-2">
+                                    <div className="w-4 h-4 rounded-full bg-[#3a3a5a]/10 flex items-center justify-center shrink-0 mt-0.5">
+                                      <span className="text-[8px] font-bold text-[#3a3a5a]">{i + 1}</span>
+                                    </div>
+                                    <p className="text-[11px] text-[#1a1a2e]/65 leading-relaxed">{step}</p>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+
+                          <div className="mt-4">
+                            <input ref={bankStatementInputRef} type="file" accept=".pdf,.doc,.docx,.txt,.csv" className="hidden" data-testid="input-bank-statement-upload"
+                              onChange={(e) => { const file = e.target.files?.[0]; if (file) handleDocumentUpload(file, "bank_statement"); e.target.value = ""; }} />
+                            <button onClick={() => bankStatementInputRef.current?.click()} disabled={docUploading}
+                              className={cn("w-full flex items-center gap-3 p-3 rounded-xl border transition-all text-left",
+                                fundingData?.hasBankStatement ? "border-green-500/20 bg-green-500/[0.04]" : "border-white/30 bg-white/50 hover:bg-white/60",
+                                docUploading && docUploadType === "bank_statement" && "opacity-50"
+                              )} data-testid="button-upload-bank-statement">
+                              {docUploading && docUploadType === "bank_statement" ? <Loader2 className="w-5 h-5 text-[#1a1a2e]/75 animate-spin shrink-0" /> :
+                                fundingData?.hasBankStatement ? <CheckCircle2 className="w-5 h-5 text-green-400 shrink-0" /> :
+                                <Upload className="w-5 h-5 text-[#1a1a2e]/65 shrink-0" />}
+                              <div>
+                                <p className="text-xs font-medium text-[#1a1a2e]/90">{fundingData?.hasBankStatement ? "Bank Statement Uploaded" : "Upload Bank Statement (Optional)"}</p>
+                                <p className="text-[10px] text-[#1a1a2e]/55">Adds extra detail to your analysis</p>
+                              </div>
+                            </button>
+                          </div>
+                          {docUploading && (
+                            <div className="mt-3 flex items-center gap-3 p-3 rounded-xl bg-white/50 border border-white/30">
+                              <Loader2 className="w-4 h-4 text-[#1a1a2e]/75 animate-spin shrink-0" />
+                              <p className="text-[10px] text-[#1a1a2e]/75">Analyzing document...</p>
+                            </div>
+                          )}
+                        </div>
+
+                        <div className="flex gap-2 mb-4">
+                          {["Experian", "Equifax", "TransUnion"].map(name => {
+                            const bData = capitalOsData.bureauHealth.bureaus.find(b => b.bureau === name);
+                            return (
+                              <button key={name} onClick={() => setMcBureauTab(name)}
+                                className={cn("flex-1 px-3 py-2.5 rounded-xl text-xs font-medium transition-all flex items-center justify-center gap-2",
+                                  mcBureauTab === name ? "bg-[#1a1a2e] text-white shadow-lg" : "bg-white/70 text-[#1a1a2e]/60 hover:bg-white/90 border border-white/40"
+                                )} data-testid={`mc-tab-${name.toLowerCase()}`}>
+                                {bData?.uploaded && <span className={cn("w-2 h-2 rounded-full", mcBureauTab === name ? "bg-green-400" : "bg-green-500")} />}
+                                {name}
+                              </button>
+                            );
+                          })}
+                        </div>
+
+                        {mcBureau.uploaded && mcBureauG ? (
+                          <>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                              <div className="rounded-2xl bg-white/70 backdrop-blur-md border border-white/40 p-5" data-testid="card-readiness">
+                                <p className="text-[10px] text-[#1a1a2e]/60 uppercase tracking-wider mb-1">Risk Tier</p>
+                                <p className="text-[9px] text-[#1a1a2e]/40 mb-3">How lenders see this bureau</p>
+                                <div className="flex items-center gap-3">
+                                  <div className="w-14 h-14 rounded-xl flex items-center justify-center" style={{ backgroundColor: mcBureauG.riskTierColor + "18" }}>
+                                    <Shield className="w-6 h-6" style={{ color: mcBureauG.riskTierColor }} />
+                                  </div>
+                                  <div>
+                                    <span className="text-lg font-bold" style={{ color: mcBureauG.riskTierColor }} data-testid="text-risk-tier">{mcBureauG.riskTier.replace("_", " ")}</span>
+                                    <p className="text-[10px] text-[#1a1a2e]/50 mt-0.5">{
+                                      mcBureauG.riskTier === "PRIME" ? "Strong approval odds" :
+                                      mcBureauG.riskTier === "STANDARD" ? "Decent approval odds" :
+                                      mcBureauG.riskTier === "SUBPRIME" ? "Low approval odds" :
+                                      "Very unlikely to be approved"
+                                    }</p>
+                                  </div>
                                 </div>
-                                <div className="flex justify-between text-[10px]">
-                                  <span className="text-[#1a1a2e]/50">Adjusted Ceiling</span>
-                                  <span className="font-mono font-semibold text-[#1a1a2e]/80">${vr.adjustedExposureCeiling.toLocaleString()}</span>
+                              </div>
+
+                              <div className="rounded-2xl bg-white/70 backdrop-blur-md border border-white/40 p-5" data-testid="card-phase">
+                                <p className="text-[10px] text-[#1a1a2e]/60 uppercase tracking-wider mb-1">Funding Phase</p>
+                                <p className="text-[9px] text-[#1a1a2e]/40 mb-3">Where you are in the journey</p>
+                                <p className="text-lg font-bold text-[#1a1a2e] mb-3" data-testid="text-phase-label">{mcBureauG.fundingPhase}</p>
+                                <div className="flex gap-1">
+                                  {["Repair", "Build", "Optimize", "Apply", "Scale"].map((p) => {
+                                    const phases = ["Repair", "Build", "Optimize", "Apply", "Scale"];
+                                    const currentIdx = phases.indexOf(mcBureauG.fundingPhase);
+                                    const thisIdx = phases.indexOf(p);
+                                    return (
+                                      <div key={p} className="flex-1 flex flex-col items-center gap-1">
+                                        <div className={cn("w-full h-1.5 rounded-full transition-all",
+                                          thisIdx < currentIdx ? "bg-[#3a3a5a]" : thisIdx === currentIdx ? "bg-[#3a3a5a]/60" : "bg-[#e0e0ea]"
+                                        )} />
+                                        <span className={cn("text-[8px]", thisIdx === currentIdx ? "text-[#1a1a2e] font-medium" : "text-[#1a1a2e]/40")}>{p}</span>
+                                      </div>
+                                    );
+                                  })}
                                 </div>
-                                {vr.mandatoryWaitingMonths > 0 && (
-                                  <div className="flex justify-between text-[10px]">
-                                    <span className="text-[#1a1a2e]/50">Mandatory Wait</span>
-                                    <span className="font-mono text-red-500 font-semibold">{vr.mandatoryWaitingMonths} months</span>
+                              </div>
+
+                              <div className="rounded-2xl bg-white/70 backdrop-blur-md border border-white/40 p-5" data-testid="card-exposure">
+                                <p className="text-[10px] text-[#1a1a2e]/60 uppercase tracking-wider mb-1">Potential Funding</p>
+                                <p className="text-[9px] text-[#1a1a2e]/40 mb-3">Based on your highest limit x2.5</p>
+                                <p className="text-2xl font-bold text-[#1a1a2e] font-mono" data-testid="text-potential-funding">${mcBureauG.exposureCeiling.toLocaleString()}</p>
+                                <p className="text-[10px] text-[#1a1a2e]/50 mt-1">This is what you could expect from {mcBureauTab} when ready — not a guarantee of approval</p>
+                              </div>
+
+                              <div className="rounded-2xl bg-white/70 backdrop-blur-md border border-white/40 p-5" data-testid="card-window">
+                                <p className="text-[10px] text-[#1a1a2e]/60 uppercase tracking-wider mb-1">Application Window</p>
+                                <p className="text-[9px] text-[#1a1a2e]/40 mb-3">When to apply</p>
+                                {mcBureauG.applicationReady ? (
+                                  <div>
+                                    <span className="text-lg font-bold text-green-600" data-testid="text-window-status">Ready</span>
+                                    <p className="text-[10px] text-[#1a1a2e]/60 mt-1">Your {mcBureauTab} profile looks strong enough to apply</p>
+                                  </div>
+                                ) : (
+                                  <div>
+                                    <span className="text-lg font-bold text-orange-500" data-testid="text-window-status">Not Yet</span>
+                                    <p className="text-[10px] text-[#1a1a2e]/50 mt-1">There are still things to fix before applying — check the action items below</p>
                                   </div>
                                 )}
-                                {vr.velocityNotes && (
-                                  <p className="text-[10px] text-[#1a1a2e]/60 leading-relaxed mt-2 pt-2 border-t border-white/30">{vr.velocityNotes}</p>
+                              </div>
+                            </div>
+
+                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
+                              <div className="rounded-2xl bg-white/70 backdrop-blur-md border border-white/40 p-5" data-testid={`bureau-stats-${mcBureauTab.toLowerCase()}`}>
+                                <p className="text-xs font-semibold text-[#1a1a2e]/70 mb-3">Credit Snapshot — {mcBureauTab}</p>
+                                <div className="grid grid-cols-3 gap-3 text-center mb-3">
+                                  <div className="p-2.5 rounded-xl bg-white/60">
+                                    <p className={cn("text-xl font-bold font-mono", mcBureau.utilization > 50 ? "text-red-600" : mcBureau.utilization > 30 ? "text-yellow-600" : mcBureau.utilization > 10 ? "text-orange-500" : "text-green-600")}>{mcBureau.utilization}%</p>
+                                    <p className="text-[9px] text-[#1a1a2e]/50 mt-0.5">Credit Usage</p>
+                                    <p className="text-[8px] text-[#1a1a2e]/35">{mcBureau.utilization <= 10 ? "Great" : mcBureau.utilization <= 30 ? "Okay" : "Too high"}</p>
+                                  </div>
+                                  <div className="p-2.5 rounded-xl bg-white/60">
+                                    <p className={cn("text-xl font-bold font-mono", mcBureau.hardInquiries > 4 ? "text-red-600" : mcBureau.hardInquiries > 2 ? "text-yellow-600" : "text-green-600")}>{mcBureau.hardInquiries}</p>
+                                    <p className="text-[9px] text-[#1a1a2e]/50 mt-0.5">Hard Inquiries</p>
+                                    <p className="text-[8px] text-[#1a1a2e]/35">{mcBureau.hardInquiries <= 2 ? "Low" : mcBureau.hardInquiries <= 4 ? "Moderate" : "High"}</p>
+                                  </div>
+                                  <div className="p-2.5 rounded-xl bg-white/60">
+                                    <p className={cn("text-xl font-bold font-mono", mcBureau.derogatoryCount > 0 ? "text-red-600" : "text-green-600")}>{mcBureau.derogatoryCount}</p>
+                                    <p className="text-[9px] text-[#1a1a2e]/50 mt-0.5">Negative Items</p>
+                                    <p className="text-[8px] text-[#1a1a2e]/35">{mcBureau.derogatoryCount === 0 ? "Clean" : "Needs work"}</p>
+                                  </div>
+                                </div>
+                                <div className="grid grid-cols-2 gap-2">
+                                  <div className="flex justify-between p-2 rounded-lg bg-white/50 text-[10px]">
+                                    <span className="text-[#1a1a2e]/50">Late Payments</span>
+                                    <span className={cn("font-semibold", mcBureauG.latePayments > 0 ? "text-red-600" : "text-green-600")}>{mcBureauG.latePayments}</span>
+                                  </div>
+                                  <div className="flex justify-between p-2 rounded-lg bg-white/50 text-[10px]">
+                                    <span className="text-[#1a1a2e]/50">Collections</span>
+                                    <span className={cn("font-semibold", mcBureauG.collections > 0 ? "text-red-600" : "text-green-600")}>{mcBureauG.collections}</span>
+                                  </div>
+                                  <div className="flex justify-between p-2 rounded-lg bg-white/50 text-[10px]">
+                                    <span className="text-[#1a1a2e]/50">Account Mix</span>
+                                    <span className="font-semibold text-[#1a1a2e]/70">{mcBureauG.accountMix || "—"}</span>
+                                  </div>
+                                  <div className="flex justify-between p-2 rounded-lg bg-white/50 text-[10px]">
+                                    <span className="text-[#1a1a2e]/50">Balance Trend</span>
+                                    <span className={cn("font-semibold", mcBureauG.balanceTrend === "Improving" ? "text-green-600" : mcBureauG.balanceTrend === "Stable" ? "text-[#1a1a2e]/70" : "text-red-600")}>{mcBureauG.balanceTrend || "—"}</span>
+                                  </div>
+                                </div>
+                                {mcBureauG.velocityRisk && (
+                                  <div className="mt-3 p-3 rounded-xl bg-white/50 border border-white/30">
+                                    <div className="flex items-center justify-between mb-1">
+                                      <span className="text-[10px] text-[#1a1a2e]/50">Application Speed Check</span>
+                                      <span className={cn("text-[10px] font-bold px-2 py-0.5 rounded-full",
+                                        mcBureauG.velocityRisk.velocityTier === "A" ? "bg-green-500/15 text-green-600" :
+                                        mcBureauG.velocityRisk.velocityTier === "B" ? "bg-yellow-500/15 text-yellow-600" :
+                                        mcBureauG.velocityRisk.velocityTier === "C" ? "bg-orange-500/15 text-orange-600" :
+                                        "bg-red-500/15 text-red-600"
+                                      )}>Tier {mcBureauG.velocityRisk.velocityTier} — {mcBureauG.velocityRisk.velocityTierLabel}</span>
+                                    </div>
+                                    {mcBureauG.velocityRisk.mandatoryWaitingMonths > 0 && (
+                                      <p className="text-[10px] text-red-500/80 mt-1">Wait at least {mcBureauG.velocityRisk.mandatoryWaitingMonths} months before applying again</p>
+                                    )}
+                                  </div>
                                 )}
-                                {vr.velocityDenialTriggers.length > 0 && (
-                                  <div className="mt-2 pt-2 border-t border-white/30">
-                                    <p className="text-[9px] text-red-500/70 font-medium mb-1">Velocity Triggers</p>
-                                    {vr.velocityDenialTriggers.map((t: string, i: number) => (
-                                      <p key={i} className="text-[9px] text-[#1a1a2e]/50">• {t}</p>
+                              </div>
+
+                              <div className="rounded-2xl bg-white/70 backdrop-blur-md border border-white/40 p-5" data-testid="action-items-panel">
+                                <p className="text-xs font-semibold text-[#1a1a2e]/70 mb-1">What To Work On — {mcBureauTab}</p>
+                                <p className="text-[10px] text-[#1a1a2e]/40 mb-3">Steps to improve your profile on this bureau</p>
+                                {mcBureauG.actionItems.length > 0 ? (
+                                  <div className="space-y-2">
+                                    {mcBureauG.actionItems.map((item, i) => (
+                                      <div key={i} className="flex items-start gap-2.5 p-2.5 rounded-xl bg-white/50">
+                                        <div className="w-5 h-5 rounded-full bg-[#3a3a5a]/10 flex items-center justify-center shrink-0 mt-0.5">
+                                          <ChevronRight className="w-3 h-3 text-[#3a3a5a]/60" />
+                                        </div>
+                                        <p className="text-[11px] text-[#1a1a2e]/70 leading-relaxed">{item}</p>
+                                      </div>
+                                    ))}
+                                  </div>
+                                ) : (
+                                  <div className="flex items-center gap-2 p-3 rounded-xl bg-green-500/5">
+                                    <CheckCircle2 className="w-4 h-4 text-green-500 shrink-0" />
+                                    <p className="text-[11px] text-green-600/80">No action items — this bureau looks good!</p>
+                                  </div>
+                                )}
+                                {mcBureauG.denialTriggers.length > 0 && (
+                                  <div className="mt-3 p-3 rounded-xl bg-red-500/5 border border-red-500/10">
+                                    <p className="text-[10px] font-semibold text-red-500/80 mb-2">Things That Could Get You Denied</p>
+                                    {mcBureauG.denialTriggers.map((t, ti) => (
+                                      <div key={ti} className="flex items-start gap-2 mb-1">
+                                        <AlertCircle className="w-3 h-3 text-red-400/70 shrink-0 mt-0.5" />
+                                        <p className="text-[10px] text-[#1a1a2e]/60 leading-relaxed">{t}</p>
+                                      </div>
                                     ))}
                                   </div>
                                 )}
                               </div>
                             </div>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  )}
 
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
-                    <div className="rounded-2xl bg-white/70 backdrop-blur-md border border-white/40 p-6" data-testid="doc-upload-section">
-                      <p className="text-xs text-[#1a1a2e]/70 mb-4">Document Analysis</p>
-                      <input ref={bankStatementInputRef} type="file" accept=".pdf,.doc,.docx,.txt,.csv" className="hidden" data-testid="input-bank-statement-upload"
-                        onChange={(e) => { const file = e.target.files?.[0]; if (file) handleDocumentUpload(file, "bank_statement"); e.target.value = ""; }} />
-                      <div className="space-y-2">
-                        <p className="text-[10px] text-[#1a1a2e]/50 mb-1">Upload bureau reports from the Bureau Health section above</p>
-                        <div className="flex items-center gap-3 p-3 rounded-xl border border-white/30 bg-white/50">
-                          {fundingData?.hasCreditReport ? <CheckCircle2 className="w-5 h-5 text-green-400 shrink-0" /> : <Upload className="w-5 h-5 text-[#1a1a2e]/65 shrink-0" />}
-                          <div>
-                            <p className="text-xs font-medium text-[#1a1a2e]/90">
-                              {capitalOsData ? `${capitalOsData.bureauHealth.bureaus.filter(b => b.uploaded).length}/3 Bureau Reports Uploaded` : "No Bureau Reports Uploaded"}
-                            </p>
-                            <p className="text-[10px] text-[#1a1a2e]/55">Upload each bureau separately above</p>
+                            <div className="mt-3 mb-6">
+                              <input
+                                ref={(el) => { bureauUploadRefs.current[mcBureauTab] = el; }}
+                                type="file" accept=".pdf,.doc,.docx,.txt,.csv" className="hidden"
+                                data-testid={`input-bureau-reupload-${mcBureauTab.toLowerCase()}`}
+                                onChange={(e) => { const file = e.target.files?.[0]; if (file) handleDocumentUpload(file, "credit_report", mcBureauTab); e.target.value = ""; }}
+                              />
+                              <button
+                                onClick={() => bureauUploadRefs.current[mcBureauTab]?.click()}
+                                disabled={docUploading}
+                                className={cn("w-full px-4 py-3 rounded-xl bg-white/70 border border-white/40 hover:bg-white/90 text-[12px] font-medium text-[#1a1a2e]/70 transition-colors flex items-center justify-center gap-2",
+                                  docUploading && bureauUploading === mcBureauTab && "opacity-50")}
+                                data-testid={`button-reupload-bureau-${mcBureauTab.toLowerCase()}`}
+                              >
+                                {docUploading && bureauUploading === mcBureauTab ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
+                                {docUploading && bureauUploading === mcBureauTab ? "Analyzing..." : `Update ${mcBureauTab} Report`}
+                              </button>
+                            </div>
+                          </>
+                        ) : (
+                          <div className="rounded-2xl bg-white/70 backdrop-blur-md border border-white/40 p-10 mb-6">
+                            <div className="flex flex-col items-center justify-center text-center">
+                              <Upload className="w-10 h-10 text-[#1a1a2e]/25 mb-3" />
+                              <p className="text-sm font-medium text-[#1a1a2e]/70 mb-1">No {mcBureauTab} report uploaded yet</p>
+                              <p className="text-[11px] text-[#1a1a2e]/45 mb-5 max-w-sm">Upload your {mcBureauTab} credit report to see your risk tier, funding potential, and personalized next steps for this bureau.</p>
+                              <input
+                                ref={(el) => { bureauUploadRefs.current[mcBureauTab] = el; }}
+                                type="file" accept=".pdf,.doc,.docx,.txt,.csv" className="hidden"
+                                data-testid={`input-bureau-upload-${mcBureauTab.toLowerCase()}`}
+                                onChange={(e) => { const file = e.target.files?.[0]; if (file) handleDocumentUpload(file, "credit_report", mcBureauTab); e.target.value = ""; }}
+                              />
+                              <button
+                                onClick={() => bureauUploadRefs.current[mcBureauTab]?.click()}
+                                disabled={docUploading}
+                                className={cn("px-6 py-3 rounded-xl bg-[#1a1a2e] text-white text-[12px] font-medium hover:bg-[#2a2a4a] transition-colors flex items-center gap-2",
+                                  docUploading && bureauUploading === mcBureauTab && "opacity-50")}
+                                data-testid={`button-upload-bureau-${mcBureauTab.toLowerCase()}`}
+                              >
+                                {docUploading && bureauUploading === mcBureauTab ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
+                                Upload {mcBureauTab} Report
+                              </button>
+                            </div>
                           </div>
-                        </div>
-                        <button onClick={() => bankStatementInputRef.current?.click()} disabled={docUploading}
-                          className={cn("w-full flex items-center gap-3 p-3 rounded-xl border transition-all text-left",
-                            fundingData?.hasBankStatement ? "border-green-500/20 bg-green-500/[0.04]" : "border-white/30 bg-white/50 hover:bg-white/60",
-                            docUploading && docUploadType === "bank_statement" && "opacity-50"
-                          )} data-testid="button-upload-bank-statement">
-                          {docUploading && docUploadType === "bank_statement" ? <Loader2 className="w-5 h-5 text-[#1a1a2e]/75 animate-spin shrink-0" /> :
-                            fundingData?.hasBankStatement ? <CheckCircle2 className="w-5 h-5 text-green-400 shrink-0" /> :
-                            <Upload className="w-5 h-5 text-[#1a1a2e]/65 shrink-0" />}
-                          <div>
-                            <p className="text-xs font-medium text-[#1a1a2e]/90">{fundingData?.hasBankStatement ? "Bank Statement Uploaded" : "Upload Bank Statement"}</p>
-                            <p className="text-[10px] text-[#1a1a2e]/55">PDF, DOC, TXT</p>
-                          </div>
-                        </button>
-                      </div>
-                      {docUploading && (
-                        <div className="mt-3 flex items-center gap-3 p-3 rounded-xl bg-white/50 border border-white/30">
-                          <Loader2 className="w-4 h-4 text-[#1a1a2e]/75 animate-spin shrink-0" />
-                          <p className="text-[10px] text-[#1a1a2e]/75">Analyzing document...</p>
-                        </div>
-                      )}
-                      {fundingData?.analysisSummary && (
-                        <div className="mt-3 p-3 rounded-xl bg-white/50 border border-white/30">
-                          <p className="text-[10px] text-[#1a1a2e]/80 leading-relaxed">{fundingData.analysisSummary}</p>
-                          {fundingData.lastAnalysisDate && <p className="text-[9px] text-[#1a1a2e]/55 mt-1.5">{timeAgo(fundingData.lastAnalysisDate)} ago</p>}
-                        </div>
-                      )}
-                    </div>
+                        )}
 
-                    <div className="rounded-2xl bg-white/70 backdrop-blur-md border border-white/40 p-6" data-testid="action-plan-card">
-                      <div className="flex items-center justify-between mb-4">
-                        <p className="text-xs text-[#1a1a2e]/70">Quick Actions</p>
-                        <button onClick={() => { fetchCapitalOsDashboard(); fetchFundingReadiness(); }} className="text-[10px] text-[#1a1a2e]/50 hover:text-[#1a1a2e]/80 flex items-center gap-1" data-testid="button-refresh-score">
-                          <RefreshCw className="w-3 h-3" /> Refresh
-                        </button>
-                      </div>
-                      <div className="space-y-2">
-                        <button onClick={() => setActiveTab("messages")} className="w-full flex items-center gap-3 p-3 rounded-xl bg-white/50 border border-white/30 hover:bg-white/60 text-left transition-colors" data-testid="button-go-chat">
-                          <MessageCircle className="w-4 h-4 text-[#1a1a2e]/60" />
-                          <div>
-                            <p className="text-xs font-medium text-[#1a1a2e]/90">Talk to a Mentor</p>
-                            <p className="text-[10px] text-[#1a1a2e]/50">Get personalized guidance</p>
-                          </div>
-                        </button>
-                        <button onClick={() => setActiveTab("repair_engine")} className="w-full flex items-center gap-3 p-3 rounded-xl bg-white/50 border border-white/30 hover:bg-white/60 text-left transition-colors">
-                          <Shield className="w-4 h-4 text-[#1a1a2e]/60" />
-                          <div>
-                            <p className="text-xs font-medium text-[#1a1a2e]/90">Credit Repair</p>
-                            <p className="text-[10px] text-[#1a1a2e]/50">Dispute & resolve issues</p>
-                          </div>
-                        </button>
-                        <button onClick={() => setActiveTab("funding_strategy")} className="w-full flex items-center gap-3 p-3 rounded-xl bg-white/50 border border-white/30 hover:bg-white/60 text-left transition-colors">
-                          <DollarSign className="w-4 h-4 text-[#1a1a2e]/60" />
-                          <div>
-                            <p className="text-xs font-medium text-[#1a1a2e]/90">Funding Strategy</p>
-                            <p className="text-[10px] text-[#1a1a2e]/50">Application timing & capital stack</p>
-                          </div>
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-
-
-                  {fundingData && fundingData.alerts.length > 0 && (
-                    <div className="rounded-2xl bg-white/70 backdrop-blur-md border border-white/40 p-6 mb-4" data-testid="risk-alerts-card">
-                      <p className="text-xs text-[#1a1a2e]/70 mb-4">Risk Alerts</p>
-                      <div className="space-y-2">
-                        {fundingData.alerts.map((alert, idx) => (
-                          <button key={idx}
-                            onClick={() => setExpandedAlerts(prev => { const next = new Set(prev); if (next.has(idx)) next.delete(idx); else next.add(idx); return next; })}
-                            className={cn("w-full text-left rounded-xl border-l-[3px] bg-white/50 hover:bg-white/60 transition-all p-3.5",
-                              alert.severity === "red" ? "border-l-red-500/60" : alert.severity === "yellow" ? "border-l-yellow-500/60" : "border-l-[#c0c0d0]"
-                            )} data-testid={`alert-${idx}`}>
-                            <div className="flex items-start gap-3">
-                              {alert.severity === "red" ? <AlertCircle className="w-4 h-4 text-red-400/70 shrink-0 mt-0.5" /> :
-                               alert.severity === "yellow" ? <AlertTriangle className="w-4 h-4 text-yellow-400/70 shrink-0 mt-0.5" /> :
-                               <Info className="w-4 h-4 text-[#1a1a2e]/55 shrink-0 mt-0.5" />}
-                              <div className="flex-1 min-w-0">
-                                <p className="text-sm text-[#1a1a2e]/95">{alert.title}</p>
-                                {expandedAlerts.has(idx) && (
-                                  <div className="mt-2 space-y-1.5 text-xs">
-                                    <p className="text-[#1a1a2e]/75">{alert.explanation}</p>
-                                    <p className="text-[#1a1a2e]/65"><span className="font-medium">Impact:</span> {alert.impact}</p>
-                                    <p className="text-green-600/70"><span className="font-medium">Fix:</span> {alert.fix}</p>
-                                  </div>
-                                )}
+                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
+                          <button onClick={() => setActiveTab("messages")} className="rounded-2xl bg-white/70 backdrop-blur-md border border-white/40 p-5 hover:bg-white/90 text-left transition-colors" data-testid="button-go-chat">
+                            <div className="flex items-center gap-3">
+                              <MessageCircle className="w-5 h-5 text-[#1a1a2e]/50" />
+                              <div>
+                                <p className="text-xs font-semibold text-[#1a1a2e]/80">Talk to a Mentor</p>
+                                <p className="text-[10px] text-[#1a1a2e]/45">Get personalized advice</p>
                               </div>
-                              <ChevronRight className={cn("w-4 h-4 text-[#1a1a2e]/45 shrink-0 transition-transform mt-0.5", expandedAlerts.has(idx) && "rotate-90")} />
                             </div>
                           </button>
-                        ))}
-                      </div>
-                    </div>
-                  )}
+                          <button onClick={() => setActiveTab("repair_engine")} className="rounded-2xl bg-white/70 backdrop-blur-md border border-white/40 p-5 hover:bg-white/90 text-left transition-colors">
+                            <div className="flex items-center gap-3">
+                              <Shield className="w-5 h-5 text-[#1a1a2e]/50" />
+                              <div>
+                                <p className="text-xs font-semibold text-[#1a1a2e]/80">Repair Engine</p>
+                                <p className="text-[10px] text-[#1a1a2e]/45">Dispute errors on your reports</p>
+                              </div>
+                            </div>
+                          </button>
+                          <button onClick={() => setActiveTab("funding_strategy")} className="rounded-2xl bg-white/70 backdrop-blur-md border border-white/40 p-5 hover:bg-white/90 text-left transition-colors">
+                            <div className="flex items-center gap-3">
+                              <DollarSign className="w-5 h-5 text-[#1a1a2e]/50" />
+                              <div>
+                                <p className="text-xs font-semibold text-[#1a1a2e]/80">Funding Strategy</p>
+                                <p className="text-[10px] text-[#1a1a2e]/45">Plan when and where to apply</p>
+                              </div>
+                            </div>
+                          </button>
+                        </div>
+
+                        {fundingData && fundingData.alerts.length > 0 && (
+                          <div className="rounded-2xl bg-white/70 backdrop-blur-md border border-white/40 p-6 mb-4" data-testid="risk-alerts-card">
+                            <p className="text-xs font-semibold text-[#1a1a2e]/70 mb-1">Alerts</p>
+                            <p className="text-[10px] text-[#1a1a2e]/40 mb-4">Things that need your attention</p>
+                            <div className="space-y-2">
+                              {fundingData.alerts.map((alert, idx) => (
+                                <button key={idx}
+                                  onClick={() => setExpandedAlerts(prev => { const next = new Set(prev); if (next.has(idx)) next.delete(idx); else next.add(idx); return next; })}
+                                  className={cn("w-full text-left rounded-xl border-l-[3px] bg-white/50 hover:bg-white/60 transition-all p-3.5",
+                                    alert.severity === "red" ? "border-l-red-500/60" : alert.severity === "yellow" ? "border-l-yellow-500/60" : "border-l-[#c0c0d0]"
+                                  )} data-testid={`alert-${idx}`}>
+                                  <div className="flex items-start gap-3">
+                                    {alert.severity === "red" ? <AlertCircle className="w-4 h-4 text-red-400/70 shrink-0 mt-0.5" /> :
+                                     alert.severity === "yellow" ? <AlertTriangle className="w-4 h-4 text-yellow-400/70 shrink-0 mt-0.5" /> :
+                                     <Info className="w-4 h-4 text-[#1a1a2e]/55 shrink-0 mt-0.5" />}
+                                    <div className="flex-1 min-w-0">
+                                      <p className="text-sm text-[#1a1a2e]/95">{alert.title}</p>
+                                      {expandedAlerts.has(idx) && (
+                                        <div className="mt-2 space-y-1.5 text-xs">
+                                          <p className="text-[#1a1a2e]/75">{alert.explanation}</p>
+                                          <p className="text-[#1a1a2e]/65"><span className="font-medium">Impact:</span> {alert.impact}</p>
+                                          <p className="text-green-600/70"><span className="font-medium">Fix:</span> {alert.fix}</p>
+                                        </div>
+                                      )}
+                                    </div>
+                                    <ChevronRight className={cn("w-4 h-4 text-[#1a1a2e]/45 shrink-0 transition-transform mt-0.5", expandedAlerts.has(idx) && "rotate-90")} />
+                                  </div>
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </>
+                    );
+                  })()}
                 </>
               ) : (
                 <div className="flex flex-col items-center justify-center py-20">
@@ -2757,20 +2666,25 @@ export default function DashboardPage() {
               <div className="flex items-center gap-3 mb-4">
                 <ProfundrLogo size="lg" />
               </div>
-              <p className="text-[11px] text-[#1a1a2e]/50 -mt-2 mb-2">Your Capital Operating System</p>
+              <p className="text-[11px] text-[#1a1a2e]/50 -mt-2 mb-2">Digital Underwriting Engine</p>
+              <p className="text-[13px] text-[#1a1a2e]/70 leading-relaxed mb-2">
+                Profundr helps you figure out how ready you are to get approved for funding — before you actually apply. Think of it like a practice test for getting a loan or credit card.
+              </p>
               <p className="text-[13px] text-[#1a1a2e]/70 leading-relaxed mb-5">
-                Profundr is an AI-powered fundability platform that evaluates your credit profile using commercial bank-grade underwriting. No composite scores — we analyze 8 independent risk metrics the way real underwriters do.
+                This matters because every time you apply and get denied, it hurts your chances next time. Profundr looks at 8 different parts of your credit — the same things real lenders check — so you know exactly what to fix first and when you're truly ready to apply with confidence.
               </p>
             </div>
 
             <div className="px-8 pb-4 space-y-3">
+              <p className="text-[11px] font-semibold text-[#1a1a2e]/60 uppercase tracking-wider">How to get started</p>
+
               <div className="flex items-start gap-3 p-3 rounded-xl bg-[#f8f8fc] border border-[#e8e8f0]">
                 <div className="w-7 h-7 rounded-lg bg-[#1a1a2e]/5 flex items-center justify-center shrink-0 mt-0.5">
                   <Upload className="w-3.5 h-3.5 text-[#1a1a2e]/60" />
                 </div>
                 <div>
                   <p className="text-[12px] font-semibold text-[#1a1a2e]/80">1. Upload Your Credit Reports</p>
-                  <p className="text-[11px] text-[#1a1a2e]/50 leading-relaxed">Go to Mission Control and upload a report for each bureau (Experian, Equifax, TransUnion). PDF format works best.</p>
+                  <p className="text-[11px] text-[#1a1a2e]/50 leading-relaxed">Head to Mission Control and upload a credit report for each bureau — Experian, Equifax, and TransUnion. You can get free reports at annualcreditreport.com. PDF files work best.</p>
                 </div>
               </div>
 
@@ -2779,8 +2693,8 @@ export default function DashboardPage() {
                   <BarChart3 className="w-3.5 h-3.5 text-[#1a1a2e]/60" />
                 </div>
                 <div>
-                  <p className="text-[12px] font-semibold text-[#1a1a2e]/80">2. Review Your Underwriting</p>
-                  <p className="text-[11px] text-[#1a1a2e]/50 leading-relaxed">Your dashboard will show risk tier, exposure ceiling, denial triggers, and action items per bureau. Check the Progress Tracker for detailed breakdowns.</p>
+                  <p className="text-[12px] font-semibold text-[#1a1a2e]/80">2. See Where You Stand</p>
+                  <p className="text-[11px] text-[#1a1a2e]/50 leading-relaxed">Once uploaded, each bureau gets its own results — your funding readiness level, how much funding you could expect, what could cause a denial, and what to work on next.</p>
                 </div>
               </div>
 
@@ -2789,8 +2703,8 @@ export default function DashboardPage() {
                   <FileText className="w-3.5 h-3.5 text-[#1a1a2e]/60" />
                 </div>
                 <div>
-                  <p className="text-[12px] font-semibold text-[#1a1a2e]/80">3. Repair and Optimize</p>
-                  <p className="text-[11px] text-[#1a1a2e]/50 leading-relaxed">Use the Repair Engine to generate FCRA-compliant dispute letters. Your AI mentors in the chat can help you strategize your next moves.</p>
+                  <p className="text-[12px] font-semibold text-[#1a1a2e]/80">3. Fix Any Issues</p>
+                  <p className="text-[11px] text-[#1a1a2e]/50 leading-relaxed">If there are errors or negative items on your report, the Repair Engine creates dispute letters you can send to the bureaus. You can also chat with AI mentors for personalized advice.</p>
                 </div>
               </div>
 
@@ -2799,8 +2713,8 @@ export default function DashboardPage() {
                   <Target className="w-3.5 h-3.5 text-[#1a1a2e]/60" />
                 </div>
                 <div>
-                  <p className="text-[12px] font-semibold text-[#1a1a2e]/80">4. Apply When Ready</p>
-                  <p className="text-[11px] text-[#1a1a2e]/50 leading-relaxed">Your application readiness status tells you when your profile meets underwriting thresholds. Utilization must be below 10% and accounts need at least 6 months of seasoning.</p>
+                  <p className="text-[12px] font-semibold text-[#1a1a2e]/80">4. Apply When You're Ready</p>
+                  <p className="text-[11px] text-[#1a1a2e]/50 leading-relaxed">Profundr tells you when your profile is strong enough to apply. No guessing — you'll know the right time to move forward so you don't waste applications or hurt your credit.</p>
                 </div>
               </div>
             </div>
@@ -2811,9 +2725,9 @@ export default function DashboardPage() {
                 className="w-full h-11 rounded-xl bg-gradient-to-r from-[#1a1a2e] to-[#3a3a5a] text-white text-sm font-semibold hover:opacity-90 transition-opacity"
                 data-testid="button-dismiss-welcome"
               >
-                Get Started
+                Let's Go
               </button>
-              <p className="text-[10px] text-[#1a1a2e]/30 text-center mt-3">You can find help anytime in the AI chat workspace</p>
+              <p className="text-[10px] text-[#1a1a2e]/30 text-center mt-3">Need help? Chat with an AI mentor anytime</p>
             </div>
           </div>
         </div>

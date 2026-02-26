@@ -28,9 +28,9 @@ Profundr is a subscription-based AI-powered fundability platform, envisioned as 
 - **Velocity Risk Model:** Assesses portfolio expansion rate, exposure growth, and inquiry density to determine velocity approval tiers, adjust exposure ceilings, and enforce mandatory waiting periods.
 - **Account Seasoning & Application Readiness:** Tracks new accounts, average account age, and seasoned accounts per bureau to determine application readiness and potential denial triggers.
 - **Credit Report Repair System:** Generates AI-powered, FCRA-compliant dispute letters for derogatory items, organized into a 3-round system. Repair analysis is contextualized by the specific bureau.
-- **Capital Operating System Dashboard (Mission Control):** Central hub displaying risk tier, funding phase, exposure ceiling, denial triggers, and a "Bureau-Specific Action Plan."
-- **Safe Exposure Meter:** Calculates maximum safe credit based on credit profile.
-- **Application Window Optimization:** Provides optimal timing for applications based on credit health.
+- **Capital Operating System Dashboard (Mission Control):** Per-bureau tabbed interface (Experian/Equifax/TransUnion) with Document Analysis at top showing phase description and next steps. Each bureau tab displays Risk Tier, Funding Phase, Potential Funding (highest limit x2.5), and Application Window. User-friendly educational language throughout. No Underwriter File Summary (internal only).
+- **Potential Funding Meter:** Shows expected funding amount per bureau based on highest credit limit x2.5 — not a guarantee, but an estimate when approval-ready.
+- **Application Window Optimization:** Per-bureau readiness indicator showing when profile is strong enough to apply.
 - **Creator Connect:** AI-powered matching of YouTube creators without requiring API keys.
 - **AI Chat Workspace:** Features 7 specialized bot mentors (e.g., Sales, Investing, Marketing) that offer targeted guidance.
 - **Messages / DM System:** Allows direct messaging between users and includes a "Team AI" feature for collaborative AI assistance within conversations.
