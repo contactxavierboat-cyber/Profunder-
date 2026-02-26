@@ -1259,6 +1259,38 @@ Be concise but thorough. Use bullet points and formatting for readability. If th
 
   const ALL_CREATOR_NAMES = Object.values(CREATOR_NAMES_BY_CATEGORY).flat();
 
+  const ytAvatarCache = new Map<string, { url: string | null; ts: number }>();
+  
+  app.get("/api/youtube-avatar/:handle", async (req, res) => {
+    const handle = req.params.handle.replace(/^@/, "");
+    if (!handle) return res.json({ avatarUrl: null });
+
+    const cached = ytAvatarCache.get(handle);
+    if (cached && Date.now() - cached.ts < 86400000) {
+      return res.json({ avatarUrl: cached.url });
+    }
+
+    try {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 5000);
+      const resp = await fetch(`https://www.youtube.com/@${handle}`, {
+        signal: controller.signal,
+        headers: { "User-Agent": "Mozilla/5.0 (compatible; Profundr/1.0)" },
+      });
+      clearTimeout(timeout);
+      const html = await resp.text();
+      
+      const ogMatch = html.match(/<meta\s+property="og:image"\s+content="([^"]+)"/);
+      const avatarUrl = ogMatch?.[1] || null;
+      
+      ytAvatarCache.set(handle, { url: avatarUrl, ts: Date.now() });
+      res.json({ avatarUrl });
+    } catch {
+      ytAvatarCache.set(handle, { url: null, ts: Date.now() });
+      res.json({ avatarUrl: null });
+    }
+  });
+
   app.post("/api/creator-match", requireAuth, async (req, res) => {
     const userId = req.session.userId!;
     const user = await storage.getUser(userId);
@@ -1309,6 +1341,8 @@ For FUNDING mode users, prioritize creators who teach:
 
 IMPORTANT: Only recommend REAL YouTube creators that actually exist. Include their exact YouTube channel name, their real handle/custom URL (like @channelname), and a brief description of what they teach. Include a mix of large and smaller niche creators.
 
+For each creator, also include a personalized message ("creatorMessage") written AS IF the creator is speaking directly to this user about their specific situation — in 1-2 sentences using the creator's known communication style. Also include "videoSearchTerms" — an array of 2-3 specific search phrases that would find the creator's most relevant videos for this user's situation (include the creator's name in the search term).
+
 You MUST respond with valid JSON only (no markdown, no code blocks):
 {
   "mode": "repair" or "funding",
@@ -1319,8 +1353,10 @@ You MUST respond with valid JSON only (no markdown, no code blocks):
       "handle": "@theirhandle",
       "specialty": "What they specifically teach",
       "matchReason": "Why this creator is perfect for THIS user's specific situation",
+      "creatorMessage": "A 1-2 sentence message written as if this creator is speaking directly to the user about their specific situation",
       "subscriberEstimate": "approximate subscriber count like 500K or 1.2M",
-      "category": "credit_repair" or "business_funding" or "business_credit" or "financial_literacy" or "entrepreneurship" or "credit_building" or "investing"
+      "category": "credit_repair" or "business_funding" or "business_credit" or "financial_literacy" or "entrepreneurship" or "credit_building" or "investing",
+      "videoSearchTerms": ["creator name + specific relevant topic search 1", "creator name + specific relevant topic search 2"]
     }
   ]
 }`;
@@ -1348,10 +1384,15 @@ You MUST respond with valid JSON only (no markdown, no code blocks):
         handle: c.handle,
         specialty: c.specialty,
         matchReason: c.matchReason,
+        creatorMessage: c.creatorMessage || "",
         subscriberEstimate: c.subscriberEstimate,
         category: c.category,
         channelUrl: c.handle ? `https://www.youtube.com/${c.handle}` : `https://www.youtube.com/results?search_query=${encodeURIComponent(c.channelName)}`,
         searchUrl: `https://www.youtube.com/results?search_query=${encodeURIComponent(c.channelName)}`,
+        videoLinks: (c.videoSearchTerms || []).map((term: string) => ({
+          label: term,
+          url: `https://www.youtube.com/results?search_query=${encodeURIComponent(term)}`,
+        })),
       }));
 
       await storage.updateUser(userId, { monthlyUsage: user.monthlyUsage + 1 });
@@ -1422,6 +1463,7 @@ When answering the user's question:
 4. Show where creators AGREE and where they DIFFER
 5. Apply their combined wisdom to the user's specific financial situation
 6. End with a synthesized recommendation that draws from multiple perspectives
+7. ALWAYS end your response with a "📺 Watch These Videos:" section that includes 3-5 specific YouTube search links formatted as markdown links. Format each as: [Creator Name - Topic](https://www.youtube.com/results?search_query=ENCODED_SEARCH). Make the search terms specific enough to find the right videos (include creator name + specific topic).
 
 Do NOT just list creators — weave their insights into a cohesive, actionable analysis.
 If the user has uploaded a credit report, reference specific data points when applying creator frameworks.${financialContext}`;

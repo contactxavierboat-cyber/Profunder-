@@ -167,7 +167,7 @@ interface CapitalOsDashboard {
     limits: { safe: number; caution: number; denial: number };
   };
   bureauHealth: {
-    bureaus: { bureau: string; uploaded: boolean; utilization: number; hardInquiries: number; derogatoryCount: number; oldestAccountAge: number; riskStatus: string; riskColor: string; priority: boolean; recommendation: string }[];
+    bureaus: { bureau: string; uploaded: boolean; utilization: number; hardInquiries: number; derogatoryCount: number; oldestAccountAge: number; riskStatus: string; riskColor: string; priority: boolean; recommendation: string; guidance: { riskTier: string; riskTierColor: string; exposureCeiling: number; exposureMultiplier: number; actionItems: string[]; denialTriggers: string[]; fundingPhase: string; applicationReady: boolean; score: number | null; latePayments: number; collections: number; chargeOffs: number; openAccounts: number; totalRevolvingLimit: number; authorizedUserAccounts: number; revolvingAccountsOver75Util: number; zeroBalanceRevolvingAccounts: number; highestSingleCardUtil: number | null; totalInstallmentAccounts: number; hasMortgage: boolean; monthsSinceMostRecentLate: number | null; collectionsBalance: number; paymentRecency: string | null; accountMix: string | null; balanceTrend: string | null; newAccountsLast6Months: number; newAccountsLast12Months: number; avgOpenAccountAgeYears: number; accountsOlderThan5Years: number; velocityRisk: { portfolioExpansionGrade: string; velocityTier: string; velocityTierLabel: string; adjustedExposureCeiling: number; mandatoryWaitingMonths: number; velocityDenialTriggers: string[]; velocityNotes: string } | null } | null }[];
     priorityBureau: string;
   };
   applicationWindow: {
@@ -286,6 +286,7 @@ export default function DashboardPage() {
   const [creatorAiUploading, setCreatorAiUploading] = useState(false);
   const [creatorMatchLoading, setCreatorMatchLoading] = useState(false);
   const [creatorMatchResults, setCreatorMatchResults] = useState<{mode: string; summary: string; searches: any[]; creators: any[]} | null>(null);
+  const [creatorAvatars, setCreatorAvatars] = useState<Record<string, string | null>>({});
 
   const [dmFriendId, setDmFriendId] = useState<number | null>(null);
   const [dmFriendName, setDmFriendName] = useState("");
@@ -358,6 +359,29 @@ export default function DashboardPage() {
     const interval = setInterval(() => fetchDmMessages(dmFriendId), 5000);
     return () => clearInterval(interval);
   }, [activeTab, dmFriendId]);
+
+  useEffect(() => {
+    if (!creatorMatchResults?.creators?.length) return;
+    const fetchAvatars = async () => {
+      const newAvatars: Record<string, string | null> = {};
+      await Promise.allSettled(
+        creatorMatchResults.creators.map(async (c: any) => {
+          if (!c.handle) return;
+          const handle = c.handle.replace(/^@/, "");
+          if (handle in creatorAvatars) return;
+          try {
+            const resp = await fetch(`/api/youtube-avatar/${encodeURIComponent(handle)}`);
+            const data = await resp.json();
+            newAvatars[handle] = data.avatarUrl || null;
+          } catch { newAvatars[handle] = null; }
+        })
+      );
+      if (Object.keys(newAvatars).length > 0) {
+        setCreatorAvatars(prev => ({ ...prev, ...newAvatars }));
+      }
+    };
+    fetchAvatars();
+  }, [creatorMatchResults]);
 
   const TRUNCATE_LENGTH = 280;
 
@@ -1872,38 +1896,73 @@ export default function DashboardPage() {
                         <p className="text-sm text-[#1a1a2e]/70">No creators found. Try uploading your credit report first.</p>
                       </div>
                     ) : (
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div className="space-y-4">
                         {creatorMatchResults.creators.map((creator: any, idx: number) => {
                           const categoryColors: Record<string, string> = { credit_repair: "from-orange-400 to-red-400", business_funding: "from-green-400 to-emerald-500", business_credit: "from-blue-400 to-indigo-500", financial_literacy: "from-purple-400 to-violet-500", entrepreneurship: "from-amber-400 to-orange-500", credit_building: "from-teal-400 to-cyan-500", investing: "from-pink-400 to-rose-500" };
                           const gradient = categoryColors[creator.category] || "from-purple-400 to-blue-400";
+                          const handle = creator.handle?.replace(/^@/, "") || "";
+                          const avatarUrl = creatorAvatars[handle];
                           return (
-                            <div key={idx} className="bg-white/70 backdrop-blur-sm border border-white/40 rounded-xl p-4 hover:shadow-md transition-all" data-testid={`creator-card-${idx}`}>
-                              <div className="flex items-start gap-3">
-                                <div className={`w-11 h-11 rounded-full bg-gradient-to-br ${gradient} flex items-center justify-center text-white font-bold text-sm shrink-0 shadow-sm`}>{(creator.channelName || "?")[0]}</div>
+                            <div key={idx} className="bg-white/70 backdrop-blur-sm border border-white/40 rounded-2xl overflow-hidden hover:shadow-lg transition-all" data-testid={`creator-card-${idx}`}>
+                              <div className="flex items-center gap-3 p-4 border-b border-white/30 bg-white/40">
+                                {avatarUrl ? (
+                                  <img src={avatarUrl} alt={creator.channelName} className="w-12 h-12 rounded-full object-cover shadow-md border-2 border-white" />
+                                ) : (
+                                  <div className={`w-12 h-12 rounded-full bg-gradient-to-br ${gradient} flex items-center justify-center text-white font-bold text-base shrink-0 shadow-md border-2 border-white`}>{(creator.channelName || "?")[0]}</div>
+                                )}
                                 <div className="flex-1 min-w-0">
-                                  <h4 className="text-[13px] font-bold text-[#1a1a2e] truncate">{creator.channelName}</h4>
+                                  <h4 className="text-sm font-bold text-[#1a1a2e] truncate">{creator.channelName}</h4>
                                   <div className="flex items-center gap-2 mt-0.5">
-                                    {creator.handle && <span className="text-[10px] text-purple-500 font-medium">{creator.handle}</span>}
-                                    {creator.subscriberEstimate && <span className="text-[10px] text-[#1a1a2e]/50">{creator.subscriberEstimate} subs</span>}
+                                    {creator.handle && <span className="text-[11px] text-purple-500 font-medium">{creator.handle}</span>}
+                                    {creator.subscriberEstimate && <span className="text-[10px] text-[#1a1a2e]/40">{creator.subscriberEstimate} subs</span>}
+                                  </div>
+                                  <p className="text-[10px] text-[#1a1a2e]/50 mt-0.5">{creator.specialty}</p>
+                                </div>
+                                <a href={creator.channelUrl} target="_blank" rel="noopener noreferrer"
+                                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-500 text-white text-[11px] font-medium hover:bg-red-600 transition-colors shrink-0" data-testid={`creator-yt-link-${idx}`}>
+                                  <Play className="w-3 h-3" /> Channel
+                                </a>
+                              </div>
+
+                              {creator.creatorMessage && (
+                                <div className="px-4 pt-3 pb-2">
+                                  <div className="flex items-start gap-3">
+                                    {avatarUrl ? (
+                                      <img src={avatarUrl} alt="" className="w-8 h-8 rounded-full object-cover shrink-0 mt-0.5 shadow-sm" />
+                                    ) : (
+                                      <div className={`w-8 h-8 rounded-full bg-gradient-to-br ${gradient} flex items-center justify-center text-white font-bold text-xs shrink-0 mt-0.5 shadow-sm`}>{(creator.channelName || "?")[0]}</div>
+                                    )}
+                                    <div className="flex-1 bg-[#f0f0f8] rounded-2xl rounded-tl-sm px-4 py-3 relative">
+                                      <p className="text-[12px] text-[#1a1a2e]/85 leading-relaxed italic">"{creator.creatorMessage}"</p>
+                                      <p className="text-[9px] text-[#1a1a2e]/40 mt-1 text-right">— {creator.channelName}</p>
+                                    </div>
                                   </div>
                                 </div>
-                              </div>
-                              <p className="text-[11px] text-[#1a1a2e]/70 mt-2 leading-relaxed">{creator.specialty}</p>
-                              {creator.matchReason && (
-                                <p className="text-[10px] text-purple-600/80 mt-1.5 flex items-start gap-1">
-                                  <Sparkles className="w-3 h-3 shrink-0 mt-0.5" /><span className="line-clamp-2">{creator.matchReason}</span>
-                                </p>
                               )}
-                              <div className="flex items-center gap-2 mt-3">
-                                <a href={creator.channelUrl} target="_blank" rel="noopener noreferrer"
-                                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-500/10 border border-red-300/30 text-red-600 text-[11px] font-medium hover:bg-red-500/20 transition-colors" data-testid={`creator-yt-link-${idx}`}>
-                                  <Play className="w-3 h-3" /> YouTube
-                                </a>
-                                <a href={creator.searchUrl} target="_blank" rel="noopener noreferrer"
-                                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-500/10 border border-blue-300/30 text-blue-600 text-[11px] font-medium hover:bg-blue-500/20 transition-colors" data-testid={`creator-search-link-${idx}`}>
-                                  <Search className="w-3 h-3" /> Search
-                                </a>
-                              </div>
+
+                              {creator.matchReason && (
+                                <div className="px-4 py-2">
+                                  <p className="text-[10px] text-purple-600/80 flex items-start gap-1.5 bg-purple-500/5 rounded-lg px-3 py-2">
+                                    <Sparkles className="w-3 h-3 shrink-0 mt-0.5" /><span>{creator.matchReason}</span>
+                                  </p>
+                                </div>
+                              )}
+
+                              {creator.videoLinks && creator.videoLinks.length > 0 && (
+                                <div className="px-4 pb-3 pt-1">
+                                  <p className="text-[10px] font-semibold text-[#1a1a2e]/50 uppercase tracking-wider mb-1.5">Recommended Videos</p>
+                                  <div className="space-y-1">
+                                    {creator.videoLinks.map((v: any, vi: number) => (
+                                      <a key={vi} href={v.url} target="_blank" rel="noopener noreferrer"
+                                        className="flex items-center gap-2 px-3 py-2 rounded-lg bg-red-500/5 border border-red-200/30 hover:bg-red-500/10 transition-colors group" data-testid={`creator-video-${idx}-${vi}`}>
+                                        <Play className="w-3.5 h-3.5 text-red-500 shrink-0" />
+                                        <span className="text-[11px] text-[#1a1a2e]/70 group-hover:text-red-600 truncate">{v.label}</span>
+                                        <ExternalLink className="w-3 h-3 text-[#1a1a2e]/30 ml-auto shrink-0" />
+                                      </a>
+                                    ))}
+                                  </div>
+                                </div>
+                              )}
                             </div>
                           );
                         })}
@@ -1942,14 +2001,32 @@ export default function DashboardPage() {
                           </div>
                         </div>
                       )}
-                      {creatorAiMessages.map((msg, idx) => (
-                        <div key={idx} className={cn("flex", msg.role === "user" ? "justify-end" : "justify-start")}>
-                          <div className={cn("max-w-[85%] rounded-xl px-4 py-3", msg.role === "user" ? "bg-purple-600/15 border border-purple-400/20 text-[#1a1a2e]" : "bg-white/60 border border-white/30 text-[#1a1a2e]")}>
-                            {msg.role === "assistant" && <div className="flex items-center gap-1.5 mb-2 text-[10px] text-purple-500/60"><Sparkles className="w-3 h-3" />Creator-Informed Insight</div>}
-                            <div className="text-[13px] leading-relaxed whitespace-pre-wrap" data-testid={`creator-ai-msg-${idx}`}>{msg.content}</div>
+                      {creatorAiMessages.map((msg, idx) => {
+                        const renderWithLinks = (text: string) => {
+                          const parts = text.split(/(\[[^\]]+\]\([^)]+\))/g);
+                          return parts.map((part, i) => {
+                            const linkMatch = part.match(/\[([^\]]+)\]\(([^)]+)\)/);
+                            if (linkMatch) {
+                              return (
+                                <a key={i} href={linkMatch[2]} target="_blank" rel="noopener noreferrer"
+                                  className="inline-flex items-center gap-1 text-red-500 hover:text-red-600 underline underline-offset-2 font-medium"
+                                  data-testid={`link-video-${idx}-${i}`}>
+                                  <Play className="w-3 h-3 inline shrink-0" />{linkMatch[1]}
+                                </a>
+                              );
+                            }
+                            return <span key={i}>{part}</span>;
+                          });
+                        };
+                        return (
+                          <div key={idx} className={cn("flex", msg.role === "user" ? "justify-end" : "justify-start")}>
+                            <div className={cn("max-w-[85%] rounded-xl px-4 py-3", msg.role === "user" ? "bg-purple-600/15 border border-purple-400/20 text-[#1a1a2e]" : "bg-white/60 border border-white/30 text-[#1a1a2e]")}>
+                              {msg.role === "assistant" && <div className="flex items-center gap-1.5 mb-2 text-[10px] text-purple-500/60"><Sparkles className="w-3 h-3" />Creator-Informed Insight</div>}
+                              <div className="text-[13px] leading-relaxed whitespace-pre-wrap" data-testid={`creator-ai-msg-${idx}`}>{msg.role === "assistant" ? renderWithLinks(msg.content) : msg.content}</div>
+                            </div>
                           </div>
-                        </div>
-                      ))}
+                        );
+                      })}
                       {creatorAiLoading && (
                         <div className="flex justify-start">
                           <div className="bg-white/60 border border-white/30 rounded-xl px-4 py-3 flex items-center gap-2">

@@ -31,7 +31,7 @@ Profundr is a subscription-based AI-powered fundability platform, envisioned as 
 - **Capital Operating System Dashboard (Mission Control):** Per-bureau tabbed interface (Experian/Equifax/TransUnion) with Document Analysis at top showing phase description and next steps. Each bureau tab displays Risk Tier, Funding Phase, Potential Funding (highest limit x2.5), and Application Window. User-friendly educational language throughout. No Underwriter File Summary (internal only).
 - **Potential Funding Meter:** Shows expected funding amount per bureau based on highest credit limit x2.5 — not a guarantee, but an estimate when approval-ready.
 - **Application Window Optimization:** Per-bureau readiness indicator showing when profile is strong enough to apply.
-- **Creator Connect:** AI-powered matching of YouTube creators without requiring API keys.
+- **Creator Connect:** AI-powered matching of YouTube creators with profile photo scraping (og:image), conversational creator messages (as-if speaking to user), and recommended video links per creator. Creator-Informed Q&A includes inline YouTube video links.
 - **AI Chat Workspace:** Features 7 specialized bot mentors (e.g., Sales, Investing, Marketing) that offer targeted guidance.
 - **Messages / DM System:** Allows direct messaging between users and includes a "Team AI" feature for collaborative AI assistance within conversations.
 - **UI/UX:** Adheres to a minimal fintech aesthetic with a white-to-lavender gradient background, frosted glass content blocks, and distinct fonts for UI and data.
