@@ -45,6 +45,13 @@ Profundr is a subscription-based AI-powered fundability platform, envisioned as 
 - **DisputeCases:** Tracks credit dispute details, including letter content and resolution status.
 - **SystemAlerts:** Manages user notifications and alerts.
 
+### Bug Fixes Applied
+- **searchUsers** now properly excludes the current user from search results
+- **primaryDenialTriggers** parsing wrapped in try-catch to prevent crashes on malformed JSON
+- **monthlyUsage** increments changed from read-then-write to atomic SQL (`SET monthlyUsage = monthlyUsage + 1`) to prevent race conditions
+- **parseInt validation** added to dispute and alert route params to reject NaN values
+- **Session secret** fallback changed from hardcoded string to crypto-random, improving security
+
 ## External Dependencies
 - **Stripe:** For managing user subscriptions and payment processing.
 - **OpenAI GPT-4o:** Integrated via Replit AI Integrations for all AI-powered functionalities (underwriting, chat mentors, dispute letter generation, creator matching, document analysis).

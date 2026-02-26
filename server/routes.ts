@@ -1,6 +1,6 @@
 import type { Express, Request, Response, NextFunction } from "express";
 import type { Server } from "http";
-import { storage } from "./storage";
+import { storage, incrementMonthlyUsage } from "./storage";
 import { z } from "zod";
 import OpenAI from "openai";
 import session from "express-session";
@@ -722,7 +722,7 @@ export async function registerRoutes(
   const SessionStore = MemoryStore(session);
 
   app.use(session({
-    secret: process.env.SESSION_SECRET || "startup-studio-session-secret-change-in-prod",
+    secret: process.env.SESSION_SECRET || require("crypto").randomBytes(32).toString("hex"),
     store: new SessionStore({ checkPeriod: 86400000 }),
     resave: false,
     saveUninitialized: false,
@@ -1063,7 +1063,7 @@ export async function registerRoutes(
 
       const aiMessage = await storage.createMessage({ userId, role: "assistant", content: aiContent, attachment: null, mentor: detectedMentor });
 
-      await storage.updateUser(userId, { monthlyUsage: user.monthlyUsage + 1 });
+      await incrementMonthlyUsage(userId);
 
       res.json(aiMessage);
     } catch (error: any) {
@@ -1232,7 +1232,7 @@ Be concise but thorough. Use bullet points and formatting for readability. If th
       const aiContent = response.choices[0]?.message?.content || "I'm sorry, I couldn't generate a response right now.";
       const aiAnswer = await storage.createDashboardQuestion({ userId, role: "assistant", content: aiContent });
 
-      await storage.updateUser(userId, { monthlyUsage: user.monthlyUsage + 1 });
+      await incrementMonthlyUsage(userId);
 
       res.json({ userQuestion, aiAnswer });
     } catch (error: any) {
@@ -1411,7 +1411,7 @@ You MUST respond with valid JSON only (no markdown, no code blocks):
         })),
       }));
 
-      await storage.updateUser(userId, { monthlyUsage: user.monthlyUsage + 1 });
+      await incrementMonthlyUsage(userId);
 
       res.json({
         mode: aiResult.mode,
@@ -1495,7 +1495,7 @@ If the user has uploaded a credit report, reference specific data points when ap
       });
 
       const aiContent = response.choices[0]?.message?.content || "Unable to generate insight right now.";
-      await storage.updateUser(userId, { monthlyUsage: user.monthlyUsage + 1 });
+      await incrementMonthlyUsage(userId);
 
       res.json({ answer: aiContent });
     } catch (error: any) {
@@ -4622,8 +4622,8 @@ ${extractedText}
         return res.status(500).json({ error: "AI analysis returned invalid format. Please try again." });
       }
 
+      await incrementMonthlyUsage(userId);
       const updateData: any = {
-        monthlyUsage: user.monthlyUsage + 1,
         lastAnalysisDate: new Date(),
         analysisSummary: analysisResult.summary || "Document analyzed successfully.",
         analysisNextSteps: JSON.stringify([]),
@@ -5148,8 +5148,8 @@ ${reportText.slice(0, 25000)}
         finalRepairData = repairResult;
       }
 
+      await incrementMonthlyUsage(userId);
       await storage.updateUser(userId, {
-        monthlyUsage: user.monthlyUsage + 1,
         creditRepairData: JSON.stringify(finalRepairData),
         lastRepairAnalysisDate: new Date(),
       });
@@ -5346,6 +5346,7 @@ ${reportText.slice(0, 25000)}
 
   app.patch("/api/capital-os/disputes/:id", requireAuth, async (req: any, res) => {
     const id = parseInt(req.params.id);
+    if (isNaN(id)) return res.status(400).json({ error: "Invalid dispute ID" });
     const userId = req.session.userId;
 
     const existing = await storage.getDisputeCases(userId);
@@ -5375,7 +5376,9 @@ ${reportText.slice(0, 25000)}
   });
 
   app.delete("/api/capital-os/disputes/:id", requireAuth, async (req: any, res) => {
-    await storage.deleteDisputeCase(parseInt(req.params.id), req.session.userId);
+    const id = parseInt(req.params.id);
+    if (isNaN(id)) return res.status(400).json({ error: "Invalid dispute ID" });
+    await storage.deleteDisputeCase(id, req.session.userId);
     res.json({ success: true });
   });
 
@@ -5387,7 +5390,9 @@ ${reportText.slice(0, 25000)}
   });
 
   app.patch("/api/capital-os/alerts/:id/read", requireAuth, async (req: any, res) => {
-    await storage.markAlertRead(parseInt(req.params.id), req.session.userId);
+    const id = parseInt(req.params.id);
+    if (isNaN(id)) return res.status(400).json({ error: "Invalid alert ID" });
+    await storage.markAlertRead(id, req.session.userId);
     res.json({ success: true });
   });
 

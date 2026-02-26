@@ -257,9 +257,16 @@ export function calculateCapitalReadiness(user: User): ReadinessScore {
   const remainingSafeCapacity = (user as any).remainingSafeCapacity || 0;
   const recommendedApproval = (user as any).recommendedNewApprovalRange || "No data";
   const approvalProbability = (user as any).approvalProbability || "Unknown";
-  const denialTriggers = (user as any).primaryDenialTriggers
-    ? (typeof (user as any).primaryDenialTriggers === "string" ? JSON.parse((user as any).primaryDenialTriggers) : (user as any).primaryDenialTriggers)
-    : [];
+  let denialTriggers: string[] = [];
+  try {
+    if ((user as any).primaryDenialTriggers) {
+      denialTriggers = typeof (user as any).primaryDenialTriggers === "string"
+        ? JSON.parse((user as any).primaryDenialTriggers)
+        : (user as any).primaryDenialTriggers;
+    }
+  } catch {
+    denialTriggers = [];
+  }
   const riskNotes = (user as any).riskDepartmentNotes || "";
 
   return {

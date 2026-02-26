@@ -2,6 +2,10 @@ import { users, messages, comments, posts, friendships, dashboardQuestions, dire
 import { db } from "./db";
 import { eq, count, desc, or, and, ne, ilike, isNull, sql, asc } from "drizzle-orm";
 
+export async function incrementMonthlyUsage(userId: number): Promise<void> {
+  await db.update(users).set({ monthlyUsage: sql`${users.monthlyUsage} + 1` }).where(eq(users.id, userId));
+}
+
 export interface IStorage {
   getUser(id: number): Promise<User | undefined>;
   getUserByEmail(email: string): Promise<User | undefined>;
@@ -163,7 +167,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async searchUsers(query: string, currentUserId: number): Promise<User[]> {
-    return db.select().from(users).where(and(ne(users.password, "bot_no_login"), or(ilike(users.displayName, `%${query}%`), ilike(users.email, `%${query}%`)))).limit(50);
+    return db.select().from(users).where(and(ne(users.id, currentUserId), ne(users.password, "bot_no_login"), or(ilike(users.displayName, `%${query}%`), ilike(users.email, `%${query}%`)))).limit(50);
   }
 
   async getDashboardQuestions(userId: number): Promise<DashboardQuestion[]> {
