@@ -395,7 +395,7 @@ export default function DashboardPage() {
   const sendFriendRequest = async (receiverId: number) => {
     try {
       const res = await fetch("/api/friends/request", { method: "POST", headers: { "Content-Type": "application/json" }, credentials: "include", body: JSON.stringify({ receiverId }) });
-      if (res.ok) { toast({ title: "Friend request sent!" }); fetchFriends(); setFriendSearchResults(prev => prev.filter(u => u.id !== receiverId)); }
+      if (res.ok) { toast({ title: "Team invite sent!" }); fetchFriends(); setFriendSearchResults(prev => prev.filter(u => u.id !== receiverId)); }
       else { const d = await res.json(); toast({ title: "Error", description: d.error, variant: "destructive" }); }
     } catch (err) { toast({ title: "Error", description: "Failed to send request", variant: "destructive" }); }
   };
@@ -404,7 +404,7 @@ export default function DashboardPage() {
     try {
       await fetch("/api/friends/accept", { method: "POST", headers: { "Content-Type": "application/json" }, credentials: "include", body: JSON.stringify({ friendshipId }) });
       fetchFriends();
-      toast({ title: "Friend request accepted!" });
+      toast({ title: "Team member added!" });
     } catch (err) { toast({ title: "Error", description: "Failed to accept", variant: "destructive" }); }
   };
 
@@ -419,7 +419,7 @@ export default function DashboardPage() {
     try {
       await fetch("/api/friends/remove", { method: "POST", headers: { "Content-Type": "application/json" }, credentials: "include", body: JSON.stringify({ friendshipId }) });
       fetchFriends();
-      toast({ title: "Friend removed" });
+      toast({ title: "Team member removed" });
     } catch (err) { toast({ title: "Error", description: "Failed to remove", variant: "destructive" }); }
   };
 
@@ -2219,86 +2219,69 @@ export default function DashboardPage() {
             <div className="w-full h-full flex flex-col" style={{ background: 'transparent' }}>
               {!dmFriendId ? (
                 <div className="flex-1 overflow-y-auto px-5 sm:px-8 py-6 max-w-[600px] mx-auto w-full">
-                  <div className="flex items-center gap-3 mb-6">
-                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-600 to-cyan-600 flex items-center justify-center">
-                      <MessageSquare className="w-5 h-5 text-[#1a1a2e]" />
+                  <div className="flex items-center justify-between mb-6">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-600 to-cyan-600 flex items-center justify-center">
+                        <Users className="w-5 h-5 text-white" />
+                      </div>
+                      <div>
+                        <h2 className="text-lg font-bold text-[#1a1a2e]" data-testid="text-messages-title">Team Messages</h2>
+                        <p className="text-[11px] text-[#1a1a2e]/75">{friendsList.length} team member{friendsList.length !== 1 ? "s" : ""}</p>
+                      </div>
                     </div>
-                    <div>
-                      <h2 className="text-lg font-bold text-[#1a1a2e]" data-testid="text-messages-title">Messages</h2>
-                      <p className="text-[11px] text-[#1a1a2e]/75">Chat with friends & ask AI together as a team</p>
-                    </div>
+                    <button onClick={() => setShowAddFriend(true)} className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#3a3a5a] text-white text-[11px] font-medium hover:bg-[#2a2a4a] transition-colors" data-testid="button-add-team-member">
+                      <UserPlus className="w-3.5 h-3.5" /> Add Member
+                    </button>
                   </div>
 
-                  {activeMentor && (
-                    <div className="rounded-xl bg-white/50 border border-white/30 p-4 mb-4">
-                      <div className="flex items-center gap-3 mb-3">
-                        <div className={cn("w-10 h-10 rounded-full flex items-center justify-center text-[10px] font-bold border border-white/30", activeMentorKey ? BOT_COLORS[activeMentorKey] : "")}>
-                          {activeMentor.initials}
-                        </div>
-                        <div>
-                          <p className="text-sm font-medium text-[#1a1a2e]">{activeMentor.name}</p>
-                          <p className="text-[10px] text-[#1a1a2e]/60">{activeMentor.specialty}</p>
-                        </div>
-                      </div>
-                      <div className="flex gap-2">
-                        <textarea ref={textareaRef} value={input} onChange={handleTextareaInput} onKeyDown={handleKeyDown}
-                          placeholder={`Ask ${activeMentor.name}...`}
-                          className="flex-1 bg-white/60 border border-white/30 rounded-xl px-3 py-2.5 text-sm text-[#1a1a2e] placeholder:text-[#8a8aa5]/50 resize-none focus:outline-none focus:border-[#c0c0d0]"
-                          rows={1} data-testid="input-mentor-chat" />
-                        <button onClick={handleSend} disabled={isLoading || !input.trim()}
-                          className="w-10 h-10 rounded-xl bg-[#3a3a5a] text-white hover:bg-[#2a2a4a] disabled:opacity-30 flex items-center justify-center transition-colors shrink-0" data-testid="button-send-mentor">
-                          {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
-                        </button>
-                      </div>
-                    </div>
-                  )}
-
-                  {messages.length > 0 && (
-                    <div className="rounded-xl bg-white/50 border border-white/30 p-4 mb-4">
-                      <p className="text-[10px] text-[#1a1a2e]/50 uppercase tracking-wider mb-3">Mentor Chat History</p>
-                      <div className="space-y-3 max-h-[300px] overflow-y-auto" style={{ scrollbarWidth: 'thin' }}>
-                        {messages.slice(-10).map((m) => {
-                          const mentorData = m.role === 'assistant' && m.mentor ? MENTOR_INFO[m.mentor] : null;
-                          return (
-                            <div key={m.id} className={cn("flex gap-2.5", m.role === 'user' ? "justify-end" : "justify-start")}>
-                              {m.role !== 'user' && mentorData && (
-                                <div className={cn("w-7 h-7 rounded-full flex items-center justify-center text-[9px] font-bold shrink-0 border border-white/30", m.mentor ? BOT_COLORS[m.mentor] : "")}>
-                                  {mentorData.initials}
-                                </div>
-                              )}
-                              <div className={cn("max-w-[80%] rounded-xl px-3 py-2", m.role === 'user' ? "bg-[#e0e0ea] text-[#1a1a2e]" : "bg-white/60 border border-white/30")}>
-                                <p className="text-[12px] text-[#1a1a2e]/85 leading-relaxed whitespace-pre-wrap line-clamp-4">{m.content}</p>
-                                <p className="text-[9px] text-[#1a1a2e]/40 mt-1">{new Date(m.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
-                              </div>
+                  {pendingRequests.length > 0 && (
+                    <div className="rounded-xl bg-yellow-500/[0.06] border border-yellow-500/15 p-4 mb-4" data-testid="pending-requests">
+                      <p className="text-[10px] text-yellow-700/70 uppercase tracking-wider mb-3 font-medium">Pending Requests · {pendingRequests.length}</p>
+                      <div className="space-y-2">
+                        {pendingRequests.map((req: any) => (
+                          <div key={req.friendshipId} className="flex items-center gap-3 p-2.5 rounded-lg bg-white/60">
+                            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-yellow-400/30 to-orange-400/30 border border-yellow-500/20 flex items-center justify-center text-[10px] font-bold text-[#1a1a2e]/70">
+                              {(req.displayName || req.email || "?").substring(0, 2).toUpperCase()}
                             </div>
-                          );
-                        })}
+                            <div className="flex-1 min-w-0">
+                              <p className="text-[12px] font-medium text-[#1a1a2e]/90 truncate">{req.displayName || req.email}</p>
+                              <p className="text-[9px] text-[#1a1a2e]/50">Wants to join your team</p>
+                            </div>
+                            <div className="flex gap-1.5">
+                              <button onClick={() => acceptFriend(req.friendshipId)} className="px-2.5 py-1.5 rounded-lg bg-green-500/15 text-green-600 text-[10px] font-medium hover:bg-green-500/25 transition-colors" data-testid={`button-accept-${req.friendshipId}`}>Accept</button>
+                              <button onClick={() => rejectFriend(req.friendshipId)} className="px-2.5 py-1.5 rounded-lg bg-red-500/10 text-red-500/70 text-[10px] font-medium hover:bg-red-500/20 transition-colors" data-testid={`button-reject-${req.friendshipId}`}>Decline</button>
+                            </div>
+                          </div>
+                        ))}
                       </div>
                     </div>
                   )}
 
                   {friendsList.length === 0 ? (
                     <div className="text-center py-16">
-                      <UserPlus className="w-10 h-10 text-[#1a1a2e]/40 mx-auto mb-3" />
-                      <p className="text-sm text-[#1a1a2e]/70 mb-1">No friends yet</p>
-                      <p className="text-[11px] text-[#1a1a2e]/55 mb-4">Add friends from the buddy list to start messaging</p>
-                      <button onClick={() => setShowAddFriend(true)} className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white/50 border border-white/30 text-sm text-[#1a1a2e]/80 hover:bg-white/60 transition-colors" data-testid="button-add-friend-dm">
-                        <UserPlus className="w-4 h-4" /> Add Friend
+                      <Users className="w-12 h-12 text-[#1a1a2e]/15 mx-auto mb-4" />
+                      <p className="text-sm font-medium text-[#1a1a2e]/70 mb-1">No team members yet</p>
+                      <p className="text-[11px] text-[#1a1a2e]/50 mb-5 max-w-[260px] mx-auto leading-relaxed">Add team members to start direct messaging. Collaborate and share insights together.</p>
+                      <button onClick={() => setShowAddFriend(true)} className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#3a3a5a] text-white text-sm font-medium hover:bg-[#2a2a4a] transition-colors" data-testid="button-add-first-member">
+                        <UserPlus className="w-4 h-4" /> Add Your First Team Member
                       </button>
                     </div>
                   ) : (
-                    <div className="space-y-2">
+                    <div className="space-y-1.5">
                       {friendsList.map((f: any) => (
                         <button key={f.id} onClick={() => openDm(f.id, f.displayName || f.email)}
-                          className="w-full flex items-center gap-3 p-3.5 rounded-xl bg-white/50 border border-white/30 hover:bg-white/60 transition-all text-left" data-testid={`dm-friend-${f.id}`}>
-                          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500/30 to-cyan-500/30 border border-white/40 flex items-center justify-center text-sm font-bold text-[#1a1a2e]/80">
+                          className="w-full flex items-center gap-3 p-3.5 rounded-xl bg-white/50 border border-white/30 hover:bg-white/70 hover:shadow-sm transition-all text-left group" data-testid={`dm-friend-${f.id}`}>
+                          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500/25 to-cyan-500/25 border border-blue-500/15 flex items-center justify-center text-sm font-bold text-[#1a1a2e]/75">
                             {(f.displayName || f.email || "?").substring(0, 2).toUpperCase()}
                           </div>
                           <div className="flex-1 min-w-0">
                             <p className="text-sm font-medium text-[#1a1a2e]/95 truncate">{f.displayName || f.email}</p>
-                            <p className="text-[10px] text-[#1a1a2e]/60">Tap to chat</p>
+                            <p className="text-[10px] text-[#1a1a2e]/45">Team Member</p>
                           </div>
-                          <ChevronRight className="w-4 h-4 text-[#1a1a2e]/45" />
+                          <div className="flex items-center gap-2">
+                            <span className="text-[10px] text-[#1a1a2e]/30 group-hover:text-[#1a1a2e]/60 transition-colors">Message</span>
+                            <ChevronRight className="w-4 h-4 text-[#1a1a2e]/30 group-hover:text-[#1a1a2e]/60 transition-colors" />
+                          </div>
                         </button>
                       ))}
                     </div>
@@ -2315,7 +2298,7 @@ export default function DashboardPage() {
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium text-[#1a1a2e]/95 truncate">{dmFriendName}</p>
-                      <p className="text-[9px] text-[#1a1a2e]/55">Direct Message · Team AI available</p>
+                      <p className="text-[9px] text-[#1a1a2e]/55">Direct Message</p>
                     </div>
                     <button onClick={() => { fetchDmMessages(dmFriendId!); }} className="w-8 h-8 rounded-xl bg-white/50 hover:bg-white/60 flex items-center justify-center transition-colors" data-testid="button-dm-refresh">
                       <RefreshCw className="w-3.5 h-3.5 text-[#1a1a2e]/65" />
@@ -2327,7 +2310,7 @@ export default function DashboardPage() {
                       <div className="flex flex-col items-center justify-center py-12">
                         <MessageSquare className="w-8 h-8 text-[#1a1a2e]/40 mb-3" />
                         <p className="text-sm text-[#1a1a2e]/65 mb-1">Start the conversation</p>
-                        <p className="text-[10px] text-[#1a1a2e]/45">Send a message or ask AI together</p>
+                        <p className="text-[10px] text-[#1a1a2e]/45">Send a direct message to {dmFriendName}</p>
                       </div>
                     )}
                     {dmMessages.map((msg: any) => {
@@ -2353,15 +2336,12 @@ export default function DashboardPage() {
                         </div>
                       );
                     })}
-                    {(dmLoading || dmAiLoading) && (
-                      <div className="flex gap-2.5 justify-start">
-                        <div className={cn("w-7 h-7 rounded-lg flex items-center justify-center shrink-0", dmAiLoading ? "bg-gradient-to-br from-purple-500/20 to-blue-500/20 border border-purple-500/20" : "bg-white/60 border border-white/30")}>
-                          {dmAiLoading ? <Sparkles className="w-3.5 h-3.5 text-purple-400/60" /> : <Loader2 className="w-3.5 h-3.5 animate-spin text-[#1a1a2e]/65" />}
-                        </div>
-                        <div className={cn("rounded-2xl px-4 py-3", dmAiLoading ? "bg-purple-500/[0.08] border border-purple-500/[0.12]" : "bg-white/50 border border-white/30")}>
+                    {dmLoading && (
+                      <div className="flex gap-2.5 justify-end">
+                        <div className="rounded-2xl px-4 py-3 bg-white/50 border border-white/30">
                           <div className="flex items-center gap-2">
                             <Loader2 className="w-3.5 h-3.5 animate-spin text-[#1a1a2e]/60" />
-                            <span className="text-[11px] text-[#1a1a2e]/60">{dmAiLoading ? "Team AI thinking..." : "Sending..."}</span>
+                            <span className="text-[11px] text-[#1a1a2e]/60">Sending...</span>
                           </div>
                         </div>
                       </div>
@@ -2376,14 +2356,9 @@ export default function DashboardPage() {
                         placeholder={`Message ${dmFriendName}...`}
                         className="flex-1 bg-white/50 border border-white/30 rounded-xl px-3.5 py-2.5 text-sm text-[#1a1a2e]/95 placeholder:text-[#8a8aa5]/50 resize-none focus:outline-none focus:border-[#c0c0d0] transition-colors"
                         rows={1} />
-                      <button data-testid="button-send-dm" onClick={sendDm} disabled={!dmInput.trim() || dmLoading || dmAiLoading}
-                        className="w-10 h-10 rounded-xl bg-white/50 border border-white/30 hover:bg-white/60 disabled:opacity-30 flex items-center justify-center transition-colors shrink-0" title="Send message">
-                        <Send className="w-4 h-4 text-[#1a1a2e]/80" />
-                      </button>
-                      <button data-testid="button-team-ai" onClick={sendTeamAi} disabled={!dmInput.trim() || dmLoading || dmAiLoading}
-                        className="h-10 px-3 rounded-xl bg-gradient-to-r from-purple-600/80 to-blue-600/80 border border-purple-500/20 hover:from-purple-500 hover:to-blue-500 disabled:opacity-30 flex items-center gap-1.5 transition-all shrink-0" title="Ask Team AI">
-                        <Sparkles className="w-3.5 h-3.5 text-[#1a1a2e]" />
-                        <span className="text-[11px] text-[#1a1a2e] font-medium">AI</span>
+                      <button data-testid="button-send-dm" onClick={sendDm} disabled={!dmInput.trim() || dmLoading}
+                        className="w-10 h-10 rounded-xl bg-[#3a3a5a] text-white hover:bg-[#2a2a4a] disabled:opacity-30 flex items-center justify-center transition-colors shrink-0" title="Send message">
+                        {dmLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
                       </button>
                     </div>
                   </div>
@@ -2455,7 +2430,7 @@ export default function DashboardPage() {
               <button onClick={() => setBuddyGroups(prev => ({ ...prev, friends: !prev.friends }))}
                 className="w-full h-9 flex items-center gap-2 px-4 hover:bg-white/50 text-left transition-colors" data-testid="buddy-group-friends">
                 <span className="text-[10px] text-[#1a1a2e]/45 font-mono w-3">{buddyGroups.friends ? "▾" : "▸"}</span>
-                <span className="text-[11px] font-bold text-[#1a1a2e]/75 uppercase tracking-widest">Friends</span>
+                <span className="text-[11px] font-bold text-[#1a1a2e]/75 uppercase tracking-widest">Team</span>
                 <span className="text-[10px] text-[#1a1a2e]/45 ml-auto">({friendsList.length})</span>
               </button>
               {buddyGroups.friends && (
@@ -2463,7 +2438,7 @@ export default function DashboardPage() {
                   <button onClick={() => setShowAddFriend(true)}
                     className="w-full h-9 flex items-center gap-3 px-4 hover:bg-white/50 text-left transition-colors" data-testid="button-add-friend">
                     <UserPlus className="w-3.5 h-3.5 text-green-400/50" />
-                    <span className="text-[11px] text-green-400/50 font-medium">Add Friend</span>
+                    <span className="text-[11px] text-green-400/50 font-medium">Add Member</span>
                   </button>
                   {pendingRequests.length > 0 && (
                     <div className="px-4 py-1">
@@ -2505,7 +2480,7 @@ export default function DashboardPage() {
                   ))}
                   {friendsList.length === 0 && pendingRequests.length === 0 && (
                     <div className="h-9 flex items-center px-4">
-                      <span className="text-[10px] text-[#1a1a2e]/40 italic">No friends yet</span>
+                      <span className="text-[10px] text-[#1a1a2e]/40 italic">No team members yet</span>
                     </div>
                   )}
                 </div>
@@ -2546,7 +2521,7 @@ export default function DashboardPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-none" onClick={() => setShowAddFriend(false)}>
           <div className="w-[340px] bg-white/95 backdrop-blur-md border border-white/30 rounded-2xl p-5 shadow-2xl" onClick={e => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-4">
-              <p className="text-sm font-semibold text-[#1a1a2e]/95">Add Friend</p>
+              <p className="text-sm font-semibold text-[#1a1a2e]/95">Add Team Member</p>
               <button onClick={() => setShowAddFriend(false)} className="text-[#1a1a2e]/60 hover:text-[#1a1a2e]/80">
                 <X className="w-4 h-4" />
               </button>
@@ -2566,7 +2541,7 @@ export default function DashboardPage() {
                     {(u.displayName || u.email || "?").substring(0, 2).toUpperCase()}
                   </div>
                   <p className="text-sm text-[#1a1a2e]/80 flex-1 truncate">{u.displayName || u.email}</p>
-                  <button onClick={() => sendFriendRequest(u.id)} className="h-7 px-3 rounded-lg bg-white/50 hover:bg-white/60 text-[10px] text-[#1a1a2e]/80 font-medium transition-colors" data-testid={`add-friend-${u.id}`}>Add</button>
+                  <button onClick={() => sendFriendRequest(u.id)} className="h-7 px-3 rounded-lg bg-[#3a3a5a] hover:bg-[#2a2a4a] text-[10px] text-white font-medium transition-colors" data-testid={`add-friend-${u.id}`}>Invite</button>
                 </div>
               ))}
               {friendSearch.length >= 2 && !friendSearchLoading && friendSearchResults.length === 0 && (
