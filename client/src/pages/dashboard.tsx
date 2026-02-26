@@ -286,7 +286,7 @@ export default function DashboardPage() {
   const [creatorAiUploading, setCreatorAiUploading] = useState(false);
   const [creatorMatchLoading, setCreatorMatchLoading] = useState(false);
   const [creatorMatchResults, setCreatorMatchResults] = useState<{mode: string; summary: string; searches: any[]; creators: any[]} | null>(null);
-  const [creatorAvatars, setCreatorAvatars] = useState<Record<string, string | null>>({});
+  const [creatorAvatarErrors, setCreatorAvatarErrors] = useState<Set<string>>(new Set());
 
   const [dmFriendId, setDmFriendId] = useState<number | null>(null);
   const [dmFriendName, setDmFriendName] = useState("");
@@ -360,28 +360,11 @@ export default function DashboardPage() {
     return () => clearInterval(interval);
   }, [activeTab, dmFriendId]);
 
-  useEffect(() => {
-    if (!creatorMatchResults?.creators?.length) return;
-    const fetchAvatars = async () => {
-      const newAvatars: Record<string, string | null> = {};
-      await Promise.allSettled(
-        creatorMatchResults.creators.map(async (c: any) => {
-          if (!c.handle) return;
-          const handle = c.handle.replace(/^@/, "");
-          if (handle in creatorAvatars) return;
-          try {
-            const resp = await fetch(`/api/youtube-avatar/${encodeURIComponent(handle)}`);
-            const data = await resp.json();
-            newAvatars[handle] = data.avatarUrl || null;
-          } catch { newAvatars[handle] = null; }
-        })
-      );
-      if (Object.keys(newAvatars).length > 0) {
-        setCreatorAvatars(prev => ({ ...prev, ...newAvatars }));
-      }
-    };
-    fetchAvatars();
-  }, [creatorMatchResults]);
+  const getCreatorAvatarUrl = (handle: string) => {
+    const clean = handle.replace(/^@/, "");
+    if (!clean || creatorAvatarErrors.has(clean)) return null;
+    return `https://unavatar.io/youtube/${encodeURIComponent(clean)}`;
+  };
 
   const TRUNCATE_LENGTH = 280;
 
@@ -1901,12 +1884,13 @@ export default function DashboardPage() {
                           const categoryColors: Record<string, string> = { credit_repair: "from-orange-400 to-red-400", business_funding: "from-green-400 to-emerald-500", business_credit: "from-blue-400 to-indigo-500", financial_literacy: "from-purple-400 to-violet-500", entrepreneurship: "from-amber-400 to-orange-500", credit_building: "from-teal-400 to-cyan-500", investing: "from-pink-400 to-rose-500" };
                           const gradient = categoryColors[creator.category] || "from-purple-400 to-blue-400";
                           const handle = creator.handle?.replace(/^@/, "") || "";
-                          const avatarUrl = creatorAvatars[handle];
+                          const avatarSrc = getCreatorAvatarUrl(creator.handle || "");
                           return (
                             <div key={idx} className="bg-white/70 backdrop-blur-sm border border-white/40 rounded-2xl overflow-hidden hover:shadow-lg transition-all" data-testid={`creator-card-${idx}`}>
                               <div className="flex items-center gap-3 p-4 border-b border-white/30 bg-white/40">
-                                {avatarUrl ? (
-                                  <img src={avatarUrl} alt={creator.channelName} className="w-12 h-12 rounded-full object-cover shadow-md border-2 border-white" />
+                                {avatarSrc ? (
+                                  <img src={avatarSrc} alt={creator.channelName} className="w-12 h-12 rounded-full object-cover shadow-md border-2 border-white"
+                                    onError={() => setCreatorAvatarErrors(prev => new Set(prev).add(handle))} data-testid={`img-avatar-${idx}`} />
                                 ) : (
                                   <div className={`w-12 h-12 rounded-full bg-gradient-to-br ${gradient} flex items-center justify-center text-white font-bold text-base shrink-0 shadow-md border-2 border-white`}>{(creator.channelName || "?")[0]}</div>
                                 )}
@@ -1927,8 +1911,9 @@ export default function DashboardPage() {
                               {creator.creatorMessage && (
                                 <div className="px-4 pt-3 pb-2">
                                   <div className="flex items-start gap-3">
-                                    {avatarUrl ? (
-                                      <img src={avatarUrl} alt="" className="w-8 h-8 rounded-full object-cover shrink-0 mt-0.5 shadow-sm" />
+                                    {avatarSrc ? (
+                                      <img src={avatarSrc} alt="" className="w-8 h-8 rounded-full object-cover shrink-0 mt-0.5 shadow-sm"
+                                        onError={() => setCreatorAvatarErrors(prev => new Set(prev).add(handle))} />
                                     ) : (
                                       <div className={`w-8 h-8 rounded-full bg-gradient-to-br ${gradient} flex items-center justify-center text-white font-bold text-xs shrink-0 mt-0.5 shadow-sm`}>{(creator.channelName || "?")[0]}</div>
                                     )}
