@@ -234,11 +234,6 @@ export default function DashboardPage() {
   const [buddyOpen, setBuddyOpen] = useState(false);
   const [selectedMentor, setSelectedMentor] = useState<string | null>(null);
   const [mentorCleared, setMentorCleared] = useState(false);
-  const [buddyGroups, setBuddyGroups] = useState<Record<string, boolean>>({
-    mentors: true,
-    friends: true,
-    offline: false,
-  });
   const [expandedMessages, setExpandedMessages] = useState<Set<number>>(new Set());
   const [activeTab, setActiveTab] = useState<TabKey>("mission_control");
   const [fundingBureauTab, setFundingBureauTab] = useState("Experian");
@@ -292,7 +287,6 @@ export default function DashboardPage() {
   const [dmMessages, setDmMessages] = useState<any[]>([]);
   const [dmInput, setDmInput] = useState("");
   const [dmLoading, setDmLoading] = useState(false);
-  const [dmAiLoading, setDmAiLoading] = useState(false);
   const dmEndRef = useRef<HTMLDivElement>(null);
 
   const [capitalOsData, setCapitalOsData] = useState<CapitalOsDashboard | null>(null);
@@ -324,23 +318,6 @@ export default function DashboardPage() {
     } catch {} finally { setDmLoading(false); }
   };
 
-  const sendTeamAi = async () => {
-    if (!dmInput.trim() || !dmFriendId || dmAiLoading) return;
-    setDmAiLoading(true);
-    try {
-      const res = await fetch(`/api/dm/${dmFriendId}/team-ai`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ question: dmInput.trim() }),
-      });
-      if (res.ok) {
-        setDmInput("");
-        await fetchDmMessages(dmFriendId);
-        setTimeout(() => dmEndRef.current?.scrollIntoView({ behavior: "smooth" }), 100);
-      }
-    } catch {} finally { setDmAiLoading(false); }
-  };
 
   const openDm = (friendId: number, friendName: string) => {
     setDmFriendId(friendId);
@@ -655,7 +632,6 @@ export default function DashboardPage() {
     setAttachedFile(null);
     if (textareaRef.current) textareaRef.current.style.height = "auto";
     setIsLoading(true);
-    setActiveTab("messages");
     try {
       let fileContent: string | undefined;
       if (file) {
@@ -793,18 +769,10 @@ export default function DashboardPage() {
           </div>
           <div className="flex items-center gap-2">
             <button
-              data-testid="button-new-chat-header"
-              onClick={() => { clearChat(); setSelectedMentor(null); setMentorCleared(true); setActiveTab("messages"); }}
-              className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white/60 transition-colors"
-              title="New Chat"
-            >
-              <Plus className="w-4 h-4 text-[#1a1a2e]/60" />
-            </button>
-            <button
               data-testid="button-toggle-buddy"
               onClick={() => setBuddyOpen(!buddyOpen)}
               className={cn("w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white/60 transition-colors", buddyOpen && "bg-white/60")}
-              title="Buddy List"
+              title="Team Members"
             >
               <Users className="w-4 h-4 text-[#1a1a2e]/60" />
             </button>
@@ -1137,8 +1105,8 @@ export default function DashboardPage() {
                             <div className="flex items-center gap-3">
                               <MessageCircle className="w-5 h-5 text-[#1a1a2e]/50" />
                               <div>
-                                <p className="text-xs font-semibold text-[#1a1a2e]/80">Talk to a Mentor</p>
-                                <p className="text-[10px] text-[#1a1a2e]/45">Get personalized advice</p>
+                                <p className="text-xs font-semibold text-[#1a1a2e]/80">Team Messages</p>
+                                <p className="text-[10px] text-[#1a1a2e]/45">Message your team members</p>
                               </div>
                             </div>
                           </button>
@@ -2315,21 +2283,18 @@ export default function DashboardPage() {
                     )}
                     {dmMessages.map((msg: any) => {
                       const isMe = msg.senderId === user.id;
-                      const isAi = msg.isAi;
                       return (
                         <div key={msg.id} className={cn("flex gap-2.5", isMe ? "justify-end" : "justify-start")} data-testid={`dm-msg-${msg.id}`}>
                           {!isMe && (
-                            <div className={cn("w-7 h-7 rounded-lg flex items-center justify-center shrink-0 mt-0.5", isAi ? "bg-gradient-to-br from-purple-500/20 to-blue-500/20 border border-purple-500/20" : "bg-white/60 border border-white/30")}>
-                              {isAi ? <Sparkles className="w-3.5 h-3.5 text-purple-400/60" /> : <span className="text-[9px] font-bold text-[#1a1a2e]/65">{dmFriendName.substring(0, 2).toUpperCase()}</span>}
+                            <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 mt-0.5 bg-white/60 border border-white/30">
+                              <span className="text-[9px] font-bold text-[#1a1a2e]/65">{dmFriendName.substring(0, 2).toUpperCase()}</span>
                             </div>
                           )}
                           <div className={cn("max-w-[80%] rounded-2xl px-4 py-3",
-                            isAi ? "bg-purple-500/[0.08] border border-purple-500/[0.12]" :
                             isMe ? "bg-white/60 border border-white/30" :
                             "bg-white/50 border border-white/30"
                           )}>
-                            {isAi && <p className="text-[9px] text-purple-400/50 font-medium mb-1">Profundr Team AI</p>}
-                            {!isMe && !isAi && <p className="text-[9px] text-[#1a1a2e]/60 font-medium mb-1">{dmFriendName}</p>}
+                            {!isMe && <p className="text-[9px] text-[#1a1a2e]/60 font-medium mb-1">{dmFriendName}</p>}
                             <p className="text-[12px] text-[#1a1a2e]/90 leading-relaxed whitespace-pre-wrap">{msg.content}</p>
                             <p className="text-[9px] text-[#1a1a2e]/45 mt-1.5">{new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
                           </div>
@@ -2375,139 +2340,83 @@ export default function DashboardPage() {
 
       {buddyOpen && (
         <aside className={cn(
-          "w-[260px] flex flex-col shrink-0 relative z-40",
+          "w-[280px] flex flex-col shrink-0 relative z-40",
           "fixed right-0 h-full lg:static lg:flex"
         )} style={{ background: 'rgba(255,255,255,0.75)', backdropFilter: 'blur(20px)' }}>
           <div className="h-12 px-4 flex items-center justify-between border-b border-white/30 bg-white/50">
-            <span className="text-[11px] font-bold text-[#1a1a2e]/70 uppercase tracking-widest">Buddy List</span>
+            <span className="text-[11px] font-bold text-[#1a1a2e]/70 uppercase tracking-widest">Team Members</span>
             <button onClick={() => setBuddyOpen(false)} className="lg:hidden text-[#1a1a2e]/60 hover:text-[#1a1a2e]">
               <X className="w-4 h-4" />
             </button>
           </div>
 
-          <div className="h-10 px-4 flex items-center gap-2 border-b border-white/30">
-            <button data-testid="button-new-chat"
-              onClick={() => { clearChat(); setSelectedMentor(null); setMentorCleared(true); setBuddyOpen(false); setActiveTab("messages"); }}
-              className="flex-1 h-7 text-[11px] rounded-lg bg-white/60 border border-white/30 hover:bg-white/70 text-[#1a1a2e]/80 font-medium transition-colors">
-              + New Chat
+          <div className="shrink-0 px-3 py-2.5 border-b border-white/30">
+            <button onClick={() => { setShowAddFriend(true); setBuddyOpen(false); }}
+              className="w-full h-8 flex items-center justify-center gap-2 rounded-lg bg-[#3a3a5a] text-white text-[11px] font-medium hover:bg-[#2a2a4a] transition-colors" data-testid="button-add-friend">
+              <UserPlus className="w-3.5 h-3.5" />
+              <span>Add Team Member</span>
             </button>
           </div>
 
           <div className="flex-1 overflow-y-auto" style={{ scrollbarWidth: 'thin' }}>
-            <div className="border-b border-white/30">
-              <button onClick={() => setBuddyGroups(prev => ({ ...prev, mentors: !prev.mentors }))}
-                className="w-full h-9 flex items-center gap-2 px-4 hover:bg-white/50 text-left transition-colors" data-testid="buddy-group-mentors">
-                <span className="text-[10px] text-[#1a1a2e]/45 font-mono w-3">{buddyGroups.mentors ? "▾" : "▸"}</span>
-                <span className="text-[11px] font-bold text-[#1a1a2e]/75 uppercase tracking-widest">Mentors</span>
-                <span className="text-[10px] text-[#1a1a2e]/45 ml-auto">(7/7)</span>
-              </button>
-              {buddyGroups.mentors && (
-                <div className="pb-1">
-                  {Object.entries(MENTOR_INFO).map(([key, mentor]) => {
-                    const isActive = activeMentorKey === key;
-                    return (
-                      <button key={key} data-testid={`buddy-${key}`}
-                        onClick={() => { setSelectedMentor(key); setMentorCleared(false); setActiveTab("messages"); setBuddyOpen(false); }}
-                        className={cn("w-full h-11 flex items-center gap-3 px-4 text-left transition-all",
-                          isActive ? "bg-white/50 border-l-2 border-l-[#8a8aa5]" : "hover:bg-white/50 border-l-2 border-l-transparent"
-                        )}>
-                        <div className="relative shrink-0">
-                          <div className={cn("w-8 h-8 rounded-lg border border-white/30 flex items-center justify-center text-[#1a1a2e] text-[10px] font-bold", BOT_COLORS[key])}>{mentor.initials}</div>
-                          <div className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-green-500 border-2 border-white/40" />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className={cn("text-[12px] font-semibold truncate leading-tight", isActive ? "text-[#1a1a2e]" : "text-[#1a1a2e]/90")}>{mentor.name}</p>
-                          <p className={cn("text-[10px] truncate leading-tight", isActive ? "text-[#1a1a2e]/70" : "text-[#1a1a2e]/55")}>{statusMessages[key] || mentor.tagline}</p>
-                        </div>
-                      </button>
-                    );
-                  })}
+            {pendingRequests.length > 0 && (
+              <div className="border-b border-white/30">
+                <div className="px-4 py-2">
+                  <span className="text-[10px] text-amber-500/70 font-medium uppercase tracking-wider">{pendingRequests.length} Pending Invite{pendingRequests.length > 1 ? "s" : ""}</span>
                 </div>
-              )}
+                {pendingRequests.map((req: any) => (
+                  <div key={req.friendshipId} className="h-12 flex items-center gap-3 px-4 hover:bg-white/50 transition-colors">
+                    <div className="w-8 h-8 rounded-lg bg-amber-500/15 border border-amber-500/20 flex items-center justify-center text-[9px] font-bold text-amber-500/70">
+                      {(req.displayName || "?").substring(0, 2).toUpperCase()}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-[11px] text-[#1a1a2e]/80 truncate font-medium">{req.displayName}</p>
+                      <p className="text-[9px] text-[#1a1a2e]/45">Wants to join</p>
+                    </div>
+                    <div className="flex gap-1">
+                      <button onClick={() => acceptFriend(req.friendshipId)} className="w-7 h-7 rounded-md bg-green-500/15 hover:bg-green-500/25 flex items-center justify-center" data-testid={`accept-friend-${req.friendshipId}`}>
+                        <Check className="w-3.5 h-3.5 text-green-500" />
+                      </button>
+                      <button onClick={() => rejectFriend(req.friendshipId)} className="w-7 h-7 rounded-md bg-red-500/10 hover:bg-red-500/20 flex items-center justify-center" data-testid={`reject-friend-${req.friendshipId}`}>
+                        <X className="w-3.5 h-3.5 text-red-400" />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            <div className="px-4 py-2 border-b border-white/30">
+              <span className="text-[10px] text-[#1a1a2e]/45 font-medium uppercase tracking-wider">Members · {friendsList.length}</span>
             </div>
 
-            <div className="border-b border-white/30">
-              <button onClick={() => setBuddyGroups(prev => ({ ...prev, friends: !prev.friends }))}
-                className="w-full h-9 flex items-center gap-2 px-4 hover:bg-white/50 text-left transition-colors" data-testid="buddy-group-friends">
-                <span className="text-[10px] text-[#1a1a2e]/45 font-mono w-3">{buddyGroups.friends ? "▾" : "▸"}</span>
-                <span className="text-[11px] font-bold text-[#1a1a2e]/75 uppercase tracking-widest">Team</span>
-                <span className="text-[10px] text-[#1a1a2e]/45 ml-auto">({friendsList.length})</span>
-              </button>
-              {buddyGroups.friends && (
-                <div className="pb-1">
-                  <button onClick={() => setShowAddFriend(true)}
-                    className="w-full h-9 flex items-center gap-3 px-4 hover:bg-white/50 text-left transition-colors" data-testid="button-add-friend">
-                    <UserPlus className="w-3.5 h-3.5 text-green-400/50" />
-                    <span className="text-[11px] text-green-400/50 font-medium">Add Member</span>
+            {friendsList.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-12 px-4 text-center">
+                <Users className="w-10 h-10 text-[#1a1a2e]/10 mb-3" />
+                <p className="text-[11px] text-[#1a1a2e]/50 mb-1">No team members yet</p>
+                <p className="text-[9px] text-[#1a1a2e]/35 leading-relaxed">Add team members to collaborate and message directly.</p>
+              </div>
+            ) : (
+              friendsList.map((f: any) => (
+                <div key={f.friendshipId} className="group h-12 flex items-center gap-3 px-4 hover:bg-white/50 transition-colors cursor-pointer"
+                  onClick={() => { openDm(f.id, f.displayName || f.email); setBuddyOpen(false); }}>
+                  <div className="relative shrink-0">
+                    <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500/15 to-cyan-500/15 border border-blue-500/10 flex items-center justify-center text-[9px] font-bold text-[#1a1a2e]/75">
+                      {(f.displayName || "?").substring(0, 2).toUpperCase()}
+                    </div>
+                    <div className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-green-500 border-2 border-white/40" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[11px] text-[#1a1a2e]/85 truncate font-medium">{f.displayName}</p>
+                    <p className="text-[9px] text-[#1a1a2e]/40">Team Member</p>
+                  </div>
+                  <MessageSquare className="w-3.5 h-3.5 text-[#1a1a2e]/15 group-hover:text-[#1a1a2e]/50 transition-colors shrink-0" />
+                  <button onClick={(e) => { e.stopPropagation(); removeFriend(f.friendshipId); }} className="hidden group-hover:flex w-5 h-5 rounded-md bg-red-500/10 hover:bg-red-500/20 items-center justify-center" data-testid={`remove-friend-${f.id}`}>
+                    <UserX className="w-3 h-3 text-red-400/60" />
                   </button>
-                  {pendingRequests.length > 0 && (
-                    <div className="px-4 py-1">
-                      <span className="text-[10px] text-amber-400/50 font-medium">{pendingRequests.length} pending request{pendingRequests.length > 1 ? "s" : ""}</span>
-                    </div>
-                  )}
-                  {pendingRequests.map((req: any) => (
-                    <div key={req.friendshipId} className="h-11 flex items-center gap-3 px-4 hover:bg-white/50 transition-colors">
-                      <div className="w-7 h-7 rounded-lg bg-amber-500/15 border border-amber-500/20 flex items-center justify-center text-[9px] font-bold text-amber-400">
-                        {(req.displayName || "?").substring(0, 2).toUpperCase()}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-[11px] text-[#1a1a2e]/80 truncate">{req.displayName}</p>
-                      </div>
-                      <div className="flex gap-1">
-                        <button onClick={() => acceptFriend(req.friendshipId)} className="w-6 h-6 rounded-md bg-green-500/15 hover:bg-green-500/25 flex items-center justify-center" data-testid={`accept-friend-${req.id}`}>
-                          <Check className="w-3 h-3 text-green-400" />
-                        </button>
-                        <button onClick={() => rejectFriend(req.friendshipId)} className="w-6 h-6 rounded-md bg-red-500/15 hover:bg-red-500/25 flex items-center justify-center" data-testid={`reject-friend-${req.id}`}>
-                          <X className="w-3 h-3 text-red-400" />
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-                  {friendsList.map((f: any) => (
-                    <div key={f.friendshipId} className="group h-11 flex items-center gap-3 px-4 hover:bg-white/50 transition-colors cursor-pointer"
-                      onClick={() => { openDm(f.id, f.displayName || f.email); setBuddyOpen(false); }}>
-                      <div className="relative shrink-0">
-                        <div className="w-7 h-7 rounded-lg bg-white/50 border border-white/30 flex items-center justify-center text-[9px] font-bold text-[#1a1a2e]/80">
-                          {(f.displayName || "?").substring(0, 2).toUpperCase()}
-                        </div>
-                        <div className="absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full bg-green-500 border-2 border-white/40" />
-                      </div>
-                      <p className="text-[11px] text-[#1a1a2e]/80 truncate flex-1">{f.displayName}</p>
-                      <button onClick={(e) => { e.stopPropagation(); removeFriend(f.friendshipId); }} className="hidden group-hover:flex w-5 h-5 rounded-md bg-red-500/10 hover:bg-red-500/20 items-center justify-center" data-testid={`remove-friend-${f.id}`}>
-                        <UserX className="w-3 h-3 text-red-400/60" />
-                      </button>
-                    </div>
-                  ))}
-                  {friendsList.length === 0 && pendingRequests.length === 0 && (
-                    <div className="h-9 flex items-center px-4">
-                      <span className="text-[10px] text-[#1a1a2e]/40 italic">No team members yet</span>
-                    </div>
-                  )}
                 </div>
-              )}
-            </div>
-
-            <div className="border-b border-white/30">
-              <button onClick={() => setBuddyGroups(prev => ({ ...prev, offline: !prev.offline }))}
-                className="w-full h-9 flex items-center gap-2 px-4 hover:bg-white/50 text-left transition-colors" data-testid="buddy-group-offline">
-                <span className="text-[10px] text-[#1a1a2e]/45 font-mono w-3">{buddyGroups.offline ? "▾" : "▸"}</span>
-                <span className="text-[11px] font-bold text-[#1a1a2e]/75 uppercase tracking-widest">Recent Chats</span>
-              </button>
-              {buddyGroups.offline && (
-                <div className="pb-1">
-                  {messages.length > 0 ? (
-                    <div className="h-9 flex items-center gap-3 px-4 hover:bg-white/50 cursor-pointer transition-colors">
-                      <div className="w-2.5 h-2.5 rounded-full bg-green-500 shrink-0" />
-                      <span className="text-[11px] text-[#1a1a2e]/65 truncate flex-1">{messages[0]?.content.substring(0, 35)}...</span>
-                    </div>
-                  ) : (
-                    <div className="h-9 flex items-center px-4">
-                      <span className="text-[10px] text-[#1a1a2e]/40 italic">No recent conversations</span>
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
+              ))
+            )}
           </div>
 
           <div className="h-11 px-4 flex items-center gap-3 border-t border-white/30 bg-white/50">
@@ -2597,7 +2506,7 @@ export default function DashboardPage() {
                 </div>
                 <div>
                   <p className="text-[12px] font-semibold text-[#1a1a2e]/80">3. Fix Any Issues</p>
-                  <p className="text-[11px] text-[#1a1a2e]/50 leading-relaxed">If there are errors or negative items on your report, the Repair Engine creates dispute letters you can send to the bureaus. You can also chat with AI mentors for personalized advice.</p>
+                  <p className="text-[11px] text-[#1a1a2e]/50 leading-relaxed">If there are errors or negative items on your report, the Repair Engine creates dispute letters you can send to the bureaus.</p>
                 </div>
               </div>
 
@@ -2620,7 +2529,7 @@ export default function DashboardPage() {
               >
                 Let's Go
               </button>
-              <p className="text-[10px] text-[#1a1a2e]/30 text-center mt-3">Need help? Chat with an AI mentor anytime</p>
+              <p className="text-[10px] text-[#1a1a2e]/30 text-center mt-3">Need help? Use the AI chat for personalized guidance</p>
             </div>
           </div>
         </div>
