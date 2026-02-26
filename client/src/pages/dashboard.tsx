@@ -363,7 +363,7 @@ export default function DashboardPage() {
   const getCreatorAvatarUrl = (handle: string) => {
     const clean = handle.replace(/^@/, "");
     if (!clean || creatorAvatarErrors.has(clean)) return null;
-    return `https://unavatar.io/youtube/${encodeURIComponent(clean)}`;
+    return `/api/youtube-avatar/${encodeURIComponent(clean)}`;
   };
 
   const TRUNCATE_LENGTH = 280;

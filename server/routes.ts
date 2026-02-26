@@ -1259,35 +1259,51 @@ Be concise but thorough. Use bullet points and formatting for readability. If th
 
   const ALL_CREATOR_NAMES = Object.values(CREATOR_NAMES_BY_CATEGORY).flat();
 
-  const ytAvatarCache = new Map<string, { url: string | null; ts: number }>();
+  const ytAvatarCache = new Map<string, { url: string | null; buffer: Buffer | null; contentType: string | null; ts: number }>();
   
   app.get("/api/youtube-avatar/:handle", async (req, res) => {
     const handle = req.params.handle.replace(/^@/, "");
-    if (!handle) return res.json({ avatarUrl: null });
+    if (!handle) return res.status(404).send("Not found");
 
     const cached = ytAvatarCache.get(handle);
     if (cached && Date.now() - cached.ts < 86400000) {
-      return res.json({ avatarUrl: cached.url });
+      if (cached.buffer) {
+        res.set("Content-Type", cached.contentType || "image/jpeg");
+        res.set("Cache-Control", "public, max-age=86400");
+        return res.send(cached.buffer);
+      }
+      return res.status(404).send("Not found");
     }
 
     try {
       const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 5000);
-      const resp = await fetch(`https://www.youtube.com/@${handle}`, {
+      const timeout = setTimeout(() => controller.abort(), 8000);
+      const resp = await fetch(`https://unavatar.io/youtube/${encodeURIComponent(handle)}`, {
         signal: controller.signal,
-        headers: { "User-Agent": "Mozilla/5.0 (compatible; Profundr/1.0)" },
       });
       clearTimeout(timeout);
-      const html = await resp.text();
-      
-      const ogMatch = html.match(/<meta\s+property="og:image"\s+content="([^"]+)"/);
-      const avatarUrl = ogMatch?.[1] || null;
-      
-      ytAvatarCache.set(handle, { url: avatarUrl, ts: Date.now() });
-      res.json({ avatarUrl });
+
+      if (!resp.ok) {
+        ytAvatarCache.set(handle, { url: null, buffer: null, contentType: null, ts: Date.now() });
+        return res.status(404).send("Not found");
+      }
+
+      const contentType = resp.headers.get("content-type") || "image/jpeg";
+      const arrayBuffer = await resp.arrayBuffer();
+      const buffer = Buffer.from(arrayBuffer);
+
+      if (buffer.length < 500) {
+        ytAvatarCache.set(handle, { url: null, buffer: null, contentType: null, ts: Date.now() });
+        return res.status(404).send("Not found");
+      }
+
+      ytAvatarCache.set(handle, { url: handle, buffer, contentType, ts: Date.now() });
+      res.set("Content-Type", contentType);
+      res.set("Cache-Control", "public, max-age=86400");
+      res.send(buffer);
     } catch {
-      ytAvatarCache.set(handle, { url: null, ts: Date.now() });
-      res.json({ avatarUrl: null });
+      ytAvatarCache.set(handle, { url: null, buffer: null, contentType: null, ts: Date.now() });
+      res.status(404).send("Not found");
     }
   });
 
