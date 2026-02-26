@@ -260,7 +260,7 @@ export default function DashboardPage() {
   const [copiedLetter, setCopiedLetter] = useState<string | null>(null);
   const [expandedDenials, setExpandedDenials] = useState<Set<number>>(new Set());
   const [activeRepairRound, setActiveRepairRound] = useState(1);
-  const [repairBureauFilter, setRepairBureauFilter] = useState<string>("All");
+  const [repairBureauFilter, setRepairBureauFilter] = useState<string>("Experian");
   const [showWelcome, setShowWelcome] = useState(() => {
     return !localStorage.getItem("profundr_welcome_seen");
   });
@@ -515,14 +515,14 @@ export default function DashboardPage() {
     finally { setRepairLoading(false); }
   };
 
-  const runRepairAnalysis = async () => {
+  const runRepairAnalysis = async (bureau?: string) => {
     setRepairAnalyzing(true);
     try {
       const res = await fetch("/api/credit-repair-analysis", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify({ useStored: true }),
+        body: JSON.stringify({ useStored: true, bureau: bureau || repairBureauFilter }),
       });
       if (res.ok) {
         const data = await res.json();
@@ -594,6 +594,7 @@ export default function DashboardPage() {
       if (activeTab === "repair_engine") {
         fetchRepairData();
         fetchFundingReadiness();
+        fetchCapitalOsDashboard();
       }
     }
   }, [activeTab]);
@@ -1177,402 +1178,222 @@ export default function DashboardPage() {
           )}
 
           {activeTab === "repair_engine" && (
-            <div className="w-full px-5 sm:px-8 py-6 max-w-[1000px] mx-auto">
-              <div className="flex items-center justify-between mb-6">
+            <div className="w-full px-5 sm:px-8 py-6 max-w-[900px] mx-auto">
+              <div className="flex items-center justify-between mb-5">
                 <div>
                   <h2 className="text-lg font-semibold text-[#1a1a2e]" data-testid="text-repair-title">Repair Engine</h2>
-                  <p className="text-[11px] text-[#1a1a2e]/60">3-round dispute system with FCRA-compliant letters for every derogatory item</p>
+                  <p className="text-[11px] text-[#1a1a2e]/60">FCRA-compliant dispute letters per bureau</p>
                 </div>
-                <button onClick={runRepairAnalysis} disabled={repairAnalyzing}
-                  className="h-9 px-4 rounded-xl bg-white/70 border border-white/40 hover:bg-white/80 text-xs font-medium text-[#1a1a2e]/80 transition-colors flex items-center gap-2 disabled:opacity-50" data-testid="button-run-repair">
-                  {repairAnalyzing ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <RefreshCw className="w-3.5 h-3.5" />}
-                  {repairAnalyzing ? "Generating Letters..." : "Generate Dispute Letters"}
-                </button>
               </div>
 
-              {repairLoading ? (
-                <div className="flex items-center justify-center py-16"><Loader2 className="w-6 h-6 animate-spin text-[#1a1a2e]/50" /></div>
-              ) : !repairData ? (
-                <div className="rounded-2xl bg-white/70 backdrop-blur-md border border-white/40 p-8 text-center">
-                  <Shield className="w-10 h-10 text-[#1a1a2e]/30 mx-auto mb-3" />
-                  <p className="text-sm text-[#1a1a2e]/70 mb-2">No repair data available</p>
-                  <p className="text-[11px] text-[#1a1a2e]/50 mb-4">Upload a credit report from Mission Control, then generate dispute letters</p>
-                  <button onClick={() => setActiveTab("mission_control")} className="text-xs text-[#1a1a2e]/60 hover:text-[#1a1a2e]/80 underline" data-testid="link-go-to-mission-control">Go to Mission Control</button>
-                </div>
-              ) : (
-                <>
-                  <div className="rounded-2xl bg-white/70 backdrop-blur-md border border-white/40 p-5 mb-5" data-testid="user-address-form">
-                    <div className="flex items-center justify-between mb-3">
-                      <p className="text-xs font-medium text-[#1a1a2e]/70">Your Mailing Address</p>
-                      <p className="text-[10px] text-[#1a1a2e]/40">Auto-populated on all letters</p>
-                    </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
-                      <div className="sm:col-span-2">
-                        <input type="text" placeholder="Full Name" value={userAddressForm.fullName} onChange={e => setUserAddressForm(p => ({ ...p, fullName: e.target.value }))}
-                          className="w-full h-9 px-3 rounded-xl bg-white/60 border border-white/30 text-sm text-[#1a1a2e] placeholder:text-[#1a1a2e]/30 outline-none focus:border-[#c0c0d0]" data-testid="input-full-name" />
-                      </div>
-                      <div className="sm:col-span-2">
-                        <input type="text" placeholder="Street Address" value={userAddressForm.streetAddress} onChange={e => setUserAddressForm(p => ({ ...p, streetAddress: e.target.value }))}
-                          className="w-full h-9 px-3 rounded-xl bg-white/60 border border-white/30 text-sm text-[#1a1a2e] placeholder:text-[#1a1a2e]/30 outline-none focus:border-[#c0c0d0]" data-testid="input-street-address" />
-                      </div>
-                      <input type="text" placeholder="City" value={userAddressForm.city} onChange={e => setUserAddressForm(p => ({ ...p, city: e.target.value }))}
-                        className="w-full h-9 px-3 rounded-xl bg-white/60 border border-white/30 text-sm text-[#1a1a2e] placeholder:text-[#1a1a2e]/30 outline-none focus:border-[#c0c0d0]" data-testid="input-city" />
-                      <div className="flex gap-3">
-                        <input type="text" placeholder="State" value={userAddressForm.state} onChange={e => setUserAddressForm(p => ({ ...p, state: e.target.value }))}
-                          className="w-1/2 h-9 px-3 rounded-xl bg-white/60 border border-white/30 text-sm text-[#1a1a2e] placeholder:text-[#1a1a2e]/30 outline-none focus:border-[#c0c0d0]" data-testid="input-state" />
-                        <input type="text" placeholder="ZIP Code" value={userAddressForm.zipCode} onChange={e => setUserAddressForm(p => ({ ...p, zipCode: e.target.value }))}
-                          className="w-1/2 h-9 px-3 rounded-xl bg-white/60 border border-white/30 text-sm text-[#1a1a2e] placeholder:text-[#1a1a2e]/30 outline-none focus:border-[#c0c0d0]" data-testid="input-zip" />
-                      </div>
-                    </div>
-                    <button onClick={saveUserAddress} disabled={addressSaving}
-                      className="h-8 px-4 rounded-xl bg-[#3a3a5a] text-white text-[11px] font-medium hover:bg-[#2a2a4a] disabled:opacity-50 transition-colors flex items-center gap-2" data-testid="button-save-address">
-                      {addressSaving ? <Loader2 className="w-3 h-3 animate-spin" /> : <Check className="w-3 h-3" />}
-                      Save Address
-                    </button>
-                  </div>
+              <div className="flex gap-1 p-1 rounded-xl bg-white/50 border border-white/30 mb-5" data-testid="repair-bureau-tabs">
+                {["Experian", "Equifax", "TransUnion"].map(bureau => (
+                  <button key={bureau} onClick={() => setRepairBureauFilter(bureau)}
+                    className={cn("flex-1 py-2 px-3 rounded-lg text-xs font-medium transition-all",
+                      repairBureauFilter === bureau ? "bg-white shadow-sm text-[#1a1a2e]" : "text-[#1a1a2e]/45 hover:text-[#1a1a2e]/70"
+                    )} data-testid={`repair-tab-${bureau.toLowerCase()}`}>{bureau}</button>
+                ))}
+              </div>
 
-                  {capitalOsData && capitalOsData.bureauHealth.bureaus.some(b => b.uploaded && b.guidance) && (
-                    <div className="rounded-2xl bg-white/70 backdrop-blur-md border border-white/40 p-5 mb-5" data-testid="bureau-repair-overview">
-                      <p className="text-xs font-medium text-[#1a1a2e]/70 mb-4">Per-Bureau Repair Status</p>
-                      <div className="space-y-3">
-                        {capitalOsData.bureauHealth.bureaus.filter(b => b.uploaded && b.guidance).map(b => {
-                          const g = b.guidance!;
-                          const needsRepair = g.denialTriggers.length > 0 || b.derogatoryCount > 0 || g.latePayments > 0 || g.collections > 0 || g.chargeOffs > 0;
-                          return (
-                            <div key={b.bureau} className={cn("p-4 rounded-xl border", needsRepair ? "bg-red-50/40 border-red-200/30" : "bg-green-50/40 border-green-200/30")}>
-                              <div className="flex items-center justify-between mb-3">
-                                <div className="flex items-center gap-2">
-                                  <span className="text-sm font-semibold text-[#1a1a2e]">{b.bureau}</span>
-                                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ backgroundColor: g.riskTierColor + '15', color: g.riskTierColor }}>{g.riskTier.replace("_", " ")}</span>
-                                </div>
-                                <span className={cn("text-[10px] px-2 py-0.5 rounded-full font-medium", needsRepair ? "bg-red-500/15 text-red-600" : "bg-green-500/15 text-green-600")}>{needsRepair ? "Repair Needed" : "Clean"}</span>
-                              </div>
-                              <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 mb-3">
-                                <div className="text-center p-2 rounded-lg bg-white/60">
-                                  <p className="text-[9px] text-[#1a1a2e]/50">Derogatory</p>
-                                  <p className={cn("text-sm font-bold", b.derogatoryCount > 0 ? "text-red-600" : "text-green-600")}>{b.derogatoryCount}</p>
-                                </div>
-                                <div className="text-center p-2 rounded-lg bg-white/60">
-                                  <p className="text-[9px] text-[#1a1a2e]/50">Late Pmts</p>
-                                  <p className={cn("text-sm font-bold", g.latePayments > 0 ? "text-red-600" : "text-green-600")}>{g.latePayments}</p>
-                                </div>
-                                <div className="text-center p-2 rounded-lg bg-white/60">
-                                  <p className="text-[9px] text-[#1a1a2e]/50">Collections</p>
-                                  <p className={cn("text-sm font-bold", g.collections > 0 ? "text-red-600" : "text-green-600")}>{g.collections}</p>
-                                </div>
-                                <div className="text-center p-2 rounded-lg bg-white/60">
-                                  <p className="text-[9px] text-[#1a1a2e]/50">Charge-Offs</p>
-                                  <p className={cn("text-sm font-bold", g.chargeOffs > 0 ? "text-red-600" : "text-green-600")}>{g.chargeOffs}</p>
-                                </div>
-                                <div className="text-center p-2 rounded-lg bg-white/60">
-                                  <p className="text-[9px] text-[#1a1a2e]/50">Utilization</p>
-                                  <p className={cn("text-sm font-bold", b.utilization > 45 ? "text-red-600" : b.utilization > 30 ? "text-yellow-600" : "text-green-600")}>{b.utilization}%</p>
-                                </div>
-                              </div>
-                              {needsRepair && g.actionItems.length > 0 && (
-                                <div className="space-y-1 pt-2 border-t border-white/40">
-                                  <p className="text-[9px] text-[#1a1a2e]/50 uppercase mb-1">Repair Actions</p>
-                                  {g.actionItems.filter(a => a.includes("Dispute") || a.includes("Resolve") || a.includes("Address") || a.includes("Reduce")).map((item, i) => (
-                                    <div key={i} className="flex items-start gap-2">
-                                      <div className="w-1.5 h-1.5 rounded-full bg-red-400/50 mt-1.5 shrink-0" />
-                                      <p className="text-[11px] text-[#1a1a2e]/70 leading-relaxed">{item}</p>
-                                    </div>
-                                  ))}
-                                </div>
-                              )}
-                              {!needsRepair && (
-                                <p className="text-[10px] text-green-600/70 leading-relaxed">No repair actions needed for {b.bureau}. Profile is clean.</p>
-                              )}
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  )}
+              {(() => {
+                const bureau = repairBureauFilter;
+                const bureauData = capitalOsData?.bureauHealth?.bureaus?.find(b => b.bureau === bureau);
+                const g = bureauData?.guidance;
+                const needsRepair = g ? (g.denialTriggers.length > 0 || (bureauData?.derogatoryCount || 0) > 0 || g.latePayments > 0 || g.collections > 0 || g.chargeOffs > 0) : false;
+                const bureauIssues = repairData?.detectedIssues?.filter((issue: any) => {
+                  if (!issue.bureau) return true;
+                  return issue.bureau.toLowerCase().includes(bureau.toLowerCase()) || issue.bureau === "All";
+                }) || [];
+                const bureauLetters = repairData?.letters?.filter((l: any) => {
+                  if (!l.bureau) return true;
+                  return l.bureau.toLowerCase().includes(bureau.toLowerCase()) || l.bureau === "All";
+                }) || [];
 
-                  <div className="rounded-2xl bg-white/70 backdrop-blur-md border border-white/40 p-5 mb-5" data-testid="dispute-timeline">
-                    <p className="text-xs font-medium text-[#1a1a2e]/70 mb-4">3-Round Dispute Timeline</p>
-                    <div className="flex gap-2 mb-4">
-                      {[1, 2, 3].map(round => (
-                        <button key={round} onClick={() => setActiveRepairRound(round)}
-                          className={cn("flex-1 h-10 rounded-xl text-xs font-medium transition-all flex items-center justify-center gap-2",
-                            activeRepairRound === round
-                              ? "bg-[#3a3a5a] text-white shadow-lg"
-                              : "bg-white/50 border border-white/30 text-[#1a1a2e]/60 hover:bg-white/70"
-                          )} data-testid={`button-round-${round}`}>
-                          Round {round}
-                        </button>
-                      ))}
-                    </div>
-                    <div className="grid grid-cols-3 gap-3 text-center">
-                      <div className={cn("rounded-xl p-3 border", activeRepairRound === 1 ? "bg-blue-50/80 border-blue-200/50" : "bg-white/40 border-white/30")}>
-                        <p className="text-[9px] font-bold text-[#1a1a2e]/50 uppercase mb-1">Round 1</p>
-                        <p className="text-[10px] text-[#1a1a2e]/70 font-medium">Day 0</p>
-                        <p className="text-[9px] text-[#1a1a2e]/40 mt-1">Inaccurate / Unverifiable</p>
-                      </div>
-                      <div className={cn("rounded-xl p-3 border", activeRepairRound === 2 ? "bg-purple-50/80 border-purple-200/50" : "bg-white/40 border-white/30")}>
-                        <p className="text-[9px] font-bold text-[#1a1a2e]/50 uppercase mb-1">Round 2</p>
-                        <p className="text-[10px] text-[#1a1a2e]/70 font-medium">Day 35-40</p>
-                        <p className="text-[9px] text-[#1a1a2e]/40 mt-1">Verification Challenge</p>
-                      </div>
-                      <div className={cn("rounded-xl p-3 border", activeRepairRound === 3 ? "bg-red-50/80 border-red-200/50" : "bg-white/40 border-white/30")}>
-                        <p className="text-[9px] font-bold text-[#1a1a2e]/50 uppercase mb-1">Round 3</p>
-                        <p className="text-[10px] text-[#1a1a2e]/70 font-medium">Day 65-75</p>
-                        <p className="text-[9px] text-[#1a1a2e]/40 mt-1">Fraud Escalation</p>
-                      </div>
-                    </div>
-                  </div>
+                const disputeAddr: Record<string, string> = {
+                  "Experian": "P.O. Box 4500, Allen, TX 75013",
+                  "Equifax": "P.O. Box 740256, Atlanta, GA 30374-0256",
+                  "TransUnion": "P.O. Box 2000, Chester, PA 19016-2000",
+                };
 
-                  <div className={cn("rounded-2xl backdrop-blur-md border p-5 mb-5",
-                    activeRepairRound === 3 ? "bg-red-50/60 border-red-200/30" : "bg-white/70 border-white/40"
-                  )} data-testid="bureau-addresses">
-                    <p className={cn("text-xs font-medium mb-3", activeRepairRound === 3 ? "text-red-800/70" : "text-[#1a1a2e]/70")}>
-                      {activeRepairRound === 3 ? "Bureau Fraud Department Addresses" : "Bureau Dispute Addresses"}
-                    </p>
-                    <p className="text-[10px] text-[#1a1a2e]/50 mb-4">
-                      {activeRepairRound === 1 ? "Round 1 letters are sent to bureau dispute centers via certified mail" :
-                       activeRepairRound === 2 ? "Round 2 letters challenge verification methods at dispute centers" :
-                       "Round 3 letters are sent to fraud departments, not regular dispute centers"}
-                    </p>
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                      {activeRepairRound === 3 ? (
-                        <>
-                          <div className="rounded-xl bg-white/70 p-3 border border-red-200/20">
-                            <p className="text-[10px] font-bold text-[#1a1a2e]/80 mb-1">Experian Fraud</p>
-                            <p className="text-[10px] text-[#1a1a2e]/60 leading-relaxed">P.O. Box 9554<br/>Allen, TX 75013</p>
-                            <p className="text-[9px] text-[#1a1a2e]/40 mt-1">1-888-397-3742</p>
+                return (
+                  <>
+                    {g && bureauData?.uploaded && (
+                      <div className={cn("rounded-2xl backdrop-blur-md border p-4 mb-4", needsRepair ? "bg-red-50/30 border-red-200/25" : "bg-green-50/30 border-green-200/25")} data-testid="repair-bureau-status">
+                        <div className="flex items-center justify-between mb-3">
+                          <div className="flex items-center gap-2">
+                            <span className="text-sm font-semibold text-[#1a1a2e]">{bureau}</span>
+                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ backgroundColor: g.riskTierColor + '15', color: g.riskTierColor }}>{g.riskTier.replace("_", " ")}</span>
                           </div>
-                          <div className="rounded-xl bg-white/70 p-3 border border-red-200/20">
-                            <p className="text-[10px] font-bold text-[#1a1a2e]/80 mb-1">Equifax Fraud</p>
-                            <p className="text-[10px] text-[#1a1a2e]/60 leading-relaxed">P.O. Box 105069<br/>Atlanta, GA 30348</p>
-                            <p className="text-[9px] text-[#1a1a2e]/40 mt-1">1-800-525-6285</p>
-                          </div>
-                          <div className="rounded-xl bg-white/70 p-3 border border-red-200/20">
-                            <p className="text-[10px] font-bold text-[#1a1a2e]/80 mb-1">TransUnion Fraud</p>
-                            <p className="text-[10px] text-[#1a1a2e]/60 leading-relaxed">P.O. Box 2000<br/>Chester, PA 19016</p>
-                            <p className="text-[9px] text-[#1a1a2e]/40 mt-1">1-800-680-7289</p>
-                          </div>
-                        </>
-                      ) : (
-                        <>
-                          <div className="rounded-xl bg-white/50 p-3 border border-white/30">
-                            <p className="text-[10px] font-bold text-[#1a1a2e]/80 mb-1">Experian</p>
-                            <p className="text-[10px] text-[#1a1a2e]/60 leading-relaxed">P.O. Box 4500<br/>Allen, TX 75013</p>
-                          </div>
-                          <div className="rounded-xl bg-white/50 p-3 border border-white/30">
-                            <p className="text-[10px] font-bold text-[#1a1a2e]/80 mb-1">Equifax</p>
-                            <p className="text-[10px] text-[#1a1a2e]/60 leading-relaxed">P.O. Box 740256<br/>Atlanta, GA 30374-0256</p>
-                          </div>
-                          <div className="rounded-xl bg-white/50 p-3 border border-white/30">
-                            <p className="text-[10px] font-bold text-[#1a1a2e]/80 mb-1">TransUnion</p>
-                            <p className="text-[10px] text-[#1a1a2e]/60 leading-relaxed">P.O. Box 2000<br/>Chester, PA 19016-2000</p>
-                          </div>
-                        </>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="rounded-2xl bg-white/70 backdrop-blur-md border border-white/40 p-5 mb-5" data-testid="mailing-services">
-                    <p className="text-xs font-medium text-[#1a1a2e]/70 mb-3">Recommended Mailing Services</p>
-                    <p className="text-[10px] text-[#1a1a2e]/40 mb-3">Always send dispute letters via certified mail with return receipt</p>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                      <div className="flex items-start gap-3 p-3 rounded-xl bg-white/50 border border-white/30">
-                        <div className="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center shrink-0"><Send className="w-4 h-4 text-blue-500/70" /></div>
-                        <div>
-                          <p className="text-[11px] font-medium text-[#1a1a2e]/80">USPS Certified Mail</p>
-                          <p className="text-[10px] text-[#1a1a2e]/50">usps.com - Best for proof of delivery</p>
+                          <span className={cn("text-[10px] px-2 py-0.5 rounded-full font-medium", needsRepair ? "bg-red-500/15 text-red-600" : "bg-green-500/15 text-green-600")}>{needsRepair ? "Repair Needed" : "Clean"}</span>
                         </div>
-                      </div>
-                      <div className="flex items-start gap-3 p-3 rounded-xl bg-white/50 border border-white/30">
-                        <div className="w-8 h-8 rounded-lg bg-green-500/10 flex items-center justify-center shrink-0"><Send className="w-4 h-4 text-green-500/70" /></div>
-                        <div>
-                          <p className="text-[11px] font-medium text-[#1a1a2e]/80">LetterStream</p>
-                          <p className="text-[10px] text-[#1a1a2e]/50">letterstream.com - Online certified mail service</p>
-                        </div>
-                      </div>
-                      <div className="flex items-start gap-3 p-3 rounded-xl bg-white/50 border border-white/30">
-                        <div className="w-8 h-8 rounded-lg bg-purple-500/10 flex items-center justify-center shrink-0"><Send className="w-4 h-4 text-purple-500/70" /></div>
-                        <div>
-                          <p className="text-[11px] font-medium text-[#1a1a2e]/80">Click2Mail</p>
-                          <p className="text-[10px] text-[#1a1a2e]/50">click2mail.com - Print & mail from your browser</p>
-                        </div>
-                      </div>
-                      <div className="flex items-start gap-3 p-3 rounded-xl bg-white/50 border border-white/30">
-                        <div className="w-8 h-8 rounded-lg bg-orange-500/10 flex items-center justify-center shrink-0"><Send className="w-4 h-4 text-orange-500/70" /></div>
-                        <div>
-                          <p className="text-[11px] font-medium text-[#1a1a2e]/80">Lob</p>
-                          <p className="text-[10px] text-[#1a1a2e]/50">lob.com - Automated mail with tracking</p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {repairData.detectedIssues && repairData.detectedIssues.length > 0 && (
-                    <div className="rounded-2xl bg-white/70 backdrop-blur-md border border-white/40 p-5 mb-5" data-testid="detected-issues-card">
-                      <p className="text-xs font-medium text-[#1a1a2e]/70 mb-3">Detected Derogatory Items ({repairData.detectedIssues.length})</p>
-                      <div className="space-y-2">
-                        {repairData.detectedIssues.map((issue: any, idx: number) => (
-                          <div key={idx} className="flex items-start gap-3 p-3 rounded-xl bg-white/50 border border-white/30" data-testid={`issue-${idx}`}>
-                            <AlertTriangle className="w-4 h-4 text-orange-500/70 shrink-0 mt-0.5" />
-                            <div className="flex-1 min-w-0">
-                              <p className="text-sm text-[#1a1a2e]/90">
-                                {typeof issue === "string" ? issue : (issue.issue || issue.description || issue.issueType || issue.creditor || `Item ${idx + 1}`)}
-                              </p>
-                              {issue.creditor && <p className="text-[10px] text-[#1a1a2e]/50 mt-0.5">Creditor: {issue.creditor}</p>}
-                              {issue.accountLast4 && <p className="text-[10px] text-[#1a1a2e]/50">Account: ...{issue.accountLast4}</p>}
-                              {issue.bureau && <p className="text-[10px] text-[#1a1a2e]/50 mt-0.5">Bureau: {issue.bureau}</p>}
-                              {issue.severity && <p className="text-[10px] text-[#1a1a2e]/50">Severity: {issue.severity}</p>}
-                              {issue.impact && <p className="text-[10px] text-[#1a1a2e]/50">Impact: {issue.impact}</p>}
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {repairData.letters && repairData.letters.length > 0 && (
-                    <div className="rounded-2xl bg-white/70 backdrop-blur-md border border-white/40 p-5 mb-5" data-testid="dispute-letters-card">
-                      <div className="flex items-center justify-between mb-3">
-                        <p className="text-xs font-medium text-[#1a1a2e]/70">
-                          Round {activeRepairRound} Dispute Letters
-                        </p>
-                        <span className="text-[10px] bg-[#3a3a5a]/10 text-[#3a3a5a] px-2 py-0.5 rounded-full font-medium">
-                          {repairData.letters.filter((l: any) => {
-                            const r = l.round || 1;
-                            const matchRound = r === activeRepairRound;
-                            const matchBureau = repairBureauFilter === "All" || (l.bureau || "").toLowerCase().includes(repairBureauFilter.toLowerCase());
-                            return matchRound && matchBureau;
-                          }).length} letters
-                        </span>
-                      </div>
-                      <div className="flex gap-1 mb-4 p-1 rounded-lg bg-white/40">
-                        {["All", "Experian", "Equifax", "TransUnion"].map(bf => (
-                          <button key={bf} onClick={() => setRepairBureauFilter(bf)}
-                            className={cn("flex-1 py-1.5 px-2 rounded-md text-[10px] font-medium transition-all",
-                              repairBureauFilter === bf ? "bg-white shadow-sm text-[#1a1a2e]" : "text-[#1a1a2e]/40 hover:text-[#1a1a2e]/60"
-                            )} data-testid={`filter-repair-bureau-${bf.toLowerCase()}`}>{bf}</button>
-                        ))}
-                      </div>
-                      <div className="space-y-3">
-                        {repairData.letters
-                          .map((letter: any, idx: number) => ({ ...letter, _idx: idx }))
-                          .filter((letter: any) => {
-                            const r = letter.round || 1;
-                            const matchRound = r === activeRepairRound;
-                            const matchBureau = repairBureauFilter === "All" || (letter.bureau || "").toLowerCase().includes(repairBureauFilter.toLowerCase());
-                            return matchRound && matchBureau;
-                          })
-                          .map((letter: any) => {
-                            const key = `r${letter.round || 1}-${letter._idx}`;
-                            const mailingAddr = letter.recipientAddress || "";
-                            const fraudAddr = letter.fraudDeptAddress || "";
-                            return (
-                              <div key={key} className="rounded-xl bg-white/50 border border-white/30 overflow-hidden" data-testid={`letter-${key}`}>
-                                <button
-                                  onClick={() => setExpandedLetters(prev => { const next = new Set(prev); if (next.has(key)) next.delete(key); else next.add(key); return next; })}
-                                  className="w-full flex items-center justify-between p-4 text-left hover:bg-white/60 transition-colors"
-                                >
-                                  <div className="flex items-center gap-3 flex-1 min-w-0">
-                                    <FileText className="w-4 h-4 text-[#1a1a2e]/60 shrink-0" />
-                                    <div className="flex-1 min-w-0">
-                                      <p className="text-sm font-medium text-[#1a1a2e]/90 truncate">{letter.title || letter.bureau || `Letter ${letter._idx + 1}`}</p>
-                                      <div className="flex flex-wrap items-center gap-2 mt-0.5">
-                                        {letter.bureau && <span className="text-[10px] text-[#1a1a2e]/50">{letter.bureau}</span>}
-                                        {letter.disputeType && <span className="text-[9px] bg-[#1a1a2e]/5 text-[#1a1a2e]/50 px-1.5 py-0.5 rounded">{letter.disputeType}</span>}
-                                        {letter.fcraCitation && <span className="text-[9px] text-blue-500/60">{letter.fcraCitation}</span>}
-                                      </div>
-                                      {mailingAddr && (
-                                        <p className="text-[9px] text-[#1a1a2e]/40 mt-1 flex items-center gap-1">
-                                          <Send className="w-2.5 h-2.5" /> Mail to: {mailingAddr}
-                                        </p>
-                                      )}
-                                    </div>
-                                  </div>
-                                  <ChevronRight className={cn("w-4 h-4 text-[#1a1a2e]/40 transition-transform shrink-0", expandedLetters.has(key) && "rotate-90")} />
-                                </button>
-                                {expandedLetters.has(key) && (
-                                  <div className="px-4 pb-4 border-t border-white/30">
-                                    {(mailingAddr || fraudAddr) && (
-                                      <div className="mt-3 mb-3 p-3 rounded-lg bg-[#f0f0f8]/60 border border-[#e0e0ea]/40">
-                                        {mailingAddr && (
-                                          <div className="flex items-start gap-2 mb-1.5">
-                                            <Send className="w-3 h-3 text-[#1a1a2e]/40 shrink-0 mt-0.5" />
-                                            <div>
-                                              <p className="text-[9px] font-bold text-[#1a1a2e]/50 uppercase">Send To</p>
-                                              <p className="text-[10px] text-[#1a1a2e]/70">{mailingAddr}</p>
-                                            </div>
-                                          </div>
-                                        )}
-                                        {fraudAddr && (
-                                          <div className="flex items-start gap-2">
-                                            <AlertTriangle className="w-3 h-3 text-red-400/60 shrink-0 mt-0.5" />
-                                            <div>
-                                              <p className="text-[9px] font-bold text-red-500/50 uppercase">CC: Fraud Department</p>
-                                              <p className="text-[10px] text-[#1a1a2e]/70">{fraudAddr}</p>
-                                            </div>
-                                          </div>
-                                        )}
-                                      </div>
-                                    )}
-                                    <pre className="text-[11px] text-[#1a1a2e]/80 leading-relaxed whitespace-pre-wrap font-sans">{letter.content || letter.text || letter.body}</pre>
-                                    <div className="flex items-center gap-2 mt-3">
-                                      <button
-                                        onClick={() => copyLetterToClipboard(letter.content || letter.text || letter.body, key)}
-                                        className="flex items-center gap-2 h-8 px-3 rounded-lg bg-white/60 border border-white/30 text-[10px] text-[#1a1a2e]/70 hover:bg-white/80 transition-colors"
-                                        data-testid={`copy-letter-${key}`}
-                                      >
-                                        {copiedLetter === key ? <><Check className="w-3 h-3" /> Copied</> : <><Copy className="w-3 h-3" /> Copy to Clipboard</>}
-                                      </button>
-                                    </div>
-                                  </div>
-                                )}
-                              </div>
-                            );
-                          })}
-                        {repairData.letters.filter((l: any) => {
-                            const r = l.round || 1;
-                            const matchRound = r === activeRepairRound;
-                            const matchBureau = repairBureauFilter === "All" || (l.bureau || "").toLowerCase().includes(repairBureauFilter.toLowerCase());
-                            return matchRound && matchBureau;
-                          }).length === 0 && (
-                          <div className="text-center py-6">
-                            <p className="text-xs text-[#1a1a2e]/50">No Round {activeRepairRound} letters generated yet.</p>
-                            <p className="text-[10px] text-[#1a1a2e]/30 mt-1">
-                              {activeRepairRound === 1 ? "Click 'Generate Dispute Letters' above to start" :
-                               activeRepairRound === 2 ? "Send after Day 35 if Round 1 disputes are not resolved" :
-                               "Send to fraud departments after Day 65 for unresolved items"}
-                            </p>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  )}
-
-                  {repairData.actionPlan && (
-                    <div className="rounded-2xl bg-white/70 backdrop-blur-md border border-white/40 p-5 mb-5" data-testid="action-plan-card">
-                      <p className="text-xs font-medium text-[#1a1a2e]/70 mb-4">Action Plan</p>
-                      {Array.isArray(repairData.actionPlan) ? (
-                        <div className="space-y-3">
-                          {repairData.actionPlan.map((step: any, idx: number) => (
-                            <div key={idx} className="flex gap-3 p-3 rounded-xl bg-white/50 border border-white/30" data-testid={`action-step-${idx}`}>
-                              <div className="w-7 h-7 rounded-lg bg-[#3a3a5a]/10 flex items-center justify-center shrink-0">
-                                <span className="text-[11px] font-bold text-[#3a3a5a]">{step.step || idx + 1}</span>
-                              </div>
-                              <div className="flex-1 min-w-0">
-                                <p className="text-sm font-medium text-[#1a1a2e]/90">{step.action || step}</p>
-                                {step.timing && <p className="text-[10px] text-[#1a1a2e]/50 mt-0.5 flex items-center gap-1"><Clock className="w-3 h-3" />{step.timing}</p>}
-                                {step.details && <p className="text-[11px] text-[#1a1a2e]/60 mt-1.5 leading-relaxed">{step.details}</p>}
-                              </div>
+                        <div className="grid grid-cols-4 gap-2">
+                          {[
+                            { label: "Derogatory", val: bureauData.derogatoryCount, bad: bureauData.derogatoryCount > 0 },
+                            { label: "Late Pmts", val: g.latePayments, bad: g.latePayments > 0 },
+                            { label: "Collections", val: g.collections, bad: g.collections > 0 },
+                            { label: "Charge-Offs", val: g.chargeOffs, bad: g.chargeOffs > 0 },
+                          ].map(item => (
+                            <div key={item.label} className="text-center p-2 rounded-lg bg-white/60">
+                              <p className="text-[9px] text-[#1a1a2e]/50">{item.label}</p>
+                              <p className={cn("text-sm font-bold font-mono", item.bad ? "text-red-600" : "text-green-600")}>{item.val}</p>
                             </div>
                           ))}
                         </div>
-                      ) : (
-                        <div className="text-[11px] text-[#1a1a2e]/70 leading-relaxed whitespace-pre-wrap">{repairData.actionPlan}</div>
-                      )}
+                      </div>
+                    )}
+
+                    <div className="rounded-2xl bg-white/70 backdrop-blur-md border border-white/40 p-4 mb-4" data-testid="user-address-form">
+                      <p className="text-[10px] font-medium text-[#1a1a2e]/60 uppercase tracking-wider mb-3">Your Mailing Address</p>
+                      <div className="grid grid-cols-2 gap-2 mb-2">
+                        <input type="text" placeholder="Full Name" value={userAddressForm.fullName} onChange={e => setUserAddressForm(p => ({ ...p, fullName: e.target.value }))}
+                          className="col-span-2 h-8 px-3 rounded-lg bg-white/60 border border-white/30 text-xs text-[#1a1a2e] placeholder:text-[#1a1a2e]/30 outline-none focus:border-[#c0c0d0]" data-testid="input-full-name" />
+                        <input type="text" placeholder="Street Address" value={userAddressForm.streetAddress} onChange={e => setUserAddressForm(p => ({ ...p, streetAddress: e.target.value }))}
+                          className="col-span-2 h-8 px-3 rounded-lg bg-white/60 border border-white/30 text-xs text-[#1a1a2e] placeholder:text-[#1a1a2e]/30 outline-none focus:border-[#c0c0d0]" data-testid="input-street-address" />
+                        <input type="text" placeholder="City" value={userAddressForm.city} onChange={e => setUserAddressForm(p => ({ ...p, city: e.target.value }))}
+                          className="h-8 px-3 rounded-lg bg-white/60 border border-white/30 text-xs text-[#1a1a2e] placeholder:text-[#1a1a2e]/30 outline-none focus:border-[#c0c0d0]" data-testid="input-city" />
+                        <div className="flex gap-2">
+                          <input type="text" placeholder="State" value={userAddressForm.state} onChange={e => setUserAddressForm(p => ({ ...p, state: e.target.value }))}
+                            className="w-1/2 h-8 px-3 rounded-lg bg-white/60 border border-white/30 text-xs text-[#1a1a2e] placeholder:text-[#1a1a2e]/30 outline-none focus:border-[#c0c0d0]" data-testid="input-state" />
+                          <input type="text" placeholder="ZIP" value={userAddressForm.zipCode} onChange={e => setUserAddressForm(p => ({ ...p, zipCode: e.target.value }))}
+                            className="w-1/2 h-8 px-3 rounded-lg bg-white/60 border border-white/30 text-xs text-[#1a1a2e] placeholder:text-[#1a1a2e]/30 outline-none focus:border-[#c0c0d0]" data-testid="input-zip" />
+                        </div>
+                      </div>
+                      <button onClick={saveUserAddress} disabled={addressSaving}
+                        className="h-7 px-3 rounded-lg bg-[#3a3a5a] text-white text-[10px] font-medium hover:bg-[#2a2a4a] disabled:opacity-50 transition-colors flex items-center gap-1.5" data-testid="button-save-address">
+                        {addressSaving ? <Loader2 className="w-3 h-3 animate-spin" /> : <Check className="w-3 h-3" />}
+                        Save
+                      </button>
                     </div>
-                  )}
-                </>
-              )}
+
+                    <div className="rounded-2xl bg-white/70 backdrop-blur-md border border-white/40 p-4 mb-4">
+                      <div className="flex items-center justify-between mb-3">
+                        <p className="text-[10px] font-medium text-[#1a1a2e]/60 uppercase tracking-wider">Mail Disputes To</p>
+                      </div>
+                      <div className="flex items-center gap-3 p-3 rounded-lg bg-white/50 border border-white/30">
+                        <Send className="w-4 h-4 text-[#1a1a2e]/40 shrink-0" />
+                        <div>
+                          <p className="text-xs font-medium text-[#1a1a2e]/80">{bureau} Dispute Center</p>
+                          <p className="text-[10px] text-[#1a1a2e]/55">{disputeAddr[bureau]}</p>
+                        </div>
+                      </div>
+                      <p className="text-[9px] text-[#1a1a2e]/35 mt-2">Send via USPS Certified Mail with Return Receipt</p>
+                    </div>
+
+                    <div className="flex items-center justify-between mb-4">
+                      <button onClick={runRepairAnalysis} disabled={repairAnalyzing}
+                        className="h-9 px-5 rounded-xl bg-[#3a3a5a] text-white text-xs font-medium hover:bg-[#2a2a4a] disabled:opacity-50 transition-colors flex items-center gap-2" data-testid="button-run-repair">
+                        {repairAnalyzing ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Shield className="w-3.5 h-3.5" />}
+                        {repairAnalyzing ? "Generating..." : `Generate ${bureau} Letters`}
+                      </button>
+                      <div className="flex gap-1 p-0.5 rounded-lg bg-white/40 border border-white/20">
+                        {[1, 2, 3].map(round => (
+                          <button key={round} onClick={() => setActiveRepairRound(round)}
+                            className={cn("px-3 py-1.5 rounded-md text-[10px] font-medium transition-all",
+                              activeRepairRound === round ? "bg-white shadow-sm text-[#1a1a2e]" : "text-[#1a1a2e]/40 hover:text-[#1a1a2e]/60"
+                            )} data-testid={`button-round-${round}`}>
+                            R{round}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {repairLoading ? (
+                      <div className="flex items-center justify-center py-12"><Loader2 className="w-6 h-6 animate-spin text-[#1a1a2e]/40" /></div>
+                    ) : !repairData ? (
+                      <div className="rounded-2xl bg-white/60 border border-white/30 p-8 text-center">
+                        <Shield className="w-8 h-8 text-[#1a1a2e]/20 mx-auto mb-3" />
+                        <p className="text-xs text-[#1a1a2e]/60 mb-1">No dispute data yet</p>
+                        <p className="text-[10px] text-[#1a1a2e]/40">Upload a credit report in Mission Control, then generate dispute letters</p>
+                      </div>
+                    ) : (
+                      <>
+                        {bureauIssues.length > 0 && (
+                          <div className="rounded-2xl bg-white/70 backdrop-blur-md border border-white/40 p-4 mb-4" data-testid="detected-issues-card">
+                            <p className="text-[10px] font-medium text-[#1a1a2e]/60 uppercase tracking-wider mb-3">Detected Issues · {bureauIssues.length}</p>
+                            <div className="space-y-1.5">
+                              {bureauIssues.map((issue: any, idx: number) => (
+                                <div key={idx} className="flex items-start gap-2.5 p-2.5 rounded-lg bg-white/50 border border-white/30" data-testid={`issue-${idx}`}>
+                                  <AlertTriangle className="w-3.5 h-3.5 text-orange-500/60 shrink-0 mt-0.5" />
+                                  <div className="flex-1 min-w-0">
+                                    <p className="text-[11px] text-[#1a1a2e]/85 font-medium">
+                                      {typeof issue === "string" ? issue : (issue.creditor || issue.issueType || issue.issue || `Item ${idx + 1}`)}
+                                    </p>
+                                    <div className="flex flex-wrap gap-1.5 mt-1">
+                                      {issue.issueType && <span className="text-[9px] bg-red-500/10 text-red-600/70 px-1.5 py-0.5 rounded">{issue.issueType}</span>}
+                                      {issue.severity && <span className={cn("text-[9px] px-1.5 py-0.5 rounded", issue.severity === "High" ? "bg-red-500/10 text-red-600" : issue.severity === "Medium" ? "bg-yellow-500/10 text-yellow-700" : "bg-gray-500/10 text-gray-600")}>{issue.severity}</span>}
+                                      {issue.accountLast4 && issue.accountLast4 !== "N/A" && <span className="text-[9px] text-[#1a1a2e]/40">...{issue.accountLast4}</span>}
+                                    </div>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        {(() => {
+                          const roundLetters = bureauLetters.filter((l: any) => (l.round || 1) === activeRepairRound);
+                          return (
+                            <div className="rounded-2xl bg-white/70 backdrop-blur-md border border-white/40 p-4" data-testid="dispute-letters-card">
+                              <div className="flex items-center justify-between mb-3">
+                                <p className="text-[10px] font-medium text-[#1a1a2e]/60 uppercase tracking-wider">
+                                  Round {activeRepairRound} Letters · {bureau}
+                                </p>
+                                <span className="text-[10px] text-[#1a1a2e]/40">{roundLetters.length} letter{roundLetters.length !== 1 ? "s" : ""}</span>
+                              </div>
+
+                              {roundLetters.length === 0 ? (
+                                <div className="text-center py-6">
+                                  <p className="text-[11px] text-[#1a1a2e]/45">No Round {activeRepairRound} letters for {bureau}</p>
+                                  <p className="text-[9px] text-[#1a1a2e]/30 mt-1">
+                                    {activeRepairRound === 1 ? "Click Generate to create dispute letters" :
+                                     activeRepairRound === 2 ? "Send after Day 35 if Round 1 unresolved" :
+                                     "Fraud escalation after Day 65"}
+                                  </p>
+                                </div>
+                              ) : (
+                                <div className="space-y-2">
+                                  {roundLetters.map((letter: any, idx: number) => {
+                                    const key = `${bureau}-r${letter.round || 1}-${idx}`;
+                                    return (
+                                      <div key={key} className="rounded-xl bg-white/50 border border-white/30 overflow-hidden" data-testid={`letter-${key}`}>
+                                        <button
+                                          onClick={() => setExpandedLetters(prev => { const next = new Set(prev); if (next.has(key)) next.delete(key); else next.add(key); return next; })}
+                                          className="w-full flex items-center justify-between p-3 text-left hover:bg-white/60 transition-colors"
+                                        >
+                                          <div className="flex items-center gap-2.5 flex-1 min-w-0">
+                                            <FileText className="w-4 h-4 text-[#1a1a2e]/50 shrink-0" />
+                                            <div className="flex-1 min-w-0">
+                                              <p className="text-[11px] font-medium text-[#1a1a2e]/85 truncate">{letter.title || letter.creditor || `Letter ${idx + 1}`}</p>
+                                              {letter.disputeType && <p className="text-[9px] text-[#1a1a2e]/40 mt-0.5">{letter.disputeType}</p>}
+                                            </div>
+                                          </div>
+                                          <ChevronDown className={cn("w-3.5 h-3.5 text-[#1a1a2e]/30 transition-transform shrink-0", expandedLetters.has(key) && "rotate-180")} />
+                                        </button>
+                                        {expandedLetters.has(key) && (
+                                          <div className="px-3 pb-3 border-t border-white/30">
+                                            <pre className="text-[11px] text-[#1a1a2e]/75 leading-relaxed whitespace-pre-wrap font-sans mt-3">{letter.content || letter.text || letter.body}</pre>
+                                            <button
+                                              onClick={() => copyLetterToClipboard(letter.content || letter.text || letter.body, key)}
+                                              className="mt-3 flex items-center gap-1.5 h-7 px-3 rounded-lg bg-white/60 border border-white/30 text-[10px] text-[#1a1a2e]/60 hover:bg-white/80 transition-colors"
+                                              data-testid={`copy-letter-${key}`}
+                                            >
+                                              {copiedLetter === key ? <><Check className="w-3 h-3" /> Copied</> : <><Copy className="w-3 h-3" /> Copy</>}
+                                            </button>
+                                          </div>
+                                        )}
+                                      </div>
+                                    );
+                                  })}
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })()}
+                      </>
+                    )}
+                  </>
+                );
+              })()}
             </div>
           )}
 
