@@ -207,7 +207,7 @@ function DonutChart({ value, max, size = 120, strokeWidth = 10, color = "#3a3a5a
   );
 }
 
-type TabKey = "mission_control" | "repair_engine" | "funding_strategy" | "creator_connect" | "messages" | "progress_tracker";
+type TabKey = "mission_control" | "repair_engine" | "funding_strategy" | "creator_connect" | "messages";
 
 const NAV_ITEMS: { key: TabKey; label: string; icon: any }[] = [
   { key: "mission_control", label: "Mission Control", icon: Target },
@@ -215,7 +215,6 @@ const NAV_ITEMS: { key: TabKey; label: string; icon: any }[] = [
   { key: "funding_strategy", label: "Funding Strategy", icon: DollarSign },
   { key: "creator_connect", label: "Creator Connect", icon: Sparkles },
   { key: "messages", label: "Messages", icon: MessageSquare },
-  { key: "progress_tracker", label: "Progress Tracker", icon: Activity },
 ];
 
 export default function DashboardPage() {
@@ -242,7 +241,7 @@ export default function DashboardPage() {
   });
   const [expandedMessages, setExpandedMessages] = useState<Set<number>>(new Set());
   const [activeTab, setActiveTab] = useState<TabKey>("mission_control");
-  const [progressBureauTab, setProgressBureauTab] = useState("Experian");
+  const [fundingBureauTab, setFundingBureauTab] = useState("Experian");
   const [mcBureauTab, setMcBureauTab] = useState("Experian");
   const [friendsList, setFriendsList] = useState<any[]>([]);
   const [pendingRequests, setPendingRequests] = useState<any[]>([]);
@@ -299,9 +298,6 @@ export default function DashboardPage() {
   const [capitalOsData, setCapitalOsData] = useState<CapitalOsDashboard | null>(null);
   const [capitalOsLoading, setCapitalOsLoading] = useState(false);
 
-  const [capitalStackAmount, setCapitalStackAmount] = useState(50000);
-  const [capitalStackResult, setCapitalStackResult] = useState<any>(null);
-  const [capitalStackLoading, setCapitalStackLoading] = useState(false);
 
   const fetchDmMessages = async (friendId: number) => {
     try {
@@ -600,20 +596,6 @@ export default function DashboardPage() {
   };
 
 
-  const submitCapitalStack = async () => {
-    setCapitalStackLoading(true);
-    try {
-      const res = await fetch("/api/capital-os/capital-stack", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ targetAmount: capitalStackAmount }),
-      });
-      if (res.ok) setCapitalStackResult(await res.json());
-      else toast({ title: "Error", description: "Failed to simulate capital stack.", variant: "destructive" });
-    } catch { toast({ title: "Error", description: "Failed to simulate capital stack.", variant: "destructive" }); }
-    finally { setCapitalStackLoading(false); }
-  };
 
   useEffect(() => {
     if (user) {
@@ -628,7 +610,7 @@ export default function DashboardPage() {
 
   useEffect(() => {
     if (user) {
-      if (activeTab === "mission_control" || activeTab === "funding_strategy" || activeTab === "progress_tracker") {
+      if (activeTab === "mission_control" || activeTab === "funding_strategy") {
         fetchFundingReadiness();
         fetchCapitalOsDashboard();
       }
@@ -1629,151 +1611,311 @@ export default function DashboardPage() {
           {activeTab === "funding_strategy" && (
             <div className="w-full px-5 sm:px-8 py-6 max-w-[1000px] mx-auto">
               <div className="mb-6">
-                <h2 className="text-lg font-semibold text-[#1a1a2e]" data-testid="text-funding-title">Funding Strategy</h2>
-                <p className="text-[11px] text-[#1a1a2e]/60">Application timing and capital stack planning</p>
+                <h2 className="text-lg font-semibold text-[#1a1a2e]" data-testid="text-funding-title">Optimize Funding Strategy</h2>
+                <p className="text-[11px] text-[#1a1a2e]/60">Your step-by-step path to funding-ready applications — bureau by bureau</p>
               </div>
 
-              {capitalOsData && (
-                <div className="rounded-2xl bg-white/70 backdrop-blur-md border border-white/40 p-6 mb-6" data-testid="application-window-detail">
-                  <div className="flex items-center justify-between mb-4">
-                    <p className="text-xs text-[#1a1a2e]/70">Application Window</p>
-                    <span className={cn("text-[10px] px-2 py-0.5 rounded-full font-medium",
-                      capitalOsData.applicationWindow.currentStatus === "ready" ? "bg-green-500/15 text-green-600" :
-                      capitalOsData.applicationWindow.currentStatus === "wait" ? "bg-yellow-500/15 text-yellow-600" :
-                      "bg-red-500/15 text-red-600"
-                    )}>{capitalOsData.applicationWindow.currentStatus === "ready" ? "Ready Now" : capitalOsData.applicationWindow.currentStatus === "wait" ? "Waiting" : "Repair First"}</span>
-                  </div>
-                  {capitalOsData.applicationWindow.daysUntilOptimal > 0 && (
-                    <div className="flex items-baseline gap-2 mb-3">
-                      <span className="text-4xl font-bold text-[#1a1a2e] font-mono">{capitalOsData.applicationWindow.daysUntilOptimal}</span>
-                      <span className="text-sm text-[#1a1a2e]/50">days until optimal window</span>
-                    </div>
-                  )}
-                  <p className="text-[11px] text-[#1a1a2e]/70 mb-4 leading-relaxed">{capitalOsData.applicationWindow.reasoning}</p>
-                  <div className="space-y-2">
-                    {capitalOsData.applicationWindow.factors.map((f, i) => (
-                      <div key={i} className="flex items-center gap-3 p-3 rounded-xl bg-white/50">
-                        <div className={cn("w-2 h-2 rounded-full shrink-0", f.status === "good" ? "bg-green-500" : f.status === "warning" ? "bg-yellow-500" : "bg-red-500")} />
-                        <div className="flex-1 min-w-0">
-                          <p className="text-xs font-medium text-[#1a1a2e]/85">{f.factor}</p>
-                          <p className="text-[10px] text-[#1a1a2e]/55">{f.detail}</p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
+              {capitalOsData ? (
+                <>
+                  {(() => {
+                    const uploadedBureaus = capitalOsData.bureauHealth.bureaus.filter(b => b.uploaded && b.guidance);
+                    const readyCount = uploadedBureaus.filter(b => b.guidance!.applicationReady).length;
+                    const totalUploaded = uploadedBureaus.length;
+                    const overallPhase = capitalOsData.phase.phaseLabel.split(":")[0]?.trim() || "Repair";
+                    const phaseSteps = [
+                      { key: "repair", label: "Repair", desc: "Fix errors, remove negatives, dispute inaccuracies" },
+                      { key: "build", label: "Build", desc: "Establish strong payment history and account mix" },
+                      { key: "optimize", label: "Optimize", desc: "Lower utilization, season accounts, reduce inquiries" },
+                      { key: "apply", label: "Apply", desc: "Submit applications through strongest bureau first" },
+                      { key: "scale", label: "Scale", desc: "Expand limits, add products, grow credit portfolio" },
+                    ];
+                    const activePhaseIdx = phaseSteps.findIndex(p => p.label.toLowerCase() === overallPhase.toLowerCase());
 
-              {capitalOsData && capitalOsData.bureauHealth.bureaus.some(b => b.uploaded && b.guidance) && (
-                <div className="rounded-2xl bg-white/70 backdrop-blur-md border border-white/40 p-6 mb-6" data-testid="bureau-funding-readiness">
-                  <p className="text-xs text-[#1a1a2e]/70 mb-4">Bureau Funding Readiness</p>
-                  <div className="space-y-3">
-                    {capitalOsData.bureauHealth.bureaus.filter(b => b.uploaded && b.guidance).map(b => {
-                      const g = b.guidance!;
-                      return (
-                        <div key={b.bureau} className={cn("p-4 rounded-xl border", g.applicationReady ? "bg-green-50/40 border-green-200/30" : "bg-white/50 border-white/30")}>
-                          <div className="flex items-center justify-between mb-2">
+                    return (
+                      <>
+                        <div className="rounded-2xl bg-white/70 backdrop-blur-md border border-white/40 p-6 mb-6" data-testid="funding-overview">
+                          <div className="flex items-center justify-between mb-4">
+                            <p className="text-xs font-medium text-[#1a1a2e]/70">Funding Readiness Overview</p>
                             <div className="flex items-center gap-2">
-                              <span className="text-[12px] font-semibold text-[#1a1a2e]">{b.bureau}</span>
-                              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ backgroundColor: g.riskTierColor + '15', color: g.riskTierColor }}>{g.riskTier.replace("_", " ")}</span>
-                              {b.priority && <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-[#3a3a5a]/10 text-[#3a3a5a] font-medium">Priority</span>}
-                            </div>
-                            <span className={cn("text-[10px] px-2 py-0.5 rounded-full font-medium", g.applicationReady ? "bg-green-500/15 text-green-600" : "bg-yellow-500/15 text-yellow-600")}>{g.applicationReady ? "Ready to Apply" : g.fundingPhase + " Phase"}</span>
-                          </div>
-                          <div className="grid grid-cols-3 gap-2 text-center text-[9px] mb-2">
-                            <div className="p-1.5 rounded-lg bg-white/60">
-                              <span className="text-[#1a1a2e]/50">Ceiling</span>
-                              <p className="font-semibold text-[#1a1a2e]/80 font-mono">${g.exposureCeiling.toLocaleString()}</p>
-                            </div>
-                            <div className="p-1.5 rounded-lg bg-white/60">
-                              <span className="text-[#1a1a2e]/50">Multiplier</span>
-                              <p className="font-semibold text-[#1a1a2e]/80 font-mono">{g.exposureMultiplier}x</p>
-                            </div>
-                            <div className="p-1.5 rounded-lg bg-white/60">
-                              <span className="text-[#1a1a2e]/50">Triggers</span>
-                              <p className={cn("font-semibold", g.denialTriggers.length > 0 ? "text-red-600" : "text-green-600")}>{g.denialTriggers.length}</p>
+                              <span className={cn("text-[10px] px-2.5 py-1 rounded-full font-semibold",
+                                readyCount === totalUploaded && totalUploaded > 0 ? "bg-green-500/15 text-green-600" :
+                                readyCount > 0 ? "bg-yellow-500/15 text-yellow-600" :
+                                "bg-red-500/15 text-red-600"
+                              )}>{readyCount} of {totalUploaded} Bureau{totalUploaded !== 1 ? "s" : ""} Ready</span>
                             </div>
                           </div>
-                          {g.denialTriggers.length > 0 && (
-                            <div className="pt-2 border-t border-white/40">
-                              {g.denialTriggers.map((t, i) => (
-                                <p key={i} className="text-[10px] text-red-500/70 leading-relaxed">• {t}</p>
-                              ))}
-                            </div>
-                          )}
-                          {g.velocityRisk && (
-                            <div className="mt-2 pt-2 border-t border-white/40">
-                              <div className="flex items-center justify-between text-[10px]">
-                                <span className="text-[#1a1a2e]/50">Velocity</span>
-                                <span className={cn("font-semibold px-1.5 py-0.5 rounded-full text-[9px]",
-                                  g.velocityRisk.velocityTier === "A" ? "bg-green-500/15 text-green-600" :
-                                  g.velocityRisk.velocityTier === "B" ? "bg-yellow-500/15 text-yellow-600" :
-                                  g.velocityRisk.velocityTier === "C" ? "bg-orange-500/15 text-orange-600" :
-                                  "bg-red-500/15 text-red-600"
-                                )}>Tier {g.velocityRisk.velocityTier} — Ceiling ${g.velocityRisk.adjustedExposureCeiling.toLocaleString()}</span>
-                              </div>
-                              {g.velocityRisk.mandatoryWaitingMonths > 0 && (
-                                <p className="text-[9px] text-red-500/70 mt-1">Wait {g.velocityRisk.mandatoryWaitingMonths} months before applying</p>
-                              )}
-                            </div>
-                          )}
-                          {g.applicationReady && (
-                            <p className="text-[10px] text-green-600/70 mt-1">Apply through {b.bureau} for best approval odds at this bureau.</p>
-                          )}
+
+                          <div className="flex items-center gap-0 mb-5">
+                            {phaseSteps.map((step, i) => {
+                              const isCompleted = i < activePhaseIdx;
+                              const isActive = i === activePhaseIdx;
+                              return (
+                                <div key={step.key} className="flex items-center flex-1">
+                                  <div className="flex flex-col items-center flex-1">
+                                    <div className={cn(
+                                      "w-9 h-9 rounded-full flex items-center justify-center text-[10px] font-bold mb-1.5 transition-all",
+                                      isCompleted ? "bg-green-500 text-white" :
+                                      isActive ? "bg-[#3a3a5a] text-white ring-2 ring-[#3a3a5a]/30 ring-offset-2" :
+                                      "bg-[#e0e0ea] text-[#1a1a2e]/30"
+                                    )}>
+                                      {isCompleted ? <Check className="w-4 h-4" /> : i + 1}
+                                    </div>
+                                    <span className={cn("text-[9px] text-center leading-tight", isActive ? "text-[#1a1a2e] font-semibold" : isCompleted ? "text-green-600" : "text-[#1a1a2e]/40")}>{step.label}</span>
+                                  </div>
+                                  {i < phaseSteps.length - 1 && (
+                                    <div className={cn("h-0.5 flex-1 -mx-1 mt-[-12px]", i < activePhaseIdx ? "bg-green-500" : "bg-[#e0e0ea]")} />
+                                  )}
+                                </div>
+                              );
+                            })}
+                          </div>
+
+                          <div className="p-3 rounded-xl bg-white/50 border border-white/30">
+                            <p className="text-[11px] text-[#1a1a2e]/80 leading-relaxed">
+                              <span className="font-semibold">Current Phase: {overallPhase}</span> — {phaseSteps[activePhaseIdx >= 0 ? activePhaseIdx : 0]?.desc}
+                            </p>
+                          </div>
                         </div>
-                      );
-                    })}
-                  </div>
+
+                        <div className="rounded-2xl bg-white/70 backdrop-blur-md border border-white/40 overflow-hidden mb-6" data-testid="funding-bureau-tabs">
+                          <div className="flex gap-0 p-1.5 bg-white/50 border-b border-white/30">
+                            {capitalOsData.bureauHealth.bureaus.map(b => (
+                              <button
+                                key={b.bureau}
+                                onClick={() => setFundingBureauTab(b.bureau)}
+                                className={cn(
+                                  "flex-1 py-3 px-3 rounded-xl text-[11px] font-medium transition-all",
+                                  fundingBureauTab === b.bureau
+                                    ? "bg-white shadow-sm text-[#1a1a2e]"
+                                    : "text-[#1a1a2e]/50 hover:text-[#1a1a2e]/70"
+                                )}
+                                data-testid={`tab-funding-bureau-${b.bureau.toLowerCase()}`}
+                              >
+                                <div className="flex flex-col items-center gap-1">
+                                  <span className="font-semibold">{b.bureau}</span>
+                                  {b.uploaded && b.guidance ? (
+                                    <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full" style={{ backgroundColor: b.guidance.riskTierColor + '15', color: b.guidance.riskTierColor }}>{b.guidance.riskTier.replace("_", " ")}</span>
+                                  ) : (
+                                    <span className="text-[9px] text-[#1a1a2e]/30">Not Uploaded</span>
+                                  )}
+                                </div>
+                              </button>
+                            ))}
+                          </div>
+
+                          <div className="p-6">
+                            {(() => {
+                              const activeBureau = capitalOsData.bureauHealth.bureaus.find(b => b.bureau === fundingBureauTab);
+                              if (!activeBureau) return null;
+                              if (!activeBureau.uploaded || !activeBureau.guidance) {
+                                return (
+                                  <div className="text-center py-10">
+                                    <Upload className="w-10 h-10 text-[#1a1a2e]/15 mx-auto mb-3" />
+                                    <p className="text-[13px] text-[#1a1a2e]/60 mb-1 font-medium">No {activeBureau.bureau} report uploaded</p>
+                                    <p className="text-[10px] text-[#1a1a2e]/40 mb-3">Upload your {activeBureau.bureau} credit report from Mission Control to see your funding roadmap</p>
+                                    <button onClick={() => setActiveTab("mission_control")} className="text-[11px] text-[#3a3a5a] hover:underline font-medium" data-testid="link-go-upload">Go to Mission Control →</button>
+                                  </div>
+                                );
+                              }
+                              const g = activeBureau.guidance;
+                              const bureauPhaseIdx = phaseSteps.findIndex(p => p.label.toLowerCase() === g.fundingPhase.toLowerCase());
+
+                              const steps: { title: string; detail: string; status: "done" | "current" | "pending"; icon: any }[] = [];
+
+                              const hasNoNegatives = g.collections === 0 && g.chargeOffs === 0 && g.latePayments === 0;
+                              steps.push({
+                                title: "Clean Up Negative Items",
+                                detail: hasNoNegatives
+                                  ? "No collections, charge-offs, or late payments found — you're clean."
+                                  : `${g.collections} collection(s), ${g.chargeOffs} charge-off(s), ${g.latePayments} late payment(s) need attention.`,
+                                status: hasNoNegatives ? "done" : (bureauPhaseIdx <= 0 ? "current" : "pending"),
+                                icon: Shield,
+                              });
+
+                              const goodUtil = activeBureau.utilization <= 10;
+                              steps.push({
+                                title: "Optimize Utilization to ≤10%",
+                                detail: goodUtil
+                                  ? `Current utilization is ${activeBureau.utilization}% — optimal for approvals.`
+                                  : `Current utilization is ${activeBureau.utilization}% — pay down balances to get below 10%.`,
+                                status: goodUtil ? "done" : (hasNoNegatives ? "current" : "pending"),
+                                icon: TrendingUp,
+                              });
+
+                              const goodSeasoning = (g as any).avgOpenAccountAgeYears >= 2 && (g as any).newAccountsLast6Months <= 1;
+                              steps.push({
+                                title: "Season Your Accounts",
+                                detail: goodSeasoning
+                                  ? `Average account age is ${(g as any).avgOpenAccountAgeYears}yr with ${(g as any).newAccountsLast6Months} new account(s) in 6 months — well seasoned.`
+                                  : `Average age: ${(g as any).avgOpenAccountAgeYears || 0}yr, ${(g as any).newAccountsLast6Months ?? 0} new account(s) in 6mo. Avoid opening new accounts.`,
+                                status: goodSeasoning ? "done" : (hasNoNegatives && goodUtil ? "current" : "pending"),
+                                icon: Clock,
+                              });
+
+                              const lowInquiries = activeBureau.hardInquiries <= 2;
+                              steps.push({
+                                title: "Minimize Hard Inquiries",
+                                detail: lowInquiries
+                                  ? `Only ${activeBureau.hardInquiries} hard inquir${activeBureau.hardInquiries === 1 ? "y" : "ies"} — inquiry velocity is safe.`
+                                  : `${activeBureau.hardInquiries} hard inquiries detected — stop applying for new credit.`,
+                                status: lowInquiries ? "done" : (hasNoNegatives && goodUtil && goodSeasoning ? "current" : "pending"),
+                                icon: Eye,
+                              });
+
+                              const goodMix = g.accountMix === "Strong Mix" || g.accountMix === "Adequate Mix";
+                              steps.push({
+                                title: "Build Account Mix",
+                                detail: goodMix
+                                  ? `Account mix is "${g.accountMix}" with ${g.openAccounts} open accounts — diverse portfolio.`
+                                  : `Account mix is "${g.accountMix || "Limited"}" — consider adding different account types.`,
+                                status: goodMix ? "done" : "pending",
+                                icon: Building2,
+                              });
+
+                              steps.push({
+                                title: "Submit Funding Application",
+                                detail: g.applicationReady
+                                  ? `This bureau is ready! Potential funding: $${g.exposureCeiling.toLocaleString()} based on your highest limit.`
+                                  : `Not ready yet — resolve ${g.denialTriggers.length} denial trigger(s) first.`,
+                                status: g.applicationReady ? "done" : "pending",
+                                icon: DollarSign,
+                              });
+
+                              const waitMonths = g.velocityRisk?.mandatoryWaitingMonths || 0;
+                              const daysUntilOptimal = capitalOsData.applicationWindow.daysUntilOptimal;
+
+                              return (
+                                <div className="space-y-6">
+                                  <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-3">
+                                      <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ backgroundColor: g.riskTierColor + '15' }}>
+                                        <Target className="w-5 h-5" style={{ color: g.riskTierColor }} />
+                                      </div>
+                                      <div>
+                                        <p className="text-sm font-bold" style={{ color: g.riskTierColor }}>{g.riskTier.replace("_", " ")}</p>
+                                        <p className="text-[10px] text-[#1a1a2e]/50">{g.fundingPhase} Phase · {g.openAccounts} accounts</p>
+                                      </div>
+                                    </div>
+                                    <div className="text-right">
+                                      <p className="text-[9px] text-[#1a1a2e]/40 uppercase">Potential Funding</p>
+                                      <p className="text-lg font-bold text-[#1a1a2e] font-mono">${g.exposureCeiling.toLocaleString()}</p>
+                                    </div>
+                                  </div>
+
+                                  <div data-testid="funding-steps">
+                                    <p className="text-[10px] text-[#1a1a2e]/50 uppercase mb-3 font-medium">Step-by-Step to Funding Ready</p>
+                                    <div className="space-y-0">
+                                      {steps.map((step, i) => {
+                                        const StepIcon = step.icon;
+                                        return (
+                                          <div key={i} className="flex gap-3" data-testid={`funding-step-${i}`}>
+                                            <div className="flex flex-col items-center">
+                                              <div className={cn("w-8 h-8 rounded-full flex items-center justify-center shrink-0 transition-all",
+                                                step.status === "done" ? "bg-green-500 text-white" :
+                                                step.status === "current" ? "bg-[#3a3a5a] text-white ring-2 ring-[#3a3a5a]/20" :
+                                                "bg-[#e0e0ea] text-[#1a1a2e]/30"
+                                              )}>
+                                                {step.status === "done" ? <Check className="w-3.5 h-3.5" /> : <StepIcon className="w-3.5 h-3.5" />}
+                                              </div>
+                                              {i < steps.length - 1 && <div className={cn("w-0.5 flex-1 my-1", step.status === "done" ? "bg-green-400" : "bg-[#e0e0ea]")} />}
+                                            </div>
+                                            <div className={cn("flex-1 pb-4", step.status === "pending" && "opacity-50")}>
+                                              <p className={cn("text-[12px] font-semibold mb-0.5", step.status === "done" ? "text-green-600" : step.status === "current" ? "text-[#1a1a2e]" : "text-[#1a1a2e]/50")}>{step.title}</p>
+                                              <p className="text-[10px] text-[#1a1a2e]/60 leading-relaxed">{step.detail}</p>
+                                            </div>
+                                          </div>
+                                        );
+                                      })}
+                                    </div>
+                                  </div>
+
+                                  <div className="rounded-xl bg-white/50 border border-white/30 p-4" data-testid="funding-timeline">
+                                    <p className="text-[10px] text-[#1a1a2e]/50 uppercase mb-3 font-medium flex items-center gap-1.5"><Calendar className="w-3 h-3" /> Estimated Timeline</p>
+                                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                                      <div className="text-center p-2 rounded-lg bg-white/60">
+                                        <p className="text-[8px] text-[#1a1a2e]/40 uppercase mb-1">Application Window</p>
+                                        <p className={cn("text-[11px] font-bold", g.applicationReady ? "text-green-600" : "text-yellow-600")}>
+                                          {g.applicationReady ? "Open Now" : daysUntilOptimal > 0 ? `~${daysUntilOptimal} days` : "Pending"}
+                                        </p>
+                                      </div>
+                                      <div className="text-center p-2 rounded-lg bg-white/60">
+                                        <p className="text-[8px] text-[#1a1a2e]/40 uppercase mb-1">Wait Period</p>
+                                        <p className={cn("text-[11px] font-bold font-mono", waitMonths > 0 ? "text-red-600" : "text-green-600")}>
+                                          {waitMonths > 0 ? `${waitMonths} month${waitMonths > 1 ? "s" : ""}` : "None"}
+                                        </p>
+                                      </div>
+                                      <div className="text-center p-2 rounded-lg bg-white/60">
+                                        <p className="text-[8px] text-[#1a1a2e]/40 uppercase mb-1">Avg Account Age</p>
+                                        <p className={cn("text-[11px] font-bold font-mono", (g as any).avgOpenAccountAgeYears < 2 ? "text-yellow-600" : "text-green-600")}>
+                                          {(g as any).avgOpenAccountAgeYears ? `${(g as any).avgOpenAccountAgeYears} yr` : "—"}
+                                        </p>
+                                      </div>
+                                      <div className="text-center p-2 rounded-lg bg-white/60">
+                                        <p className="text-[8px] text-[#1a1a2e]/40 uppercase mb-1">Velocity Tier</p>
+                                        <p className={cn("text-[11px] font-bold",
+                                          !g.velocityRisk || g.velocityRisk.velocityTier === "A" ? "text-green-600" :
+                                          g.velocityRisk.velocityTier === "B" ? "text-yellow-600" : "text-red-600"
+                                        )}>
+                                          {g.velocityRisk ? `Tier ${g.velocityRisk.velocityTier}` : "Tier A"}
+                                        </p>
+                                      </div>
+                                    </div>
+                                  </div>
+
+                                  {g.denialTriggers.length > 0 && (
+                                    <div className="rounded-xl bg-red-500/[0.04] border border-red-500/10 p-4" data-testid="denial-triggers">
+                                      <p className="text-[10px] text-red-600/70 uppercase mb-2 font-medium flex items-center gap-1.5"><AlertTriangle className="w-3 h-3" /> Denial Triggers — Fix These First</p>
+                                      {g.denialTriggers.map((t, i) => (
+                                        <p key={i} className="text-[11px] text-[#1a1a2e]/70 flex items-start gap-2 mb-1.5"><AlertTriangle className="w-3 h-3 text-red-500/60 shrink-0 mt-0.5" />{t}</p>
+                                      ))}
+                                    </div>
+                                  )}
+
+                                  <div className="rounded-xl bg-white/50 border border-white/30 p-4" data-testid="funding-next-steps">
+                                    <p className="text-[10px] text-[#1a1a2e]/50 uppercase mb-3 font-medium flex items-center gap-1.5"><ArrowRight className="w-3 h-3" /> Next Steps for {activeBureau.bureau}</p>
+                                    <div className="space-y-2">
+                                      {g.actionItems.map((item, i) => (
+                                        <div key={i} className="flex items-start gap-2.5 p-2.5 rounded-lg bg-white/60" data-testid={`next-step-${i}`}>
+                                          <div className="w-5 h-5 rounded-full bg-[#3a3a5a]/10 flex items-center justify-center shrink-0 mt-0.5">
+                                            <span className="text-[9px] font-bold text-[#3a3a5a]">{i + 1}</span>
+                                          </div>
+                                          <p className="text-[11px] text-[#1a1a2e]/75 leading-relaxed">{item}</p>
+                                        </div>
+                                      ))}
+                                    </div>
+                                    {g.applicationReady && (
+                                      <div className="mt-3 p-3 rounded-lg bg-green-500/[0.06] border border-green-500/15 flex items-center gap-2">
+                                        <CheckCircle2 className="w-4 h-4 text-green-500 shrink-0" />
+                                        <p className="text-[11px] text-green-700/80">This bureau is application-ready. Apply through {activeBureau.bureau} for best approval odds.</p>
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
+                              );
+                            })()}
+                          </div>
+                        </div>
+
+                        {capitalOsData.readiness.riskDepartmentNotes && (
+                          <div className="rounded-2xl bg-white/70 backdrop-blur-md border border-white/40 p-6" data-testid="risk-notes">
+                            <p className="text-xs text-[#1a1a2e]/70 mb-3 flex items-center gap-1.5"><Info className="w-3.5 h-3.5" /> Risk Assessment Notes</p>
+                            <p className="text-[11px] text-[#1a1a2e]/70 leading-relaxed">{capitalOsData.readiness.riskDepartmentNotes}</p>
+                          </div>
+                        )}
+                      </>
+                    );
+                  })()}
+                </>
+              ) : capitalOsLoading ? (
+                <div className="flex items-center justify-center py-20"><Loader2 className="w-6 h-6 animate-spin text-[#1a1a2e]/50" /></div>
+              ) : (
+                <div className="rounded-2xl bg-white/70 backdrop-blur-md border border-white/40 p-8 text-center">
+                  <DollarSign className="w-10 h-10 text-[#1a1a2e]/30 mx-auto mb-3" />
+                  <p className="text-sm text-[#1a1a2e]/70 mb-1">No funding data available</p>
+                  <p className="text-[10px] text-[#1a1a2e]/40 mb-3">Upload a credit report from Mission Control to see your funding strategy</p>
+                  <button onClick={() => setActiveTab("mission_control")} className="text-xs text-[#3a3a5a] hover:underline font-medium" data-testid="link-go-upload-2">Go to Mission Control →</button>
                 </div>
               )}
-
-              <div className="rounded-2xl bg-white/70 backdrop-blur-md border border-white/40 p-6" data-testid="capital-stack-simulator">
-                <p className="text-xs text-[#1a1a2e]/70 mb-4">Capital Stack Simulator</p>
-                <div className="flex gap-3 mb-4">
-                  <div className="flex-1">
-                    <label className="text-[10px] text-[#1a1a2e]/60 mb-1 block">Target Amount ($)</label>
-                    <input type="number" value={capitalStackAmount} onChange={e => setCapitalStackAmount(Number(e.target.value))}
-                      className="w-full h-10 px-3 rounded-xl bg-white/60 border border-white/30 text-sm text-[#1a1a2e] outline-none focus:border-[#c0c0d0]" data-testid="input-target-amount" />
-                  </div>
-                  <button onClick={submitCapitalStack} disabled={capitalStackLoading}
-                    className="self-end h-10 px-5 rounded-xl bg-[#3a3a5a] text-white text-xs font-medium hover:bg-[#2a2a4a] disabled:opacity-50 transition-colors flex items-center gap-2" data-testid="button-simulate-stack">
-                    {capitalStackLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <BarChart3 className="w-3.5 h-3.5" />}
-                    Simulate
-                  </button>
-                </div>
-
-                {capitalStackResult && (
-                  <div className="mt-2" data-testid="capital-stack-result">
-                    <div className="flex items-center justify-between p-3 rounded-xl bg-white/50 border border-white/30 mb-4">
-                      <div>
-                        <p className="text-[10px] text-[#1a1a2e]/50">Total Estimated</p>
-                        <p className="text-xl font-bold text-[#1a1a2e]">${capitalStackResult.totalEstimated?.toLocaleString()}</p>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-[10px] text-[#1a1a2e]/50">Timeline</p>
-                        <p className="text-sm font-medium text-[#1a1a2e]">{capitalStackResult.timeline}</p>
-                      </div>
-                    </div>
-                    <div className="space-y-0">
-                      {capitalStackResult.stages?.map((stage: any, i: number) => (
-                        <div key={i} className="flex gap-4" data-testid={`stage-${i}`}>
-                          <div className="flex flex-col items-center">
-                            <div className={cn("w-8 h-8 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0",
-                              i === 0 ? "bg-[#3a3a5a] text-white" : "bg-white/60 border border-white/30 text-[#1a1a2e]/60"
-                            )}>{stage.stage}</div>
-                            {i < (capitalStackResult.stages?.length || 0) - 1 && <div className="w-px flex-1 bg-[#e0e0ea] my-1" />}
-                          </div>
-                          <div className="flex-1 pb-5">
-                            <p className="text-sm font-medium text-[#1a1a2e]/90">{stage.product}</p>
-                            <p className="text-[10px] text-[#1a1a2e]/50">{stage.bureau} · {stage.timing}</p>
-                            <p className="text-xs font-semibold text-[#1a1a2e]/80 mt-1">${stage.estimatedAmount?.toLocaleString()}</p>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
             </div>
           )}
 
@@ -2250,292 +2392,6 @@ export default function DashboardPage() {
             </div>
           )}
 
-          {activeTab === "progress_tracker" && (
-            <div className="w-full px-5 sm:px-8 py-6 max-w-[1000px] mx-auto">
-              <div className="mb-6">
-                <h2 className="text-lg font-semibold text-[#1a1a2e]" data-testid="text-progress-title">Progress Tracker</h2>
-                <p className="text-[11px] text-[#1a1a2e]/60">Phase progression, bureau-level underwriting, and exposure analysis</p>
-              </div>
-
-              {capitalOsData ? (
-                <>
-                  <div className="rounded-2xl bg-white/70 backdrop-blur-md border border-white/40 p-6 mb-6" data-testid="phase-progress-card">
-                    <p className="text-xs text-[#1a1a2e]/70 mb-4">Phase Progress</p>
-                    <div className="flex items-center gap-2 mb-4">
-                      {capitalOsData.phase.phases.map((p, i) => (
-                        <div key={p.key} className="flex-1 flex flex-col items-center">
-                          <div className={cn(
-                            "w-10 h-10 rounded-full flex items-center justify-center text-[11px] font-bold mb-2 transition-all",
-                            p.completed ? "bg-[#3a3a5a] text-white" :
-                            p.active ? "bg-[#3a3a5a]/20 text-[#3a3a5a] ring-2 ring-[#3a3a5a]/30" :
-                            "bg-[#e0e0ea] text-[#1a1a2e]/40"
-                          )}>
-                            {p.completed ? <Check className="w-4 h-4" /> : i + 1}
-                          </div>
-                          <span className={cn("text-[10px] text-center", p.active ? "text-[#1a1a2e] font-semibold" : "text-[#1a1a2e]/50")}>{p.label}</span>
-                        </div>
-                      ))}
-                    </div>
-                    <div className="w-full h-2 rounded-full bg-[#e0e0ea] overflow-hidden mb-3">
-                      <div className="h-full rounded-full bg-[#3a3a5a] transition-all" style={{ width: `${capitalOsData.phase.progress}%` }} />
-                    </div>
-                    <p className="text-[11px] text-[#1a1a2e]/70 leading-relaxed">{capitalOsData.phase.reasoning}</p>
-                  </div>
-
-                  <div className="rounded-2xl bg-white/70 backdrop-blur-md border border-white/40 p-6 mb-6" data-testid="bureau-tabs-progress">
-                    <p className="text-xs text-[#1a1a2e]/70 mb-4">Bureau Underwriting Review</p>
-                    <div className="flex gap-1 mb-5 p-1 rounded-xl bg-white/50">
-                      {capitalOsData.bureauHealth.bureaus.map(b => (
-                        <button
-                          key={b.bureau}
-                          onClick={() => setProgressBureauTab(b.bureau)}
-                          className={cn(
-                            "flex-1 py-2.5 px-3 rounded-lg text-[11px] font-medium transition-all",
-                            progressBureauTab === b.bureau
-                              ? "bg-white shadow-sm text-[#1a1a2e]"
-                              : "text-[#1a1a2e]/50 hover:text-[#1a1a2e]/70"
-                          )}
-                          data-testid={`tab-progress-bureau-${b.bureau.toLowerCase()}`}
-                        >
-                          <div className="flex flex-col items-center gap-1">
-                            <span>{b.bureau}</span>
-                            {b.uploaded && b.guidance ? (
-                              <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full" style={{ backgroundColor: b.guidance.riskTierColor + '15', color: b.guidance.riskTierColor }}>{b.guidance.riskTier.replace("_", " ")}</span>
-                            ) : (
-                              <span className="text-[9px] text-[#1a1a2e]/30">Not Uploaded</span>
-                            )}
-                          </div>
-                        </button>
-                      ))}
-                    </div>
-
-                    {(() => {
-                      const activeBureau = capitalOsData.bureauHealth.bureaus.find(b => b.bureau === progressBureauTab);
-                      if (!activeBureau) return null;
-                      if (!activeBureau.uploaded || !activeBureau.guidance) {
-                        return (
-                          <div className="text-center py-8">
-                            <Upload className="w-8 h-8 text-[#1a1a2e]/20 mx-auto mb-3" />
-                            <p className="text-[12px] text-[#1a1a2e]/50 mb-1">No {activeBureau.bureau} report uploaded</p>
-                            <p className="text-[10px] text-[#1a1a2e]/40">Upload from Mission Control to see bureau analysis</p>
-                          </div>
-                        );
-                      }
-                      const g = activeBureau.guidance;
-                      return (
-                        <div className="space-y-4">
-                          <div className="flex items-center justify-between p-3 rounded-xl bg-white/50 border border-white/30">
-                            <div className="flex items-center gap-3">
-                              <div className="w-10 h-10 rounded-lg flex items-center justify-center" style={{ backgroundColor: g.riskTierColor + '15' }}>
-                                <Shield className="w-5 h-5" style={{ color: g.riskTierColor }} />
-                              </div>
-                              <div>
-                                <p className="text-sm font-bold" style={{ color: g.riskTierColor }}>{g.riskTier.replace("_", " ")}</p>
-                                <p className="text-[10px] text-[#1a1a2e]/50">{g.fundingPhase} Phase</p>
-                              </div>
-                            </div>
-                            <div className="text-right">
-                              {g.score && <p className="text-lg font-bold text-[#1a1a2e] font-mono">{g.score}</p>}
-                              <span className={cn("text-[10px] px-2 py-0.5 rounded-full font-medium", g.applicationReady ? "bg-green-500/15 text-green-600" : "bg-red-500/15 text-red-600")}>{g.applicationReady ? "Application Ready" : "Not Ready"}</span>
-                            </div>
-                          </div>
-
-                          <div>
-                            <p className="text-[10px] text-[#1a1a2e]/50 uppercase mb-2">Exposure — 2.5x Highest Limit</p>
-                            <div className="grid grid-cols-3 gap-2">
-                              <div className="p-3 rounded-xl bg-white/50 border border-white/30 text-center">
-                                <p className="text-[8px] text-[#1a1a2e]/40 uppercase mb-1">Highest Limit</p>
-                                <p className="text-sm font-bold text-[#1a1a2e] font-mono">${(g.exposureCeiling / 2.5).toLocaleString(undefined, {maximumFractionDigits: 0})}</p>
-                              </div>
-                              <div className="p-3 rounded-xl bg-white/50 border border-white/30 text-center">
-                                <p className="text-[8px] text-[#1a1a2e]/40 uppercase mb-1">Exposure Ceiling</p>
-                                <p className="text-sm font-bold text-[#1a1a2e] font-mono">${g.exposureCeiling.toLocaleString()}</p>
-                              </div>
-                              <div className="p-3 rounded-xl bg-white/50 border border-white/30 text-center">
-                                <p className="text-[8px] text-[#1a1a2e]/40 uppercase mb-1">Remaining</p>
-                                <p className={cn("text-sm font-bold font-mono", (g.exposureCeiling - g.totalRevolvingLimit) >= 0 ? "text-green-600" : "text-red-600")}>
-                                  {(g.exposureCeiling - g.totalRevolvingLimit) < 0 ? "-" : ""}${Math.abs(g.exposureCeiling - g.totalRevolvingLimit).toLocaleString()}
-                                </p>
-                              </div>
-                            </div>
-                          </div>
-
-                          <div>
-                            <p className="text-[10px] text-[#1a1a2e]/50 uppercase mb-2">Revolving Utilization</p>
-                            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                              <div className="p-2 rounded-lg bg-white/60 text-center">
-                                <p className="text-[8px] text-[#1a1a2e]/40 uppercase">Aggregate</p>
-                                <p className={cn("text-sm font-bold font-mono", activeBureau.utilization > 50 ? "text-red-600" : activeBureau.utilization > 30 ? "text-yellow-600" : "text-green-600")}>{activeBureau.utilization}%</p>
-                              </div>
-                              <div className="p-2 rounded-lg bg-white/60 text-center">
-                                <p className="text-[8px] text-[#1a1a2e]/40 uppercase">Highest Card</p>
-                                <p className={cn("text-sm font-bold font-mono", (g.highestSingleCardUtil || 0) > 75 ? "text-red-600" : (g.highestSingleCardUtil || 0) > 50 ? "text-yellow-600" : "text-green-600")}>{g.highestSingleCardUtil ?? "—"}%</p>
-                              </div>
-                              <div className="p-2 rounded-lg bg-white/60 text-center">
-                                <p className="text-[8px] text-[#1a1a2e]/40 uppercase">Cards &gt;75%</p>
-                                <p className={cn("text-sm font-bold font-mono", g.revolvingAccountsOver75Util > 0 ? "text-red-600" : "text-green-600")}>{g.revolvingAccountsOver75Util}</p>
-                              </div>
-                              <div className="p-2 rounded-lg bg-white/60 text-center">
-                                <p className="text-[8px] text-[#1a1a2e]/40 uppercase">Zero-Balance</p>
-                                <p className="text-sm font-bold font-mono text-[#1a1a2e]/80">{g.zeroBalanceRevolvingAccounts}</p>
-                              </div>
-                            </div>
-                          </div>
-
-                          <div>
-                            <p className="text-[10px] text-[#1a1a2e]/50 uppercase mb-2">Payment &amp; Derogatory</p>
-                            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                              <div className="p-2 rounded-lg bg-white/60 text-center">
-                                <p className="text-[8px] text-[#1a1a2e]/40 uppercase">Late Payments</p>
-                                <p className={cn("text-sm font-bold font-mono", g.latePayments > 0 ? "text-red-600" : "text-green-600")}>{g.latePayments}</p>
-                              </div>
-                              <div className="p-2 rounded-lg bg-white/60 text-center">
-                                <p className="text-[8px] text-[#1a1a2e]/40 uppercase">Recency</p>
-                                <p className={cn("text-[11px] font-semibold", g.paymentRecency === "No Lates" || !g.paymentRecency ? "text-green-600" : g.paymentRecency === "Within 6 Months" ? "text-red-600" : "text-yellow-600")}>{g.paymentRecency || "No Lates"}</p>
-                              </div>
-                              <div className="p-2 rounded-lg bg-white/60 text-center">
-                                <p className="text-[8px] text-[#1a1a2e]/40 uppercase">Collections</p>
-                                <p className={cn("text-sm font-bold font-mono", g.collections > 0 ? "text-red-600" : "text-green-600")}>{g.collections}{g.collectionsBalance > 0 ? ` ($${g.collectionsBalance.toLocaleString()})` : ""}</p>
-                              </div>
-                              <div className="p-2 rounded-lg bg-white/60 text-center">
-                                <p className="text-[8px] text-[#1a1a2e]/40 uppercase">Charge-offs</p>
-                                <p className={cn("text-sm font-bold font-mono", g.chargeOffs > 0 ? "text-red-600" : "text-green-600")}>{g.chargeOffs}</p>
-                              </div>
-                            </div>
-                          </div>
-
-                          <div>
-                            <p className="text-[10px] text-[#1a1a2e]/50 uppercase mb-2">Tradeline Profile</p>
-                            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                              <div className="p-2 rounded-lg bg-white/60 text-center">
-                                <p className="text-[8px] text-[#1a1a2e]/40 uppercase">Open Accounts</p>
-                                <p className="text-sm font-bold font-mono text-[#1a1a2e]/80">{g.openAccounts}</p>
-                              </div>
-                              <div className="p-2 rounded-lg bg-white/60 text-center">
-                                <p className="text-[8px] text-[#1a1a2e]/40 uppercase">Installment</p>
-                                <p className="text-sm font-bold font-mono text-[#1a1a2e]/80">{g.totalInstallmentAccounts}</p>
-                              </div>
-                              <div className="p-2 rounded-lg bg-white/60 text-center">
-                                <p className="text-[8px] text-[#1a1a2e]/40 uppercase">Mortgage</p>
-                                <p className={cn("text-sm font-bold", g.hasMortgage ? "text-green-600" : "text-[#1a1a2e]/40")}>{g.hasMortgage ? "Yes" : "No"}</p>
-                              </div>
-                              <div className="p-2 rounded-lg bg-white/60 text-center">
-                                <p className="text-[8px] text-[#1a1a2e]/40 uppercase">Account Mix</p>
-                                <p className={cn("text-[11px] font-semibold", g.accountMix === "Strong Mix" || g.accountMix === "Adequate Mix" ? "text-green-600" : g.accountMix === "Limited Mix" ? "text-yellow-600" : "text-red-600")}>{g.accountMix || "—"}</p>
-                              </div>
-                            </div>
-                          </div>
-
-                          <div>
-                            <p className="text-[10px] text-[#1a1a2e]/50 uppercase mb-2">Account Seasoning</p>
-                            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                              <div className="p-2 rounded-lg bg-white/60 text-center">
-                                <p className="text-[8px] text-[#1a1a2e]/40 uppercase">New (6mo)</p>
-                                <p className={cn("text-sm font-bold font-mono", (g as any).newAccountsLast6Months > 2 ? "text-red-600" : (g as any).newAccountsLast6Months > 1 ? "text-yellow-600" : "text-green-600")}>{(g as any).newAccountsLast6Months ?? "—"}</p>
-                              </div>
-                              <div className="p-2 rounded-lg bg-white/60 text-center">
-                                <p className="text-[8px] text-[#1a1a2e]/40 uppercase">New (12mo)</p>
-                                <p className={cn("text-sm font-bold font-mono", (g as any).newAccountsLast12Months > 4 ? "text-red-600" : (g as any).newAccountsLast12Months > 2 ? "text-yellow-600" : "text-green-600")}>{(g as any).newAccountsLast12Months ?? "—"}</p>
-                              </div>
-                              <div className="p-2 rounded-lg bg-white/60 text-center">
-                                <p className="text-[8px] text-[#1a1a2e]/40 uppercase">Avg Age</p>
-                                <p className={cn("text-[11px] font-semibold", (g as any).avgOpenAccountAgeYears < 1 ? "text-red-600" : (g as any).avgOpenAccountAgeYears < 2 ? "text-yellow-600" : "text-green-600")}>{(g as any).avgOpenAccountAgeYears ? `${(g as any).avgOpenAccountAgeYears}yr` : "—"}</p>
-                              </div>
-                              <div className="p-2 rounded-lg bg-white/60 text-center">
-                                <p className="text-[8px] text-[#1a1a2e]/40 uppercase">5yr+ Accts</p>
-                                <p className="text-sm font-bold font-mono text-[#1a1a2e]/80">{(g as any).accountsOlderThan5Years ?? "—"}</p>
-                              </div>
-                            </div>
-                          </div>
-
-                          <div>
-                            <p className="text-[10px] text-[#1a1a2e]/50 uppercase mb-2">Balance &amp; Depth</p>
-                            <div className="grid grid-cols-3 gap-2">
-                              <div className="p-2 rounded-lg bg-white/60 text-center">
-                                <p className="text-[8px] text-[#1a1a2e]/40 uppercase">Total Limits</p>
-                                <p className="text-sm font-bold font-mono text-[#1a1a2e]/80">${g.totalRevolvingLimit.toLocaleString()}</p>
-                              </div>
-                              <div className="p-2 rounded-lg bg-white/60 text-center">
-                                <p className="text-[8px] text-[#1a1a2e]/40 uppercase">Balance Trend</p>
-                                <p className={cn("text-[11px] font-semibold", g.balanceTrend === "Improving" ? "text-green-600" : g.balanceTrend === "Stable" ? "text-[#1a1a2e]/70" : "text-red-600")}>{g.balanceTrend || "—"}</p>
-                              </div>
-                              <div className="p-2 rounded-lg bg-white/60 text-center">
-                                <p className="text-[8px] text-[#1a1a2e]/40 uppercase">Inquiries</p>
-                                <p className={cn("text-sm font-bold font-mono", activeBureau.hardInquiries > 4 ? "text-red-600" : activeBureau.hardInquiries > 2 ? "text-yellow-600" : "text-green-600")}>{activeBureau.hardInquiries}</p>
-                              </div>
-                            </div>
-                          </div>
-
-                          {g.authorizedUserAccounts > 0 && (
-                            <div className="p-3 rounded-xl bg-yellow-500/[0.06] border border-yellow-500/15">
-                              <p className="text-[10px] text-yellow-600/80"><span className="font-medium">AU Alert:</span> {g.authorizedUserAccounts} authorized user account(s) — reduced weight in underwriting</p>
-                            </div>
-                          )}
-
-                          {g.velocityRisk && (
-                            <div className="p-3 rounded-xl bg-white/50 border border-white/30">
-                              <div className="flex items-center justify-between mb-2">
-                                <p className="text-[10px] text-[#1a1a2e]/50 uppercase">Velocity Risk</p>
-                                <span className={cn("text-[10px] font-bold px-2 py-0.5 rounded-full",
-                                  g.velocityRisk.velocityTier === "A" ? "bg-green-500/15 text-green-600" :
-                                  g.velocityRisk.velocityTier === "B" ? "bg-yellow-500/15 text-yellow-600" :
-                                  g.velocityRisk.velocityTier === "C" ? "bg-orange-500/15 text-orange-600" :
-                                  "bg-red-500/15 text-red-600"
-                                )}>Tier {g.velocityRisk.velocityTier} — {g.velocityRisk.velocityTierLabel}</span>
-                              </div>
-                              <div className="grid grid-cols-2 gap-2 text-[10px]">
-                                <div className="flex justify-between"><span className="text-[#1a1a2e]/50">Expansion</span><span className="font-medium">{g.velocityRisk.portfolioExpansionGrade}</span></div>
-                                <div className="flex justify-between"><span className="text-[#1a1a2e]/50">Adj. Ceiling</span><span className="font-mono font-semibold">${g.velocityRisk.adjustedExposureCeiling.toLocaleString()}</span></div>
-                              </div>
-                              {g.velocityRisk.mandatoryWaitingMonths > 0 && (
-                                <p className="text-[9px] text-red-500/70 mt-1">Mandatory {g.velocityRisk.mandatoryWaitingMonths}-month wait before new applications</p>
-                              )}
-                            </div>
-                          )}
-
-                          {g.denialTriggers.length > 0 && (
-                            <div className="p-3 rounded-xl bg-red-500/[0.04] border border-red-500/10">
-                              <p className="text-[10px] text-red-600/70 uppercase mb-2">Denial Triggers</p>
-                              {g.denialTriggers.map((t, i) => (
-                                <p key={i} className="text-[11px] text-[#1a1a2e]/70 flex items-start gap-2 mb-1"><AlertTriangle className="w-3 h-3 text-red-500/60 shrink-0 mt-0.5" />{t}</p>
-                              ))}
-                            </div>
-                          )}
-
-                          <div>
-                            <p className="text-[10px] text-[#1a1a2e]/50 uppercase mb-2">Action Items</p>
-                            <div className="space-y-1.5">
-                              {g.actionItems.map((item, i) => (
-                                <div key={i} className="flex items-start gap-2">
-                                  <div className="w-1.5 h-1.5 rounded-full bg-[#3a3a5a]/40 mt-1.5 shrink-0" />
-                                  <p className="text-[11px] text-[#1a1a2e]/70 leading-relaxed">{item}</p>
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                        </div>
-                      );
-                    })()}
-                  </div>
-
-                  {capitalOsData.readiness.riskDepartmentNotes && (
-                    <div className="rounded-2xl bg-white/70 backdrop-blur-md border border-white/40 p-6" data-testid="risk-notes-card">
-                      <p className="text-xs text-[#1a1a2e]/70 mb-3">Risk Department Notes</p>
-                      <p className="text-[11px] text-[#1a1a2e]/70 leading-relaxed">{capitalOsData.readiness.riskDepartmentNotes}</p>
-                    </div>
-                  )}
-                </>
-              ) : capitalOsLoading ? (
-                <div className="flex items-center justify-center py-20"><Loader2 className="w-6 h-6 animate-spin text-[#1a1a2e]/50" /></div>
-              ) : (
-                <div className="rounded-2xl bg-white/70 backdrop-blur-md border border-white/40 p-8 text-center">
-                  <Activity className="w-10 h-10 text-[#1a1a2e]/30 mx-auto mb-3" />
-                  <p className="text-sm text-[#1a1a2e]/70">No progress data available</p>
-                  <button onClick={fetchCapitalOsDashboard} className="mt-3 text-xs text-[#1a1a2e]/60 hover:text-[#1a1a2e]/80 underline">Load Data</button>
-                </div>
-              )}
-            </div>
-          )}
 
         </div>
       </main>
