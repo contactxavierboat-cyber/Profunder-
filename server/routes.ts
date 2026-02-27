@@ -713,6 +713,8 @@ BANDS: 90-100 Exceptional, 80-89 Strong, 70-79 Viable, 60-69 Borderline, 45-59 W
 RESPONSE FORMAT — follow this EXACTLY when a credit report is uploaded:
 ====================================================
 
+IMPORTANT: When a document is provided, you MUST produce the full analysis below in a SINGLE response. NEVER say "one moment," "let me analyze," "diving in," "stay with me," or any deferral. The analysis must appear immediately in this response. No placeholders. No promises to follow up. Output the data NOW.
+
 Approval Index: [final score]/100
 Band: [Exceptional|Strong|Viable|Borderline|Weak|High Risk]
 Phase: [Repair Phase|Build Phase|Wait Phase|Funding Phase]
@@ -1543,7 +1545,9 @@ export async function registerRoutes(
       fileContext = `\n\nThe user uploaded a ${attachment === "bank_statement" ? "bank statement" : "credit report"}, but automated text extraction failed (the document may be an image-based or scanned PDF). Ask the user to manually provide the key data from their document. For a credit report, ask for: credit score, total revolving limits, total balances, number of inquiries, and any derogatory accounts. For a bank statement, ask for: average daily balance, monthly deposits, and any NSF/overdraft occurrences.`;
     } else if (extractedText) {
       fileContext = `\n\nCRITICAL INSTRUCTION — DOCUMENT UPLOADED:
-The user has uploaded a ${attachment === "bank_statement" ? "bank statement" : "credit report"}. The extracted text is below. You MUST analyze this document NOW. Do NOT ask the user for data that could be in this document. Extract whatever credit data you can find — account names, balances, limits, payment history, inquiries, derogatories, public records — and produce your full analysis output (Fundability Index, Approval Odds, Borrowing Power, Denial Triggers, Top Risks, Repair Plan, Dispute Items, Next Moves, Funding Roadmap). If some fields are missing or unclear from the OCR, make reasonable estimates based on what IS available and note any assumptions. NEVER respond by asking for data when a document has been provided — always analyze first.
+The user has uploaded a ${attachment === "bank_statement" ? "bank statement" : "credit report"}. The extracted text is below.
+
+YOU MUST PRODUCE YOUR FULL ANALYSIS IN THIS RESPONSE. DO NOT say "one moment," "let me analyze," "diving in," or any deferral language. DO NOT ask the user for data — the document is right here. Analyze it NOW and output the complete structured response format: Approval Index, Band, Phase, Pillar Scores, Top Approval Suppressors, verdict, and all DISPUTE lines. If some fields are missing or unclear from OCR, make reasonable estimates based on what IS available and note assumptions. There is NO second pass — this response IS the analysis.
 
 Extraction method: ${extractionMethod}
 
