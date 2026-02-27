@@ -2,7 +2,7 @@ import Stripe from 'stripe';
 
 let connectionSettings: any;
 
-async function getCredentials() {
+async function fetchCredentialsForEnvironment(environment: string) {
   const hostname = process.env.REPLIT_CONNECTORS_HOSTNAME;
   const xReplitToken = process.env.REPL_IDENTITY
     ? 'repl ' + process.env.REPL_IDENTITY
@@ -11,17 +11,15 @@ async function getCredentials() {
       : null;
 
   if (!xReplitToken) {
-    throw new Error('X_REPLIT_TOKEN not found for repl/depl');
+    throw new Error('X-Replit-Token not found for repl/depl');
   }
 
   const connectorName = 'stripe';
-  const isProduction = process.env.REPLIT_DEPLOYMENT === '1';
-  const targetEnvironment = isProduction ? 'production' : 'development';
 
   const url = new URL(`https://${hostname}/api/v2/connection`);
   url.searchParams.set('include_secrets', 'true');
   url.searchParams.set('connector_names', connectorName);
-  url.searchParams.set('environment', targetEnvironment);
+  url.searchParams.set('environment', environment);
 
   const response = await fetch(url.toString(), {
     headers: {
@@ -31,16 +29,34 @@ async function getCredentials() {
   });
 
   const data = await response.json();
-  connectionSettings = data.items?.[0];
+  const settings = data.items?.[0];
 
-  if (!connectionSettings || (!connectionSettings.settings.publishable || !connectionSettings.settings.secret)) {
-    throw new Error(`Stripe ${targetEnvironment} connection not found`);
+  if (!settings || !settings.settings?.publishable || !settings.settings?.secret) {
+    return null;
   }
 
   return {
-    publishableKey: connectionSettings.settings.publishable,
-    secretKey: connectionSettings.settings.secret,
+    publishableKey: settings.settings.publishable,
+    secretKey: settings.settings.secret,
   };
+}
+
+async function getCredentials() {
+  const isProduction = process.env.REPLIT_DEPLOYMENT === '1';
+  const targetEnvironment = isProduction ? 'production' : 'development';
+
+  let creds = await fetchCredentialsForEnvironment(targetEnvironment);
+
+  if (!creds && isProduction) {
+    console.log('Production Stripe keys not found, falling back to development/sandbox keys');
+    creds = await fetchCredentialsForEnvironment('development');
+  }
+
+  if (!creds) {
+    throw new Error(`Stripe connection not found`);
+  }
+
+  return creds;
 }
 
 export async function getUncachableStripeClient() {
