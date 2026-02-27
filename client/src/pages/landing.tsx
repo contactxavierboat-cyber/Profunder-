@@ -26,7 +26,7 @@ interface DisputeItem {
 }
 
 function parseDisputeItems(content: string): DisputeItem[] {
-  const cleanText = content.replace(/\*+/g, "").replace(/"+/g, '"');
+  const cleanText = content.replace(/\*+/g, "").replace(/[\u201C\u201D\u201E\u201F"+]/g, '"').replace(/[\u2018\u2019\u201A\u201B'+]/g, "'");
   const disputes: DisputeItem[] = [];
   const lines = cleanText.split("\n");
   for (const line of lines) {

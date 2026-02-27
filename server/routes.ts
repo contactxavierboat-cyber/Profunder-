@@ -1266,6 +1266,8 @@ ${extractedText}
         const d = disputes[i];
         if (i > 0) doc.addPage();
 
+        const isInquiry = /inquir|hard\s*pull|credit\s*pull|unauthorized.*pull/i.test(d.issue) || /inquir|hard\s*pull|credit\s*pull|1681b|permissible\s*purpose/i.test(d.reason);
+
         const bureauAddr = bureauAddresses[d.bureau] || bureauAddresses["All"];
 
         doc.font("Helvetica").fontSize(9).fillColor("#888888")
@@ -1282,65 +1284,129 @@ ${extractedText}
         doc.text(bureauAddr)
           .moveDown(1);
 
-        doc.font("Helvetica-Bold").fontSize(10).fillColor("#111111")
-          .text("Re: Dispute of Inaccurate Information — Request for Investigation")
-          .moveDown(0.8);
+        if (isInquiry) {
+          doc.font("Helvetica-Bold").fontSize(10).fillColor("#111111")
+            .text("Re: Removal of Unauthorized Hard Inquiry — Request for Proof of Permissible Purpose")
+            .moveDown(0.8);
 
-        doc.font("Helvetica").fontSize(10).fillColor("#333333")
-          .text("To Whom It May Concern,")
-          .moveDown(0.6);
+          doc.font("Helvetica").fontSize(10).fillColor("#333333")
+            .text("To Whom It May Concern,")
+            .moveDown(0.6);
 
-        doc.text(
-          "I am writing to dispute inaccurate information on my credit report pursuant to my rights under the Fair Credit Reporting Act (FCRA), 15 U.S.C. § 1681. I am requesting that the following item be investigated and corrected or removed:",
-          { lineGap: 2 }
-        ).moveDown(0.8);
+          doc.text(
+            "I am writing to dispute an unauthorized hard inquiry appearing on my credit report. I did not authorize this credit pull, nor did I provide written consent for my credit file to be accessed. I am requesting immediate removal of this inquiry pursuant to my rights under the Fair Credit Reporting Act (FCRA).",
+            { lineGap: 2 }
+          ).moveDown(0.8);
 
-        doc.font("Helvetica-Bold").fontSize(10)
-          .text("Account Details:", { underline: true })
-          .moveDown(0.4);
-        doc.font("Helvetica").fontSize(10).fillColor("#333333");
-        doc.text(`Creditor/Furnisher: ${d.creditor}`);
-        if (d.accountNumber && d.accountNumber !== "N/A") {
-          doc.text(`Account Number: ${d.accountNumber}`);
+          doc.font("Helvetica-Bold").fontSize(10)
+            .text("Inquiry Details:", { underline: true })
+            .moveDown(0.4);
+          doc.font("Helvetica").fontSize(10).fillColor("#333333");
+          doc.text(`Inquiring Creditor: ${d.creditor}`);
+          if (d.accountNumber && d.accountNumber !== "N/A") {
+            doc.text(`Reference/Account Number: ${d.accountNumber}`);
+          }
+          doc.text(`Reporting Bureau: ${d.bureau}`);
+          doc.text(`Issue: ${d.issue}`);
+          doc.moveDown(0.6);
+
+          doc.font("Helvetica-Bold").text("Legal Basis:", { underline: true }).moveDown(0.4);
+          doc.font("Helvetica").text(
+            "Under the FCRA, a credit report may only be accessed for a permissible purpose as defined in 15 USC §1681b. These include:",
+            { lineGap: 2 }
+          ).moveDown(0.3);
+          doc.text("• A firm offer of credit initiated by the creditor (pre-screening)", { lineGap: 1.5 });
+          doc.text("• A credit transaction initiated by the consumer", { lineGap: 1.5 });
+          doc.text("• Employment purposes (with written consent)", { lineGap: 1.5 });
+          doc.text("• Insurance underwriting", { lineGap: 1.5 });
+          doc.text("• Legitimate business need in connection with a transaction initiated by the consumer", { lineGap: 1.5 });
+          doc.moveDown(0.4);
+          doc.text(
+            "I did not initiate a transaction with the inquiring creditor listed above, nor did I provide written authorization for them to access my credit file. This inquiry therefore lacks a permissible purpose under 15 USC §1681b.",
+            { lineGap: 2 }
+          ).moveDown(0.6);
+
+          doc.font("Helvetica-Bold").text("Required Action:", { underline: true }).moveDown(0.4);
+          doc.font("Helvetica").text(
+            "I am requesting that you take the following actions within 30 days:",
+            { lineGap: 2 }
+          ).moveDown(0.2);
+          doc.text("1. Provide proof of the permissible purpose under which this inquiry was made, including any written authorization bearing my signature.", { lineGap: 1.5 });
+          doc.text("2. If no permissible purpose or written authorization can be provided, immediately remove this hard inquiry from my credit report.", { lineGap: 1.5 });
+          doc.text("3. Provide written confirmation of the removal or a detailed explanation of the verified permissible purpose.", { lineGap: 1.5 });
+          doc.moveDown(0.4);
+
+          doc.text(
+            "Please be advised that under 15 USC §1681i, you are required to conduct a reasonable investigation within 30 days. Under 15 USC §1681n, any willful failure to comply with the FCRA may result in liability for actual damages, punitive damages, and attorney's fees. I reserve all rights under the FCRA.",
+            { lineGap: 2 }
+          ).moveDown(0.5);
+
+          doc.text(
+            "I also intend to send a separate letter directly to the inquiring creditor demanding proof of permissible purpose. If they cannot produce written authorization, I expect this inquiry to be promptly deleted.",
+            { lineGap: 2 }
+          ).moveDown(1);
+
+        } else {
+          doc.font("Helvetica-Bold").fontSize(10).fillColor("#111111")
+            .text("Re: Dispute of Inaccurate Information — Request for Investigation")
+            .moveDown(0.8);
+
+          doc.font("Helvetica").fontSize(10).fillColor("#333333")
+            .text("To Whom It May Concern,")
+            .moveDown(0.6);
+
+          doc.text(
+            "I am writing to dispute inaccurate information on my credit report pursuant to my rights under the Fair Credit Reporting Act (FCRA), 15 U.S.C. § 1681. I am requesting that the following item be investigated and corrected or removed:",
+            { lineGap: 2 }
+          ).moveDown(0.8);
+
+          doc.font("Helvetica-Bold").fontSize(10)
+            .text("Account Details:", { underline: true })
+            .moveDown(0.4);
+          doc.font("Helvetica").fontSize(10).fillColor("#333333");
+          doc.text(`Creditor/Furnisher: ${d.creditor}`);
+          if (d.accountNumber && d.accountNumber !== "N/A") {
+            doc.text(`Account Number: ${d.accountNumber}`);
+          }
+          doc.text(`Reporting Bureau: ${d.bureau}`);
+          doc.moveDown(0.6);
+
+          doc.font("Helvetica-Bold").text("Nature of Dispute:", { underline: true }).moveDown(0.4);
+          doc.font("Helvetica").text(d.issue, { lineGap: 2 }).moveDown(0.6);
+
+          doc.font("Helvetica-Bold").text("Factual Basis for Dispute:", { underline: true }).moveDown(0.4);
+          doc.font("Helvetica").text(d.reason, { lineGap: 2 }).moveDown(0.6);
+
+          doc.font("Helvetica-Bold").text("Legal Basis:", { underline: true }).moveDown(0.4);
+          doc.font("Helvetica").text(
+            "This dispute is filed pursuant to my rights under the Fair Credit Reporting Act (FCRA):",
+            { lineGap: 2 }
+          ).moveDown(0.3);
+          doc.text("• 15 USC §1681i — Right to dispute inaccurate or incomplete information. You must conduct a reasonable investigation within 30 days.", { lineGap: 1.5 });
+          doc.text("• 15 USC §1681e(b) — You must follow reasonable procedures to assure maximum possible accuracy of credit information.", { lineGap: 1.5 });
+          doc.text("• 15 USC §1681s-2(b) — The furnisher of this information is obligated to investigate this dispute upon notification from your agency.", { lineGap: 1.5 });
+          doc.moveDown(0.6);
+
+          doc.font("Helvetica-Bold").text("Required Action:", { underline: true }).moveDown(0.4);
+          doc.font("Helvetica").text(
+            "I am requesting that you investigate this item and provide the following within 30 days:",
+            { lineGap: 2 }
+          ).moveDown(0.2);
+          doc.text("1. Complete verification from the original furnisher, including the original signed agreement or contract.", { lineGap: 1.5 });
+          doc.text("2. Complete payment history and documentation supporting the reported status.", { lineGap: 1.5 });
+          doc.text("3. Proof that the information is being reported with maximum possible accuracy.", { lineGap: 1.5 });
+          doc.moveDown(0.4);
+
+          doc.text(
+            "If the information cannot be verified as accurate and complete, it must be promptly deleted or modified per FCRA Section 611. Failure to investigate or respond within 30 days constitutes a violation of the FCRA, and I reserve my rights under 15 USC §1681n (willful noncompliance) and §1681o (negligent noncompliance).",
+            { lineGap: 2 }
+          ).moveDown(0.5);
+
+          doc.text(
+            "I request written notification of the results of your investigation, including a description of the procedure used to determine accuracy and completeness, and an updated copy of my credit report if changes are made.",
+            { lineGap: 2 }
+          ).moveDown(1);
         }
-        doc.text(`Reporting Bureau: ${d.bureau}`);
-        doc.moveDown(0.6);
-
-        doc.font("Helvetica-Bold").text("Nature of Dispute:", { underline: true }).moveDown(0.4);
-        doc.font("Helvetica").text(d.issue, { lineGap: 2 }).moveDown(0.6);
-
-        doc.font("Helvetica-Bold").text("Factual Basis for Dispute:", { underline: true }).moveDown(0.4);
-        doc.font("Helvetica").text(d.reason, { lineGap: 2 }).moveDown(0.6);
-
-        doc.font("Helvetica-Bold").text("Legal Basis:", { underline: true }).moveDown(0.4);
-        doc.font("Helvetica").text(
-          "This dispute is filed pursuant to my rights under the Fair Credit Reporting Act (FCRA):",
-          { lineGap: 2 }
-        ).moveDown(0.3);
-        doc.text("• 15 USC §1681i — Right to dispute inaccurate or incomplete information. You must conduct a reasonable investigation within 30 days.", { lineGap: 1.5 });
-        doc.text("• 15 USC §1681e(b) — You must follow reasonable procedures to assure maximum possible accuracy of credit information.", { lineGap: 1.5 });
-        doc.text("• 15 USC §1681s-2(b) — The furnisher of this information is obligated to investigate this dispute upon notification from your agency.", { lineGap: 1.5 });
-        doc.moveDown(0.6);
-
-        doc.font("Helvetica-Bold").text("Required Action:", { underline: true }).moveDown(0.4);
-        doc.font("Helvetica").text(
-          "I am requesting that you investigate this item and provide the following within 30 days:",
-          { lineGap: 2 }
-        ).moveDown(0.2);
-        doc.text("1. Complete verification from the original furnisher, including the original signed agreement or contract.", { lineGap: 1.5 });
-        doc.text("2. Complete payment history and documentation supporting the reported status.", { lineGap: 1.5 });
-        doc.text("3. Proof that the information is being reported with maximum possible accuracy.", { lineGap: 1.5 });
-        doc.moveDown(0.4);
-
-        doc.text(
-          "If the information cannot be verified as accurate and complete, it must be promptly deleted or modified per FCRA Section 611. Failure to investigate or respond within 30 days constitutes a violation of the FCRA, and I reserve my rights under 15 USC §1681n (willful noncompliance) and §1681o (negligent noncompliance).",
-          { lineGap: 2 }
-        ).moveDown(0.5);
-
-        doc.text(
-          "I request written notification of the results of your investigation, including a description of the procedure used to determine accuracy and completeness, and an updated copy of my credit report if changes are made.",
-          { lineGap: 2 }
-        ).moveDown(1);
 
         doc.text("Sincerely,").moveDown(1.5);
         doc.text(userName);
