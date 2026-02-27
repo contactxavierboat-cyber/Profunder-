@@ -742,7 +742,7 @@ export default function LandingPage() {
           {!hasMessages && !isSending ? (
             <div className="flex-1 flex flex-col items-center justify-center px-4 gap-4 min-h-[calc(100dvh-180px)]">
               <h1 className="text-[28px] sm:text-[36px] font-semibold text-[#1a1a1a] tracking-[-0.03em] text-center leading-tight" data-testid="text-hero-headline">
-                Qualify before you Apply
+                Are you fundable?
               </h1>
               <button
                 onClick={() => { setAutoSendFile(true); handleUploadClick(); }}
