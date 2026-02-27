@@ -7,6 +7,7 @@ interface TeamMember {
   friendshipId: number;
   displayName: string;
   email: string;
+  profilePhoto?: string | null;
 }
 
 interface TeamInvite {
@@ -14,12 +15,14 @@ interface TeamInvite {
   friendshipId: number;
   displayName: string;
   email: string;
+  profilePhoto?: string | null;
 }
 
 interface TeamMessage {
   id: number;
   senderId: number;
   displayName: string;
+  profilePhoto?: string | null;
   content: string;
   isAi: boolean;
   timestamp: string;
@@ -30,6 +33,7 @@ interface GuestMessage {
   role: "user" | "assistant" | "team";
   content: string;
   senderName?: string;
+  senderPhoto?: string | null;
   senderId?: number;
 }
 
@@ -484,6 +488,33 @@ function saveDocs(docs: SavedDoc[]) {
   localStorage.setItem("profundr_docs", JSON.stringify(docs));
 }
 
+function ProfileAvatar({ photo, name, size = 28, className = "" }: { photo?: string | null; name?: string; size?: number; className?: string }) {
+  if (photo) {
+    return <img src={photo} alt={name || ""} className={`rounded-full object-cover shrink-0 ${className}`} style={{ width: size, height: size }} />;
+  }
+  const initial = name?.[0]?.toUpperCase() || "?";
+  return (
+    <div className={`rounded-full bg-[#1a1a2e] text-white flex items-center justify-center font-bold shrink-0 ${className}`} style={{ width: size, height: size, fontSize: size * 0.38 }}>
+      {initial}
+    </div>
+  );
+}
+
+function ProfundrAvatar({ size = 28, className = "" }: { size?: number; className?: string }) {
+  return (
+    <div className={`rounded-lg bg-[#1a1a2e] flex items-center justify-center shrink-0 ${className}`} style={{ width: size, height: size }}>
+      <svg width={size * 0.57} height={size * 0.57} viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M12 2C9.5 2 7.5 4 7.5 6.5c0 .5-.4 1-1 1C4.5 7.5 3 9.5 3 11.5c0 1.5.8 2.8 2 3.5 0 0-.5 1.5-.5 2.5C4.5 20 6.5 22 9 22c1.5 0 2.5-.5 3-1.5.5 1 1.5 1.5 3 1.5 2.5 0 4.5-2 4.5-4.5 0-1-.5-2.5-.5-2.5 1.2-.7 2-2 2-3.5 0-2-1.5-4-3.5-4-.6 0-1-.5-1-1C16.5 4 14.5 2 12 2z" />
+        <path d="M12 2v20" />
+        <path d="M7.5 7.5C9 8.5 10 10 10.5 12" />
+        <path d="M16.5 7.5C15 8.5 14 10 13.5 12" />
+        <path d="M5 15c2-.5 3.5-1 5-3" />
+        <path d="M19 15c-2-.5-3.5-1-5-3" />
+      </svg>
+    </div>
+  );
+}
+
 function TeamSection({ user, onOpenTeamChat, activeTeamChatId }: { user: any; onOpenTeamChat?: (member: TeamMember) => void; activeTeamChatId?: number | null }) {
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<{ id: number; displayName: string; email: string }[]>([]);
@@ -568,9 +599,7 @@ function TeamSection({ user, onOpenTeamChat, activeTeamChatId }: { user: any; on
         <div className="pl-5 mb-2 space-y-1">
           {team.pending.map(inv => (
             <div key={inv.friendshipId} className="flex items-center gap-1.5 py-1.5 rounded-lg bg-[#f8f7ff] px-2" data-testid={`team-invite-${inv.id}`}>
-              <div className="w-5 h-5 rounded-full bg-[#6366f1] text-white flex items-center justify-center text-[9px] font-bold shrink-0">
-                {inv.displayName[0]?.toUpperCase()}
-              </div>
+              <ProfileAvatar photo={inv.profilePhoto} name={inv.displayName} size={20} className="!bg-[#6366f1]" />
               <div className="flex-1 min-w-0">
                 <p className="text-[10px] text-[#444] truncate">{inv.displayName}</p>
                 <p className="text-[8px] text-[#999]">wants to join</p>
@@ -593,9 +622,7 @@ function TeamSection({ user, onOpenTeamChat, activeTeamChatId }: { user: any; on
               onClick={() => onOpenTeamChat?.(m)}
               data-testid={`team-member-${m.id}`}
             >
-              <div className={`w-5 h-5 rounded-full ${activeTeamChatId === m.id ? 'bg-[#6366f1]' : 'bg-[#1a1a2e]'} text-white flex items-center justify-center text-[9px] font-bold shrink-0`}>
-                {m.displayName[0]?.toUpperCase()}
-              </div>
+              <ProfileAvatar photo={m.profilePhoto} name={m.displayName} size={20} className={activeTeamChatId === m.id ? '!bg-[#6366f1]' : ''} />
               <div className="flex-1 min-w-0">
                 <p className="text-[11px] text-[#444] truncate">{m.displayName}</p>
               </div>
@@ -873,6 +900,7 @@ export default function LandingPage() {
         role: "user" as const,
         content: m.content,
         senderName: m.displayName,
+        senderPhoto: m.profilePhoto,
         senderId: m.senderId,
       };
     }
@@ -881,6 +909,7 @@ export default function LandingPage() {
       role: "team" as const,
       content: m.content,
       senderName: m.displayName,
+      senderPhoto: m.profilePhoto,
       senderId: m.senderId,
     };
   }, []);
@@ -1337,6 +1366,26 @@ export default function LandingPage() {
             {user ? (
               <div className="flex items-center gap-3">
                 <span className="text-[12px] text-[#999] hidden sm:inline" data-testid="text-user-email">{user.email}</span>
+                <label className="cursor-pointer relative group" title="Change profile photo" data-testid="button-profile-photo">
+                  <ProfileAvatar photo={user.profilePhoto} name={user.displayName || user.email} size={30} />
+                  <div className="absolute inset-0 rounded-full bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                    <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 1v10M1 6h10" stroke="white" strokeWidth="1.5" strokeLinecap="round" /></svg>
+                  </div>
+                  <input type="file" accept="image/*" className="hidden" onChange={async (e) => {
+                    const file = e.target.files?.[0];
+                    if (!file) return;
+                    if (file.size > 1_500_000) { alert("Photo too large (max 1.5MB)"); return; }
+                    const reader = new FileReader();
+                    reader.onload = async () => {
+                      const base64 = reader.result as string;
+                      try {
+                        const res = await fetch("/api/profile-photo", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ photo: base64 }) });
+                        if (res.ok) { window.location.reload(); }
+                      } catch {}
+                    };
+                    reader.readAsDataURL(file);
+                  }} data-testid="input-profile-photo" />
+                </label>
                 <button
                   onClick={() => { logout(); window.location.href = '/'; }}
                   className="rounded-full px-4 py-1.5 text-[12px] font-medium bg-[#1a1a2e] text-white hover:bg-[#2a2a40] transition-colors"
@@ -1359,9 +1408,7 @@ export default function LandingPage() {
           {activeTeamChat && (
             <div className="sticky top-[53px] z-20 bg-[#f0eeff] border-b border-[#d4d0f0] px-4 py-2 flex items-center justify-between" data-testid="team-chat-banner">
               <div className="flex items-center gap-2">
-                <div className="w-6 h-6 rounded-full bg-[#6366f1] text-white flex items-center justify-center text-[10px] font-bold">
-                  {activeTeamChat.displayName[0]?.toUpperCase()}
-                </div>
+                <ProfileAvatar photo={activeTeamChat.profilePhoto} name={activeTeamChat.displayName} size={24} className="!bg-[#6366f1]" />
                 <span className="text-[12px] font-medium text-[#333]">Team chat with {activeTeamChat.displayName}</span>
                 <span className="text-[10px] text-[#888]">3-way: You + {activeTeamChat.displayName} + Profundr AI</span>
               </div>
@@ -1408,9 +1455,7 @@ export default function LandingPage() {
                     <div key={msg.id}>
                       {msg.role === "team" ? (
                         <div className="flex gap-3 justify-start">
-                          <div className="w-7 h-7 rounded-full bg-[#6366f1] text-white flex items-center justify-center text-[11px] font-bold shrink-0 mt-0.5" title={msg.senderName}>
-                            {msg.senderName?.[0]?.toUpperCase() || "T"}
-                          </div>
+                          <ProfileAvatar photo={msg.senderPhoto} name={msg.senderName} size={28} className="mt-0.5 !bg-[#6366f1]" />
                           <div className="max-w-[85%]" data-testid={`message-team-${msg.id}`}>
                             <p className="text-[10px] text-[#6366f1] font-medium mb-0.5">{msg.senderName}</p>
                             <div className="bg-[#f0eeff] rounded-[20px] rounded-bl-[6px] px-4 py-2.5">
@@ -1421,16 +1466,7 @@ export default function LandingPage() {
                       ) : (
                       <div className={`flex gap-3 ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
                         {msg.role === "assistant" && (
-                          <div className="w-7 h-7 rounded-lg bg-[#1a1a2e] flex items-center justify-center shrink-0 mt-0.5">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                              <path d="M12 2C9.5 2 7.5 4 7.5 6.5c0 .5-.4 1-1 1C4.5 7.5 3 9.5 3 11.5c0 1.5.8 2.8 2 3.5 0 0-.5 1.5-.5 2.5C4.5 20 6.5 22 9 22c1.5 0 2.5-.5 3-1.5.5 1 1.5 1.5 3 1.5 2.5 0 4.5-2 4.5-4.5 0-1-.5-2.5-.5-2.5 1.2-.7 2-2 2-3.5 0-2-1.5-4-3.5-4-.6 0-1-.5-1-1C16.5 4 14.5 2 12 2z" />
-                              <path d="M12 2v20" />
-                              <path d="M7.5 7.5C9 8.5 10 10 10.5 12" />
-                              <path d="M16.5 7.5C15 8.5 14 10 13.5 12" />
-                              <path d="M5 15c2-.5 3.5-1 5-3" />
-                              <path d="M19 15c-2-.5-3.5-1-5-3" />
-                            </svg>
-                          </div>
+                          <ProfundrAvatar size={28} className="mt-0.5" />
                         )}
                         <div
                           className={`max-w-[85%] ${msg.role === "user" ? "bg-[#f0f0f0] rounded-[20px] rounded-br-[6px] px-4 py-2.5" : "bg-transparent"}`}
@@ -1445,6 +1481,9 @@ export default function LandingPage() {
                             <FormatResponse content={msg.content} />
                           )}
                         </div>
+                        {msg.role === "user" && (
+                          <ProfileAvatar photo={msg.senderPhoto || user?.profilePhoto} name={msg.senderName || user?.displayName || user?.email} size={28} className="mt-0.5" />
+                        )}
                       </div>
                       )}
                       {showDashboard && (
@@ -1490,16 +1529,7 @@ export default function LandingPage() {
                 })}
                 {isSending && (
                   <div className="flex gap-3 justify-start">
-                    <div className="w-7 h-7 rounded-lg bg-[#1a1a2e] flex items-center justify-center shrink-0 mt-0.5 animate-pulse">
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M12 2C9.5 2 7.5 4 7.5 6.5c0 .5-.4 1-1 1C4.5 7.5 3 9.5 3 11.5c0 1.5.8 2.8 2 3.5 0 0-.5 1.5-.5 2.5C4.5 20 6.5 22 9 22c1.5 0 2.5-.5 3-1.5.5 1 1.5 1.5 3 1.5 2.5 0 4.5-2 4.5-4.5 0-1-.5-2.5-.5-2.5 1.2-.7 2-2 2-3.5 0-2-1.5-4-3.5-4-.6 0-1-.5-1-1C16.5 4 14.5 2 12 2z" />
-                        <path d="M12 2v20" />
-                        <path d="M7.5 7.5C9 8.5 10 10 10.5 12" />
-                        <path d="M16.5 7.5C15 8.5 14 10 13.5 12" />
-                        <path d="M5 15c2-.5 3.5-1 5-3" />
-                        <path d="M19 15c-2-.5-3.5-1-5-3" />
-                      </svg>
-                    </div>
+                    <ProfundrAvatar size={28} className="mt-0.5 animate-pulse" />
                     <div className="flex items-center gap-1.5 py-2">
                       <span className="w-1.5 h-1.5 bg-[#999] rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
                       <span className="w-1.5 h-1.5 bg-[#999] rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
@@ -1560,13 +1590,11 @@ export default function LandingPage() {
                     onClick={() => insertMention(c.name)}
                     data-testid={`mention-option-${c.name}`}
                   >
-                    <div className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0 ${c.type === 'ai' ? 'bg-[#1a1a2e] text-white' : c.type === 'self' ? 'bg-[#10b981] text-white' : 'bg-[#6366f1] text-white'}`}>
-                      {c.type === 'ai' ? (
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                          <path d="M12 2C9.5 2 7.5 4 7.5 6.5c0 .5-.4 1-1 1C4.5 7.5 3 9.5 3 11.5c0 1.5.8 2.8 2 3.5 0 0-.5 1.5-.5 2.5C4.5 20 6.5 22 9 22c1.5 0 2.5-.5 3-1.5.5 1 1.5 1.5 3 1.5 2.5 0 4.5-2 4.5-4.5 0-1-.5-2.5-.5-2.5 1.2-.7 2-2 2-3.5 0-2-1.5-4-3.5-4-.6 0-1-.5-1-1C16.5 4 14.5 2 12 2z" />
-                        </svg>
-                      ) : c.name[0]?.toUpperCase()}
-                    </div>
+                    {c.type === 'ai' ? (
+                      <ProfundrAvatar size={24} />
+                    ) : (
+                      <ProfileAvatar photo={c.type === 'self' ? user?.profilePhoto : activeTeamChat?.profilePhoto} name={c.name} size={24} className={c.type === 'self' ? '!bg-[#10b981]' : '!bg-[#6366f1]'} />
+                    )}
                     <div>
                       <p className="text-[12px] font-medium text-[#333]">@{c.name}</p>
                       <p className="text-[9px] text-[#999]">{c.type === 'ai' ? 'AI Assistant' : c.type === 'self' ? 'You' : 'Team Member'}</p>

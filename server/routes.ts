@@ -1245,6 +1245,18 @@ export async function registerRoutes(
     res.json(stripPassword(user));
   });
 
+  app.post("/api/profile-photo", requireAuth, async (req, res) => {
+    try {
+      const { photo } = req.body;
+      if (!photo || typeof photo !== "string") return res.status(400).json({ error: "Photo data required" });
+      if (photo.length > 2_000_000) return res.status(400).json({ error: "Photo too large (max ~1.5MB)" });
+      const user = await storage.updateUser(req.session.userId!, { profilePhoto: photo });
+      res.json({ profilePhoto: user.profilePhoto });
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
   app.get("/api/users", requireAdmin, async (req, res) => {
     const allUsers = await storage.getAllUsers();
     res.json(allUsers.map(stripPassword));
@@ -2521,8 +2533,8 @@ Respond to the latest question as the team's AI mentor. Be direct, helpful, and 
       const friends = await storage.getFriends(userId);
       const pending = await storage.getPendingRequests(userId);
       res.json({
-        members: friends.map(f => ({ id: f.friend.id, friendshipId: f.friendship.id, displayName: f.friend.displayName || f.friend.email, email: f.friend.email })),
-        pending: pending.map(p => ({ id: p.requester.id, friendshipId: p.friendship.id, displayName: p.requester.displayName || p.requester.email, email: p.requester.email })),
+        members: friends.map(f => ({ id: f.friend.id, friendshipId: f.friendship.id, displayName: f.friend.displayName || f.friend.email, email: f.friend.email, profilePhoto: f.friend.profilePhoto || null })),
+        pending: pending.map(p => ({ id: p.requester.id, friendshipId: p.friendship.id, displayName: p.requester.displayName || p.requester.email, email: p.requester.email, profilePhoto: p.requester.profilePhoto || null })),
       });
     } catch (error: any) {
       res.status(500).json({ error: error.message });
@@ -2614,15 +2626,16 @@ Respond to the latest question as the team's AI mentor. Be direct, helpful, and 
       const teamMemberIds = new Set(friends.map(f => f.friend.id));
       const teamMsgs = msgs.filter(m => m.senderId === userId || teamMemberIds.has(m.senderId));
       const userIds = [...new Set(teamMsgs.map(m => m.senderId))];
-      const usersMap: Record<number, { displayName: string; email: string }> = {};
+      const usersMap: Record<number, { displayName: string; email: string; profilePhoto: string | null }> = {};
       for (const uid of userIds) {
         const u = await storage.getUser(uid);
-        if (u) usersMap[uid] = { displayName: u.displayName || u.email, email: u.email };
+        if (u) usersMap[uid] = { displayName: u.displayName || u.email, email: u.email, profilePhoto: u.profilePhoto || null };
       }
       res.json(teamMsgs.slice(-200).map(m => ({
         id: m.id,
         senderId: m.senderId,
         displayName: usersMap[m.senderId]?.displayName || "User",
+        profilePhoto: usersMap[m.senderId]?.profilePhoto || null,
         content: m.content,
         isAi: m.isAi,
         timestamp: m.timestamp,
@@ -2661,15 +2674,16 @@ Respond to the latest question as the team's AI mentor. Be direct, helpful, and 
       const sharedKey = `teamchat_${ids[0]}_${ids[1]}`;
       const msgs = await storage.getDirectMessages(sharedKey);
       const userIds = [...new Set(msgs.map(m => m.senderId))];
-      const usersMap: Record<number, { displayName: string; email: string }> = {};
+      const usersMap: Record<number, { displayName: string; email: string; profilePhoto: string | null }> = {};
       for (const uid of userIds) {
         const u = await storage.getUser(uid);
-        if (u) usersMap[uid] = { displayName: u.displayName || u.email, email: u.email };
+        if (u) usersMap[uid] = { displayName: u.displayName || u.email, email: u.email, profilePhoto: u.profilePhoto || null };
       }
       res.json(msgs.slice(-200).map(m => ({
         id: m.id,
         senderId: m.senderId,
         displayName: usersMap[m.senderId]?.displayName || "User",
+        profilePhoto: usersMap[m.senderId]?.profilePhoto || null,
         content: m.content,
         isAi: m.isAi,
         timestamp: m.timestamp,
