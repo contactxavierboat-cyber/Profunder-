@@ -1728,37 +1728,44 @@ CONVERSATIONAL RULES:
   function drawWatermark(doc: InstanceType<typeof PDFDocument>) {
     const pw = doc.page.width;
     const ph = doc.page.height;
-    const savedY = doc.y;
     const savedX = doc.x;
-    doc.save();
-    doc.opacity(0.04);
-    doc.font("Helvetica-Bold").fontSize(24).fillColor("#1a1a2e");
+    const savedY = doc.y;
+
     const text = "profundr.";
+    const fontSize = 28;
+    const spacing = 180;
+    const angleRad = -35 * Math.PI / 180;
+    const cosA = Math.cos(angleRad);
+    const sinA = Math.sin(angleRad);
+
+    doc.save();
+    doc.opacity(0.035);
+    doc.font("Helvetica-Bold").fontSize(fontSize).fillColor("#1a1a2e");
+
     const tw = doc.widthOfString(text);
     const th = doc.currentLineHeight();
-    const spacingX = tw + 60;
-    const spacingY = th + 80;
-    const cos35 = Math.cos(-35 * Math.PI / 180);
-    const sin35 = Math.sin(-35 * Math.PI / 180);
-    for (let row = -4; row < 12; row++) {
-      for (let col = -4; col < 10; col++) {
-        const bx = col * spacingX;
-        const by = row * spacingY;
-        const rx = bx * cos35 - by * sin35;
-        const ry = bx * sin35 + by * cos35;
-        const px = rx - 100;
-        const py = ry - 200;
-        if (px > -tw && px < pw + tw && py > -th && py < ph + th) {
-          doc.save();
-          doc.rotate(-35, { origin: [px + tw / 2, py + th / 2] });
-          doc.text(text, px, py, { lineBreak: false });
-          doc.restore();
+
+    const positions: { x: number; y: number }[] = [];
+    for (let gy = -spacing * 2; gy < ph + spacing * 2; gy += spacing) {
+      for (let gx = -spacing * 2; gx < pw + spacing * 2; gx += spacing) {
+        const rx = gx * cosA - gy * sinA + pw / 2 * (1 - cosA) + ph / 2 * sinA;
+        const ry = gx * sinA + gy * cosA + ph / 2 * (1 - cosA) - pw / 2 * sinA;
+        if (rx > -tw * 2 && rx < pw + tw * 2 && ry > -th * 2 && ry < ph + th * 2) {
+          positions.push({ x: rx, y: ry });
         }
       }
     }
+
+    doc.rotate(-35, { origin: [pw / 2, ph / 2] });
+    for (const pos of positions) {
+      doc.text(text, pos.x - tw / 2, pos.y - th / 2, { lineBreak: false });
+    }
     doc.restore();
+
+    doc.font("Helvetica").fontSize(10).fillColor("#333333");
     doc.x = savedX;
     doc.y = savedY;
+    doc.opacity(1);
   }
 
   function drawPdfLetterhead(doc: InstanceType<typeof PDFDocument>) {
@@ -1821,7 +1828,13 @@ CONVERSATIONAL RULES:
       const doc = new PDFDocument({ size: "LETTER", margins: { top: 60, bottom: 60, left: 65, right: 65 } });
       const chunks: Buffer[] = [];
       doc.on("data", (chunk: Buffer) => chunks.push(chunk));
-      doc.on("pageAdded", () => { drawPageBackground(doc); drawWatermark(doc); });
+
+      let skipNextPageEvent = false;
+      doc.on("pageAdded", () => {
+        if (skipNextPageEvent) { skipNextPageEvent = false; return; }
+        drawPageBackground(doc);
+        drawWatermark(doc);
+      });
 
       const pdfReady = new Promise<Buffer>((resolve) => {
         doc.on("end", () => resolve(Buffer.concat(chunks)));
@@ -1829,7 +1842,7 @@ CONVERSATIONAL RULES:
 
       for (let i = 0; i < disputes.length; i++) {
         const d = disputes[i];
-        if (i > 0) doc.addPage();
+        if (i > 0) { skipNextPageEvent = true; doc.addPage(); }
 
         const isInquiry = /inquir|hard\s*pull|credit\s*pull|unauthorized.*pull/i.test(d.issue) || /inquir|hard\s*pull|credit\s*pull|1681b|permissible\s*purpose/i.test(d.reason);
 
