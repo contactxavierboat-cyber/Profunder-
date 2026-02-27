@@ -5,7 +5,7 @@ Profundr is a subscription-based AI-powered fundability platform, envisioned as 
 
 ## User Preferences
 - Landing page: Light UI theme (bg-[#fafafa]) with centered headline "How fundable are you?", chat input bar at bottom, suggestion pills, and real AI chat powered by /api/chat/guest endpoint
-- AI system prompt: Digital Underwriting and Credit Optimization Engine with FCRA-compliant dispute letter generation
+- AI system prompt: Profundr identity — high-level digital underwriting strategist with human-like personality (calm, sharp, strategic, premium, direct). Combines three roles: Credit Repair Specialist, Funding Readiness Strategist, Capital Stacking Architect. Phase-based classification (Repair/Build/Funding/Wait). FCRA-compliant dispute letter generation with statutory citations.
 - Dispute letters: AI outputs DISPUTE: items in structured format; frontend parses and offers PDF download via /api/dispute-letters endpoint (PDFKit)
 - Login from landing page uses `loginSilent` (no redirect) so users stay on chat
 - Inter font for UI, JetBrains Mono for data/metrics
