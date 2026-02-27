@@ -484,17 +484,13 @@ function saveDocs(docs: SavedDoc[]) {
   localStorage.setItem("profundr_docs", JSON.stringify(docs));
 }
 
-function TeamSection({ user, onSendDM }: { user: any; onSendDM?: (content: string, toMember: TeamMember) => void }) {
+function TeamSection({ user, onOpenTeamChat, activeTeamChatId }: { user: any; onOpenTeamChat?: (member: TeamMember) => void; activeTeamChatId?: number | null }) {
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<{ id: number; displayName: string; email: string }[]>([]);
   const [searching, setSearching] = useState(false);
   const [team, setTeam] = useState<{ members: TeamMember[]; pending: TeamInvite[] }>({ members: [], pending: [] });
   const [showSearch, setShowSearch] = useState(false);
   const [inviting, setInviting] = useState<number | null>(null);
-  const [dmTarget, setDmTarget] = useState<TeamMember | null>(null);
-  const [dmText, setDmText] = useState("");
-  const [dmSending, setDmSending] = useState(false);
-  const dmInputRef = useRef<HTMLInputElement>(null);
 
   const fetchTeam = useCallback(async () => {
     if (!user) return;
@@ -547,21 +543,6 @@ function TeamSection({ user, onSendDM }: { user: any; onSendDM?: (content: strin
     } catch {}
   };
 
-  const handleSendDM = async () => {
-    if (!dmText.trim() || !dmTarget || dmSending) return;
-    setDmSending(true);
-    try {
-      await fetch("/api/team/message", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ content: dmText.trim() }),
-      });
-      if (onSendDM) onSendDM(dmText.trim(), dmTarget);
-      setDmText("");
-    } catch {}
-    setDmSending(false);
-    dmInputRef.current?.focus();
-  };
 
   if (!user) {
     return (
@@ -606,55 +587,24 @@ function TeamSection({ user, onSendDM }: { user: any; onSendDM?: (content: strin
       ) : (
         <div className="space-y-1 mb-2">
           {team.members.map(m => (
-            <div key={m.friendshipId}>
-              <div
-                className={`flex items-center gap-1.5 pl-5 py-1.5 rounded-lg hover:bg-[#f5f5f5] group transition-colors cursor-pointer ${dmTarget?.id === m.id ? 'bg-[#f0eeff]' : ''}`}
-                onClick={() => { setDmTarget(dmTarget?.id === m.id ? null : m); setTimeout(() => dmInputRef.current?.focus(), 100); }}
-                data-testid={`team-member-${m.id}`}
-              >
-                <div className={`w-5 h-5 rounded-full ${dmTarget?.id === m.id ? 'bg-[#6366f1]' : 'bg-[#1a1a2e]'} text-white flex items-center justify-center text-[9px] font-bold shrink-0`}>
-                  {m.displayName[0]?.toUpperCase()}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-[11px] text-[#444] truncate">{m.displayName}</p>
-                </div>
-                <button
-                  onClick={(e) => { e.stopPropagation(); setDmTarget(dmTarget?.id === m.id ? null : m); setTimeout(() => dmInputRef.current?.focus(), 100); }}
-                  className="opacity-0 group-hover:opacity-100 text-[#6366f1] hover:text-[#4f46e5] transition-all p-0.5 mr-1"
-                  title="Send message"
-                  data-testid={`button-dm-${m.id}`}
-                >
-                  <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M1 3.5C1 2.67 1.67 2 2.5 2h5C8.33 2 9 2.67 9 3.5v3C9 7.33 8.33 8 7.5 8h-3L2.5 9.5V8H2.5C1.67 8 1 7.33 1 6.5v-3z" stroke="currentColor" strokeWidth="1" fill="none" /></svg>
-                </button>
-                <button onClick={(e) => { e.stopPropagation(); handleRemove(m.friendshipId); }} className="opacity-0 group-hover:opacity-100 text-[#ccc] hover:text-red-400 transition-all p-0.5" data-testid={`button-remove-member-${m.id}`}>
-                  <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2 2l6 6M8 2l-6 6" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" /></svg>
-                </button>
+            <div
+              key={m.friendshipId}
+              className={`flex items-center gap-1.5 pl-5 py-1.5 rounded-lg hover:bg-[#f5f5f5] group transition-colors cursor-pointer ${activeTeamChatId === m.id ? 'bg-[#f0eeff]' : ''}`}
+              onClick={() => onOpenTeamChat?.(m)}
+              data-testid={`team-member-${m.id}`}
+            >
+              <div className={`w-5 h-5 rounded-full ${activeTeamChatId === m.id ? 'bg-[#6366f1]' : 'bg-[#1a1a2e]'} text-white flex items-center justify-center text-[9px] font-bold shrink-0`}>
+                {m.displayName[0]?.toUpperCase()}
               </div>
-              {dmTarget?.id === m.id && (
-                <div className="pl-5 pr-2 mt-1 mb-2">
-                  <form onSubmit={(e) => { e.preventDefault(); handleSendDM(); }} className="flex gap-1.5">
-                    <input
-                      ref={dmInputRef}
-                      data-testid="input-dm-message"
-                      type="text"
-                      placeholder={`Message ${m.displayName}...`}
-                      className="flex-1 bg-[#f5f5f5] border border-[#e5e5e5] rounded-lg h-[30px] px-3 text-[11px] text-[#333] placeholder:text-[#aaa] outline-none focus:border-[#6366f1] transition-colors"
-                      value={dmText}
-                      onChange={(e) => setDmText(e.target.value)}
-                      disabled={dmSending}
-                    />
-                    <button
-                      type="submit"
-                      disabled={!dmText.trim() || dmSending}
-                      className="h-[30px] px-3 rounded-lg bg-[#6366f1] text-white text-[10px] font-medium hover:bg-[#4f46e5] disabled:opacity-50 disabled:cursor-not-allowed transition-colors shrink-0"
-                      data-testid="button-send-dm"
-                    >
-                      {dmSending ? "..." : "Send"}
-                    </button>
-                  </form>
-                  <p className="text-[9px] text-[#aaa] mt-1 pl-1">Message appears in main chat for both of you</p>
-                </div>
-              )}
+              <div className="flex-1 min-w-0">
+                <p className="text-[11px] text-[#444] truncate">{m.displayName}</p>
+              </div>
+              <svg width="10" height="10" viewBox="0 0 10 10" fill="none" className="opacity-0 group-hover:opacity-100 text-[#6366f1] transition-all mr-1">
+                <path d="M1 3.5C1 2.67 1.67 2 2.5 2h5C8.33 2 9 2.67 9 3.5v3C9 7.33 8.33 8 7.5 8h-3L2.5 9.5V8H2.5C1.67 8 1 7.33 1 6.5v-3z" stroke="currentColor" strokeWidth="1" fill="none" />
+              </svg>
+              <button onClick={(e) => { e.stopPropagation(); handleRemove(m.friendshipId); }} className="opacity-0 group-hover:opacity-100 text-[#ccc] hover:text-red-400 transition-all p-0.5" data-testid={`button-remove-member-${m.id}`}>
+                <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2 2l6 6M8 2l-6 6" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" /></svg>
+              </button>
             </div>
           ))}
         </div>
@@ -711,7 +661,7 @@ function TeamSection({ user, onSendDM }: { user: any; onSendDM?: (content: strin
   );
 }
 
-function DocsPanel({ docs, onClose, onDelete, onSave, user, onSendDM }: { docs: SavedDoc[]; onClose: () => void; onDelete: (id: string) => void; onSave: (doc: SavedDoc) => void; user: any; onSendDM?: (content: string, toMember: TeamMember) => void }) {
+function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, activeTeamChatId }: { docs: SavedDoc[]; onClose: () => void; onDelete: (id: string) => void; onSave: (doc: SavedDoc) => void; user: any; onOpenTeamChat?: (member: TeamMember) => void; activeTeamChatId?: number | null }) {
   const docInputRef = useRef<HTMLInputElement>(null);
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
 
@@ -866,7 +816,7 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onSendDM }: { docs: 
           icon={<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><rect x="2" y="1" width="8" height="10" rx="1" stroke="#999" strokeWidth="1" fill="none" /></svg>}
         />
         <div className="w-full h-px bg-[#eee] my-3"></div>
-        <TeamSection user={user} onSendDM={onSendDM} />
+        <TeamSection user={user} onOpenTeamChat={onOpenTeamChat} activeTeamChatId={activeTeamChatId} />
       </div>
 
       <div className="px-4 py-3 border-t border-[#eee]">
@@ -896,8 +846,10 @@ export default function LandingPage() {
   const [autoSendFile, setAutoSendFile] = useState(false);
   const [docsOpen, setDocsOpen] = useState(false);
   const [savedDocs, setSavedDocs] = useState<SavedDoc[]>(loadSavedDocs);
-  const [teamTyping, setTeamTyping] = useState<string | null>(null);
+  const [activeTeamChat, setActiveTeamChat] = useState<TeamMember | null>(null);
+  const [teamChatMessages, setTeamChatMessages] = useState<GuestMessage[]>([]);
   const teamConvoLoaded = useRef(false);
+  const teamChatLoaded = useRef(false);
   const { user, logout } = useAuth();
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -970,6 +922,65 @@ export default function LandingPage() {
     return () => clearInterval(interval);
   }, [user, teamMsgToGuestMsg]);
 
+  const playNotificationSound = useCallback(() => {
+    try {
+      const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.frequency.setValueAtTime(800, ctx.currentTime);
+      osc.frequency.setValueAtTime(600, ctx.currentTime + 0.1);
+      gain.gain.setValueAtTime(0.3, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.2);
+      osc.start(ctx.currentTime);
+      osc.stop(ctx.currentTime + 0.2);
+    } catch {}
+  }, []);
+
+  const handleOpenTeamChat = useCallback((member: TeamMember) => {
+    if (activeTeamChat?.id === member.id) {
+      setActiveTeamChat(null);
+      setTeamChatMessages([]);
+      teamChatLoaded.current = false;
+      return;
+    }
+    setActiveTeamChat(member);
+    setTeamChatMessages([]);
+    teamChatLoaded.current = false;
+  }, [activeTeamChat]);
+
+  useEffect(() => {
+    if (!user || !activeTeamChat) return;
+    let cancelled = false;
+    const targetId = activeTeamChat.id;
+    let lastKnownCount = 0;
+
+    const poll = async () => {
+      if (cancelled) return;
+      try {
+        const res = await fetch(`/api/team/chat/messages?with=${targetId}`);
+        if (!res.ok || cancelled) return;
+        const msgs: TeamMessage[] = await res.json();
+        if (cancelled) return;
+
+        const allMsgs = msgs.map(m => teamMsgToGuestMsg(m, user.id));
+
+        if (lastKnownCount > 0 && msgs.length > lastKnownCount) {
+          const newFromOthers = msgs.slice(lastKnownCount).filter(m => m.senderId !== user.id);
+          if (newFromOthers.length > 0) playNotificationSound();
+        }
+
+        lastKnownCount = msgs.length;
+        setTeamChatMessages(allMsgs);
+      } catch {}
+    };
+
+    poll();
+    const interval = setInterval(poll, 3000);
+    return () => { cancelled = true; clearInterval(interval); };
+  }, [user, activeTeamChat, teamMsgToGuestMsg, playNotificationSound]);
+
   const handleSaveDoc = (doc: SavedDoc) => {
     const updated = [doc, ...savedDocs];
     setSavedDocs(updated);
@@ -996,7 +1007,7 @@ export default function LandingPage() {
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [guestMessages]);
+  }, [guestMessages, teamChatMessages]);
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -1024,6 +1035,73 @@ export default function LandingPage() {
   const doSend = async (text: string, file?: { name: string; content: string; isPdf?: boolean } | null) => {
     const displayText = file ? `${text}\n\n[Attached: ${file.name}]` : text;
     const userMsg: GuestMessage = { id: nextId, role: "user", content: displayText, senderName: user?.displayName || user?.email };
+
+    if (activeTeamChat && user) {
+      setTeamChatMessages((prev) => [...prev, userMsg]);
+      setNextId((n) => n + 1);
+      setIsSending(true);
+      playNotificationSound();
+
+      try {
+        const storeRes = await fetch("/api/team/chat/message", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ content: displayText, withUserId: activeTeamChat.id }),
+        });
+        if (storeRes.ok) {
+          const stored = await storeRes.json();
+          setTeamChatMessages(prev => prev.map(m => m.id === userMsg.id ? { ...m, id: stored.id + 100000 } : m));
+        }
+
+        const histRes = await fetch(`/api/team/chat/messages?with=${activeTeamChat.id}`);
+        let history: { role: string; content: string }[] = [];
+        if (histRes.ok) {
+          const serverMsgs: TeamMessage[] = await histRes.json();
+          history = serverMsgs.map(m => ({
+            role: m.isAi ? "assistant" : "user",
+            content: m.senderId !== user.id && !m.isAi
+              ? `[Team member ${m.displayName}]: ${m.content}`
+              : m.content,
+          }));
+        }
+
+        const payload: Record<string, unknown> = { content: text, history };
+        if (file) {
+          payload.fileContent = file.content;
+          payload.attachment = "credit_report";
+          payload.fileType = file.isPdf ? "pdf" : "text";
+        }
+        const res = await fetch("/api/chat/guest", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+        if (!res.ok) throw new Error("Failed");
+        const data = await res.json();
+        const aiMsg: GuestMessage = { id: nextId + 1, role: "assistant", content: data.content };
+        setTeamChatMessages((prev) => [...prev, aiMsg]);
+        setNextId((n) => n + 1);
+
+        const aiStoreRes = await fetch("/api/team/chat/message", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ content: data.content, withUserId: activeTeamChat.id, isAi: true }),
+        });
+        if (aiStoreRes.ok) {
+          const aiStored = await aiStoreRes.json();
+          setTeamChatMessages(prev => prev.map(m => m.id === aiMsg.id ? { ...m, id: aiStored.id + 100000 } : m));
+        }
+      } catch {
+        const errMsg: GuestMessage = { id: nextId + 1, role: "assistant", content: "Sorry, something went wrong. Please try again." };
+        setTeamChatMessages((prev) => [...prev, errMsg]);
+        setNextId((n) => n + 1);
+      } finally {
+        setIsSending(false);
+        inputRef.current?.focus();
+      }
+      return;
+    }
+
     setGuestMessages((prev) => [...prev, userMsg]);
     setNextId((n) => n + 1);
     setIsSending(true);
@@ -1119,7 +1197,8 @@ export default function LandingPage() {
 
   const handleSubmit = (e: React.FormEvent) => { e.preventDefault(); handleSend(); };
   const handleUploadClick = () => { fileInputRef.current?.click(); };
-  const hasMessages = guestMessages.length > 0;
+  const displayMessages = activeTeamChat ? teamChatMessages : guestMessages;
+  const hasMessages = displayMessages.length > 0;
 
   return (
     <div className="relative h-[100dvh] flex bg-[#fafafa]" style={{ fontFamily: "'Inter', sans-serif" }}>
@@ -1129,11 +1208,7 @@ export default function LandingPage() {
         <>
           <div className="sm:hidden fixed inset-0 bg-black/30 z-40" onClick={() => setDocsOpen(false)} />
           <div className="fixed sm:relative z-50 sm:z-auto w-[280px] h-full shrink-0 transition-all" data-testid="docs-sidebar">
-            <DocsPanel docs={savedDocs} onClose={() => setDocsOpen(false)} onDelete={handleDeleteDoc} onSave={handleSaveDoc} user={user} onSendDM={(content, member) => {
-              const dmMsg: GuestMessage = { id: nextId, role: "user", content, senderName: user?.displayName || user?.email };
-              setGuestMessages(prev => [...prev, dmMsg]);
-              setNextId(n => n + 1);
-            }} />
+            <DocsPanel docs={savedDocs} onClose={() => setDocsOpen(false)} onDelete={handleDeleteDoc} onSave={handleSaveDoc} user={user} onOpenTeamChat={handleOpenTeamChat} activeTeamChatId={activeTeamChat?.id} />
           </div>
         </>
       )}
@@ -1184,6 +1259,26 @@ export default function LandingPage() {
             )}
           </nav>
 
+          {activeTeamChat && (
+            <div className="sticky top-[53px] z-20 bg-[#f0eeff] border-b border-[#d4d0f0] px-4 py-2 flex items-center justify-between" data-testid="team-chat-banner">
+              <div className="flex items-center gap-2">
+                <div className="w-6 h-6 rounded-full bg-[#6366f1] text-white flex items-center justify-center text-[10px] font-bold">
+                  {activeTeamChat.displayName[0]?.toUpperCase()}
+                </div>
+                <span className="text-[12px] font-medium text-[#333]">Team chat with {activeTeamChat.displayName}</span>
+                <span className="text-[10px] text-[#888]">3-way: You + {activeTeamChat.displayName} + Profundr AI</span>
+              </div>
+              <button
+                onClick={() => { setActiveTeamChat(null); setTeamChatMessages([]); teamChatLoaded.current = false; }}
+                className="text-[11px] text-[#6366f1] font-medium hover:text-[#4f46e5] flex items-center gap-1"
+                data-testid="button-close-team-chat"
+              >
+                <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2 2l6 6M8 2l-6 6" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" /></svg>
+                Back to personal
+              </button>
+            </div>
+          )}
+
           {!hasMessages && !isSending ? (
             <div className="flex-1 flex flex-col items-center justify-center px-4 gap-4 min-h-[calc(100dvh-180px)]">
               <h1 className="text-[28px] sm:text-[36px] font-semibold text-[#1a1a1a] tracking-[-0.03em] text-center leading-tight" data-testid="text-hero-headline">
@@ -1207,7 +1302,7 @@ export default function LandingPage() {
           ) : (
             <div className="w-full max-w-[720px] mx-auto px-4 pt-4 pb-2" data-testid="chat-messages">
               <div className="space-y-6">
-                {guestMessages.map((msg) => {
+                {displayMessages.map((msg) => {
                   const msgData = msg.role === "assistant" ? parseSingleMessageData(msg.content) : null;
                   const showDashboard = msgData && hasAnalysisData(msgData);
                   const disputes = msg.role === "assistant" ? parseDisputeItems(msg.content) : [];
@@ -1368,7 +1463,7 @@ export default function LandingPage() {
               </button>
               <input
                 ref={inputRef} data-testid="input-chat" type="text"
-                placeholder={attachedFile ? "Add a message about your report..." : "Ask about your funding readiness..."}
+                placeholder={attachedFile ? "Add a message about your report..." : activeTeamChat ? `Message team chat with ${activeTeamChat.displayName}...` : "Ask about your funding readiness..."}
                 className="flex-1 bg-transparent text-[14px] text-[#1a1a1a] placeholder:text-[#999] outline-none px-2"
                 value={input} onChange={(e) => setInput(e.target.value)} disabled={isSending}
               />

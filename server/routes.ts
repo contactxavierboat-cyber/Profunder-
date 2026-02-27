@@ -2572,6 +2572,53 @@ Respond to the latest question as the team's AI mentor. Be direct, helpful, and 
     }
   });
 
+  app.post("/api/team/chat/message", requireAuth, async (req, res) => {
+    try {
+      const userId = req.session.userId!;
+      const { content, isAi, withUserId } = req.body;
+      if (!content || typeof content !== "string") return res.status(400).json({ error: "Message required" });
+      if (!withUserId || typeof withUserId !== "number") return res.status(400).json({ error: "withUserId required" });
+      const friendship = await storage.getFriendship(userId, withUserId);
+      if (!friendship || friendship.status !== "accepted") return res.status(403).json({ error: "Not a team member" });
+      const ids = [userId, withUserId].sort((a, b) => a - b);
+      const sharedKey = `teamchat_${ids[0]}_${ids[1]}`;
+      const msg = await storage.createDirectMessage({ senderId: userId, receiverId: withUserId, conversationKey: sharedKey, content, isAi: !!isAi });
+      const user = await storage.getUser(userId);
+      res.json({ id: msg.id, senderId: userId, displayName: user?.displayName || user?.email || "User", content: msg.content, isAi: !!isAi, timestamp: msg.timestamp });
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  app.get("/api/team/chat/messages", requireAuth, async (req, res) => {
+    try {
+      const userId = req.session.userId!;
+      const withUserId = parseInt(req.query.with as string);
+      if (!withUserId || isNaN(withUserId)) return res.status(400).json({ error: "with parameter required" });
+      const friendship = await storage.getFriendship(userId, withUserId);
+      if (!friendship || friendship.status !== "accepted") return res.status(403).json({ error: "Not a team member" });
+      const ids = [userId, withUserId].sort((a, b) => a - b);
+      const sharedKey = `teamchat_${ids[0]}_${ids[1]}`;
+      const msgs = await storage.getDirectMessages(sharedKey);
+      const userIds = [...new Set(msgs.map(m => m.senderId))];
+      const usersMap: Record<number, { displayName: string; email: string }> = {};
+      for (const uid of userIds) {
+        const u = await storage.getUser(uid);
+        if (u) usersMap[uid] = { displayName: u.displayName || u.email, email: u.email };
+      }
+      res.json(msgs.slice(-200).map(m => ({
+        id: m.id,
+        senderId: m.senderId,
+        displayName: usersMap[m.senderId]?.displayName || "User",
+        content: m.content,
+        isAi: m.isAi,
+        timestamp: m.timestamp,
+      })));
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
   const rssParser = new Parser({
     timeout: 3000,
     headers: { 'User-Agent': 'Mozilla/5.0 (compatible; Profundr-Feed/1.0)' },
