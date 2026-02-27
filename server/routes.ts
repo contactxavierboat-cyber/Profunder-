@@ -1807,14 +1807,16 @@ CONVERSATIONAL RULES:
         reason: z.string().max(1000)
       })).min(1).max(20),
       userName: z.string().max(100).optional(),
-      userAddress: z.string().max(300).optional()
+      userAddress: z.string().max(300).optional(),
+      ssnLast4: z.string().max(4).optional(),
+      dob: z.string().max(20).optional()
     }).safeParse(req.body);
 
     if (!body.success) {
       return res.status(400).json({ error: "Invalid dispute data" });
     }
 
-    const { disputes, userName = "[YOUR NAME]", userAddress = "[YOUR ADDRESS]\n[CITY, STATE ZIP]" } = body.data;
+    const { disputes, userName = "[YOUR NAME]", userAddress = "[YOUR ADDRESS]\n[CITY, STATE ZIP]", ssnLast4 = "[LAST 4 SSN]", dob = "[DATE OF BIRTH]" } = body.data;
     const today = new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
 
     const bureauAddresses: Record<string, string> = {
@@ -1858,6 +1860,8 @@ CONVERSATIONAL RULES:
         doc.font("Helvetica").fontSize(10).fillColor("#333333")
           .text(userName, c)
           .text(userAddress, c)
+          .text(`SSN: XXX-XX-${ssnLast4}`, c)
+          .text(`DOB: ${dob}`, c)
           .moveDown(0.5)
           .text(today, c)
           .moveDown(1);
