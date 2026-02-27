@@ -1722,13 +1722,24 @@ CONVERSATIONAL RULES:
   function drawWatermark(doc: InstanceType<typeof PDFDocument>) {
     const pw = doc.page.width;
     const ph = doc.page.height;
+    const savedY = doc.y;
+    const savedX = doc.x;
     doc.save();
-    doc.opacity(0.04);
-    doc.translate(pw / 2, ph / 2);
-    doc.rotate(-35);
-    doc.font("Helvetica-Bold").fontSize(72).fillColor("#1a1a2e")
-      .text("profundr.", -200, -30, { width: 400, align: "center" });
+    doc.opacity(0.045);
+    const cx = pw / 2;
+    const cy = ph / 2;
+    const angle = -35 * (Math.PI / 180);
+    const text = "profundr.";
+    doc.font("Helvetica-Bold").fontSize(80).fillColor("#1a1a2e");
+    const tw = doc.widthOfString(text);
+    const th = doc.currentLineHeight();
+    const rx = cx - (tw / 2) * Math.cos(angle) + (th / 2) * Math.sin(angle);
+    const ry = cy - (tw / 2) * Math.sin(angle) - (th / 2) * Math.cos(angle);
+    doc.rotate(-35, { origin: [cx, cy] });
+    doc.text(text, cx - tw / 2, cy - th / 2, { lineBreak: false });
     doc.restore();
+    doc.x = savedX;
+    doc.y = savedY;
   }
 
   function drawPdfLetterhead(doc: InstanceType<typeof PDFDocument>) {
