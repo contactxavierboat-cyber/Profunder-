@@ -1058,6 +1058,40 @@ export async function registerRoutes(
     }
   });
 
+  app.post("/api/chat/guest", async (req, res) => {
+    const body = z.object({
+      content: z.string().min(1).max(5000),
+      history: z.array(z.object({
+        role: z.enum(["user", "assistant"]),
+        content: z.string()
+      })).max(10).optional()
+    }).safeParse(req.body);
+
+    if (!body.success) {
+      return res.status(400).json({ error: "Invalid message data" });
+    }
+
+    const { content, history = [] } = body.data;
+
+    try {
+      const response = await openai.chat.completions.create({
+        model: "gpt-4o",
+        messages: [
+          { role: "system", content: MENTXR_SYSTEM_PROMPT },
+          ...history.slice(-8),
+          { role: "user", content }
+        ],
+        max_tokens: 2048,
+      });
+
+      const aiContent = response.choices[0]?.message?.content || "I'm sorry, I couldn't generate a response right now.";
+      res.json({ content: aiContent });
+    } catch (error: any) {
+      console.error("Guest chat OpenAI Error:", error);
+      res.status(500).json({ error: "Error generating AI response. Please try again." });
+    }
+  });
+
   app.delete("/api/chat", requireAuth, async (req, res) => {
     await storage.clearMessages(req.session.userId!);
     res.status(204).send();

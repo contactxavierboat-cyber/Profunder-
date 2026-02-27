@@ -2,6 +2,12 @@ import { useState, useRef, useEffect } from "react";
 import { useAuth } from "@/lib/store";
 import { ProfundrLogo } from "@/components/profundr-logo";
 
+interface GuestMessage {
+  id: number;
+  role: "user" | "assistant";
+  content: string;
+}
+
 function FormatResponse({ content }: { content: string }) {
   const cleaned = content
     .replace(/\*\*\*/g, "")
@@ -54,33 +60,44 @@ function FormatResponse({ content }: { content: string }) {
 
 export default function LandingPage() {
   const [input, setInput] = useState("");
-  const [loginEmail, setLoginEmail] = useState("");
   const [isSending, setIsSending] = useState(false);
-  const [isLoggingIn, setIsLoggingIn] = useState(false);
-  const [showLogin, setShowLogin] = useState(false);
-  const [pendingMessage, setPendingMessage] = useState("");
-  const { user, messages, sendMessage, loginSilent } = useAuth();
+  const [guestMessages, setGuestMessages] = useState<GuestMessage[]>([]);
+  const [nextId, setNextId] = useState(1);
+  const { user } = useAuth();
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
-
-  useEffect(() => {
-    if (user && pendingMessage) {
-      const msg = pendingMessage;
-      setPendingMessage("");
-      setInput("");
-      doSend(msg);
-    }
-  }, [user]);
+  }, [guestMessages]);
 
   const doSend = async (text: string) => {
+    const userMsg: GuestMessage = { id: nextId, role: "user", content: text };
+    setGuestMessages((prev) => [...prev, userMsg]);
+    setNextId((n) => n + 1);
     setIsSending(true);
+
     try {
-      await sendMessage(text);
+      const history = guestMessages.map((m) => ({ role: m.role, content: m.content }));
+
+      const res = await fetch("/api/chat/guest", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ content: text, history }),
+      });
+
+      if (!res.ok) {
+        throw new Error("Failed to get response");
+      }
+
+      const data = await res.json();
+      const aiMsg: GuestMessage = { id: nextId + 1, role: "assistant", content: data.content };
+      setGuestMessages((prev) => [...prev, aiMsg]);
+      setNextId((n) => n + 1);
     } catch {
+      const errMsg: GuestMessage = { id: nextId + 1, role: "assistant", content: "Sorry, something went wrong. Please try again." };
+      setGuestMessages((prev) => [...prev, errMsg]);
+      setNextId((n) => n + 1);
     } finally {
       setIsSending(false);
       inputRef.current?.focus();
@@ -90,14 +107,6 @@ export default function LandingPage() {
   const handleSend = async (messageText?: string) => {
     const text = messageText || input.trim();
     if (!text || isSending) return;
-
-    if (!user) {
-      setPendingMessage(text);
-      setInput(text);
-      setShowLogin(true);
-      return;
-    }
-
     setInput("");
     doSend(text);
   };
@@ -107,58 +116,10 @@ export default function LandingPage() {
     handleSend();
   };
 
-  const handleLoginModal = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!loginEmail) return;
-    setIsLoggingIn(true);
-    try {
-      await loginSilent(loginEmail);
-      setShowLogin(false);
-    } catch {
-    } finally {
-      setIsLoggingIn(false);
-    }
-  };
-
-  const isLoggedIn = !!user;
-  const hasMessages = isLoggedIn && messages.length > 0;
+  const hasMessages = guestMessages.length > 0;
 
   return (
     <div className="relative min-h-[100dvh] flex flex-col bg-[#f9f9f9]" style={{ fontFamily: "'Inter', sans-serif" }}>
-
-      {showLogin && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/30 backdrop-blur-sm" onClick={() => !isLoggingIn && setShowLogin(false)}>
-          <div className="w-full max-w-[400px] mx-4 bg-white rounded-2xl shadow-2xl p-8" onClick={(e) => e.stopPropagation()}>
-            <div className="flex items-center justify-between mb-6">
-              <ProfundrLogo size="md" />
-              <button onClick={() => setShowLogin(false)} className="text-[#b0b0b0] hover:text-[#666] transition-colors text-[20px] leading-none" data-testid="button-close-login">&times;</button>
-            </div>
-            <h2 className="text-[20px] font-semibold tracking-[-0.02em] text-[#1a1a1a] mb-1" data-testid="text-login-title">Sign in to continue</h2>
-            <p className="text-[13px] text-[#888] mb-6">Enter your email to start your capital analysis</p>
-            <form onSubmit={handleLoginModal}>
-              <input
-                data-testid="input-login-email"
-                type="email"
-                placeholder="Email address"
-                className="w-full bg-[#f4f4f4] border border-[#e5e5e5] rounded-xl h-[48px] px-4 text-[14px] text-[#1a1a1a] placeholder:text-[#aaa] outline-none focus:border-[#ccc] transition-colors mb-4"
-                value={loginEmail}
-                onChange={(e) => setLoginEmail(e.target.value)}
-                required
-                disabled={isLoggingIn}
-                autoFocus
-              />
-              <button
-                data-testid="button-login-submit"
-                type="submit"
-                disabled={isLoggingIn}
-                className="w-full h-[48px] rounded-xl bg-[#1a1a1a] text-white text-[14px] font-medium hover:bg-[#333] transition-colors disabled:opacity-50"
-              >
-                {isLoggingIn ? "..." : "Continue"}
-              </button>
-            </form>
-          </div>
-        </div>
-      )}
 
       <nav className="flex items-center justify-between px-4 sm:px-6 py-3 shrink-0" data-testid="nav-top">
         <div className="flex items-center gap-2" data-testid="nav-logo">
@@ -177,7 +138,7 @@ export default function LandingPage() {
           </div>
         ) : (
           <button
-            onClick={() => setShowLogin(true)}
+            onClick={() => window.location.href = '/auth'}
             className="rounded-full px-5 py-2 text-[13px] font-medium border border-[#ddd] text-[#1a1a1a] hover:bg-[#f0f0f0] transition-colors"
             data-testid="button-login"
           >
@@ -199,7 +160,7 @@ export default function LandingPage() {
         ) : (
           <div className="flex-1 w-full max-w-[680px] mx-auto overflow-y-auto px-4 pt-4 pb-2" data-testid="chat-messages">
             <div className="space-y-6">
-              {messages.map((msg) => (
+              {guestMessages.map((msg) => (
                 <div key={msg.id} className={`flex gap-3 ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
                   {msg.role !== "user" && (
                     <div className="w-7 h-7 rounded-full bg-[#1a1a1a] flex items-center justify-center shrink-0 mt-0.5">
