@@ -31,7 +31,7 @@ export default function SubscriptionPage() {
           if (data.active) {
             queryClient.invalidateQueries({ queryKey: ["/api/me"] });
             toast({ title: "Subscription Activated!", description: "Welcome to Profundr." });
-            setTimeout(() => setLocation("/dashboard"), 1500);
+            setTimeout(() => setLocation("/"), 1500);
           }
         });
     }
@@ -147,7 +147,7 @@ export default function SubscriptionPage() {
             <span className="text-[12px] text-[#999] hidden sm:inline" data-testid="text-user-email">{user.email}</span>
             {isActive && (
               <button
-                onClick={() => setLocation("/dashboard")}
+                onClick={() => setLocation("/")}
                 className="rounded-full px-4 py-1.5 text-[12px] font-medium bg-[#1a1a2e] text-white hover:bg-[#2a2a40] transition-colors"
                 data-testid="button-dashboard"
               >
