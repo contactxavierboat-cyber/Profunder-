@@ -184,62 +184,35 @@ function FormatResponse({ content }: { content: string }) {
     .replace(/\*/g, "")
     .replace(/^---+$/gm, "")
     .replace(/^-{2,}/gm, "");
-  const sections = cleaned.split(/\n{2,}/);
 
-  const metricLinePattern = /^(FUNDABILITY\s*INDEX|APPROVAL\s*ODDS|BORROWING\s*POWER|DISPUTE\s*ITEMS?|[-•]\s*(Bank\s*Term|Online\s*Lender|Business\s*LOC|Credit\s*Card|MCA)\s*:)/i;
+  const isMetricLine = (line: string): boolean => {
+    const t = line.trim();
+    if (!t) return true;
+    if (/^FUNDABILITY\s*INDEX/i.test(t)) return true;
+    if (/^APPROVAL\s*ODDS/i.test(t)) return true;
+    if (/^BORROWING\s*POWER/i.test(t)) return true;
+    if (/^DISPUTE\s*ITEMS?\s*:?/i.test(t)) return true;
+    if (/^[-•]\s*(Bank\s*Term|Online\s*Lender|Business\s*LOC|Credit\s*Card|MCA)\s*:/i.test(t)) return true;
+    if (/^(Bank\s*Term|Online\s*Lender|Business\s*LOC|Credit\s*Card|MCA)\s*:/i.test(t)) return true;
+    if (/^Conservative\s*:/i.test(t)) return true;
+    if (/^\d+\s*\/\s*100/i.test(t)) return true;
+    return false;
+  };
 
-  const visibleSections = sections.filter((section) => {
-    const trimmed = section.trim();
-    if (!trimmed) return false;
-    if (/^DISPUTE:/i.test(trimmed)) return false;
-    const lines = trimmed.split("\n");
-    const allMetric = lines.every(l => !l.trim() || metricLinePattern.test(l.trim()));
-    if (allMetric) return false;
+  const allLines = cleaned.split("\n");
+  const verdictLines = allLines.filter(l => {
+    const t = l.trim();
+    if (!t) return false;
+    if (isMetricLine(t)) return false;
+    if (/^DISPUTE:/i.test(t)) return false;
     return true;
   });
 
   return (
-    <div className="space-y-3">
-      {visibleSections.map((section, i) => {
-        const trimmed = section.trim();
-        const lines = trimmed.split("\n").filter(l => {
-          const lt = l.trim();
-          return lt && !metricLinePattern.test(lt) && !/^DISPUTE:/i.test(lt);
-        });
-        if (lines.length === 0) return null;
-
-        const hasBullets = lines.some((l) => /^\s*[-•]\s/.test(l) || /^\s*\d+[.)]\s/.test(l));
-        const isTitle =
-          lines.length === 1 && (
-            /^\d+\)\s/.test(lines[0]) ||
-            (lines[0].length < 80 && lines[0] === lines[0].toUpperCase() && !lines[0].includes("."))
-          );
-
-        if (isTitle) {
-          return (
-            <p key={i} className="text-[13px] font-semibold text-[#1a1a2e] tracking-wide">
-              {toTitleCase(lines[0])}
-            </p>
-          );
-        }
-        if (hasBullets) {
-          return (
-            <div key={i} className="space-y-1">
-              {lines.map((line, j) => {
-                const bulletMatch = line.match(/^\s*[-•]\s*(.*)/);
-                const numMatch = line.match(/^\s*\d+[.)]\s*(.*)/);
-                if (bulletMatch) return <p key={j} className="pl-4 text-[14px] text-[#444] leading-[1.65]">{"\u2022"} {normalizeCase(bulletMatch[1])}</p>;
-                if (numMatch) {
-                  const num = line.match(/^\s*(\d+)/)?.[1];
-                  return <p key={j} className="pl-4 text-[14px] text-[#444] leading-[1.65]">{num}. {normalizeCase(numMatch[1])}</p>;
-                }
-                return <p key={j} className="text-[14px] text-[#444] leading-[1.65]">{normalizeCase(line)}</p>;
-              })}
-            </div>
-          );
-        }
-        return <p key={i} className="text-[14px] text-[#444] leading-[1.65]">{normalizeCase(lines.join(" "))}</p>;
-      })}
+    <div className="space-y-2">
+      {verdictLines.map((line, i) => (
+        <p key={i} className="text-[14px] text-[#444] leading-[1.65]">{normalizeCase(line.trim())}</p>
+      ))}
     </div>
   );
 }
