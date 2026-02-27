@@ -391,47 +391,41 @@ function MissionDashboard({ data }: { data: MissionData }) {
         </div>
       )}
 
-      {(data.suppressors.length > 0 || data.helping.length > 0 || data.bestNextMove) && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-          {data.suppressors.length > 0 && (
-            <div className="rounded-xl bg-white border border-[#e8e8e8] p-4 shadow-sm" data-testid="card-suppressors">
-              <p className="text-[10px] text-[#999] tracking-[0.01em] font-medium mb-2.5">Top Approval Suppressors</p>
-              <div className="space-y-2">
-                {data.suppressors.map((s, i) => (
-                  <div key={i} className="flex items-start gap-2.5">
-                    <div className="w-5 h-5 rounded-md bg-[#f0eeff] flex items-center justify-center shrink-0 mt-0.5">
-                      <span className="text-[9px] font-bold text-[#7c3aed]">{i + 1}</span>
-                    </div>
-                    <p className="text-[12px] text-[#444] leading-[1.55] font-medium">{s}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
+      {data.suppressors.length > 0 && (
+        <div className="rounded-xl bg-white border border-[#e8e8e8] p-4 shadow-sm" data-testid="card-suppressors">
+          <p className="text-[10px] text-[#999] tracking-[0.01em] font-medium mb-2.5">Top Approval Suppressors</p>
           <div className="space-y-2">
-            {data.bestNextMove && (
-              <div className="rounded-xl bg-white border border-[#e8e8e8] p-4 shadow-sm" data-testid="card-best-next-move">
-                <p className="text-[10px] text-[#999] tracking-[0.01em] font-medium mb-2">Best Next Move</p>
-                <p className="text-[12px] text-[#333] leading-[1.6] font-medium">{data.bestNextMove}</p>
-              </div>
-            )}
-
-            {data.helping.length > 0 && (
-              <div className="rounded-xl bg-white border border-[#e8e8e8] p-4 shadow-sm" data-testid="card-helping">
-                <p className="text-[10px] text-[#999] tracking-[0.01em] font-medium mb-2">What's Helping</p>
-                <div className="space-y-1.5">
-                  {data.helping.map((h, i) => (
-                    <div key={i} className="flex items-start gap-2">
-                      <div className="w-4 h-4 rounded-md bg-[#f0eeff] flex items-center justify-center shrink-0 mt-0.5">
-                        <span className="text-[9px] text-[#6366f1] font-bold">✓</span>
-                      </div>
-                      <p className="text-[11px] text-[#555] leading-[1.5]">{h}</p>
-                    </div>
-                  ))}
+            {data.suppressors.map((s, i) => (
+              <div key={i} className="flex items-start gap-2.5">
+                <div className="w-5 h-5 rounded-md bg-[#f0eeff] flex items-center justify-center shrink-0 mt-0.5">
+                  <span className="text-[9px] font-bold text-[#7c3aed]">{i + 1}</span>
                 </div>
+                <p className="text-[12px] text-[#444] leading-[1.55] font-medium">{s}</p>
               </div>
-            )}
+            ))}
+          </div>
+        </div>
+      )}
+
+      {data.bestNextMove && (
+        <div className="rounded-xl bg-white border border-[#e8e8e8] p-4 shadow-sm" data-testid="card-best-next-move">
+          <p className="text-[10px] text-[#999] tracking-[0.01em] font-medium mb-2">Best Next Move</p>
+          <p className="text-[12px] text-[#333] leading-[1.6] font-medium">{data.bestNextMove}</p>
+        </div>
+      )}
+
+      {data.helping.length > 0 && (
+        <div className="rounded-xl bg-white border border-[#e8e8e8] p-4 shadow-sm" data-testid="card-helping">
+          <p className="text-[10px] text-[#999] tracking-[0.01em] font-medium mb-2">What's Helping</p>
+          <div className="space-y-1.5">
+            {data.helping.map((h, i) => (
+              <div key={i} className="flex items-start gap-2">
+                <div className="w-4 h-4 rounded-md bg-[#f0eeff] flex items-center justify-center shrink-0 mt-0.5">
+                  <span className="text-[9px] text-[#6366f1] font-bold">✓</span>
+                </div>
+                <p className="text-[11px] text-[#555] leading-[1.5]">{h}</p>
+              </div>
+            ))}
           </div>
         </div>
       )}
