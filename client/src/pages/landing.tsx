@@ -261,11 +261,11 @@ export default function LandingPage() {
             </div>
 
             <h1
-              className="text-[48px] min-[400px]:text-[58px] sm:text-[68px] md:text-[88px] lg:text-[108px] mb-6 sm:mb-8 text-center"
-              style={{ fontFamily: "'Inter', sans-serif", fontWeight: 800, letterSpacing: '-0.05em', lineHeight: 1, backgroundImage: 'linear-gradient(135deg, #1a1a2e 0%, #4a4a6a 50%, #8a8aa5 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}
+              className="text-[48px] min-[400px]:text-[58px] sm:text-[68px] md:text-[88px] lg:text-[108px] uppercase italic leading-[0.85] mb-6 sm:mb-8 text-center"
+              style={{ fontFamily: "'Satoshi', sans-serif", fontWeight: 400, letterSpacing: '-0.06em', backgroundImage: 'linear-gradient(180deg, #000000 0%, #3a3a5a 50%, #7a7a9a 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}
               data-testid="text-hero-headline"
             >
-              <span className="hidden sm:inline">qualify<br />before<br />you apply</span><span className="sm:hidden">qualify<br />before<br />you apply</span>
+              <span className="hidden sm:inline">Qualify<br />Before<br />You Apply</span><span className="sm:hidden">Qualify Before<br />You Apply</span>
             </h1>
 
             <div className="w-12 h-px bg-gradient-to-r from-transparent via-[#9a9ab8] to-transparent mb-6 sm:mb-8" />
