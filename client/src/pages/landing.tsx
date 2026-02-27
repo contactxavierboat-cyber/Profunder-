@@ -256,17 +256,16 @@ export default function LandingPage() {
         <div className="relative max-w-[900px] mx-auto flex flex-col items-center">
 
           <div className="relative w-full rounded-2xl sm:rounded-3xl bg-white/70 backdrop-blur-xl border border-white/80 shadow-[0_8px_40px_rgba(0,0,0,0.06)] px-5 sm:px-12 py-10 sm:py-16 flex flex-col items-center">
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-[#d0d0de] bg-white/80 mb-8 sm:mb-10">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+            <div className="inline-flex items-center px-4 py-1.5 rounded-full border border-[#d0d0de] bg-white/80 mb-8 sm:mb-10">
               <span className="text-[10px] sm:text-[11px] tracking-[0.15em] uppercase text-[#6a6a8a] font-medium" data-testid="text-hero-label">Digital Underwriting Engine</span>
             </div>
 
             <h1
-              className="text-[48px] min-[400px]:text-[58px] sm:text-[68px] md:text-[88px] lg:text-[108px] uppercase italic leading-[0.85] mb-6 sm:mb-8 text-center"
-              style={{ fontFamily: "'Satoshi', sans-serif", fontWeight: 400, letterSpacing: '-0.06em', backgroundImage: 'linear-gradient(180deg, #000000 0%, #3a3a5a 50%, #7a7a9a 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}
+              className="text-[48px] min-[400px]:text-[58px] sm:text-[68px] md:text-[88px] lg:text-[108px] uppercase leading-[0.9] mb-6 sm:mb-8 text-center"
+              style={{ fontFamily: "'Inter', sans-serif", fontWeight: 800, letterSpacing: '-0.05em', backgroundImage: 'linear-gradient(135deg, #1a1a2e 0%, #4a4a6a 50%, #8a8aa5 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}
               data-testid="text-hero-headline"
             >
-              <span className="hidden sm:inline">Qualify<br />Before<br />You Apply</span><span className="sm:hidden">Qualify Before<br />You Apply</span>
+              <span className="hidden sm:inline">QUALIFY<br />BEFORE<br />YOU APPLY</span><span className="sm:hidden">QUALIFY<br />BEFORE<br />YOU APPLY</span>
             </h1>
 
             <div className="w-12 h-px bg-gradient-to-r from-transparent via-[#9a9ab8] to-transparent mb-6 sm:mb-8" />
