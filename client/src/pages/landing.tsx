@@ -24,7 +24,7 @@ function FormatResponse({ content }: { content: string }) {
         if (!trimmed) return null;
         const isTitle =
           /^\d+\)\s/.test(trimmed) ||
-          /^(FUNDABILITY|FUNDING|KEY FINDINGS|PHASE|TIMELINE|NEXT MOVE|CAPITAL|CLIENT|CERTIFICATION)/i.test(trimmed) ||
+          /^(FUNDABILITY|FUNDING|KEY FINDINGS|PHASE|TIMELINE|NEXT MOVE|CAPITAL|CLIENT|CERTIFICATION|APPROVAL|ESTIMATED|OPTIMIZATION|SCENARIO|RISK)/i.test(trimmed) ||
           (trimmed.length < 80 && trimmed === trimmed.toUpperCase() && !trimmed.includes("."));
         const lines = trimmed.split("\n");
         const hasBullets = lines.some((l) => /^\s*[-•]\s/.test(l) || /^\s*\d+[.)]\s/.test(l));
@@ -63,16 +63,68 @@ export default function LandingPage() {
   const [isSending, setIsSending] = useState(false);
   const [guestMessages, setGuestMessages] = useState<GuestMessage[]>([]);
   const [nextId, setNextId] = useState(1);
+  const [attachedFile, setAttachedFile] = useState<{ name: string; content: string; isPdf?: boolean } | null>(null);
+  const [autoSendFile, setAutoSendFile] = useState(false);
   const { user } = useAuth();
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [guestMessages]);
 
-  const doSend = async (text: string) => {
-    const userMsg: GuestMessage = { id: nextId, role: "user", content: text };
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) {
+      setAutoSendFile(false);
+      return;
+    }
+
+    const maxSize = 10 * 1024 * 1024;
+    if (file.size > maxSize) {
+      setAutoSendFile(false);
+      alert("File too large. Maximum size is 10MB.");
+      return;
+    }
+
+    const shouldAutoSend = autoSendFile;
+    setAutoSendFile(false);
+
+    const isPdf = file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf");
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      const result = reader.result as string;
+      let content: string;
+
+      if (isPdf) {
+        content = result.split(",")[1] || result;
+      } else {
+        content = result;
+      }
+
+      const fileData = { name: file.name, content, isPdf };
+
+      if (shouldAutoSend) {
+        doSend("Analyze my credit report and generate my Fundability Index.", fileData);
+      } else {
+        setAttachedFile(fileData);
+      }
+    };
+
+    if (isPdf) {
+      reader.readAsDataURL(file);
+    } else {
+      reader.readAsText(file);
+    }
+
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
+
+  const doSend = async (text: string, file?: { name: string; content: string; isPdf?: boolean } | null) => {
+    const displayText = file ? `${text}\n\n[Attached: ${file.name}]` : text;
+    const userMsg: GuestMessage = { id: nextId, role: "user", content: displayText };
     setGuestMessages((prev) => [...prev, userMsg]);
     setNextId((n) => n + 1);
     setIsSending(true);
@@ -80,10 +132,17 @@ export default function LandingPage() {
     try {
       const history = guestMessages.map((m) => ({ role: m.role, content: m.content }));
 
+      const payload: Record<string, unknown> = { content: text, history };
+      if (file) {
+        payload.fileContent = file.content;
+        payload.attachment = "credit_report";
+        payload.fileType = file.isPdf ? "pdf" : "text";
+      }
+
       const res = await fetch("/api/chat/guest", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ content: text, history }),
+        body: JSON.stringify(payload),
       });
 
       if (!res.ok) {
@@ -106,9 +165,13 @@ export default function LandingPage() {
 
   const handleSend = async (messageText?: string) => {
     const text = messageText || input.trim();
-    if (!text || isSending) return;
+    if (isSending) return;
+    if (!text && !attachedFile) return;
+    const file = attachedFile;
+    const msg = text || "Analyze my credit report and generate my Fundability Index.";
     setInput("");
-    doSend(text);
+    setAttachedFile(null);
+    doSend(msg, file);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -116,10 +179,22 @@ export default function LandingPage() {
     handleSend();
   };
 
+  const handleUploadClick = () => {
+    fileInputRef.current?.click();
+  };
+
   const hasMessages = guestMessages.length > 0;
 
   return (
     <div className="relative min-h-[100dvh] flex flex-col bg-[#f9f9f9]" style={{ fontFamily: "'Inter', sans-serif" }}>
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept=".pdf,.txt,.csv"
+        className="hidden"
+        onChange={handleFileSelect}
+        data-testid="input-file-upload"
+      />
 
       <nav className="flex items-center justify-between px-4 sm:px-6 py-3 shrink-0" data-testid="nav-top">
         <div className="flex items-center gap-2" data-testid="nav-logo">
@@ -149,13 +224,25 @@ export default function LandingPage() {
 
       <main className="flex-1 flex flex-col items-center overflow-hidden">
         {!hasMessages && !isSending ? (
-          <div className="flex-1 flex items-center justify-center px-4">
+          <div className="flex-1 flex flex-col items-center justify-center px-4 gap-6">
             <h1
               className="text-[28px] sm:text-[32px] font-normal text-[#1a1a1a] tracking-[-0.02em] text-center"
               data-testid="text-hero-headline"
             >
               How fundable are you?
             </h1>
+            <button
+              onClick={() => { setAutoSendFile(true); handleUploadClick(); }}
+              className="flex items-center gap-2.5 px-6 py-3 bg-[#1a1a1a] text-white rounded-full text-[14px] font-medium hover:bg-[#333] transition-colors shadow-sm"
+              data-testid="button-upload-report"
+            >
+              <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+                <path d="M9 3V12M9 3L5.5 6.5M9 3L12.5 6.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                <path d="M3 12V14C3 14.5523 3.44772 15 4 15H14C14.5523 15 15 14.5523 15 14V12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+              Upload credit report to get started
+            </button>
+            <p className="text-[12px] text-[#999]">PDF, TXT, or CSV — your data stays private</p>
           </div>
         ) : (
           <div className="flex-1 w-full max-w-[680px] mx-auto overflow-y-auto px-4 pt-4 pb-2" data-testid="chat-messages">
@@ -176,7 +263,7 @@ export default function LandingPage() {
                     data-testid={`message-${msg.role}-${msg.id}`}
                   >
                     {msg.role === "user" ? (
-                      <p className="text-[14px] text-[#1a1a1a] leading-[1.6]">{msg.content}</p>
+                      <p className="text-[14px] text-[#1a1a1a] leading-[1.6] whitespace-pre-wrap">{msg.content}</p>
                     ) : (
                       <FormatResponse content={msg.content} />
                     )}
@@ -222,14 +309,44 @@ export default function LandingPage() {
           </div>
         )}
 
+        {attachedFile && (
+          <div className="flex items-center gap-2 mb-2 px-1">
+            <div className="flex items-center gap-2 bg-[#e8e8e8] rounded-lg px-3 py-1.5 text-[12px] text-[#555]">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                <path d="M7 1V10M3 6H11" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
+                <rect x="2" y="2" width="10" height="10" rx="2" stroke="currentColor" strokeWidth="1.2" fill="none" />
+              </svg>
+              <span className="max-w-[200px] truncate">{attachedFile.name}</span>
+              <button
+                onClick={() => setAttachedFile(null)}
+                className="text-[#999] hover:text-[#666] ml-1"
+                data-testid="button-remove-file"
+              >
+                &times;
+              </button>
+            </div>
+          </div>
+        )}
+
         <form onSubmit={handleSubmit} className="w-full">
-          <div className="flex items-center bg-[#f0f0f0] rounded-full h-[52px] pl-4 pr-1.5 border border-[#e5e5e5] shadow-sm focus-within:border-[#ccc] transition-colors">
+          <div className="flex items-center bg-[#f0f0f0] rounded-full h-[52px] pl-1.5 pr-1.5 border border-[#e5e5e5] shadow-sm focus-within:border-[#ccc] transition-colors">
+            <button
+              type="button"
+              onClick={handleUploadClick}
+              className="w-9 h-9 flex items-center justify-center rounded-full text-[#888] hover:text-[#555] hover:bg-[#e5e5e5] transition-colors shrink-0"
+              title="Upload credit report"
+              data-testid="button-attach-file"
+            >
+              <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+                <path d="M15.75 8.55L9.3075 14.9925C8.59083 15.7092 7.62164 16.1121 6.61125 16.1121C5.60086 16.1121 4.63167 15.7092 3.915 14.9925C3.19833 14.2758 2.79544 13.3067 2.79544 12.2963C2.79544 11.2859 3.19833 10.3167 3.915 9.6L10.3575 3.1575C10.8358 2.67917 11.4845 2.41121 12.16 2.41121C12.8355 2.41121 13.4842 2.67917 13.9625 3.1575C14.4408 3.63583 14.7088 4.28453 14.7088 4.96C14.7088 5.63547 14.4408 6.28417 13.9625 6.7625L7.5125 13.205C7.27333 13.4442 6.94898 13.5782 6.61125 13.5782C6.27352 13.5782 5.94917 13.4442 5.71 13.205C5.47083 12.9658 5.33685 12.6415 5.33685 12.3038C5.33685 11.966 5.47083 11.6417 5.71 11.4025L11.6025 5.5175" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </button>
             <input
               ref={inputRef}
               data-testid="input-chat"
               type="text"
-              placeholder="Ask about your funding readiness..."
-              className="flex-1 bg-transparent text-[14px] text-[#1a1a1a] placeholder:text-[#999] outline-none"
+              placeholder={attachedFile ? "Add a message about your report..." : "Ask about your funding readiness..."}
+              className="flex-1 bg-transparent text-[14px] text-[#1a1a1a] placeholder:text-[#999] outline-none px-2"
               value={input}
               onChange={(e) => setInput(e.target.value)}
               disabled={isSending}
@@ -237,7 +354,7 @@ export default function LandingPage() {
             <button
               data-testid="button-send"
               type="submit"
-              disabled={isSending || !input.trim()}
+              disabled={isSending || (!input.trim() && !attachedFile)}
               className="w-8 h-8 flex items-center justify-center rounded-full bg-[#1a1a1a] text-white hover:bg-[#333] transition-colors shrink-0 disabled:bg-[#ccc] disabled:cursor-not-allowed"
             >
               {isSending ? (

@@ -1259,20 +1259,56 @@ export async function registerRoutes(
       history: z.array(z.object({
         role: z.enum(["user", "assistant"]),
         content: z.string()
-      })).max(10).optional()
+      })).max(10).optional(),
+      fileContent: z.string().max(15_000_000).nullable().optional(),
+      attachment: z.enum(["credit_report", "bank_statement"]).nullable().optional(),
+      fileType: z.enum(["pdf", "text"]).nullable().optional()
     }).safeParse(req.body);
 
     if (!body.success) {
       return res.status(400).json({ error: "Invalid message data" });
     }
 
-    const { content, history = [] } = body.data;
+    const { content, history = [], fileContent, attachment, fileType } = body.data;
+
+    let extractedText = "";
+    let extractionMethod = "";
+    let manualEntryNeeded = false;
+
+    if (fileContent && attachment) {
+      try {
+        const isPdf = fileType === "pdf" || (fileContent.length > 100 && !fileContent.includes("\n"));
+        if (isPdf) {
+          const buffer = Buffer.from(fileContent, "base64");
+          const result = await processPdfBuffer(buffer);
+          extractedText = result.text;
+          extractionMethod = result.method;
+          manualEntryNeeded = result.method === "manual_entry_needed";
+        } else {
+          extractedText = fileContent.slice(0, EXTRACTION_MAX_CHARS);
+          extractionMethod = "raw_text";
+        }
+      } catch (err) {
+        console.error("Guest file parsing error:", err);
+        manualEntryNeeded = true;
+        extractionMethod = "manual_entry_needed";
+      }
+    }
+
+    let fileContext = "";
+    if (manualEntryNeeded && attachment) {
+      fileContext = `\n\nThe user uploaded a ${attachment === "bank_statement" ? "bank statement" : "credit report"}, but automated text extraction failed (the document may be an image-based or scanned PDF). Ask the user to manually provide the key data from their document. For a credit report, ask for: credit score, total revolving limits, total balances, number of inquiries, and any derogatory accounts. For a bank statement, ask for: average daily balance, monthly deposits, and any NSF/overdraft occurrences.`;
+    } else if (extractedText) {
+      fileContext = `\n\nThe user has uploaded a ${attachment === "bank_statement" ? "bank statement" : "credit report"}. Here is the extracted text from the document (extracted via ${extractionMethod}):\n\n--- START OF DOCUMENT ---\n${extractedText}\n--- END OF DOCUMENT ---\n\nAnalyze this document thoroughly using the Fundability Engine framework. Calculate the Fundability Index, approval probabilities, estimated borrowing power, key risk drivers, and optimization roadmap based on the data extracted.`;
+    }
+
+    const systemPrompt = FUNDABILITY_ENGINE_PROMPT + fileContext;
 
     try {
       const response = await openai.chat.completions.create({
         model: "gpt-4o",
         messages: [
-          { role: "system", content: FUNDABILITY_ENGINE_PROMPT },
+          { role: "system", content: systemPrompt },
           ...history.slice(-8),
           { role: "user", content }
         ],
