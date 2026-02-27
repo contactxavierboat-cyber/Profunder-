@@ -186,23 +186,39 @@ function FormatResponse({ content }: { content: string }) {
     .replace(/^-{2,}/gm, "");
   const sections = cleaned.split(/\n{2,}/);
 
+  const metricLinePattern = /^(FUNDABILITY\s*INDEX|APPROVAL\s*ODDS|BORROWING\s*POWER|DISPUTE\s*ITEMS?|[-•]\s*(Bank\s*Term|Online\s*Lender|Business\s*LOC|Credit\s*Card|MCA)\s*:)/i;
+
+  const visibleSections = sections.filter((section) => {
+    const trimmed = section.trim();
+    if (!trimmed) return false;
+    if (/^DISPUTE:/i.test(trimmed)) return false;
+    const lines = trimmed.split("\n");
+    const allMetric = lines.every(l => !l.trim() || metricLinePattern.test(l.trim()));
+    if (allMetric) return false;
+    return true;
+  });
+
   return (
     <div className="space-y-3">
-      {sections.map((section, i) => {
+      {visibleSections.map((section, i) => {
         const trimmed = section.trim();
-        if (!trimmed) return null;
-        if (/^DISPUTE:/i.test(trimmed)) return null;
-        const isTitle =
-          /^\d+\)\s/.test(trimmed) ||
-          /^(FUNDABILITY|FUNDING|KEY FINDINGS|PHASE|TIMELINE|NEXT MOVE|CAPITAL|CLIENT|CERTIFICATION|APPROVAL|ESTIMATED|OPTIMIZATION|SCENARIO|RISK|BORROWING|TOP|DENIAL|REPAIR|DISPUTE)/i.test(trimmed) ||
-          (trimmed.length < 80 && trimmed === trimmed.toUpperCase() && !trimmed.includes("."));
-        const lines = trimmed.split("\n").filter(l => !/^DISPUTE:/i.test(l.trim()));
+        const lines = trimmed.split("\n").filter(l => {
+          const lt = l.trim();
+          return lt && !metricLinePattern.test(lt) && !/^DISPUTE:/i.test(lt);
+        });
+        if (lines.length === 0) return null;
+
         const hasBullets = lines.some((l) => /^\s*[-•]\s/.test(l) || /^\s*\d+[.)]\s/.test(l));
+        const isTitle =
+          lines.length === 1 && (
+            /^\d+\)\s/.test(lines[0]) ||
+            (lines[0].length < 80 && lines[0] === lines[0].toUpperCase() && !lines[0].includes("."))
+          );
 
         if (isTitle) {
           return (
             <p key={i} className="text-[13px] font-semibold text-[#1a1a2e] tracking-wide">
-              {toTitleCase(trimmed)}
+              {toTitleCase(lines[0])}
             </p>
           );
         }
@@ -222,7 +238,7 @@ function FormatResponse({ content }: { content: string }) {
             </div>
           );
         }
-        return <p key={i} className="text-[14px] text-[#444] leading-[1.65]">{normalizeCase(trimmed)}</p>;
+        return <p key={i} className="text-[14px] text-[#444] leading-[1.65]">{normalizeCase(lines.join(" "))}</p>;
       })}
     </div>
   );
