@@ -190,28 +190,28 @@ function hasAnalysisData(data: MissionData): boolean {
 function getBandColor(band: string | null): string {
   if (!band) return "#999";
   const b = band.toLowerCase();
-  if (b === "exceptional") return "#16a34a";
-  if (b === "strong") return "#22c55e";
-  if (b === "viable") return "#eab308";
-  if (b === "borderline") return "#f97316";
-  if (b === "weak") return "#ef4444";
-  return "#dc2626";
+  if (b === "exceptional") return "#6366f1";
+  if (b === "strong") return "#818cf8";
+  if (b === "viable") return "#a78bfa";
+  if (b === "borderline") return "#c4b5fd";
+  if (b === "weak") return "#7c3aed";
+  return "#5b21b6";
 }
 
 function getPhaseColor(phase: string | null): string {
   if (!phase) return "#999";
   const p = phase.toLowerCase();
-  if (p.includes("funding")) return "#22c55e";
-  if (p.includes("build")) return "#3b82f6";
-  if (p.includes("wait")) return "#eab308";
-  return "#ef4444";
+  if (p.includes("funding")) return "#6366f1";
+  if (p.includes("build")) return "#818cf8";
+  if (p.includes("wait")) return "#a78bfa";
+  return "#7c3aed";
 }
 
 function getPillarColor(value: number): string {
-  if (value >= 85) return "#22c55e";
-  if (value >= 70) return "#eab308";
-  if (value >= 50) return "#f97316";
-  return "#ef4444";
+  if (value >= 85) return "#6366f1";
+  if (value >= 70) return "#818cf8";
+  if (value >= 50) return "#a78bfa";
+  return "#c4b5fd";
 }
 
 function toTitleCase(text: string): string {
@@ -399,8 +399,8 @@ function MissionDashboard({ data }: { data: MissionData }) {
               <div className="space-y-2">
                 {data.suppressors.map((s, i) => (
                   <div key={i} className="flex items-start gap-2.5">
-                    <div className="w-5 h-5 rounded-md bg-red-50 flex items-center justify-center shrink-0 mt-0.5">
-                      <span className="text-[9px] font-bold text-red-500">{i + 1}</span>
+                    <div className="w-5 h-5 rounded-md bg-[#f0eeff] flex items-center justify-center shrink-0 mt-0.5">
+                      <span className="text-[9px] font-bold text-[#7c3aed]">{i + 1}</span>
                     </div>
                     <p className="text-[12px] text-[#444] leading-[1.55] font-medium">{s}</p>
                   </div>
@@ -423,8 +423,8 @@ function MissionDashboard({ data }: { data: MissionData }) {
                 <div className="space-y-1.5">
                   {data.helping.map((h, i) => (
                     <div key={i} className="flex items-start gap-2">
-                      <div className="w-4 h-4 rounded-md bg-green-50 flex items-center justify-center shrink-0 mt-0.5">
-                        <span className="text-[9px] text-green-600 font-bold">✓</span>
+                      <div className="w-4 h-4 rounded-md bg-[#f0eeff] flex items-center justify-center shrink-0 mt-0.5">
+                        <span className="text-[9px] text-[#6366f1] font-bold">✓</span>
                       </div>
                       <p className="text-[11px] text-[#555] leading-[1.5]">{h}</p>
                     </div>
@@ -442,8 +442,8 @@ function MissionDashboard({ data }: { data: MissionData }) {
           <div className="space-y-1.5">
             {data.hurting.map((h, i) => (
               <div key={i} className="flex items-start gap-2">
-                <div className="w-4 h-4 rounded-md bg-red-50 flex items-center justify-center shrink-0 mt-0.5">
-                  <span className="text-[9px] text-red-500 font-bold">−</span>
+                <div className="w-4 h-4 rounded-md bg-[#f5f0ff] flex items-center justify-center shrink-0 mt-0.5">
+                  <span className="text-[9px] text-[#a78bfa] font-bold">−</span>
                 </div>
                 <p className="text-[11px] text-[#555] leading-[1.5]">{h}</p>
               </div>
