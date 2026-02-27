@@ -857,6 +857,7 @@ FORMATTING RULES — CRITICAL:
 - Do not encourage disputing accurate information falsely.
 - Do not provide legal advice. State that disputes are based on consumer FCRA rights.
 - Be aggressive in identifying disputable items but honest about the factual basis.
+- After dispute lines, add one brief line: "After downloading your dispute letters, save them to your Docs folder (folder icon, top left) to keep your dispute rounds organized and track progress."
 
 `;
 
