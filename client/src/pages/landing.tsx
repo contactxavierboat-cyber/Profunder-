@@ -56,9 +56,9 @@ const SectionLabel = ({ children }: { children: string }) => (
   <p className="text-[11px] tracking-[0.2em] uppercase mb-6 sm:mb-8 text-[#7a7a9a]">{children}</p>
 );
 
-const SubscribeButton = ({ className = "" }: { className?: string }) => (
+const SubscribeButton = ({ className = "", onSubscribe }: { className?: string; onSubscribe: () => void }) => (
   <button
-    onClick={() => window.location.href = '/subscription'}
+    onClick={onSubscribe}
     className={`inline-flex items-center justify-center h-[44px] px-8 rounded-full text-white text-[13px] font-bold tracking-wide hover:opacity-90 transition-all hover:scale-[1.02] shadow-sm ${className}`}
     style={{ background: 'linear-gradient(135deg, #2a2a2a 0%, #0a0a0a 100%)' }}
     data-testid="button-subscribe"
@@ -124,9 +124,17 @@ export default function LandingPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [showLogin, setShowLogin] = useState(false);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
-  const { login } = useAuth();
+  const { login, user } = useAuth();
   const [proofIndex, setProofIndex] = useState(0);
   const [proofVisible, setProofVisible] = useState(true);
+
+  const handleSubscribeClick = () => {
+    if (user) {
+      window.location.href = '/subscription';
+    } else {
+      setShowLogin(true);
+    }
+  };
 
   useEffect(() => {
     const cycle = setInterval(() => {
@@ -320,7 +328,7 @@ export default function LandingPage() {
               </div>
             ))}
           </div></div>
-          <SubscribeButton className="mt-10" />
+          <SubscribeButton className="mt-10" onSubscribe={handleSubscribeClick} />
           <ScrollArrow targetId="sec-solution" />
         </div>
       </section>
@@ -353,7 +361,7 @@ export default function LandingPage() {
               </div>
             ))}
           </div></div>
-          <SubscribeButton className="mt-10" />
+          <SubscribeButton className="mt-10" onSubscribe={handleSubscribeClick} />
           <ScrollArrow targetId="how-it-works" />
         </div>
       </section>
@@ -384,7 +392,7 @@ export default function LandingPage() {
               </div>
             ))}
           </div></div>
-          <SubscribeButton className="mt-10" />
+          <SubscribeButton className="mt-10" onSubscribe={handleSubscribeClick} />
           <ScrollArrow targetId="features" />
         </div>
       </section>
@@ -418,7 +426,7 @@ export default function LandingPage() {
               </div>
             ))}
           </div></div>
-          <SubscribeButton className="mt-10" />
+          <SubscribeButton className="mt-10" onSubscribe={handleSubscribeClick} />
           <ScrollArrow targetId="results" />
         </div>
       </section>
@@ -463,7 +471,7 @@ export default function LandingPage() {
               </div>
             ))}
           </div></div>
-          <SubscribeButton className="mt-10" />
+          <SubscribeButton className="mt-10" onSubscribe={handleSubscribeClick} />
           <ScrollArrow targetId="sec-risk" />
         </div>
       </section>
@@ -503,7 +511,7 @@ export default function LandingPage() {
               </ul>
             </div>
           </div></div>
-          <SubscribeButton className="mt-10" />
+          <SubscribeButton className="mt-10" onSubscribe={handleSubscribeClick} />
           <ScrollArrow targetId="sec-breakdown" />
         </div>
       </section>
@@ -542,7 +550,7 @@ export default function LandingPage() {
               <span className="text-[12px] text-[#8a8aa5]">→ Qualification Range: $25K – $5M+ based on composite score and tier placement</span>
             </div>
           </div></div>
-          <SubscribeButton className="mt-10" />
+          <SubscribeButton className="mt-10" onSubscribe={handleSubscribeClick} />
           <ScrollArrow targetId="sec-modes" />
         </div>
       </section>
@@ -593,7 +601,7 @@ export default function LandingPage() {
               </ul>
             </div>
           </div></div>
-          <SubscribeButton className="mt-10" />
+          <SubscribeButton className="mt-10" onSubscribe={handleSubscribeClick} />
           <ScrollArrow targetId="sec-tiers" />
         </div>
       </section>
@@ -622,7 +630,7 @@ export default function LandingPage() {
               </div>
             ))}
           </div></div>
-          <SubscribeButton className="mt-10" />
+          <SubscribeButton className="mt-10" onSubscribe={handleSubscribeClick} />
           <ScrollArrow targetId="sec-case" />
         </div>
       </section>
@@ -656,7 +664,7 @@ export default function LandingPage() {
               </div>
             ))}
           </div></div>
-          <SubscribeButton className="mt-10" />
+          <SubscribeButton className="mt-10" onSubscribe={handleSubscribeClick} />
           <ScrollArrow targetId="faq" />
         </div>
       </section>
@@ -690,7 +698,7 @@ export default function LandingPage() {
               </div>
             ))}
           </div></div>
-          <SubscribeButton className="mt-10" />
+          <SubscribeButton className="mt-10" onSubscribe={handleSubscribeClick} />
           <ScrollArrow targetId="sec-trust" />
         </div>
       </section>
@@ -719,7 +727,7 @@ export default function LandingPage() {
               </div>
             ))}
           </div></div>
-          <SubscribeButton className="mt-10" />
+          <SubscribeButton className="mt-10" onSubscribe={handleSubscribeClick} />
           <ScrollArrow targetId="sec-cta" />
         </div>
       </section>
@@ -766,7 +774,7 @@ export default function LandingPage() {
           <p className="text-[11px] text-[#b0b0c0] tracking-wide">
             Join 12,500+ founders already qualifying before they apply
           </p>
-          <SubscribeButton className="mt-6" />
+          <SubscribeButton className="mt-6" onSubscribe={handleSubscribeClick} />
         </div>
       </section>
 
