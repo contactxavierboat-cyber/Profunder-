@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useAuth } from "@/lib/store";
 import { ProfundrLogo } from "@/components/profundr-logo";
-import heroBgImg from "@assets/IMG_0426_1772173506429.jpeg";
+import heroBgImg from "@assets/IMG_0427_1772173759679.jpeg";
 
 function SpaceBackground() {
   return (
