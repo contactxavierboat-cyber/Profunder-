@@ -28,16 +28,29 @@ interface DisputeItem {
 function parseDisputeItems(content: string): DisputeItem[] {
   const cleanText = content.replace(/\*+/g, "");
   const disputes: DisputeItem[] = [];
-  const pattern = /DISPUTE:\s*([^|]+)\|([^|]+)\|([^|]+)\|([^|]+)\|(.+?)(?=\nDISPUTE:|\n\n|$)/gi;
-  let match;
-  while ((match = pattern.exec(cleanText)) !== null) {
-    disputes.push({
-      creditor: match[1].trim(),
-      accountNumber: match[2].trim(),
-      issue: match[3].trim(),
-      bureau: match[4].trim(),
-      reason: match[5].trim()
-    });
+  const lines = cleanText.split("\n");
+  for (const line of lines) {
+    const trimmed = line.trim();
+    if (!/^DISPUTE:\s*/i.test(trimmed)) continue;
+    const afterPrefix = trimmed.replace(/^DISPUTE:\s*/i, "");
+    const parts = afterPrefix.split("|").map(p => p.trim());
+    if (parts.length >= 5) {
+      disputes.push({
+        creditor: parts[0],
+        accountNumber: parts[1],
+        issue: parts[2],
+        bureau: parts[3].replace(/^Bureau:\s*/i, ""),
+        reason: parts.slice(4).join(" | ")
+      });
+    } else if (parts.length >= 3) {
+      disputes.push({
+        creditor: parts[0],
+        accountNumber: parts[1] || "N/A",
+        issue: parts[2],
+        bureau: parts[3]?.replace(/^Bureau:\s*/i, "") || "All",
+        reason: parts[4] || parts[2]
+      });
+    }
   }
   return disputes;
 }
