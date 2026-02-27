@@ -1721,17 +1721,14 @@ CONVERSATIONAL RULES:
 
   function drawPdfLetterhead(doc: InstanceType<typeof PDFDocument>) {
     const pageWidth = doc.page.width;
-    const logoSize = 32;
+    const logoSize = 36;
     try {
-      drawBrainLogo(doc, pageWidth / 2, 36, logoSize);
+      drawBrainLogo(doc, pageWidth / 2, 38, logoSize);
     } catch (e) {
       // fallback: no logo if path fails
     }
-    doc.font("Helvetica-Bold").fontSize(16).fillColor("#1a1a2e")
-      .text("profundr.", 0, 58, { align: "center" });
-    doc.font("Helvetica").fontSize(7).fillColor("#999999")
-      .text("Capital Operating System", { align: "center" });
-    doc.moveDown(1.5);
+    doc.y = 62;
+    doc.moveDown(1);
   }
 
   const pendingPdfs = new Map<string, { buffer: Buffer; created: number }>();
@@ -1797,154 +1794,157 @@ CONVERSATIONAL RULES:
 
         drawPdfLetterhead(doc);
 
+        const j: PDFKit.Mixins.TextOptions = { align: "justify", lineGap: 2 };
+        const c: PDFKit.Mixins.TextOptions = { align: "center" };
+
         doc.font("Helvetica").fontSize(10).fillColor("#333333")
-          .text(userName)
-          .text(userAddress)
+          .text(userName, c)
+          .text(userAddress, c)
           .moveDown(0.5)
-          .text(today)
+          .text(today, c)
           .moveDown(1);
 
-        doc.text(bureauAddr)
+        doc.text(bureauAddr, c)
           .moveDown(1);
 
         if (isInquiry) {
           doc.font("Helvetica-Bold").fontSize(10).fillColor("#111111")
-            .text("Re: Removal of Unauthorized Hard Inquiry — Request for Proof of Permissible Purpose")
+            .text("Re: Removal of Unauthorized Hard Inquiry — Request for Proof of Permissible Purpose", c)
             .moveDown(0.8);
 
           doc.font("Helvetica").fontSize(10).fillColor("#333333")
-            .text("To Whom It May Concern,")
+            .text("To Whom It May Concern,", c)
             .moveDown(0.6);
 
           doc.text(
             "I am writing to dispute an unauthorized hard inquiry appearing on my credit report. I did not authorize this credit pull, nor did I provide written consent for my credit file to be accessed. I am requesting immediate removal of this inquiry pursuant to my rights under the Fair Credit Reporting Act (FCRA).",
-            { lineGap: 2 }
+            j
           ).moveDown(0.8);
 
           doc.font("Helvetica-Bold").fontSize(10)
-            .text("Inquiry Details:", { underline: true })
+            .text("Inquiry Details:", { underline: true, align: "center" })
             .moveDown(0.4);
           doc.font("Helvetica").fontSize(10).fillColor("#333333");
-          doc.text(`Inquiring Creditor: ${d.creditor}`);
+          doc.text(`Inquiring Creditor: ${d.creditor}`, c);
           if (d.accountNumber && d.accountNumber !== "N/A") {
-            doc.text(`Reference/Account Number: ${d.accountNumber}`);
+            doc.text(`Reference/Account Number: ${d.accountNumber}`, c);
           }
-          doc.text(`Reporting Bureau: ${d.bureau}`);
-          doc.text(`Issue: ${d.issue}`);
+          doc.text(`Reporting Bureau: ${d.bureau}`, c);
+          doc.text(`Issue: ${d.issue}`, c);
           doc.moveDown(0.6);
 
-          doc.font("Helvetica-Bold").text("Legal Basis — FCRA §604 [15 USC §1681b]:", { underline: true }).moveDown(0.4);
+          doc.font("Helvetica-Bold").text("Legal Basis — FCRA §604 [15 USC §1681b]:", { underline: true, align: "center" }).moveDown(0.4);
           doc.font("Helvetica").text(
             "Under FCRA §604(a), a consumer reporting agency may furnish a consumer report only under the following circumstances and no other:",
-            { lineGap: 2 }
+            j
           ).moveDown(0.3);
-          doc.text("• §604(a)(2): In accordance with the written instructions of the consumer", { lineGap: 1.5 });
-          doc.text("• §604(a)(3)(A): In connection with a credit transaction involving the consumer — extension, review, or collection", { lineGap: 1.5 });
-          doc.text("• §604(a)(3)(F): Legitimate business need in connection with a business transaction initiated by the consumer", { lineGap: 1.5 });
+          doc.text("• §604(a)(2): In accordance with the written instructions of the consumer", j);
+          doc.text("• §604(a)(3)(A): In connection with a credit transaction involving the consumer — extension, review, or collection", j);
+          doc.text("• §604(a)(3)(F): Legitimate business need in connection with a business transaction initiated by the consumer", j);
           doc.moveDown(0.3);
           doc.text(
             "Per §604(f): \"A person shall not use or obtain a consumer report for any purpose unless the consumer report is obtained for a purpose for which the consumer report is authorized to be furnished under this section and the purpose is certified in accordance with section 607.\"",
-            { lineGap: 2 }
+            j
           ).moveDown(0.3);
           doc.text(
             "I did not initiate a transaction with the inquiring creditor listed above, nor did I provide written instructions or consent for my credit file to be accessed. This inquiry therefore lacks a permissible purpose under §604 and must be removed.",
-            { lineGap: 2 }
+            j
           ).moveDown(0.6);
 
-          doc.font("Helvetica-Bold").text("Required Action — FCRA §611 [15 USC §1681i]:", { underline: true }).moveDown(0.4);
+          doc.font("Helvetica-Bold").text("Required Action — FCRA §611 [15 USC §1681i]:", { underline: true, align: "center" }).moveDown(0.4);
           doc.font("Helvetica").text(
             "Under §611(a)(1)(A), you are required to conduct a reasonable reinvestigation within 30 days. I am requesting:",
-            { lineGap: 2 }
+            j
           ).moveDown(0.2);
-          doc.text("1. Proof of the permissible purpose under §604(a) for this inquiry, including any written authorization bearing my signature per §604(a)(2).", { lineGap: 1.5 });
-          doc.text("2. If no permissible purpose or written authorization can be provided, immediate removal of this inquiry per §611(a)(5)(A) — items that cannot be verified must be promptly deleted.", { lineGap: 1.5 });
-          doc.text("3. Written notification of the results of your investigation per §611(a)(6), including the procedure used to determine accuracy.", { lineGap: 1.5 });
+          doc.text("1. Proof of the permissible purpose under §604(a) for this inquiry, including any written authorization bearing my signature per §604(a)(2).", j);
+          doc.text("2. If no permissible purpose or written authorization can be provided, immediate removal of this inquiry per §611(a)(5)(A) — items that cannot be verified must be promptly deleted.", j);
+          doc.text("3. Written notification of the results of your investigation per §611(a)(6), including the procedure used to determine accuracy.", j);
           doc.moveDown(0.4);
 
           doc.text(
             "Per §616 [15 USC §1681n], any willful failure to comply with FCRA requirements subjects you to liability of $100 to $1,000 per violation, plus punitive damages and attorney's fees. Per §617 [15 USC §1681o], negligent noncompliance subjects you to actual damages and attorney's fees. Per §618 [15 USC §1681p], I have 2 years from discovery of the violation to bring action. I reserve all rights under the FCRA.",
-            { lineGap: 2 }
+            j
           ).moveDown(0.5);
 
           doc.text(
             "I also intend to send a separate letter directly to the inquiring creditor demanding proof of permissible purpose under §604. Per §623(a)(1)(A) [15 USC §1681s-2], the furnisher may not report information it knows or has reasonable cause to believe is inaccurate.",
-            { lineGap: 2 }
+            j
           ).moveDown(1);
 
         } else {
           doc.font("Helvetica-Bold").fontSize(10).fillColor("#111111")
-            .text("Re: Dispute of Inaccurate Information — Request for Investigation")
+            .text("Re: Dispute of Inaccurate Information — Request for Investigation", c)
             .moveDown(0.8);
 
           doc.font("Helvetica").fontSize(10).fillColor("#333333")
-            .text("To Whom It May Concern,")
+            .text("To Whom It May Concern,", c)
             .moveDown(0.6);
 
           doc.text(
             "I am writing to dispute inaccurate information on my credit report pursuant to my rights under the Fair Credit Reporting Act (FCRA), 15 U.S.C. § 1681. I am requesting that the following item be investigated and corrected or removed:",
-            { lineGap: 2 }
+            j
           ).moveDown(0.8);
 
           doc.font("Helvetica-Bold").fontSize(10)
-            .text("Account Details:", { underline: true })
+            .text("Account Details:", { underline: true, align: "center" })
             .moveDown(0.4);
           doc.font("Helvetica").fontSize(10).fillColor("#333333");
-          doc.text(`Creditor/Furnisher: ${d.creditor}`);
+          doc.text(`Creditor/Furnisher: ${d.creditor}`, c);
           if (d.accountNumber && d.accountNumber !== "N/A") {
-            doc.text(`Account Number: ${d.accountNumber}`);
+            doc.text(`Account Number: ${d.accountNumber}`, c);
           }
-          doc.text(`Reporting Bureau: ${d.bureau}`);
+          doc.text(`Reporting Bureau: ${d.bureau}`, c);
           doc.moveDown(0.6);
 
-          doc.font("Helvetica-Bold").text("Nature of Dispute:", { underline: true }).moveDown(0.4);
-          doc.font("Helvetica").text(d.issue, { lineGap: 2 }).moveDown(0.6);
+          doc.font("Helvetica-Bold").text("Nature of Dispute:", { underline: true, align: "center" }).moveDown(0.4);
+          doc.font("Helvetica").text(d.issue, j).moveDown(0.6);
 
-          doc.font("Helvetica-Bold").text("Factual Basis for Dispute:", { underline: true }).moveDown(0.4);
-          doc.font("Helvetica").text(d.reason, { lineGap: 2 }).moveDown(0.6);
+          doc.font("Helvetica-Bold").text("Factual Basis for Dispute:", { underline: true, align: "center" }).moveDown(0.4);
+          doc.font("Helvetica").text(d.reason, j).moveDown(0.6);
 
-          doc.font("Helvetica-Bold").text("Legal Basis — FCRA Statutory Authority:", { underline: true }).moveDown(0.4);
+          doc.font("Helvetica-Bold").text("Legal Basis — FCRA Statutory Authority:", { underline: true, align: "center" }).moveDown(0.4);
           doc.font("Helvetica").text(
             "This dispute is filed pursuant to my rights under the Fair Credit Reporting Act (FCRA), 15 U.S.C. §1681 et seq.:",
-            { lineGap: 2 }
+            j
           ).moveDown(0.3);
-          doc.text("• §611(a)(1)(A) [15 USC §1681i] — If the completeness or accuracy of any item is disputed by the consumer, the agency shall, free of charge, conduct a reasonable reinvestigation and record the current status or delete the item before the end of the 30-day period.", { lineGap: 1.5 });
-          doc.text("• §607(b) [15 USC §1681e(b)] — \"Whenever a consumer reporting agency prepares a consumer report it shall follow reasonable procedures to assure maximum possible accuracy.\"", { lineGap: 1.5 });
-          doc.text("• §623(b)(1) [15 USC §1681s-2(b)] — After receiving notice of a dispute, the furnisher shall: (A) conduct an investigation; (B) review all relevant information; (C) report results to the agency; (E) if inaccurate or unverifiable — modify, delete, or permanently block the item.", { lineGap: 1.5 });
-          doc.text("• §623(a)(1)(A) — A person shall not furnish information if the person knows or has reasonable cause to believe the information is inaccurate.", { lineGap: 1.5 });
+          doc.text("• §611(a)(1)(A) [15 USC §1681i] — If the completeness or accuracy of any item is disputed by the consumer, the agency shall, free of charge, conduct a reasonable reinvestigation and record the current status or delete the item before the end of the 30-day period.", j);
+          doc.text("• §607(b) [15 USC §1681e(b)] — \"Whenever a consumer reporting agency prepares a consumer report it shall follow reasonable procedures to assure maximum possible accuracy.\"", j);
+          doc.text("• §623(b)(1) [15 USC §1681s-2(b)] — After receiving notice of a dispute, the furnisher shall: (A) conduct an investigation; (B) review all relevant information; (C) report results to the agency; (E) if inaccurate or unverifiable — modify, delete, or permanently block the item.", j);
+          doc.text("• §623(a)(1)(A) — A person shall not furnish information if the person knows or has reasonable cause to believe the information is inaccurate.", j);
           doc.moveDown(0.6);
 
-          doc.font("Helvetica-Bold").text("Required Action — FCRA §611 [15 USC §1681i]:", { underline: true }).moveDown(0.4);
+          doc.font("Helvetica-Bold").text("Required Action — FCRA §611 [15 USC §1681i]:", { underline: true, align: "center" }).moveDown(0.4);
           doc.font("Helvetica").text(
             "Under §611(a)(1)(A), you must complete your reinvestigation within 30 days. I am requesting:",
-            { lineGap: 2 }
+            j
           ).moveDown(0.2);
-          doc.text("1. Complete verification from the original furnisher per §623(b)(1)(A), including the original signed agreement or contract.", { lineGap: 1.5 });
-          doc.text("2. Complete payment history and documentation supporting the reported status per §623(b)(1)(B).", { lineGap: 1.5 });
-          doc.text("3. Proof that the information is being reported with maximum possible accuracy per §607(b).", { lineGap: 1.5 });
+          doc.text("1. Complete verification from the original furnisher per §623(b)(1)(A), including the original signed agreement or contract.", j);
+          doc.text("2. Complete payment history and documentation supporting the reported status per §623(b)(1)(B).", j);
+          doc.text("3. Proof that the information is being reported with maximum possible accuracy per §607(b).", j);
           doc.moveDown(0.4);
 
           doc.text(
             "Per §611(a)(5)(A), if this item is found inaccurate, incomplete, or cannot be verified, you must promptly delete or modify the item and notify the furnisher. Per §611(a)(5)(B), deleted information may not be reinserted unless the furnisher certifies accuracy and the consumer is notified in writing within 5 business days.",
-            { lineGap: 2 }
+            j
           ).moveDown(0.3);
 
           doc.text(
             "Per §616 [15 USC §1681n], willful noncompliance subjects you to liability of $100 to $1,000 per violation, plus punitive damages and attorney's fees. Per §617 [15 USC §1681o], negligent noncompliance subjects you to actual damages and attorney's fees. Per §618 [15 USC §1681p], I have 2 years from discovery to bring action. I reserve all rights under the FCRA.",
-            { lineGap: 2 }
+            j
           ).moveDown(0.5);
 
           doc.text(
             "Per §611(a)(6), I request written notification of the results of your investigation within 5 business days of completion, including: a statement of completion, an updated consumer report, the procedure used to determine accuracy, furnisher contact information, and notice of my right to add a dispute statement.",
-            { lineGap: 2 }
+            j
           ).moveDown(1);
         }
 
-        doc.text("Sincerely,").moveDown(1.5);
-        doc.text(userName);
+        doc.text("Sincerely,", c).moveDown(1.5);
+        doc.text(userName, c);
 
         doc.moveDown(1);
         doc.fontSize(8).fillColor("#999999")
-          .text("Generated by Profundr. This letter is based on consumer rights under the FCRA and is for educational and advocacy purposes. Profundr is not a law firm and does not provide legal advice.", { align: "center" });
+          .text("Generated by Profundr. This letter is based on consumer rights under the FCRA and is for educational and advocacy purposes. Profundr is not a law firm and does not provide legal advice.", c);
       }
 
       doc.end();
