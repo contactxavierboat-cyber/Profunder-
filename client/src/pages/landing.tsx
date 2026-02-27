@@ -67,20 +67,18 @@ const SubscribeButton = ({ className = "", onSubscribe }: { className?: string; 
   </button>
 );
 
-const TornPaperEdge = ({ flip = false }: { flip?: boolean }) => (
-  <div className={`relative z-30 w-full overflow-hidden pointer-events-none ${flip ? 'rotate-180' : ''}`} style={{ height: '60px', marginTop: flip ? '0' : '-30px', marginBottom: flip ? '-30px' : '0' }}>
-    <svg viewBox="0 0 1200 60" preserveAspectRatio="none" className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
-      <path
-        d="M0,30 Q15,8 30,28 Q45,48 60,25 Q75,2 90,22 Q105,42 120,18 Q135,0 150,26 Q165,52 180,20 Q195,0 210,32 Q225,55 240,15 Q255,0 270,28 Q285,50 300,22 Q315,0 330,30 Q345,55 360,18 Q375,0 390,25 Q405,48 420,12 Q435,0 450,32 Q465,58 480,20 Q495,0 510,28 Q525,50 540,16 Q555,0 570,30 Q585,52 600,22 Q615,0 630,26 Q645,48 660,14 Q675,0 690,28 Q705,55 720,18 Q735,0 750,30 Q765,52 780,20 Q795,0 810,25 Q825,48 840,15 Q855,0 870,32 Q885,55 900,18 Q915,0 930,28 Q945,50 960,22 Q975,0 990,26 Q1005,48 1020,16 Q1035,0 1050,30 Q1065,52 1080,20 Q1095,0 1110,28 Q1125,50 1140,18 Q1155,0 1170,25 Q1185,48 1200,30 L1200,60 L0,60 Z"
-        fill="white"
-        fillOpacity="0.35"
-      />
-      <path
-        d="M0,30 Q15,8 30,28 Q45,48 60,25 Q75,2 90,22 Q105,42 120,18 Q135,0 150,26 Q165,52 180,20 Q195,0 210,32 Q225,55 240,15 Q255,0 270,28 Q285,50 300,22 Q315,0 330,30 Q345,55 360,18 Q375,0 390,25 Q405,48 420,12 Q435,0 450,32 Q465,58 480,20 Q495,0 510,28 Q525,50 540,16 Q555,0 570,30 Q585,52 600,22 Q615,0 630,26 Q645,48 660,14 Q675,0 690,28 Q705,55 720,18 Q735,0 750,30 Q765,52 780,20 Q795,0 810,25 Q825,48 840,15 Q855,0 870,32 Q885,55 900,18 Q915,0 930,28 Q945,50 960,22 Q975,0 990,26 Q1005,48 1020,16 Q1035,0 1050,30 Q1065,52 1080,20 Q1095,0 1110,28 Q1125,50 1140,18 Q1155,0 1170,25 Q1185,48 1200,30"
-        fill="none"
-        stroke="rgba(180,180,200,0.2)"
-        strokeWidth="1"
-      />
+const TornPaperCard = ({ children }: { children: React.ReactNode }) => (
+  <div className="relative">
+    <svg className="absolute top-0 left-0 w-full pointer-events-none" style={{ height: '35px', transform: 'translateY(-100%) scaleY(-1)' }} viewBox="0 0 1200 40" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M0,40 L0,12 Q10,8 20,14 Q30,20 40,10 Q50,2 60,8 Q70,16 80,6 Q90,0 100,10 Q110,18 120,8 Q130,0 140,12 Q150,22 160,10 Q170,2 180,14 Q190,24 200,8 Q210,0 220,10 Q230,18 240,6 Q250,0 260,12 Q270,22 280,8 Q290,0 300,14 Q310,24 320,10 Q330,2 340,12 Q350,20 360,6 Q370,0 380,10 Q390,18 400,8 Q410,0 420,14 Q430,24 440,8 Q450,0 460,12 Q470,20 480,6 Q490,0 500,10 Q510,18 520,8 Q530,2 540,14 Q550,22 560,10 Q570,0 580,12 Q590,22 600,8 Q610,0 620,10 Q630,18 640,6 Q650,0 660,14 Q670,24 680,8 Q690,0 700,12 Q710,20 720,6 Q730,0 740,10 Q750,18 760,8 Q770,2 780,14 Q790,24 800,10 Q810,0 820,12 Q830,22 840,6 Q850,0 860,10 Q870,18 880,8 Q890,0 900,14 Q910,24 920,8 Q930,0 940,12 Q950,20 960,6 Q970,0 980,10 Q990,18 1000,8 Q1010,2 1020,14 Q1030,22 1040,10 Q1050,0 1060,12 Q1070,22 1080,8 Q1090,0 1100,10 Q1110,18 1120,6 Q1130,0 1140,14 Q1150,24 1160,8 Q1170,0 1180,12 Q1190,20 1200,10 L1200,40 Z" fill="rgba(255,255,255,0.55)" />
+      <path d="M0,12 Q10,8 20,14 Q30,20 40,10 Q50,2 60,8 Q70,16 80,6 Q90,0 100,10 Q110,18 120,8 Q130,0 140,12 Q150,22 160,10 Q170,2 180,14 Q190,24 200,8 Q210,0 220,10 Q230,18 240,6 Q250,0 260,12 Q270,22 280,8 Q290,0 300,14 Q310,24 320,10 Q330,2 340,12 Q350,20 360,6 Q370,0 380,10 Q390,18 400,8 Q410,0 420,14 Q430,24 440,8 Q450,0 460,12 Q470,20 480,6 Q490,0 500,10 Q510,18 520,8 Q530,2 540,14 Q550,22 560,10 Q570,0 580,12 Q590,22 600,8 Q610,0 620,10 Q630,18 640,6 Q650,0 660,14 Q670,24 680,8 Q690,0 700,12 Q710,20 720,6 Q730,0 740,10 Q750,18 760,8 Q770,2 780,14 Q790,24 800,10 Q810,0 820,12 Q830,22 840,6 Q850,0 860,10 Q870,18 880,8 Q890,0 900,14 Q910,24 920,8 Q930,0 940,12 Q950,20 960,6 Q970,0 980,10 Q990,18 1000,8 Q1010,2 1020,14 Q1030,22 1040,10 Q1050,0 1060,12 Q1070,22 1080,8 Q1090,0 1100,10 Q1110,18 1120,6 Q1130,0 1140,14 Q1150,24 1160,8 Q1170,0 1180,12 Q1190,20 1200,10" fill="none" stroke="rgba(160,160,185,0.25)" strokeWidth="1" />
+    </svg>
+    <div className="relative bg-white/55 backdrop-blur-sm px-4 sm:px-12 py-8 sm:py-14" style={{ boxShadow: '0 4px 30px rgba(0,0,0,0.06)' }}>
+      {children}
+    </div>
+    <svg className="absolute bottom-0 left-0 w-full pointer-events-none" style={{ height: '35px', transform: 'translateY(100%)' }} viewBox="0 0 1200 40" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M0,0 L0,18 Q10,24 20,16 Q30,8 40,18 Q50,28 60,16 Q70,6 80,18 Q90,28 100,14 Q110,4 120,16 Q130,26 140,12 Q150,2 160,14 Q170,24 180,10 Q190,0 200,16 Q210,28 220,12 Q230,0 240,14 Q250,26 260,10 Q270,0 280,16 Q290,28 300,12 Q310,2 320,18 Q330,28 340,14 Q350,4 360,16 Q370,26 380,10 Q390,0 400,14 Q410,24 420,12 Q430,2 440,18 Q450,28 460,14 Q470,4 480,16 Q490,26 500,10 Q510,0 520,14 Q530,24 540,12 Q550,2 560,18 Q570,28 580,14 Q590,4 600,16 Q610,26 620,10 Q630,0 640,14 Q650,24 660,12 Q670,2 680,18 Q690,28 700,14 Q710,4 720,16 Q730,26 740,10 Q750,0 760,14 Q770,24 780,12 Q790,2 800,18 Q810,28 820,14 Q830,4 840,16 Q850,26 860,10 Q870,0 880,14 Q890,24 900,12 Q910,2 920,18 Q930,28 940,14 Q950,4 960,16 Q970,26 980,10 Q990,0 1000,14 Q1010,24 1020,12 Q1030,2 1040,18 Q1050,28 1060,14 Q1070,4 1080,16 Q1090,26 1100,10 Q1110,0 1120,14 Q1130,24 1140,12 Q1150,2 1160,18 Q1170,28 1180,14 Q1190,4 1200,16 L1200,0 Z" fill="rgba(255,255,255,0.55)" />
+      <path d="M0,18 Q10,24 20,16 Q30,8 40,18 Q50,28 60,16 Q70,6 80,18 Q90,28 100,14 Q110,4 120,16 Q130,26 140,12 Q150,2 160,14 Q170,24 180,10 Q190,0 200,16 Q210,28 220,12 Q230,0 240,14 Q250,26 260,10 Q270,0 280,16 Q290,28 300,12 Q310,2 320,18 Q330,28 340,14 Q350,4 360,16 Q370,26 380,10 Q390,0 400,14 Q410,24 420,12 Q430,2 440,18 Q450,28 460,14 Q470,4 480,16 Q490,26 500,10 Q510,0 520,14 Q530,24 540,12 Q550,2 560,18 Q570,28 580,14 Q590,4 600,16 Q610,26 620,10 Q630,0 640,14 Q650,24 660,12 Q670,2 680,18 Q690,28 700,14 Q710,4 720,16 Q730,26 740,10 Q750,0 760,14 Q770,24 780,12 Q790,2 800,18 Q810,28 820,14 Q830,4 840,16 Q850,26 860,10 Q870,0 880,14 Q890,24 900,12 Q910,2 920,18 Q930,28 940,14 Q950,4 960,16 Q970,26 980,10 Q990,0 1000,14 Q1010,24 1020,12 Q1030,2 1040,18 Q1050,28 1060,14 Q1070,4 1080,16 Q1090,26 1100,10 Q1110,0 1120,14 Q1130,24 1140,12 Q1150,2 1160,18 Q1170,28 1180,14 Q1190,4 1200,16" fill="none" stroke="rgba(160,160,185,0.25)" strokeWidth="1" />
     </svg>
   </div>
 );
@@ -268,58 +266,57 @@ export default function LandingPage() {
       </div>
 
       {/* ═══════════════ 1. HERO ═══════════════ */}
-      <section id="sec-hero" className="relative z-20 min-h-[90vh] flex flex-col items-center justify-center px-4 sm:px-12 md:px-20 lg:px-28 py-16 sm:py-20 text-center">
+      <section id="sec-hero" className="relative z-20 min-h-[90vh] flex flex-col items-center justify-center px-4 sm:px-12 md:px-20 lg:px-28 py-24 sm:py-28 text-center overflow-visible">
 
         <div className="relative max-w-[900px] mx-auto">
-          <div className="rounded-2xl sm:rounded-3xl bg-white/50 backdrop-blur-sm px-4 sm:px-12 py-8 sm:py-14 shadow-lg shadow-black/8 hover:bg-white/60 hover:shadow-xl hover:shadow-black/12 transition-all duration-500">
-          <p className="text-[11px] tracking-[0.2em] uppercase text-[#6a6a8a] mb-6" data-testid="text-hero-label">Digital Underwriting Engine</p>
-          <h1
-            className="text-[48px] min-[400px]:text-[58px] sm:text-[68px] md:text-[88px] lg:text-[108px] uppercase italic leading-[0.85] mb-6 sm:mb-8 text-center"
-            style={{ fontFamily: "'Satoshi', sans-serif", fontWeight: 400, letterSpacing: '-0.06em', backgroundImage: 'linear-gradient(180deg, #000000 0%, #3a3a5a 50%, #7a7a9a 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}
-            data-testid="text-hero-headline"
-          >
-            <span className="hidden sm:inline">Qualify<br />Before<br />You Apply</span><span className="sm:hidden">Qualify Before<br />You Apply</span>
-          </h1>
-          <p className="text-[12px] sm:text-[17px] text-[#5a5a7a] leading-[1.6] sm:leading-[1.8] max-w-[560px] mx-auto mb-8 sm:mb-10 px-1 sm:px-0">
-            Know exactly where you stand before you submit a single funding application. We analyze your profile using real underwriting logic to determine your funding potential — before lenders ever see you. Stop guessing. Start qualifying.
-          </p>
+          <TornPaperCard>
+            <p className="text-[11px] tracking-[0.2em] uppercase text-[#6a6a8a] mb-6" data-testid="text-hero-label">Digital Underwriting Engine</p>
+            <h1
+              className="text-[48px] min-[400px]:text-[58px] sm:text-[68px] md:text-[88px] lg:text-[108px] uppercase italic leading-[0.85] mb-6 sm:mb-8 text-center"
+              style={{ fontFamily: "'Satoshi', sans-serif", fontWeight: 400, letterSpacing: '-0.06em', backgroundImage: 'linear-gradient(180deg, #000000 0%, #3a3a5a 50%, #7a7a9a 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}
+              data-testid="text-hero-headline"
+            >
+              <span className="hidden sm:inline">Qualify<br />Before<br />You Apply</span><span className="sm:hidden">Qualify Before<br />You Apply</span>
+            </h1>
+            <p className="text-[12px] sm:text-[17px] text-[#5a5a7a] leading-[1.6] sm:leading-[1.8] max-w-[560px] mx-auto mb-8 sm:mb-10 px-1 sm:px-0">
+              Know exactly where you stand before you submit a single funding application. We analyze your profile using real underwriting logic to determine your funding potential — before lenders ever see you. Stop guessing. Start qualifying.
+            </p>
 
-          <form onSubmit={handleLogin} className="w-full max-w-[440px] mx-auto mb-8">
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center bg-[#f5f5fa] border border-[#e0e0ea] rounded-2xl sm:rounded-full sm:h-[52px] sm:pl-5 sm:pr-1.5 overflow-hidden">
-              <input
-                data-testid="input-email"
-                type="email"
-                placeholder="Enter your email"
-                className="flex-1 bg-transparent text-[14px] text-[#1a1a2e] placeholder:text-[#6a6a8a] outline-none px-4 py-3.5 sm:px-0 sm:py-0"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                disabled={isLoading}
-              />
-              <button
-                data-testid="button-join"
-                type="submit"
-                disabled={isLoading}
-                className="h-[44px] sm:h-[40px] px-6 sm:rounded-full text-white text-[13px] font-bold hover:opacity-90 transition-colors shrink-0 sm:border-t-0 mx-1.5 mb-1.5 sm:mb-0 sm:mx-0 rounded-xl sm:rounded-full tracking-wide"
-                style={{ background: 'linear-gradient(135deg, #2a2a2a 0%, #0a0a0a 100%)' }}
-              >
-                {isLoading ? "..." : "SUBSCRIBE"}
-              </button>
+            <form onSubmit={handleLogin} className="w-full max-w-[440px] mx-auto mb-8">
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center bg-[#f5f5fa] border border-[#e0e0ea] rounded-2xl sm:rounded-full sm:h-[52px] sm:pl-5 sm:pr-1.5 overflow-hidden">
+                <input
+                  data-testid="input-email"
+                  type="email"
+                  placeholder="Enter your email"
+                  className="flex-1 bg-transparent text-[14px] text-[#1a1a2e] placeholder:text-[#6a6a8a] outline-none px-4 py-3.5 sm:px-0 sm:py-0"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  disabled={isLoading}
+                />
+                <button
+                  data-testid="button-join"
+                  type="submit"
+                  disabled={isLoading}
+                  className="h-[44px] sm:h-[40px] px-6 sm:rounded-full text-white text-[13px] font-bold hover:opacity-90 transition-colors shrink-0 sm:border-t-0 mx-1.5 mb-1.5 sm:mb-0 sm:mx-0 rounded-xl sm:rounded-full tracking-wide"
+                  style={{ background: 'linear-gradient(135deg, #2a2a2a 0%, #0a0a0a 100%)' }}
+                >
+                  {isLoading ? "..." : "SUBSCRIBE"}
+                </button>
+              </div>
+            </form>
+
+            <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-6 text-[10px] sm:text-[11px] text-[#7a7a9a] tracking-wide">
+              <span>Full platform access</span>
+              <span className="w-1 h-1 rounded-full bg-[#c0c0d0]"></span>
+              <span>Cancel anytime</span>
+              <span className="w-1 h-1 rounded-full bg-[#c0c0d0]"></span>
+              <span>30 analyses / month</span>
             </div>
-          </form>
-
-          <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-6 text-[10px] sm:text-[11px] text-[#7a7a9a] tracking-wide">
-            <span>Full platform access</span>
-            <span className="w-1 h-1 rounded-full bg-[#c0c0d0]"></span>
-            <span>Cancel anytime</span>
-            <span className="w-1 h-1 rounded-full bg-[#c0c0d0]"></span>
-            <span>30 analyses / month</span>
-          </div>
-          </div>
+          </TornPaperCard>
           <ScrollArrow targetId="sec-problem" />
         </div>
       </section>
-      <TornPaperEdge />
 
       {/* ═══════════════ 2. PROBLEM / PAIN ═══════════════ */}
       <section id="sec-problem" className="relative z-20 px-6 sm:px-12 md:px-20 py-20 sm:py-28 text-center">
@@ -349,7 +346,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      <TornPaperEdge />
+
       {/* ═══════════════ 3. SOLUTION OVERVIEW ═══════════════ */}
       <section id="sec-solution" className="relative z-20 px-6 sm:px-12 md:px-20 py-20 sm:py-28 text-center">
 
@@ -383,7 +380,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      <TornPaperEdge />
+
       {/* ═══════════════ 4. HOW IT WORKS ═══════════════ */}
       <section id="how-it-works" className="relative z-20 px-6 sm:px-12 md:px-20 py-20 sm:py-28 text-center">
 
@@ -415,7 +412,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      <TornPaperEdge />
+
       {/* ═══════════════ 5. FUNDING OUTCOMES ═══════════════ */}
       <section id="features" className="relative z-20 px-6 sm:px-12 md:px-20 py-20 sm:py-28 text-center">
 
@@ -450,7 +447,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      <TornPaperEdge />
+
       {/* ═══════════════ 6. SOCIAL PROOF ═══════════════ */}
       <section id="results" className="relative z-20 px-6 sm:px-12 md:px-20 py-20 sm:py-28 text-center">
 
@@ -496,7 +493,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      <TornPaperEdge />
+
       {/* ═══════════════ 7. RISK REVERSAL ═══════════════ */}
       <section id="sec-risk" className="relative z-20 px-6 sm:px-12 md:px-20 py-20 sm:py-28 text-center">
 
@@ -537,7 +534,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      <TornPaperEdge />
+
       {/* ═══════════════ 8. FEATURE BREAKDOWN ═══════════════ */}
       <section id="sec-breakdown" className="relative z-20 px-6 sm:px-12 md:px-20 py-20 sm:py-28 text-center">
 
@@ -577,7 +574,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      <TornPaperEdge />
+
       {/* ═══════════════ 9. MODE DIFFERENTIATION ═══════════════ */}
       <section id="sec-modes" className="relative z-20 px-6 sm:px-12 md:px-20 py-20 sm:py-28 text-center">
 
@@ -629,7 +626,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      <TornPaperEdge />
+
       {/* ═══════════════ 10. TIER POSITIONING ═══════════════ */}
       <section id="sec-tiers" className="relative z-20 px-6 sm:px-12 md:px-20 py-20 sm:py-28 text-center">
 
@@ -659,7 +656,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      <TornPaperEdge />
+
       {/* ═══════════════ 11. CASE STUDY ═══════════════ */}
       <section id="sec-case" className="relative z-20 px-6 sm:px-12 md:px-20 py-20 sm:py-28 text-center">
 
@@ -694,7 +691,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      <TornPaperEdge />
+
       {/* ═══════════════ 12. FAQ / OBJECTION HANDLING ═══════════════ */}
       <section id="faq" className="relative z-20 px-6 sm:px-12 md:px-20 py-20 sm:py-28 text-center">
 
@@ -729,7 +726,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      <TornPaperEdge />
+
       {/* ═══════════════ 13. TRUST & COMPLIANCE ═══════════════ */}
       <section id="sec-trust" className="relative z-20 px-6 sm:px-12 md:px-20 py-20 sm:py-28 text-center">
 
@@ -759,7 +756,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      <TornPaperEdge />
+
       {/* ═══════════════ 14. FINAL CTA ═══════════════ */}
       <section id="sec-cta" className="relative z-20 px-6 sm:px-12 md:px-20 py-24 sm:py-36">
 
