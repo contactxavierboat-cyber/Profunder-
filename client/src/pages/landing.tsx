@@ -260,61 +260,13 @@ export default function LandingPage() {
               <span className="text-[10px] sm:text-[11px] tracking-[0.15em] uppercase text-[#6a6a8a] font-medium" data-testid="text-hero-label">Digital Underwriting Engine</span>
             </div>
 
-            <div className="relative mb-6 sm:mb-8" data-testid="text-hero-headline">
-              <svg
-                className="absolute pointer-events-none select-none"
-                style={{ top: '50%', left: '50%', transform: 'translate(-50%, -50%) rotate(-5deg)', width: '140%', height: '160%' }}
-                viewBox="0 0 800 600"
-                preserveAspectRatio="none"
-                xmlns="http://www.w3.org/2000/svg"
-                aria-hidden="true"
-              >
-                <defs>
-                  <filter id="brush-blur">
-                    <feTurbulence type="fractalNoise" baseFrequency="0.04" numOctaves="4" seed="3" result="noise" />
-                    <feDisplacementMap in="SourceGraphic" in2="noise" scale="18" xChannelSelector="R" yChannelSelector="G" />
-                  </filter>
-                  <filter id="splatter">
-                    <feTurbulence type="fractalNoise" baseFrequency="0.08" numOctaves="3" seed="7" result="noise" />
-                    <feDisplacementMap in="SourceGraphic" in2="noise" scale="12" />
-                  </filter>
-                </defs>
-
-                <path d="M120,280 C80,200 140,100 250,60 C360,20 500,40 580,120 C640,180 680,300 620,400 C560,480 420,520 300,500 C180,480 160,360 120,280Z" fill="rgba(10,10,20,0.85)" filter="url(#brush-blur)" />
-
-                <path d="M200,350 C150,250 80,180 160,90 C240,20 420,-10 560,80 C650,140 700,260 680,380 C660,470 550,540 400,530 C280,520 250,440 200,350Z" fill="rgba(25,25,45,0.55)" filter="url(#brush-blur)" transform="rotate(8, 400, 300)" />
-
-                <path d="M80,250 Q60,150 180,80 Q350,0 520,50 Q680,100 720,260 Q740,380 620,470 Q480,550 300,520 Q140,490 80,350Z" fill="rgba(50,50,75,0.3)" filter="url(#brush-blur)" transform="rotate(-3, 400, 300)" />
-
-                <path d="M150,300 C130,220 200,120 320,70 L500,60" fill="none" stroke="rgba(15,15,30,0.7)" strokeWidth="28" strokeLinecap="round" filter="url(#brush-blur)" />
-                <path d="M580,140 C650,220 660,350 600,440 L450,510" fill="none" stroke="rgba(20,20,40,0.5)" strokeWidth="22" strokeLinecap="round" filter="url(#brush-blur)" />
-                <path d="M250,480 C180,450 120,380 100,300" fill="none" stroke="rgba(30,30,55,0.4)" strokeWidth="18" strokeLinecap="round" filter="url(#brush-blur)" />
-
-                <path d="M350,25 C380,15 430,30 460,20" fill="none" stroke="rgba(15,15,30,0.5)" strokeWidth="10" strokeLinecap="round" filter="url(#splatter)" />
-                <path d="M620,450 C660,470 690,440 710,460" fill="none" stroke="rgba(25,25,45,0.35)" strokeWidth="8" strokeLinecap="round" filter="url(#splatter)" />
-
-                <g filter="url(#splatter)">
-                  <circle cx="100" cy="120" r="8" fill="rgba(15,15,30,0.5)" />
-                  <circle cx="680" cy="150" r="6" fill="rgba(20,20,40,0.4)" />
-                  <circle cx="90" cy="400" r="7" fill="rgba(15,15,30,0.35)" />
-                  <circle cx="700" cy="400" r="5" fill="rgba(25,25,45,0.3)" />
-                  <circle cx="200" cy="30" r="4" fill="rgba(20,20,35,0.4)" />
-                  <circle cx="600" cy="30" r="5" fill="rgba(15,15,30,0.35)" />
-                  <circle cx="150" cy="500" r="6" fill="rgba(20,20,40,0.3)" />
-                  <circle cx="650" cy="520" r="4" fill="rgba(25,25,45,0.25)" />
-                  <circle cx="50" cy="200" r="3" fill="rgba(15,15,30,0.3)" />
-                  <circle cx="750" cy="280" r="4" fill="rgba(20,20,40,0.25)" />
-                  <circle cx="300" cy="550" r="3" fill="rgba(15,15,30,0.2)" />
-                  <circle cx="500" cy="560" r="5" fill="rgba(25,25,45,0.2)" />
-                </g>
-              </svg>
-              <h1
-                className="relative z-10 text-[48px] min-[400px]:text-[58px] sm:text-[68px] md:text-[88px] lg:text-[108px] uppercase italic leading-[0.85] text-center text-white px-6 sm:px-10 py-6 sm:py-10"
-                style={{ fontFamily: "'Satoshi', sans-serif", fontWeight: 400, letterSpacing: '-0.06em', textShadow: '0 2px 16px rgba(0,0,0,0.4)' }}
-              >
-                <span className="hidden sm:inline">Qualify<br />Before<br />You Apply</span><span className="sm:hidden">Qualify Before<br />You Apply</span>
-              </h1>
-            </div>
+            <h1
+              className="text-[48px] min-[400px]:text-[58px] sm:text-[68px] md:text-[88px] lg:text-[108px] uppercase italic leading-[0.85] mb-6 sm:mb-8 text-center"
+              style={{ fontFamily: "'Satoshi', sans-serif", fontWeight: 400, letterSpacing: '-0.06em', backgroundImage: 'linear-gradient(180deg, #000000 0%, #3a3a5a 50%, #7a7a9a 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}
+              data-testid="text-hero-headline"
+            >
+              <span className="hidden sm:inline">Qualify<br />Before<br />You Apply</span><span className="sm:hidden">Qualify Before<br />You Apply</span>
+            </h1>
 
             <div className="w-12 h-px bg-gradient-to-r from-transparent via-[#9a9ab8] to-transparent mb-6 sm:mb-8" />
 
