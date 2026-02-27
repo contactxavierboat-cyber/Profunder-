@@ -358,7 +358,17 @@ function DisputeDownloadButton({ disputes }: { disputes: DisputeItem[] }) {
       if (!res.ok) throw new Error("Failed to generate");
       const data = await res.json();
       if (data.downloadUrl) {
-        window.open(data.downloadUrl, "_blank");
+        const pdfRes = await fetch(data.downloadUrl);
+        if (!pdfRes.ok) throw new Error("Download failed");
+        const blob = await pdfRes.blob();
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "profundr-dispute-letters.pdf";
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
       }
     } catch {
       alert("Failed to generate dispute letters. Please try again.");
