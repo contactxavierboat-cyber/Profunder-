@@ -2532,7 +2532,7 @@ Respond to the latest question as the team's AI mentor. Be direct, helpful, and 
       const { content, isAi } = req.body;
       if (!content || typeof content !== "string") return res.status(400).json({ error: "Message required" });
       const teamKey = `team_${userId}`;
-      const msg = await storage.createDirectMessage({ senderId: userId, receiverId: 0, conversationKey: teamKey, content, isAi: !!isAi });
+      const msg = await storage.createDirectMessage({ senderId: userId, receiverId: userId, conversationKey: teamKey, content, isAi: !!isAi });
       const friends = await storage.getFriends(userId);
       for (const f of friends) {
         const friendKey = `team_${f.friend.id}`;
