@@ -856,17 +856,28 @@ export default function LandingPage() {
           const newMsgs = otherMsgs.filter(m => m.id > lastTeamMsgId.current);
           if (newMsgs.length > 0) {
             setGuestMessages(prev => {
-              const existingTeamIds = new Set(prev.filter(p => p.role === "team").map(p => p.id));
-              const teamMsgs: GuestMessage[] = newMsgs
+              const existingTeamIds = new Set(prev.filter(p => p.role === "team" || p.role === "assistant").map(p => p.id));
+              const incoming: GuestMessage[] = newMsgs
                 .filter(m => !existingTeamIds.has(m.id + 100000))
-                .map(m => ({
-                  id: m.id + 100000,
-                  role: "team" as const,
-                  content: m.content,
-                  senderName: m.displayName,
-                  senderId: m.senderId,
-                }));
-              return teamMsgs.length > 0 ? [...prev, ...teamMsgs] : prev;
+                .map(m => {
+                  if (m.isAi) {
+                    return {
+                      id: m.id + 100000,
+                      role: "assistant" as const,
+                      content: m.content,
+                      senderName: `${m.displayName}'s AI`,
+                      senderId: m.senderId,
+                    };
+                  }
+                  return {
+                    id: m.id + 100000,
+                    role: "team" as const,
+                    content: m.content,
+                    senderName: m.displayName,
+                    senderId: m.senderId,
+                  };
+                });
+              return incoming.length > 0 ? [...prev, ...incoming] : prev;
             });
           }
           lastTeamMsgId.current = Math.max(...msgs.map(m => m.id));
@@ -939,7 +950,10 @@ export default function LandingPage() {
       try { await fetch("/api/team/message", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ content: displayText }) }); } catch {}
     }
     try {
-      const history = [...guestMessages, userMsg].map((m) => ({ role: m.role === "team" ? "user" : m.role, content: m.content }));
+      const history = [...guestMessages, userMsg].map((m) => ({
+        role: m.role === "team" ? "user" : m.role,
+        content: m.role === "team" ? `[Team member ${m.senderName || "Unknown"}]: ${m.content}` : m.content,
+      }));
       const payload: Record<string, unknown> = { content: text, history };
       if (file) {
         payload.fileContent = file.content;
@@ -956,6 +970,9 @@ export default function LandingPage() {
       const aiMsg: GuestMessage = { id: nextId + 1, role: "assistant", content: data.content };
       setGuestMessages((prev) => [...prev, aiMsg]);
       setNextId((n) => n + 1);
+      if (user) {
+        try { await fetch("/api/team/message", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ content: data.content, isAi: true }) }); } catch {}
+      }
     } catch {
       const errMsg: GuestMessage = { id: nextId + 1, role: "assistant", content: "Sorry, something went wrong. Please try again." };
       setGuestMessages((prev) => [...prev, errMsg]);
@@ -1100,6 +1117,9 @@ export default function LandingPage() {
                           className={`max-w-[85%] ${msg.role === "user" ? "bg-[#f0f0f0] rounded-[20px] rounded-br-[6px] px-4 py-2.5" : "bg-transparent"}`}
                           data-testid={`message-${msg.role}-${msg.id}`}
                         >
+                          {msg.role === "assistant" && msg.senderName && (
+                            <p className="text-[10px] text-[#6366f1] font-medium mb-0.5">{msg.senderName}</p>
+                          )}
                           {msg.role === "user" ? (
                             <p className="text-[14px] text-[#1a1a1a] leading-[1.6] whitespace-pre-wrap">{msg.content}</p>
                           ) : (

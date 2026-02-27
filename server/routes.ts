@@ -2523,17 +2523,17 @@ Respond to the latest question as the team's AI mentor. Be direct, helpful, and 
   app.post("/api/team/message", requireAuth, async (req, res) => {
     try {
       const userId = req.session.userId!;
-      const { content } = req.body;
+      const { content, isAi } = req.body;
       if (!content || typeof content !== "string") return res.status(400).json({ error: "Message required" });
       const teamKey = `team_${userId}`;
-      const msg = await storage.createDirectMessage({ senderId: userId, receiverId: 0, conversationKey: teamKey, content, isAi: false });
+      const msg = await storage.createDirectMessage({ senderId: userId, receiverId: 0, conversationKey: teamKey, content, isAi: !!isAi });
       const friends = await storage.getFriends(userId);
       for (const f of friends) {
         const friendKey = `team_${f.friend.id}`;
-        await storage.createDirectMessage({ senderId: userId, receiverId: f.friend.id, conversationKey: friendKey, content, isAi: false });
+        await storage.createDirectMessage({ senderId: userId, receiverId: f.friend.id, conversationKey: friendKey, content, isAi: !!isAi });
       }
       const user = await storage.getUser(userId);
-      res.json({ id: msg.id, senderId: userId, displayName: user?.displayName || user?.email || "User", content: msg.content, timestamp: msg.timestamp });
+      res.json({ id: msg.id, senderId: userId, displayName: user?.displayName || user?.email || "User", content: msg.content, isAi: !!isAi, timestamp: msg.timestamp });
     } catch (error: any) {
       res.status(500).json({ error: error.message });
     }
