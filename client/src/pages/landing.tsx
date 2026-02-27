@@ -261,8 +261,8 @@ export default function LandingPage() {
             </div>
 
             <h1
-              className="text-[48px] min-[400px]:text-[58px] sm:text-[68px] md:text-[88px] lg:text-[108px] uppercase leading-[0.9] mb-6 sm:mb-8 text-center"
-              style={{ fontFamily: "'Inter', sans-serif", fontWeight: 800, letterSpacing: '-0.05em', backgroundImage: 'linear-gradient(135deg, #1a1a2e 0%, #4a4a6a 50%, #8a8aa5 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}
+              className="text-[48px] min-[400px]:text-[58px] sm:text-[68px] md:text-[88px] lg:text-[108px] uppercase italic leading-[0.9] mb-6 sm:mb-8 text-center"
+              style={{ fontFamily: "'Inter', sans-serif", fontWeight: 300, letterSpacing: '-0.05em', backgroundImage: 'linear-gradient(135deg, #1a1a2e 0%, #4a4a6a 50%, #8a8aa5 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}
               data-testid="text-hero-headline"
             >
               <span className="hidden sm:inline">QUALIFY<br />BEFORE<br />YOU APPLY</span><span className="sm:hidden">QUALIFY<br />BEFORE<br />YOU APPLY</span>
