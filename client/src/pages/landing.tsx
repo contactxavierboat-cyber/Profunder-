@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import { useAuth } from "@/lib/store";
 import { ProfundrLogo } from "@/components/profundr-logo";
 
@@ -848,6 +848,8 @@ export default function LandingPage() {
   const [savedDocs, setSavedDocs] = useState<SavedDoc[]>(loadSavedDocs);
   const [activeTeamChat, setActiveTeamChat] = useState<TeamMember | null>(null);
   const [teamChatMessages, setTeamChatMessages] = useState<GuestMessage[]>([]);
+  const [mentionDropdown, setMentionDropdown] = useState<{ show: boolean; query: string; startIdx: number }>({ show: false, query: "", startIdx: 0 });
+  const [mentionSelected, setMentionSelected] = useState(0);
   const teamConvoLoaded = useRef(false);
   const teamChatLoaded = useRef(false);
   const { user, logout } = useAuth();
@@ -1210,10 +1212,90 @@ export default function LandingPage() {
     doSend(msg, file);
   };
 
-  const handleSubmit = (e: React.FormEvent) => { e.preventDefault(); handleSend(); };
+  const handleSubmit = (e: React.FormEvent) => { e.preventDefault(); if (mentionDropdown.show) return; handleSend(); };
   const handleUploadClick = () => { fileInputRef.current?.click(); };
+
+  const renderMentionText = useCallback((text: string) => {
+    const parts = text.split(/(@\w+)/g);
+    return parts.map((part, i) => {
+      if (part.startsWith("@")) {
+        const name = part.slice(1);
+        const isProfundr = name.toLowerCase() === "profundr";
+        return (
+          <span key={i} className={`inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-md text-[13px] font-medium ${isProfundr ? 'bg-[#1a1a2e] text-white' : 'bg-[#ede9fe] text-[#6366f1]'}`}>
+            @{name}
+          </span>
+        );
+      }
+      return part;
+    });
+  }, []);
   const displayMessages = activeTeamChat ? teamChatMessages : guestMessages;
   const hasMessages = displayMessages.length > 0;
+
+  const mentionCandidates = useMemo(() => {
+    if (!activeTeamChat) return [];
+    const candidates = [
+      { name: "Profundr", type: "ai" as const },
+      { name: activeTeamChat.displayName, type: "member" as const },
+    ];
+    if (user?.displayName || user?.email) {
+      candidates.push({ name: (user.displayName || user.email)!, type: "self" as const });
+    }
+    return candidates;
+  }, [activeTeamChat, user]);
+
+  const filteredMentions = useMemo(() => {
+    if (!mentionDropdown.show) return [];
+    const q = mentionDropdown.query.toLowerCase();
+    return mentionCandidates.filter(c => c.name.toLowerCase().includes(q));
+  }, [mentionDropdown, mentionCandidates]);
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value;
+    setInput(val);
+
+    if (!activeTeamChat) {
+      setMentionDropdown({ show: false, query: "", startIdx: 0 });
+      return;
+    }
+
+    const cursorPos = e.target.selectionStart || val.length;
+    const textBefore = val.slice(0, cursorPos);
+    const atMatch = textBefore.match(/@(\w*)$/);
+
+    if (atMatch) {
+      setMentionDropdown({ show: true, query: atMatch[1], startIdx: cursorPos - atMatch[0].length });
+      setMentionSelected(0);
+    } else {
+      setMentionDropdown({ show: false, query: "", startIdx: 0 });
+    }
+  };
+
+  const insertMention = (name: string) => {
+    const before = input.slice(0, mentionDropdown.startIdx);
+    const after = input.slice(mentionDropdown.startIdx + mentionDropdown.query.length + 1);
+    const newVal = `${before}@${name} ${after}`;
+    setInput(newVal);
+    setMentionDropdown({ show: false, query: "", startIdx: 0 });
+    inputRef.current?.focus();
+  };
+
+  const handleInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (!mentionDropdown.show || filteredMentions.length === 0) return;
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      setMentionSelected(prev => (prev + 1) % filteredMentions.length);
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      setMentionSelected(prev => (prev - 1 + filteredMentions.length) % filteredMentions.length);
+    } else if (e.key === "Enter" || e.key === "Tab") {
+      e.preventDefault();
+      insertMention(filteredMentions[mentionSelected].name);
+    } else if (e.key === "Escape") {
+      setMentionDropdown({ show: false, query: "", startIdx: 0 });
+    }
+  };
 
   return (
     <div className="relative h-[100dvh] flex bg-[#fafafa]" style={{ fontFamily: "'Inter', sans-serif" }}>
@@ -1332,7 +1414,7 @@ export default function LandingPage() {
                           <div className="max-w-[85%]" data-testid={`message-team-${msg.id}`}>
                             <p className="text-[10px] text-[#6366f1] font-medium mb-0.5">{msg.senderName}</p>
                             <div className="bg-[#f0eeff] rounded-[20px] rounded-bl-[6px] px-4 py-2.5">
-                              <p className="text-[14px] text-[#1a1a1a] leading-[1.6] whitespace-pre-wrap">{msg.content}</p>
+                              <p className="text-[14px] text-[#1a1a1a] leading-[1.6] whitespace-pre-wrap">{renderMentionText(msg.content)}</p>
                             </div>
                           </div>
                         </div>
@@ -1358,7 +1440,7 @@ export default function LandingPage() {
                             <p className="text-[10px] text-[#6366f1] font-medium mb-0.5">{msg.senderName}</p>
                           )}
                           {msg.role === "user" ? (
-                            <p className="text-[14px] text-[#1a1a1a] leading-[1.6] whitespace-pre-wrap">{msg.content}</p>
+                            <p className="text-[14px] text-[#1a1a1a] leading-[1.6] whitespace-pre-wrap">{renderMentionText(msg.content)}</p>
                           ) : (
                             <FormatResponse content={msg.content} />
                           )}
@@ -1465,6 +1547,36 @@ export default function LandingPage() {
             </div>
           )}
 
+          {mentionDropdown.show && filteredMentions.length > 0 && (
+            <div className="w-full mb-1.5" data-testid="mention-dropdown">
+              <div className="bg-white border border-[#e0e0e0] rounded-xl shadow-lg overflow-hidden max-w-[280px]">
+                <div className="px-3 py-1.5 border-b border-[#f0f0f0]">
+                  <p className="text-[9px] text-[#999] font-medium uppercase tracking-wider">Mention</p>
+                </div>
+                {filteredMentions.map((c, i) => (
+                  <button
+                    key={c.name}
+                    className={`w-full flex items-center gap-2.5 px-3 py-2 text-left transition-colors ${i === mentionSelected ? 'bg-[#f0eeff]' : 'hover:bg-[#f8f8f8]'}`}
+                    onClick={() => insertMention(c.name)}
+                    data-testid={`mention-option-${c.name}`}
+                  >
+                    <div className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0 ${c.type === 'ai' ? 'bg-[#1a1a2e] text-white' : c.type === 'self' ? 'bg-[#10b981] text-white' : 'bg-[#6366f1] text-white'}`}>
+                      {c.type === 'ai' ? (
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M12 2C9.5 2 7.5 4 7.5 6.5c0 .5-.4 1-1 1C4.5 7.5 3 9.5 3 11.5c0 1.5.8 2.8 2 3.5 0 0-.5 1.5-.5 2.5C4.5 20 6.5 22 9 22c1.5 0 2.5-.5 3-1.5.5 1 1.5 1.5 3 1.5 2.5 0 4.5-2 4.5-4.5 0-1-.5-2.5-.5-2.5 1.2-.7 2-2 2-3.5 0-2-1.5-4-3.5-4-.6 0-1-.5-1-1C16.5 4 14.5 2 12 2z" />
+                        </svg>
+                      ) : c.name[0]?.toUpperCase()}
+                    </div>
+                    <div>
+                      <p className="text-[12px] font-medium text-[#333]">@{c.name}</p>
+                      <p className="text-[9px] text-[#999]">{c.type === 'ai' ? 'AI Assistant' : c.type === 'self' ? 'You' : 'Team Member'}</p>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
           <form onSubmit={handleSubmit} className="w-full">
             <div className="flex items-center bg-[#f0f0f0] rounded-full h-[52px] pl-1.5 pr-1.5 border border-[#e5e5e5] shadow-sm focus-within:border-[#ccc] transition-colors">
               <button
@@ -1478,9 +1590,9 @@ export default function LandingPage() {
               </button>
               <input
                 ref={inputRef} data-testid="input-chat" type="text"
-                placeholder={attachedFile ? "Add a message about your report..." : activeTeamChat ? `Message team chat with ${activeTeamChat.displayName}...` : "Ask about your funding readiness..."}
+                placeholder={attachedFile ? "Add a message about your report..." : activeTeamChat ? `Message team chat with ${activeTeamChat.displayName}... (type @ to mention)` : "Ask about your funding readiness..."}
                 className="flex-1 bg-transparent text-[14px] text-[#1a1a1a] placeholder:text-[#999] outline-none px-2"
-                value={input} onChange={(e) => setInput(e.target.value)} disabled={isSending}
+                value={input} onChange={handleInputChange} onKeyDown={handleInputKeyDown} disabled={isSending}
               />
               <button
                 data-testid="button-send" type="submit" disabled={isSending || (!input.trim() && !attachedFile)}
