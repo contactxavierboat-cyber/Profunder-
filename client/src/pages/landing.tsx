@@ -8,13 +8,19 @@ interface GuestMessage {
   content: string;
 }
 
+interface PillarScore {
+  label: string;
+  value: number;
+}
+
 interface MissionData {
-  fundabilityIndex: number | null;
-  riskTier: string | null;
-  approvalOdds: { label: string; value: string }[];
-  borrowingPower: { conservative: string; moderate: string; aggressive: string } | null;
-  topRisks: string[];
-  nextMoves: string[];
+  approvalIndex: number | null;
+  band: string | null;
+  phase: string | null;
+  pillarScores: PillarScore[];
+  suppressors: string[];
+  helping: string[];
+  hurting: string[];
 }
 
 interface DisputeItem {
@@ -61,105 +67,113 @@ function parseDisputeItems(content: string): DisputeItem[] {
 function parseSingleMessageData(content: string): MissionData {
   const cleanText = content.replace(/\*+/g, "");
 
-  let fundabilityIndex: number | null = null;
-  let riskTier: string | null = null;
+  let approvalIndex: number | null = null;
+  let band: string | null = null;
+  let phase: string | null = null;
 
   const indexPatterns = [
+    /Approval\s*Index[:\s]*(\d+)\s*\/?\s*100/i,
     /FUNDABILITY\s*INDEX[:\s]*(\d+)\s*\/?\s*100/i,
-    /(\d+)\s*\/\s*100\s*[-—]\s*(Strong|Moderate|Weak|High Risk|Prime|Near Prime|Subprime)/i,
+    /(\d+)\s*\/\s*100/i,
     /Index[:\s]*(\d+)\s*\/\s*100/i,
-    /Index[:\s]*(\d+)\s*[-—]/i,
-    /Score[:\s]*(\d+)\s*\/\s*100/i,
   ];
   for (const p of indexPatterns) {
     const m = cleanText.match(p);
-    if (m) { fundabilityIndex = parseInt(m[1]); break; }
+    if (m) { approvalIndex = parseInt(m[1]); break; }
   }
 
-  const tierPatterns = [
-    /(?:Risk\s*)?(?:Tier|Classification)[:\s]*(Strong|Moderate|Weak|High Risk|Prime|Near Prime|Subprime)/i,
-    /(\d+)\s*\/\s*100\s*[-—]\s*(Strong|Moderate|Weak|High Risk|Prime|Near Prime|Subprime)/i,
-    /[-—]\s*(Strong|Moderate|Weak|High Risk|Prime|Near Prime|Subprime)/i,
+  const bandPatterns = [
+    /Band[:\s]*(Exceptional|Strong|Viable|Borderline|Weak|High Risk)/i,
+    /[-—]\s*(Exceptional|Strong|Viable|Borderline|Weak|High Risk)/i,
   ];
-  for (const p of tierPatterns) {
+  for (const p of bandPatterns) {
     const m = cleanText.match(p);
-    if (m) { riskTier = m[m.length === 3 ? 2 : 1]; break; }
+    if (m) { band = m[1]; break; }
   }
 
-  const approvalOdds: { label: string; value: string }[] = [];
-  const oddsPatterns = [
-    { label: "Bank Term Loan", pattern: /Bank\s*Term\s*Loan[:\s]*(\d+)%/i },
-    { label: "Online Lender", pattern: /Online\s*(?:Term\s*)?Lender[:\s]*(\d+)%/i },
-    { label: "Business LOC", pattern: /(?:Business\s*)?(?:Line\s*of\s*Credit|LOC|Business\s*LOC)[:\s]*(\d+)%/i },
-    { label: "Credit Card", pattern: /Credit\s*Card[:\s]*(\d+)%/i },
-    { label: "MCA", pattern: /MCA[:\s]*(\d+)%/i },
+  const phasePatterns = [
+    /Phase[:\s]*(Repair Phase|Build Phase|Wait Phase|Funding Phase|Repair|Build|Wait|Funding)/i,
   ];
-  for (const { label, pattern } of oddsPatterns) {
+  for (const p of phasePatterns) {
+    const m = cleanText.match(p);
+    if (m) { phase = m[1]; break; }
+  }
+
+  const pillarScores: PillarScore[] = [];
+  const pillarPatterns = [
+    { label: "Payment Integrity", pattern: /Payment\s*Integrity[:\s]*(\d+)/i },
+    { label: "Utilization Control", pattern: /Utilization\s*Control[:\s]*(\d+)/i },
+    { label: "File Stability", pattern: /File\s*Stability[:\s]*(\d+)/i },
+    { label: "Credit Depth", pattern: /Credit\s*Depth[:\s]*(\d+)/i },
+    { label: "Timing Risk", pattern: /Timing\s*Risk[:\s]*(\d+)/i },
+    { label: "Lender Confidence", pattern: /Lender\s*Confidence[:\s]*(\d+)/i },
+  ];
+  for (const { label, pattern } of pillarPatterns) {
     const m = cleanText.match(pattern);
-    if (m) approvalOdds.push({ label, value: m[1] + "%" });
+    if (m) pillarScores.push({ label, value: parseInt(m[1]) });
   }
 
-  let borrowingPower: MissionData["borrowingPower"] = null;
-  const bpCon = cleanText.match(/[Cc]onservative[:\s]*\$?([\d,]+)/);
-  const bpMod = cleanText.match(/[Mm]oderate[:\s]*\$?([\d,]+)/);
-  const bpAgg = cleanText.match(/[Aa]ggressive[:\s]*\$?([\d,]+)/);
-  if (bpCon || bpMod || bpAgg) {
-    borrowingPower = {
-      conservative: bpCon ? "$" + bpCon[1] : "—",
-      moderate: bpMod ? "$" + bpMod[1] : "—",
-      aggressive: bpAgg ? "$" + bpAgg[1] : "—",
-    };
-  }
-
-  const topRisks: string[] = [];
-  const riskPatterns = [
-    /TOP\s*RISKS?[:\s]*([\s\S]*?)(?=\n\s*(?:NEXT|BORROWING|APPROVAL|SCENARIO|REPAIR|DISPUTE|FUNDING)\b|\n\n\n)/i,
-    /DENIAL\s*TRIGGERS?[:\s]*([\s\S]*?)(?=\n\s*(?:NEXT|BORROWING|APPROVAL|SCENARIO|REPAIR|DISPUTE|TOP)\b|\n\n\n)/i,
-    /KEY\s*RISK\s*(?:DRIVERS?|FACTORS?)[:\s]*([\s\S]*?)(?=\n\s*(?:NEXT|BORROWING|OPTIMIZATION|SCENARIO)\b|\n\n\n)/i,
-  ];
-  for (const p of riskPatterns) {
-    const m = cleanText.match(p);
-    if (m) {
-      const lines = m[1].split("\n").filter((l) => l.trim().match(/^[-•\d]/));
-      for (const line of lines.slice(0, 4)) {
-        const cleaned = line.replace(/^\s*[-•]\s*/, "").replace(/^\s*\d+[.)]\s*/, "").trim();
-        if (cleaned.length > 5) topRisks.push(cleaned);
-      }
-      if (topRisks.length > 0) break;
+  const suppressors: string[] = [];
+  const suppressorMatch = cleanText.match(/Top\s*Approval\s*Suppressors?[:\s]*([\s\S]*?)(?=\n\s*(?:What|Primary|Best|Then|DISPUTE)\b|\n\n)/i);
+  if (suppressorMatch) {
+    const lines = suppressorMatch[1].split("\n").filter(l => l.trim().match(/^[-•\d]/));
+    for (const line of lines.slice(0, 5)) {
+      const cleaned = line.replace(/^\s*[-•]\s*/, "").replace(/^\s*\d+[.)]\s*/, "").trim();
+      if (cleaned.length > 3) suppressors.push(cleaned);
     }
   }
 
-  const nextMoves: string[] = [];
-  const movePatterns = [
-    /NEXT\s*MOVES?[^:\n]*[:\s]*([\s\S]*?)(?=\n\s*(?:TOP|BORROWING|APPROVAL|SCENARIO|KEY|FUNDING|DISPUTE)\b|\n\n\n|$)/i,
-    /FUNDING\s*(?:ROADMAP|READINESS)[:\s]*([\s\S]*?)(?=\n\s*(?:TOP|BORROWING|APPROVAL|SCENARIO|DISPUTE)\b|\n\n\n|$)/i,
-    /OPTIMIZATION\s*(?:ROADMAP)?[:\s]*([\s\S]*?)(?=\n\s*(?:TOP|BORROWING|APPROVAL|SCENARIO)\b|\n\n\n|$)/i,
-  ];
-  for (const p of movePatterns) {
-    const m = cleanText.match(p);
-    if (m) {
-      const lines = m[1].split("\n").filter((l) => l.trim().match(/^[-•\d]/));
-      for (const line of lines.slice(0, 5)) {
-        const cleaned = line.replace(/^\s*[-•]\s*/, "").replace(/^\s*\d+[.)]\s*/, "").trim();
-        if (cleaned.length > 5) nextMoves.push(cleaned);
-      }
-      if (nextMoves.length > 0) break;
+  const helping: string[] = [];
+  const helpingMatch = cleanText.match(/What['']?s\s*Helping[:\s]*([\s\S]*?)(?=\n\s*(?:What|Best|Primary|Top|DISPUTE)\b|\n\n)/i);
+  if (helpingMatch) {
+    const lines = helpingMatch[1].split("\n").filter(l => l.trim().match(/^[-•\d]/));
+    for (const line of lines.slice(0, 4)) {
+      const cleaned = line.replace(/^\s*[-•]\s*/, "").replace(/^\s*\d+[.)]\s*/, "").trim();
+      if (cleaned.length > 3) helping.push(cleaned);
     }
   }
 
-  return { fundabilityIndex, riskTier, approvalOdds, borrowingPower, topRisks, nextMoves };
+  const hurting: string[] = [];
+  const hurtingMatch = cleanText.match(/What['']?s\s*Hurting[:\s]*([\s\S]*?)(?=\n\s*(?:Best|What|Primary|Top|DISPUTE)\b|\n\n)/i);
+  if (hurtingMatch) {
+    const lines = hurtingMatch[1].split("\n").filter(l => l.trim().match(/^[-•\d]/));
+    for (const line of lines.slice(0, 4)) {
+      const cleaned = line.replace(/^\s*[-•]\s*/, "").replace(/^\s*\d+[.)]\s*/, "").trim();
+      if (cleaned.length > 3) hurting.push(cleaned);
+    }
+  }
+
+  return { approvalIndex, band, phase, pillarScores, suppressors, helping, hurting };
 }
 
 function hasAnalysisData(data: MissionData): boolean {
-  return data.fundabilityIndex !== null || data.riskTier !== null || data.approvalOdds.length > 0 || data.borrowingPower !== null;
+  return data.approvalIndex !== null || data.band !== null || data.phase !== null || data.pillarScores.length > 0 || data.suppressors.length > 0 || data.helping.length > 0 || data.hurting.length > 0;
 }
 
-function getTierColor(tier: string | null): string {
-  if (!tier) return "#999";
-  const t = tier.toLowerCase();
-  if (t === "strong" || t === "prime") return "#22c55e";
-  if (t === "moderate" || t === "near prime") return "#eab308";
-  if (t === "weak" || t === "subprime") return "#f97316";
+function getBandColor(band: string | null): string {
+  if (!band) return "#999";
+  const b = band.toLowerCase();
+  if (b === "exceptional") return "#16a34a";
+  if (b === "strong") return "#22c55e";
+  if (b === "viable") return "#eab308";
+  if (b === "borderline") return "#f97316";
+  if (b === "weak") return "#ef4444";
+  return "#dc2626";
+}
+
+function getPhaseColor(phase: string | null): string {
+  if (!phase) return "#999";
+  const p = phase.toLowerCase();
+  if (p.includes("funding")) return "#22c55e";
+  if (p.includes("build")) return "#3b82f6";
+  if (p.includes("wait")) return "#eab308";
+  return "#ef4444";
+}
+
+function getPillarColor(value: number): string {
+  if (value >= 85) return "#22c55e";
+  if (value >= 70) return "#eab308";
+  if (value >= 50) return "#f97316";
   return "#ef4444";
 }
 
@@ -191,14 +205,25 @@ function FormatResponse({ content }: { content: string }) {
   const isMetricLine = (line: string): boolean => {
     const t = line.trim().replace(/^[-•–—]\s*/, "");
     if (!t) return true;
+    if (/Approval\s*Index/i.test(t)) return true;
     if (/FUNDABILITY\s*INDEX/i.test(t)) return true;
+    if (/^Band[:\s]/i.test(t)) return true;
+    if (/^Phase[:\s]/i.test(t)) return true;
+    if (/Pillar\s*Scores?/i.test(t)) return true;
+    if (/^(Payment\s*Integrity|Utilization\s*Control|File\s*Stability|Credit\s*Depth|Timing\s*Risk|Lender\s*Confidence)[:\s]*\d+/i.test(t)) return true;
+    if (/Top\s*Approval\s*Suppressors?/i.test(t)) return true;
+    if (/What['']?s\s*(Helping|Hurting)/i.test(t)) return true;
+    if (/Best\s*Next\s*Move/i.test(t)) return true;
+    if (/What\s*Not\s*[Tt]o\s*Do/i.test(t)) return true;
+    if (/Primary\s*Diagnosis/i.test(t)) return true;
     if (/APPROVAL\s*ODDS/i.test(t)) return true;
     if (/BORROWING\s*POWER/i.test(t)) return true;
     if (/DISPUTE\s*ITEMS?\s*:?$/i.test(t)) return true;
     if (/^(Bank\s*Term\s*Loan|Online\s*Lender|Business\s*LOC|Credit\s*Card|MCA)\s*:/i.test(t)) return true;
-    if (/(Bank\s*Term\s*Loan|Online\s*Lender|Business\s*LOC|Credit\s*Card|MCA)\s*:\s*\d+%/i.test(t)) return true;
     if (/Conservative\s*:/i.test(t)) return true;
     if (/^\d+\s*\/\s*100/i.test(t)) return true;
+    if (/^(Exceptional|Strong|Viable|Borderline|Weak|High Risk)$/i.test(t)) return true;
+    if (/^(Repair|Build|Wait|Funding)\s*Phase$/i.test(t)) return true;
     return false;
   };
 
@@ -213,6 +238,7 @@ function FormatResponse({ content }: { content: string }) {
     if (/^(Key\s*Next\s*Steps|Dispute\s*Items|Dispute\s*Strategy|Legal\s*Basis|Required\s*Action|Round\s*\d)/i.test(stripped)) return false;
     if (/^(Focus on|Submit disputes|Lower your|Please provide additional)/i.test(stripped)) return false;
     if (/^Verdict:?\s*$/i.test(stripped)) return false;
+    if (/^(Top\s*Approval\s*Suppressors?|What['']?s\s*Helping|What['']?s\s*Hurting|Best\s*Next\s*Move|What\s*Not\s*[Tt]o\s*Do|Primary\s*Diagnosis|Pillar\s*Scores?)/i.test(stripped)) return false;
     return true;
   });
 
@@ -225,79 +251,80 @@ function FormatResponse({ content }: { content: string }) {
   );
 }
 
-function MissionDashboard({ data, tierColor }: { data: MissionData; tierColor: string }) {
+function MissionDashboard({ data }: { data: MissionData }) {
+  const bandColor = getBandColor(data.band);
+  const phaseColor = getPhaseColor(data.phase);
+
   return (
     <div className="w-full mt-4 space-y-2.5" data-testid="mission-dashboard-inline">
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-        {data.fundabilityIndex !== null && (
-          <div className="rounded-xl bg-white border border-[#e8e8e8] p-4 shadow-sm" data-testid="card-fundability-index">
-            <p className="text-[10px] text-[#999] tracking-[0.01em] font-medium mb-2">Fundability Index</p>
+        {data.approvalIndex !== null && (
+          <div className="rounded-xl bg-white border border-[#e8e8e8] p-4 shadow-sm" data-testid="card-approval-index">
+            <p className="text-[10px] text-[#999] tracking-[0.01em] font-medium mb-2">Approval Index</p>
             <div className="flex items-baseline gap-1.5">
-              <span className="text-[28px] font-bold leading-none font-mono tracking-tight" style={{ color: tierColor }} data-testid="text-fundability-score">
-                {data.fundabilityIndex}
+              <span className="text-[28px] font-bold leading-none font-mono tracking-tight" style={{ color: bandColor }} data-testid="text-approval-score">
+                {data.approvalIndex}
               </span>
               <span className="text-[13px] text-[#ccc] font-mono">/100</span>
             </div>
             <div className="mt-2.5 w-full h-1.5 bg-[#f0f0f0] rounded-full overflow-hidden">
-              <div className="h-full rounded-full transition-all duration-1000 ease-out" style={{ width: `${data.fundabilityIndex}%`, backgroundColor: tierColor }} />
+              <div className="h-full rounded-full transition-all duration-1000 ease-out" style={{ width: `${data.approvalIndex}%`, backgroundColor: bandColor }} />
             </div>
           </div>
         )}
 
-        {data.riskTier && (
-          <div className="rounded-xl bg-white border border-[#e8e8e8] p-4 shadow-sm" data-testid="card-risk-tier">
-            <p className="text-[10px] text-[#999] tracking-[0.01em] font-medium mb-2">Risk Classification</p>
-            <p className="text-[20px] font-bold tracking-[-0.02em]" style={{ color: tierColor }} data-testid="text-risk-tier">
-              {data.riskTier}
+        {data.band && (
+          <div className="rounded-xl bg-white border border-[#e8e8e8] p-4 shadow-sm" data-testid="card-band">
+            <p className="text-[10px] text-[#999] tracking-[0.01em] font-medium mb-2">Band</p>
+            <p className="text-[20px] font-bold tracking-[-0.02em]" style={{ color: bandColor }} data-testid="text-band">
+              {data.band}
             </p>
             <div className="flex items-center gap-1.5 mt-1">
-              <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: tierColor }} />
+              <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: bandColor }} />
               <p className="text-[10px] text-[#999]">
-                {data.riskTier === "Strong" || data.riskTier === "Prime" ? "Strong approval probability" :
-                 data.riskTier === "Moderate" || data.riskTier === "Near Prime" ? "Moderate approval probability" :
-                 data.riskTier === "Weak" || data.riskTier === "Subprime" ? "Limited product eligibility" : "Requires credit remediation"}
+                {data.band === "Exceptional" ? "Premium approval readiness" :
+                 data.band === "Strong" ? "Strong approval probability" :
+                 data.band === "Viable" ? "Moderate approval potential" :
+                 data.band === "Borderline" ? "Conditional eligibility" :
+                 data.band === "Weak" ? "Limited product eligibility" : "Requires credit remediation"}
               </p>
             </div>
           </div>
         )}
 
-        {data.borrowingPower && (
-          <div className="rounded-xl bg-white border border-[#e8e8e8] p-4 shadow-sm" data-testid="card-borrowing-power">
-            <p className="text-[10px] text-[#999] tracking-[0.01em] font-medium mb-2">Borrowing Power</p>
-            <p className="text-[20px] font-bold text-[#1a1a1a] font-mono tracking-tight" data-testid="text-borrowing-moderate">
-              {data.borrowingPower.moderate}
+        {data.phase && (
+          <div className="rounded-xl bg-white border border-[#e8e8e8] p-4 shadow-sm" data-testid="card-phase">
+            <p className="text-[10px] text-[#999] tracking-[0.01em] font-medium mb-2">Current Phase</p>
+            <p className="text-[18px] font-bold tracking-[-0.02em]" style={{ color: phaseColor }} data-testid="text-phase">
+              {data.phase}
             </p>
-            <div className="flex items-center gap-3 mt-1">
-              <span className="text-[9px] text-[#999] font-mono">{data.borrowingPower.conservative}</span>
-              <span className="text-[9px] text-[#999]">—</span>
-              <span className="text-[9px] text-[#999] font-mono">{data.borrowingPower.aggressive}</span>
+            <div className="flex items-center gap-1.5 mt-1">
+              <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: phaseColor }} />
+              <p className="text-[10px] text-[#999]">
+                {data.phase.toLowerCase().includes("funding") ? "Ready for controlled applications" :
+                 data.phase.toLowerCase().includes("build") ? "Strengthen structure before applying" :
+                 data.phase.toLowerCase().includes("wait") ? "Pause — timing pressure active" : "Address negatives before funding"}
+              </p>
             </div>
           </div>
         )}
       </div>
 
-      {data.approvalOdds.length > 0 && (
-        <div className="rounded-xl bg-white border border-[#e8e8e8] p-4 shadow-sm" data-testid="card-approval-odds">
-          <p className="text-[10px] text-[#999] tracking-[0.01em] font-medium mb-3">Approval Probability</p>
-          <div className="grid grid-cols-5 gap-2">
-            {data.approvalOdds.map((item) => {
-              const pct = parseInt(item.value);
-              const color = pct >= 70 ? "#22c55e" : pct >= 40 ? "#eab308" : "#ef4444";
+      {data.pillarScores.length > 0 && (
+        <div className="rounded-xl bg-white border border-[#e8e8e8] p-4 shadow-sm" data-testid="card-pillar-scores">
+          <p className="text-[10px] text-[#999] tracking-[0.01em] font-medium mb-3">Pillar Scores</p>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-x-4 gap-y-3">
+            {data.pillarScores.map((pillar) => {
+              const color = getPillarColor(pillar.value);
               return (
-                <div key={item.label} className="text-center">
-                  <div className="relative w-10 h-10 mx-auto mb-1">
-                    <svg className="w-10 h-10 -rotate-90" viewBox="0 0 40 40">
-                      <circle cx="20" cy="20" r="16" fill="none" stroke="#f0f0f0" strokeWidth="3" />
-                      <circle cx="20" cy="20" r="16" fill="none" stroke={color} strokeWidth="3"
-                        strokeDasharray={`${(pct / 100) * 100.5} 100.5`}
-                        strokeLinecap="round" className="transition-all duration-1000"
-                      />
-                    </svg>
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <span className="text-[9px] font-bold font-mono" style={{ color }} data-testid={`text-odds-${item.label.toLowerCase().replace(/\s+/g, "-")}`}>{pct}%</span>
-                    </div>
+                <div key={pillar.label} data-testid={`pillar-${pillar.label.toLowerCase().replace(/\s+/g, "-")}`}>
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-[10px] text-[#666]">{pillar.label}</span>
+                    <span className="text-[11px] font-bold font-mono" style={{ color }}>{pillar.value}</span>
                   </div>
-                  <p className="text-[8px] text-[#999] tracking-wide leading-tight">{item.label}</p>
+                  <div className="w-full h-1.5 bg-[#f0f0f0] rounded-full overflow-hidden">
+                    <div className="h-full rounded-full transition-all duration-1000 ease-out" style={{ width: `${pillar.value}%`, backgroundColor: color }} />
+                  </div>
                 </div>
               );
             })}
@@ -305,37 +332,56 @@ function MissionDashboard({ data, tierColor }: { data: MissionData; tierColor: s
         </div>
       )}
 
-      {(data.topRisks.length > 0 || data.nextMoves.length > 0) && (
+      {(data.suppressors.length > 0 || data.helping.length > 0 || data.hurting.length > 0) && (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-          {data.topRisks.length > 0 && (
-            <div className="rounded-xl bg-white border border-[#e8e8e8] p-4 shadow-sm" data-testid="card-top-risks">
-              <p className="text-[10px] text-[#999] tracking-[0.01em] font-medium mb-2.5">Risk Factors</p>
+          {data.suppressors.length > 0 && (
+            <div className="rounded-xl bg-white border border-[#e8e8e8] p-4 shadow-sm" data-testid="card-suppressors">
+              <p className="text-[10px] text-[#999] tracking-[0.01em] font-medium mb-2.5">Top Approval Suppressors</p>
               <div className="space-y-2">
-                {data.topRisks.map((risk, i) => (
+                {data.suppressors.map((s, i) => (
                   <div key={i} className="flex items-start gap-2">
                     <div className="w-4 h-4 rounded bg-red-50 flex items-center justify-center shrink-0 mt-0.5">
-                      <span className="text-[8px] font-bold text-red-500">!</span>
+                      <span className="text-[8px] font-bold text-red-500">{i + 1}</span>
                     </div>
-                    <p className="text-[11px] text-[#555] leading-[1.5]">{risk}</p>
+                    <p className="text-[11px] text-[#555] leading-[1.5]">{s}</p>
                   </div>
                 ))}
               </div>
             </div>
           )}
 
-          {data.nextMoves.length > 0 && (
-            <div className="rounded-xl bg-white border border-[#e8e8e8] p-4 shadow-sm" data-testid="card-next-moves">
-              <p className="text-[10px] text-[#999] tracking-[0.01em] font-medium mb-2.5">Next Moves</p>
-              <div className="space-y-2">
-                {data.nextMoves.map((move, i) => (
-                  <div key={i} className="flex items-start gap-2">
-                    <div className="w-4 h-4 rounded bg-[#f0f0f0] flex items-center justify-center shrink-0 mt-0.5">
-                      <span className="text-[8px] font-bold text-[#666] font-mono">{i + 1}</span>
-                    </div>
-                    <p className="text-[11px] text-[#555] leading-[1.5]">{move}</p>
+          {(data.helping.length > 0 || data.hurting.length > 0) && (
+            <div className="space-y-2">
+              {data.helping.length > 0 && (
+                <div className="rounded-xl bg-white border border-[#e8e8e8] p-4 shadow-sm" data-testid="card-helping">
+                  <p className="text-[10px] text-[#999] tracking-[0.01em] font-medium mb-2">What's Helping</p>
+                  <div className="space-y-1.5">
+                    {data.helping.map((h, i) => (
+                      <div key={i} className="flex items-start gap-2">
+                        <div className="w-3.5 h-3.5 rounded bg-green-50 flex items-center justify-center shrink-0 mt-0.5">
+                          <span className="text-[8px] text-green-600">+</span>
+                        </div>
+                        <p className="text-[10px] text-[#555] leading-[1.5]">{h}</p>
+                      </div>
+                    ))}
                   </div>
-                ))}
-              </div>
+                </div>
+              )}
+              {data.hurting.length > 0 && (
+                <div className="rounded-xl bg-white border border-[#e8e8e8] p-4 shadow-sm" data-testid="card-hurting">
+                  <p className="text-[10px] text-[#999] tracking-[0.01em] font-medium mb-2">What's Hurting</p>
+                  <div className="space-y-1.5">
+                    {data.hurting.map((h, i) => (
+                      <div key={i} className="flex items-start gap-2">
+                        <div className="w-3.5 h-3.5 rounded bg-red-50 flex items-center justify-center shrink-0 mt-0.5">
+                          <span className="text-[8px] text-red-500">-</span>
+                        </div>
+                        <p className="text-[10px] text-[#555] leading-[1.5]">{h}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -423,7 +469,7 @@ export default function LandingPage() {
       const content = isPdf ? (result.split(",")[1] || result) : result;
       const fileData = { name: file.name, content, isPdf };
       if (shouldAutoSend) {
-        doSend("Analyze my credit report and generate my Fundability Index.", fileData);
+        doSend("Analyze my credit report and generate my Approval Index.", fileData);
       } else {
         setAttachedFile(fileData);
       }
@@ -471,7 +517,7 @@ export default function LandingPage() {
     if (isSending) return;
     if (!text && !attachedFile) return;
     const file = attachedFile;
-    const msg = text || "Analyze my credit report and generate my Fundability Index.";
+    const msg = text || "Analyze my credit report and generate my Approval Index.";
     setInput("");
     setAttachedFile(null);
     doSend(msg, file);
@@ -515,7 +561,7 @@ export default function LandingPage() {
         {!hasMessages && !isSending ? (
           <div className="flex-1 flex flex-col items-center justify-center px-4 gap-4">
             <h1 className="text-[28px] sm:text-[36px] font-semibold text-[#1a1a1a] tracking-[-0.03em] text-center leading-tight" data-testid="text-hero-headline">
-              How fundable are you?
+              How approval-ready are you?
             </h1>
             <button
               onClick={() => { setAutoSendFile(true); handleUploadClick(); }}
@@ -538,7 +584,6 @@ export default function LandingPage() {
               {guestMessages.map((msg) => {
                 const msgData = msg.role === "assistant" ? parseSingleMessageData(msg.content) : null;
                 const showDashboard = msgData && hasAnalysisData(msgData);
-                const msgTierColor = msgData ? getTierColor(msgData.riskTier) : "#999";
                 const disputes = msg.role === "assistant" ? parseDisputeItems(msg.content) : [];
 
                 return (
@@ -569,7 +614,7 @@ export default function LandingPage() {
                     </div>
                     {showDashboard && (
                       <div className="ml-10">
-                        <MissionDashboard data={msgData} tierColor={msgTierColor} />
+                        <MissionDashboard data={msgData} />
                       </div>
                     )}
                     {disputes.length > 0 && (
@@ -626,7 +671,7 @@ export default function LandingPage() {
           <div className="flex flex-wrap justify-center gap-2 mb-3">
             {[
               "Analyze my credit profile",
-              "What tier am I in?",
+              "What band am I in?",
               "Run a denial simulation",
               "How do I improve my score?",
             ].map((suggestion) => (

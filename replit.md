@@ -25,7 +25,7 @@ Profundr is a subscription-based AI-powered fundability platform, envisioned as 
 
 ### Core Features and Design
 - **Funding Phase Management:** A five-phase system (Repair, Build, Optimize, Apply, Scale) determines user progression based on credit metrics.
-- **Commercial Bank-Grade Underwriting (BASE44 Master Prompt):** Employs 8 independent risk metrics (Utilization, Payment Performance, Payment Recency, Derogatory Events, Inquiry Velocity, Credit Depth, Account Mix, Balance Trend) to classify users into risk tiers (PRIME, STANDARD, SUBPRIME, DECLINE LIKELY). No composite score is used.
+- **Approval Index Model:** Proprietary 0-100 score based on 6 weighted pillars: Payment Integrity (25%), Utilization Control (20%), File Stability (15%), Credit Depth (15%), Timing Risk (10%), Lender Confidence (15%). Hard caps at 59/74/84 based on structural triggers. Bands: Exceptional (90-100), Strong (80-89), Viable (70-79), Borderline (60-69), Weak (45-59), High Risk (0-44). Phase assignment: Repair/Build/Wait/Funding. Top 3 approval suppressors identified per analysis.
 - **Per-Bureau Credit Reporting & Guidance:** Users upload individual credit reports for Experian, Equifax, and TransUnion. The system processes each bureau's data independently, providing per-bureau risk tiers, funding phases, exposure ceilings (2.5x highest limit), denial triggers, and action items.
 - **Velocity Risk Model:** Assesses portfolio expansion rate, exposure growth, and inquiry density to determine velocity approval tiers, adjust exposure ceilings, and enforce mandatory waiting periods.
 - **Account Seasoning & Application Readiness:** Tracks new accounts, average account age, and seasoned accounts per bureau to determine application readiness and potential denial triggers.
