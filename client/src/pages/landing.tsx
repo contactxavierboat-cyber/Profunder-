@@ -1033,9 +1033,9 @@ export default function LandingPage() {
               <button
                 onClick={() => window.location.href = '/subscription'}
                 className="rounded-full px-5 py-2 text-[13px] font-medium border border-[#ddd] text-[#555] hover:bg-[#f0f0f0] transition-colors"
-                data-testid="button-subscribe"
+                data-testid="button-signin"
               >
-                Subscribe
+                Sign In
               </button>
             )}
           </nav>
