@@ -421,9 +421,9 @@ RESPONSE APPROACH
 
 Tone: Professional. Conversational. Direct. Empowering. Realistic.`;
 
-const FUNDABILITY_ENGINE_PROMPT = `You are Profundr's underwriting engine. Analyze credit reports and give a short, clear verdict.
+const FUNDABILITY_ENGINE_PROMPT = `You are Profundr's underwriting engine. You analyze credit reports like a bank underwriter, then generate actionable FCRA-compliant dispute strategies like a professional credit repair system.
 
-RESPONSE FORMAT — follow this EXACTLY. Output these hidden data lines first (the UI renders them as visual cards, the user never sees this raw text), then the verdict, then disputes:
+RESPONSE FORMAT — follow this EXACTLY:
 
 FUNDABILITY INDEX: [score]/100 — [Strong|Moderate|Weak|High Risk]
 APPROVAL ODDS:
@@ -434,19 +434,50 @@ APPROVAL ODDS:
 - MCA: X%
 BORROWING POWER: Conservative: $X / Moderate: $X / Aggressive: $X
 
-Then write ONLY a short verdict — 2-3 sentences max. State plainly whether they are fundable or not, and the key reasons why. Examples:
-- "You are not currently fundable. A federal student loan default and high utilization are blocking approval across most products."
-- "You are fundable with moderate risk. Your payment history is clean but thin file depth limits your borrowing power."
-Do NOT repeat any numbers, scores, or data. Do NOT list accounts. Just the verdict.
+Then write ONLY a short verdict — 2-3 sentences max. State whether they are fundable or not, and the key reasons. No numbers, no scores, no data in this text. Just the verdict.
 
-Then output dispute items:
-DISPUTE: [Creditor] | [Account Number or N/A] | [Issue] | [Bureau] | [Reason]
-(One line per negative item. Scan the ENTIRE document for ALL negatives — lates, collections, charge-offs, delinquencies, public records. Include government accounts like Dept of Education.)
+Then output dispute items — THIS IS CRITICAL. You must scan EVERY line of the uploaded document for ALL negative items. Do not skip any. Catch everything: late payments (30/60/90/120+), collections (including sold/transferred), charge-offs, delinquencies (including student loans, Dept of Education, government accounts), repos, bankruptcies, judgments, liens, public records, unauthorized inquiries, balance/date discrepancies, accounts in forbearance with prior negatives.
+
+For EACH negative item, output a dispute entry using factual disputing under the FCRA:
+
+DISPUTE: [Creditor] | [Account Number or N/A] | [Issue] | [Bureau] | [FCRA Dispute Reason]
+
+DISPUTE STRATEGY — use these factual dispute methods (like a professional credit repair system):
+
+Round 1 — Initial Challenge:
+- Challenge verification: demand furnisher provide proof (original signed contract, complete payment history, proof of authorization)
+- Cite 15 USC 1681i: consumer right to dispute inaccurate/incomplete information; bureau must investigate within 30 days
+- Cite 15 USC 1681e(b): bureau must use reasonable procedures to ensure maximum possible accuracy
+- For each item, identify the specific factual basis: wrong balance, wrong date, wrong status, wrong account number, account not yours, unauthorized inquiry, duplicate reporting, re-aging, incomplete reporting
+
+Round 2 — Escalation (if user sends follow-up):
+- Cite 15 USC 1681s-2(b): furnisher obligation to investigate disputes forwarded by bureau
+- Challenge procedural violations: if bureau "verified" without proper investigation, demand method of verification
+- Request complete investigation records and documentation
+- Escalate to CFPB complaint if bureau fails to investigate properly
+
+Round 3 — Final Demand:
+- Demand deletion under FCRA if furnisher cannot provide complete documentation
+- Reference FTC guidance and CFPB complaint rights
+- Cite potential liability under 15 USC 1681n (willful noncompliance) and 1681o (negligent noncompliance)
+
+DISPUTE REASON TEMPLATES — use the most applicable for each item:
+- Late payments: "Reported payment history is inaccurate. Demand verification of complete payment records and proof of timely notification under 15 USC 1681s-2(a)."
+- Collections: "This collection has not been validated. Demand original signed agreement, complete chain of assignment, and proof of amount owed under 15 USC 1681g."
+- Charge-offs: "Balance and status reported inaccurately. Demand verification of original terms and final balance calculation."
+- Inquiries: "This inquiry was not authorized. I did not provide written consent for this credit pull. Remove under 15 USC 1681b."
+- Public records: "Reporting is incomplete or inaccurate. Demand verification of court records and proper reporting dates."
+- Student loans/Gov accounts: "Payment status and delinquency dates reported inaccurately. Demand complete payment history and verification of reported status under FCRA."
+- Duplicates: "This account is being reported as a duplicate entry. Only one tradeline should appear."
+- Balance errors: "Reported balance does not match actual outstanding balance. Demand itemized accounting."
+- Date errors: "Date of first delinquency or date of last activity is inaccurately reported, potentially re-aging this account in violation of FCRA Section 605."
 
 RULES:
-- The verdict paragraph is ALL the visible text the user sees. Keep it short.
-- ZERO data regurgitation. No scores, no percentages, no dollar amounts in the verdict text.
-- FCRA-compliant. No legal advice.
+- The verdict text is 2-3 sentences only. No data regurgitation.
+- Every negative item gets a DISPUTE entry with a specific FCRA-based reason.
+- Do not encourage disputing accurate information falsely.
+- Do not provide legal advice. State that disputes are based on consumer FCRA rights.
+- Be aggressive in identifying disputable items but honest about the factual basis.
 
 WHEN NO DOCUMENT IS PROVIDED:
 "To run your analysis, I need: revolving limits & balances, inquiries (6 & 12 months), any negatives, account ages, income & debt payments."
@@ -1275,16 +1306,36 @@ ${extractedText}
         doc.font("Helvetica-Bold").text("Nature of Dispute:", { underline: true }).moveDown(0.4);
         doc.font("Helvetica").text(d.issue, { lineGap: 2 }).moveDown(0.6);
 
-        doc.font("Helvetica-Bold").text("Basis for Dispute:", { underline: true }).moveDown(0.4);
+        doc.font("Helvetica-Bold").text("Factual Basis for Dispute:", { underline: true }).moveDown(0.4);
         doc.font("Helvetica").text(d.reason, { lineGap: 2 }).moveDown(0.6);
 
+        doc.font("Helvetica-Bold").text("Legal Basis:", { underline: true }).moveDown(0.4);
+        doc.font("Helvetica").text(
+          "This dispute is filed pursuant to my rights under the Fair Credit Reporting Act (FCRA):",
+          { lineGap: 2 }
+        ).moveDown(0.3);
+        doc.text("• 15 USC §1681i — Right to dispute inaccurate or incomplete information. You must conduct a reasonable investigation within 30 days.", { lineGap: 1.5 });
+        doc.text("• 15 USC §1681e(b) — You must follow reasonable procedures to assure maximum possible accuracy of credit information.", { lineGap: 1.5 });
+        doc.text("• 15 USC §1681s-2(b) — The furnisher of this information is obligated to investigate this dispute upon notification from your agency.", { lineGap: 1.5 });
+        doc.moveDown(0.6);
+
+        doc.font("Helvetica-Bold").text("Required Action:", { underline: true }).moveDown(0.4);
+        doc.font("Helvetica").text(
+          "I am requesting that you investigate this item and provide the following within 30 days:",
+          { lineGap: 2 }
+        ).moveDown(0.2);
+        doc.text("1. Complete verification from the original furnisher, including the original signed agreement or contract.", { lineGap: 1.5 });
+        doc.text("2. Complete payment history and documentation supporting the reported status.", { lineGap: 1.5 });
+        doc.text("3. Proof that the information is being reported with maximum possible accuracy.", { lineGap: 1.5 });
+        doc.moveDown(0.4);
+
         doc.text(
-          "Under FCRA Section 611, you are required to conduct a reasonable investigation within 30 days of receiving this dispute. If the information cannot be verified, it must be deleted from my credit report.",
+          "If the information cannot be verified as accurate and complete, it must be promptly deleted or modified per FCRA Section 611. Failure to investigate or respond within 30 days constitutes a violation of the FCRA, and I reserve my rights under 15 USC §1681n (willful noncompliance) and §1681o (negligent noncompliance).",
           { lineGap: 2 }
         ).moveDown(0.5);
 
         doc.text(
-          "I request that you provide me with written notification of the results of your investigation, including a copy of my updated credit report if changes are made.",
+          "I request written notification of the results of your investigation, including a description of the procedure used to determine accuracy and completeness, and an updated copy of my credit report if changes are made.",
           { lineGap: 2 }
         ).moveDown(1);
 
@@ -1293,7 +1344,7 @@ ${extractedText}
 
         doc.moveDown(1);
         doc.fontSize(8).fillColor("#999999")
-          .text("This letter was generated for educational and consumer advocacy purposes. Profundr is not a law firm and does not provide legal advice.", { align: "center" });
+          .text("Generated by Profundr. This letter is based on consumer rights under the FCRA and is for educational and advocacy purposes. Profundr is not a law firm and does not provide legal advice.", { align: "center" });
       }
 
       doc.end();
