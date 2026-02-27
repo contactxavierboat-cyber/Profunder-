@@ -26,29 +26,32 @@ interface DisputeItem {
 }
 
 function parseDisputeItems(content: string): DisputeItem[] {
-  const cleanText = content.replace(/\*+/g, "");
+  const cleanText = content.replace(/\*+/g, "").replace(/"+/g, '"');
   const disputes: DisputeItem[] = [];
   const lines = cleanText.split("\n");
   for (const line of lines) {
-    const trimmed = line.trim();
+    let trimmed = line.trim();
+    trimmed = trimmed.replace(/^\d+[\.\)]\s*/, "");
+    trimmed = trimmed.replace(/^[-•]\s*/, "");
     if (!/^DISPUTE:\s*/i.test(trimmed)) continue;
     const afterPrefix = trimmed.replace(/^DISPUTE:\s*/i, "");
     const parts = afterPrefix.split("|").map(p => p.trim());
+    const cleanPart = (s: string) => s.replace(/^["'"]+|["'"]+$/g, "").trim();
     if (parts.length >= 5) {
       disputes.push({
-        creditor: parts[0],
-        accountNumber: parts[1],
-        issue: parts[2],
-        bureau: parts[3].replace(/^Bureau:\s*/i, ""),
-        reason: parts.slice(4).join(" | ")
+        creditor: cleanPart(parts[0]),
+        accountNumber: cleanPart(parts[1]),
+        issue: cleanPart(parts[2]),
+        bureau: cleanPart(parts[3]).replace(/^Bureau:\s*/i, ""),
+        reason: cleanPart(parts.slice(4).join(" | "))
       });
     } else if (parts.length >= 3) {
       disputes.push({
-        creditor: parts[0],
-        accountNumber: parts[1] || "N/A",
-        issue: parts[2],
-        bureau: parts[3]?.replace(/^Bureau:\s*/i, "") || "All",
-        reason: parts[4] || parts[2]
+        creditor: cleanPart(parts[0]),
+        accountNumber: cleanPart(parts[1]) || "N/A",
+        issue: cleanPart(parts[2]),
+        bureau: cleanPart(parts[3] || "").replace(/^Bureau:\s*/i, "") || "All",
+        reason: cleanPart(parts[4] || parts[2])
       });
     }
   }
@@ -205,6 +208,11 @@ function FormatResponse({ content }: { content: string }) {
     if (!t) return false;
     if (isMetricLine(t)) return false;
     if (/^DISPUTE:/i.test(t)) return false;
+    const stripped = t.replace(/^\d+[\.\)]\s*/, "").replace(/^[-•]\s*/, "");
+    if (/^DISPUTE:/i.test(stripped)) return false;
+    if (/^(Key\s*Next\s*Steps|Dispute\s*Items|Dispute\s*Strategy|Legal\s*Basis|Required\s*Action|Round\s*\d)/i.test(stripped)) return false;
+    if (/^(Focus on|Submit disputes|Lower your|Please provide additional)/i.test(stripped)) return false;
+    if (/^Verdict:?\s*$/i.test(stripped)) return false;
     return true;
   });
 

@@ -472,8 +472,11 @@ DISPUTE REASON TEMPLATES — use the most applicable for each item:
 - Balance errors: "Reported balance does not match actual outstanding balance. Demand itemized accounting."
 - Date errors: "Date of first delinquency or date of last activity is inaccurately reported, potentially re-aging this account in violation of FCRA Section 605."
 
-RULES:
-- The verdict text is 2-3 sentences only. No data regurgitation.
+FORMATTING RULES — CRITICAL:
+- Do NOT use markdown headers, bold, or numbered lists for DISPUTE lines.
+- Each DISPUTE line must start exactly with "DISPUTE:" — no numbers, bullets, or markdown before it.
+- Do NOT add extra sections like "Key Next Steps", "Dispute Strategy", or "Summary". The verdict + DISPUTE lines are the ONLY output after the metrics.
+- The verdict text is 2-3 sentences only. No data regurgitation. Do not label it "Verdict:".
 - Every negative item gets a DISPUTE entry with a specific FCRA-based reason.
 - Do not encourage disputing accurate information falsely.
 - Do not provide legal advice. State that disputes are based on consumer FCRA rights.
