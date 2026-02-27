@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState } from "react";
 import { useAuth } from "@/lib/store";
 import { ProfundrLogo } from "@/components/profundr-logo";
 import heroBgImg from "@assets/IMG_0431_1772173955262.jpeg";
@@ -26,9 +26,6 @@ const gradientText = (dir = '180deg', _from = 0.85, _to = 0.5) => ({
   lineHeight: '0.95',
 });
 
-const sectionBg = { background: 'linear-gradient(180deg, rgba(255,255,255,0.45) 0%, rgba(255,255,255,0.3) 50%, rgba(255,255,255,0.45) 100%)' };
-
-const contentBlockStyle = "relative z-30 rounded-2xl bg-white/50 backdrop-blur-sm border border-white/30 shadow-[0_8px_32px_rgba(0,0,0,0.04),0_2px_8px_rgba(0,0,0,0.02)] p-6 sm:p-8";
 
 const SectionLabel = ({ children }: { children: string }) => (
   <p className="text-[11px] tracking-[0.2em] uppercase mb-6 sm:mb-8 text-[#7a7a9a]">{children}</p>
@@ -240,467 +237,407 @@ export default function LandingPage() {
       </section>
 
       {/* ═══════════════ 2. PROBLEM / PAIN ═══════════════ */}
-      <section id="sec-problem" className="relative z-20 px-6 sm:px-12 md:px-20 py-20 sm:py-28 text-center">
-
-        <div className="relative max-w-[800px] mx-auto">
-          <div className="rounded-2xl bg-white/50 backdrop-blur-sm px-4 sm:px-10 py-8 sm:py-10 mb-8 shadow-lg shadow-black/8">
+      <section id="sec-problem" className="relative z-20 px-6 sm:px-12 md:px-20 py-24 sm:py-36 text-center">
+        <div className="relative max-w-[720px] mx-auto">
           <SectionLabel>The Problem</SectionLabel>
-          <h2 className="text-[26px] sm:text-[36px] md:text-[44px] leading-[0.9] mb-0 tracking-[-0.03em]" style={gradientText('180deg', 0.95, 0.55)}>
-            73% of funding applications get denied. Most founders never find out why until it's too late.
+          <h2 className="text-[28px] sm:text-[40px] md:text-[52px] leading-[0.88] mb-10 sm:mb-14 tracking-[-0.04em]" style={gradientText('180deg', 0.95, 0.55)}>
+            73% of funding applications get denied.
           </h2>
-          </div>
-          <div className={`${contentBlockStyle} !p-5 sm:!p-6`}><div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+          <div className="w-16 h-px bg-gradient-to-r from-transparent via-[#8a8aaa] to-transparent mx-auto mb-10 sm:mb-14" />
+          <div className="space-y-0">
             {[
-              { num: "01", text: "You apply for funding with no idea how a lender actually evaluates you" },
-              { num: "02", text: "Credit scores alone don't tell you what products you qualify for" },
-              { num: "03", text: "Hidden risk signals silently kill your application before a human reviews it" },
-              { num: "04", text: "Every denial leaves an inquiry on your report, making the next application harder" },
-            ].map((item) => (
-              <div key={item.num} className="flex gap-4 items-start p-5 rounded-xl bg-[#f8f8fc] border border-[#e0e0ea]">
-                <span className="text-[11px] font-mono text-[#8a8aa5] shrink-0 mt-0.5">{item.num}</span>
-                <p className="text-[11px] sm:text-[14px] text-[#5a5a7a] leading-[1.6] sm:leading-[1.7] text-justify">{item.text}</p>
+              "You apply with no idea how a lender evaluates you",
+              "Credit scores alone don't reveal product eligibility",
+              "Hidden risk signals kill applications before human review",
+              "Every denial adds an inquiry — making the next one harder",
+            ].map((text, i) => (
+              <div key={i} className="flex items-center gap-6 py-5 border-b border-[#e0e0ea]/40 last:border-b-0">
+                <span className="text-[10px] font-mono text-[#a0a0b8] shrink-0 w-6">{String(i + 1).padStart(2, '0')}</span>
+                <p className="text-[13px] sm:text-[16px] text-[#4a4a6a] leading-[1.6] text-left">{text}</p>
               </div>
             ))}
-          </div></div>
-          <SubscribeButton className="mt-10" onSubscribe={handleSubscribeClick} />
+          </div>
+          <SubscribeButton className="mt-14" onSubscribe={handleSubscribeClick} />
           <ScrollArrow targetId="sec-solution" />
         </div>
       </section>
 
 
       {/* ═══════════════ 3. SOLUTION OVERVIEW ═══════════════ */}
-      <section id="sec-solution" className="relative z-20 px-6 sm:px-12 md:px-20 py-20 sm:py-28 text-center">
-
-        <div className="relative max-w-[800px] mx-auto">
-          <div className="rounded-2xl bg-white/50 backdrop-blur-sm px-4 sm:px-10 py-8 sm:py-10 mb-8 shadow-lg shadow-black/8">
+      <section id="sec-solution" className="relative z-20 px-6 sm:px-12 md:px-20 py-24 sm:py-36 text-center">
+        <div className="relative max-w-[720px] mx-auto">
           <SectionLabel>The Solution</SectionLabel>
-          <h2 className="text-[26px] sm:text-[36px] md:text-[44px] leading-[0.9] mb-6 tracking-[-0.03em]" style={gradientText('180deg', 0.95, 0.55)}>
-            AI-powered underwriting intelligence that tells you exactly what to fix — before you apply.
+          <h2 className="text-[28px] sm:text-[40px] md:text-[52px] leading-[0.88] mb-8 sm:mb-10 tracking-[-0.04em]" style={gradientText('180deg', 0.95, 0.55)}>
+            Underwriting intelligence — before you apply.
           </h2>
-          <p className="text-[12px] sm:text-[16px] text-[#6a6a8a] leading-[1.6] sm:leading-[1.8] mb-0 max-w-[640px] mx-auto text-justify">
-            We analyze your credit report and bank statements using the same 6-component framework real lenders use. You get a Capital Readiness Score, tier placement, exposure ceiling, denial simulation, and a step-by-step action plan — all powered by AI.
+          <p className="text-[13px] sm:text-[16px] text-[#5a5a7a] leading-[1.7] sm:leading-[1.9] mb-14 sm:mb-20 max-w-[560px] mx-auto text-justify">
+            We analyze your credit report and bank statements using the same 6-component framework real lenders use. You get a Capital Readiness Score, tier placement, exposure ceiling, denial simulation, and a step-by-step action plan.
           </p>
-          </div>
-          <div className={contentBlockStyle}><div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+          <div className="grid grid-cols-3 gap-y-12 sm:gap-y-16">
             {[
-              { label: "Capital Readiness Score", val: "0–100" },
-              { label: "Exposure Ceiling", val: "2.5x Logic" },
-              { label: "Tier Eligibility", val: "3 Tiers" },
-              { label: "Denial Simulation", val: "Pre-Screen" },
-              { label: "AI Mentor Chat", val: "7 Bots" },
-              { label: "Credit Repair", val: "Auto Letters" },
+              { val: "0–100", label: "Readiness Score" },
+              { val: "2.5×", label: "Exposure Logic" },
+              { val: "3", label: "Tiers" },
+              { val: "Pre", label: "Denial Screen" },
+              { val: "7", label: "AI Mentors" },
+              { val: "Auto", label: "Dispute Letters" },
             ].map((item) => (
-              <div key={item.label} className="p-4 sm:p-5 rounded-xl bg-[#f8f8fc] border border-[#e0e0ea]">
-                <p className="text-[20px] sm:text-[24px] font-mono text-[#3a3a5a] mb-2" style={{ fontFamily: "'JetBrains Mono', monospace" }}>{item.val}</p>
-                <p className="text-[11px] text-[#8a8aa5] tracking-wide uppercase">{item.label}</p>
+              <div key={item.label} className="flex flex-col items-center">
+                <p className="text-[22px] sm:text-[32px] font-mono text-[#2a2a4a] mb-1" style={{ fontFamily: "'JetBrains Mono', monospace", fontWeight: 300 }}>{item.val}</p>
+                <p className="text-[9px] sm:text-[10px] text-[#9a9ab8] tracking-[0.2em] uppercase">{item.label}</p>
               </div>
             ))}
-          </div></div>
-          <SubscribeButton className="mt-10" onSubscribe={handleSubscribeClick} />
+          </div>
+          <SubscribeButton className="mt-14" onSubscribe={handleSubscribeClick} />
           <ScrollArrow targetId="how-it-works" />
         </div>
       </section>
 
 
       {/* ═══════════════ 4. HOW IT WORKS ═══════════════ */}
-      <section id="how-it-works" className="relative z-20 px-6 sm:px-12 md:px-20 py-20 sm:py-28 text-center">
-
-        <div className="relative max-w-[800px] mx-auto">
-          <div className="rounded-2xl bg-white/50 backdrop-blur-sm px-4 sm:px-10 py-8 sm:py-10 mb-8 shadow-lg shadow-black/8">
+      <section id="how-it-works" className="relative z-20 px-6 sm:px-12 md:px-20 py-24 sm:py-36 text-center">
+        <div className="relative max-w-[720px] mx-auto">
           <SectionLabel>How It Works</SectionLabel>
-          <h2 className="text-[26px] sm:text-[36px] md:text-[44px] leading-[0.9] mb-0 tracking-[-0.03em]" style={gradientText('180deg', 0.9, 0.5)}>
-            Four steps from unknown to underwriting-ready.
+          <h2 className="text-[28px] sm:text-[40px] md:text-[52px] leading-[0.88] mb-14 sm:mb-20 tracking-[-0.04em]" style={gradientText('180deg', 0.9, 0.5)}>
+            Four steps to underwriting-ready.
           </h2>
-          </div>
-          <div className={contentBlockStyle}><div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+          <div className="space-y-16 sm:space-y-20 text-left">
             {[
-              { step: "01", title: "Upload Your Documents", desc: "Drop in your credit report and bank statement. Our AI extracts 40+ data points automatically — no manual entry." },
-              { step: "02", title: "Get Your Capital Readiness Score", desc: "We evaluate 6 components: Capital Strength, Credit Quality, Management & Structure, Cash Flow, Liquidity, and Risk Signals." },
-              { step: "03", title: "See Your Tier & Exposure Ceiling", desc: "Find out if you're Prime, Mid-Tier, or Alternative eligible — and your maximum fundable amount using 2.5x exposure logic." },
-              { step: "04", title: "Run Denial Simulation & Fix Issues", desc: "Our engine flags every underwriting trigger that would cause a denial. Get auto-generated dispute letters and a repair timeline." },
+              { step: "01", title: "Upload", desc: "Drop in your credit report and bank statement. Our AI extracts 40+ data points automatically." },
+              { step: "02", title: "Score", desc: "Six components evaluated: Capital Strength, Credit Quality, Structure, Cash Flow, Liquidity, Risk Signals." },
+              { step: "03", title: "Position", desc: "See your tier — Prime, Mid, or Alternative — and your maximum fundable amount via 2.5x exposure logic." },
+              { step: "04", title: "Fix", desc: "Every underwriting trigger flagged. Auto-generated dispute letters and a repair timeline delivered." },
             ].map((item) => (
-              <div key={item.step} className="flex flex-col items-center text-center p-6 rounded-xl bg-[#f8f8fc] border border-[#e0e0ea]">
-                <div className="w-12 h-12 rounded-full bg-[#f2f2f8] border border-[#e0e0ea] flex items-center justify-center mb-4">
-                  <span className="text-[13px] font-mono text-[#5a5a7a]">{item.step}</span>
+              <div key={item.step} className="flex gap-6 sm:gap-10 items-start">
+                <span className="text-[36px] sm:text-[56px] font-mono text-[#d0d0de] leading-none shrink-0" style={{ fontFamily: "'JetBrains Mono', monospace", fontWeight: 200 }}>{item.step}</span>
+                <div>
+                  <h3 className="text-[18px] sm:text-[24px] text-[#1a1a2e] font-light mb-2 tracking-[-0.02em]">{item.title}</h3>
+                  <p className="text-[13px] sm:text-[15px] text-[#5a5a7a] leading-[1.7]">{item.desc}</p>
                 </div>
-                <h3 className="text-[16px] sm:text-[18px] text-[#1a1a2e] font-medium mb-2">{item.title}</h3>
-                <p className="text-[11px] sm:text-[14px] text-[#3a3a5a] leading-[1.6] sm:leading-[1.7] text-justify">{item.desc}</p>
               </div>
             ))}
-          </div></div>
-          <SubscribeButton className="mt-10" onSubscribe={handleSubscribeClick} />
+          </div>
+          <SubscribeButton className="mt-14" onSubscribe={handleSubscribeClick} />
           <ScrollArrow targetId="features" />
         </div>
       </section>
 
 
       {/* ═══════════════ 5. FUNDING OUTCOMES ═══════════════ */}
-      <section id="features" className="relative z-20 px-6 sm:px-12 md:px-20 py-20 sm:py-28 text-center">
-
-        <div className="relative max-w-[900px] mx-auto">
-          <div className="rounded-2xl bg-white/50 backdrop-blur-sm px-4 sm:px-10 py-8 sm:py-10 mb-8 shadow-lg shadow-black/8">
+      <section id="features" className="relative z-20 px-6 sm:px-12 md:px-20 py-24 sm:py-36 text-center">
+        <div className="relative max-w-[720px] mx-auto">
           <SectionLabel>What You Get</SectionLabel>
-          <h2 className="text-[26px] sm:text-[36px] md:text-[44px] leading-[0.9] mb-0 tracking-[-0.03em]" style={gradientText('180deg', 0.9, 0.5)}>
-            Everything you need to walk into a lender's office with confidence.
+          <h2 className="text-[28px] sm:text-[40px] md:text-[52px] leading-[0.88] mb-14 sm:mb-20 tracking-[-0.04em]" style={gradientText('180deg', 0.9, 0.5)}>
+            Walk into any lender's office with confidence.
           </h2>
-          </div>
-          <div className={contentBlockStyle}><div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="space-y-0">
             {[
-              { icon: "◎", title: "Capital Readiness Score", desc: "A 0–100 composite score based on 6 weighted underwriting components" },
-              { icon: "⬡", title: "2.5x Exposure Ceiling", desc: "Your maximum fundable amount calculated with dynamic multiplier adjustments" },
-              { icon: "◈", title: "Tier Eligibility Report", desc: "Know if you qualify for Prime, Mid-Tier, or Alternative capital products" },
-              { icon: "⊘", title: "Denial Simulation", desc: "Pre-screen every trigger that would cause a real lender to decline your file" },
-              { icon: "◇", title: "Credit Repair Plan", desc: "AI-parsed issues with auto-generated dispute letters for all 3 bureaus" },
-              { icon: "△", title: "AI Mentor Access", desc: "7 specialized AI mentors for sales, investing, marketing, leadership, and more" },
-              { icon: "▣", title: "Operating Mode Engine", desc: "Pre-Funding or Repair mode with tailored action sequences" },
-              { icon: "◐", title: "Risk Signal Detection", desc: "Identifies liens, judgments, utilization spikes, and velocity flags" },
-              { icon: "⬢", title: "Personalized Next Steps", desc: "AI-generated action plan prioritized by impact on your fundability" },
-            ].map((item) => (
-              <div key={item.title} className="p-5 sm:p-6 rounded-xl bg-[#f8f8fc] border border-[#e0e0ea] group hover:bg-[#f2f2f8]/70 transition-colors">
-                <span className="text-[20px] text-[#8a8aa5] mb-4 block">{item.icon}</span>
-                <h3 className="text-[14px] sm:text-[15px] text-[#1a1a2e] font-medium mb-2">{item.title}</h3>
-                <p className="text-[11px] sm:text-[13px] text-[#3a3a5a] leading-[1.6] sm:leading-[1.7] text-justify">{item.desc}</p>
+              { title: "Capital Readiness Score", desc: "0–100 composite across 6 underwriting components" },
+              { title: "2.5x Exposure Ceiling", desc: "Maximum fundable amount with dynamic multiplier logic" },
+              { title: "Tier Eligibility", desc: "Prime, Mid-Tier, or Alternative classification" },
+              { title: "Denial Simulation", desc: "Pre-screen every trigger a lender would flag" },
+              { title: "Credit Repair", desc: "Auto-generated dispute letters for all 3 bureaus" },
+              { title: "AI Mentors", desc: "7 specialized advisors across strategy domains" },
+              { title: "Operating Modes", desc: "Pre-Funding or Repair with tailored action paths" },
+              { title: "Risk Detection", desc: "Liens, judgments, utilization spikes, velocity flags" },
+              { title: "Next Steps", desc: "Action plan prioritized by fundability impact" },
+            ].map((item, i) => (
+              <div key={item.title} className="flex items-baseline justify-between py-4 border-b border-[#e0e0ea]/30 last:border-b-0 gap-4">
+                <h3 className="text-[14px] sm:text-[16px] text-[#2a2a4a] font-medium text-left">{item.title}</h3>
+                <p className="text-[11px] sm:text-[13px] text-[#8a8aa5] text-right shrink-0">{item.desc}</p>
               </div>
             ))}
-          </div></div>
-          <SubscribeButton className="mt-10" onSubscribe={handleSubscribeClick} />
+          </div>
+          <SubscribeButton className="mt-14" onSubscribe={handleSubscribeClick} />
           <ScrollArrow targetId="results" />
         </div>
       </section>
 
 
       {/* ═══════════════ 6. SOCIAL PROOF ═══════════════ */}
-      <section id="results" className="relative z-20 px-6 sm:px-12 md:px-20 py-20 sm:py-28 text-center">
-
-        <div className="relative max-w-[900px] mx-auto">
-          <div className="rounded-2xl bg-white/50 backdrop-blur-sm px-4 sm:px-10 py-8 sm:py-10 mb-8 shadow-lg shadow-black/8">
+      <section id="results" className="relative z-20 px-6 sm:px-12 md:px-20 py-24 sm:py-36 text-center">
+        <div className="relative max-w-[720px] mx-auto">
           <SectionLabel>Results</SectionLabel>
-          <h2 className="text-[26px] sm:text-[36px] md:text-[44px] leading-[0.9] mb-0 tracking-[-0.03em]" style={gradientText('180deg', 0.9, 0.5)}>
-            Founders are getting funded with clarity, not luck.
+          <h2 className="text-[28px] sm:text-[40px] md:text-[52px] leading-[0.88] mb-14 sm:mb-20 tracking-[-0.04em]" style={gradientText('180deg', 0.9, 0.5)}>
+            Clarity, not luck.
           </h2>
+
+          <div className="flex justify-between items-end mb-20 sm:mb-28 px-2">
+            {[
+              { val: "12.5K+", label: "Analyzed" },
+              { val: "$47M+", label: "Deployed" },
+              { val: "89%", label: "Approved" },
+              { val: "6.2×", label: "Improvement" },
+            ].map((s) => (
+              <div key={s.label} className="flex flex-col items-center">
+                <p className="text-[20px] sm:text-[36px] font-mono text-[#2a2a4a] mb-1" style={{ fontFamily: "'JetBrains Mono', monospace", fontWeight: 200 }}>{s.val}</p>
+                <p className="text-[8px] sm:text-[10px] text-[#a0a0b8] tracking-[0.2em] uppercase">{s.label}</p>
+              </div>
+            ))}
           </div>
 
-          <div className={`${contentBlockStyle} mb-14`}><div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+          <div className="space-y-14 sm:space-y-20">
             {[
-              { val: "12,500+", label: "Founders Analyzed" },
-              { val: "$47M+", label: "Capital Deployed" },
-              { val: "89%", label: "Approval Rate" },
-              { val: "6.2x", label: "Avg Score Improvement" },
-            ].map((s) => (
-              <div key={s.label} className="text-center p-5 rounded-xl bg-[#f8f8fc] border border-[#e0e0ea]">
-                <p className="text-[24px] sm:text-[30px] font-mono text-[#3a3a5a] mb-1" style={{ fontFamily: "'JetBrains Mono', monospace" }}>{s.val}</p>
-                <p className="text-[10px] sm:text-[11px] text-[#8a8aa5] tracking-wide uppercase">{s.label}</p>
-              </div>
-            ))}
-          </div></div>
-
-          <div className={contentBlockStyle}><div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            {[
-              { name: "Marcus T.", role: "E-commerce Founder", quote: "I went from a 42 to a 78 Capital Readiness Score in 60 days. Got approved for a $250K line of credit on the first try." },
-              { name: "Aisha K.", role: "Real Estate Investor", quote: "The denial simulation caught 3 triggers I didn't know existed. Fixed them all before applying — approved same week." },
-              { name: "David L.", role: "SaaS Startup CEO", quote: "They showed me I was Mid-Tier when I thought I was Prime. After following the repair plan, I moved up and saved 4% on rates." },
+              { name: "Marcus T.", role: "E-commerce", quote: "42 to 78 in 60 days. Approved for $250K on the first try." },
+              { name: "Aisha K.", role: "Real Estate", quote: "Denial simulation caught 3 triggers. Fixed them all — approved same week." },
+              { name: "David L.", role: "SaaS", quote: "Moved from Mid-Tier to Prime. Saved 4% on rates." },
             ].map((t) => (
-              <div key={t.name} className="p-6 rounded-xl bg-[#f8f8fc] border border-[#e0e0ea]">
-                <p className="text-[11px] sm:text-[13px] text-[#6a6a8a] leading-[1.6] sm:leading-[1.8] mb-5 italic text-justify">"{t.quote}"</p>
-                <div>
-                  <p className="text-[13px] text-[#3a3a5a] font-medium">{t.name}</p>
-                  <p className="text-[11px] text-[#8a8aa5]">{t.role}</p>
-                </div>
+              <div key={t.name} className="text-left">
+                <p className="text-[16px] sm:text-[22px] text-[#3a3a5a] leading-[1.5] mb-4 italic font-light">"{t.quote}"</p>
+                <p className="text-[11px] text-[#9a9ab8] tracking-[0.1em]">{t.name} — {t.role}</p>
               </div>
             ))}
-          </div></div>
-          <SubscribeButton className="mt-10" onSubscribe={handleSubscribeClick} />
+          </div>
+          <SubscribeButton className="mt-14" onSubscribe={handleSubscribeClick} />
           <ScrollArrow targetId="sec-risk" />
         </div>
       </section>
 
 
       {/* ═══════════════ 7. RISK REVERSAL ═══════════════ */}
-      <section id="sec-risk" className="relative z-20 px-6 sm:px-12 md:px-20 py-20 sm:py-28 text-center">
-
-        <div className="relative max-w-[800px] mx-auto">
-          <div className="rounded-2xl bg-white/50 backdrop-blur-sm px-4 sm:px-10 py-8 sm:py-10 mb-8 shadow-lg shadow-black/8">
+      <section id="sec-risk" className="relative z-20 px-6 sm:px-12 md:px-20 py-24 sm:py-36 text-center">
+        <div className="relative max-w-[720px] mx-auto">
           <SectionLabel>No More Guessing</SectionLabel>
-          <h2 className="text-[26px] sm:text-[36px] md:text-[44px] leading-[0.9] mb-6 tracking-[-0.03em]" style={gradientText('180deg', 0.95, 0.55)}>
-            Stop applying blind. Start applying ready.
+          <h2 className="text-[28px] sm:text-[40px] md:text-[52px] leading-[0.88] mb-8 sm:mb-10 tracking-[-0.04em]" style={gradientText('180deg', 0.95, 0.55)}>
+            Apply ready, not blind.
           </h2>
-          <p className="text-[12px] sm:text-[15px] text-[#6a6a8a] leading-[1.6] sm:leading-[1.8] mb-0 max-w-[600px] mx-auto text-justify">
-            Every denied application costs you: hard inquiries, wasted time, damaged confidence. We eliminate the guesswork by showing you exactly what a lender sees — before you ever submit.
+          <p className="text-[13px] sm:text-[16px] text-[#5a5a7a] leading-[1.7] sm:leading-[1.9] mb-14 sm:mb-20 max-w-[520px] mx-auto">
+            Every denial costs you — hard inquiries, wasted time, damaged confidence. See what a lender sees before you ever submit.
           </p>
+          <div className="flex flex-col sm:flex-row gap-12 sm:gap-20 text-left">
+            <div className="flex-1">
+              <p className="text-[10px] tracking-[0.2em] uppercase text-[#c0c0d0] mb-6">Without</p>
+              <div className="space-y-4">
+                {["Guess at eligibility", "Multiple applications", "Hard inquiries stack", "Denied without reason", "Repeat"].map((t) => (
+                  <p key={t} className="text-[13px] sm:text-[15px] text-[#b0b0c0] line-through decoration-[#d0d0de]">{t}</p>
+                ))}
+              </div>
+            </div>
+            <div className="w-px bg-gradient-to-b from-transparent via-[#d0d0de] to-transparent hidden sm:block" />
+            <div className="flex-1">
+              <p className="text-[10px] tracking-[0.2em] uppercase text-[#7a7a9a] mb-6">With Profundr</p>
+              <div className="space-y-4">
+                {["Know your tier & ceiling", "Fix before applying", "Apply once, with clarity", "Approved first try", "Build momentum"].map((t) => (
+                  <p key={t} className="text-[13px] sm:text-[15px] text-[#3a3a5a]">{t}</p>
+                ))}
+              </div>
+            </div>
           </div>
-          <div className={contentBlockStyle}><div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-            <div className="p-6 rounded-xl border border-red-500/10 bg-red-500/[0.02]">
-              <p className="text-[11px] tracking-[0.15em] uppercase text-red-400/30 mb-4">Without Us</p>
-              <ul className="space-y-3">
-                {["Guess at eligibility", "Apply to multiple lenders", "Accumulate hard inquiries", "Get denied without explanation", "Repeat the cycle"].map((t) => (
-                  <li key={t} className="flex items-start gap-3 text-[13px] text-[#3a3a5a] leading-[1.6]">
-                    <span className="text-red-400/25 mt-0.5 shrink-0">✕</span>{t}
-                  </li>
-                ))}
-              </ul>
-            </div>
-            <div className="p-6 rounded-xl border border-white/10 bg-white/5">
-              <p className="text-[11px] tracking-[0.15em] uppercase text-[#6a6a8a] mb-4">With Us</p>
-              <ul className="space-y-3">
-                {["Know your exact tier & ceiling", "Fix issues before applying", "Apply once, with confidence", "Get approved on first submission", "Build on momentum"].map((t) => (
-                  <li key={t} className="flex items-start gap-3 text-[13px] text-[#5a5a7a] leading-[1.6]">
-                    <span className="text-[#6a6a8a] mt-0.5 shrink-0">→</span>{t}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div></div>
-          <SubscribeButton className="mt-10" onSubscribe={handleSubscribeClick} />
+          <SubscribeButton className="mt-14" onSubscribe={handleSubscribeClick} />
           <ScrollArrow targetId="sec-breakdown" />
         </div>
       </section>
 
 
       {/* ═══════════════ 8. FEATURE BREAKDOWN ═══════════════ */}
-      <section id="sec-breakdown" className="relative z-20 px-6 sm:px-12 md:px-20 py-20 sm:py-28 text-center">
-
-        <div className="relative max-w-[900px] mx-auto">
-          <div className="rounded-2xl bg-white/50 backdrop-blur-sm px-4 sm:px-10 py-8 sm:py-10 mb-8 shadow-lg shadow-black/8">
-          <SectionLabel>Feature Breakdown</SectionLabel>
-          <h2 className="text-[26px] sm:text-[36px] md:text-[44px] leading-[0.9] mb-0 tracking-[-0.03em]" style={gradientText('180deg', 0.9, 0.5)}>
-            Six components. One score. Complete clarity.
+      <section id="sec-breakdown" className="relative z-20 px-6 sm:px-12 md:px-20 py-24 sm:py-36 text-center">
+        <div className="relative max-w-[720px] mx-auto">
+          <SectionLabel>Scoring Framework</SectionLabel>
+          <h2 className="text-[28px] sm:text-[40px] md:text-[52px] leading-[0.88] mb-14 sm:mb-20 tracking-[-0.04em]" style={gradientText('180deg', 0.9, 0.5)}>
+            Six components. One score.
           </h2>
-          </div>
-          <div className={contentBlockStyle}><div className="space-y-3">
+          <div className="space-y-0">
             {[
-              { name: "Capital Strength", weight: "0–20 pts", desc: "Revenue, assets, collateral position, and business capitalization" },
-              { name: "Credit Quality", weight: "0–20 pts", desc: "FICO, payment history, derogatory marks, utilization ratios" },
-              { name: "Management & Structure", weight: "0–15 pts", desc: "Entity type, years in business, ownership structure, EIN status" },
-              { name: "Earnings & Cash Flow", weight: "0–15 pts", desc: "Monthly revenue trends, DSCR, cash reserves, deposit consistency" },
-              { name: "Liquidity & Leverage", weight: "0–15 pts", desc: "Debt-to-income, current ratio, available credit, existing obligations" },
-              { name: "Risk Signals", weight: "0–15 pts", desc: "Liens, judgments, NSFs, velocity flags, recent inquiries, collections" },
+              { name: "Capital Strength", weight: "20", desc: "Revenue, assets, collateral" },
+              { name: "Credit Quality", weight: "20", desc: "FICO, payment history, utilization" },
+              { name: "Management", weight: "15", desc: "Entity, tenure, structure" },
+              { name: "Cash Flow", weight: "15", desc: "DSCR, reserves, consistency" },
+              { name: "Liquidity", weight: "15", desc: "DTI, current ratio, obligations" },
+              { name: "Risk Signals", weight: "15", desc: "Liens, judgments, velocity flags" },
             ].map((c) => (
-              <div key={c.name} className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-6 p-5 rounded-xl bg-[#f8f8fc] border border-[#e0e0ea]">
-                <div className="flex items-center gap-4 sm:w-[200px] shrink-0">
-                  <span className="text-[14px] sm:text-[15px] text-[#3a3a5a] font-medium">{c.name}</span>
-                </div>
-                <span className="text-[12px] font-mono text-[#3a3a5a] sm:w-[80px] shrink-0" style={{ fontFamily: "'JetBrains Mono', monospace" }}>{c.weight}</span>
-                <p className="text-[10px] sm:text-[13px] text-[#8a8aa5] leading-[1.5] sm:leading-[1.6] text-justify">{c.desc}</p>
+              <div key={c.name} className="flex items-center py-5 border-b border-[#e0e0ea]/30 last:border-b-0 gap-4 sm:gap-8">
+                <span className="text-[14px] sm:text-[16px] text-[#2a2a4a] font-medium text-left w-[140px] sm:w-[180px] shrink-0">{c.name}</span>
+                <span className="text-[18px] sm:text-[22px] font-mono text-[#c0c0d0] shrink-0 w-10 text-right" style={{ fontFamily: "'JetBrains Mono', monospace", fontWeight: 200 }}>{c.weight}</span>
+                <p className="text-[11px] sm:text-[13px] text-[#9a9ab8] text-left">{c.desc}</p>
               </div>
             ))}
           </div>
-          <div className="mt-8 p-5 rounded-xl bg-[#f8f8fc] border border-[#e0e0ea]">
-            <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-8">
-              <span className="text-[15px] text-[#1a1a2e] font-medium">Total: 0–100 pts</span>
-              <span className="text-[12px] text-[#8a8aa5]">→ Qualification Range: $25K – $5M+ based on composite score and tier placement</span>
-            </div>
-          </div></div>
-          <SubscribeButton className="mt-10" onSubscribe={handleSubscribeClick} />
+          <div className="mt-10 flex items-baseline justify-between">
+            <span className="text-[13px] text-[#5a5a7a]">Total</span>
+            <span className="text-[28px] sm:text-[36px] font-mono text-[#2a2a4a]" style={{ fontFamily: "'JetBrains Mono', monospace", fontWeight: 200 }}>100</span>
+          </div>
+          <p className="text-[11px] text-[#a0a0b8] mt-2">Qualification range: $25K – $5M+ based on composite score and tier</p>
+          <SubscribeButton className="mt-14" onSubscribe={handleSubscribeClick} />
           <ScrollArrow targetId="sec-modes" />
         </div>
       </section>
 
 
       {/* ═══════════════ 9. MODE DIFFERENTIATION ═══════════════ */}
-      <section id="sec-modes" className="relative z-20 px-6 sm:px-12 md:px-20 py-20 sm:py-28 text-center">
-
-        <div className="relative max-w-[900px] mx-auto">
-          <div className="rounded-2xl bg-white/50 backdrop-blur-sm px-4 sm:px-10 py-8 sm:py-10 mb-8 shadow-lg shadow-black/8">
+      <section id="sec-modes" className="relative z-20 px-6 sm:px-12 md:px-20 py-24 sm:py-36 text-center">
+        <div className="relative max-w-[720px] mx-auto">
           <SectionLabel>Operating Modes</SectionLabel>
-          <h2 className="text-[26px] sm:text-[36px] md:text-[44px] leading-[0.9] mb-0 tracking-[-0.03em]" style={gradientText('180deg', 0.9, 0.5)}>
-            Two modes. One goal: get you funded.
+          <h2 className="text-[28px] sm:text-[40px] md:text-[52px] leading-[0.88] mb-14 sm:mb-20 tracking-[-0.04em]" style={gradientText('180deg', 0.9, 0.5)}>
+            Two modes. One goal.
           </h2>
+          <div className="flex flex-col sm:flex-row gap-16 sm:gap-20 text-left">
+            <div className="flex-1">
+              <p className="text-[10px] tracking-[0.2em] uppercase text-[#9a9ab8] mb-3">Pre-Funding</p>
+              <p className="text-[28px] sm:text-[36px] font-mono text-[#2a2a4a] mb-4" style={{ fontFamily: "'JetBrains Mono', monospace", fontWeight: 200 }}>60+</p>
+              <p className="text-[13px] sm:text-[15px] text-[#5a5a7a] leading-[1.7] mb-6">
+                Optimize ceiling, refine tier placement, match to best products.
+              </p>
+              <div className="space-y-3">
+                {["Product matching", "Ceiling maximization", "Timing strategy", "Rate optimization"].map((t) => (
+                  <p key={t} className="text-[12px] text-[#8a8aa5]">— {t}</p>
+                ))}
+              </div>
+            </div>
+            <div className="w-px bg-gradient-to-b from-transparent via-[#d0d0de] to-transparent hidden sm:block" />
+            <div className="flex-1">
+              <p className="text-[10px] tracking-[0.2em] uppercase text-[#9a9ab8] mb-3">Repair</p>
+              <p className="text-[28px] sm:text-[36px] font-mono text-[#2a2a4a] mb-4" style={{ fontFamily: "'JetBrains Mono', monospace", fontWeight: 200 }}>&lt;60</p>
+              <p className="text-[13px] sm:text-[15px] text-[#5a5a7a] leading-[1.7] mb-6">
+                Fix issues first — disputes, payments, structure corrections, timeline to ready.
+              </p>
+              <div className="space-y-3">
+                {["Dispute letters", "Issue prioritization", "90-day timeline", "Score projections"].map((t) => (
+                  <p key={t} className="text-[12px] text-[#8a8aa5]">— {t}</p>
+                ))}
+              </div>
+            </div>
           </div>
-          <div className={contentBlockStyle}><div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-            <div className="p-6 sm:p-8 rounded-xl bg-[#f8f8fc] border border-[#e0e0ea]">
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-3 h-3 rounded-full bg-white/20"></div>
-                <span className="text-[11px] tracking-[0.15em] uppercase text-[#6a6a8a]">Pre-Funding Mode</span>
-              </div>
-              <h3 className="text-[20px] sm:text-[24px] text-[#1a1a2e] font-light mb-4 tracking-[-0.02em]">Score 60+</h3>
-              <p className="text-[11px] sm:text-[13px] text-[#3a3a5a] leading-[1.6] sm:leading-[1.8] mb-6 text-justify">
-                You're fundable. This mode focuses on optimization — maximizing your ceiling, refining your tier placement, and identifying the best products for your profile.
-              </p>
-              <ul className="space-y-2.5">
-                {["Tier 1–2 product matching", "Exposure ceiling maximization", "Application timing strategy", "Rate optimization guidance"].map((t) => (
-                  <li key={t} className="flex items-center gap-3 text-[12px] text-[#6a6a8a]">
-                    <span className="w-1 h-1 rounded-full bg-white/15"></span>{t}
-                  </li>
-                ))}
-              </ul>
-            </div>
-            <div className="p-6 sm:p-8 rounded-xl bg-[#f8f8fc] border border-[#e0e0ea]">
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-3 h-3 rounded-full bg-[#c0c0d0] border border-white/20"></div>
-                <span className="text-[11px] tracking-[0.15em] uppercase text-[#6a6a8a]">Repair Mode</span>
-              </div>
-              <h3 className="text-[20px] sm:text-[24px] text-[#1a1a2e] font-light mb-4 tracking-[-0.02em]">Score &lt;60</h3>
-              <p className="text-[11px] sm:text-[13px] text-[#3a3a5a] leading-[1.6] sm:leading-[1.8] mb-6 text-justify">
-                You need work before applying. This mode focuses on fixing issues — dispute letters, payment optimization, structure corrections, and timeline to fundability.
-              </p>
-              <ul className="space-y-2.5">
-                {["Auto-generated dispute letters", "Credit issue prioritization", "90-day repair timeline", "Score impact projections"].map((t) => (
-                  <li key={t} className="flex items-center gap-3 text-[12px] text-[#6a6a8a]">
-                    <span className="w-1 h-1 rounded-full bg-white/15"></span>{t}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div></div>
-          <SubscribeButton className="mt-10" onSubscribe={handleSubscribeClick} />
+          <SubscribeButton className="mt-14" onSubscribe={handleSubscribeClick} />
           <ScrollArrow targetId="sec-tiers" />
         </div>
       </section>
 
 
       {/* ═══════════════ 10. TIER POSITIONING ═══════════════ */}
-      <section id="sec-tiers" className="relative z-20 px-6 sm:px-12 md:px-20 py-20 sm:py-28 text-center">
-
-        <div className="relative max-w-[900px] mx-auto">
-          <div className="rounded-2xl bg-white/50 backdrop-blur-sm px-4 sm:px-10 py-8 sm:py-10 mb-8 shadow-lg shadow-black/8">
+      <section id="sec-tiers" className="relative z-20 px-6 sm:px-12 md:px-20 py-24 sm:py-36 text-center">
+        <div className="relative max-w-[720px] mx-auto">
           <SectionLabel>Tier Eligibility</SectionLabel>
-          <h2 className="text-[26px] sm:text-[36px] md:text-[44px] leading-[0.9] mb-0 tracking-[-0.03em]" style={gradientText('180deg', 0.9, 0.5)}>
-            Three tiers. Know which one you belong to.
+          <h2 className="text-[28px] sm:text-[40px] md:text-[52px] leading-[0.88] mb-14 sm:mb-20 tracking-[-0.04em]" style={gradientText('180deg', 0.9, 0.5)}>
+            Three tiers. Know yours.
           </h2>
-          </div>
-          <div className={contentBlockStyle}><div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="space-y-12 sm:space-y-16 text-left">
             {[
-              { tier: "Tier 1", name: "Prime Capital", score: "75–100", products: "SBA 7(a) & 504, Conventional LOC, Term Loans, Equipment Finance", color: "border-[#3C3C3C]/30" },
-              { tier: "Tier 2", name: "Mid-Tier", score: "50–74", products: "Revenue-Based Lending, Invoice Factoring, Merchant Cash Advance, Bridge Loans", color: "border-[#303030]/30" },
-              { tier: "Tier 3", name: "Alternative", score: "25–49", products: "Microloans, Secured Cards, Credit Builder Programs, Community Development Loans", color: "border-[#404040]/30" },
-            ].map((t) => (
-              <div key={t.tier} className={`p-6 rounded-xl bg-[#f8f8fc]/60 border ${t.color}`}>
-                <span className="text-[10px] font-mono text-[#8a8aa5] tracking-wider uppercase">{t.tier}</span>
-                <h3 className="text-[18px] sm:text-[20px] text-[#1a1a2e] font-medium mt-2 mb-1">{t.name}</h3>
-                <p className="text-[13px] font-mono text-[#6a6a8a] mb-5" style={{ fontFamily: "'JetBrains Mono', monospace" }}>Score: {t.score}</p>
-                <p className="text-[10px] sm:text-[12px] text-[#8a8aa5] leading-[1.5] sm:leading-[1.7] text-justify">{t.products}</p>
+              { name: "Prime", score: "75–100", products: "SBA 7(a), Conventional LOC, Term Loans, Equipment Finance" },
+              { name: "Mid-Tier", score: "50–74", products: "Revenue-Based Lending, Invoice Factoring, MCA, Bridge Loans" },
+              { name: "Alternative", score: "25–49", products: "Microloans, Secured Cards, Credit Builders, CDFI Loans" },
+            ].map((t, i) => (
+              <div key={t.name} className="flex gap-6 sm:gap-10 items-start">
+                <span className="text-[36px] sm:text-[56px] font-mono text-[#d0d0de] leading-none shrink-0 w-16 text-right" style={{ fontFamily: "'JetBrains Mono', monospace", fontWeight: 200 }}>{String(i + 1).padStart(2, '0')}</span>
+                <div>
+                  <div className="flex items-baseline gap-4 mb-2">
+                    <h3 className="text-[18px] sm:text-[24px] text-[#1a1a2e] font-light tracking-[-0.02em]">{t.name}</h3>
+                    <span className="text-[13px] font-mono text-[#9a9ab8]" style={{ fontFamily: "'JetBrains Mono', monospace" }}>{t.score}</span>
+                  </div>
+                  <p className="text-[12px] sm:text-[14px] text-[#7a7a9a] leading-[1.6]">{t.products}</p>
+                </div>
               </div>
             ))}
-          </div></div>
-          <SubscribeButton className="mt-10" onSubscribe={handleSubscribeClick} />
+          </div>
+          <SubscribeButton className="mt-14" onSubscribe={handleSubscribeClick} />
           <ScrollArrow targetId="sec-case" />
         </div>
       </section>
 
 
       {/* ═══════════════ 11. CASE STUDY ═══════════════ */}
-      <section id="sec-case" className="relative z-20 px-6 sm:px-12 md:px-20 py-20 sm:py-28 text-center">
-
-        <div className="relative max-w-[800px] mx-auto">
-          <div className="rounded-2xl bg-white/50 backdrop-blur-sm px-4 sm:px-10 py-8 sm:py-10 mb-8 shadow-lg shadow-black/8">
-          <SectionLabel>Example Walkthrough</SectionLabel>
-          <h2 className="text-[26px] sm:text-[36px] md:text-[44px] leading-[0.9] mb-0 tracking-[-0.03em]" style={gradientText('180deg', 0.9, 0.5)}>
-            How a 38-score founder became funding-ready in 67 days.
+      <section id="sec-case" className="relative z-20 px-6 sm:px-12 md:px-20 py-24 sm:py-36 text-center">
+        <div className="relative max-w-[720px] mx-auto">
+          <SectionLabel>Case Study</SectionLabel>
+          <h2 className="text-[28px] sm:text-[40px] md:text-[52px] leading-[0.88] mb-14 sm:mb-20 tracking-[-0.04em]" style={gradientText('180deg', 0.9, 0.5)}>
+            38 → 71 in 67 days.
           </h2>
-          </div>
-
-          <div className={contentBlockStyle}><div className="space-y-0">
+          <div className="space-y-0 text-left">
             {[
-              { day: "Day 1", title: "Initial Analysis", detail: "Score: 38/100. Tier 3 (Alternative). 4 denial triggers flagged: high utilization (78%), 2 collections, thin business file, no EIN separation." },
-              { day: "Day 3", title: "Repair Plan Generated", detail: "Auto-generated 6 dispute letters (2 per bureau), created a 90-day utilization reduction plan, and recommended EIN registration + business bank account." },
-              { day: "Day 30", title: "First Checkpoint", detail: "Score: 52/100. Moved to Tier 2. 1 collection removed. Utilization down to 45%. Business structure improved. Exposure ceiling: $85K." },
-              { day: "Day 67", title: "Funding Ready", detail: "Score: 71/100. Tier 2 (upper). 0 denial triggers. Utilization: 22%. Clean business file. Exposure ceiling: $210K. Applied for $175K LOC — approved in 5 days." },
+              { day: "01", detail: "Score 38. Tier 3. Four triggers: 78% utilization, 2 collections, thin file, no EIN." },
+              { day: "03", detail: "6 dispute letters generated. 90-day utilization plan. EIN + business account recommended." },
+              { day: "30", detail: "Score 52. Tier 2. 1 collection removed. Utilization 45%. Ceiling: $85K." },
+              { day: "67", detail: "Score 71. Zero triggers. Utilization 22%. Ceiling: $210K. Applied $175K LOC — approved." },
             ].map((step) => (
-              <div key={step.day} className="flex gap-6 sm:gap-8 py-7 first:border-t-0">
-                <div className="w-[70px] shrink-0">
-                  <span className="text-[12px] font-mono text-[#6a6a8a]" style={{ fontFamily: "'JetBrains Mono', monospace" }}>{step.day}</span>
-                </div>
-                <div>
-                  <h3 className="text-[15px] text-[#1a1a2e] font-medium mb-2">{step.title}</h3>
-                  <p className="text-[11px] sm:text-[13px] text-[#3a3a5a] leading-[1.6] sm:leading-[1.7] text-justify">{step.detail}</p>
-                </div>
+              <div key={step.day} className="flex items-start gap-6 sm:gap-10 py-6 border-b border-[#e0e0ea]/30 last:border-b-0">
+                <span className="text-[10px] font-mono text-[#a0a0b8] shrink-0 mt-1 tracking-wider" style={{ fontFamily: "'JetBrains Mono', monospace" }}>DAY {step.day}</span>
+                <p className="text-[13px] sm:text-[15px] text-[#4a4a6a] leading-[1.7]">{step.detail}</p>
               </div>
             ))}
-          </div></div>
-          <SubscribeButton className="mt-10" onSubscribe={handleSubscribeClick} />
+          </div>
+          <SubscribeButton className="mt-14" onSubscribe={handleSubscribeClick} />
           <ScrollArrow targetId="faq" />
         </div>
       </section>
 
 
-      {/* ═══════════════ 12. FAQ / OBJECTION HANDLING ═══════════════ */}
-      <section id="faq" className="relative z-20 px-6 sm:px-12 md:px-20 py-20 sm:py-28 text-center">
-
-        <div className="relative max-w-[700px] mx-auto">
-          <div className="rounded-2xl bg-white/50 backdrop-blur-sm px-4 sm:px-10 py-8 sm:py-10 mb-8 shadow-lg shadow-black/8">
+      {/* ═══════════════ 12. FAQ ═══════════════ */}
+      <section id="faq" className="relative z-20 px-6 sm:px-12 md:px-20 py-24 sm:py-36 text-center">
+        <div className="relative max-w-[640px] mx-auto">
           <SectionLabel>FAQ</SectionLabel>
-          <h2 className="text-[26px] sm:text-[36px] md:text-[44px] leading-[0.9] mb-0 tracking-[-0.03em]" style={gradientText('180deg', 0.9, 0.5)}>
-            Common questions, straight answers.
+          <h2 className="text-[28px] sm:text-[40px] md:text-[52px] leading-[0.88] mb-14 sm:mb-20 tracking-[-0.04em]" style={gradientText('180deg', 0.9, 0.5)}>
+            Straight answers.
           </h2>
-          </div>
-          <div className={contentBlockStyle}><div className="space-y-0">
+          <div className="space-y-0 text-left">
             {faqItems.map((item, i) => (
-              <div key={i} className="border-b border-[#e0e0ea]">
+              <div key={i} className="border-b border-[#e0e0ea]/40">
                 <button
                   data-testid={`button-faq-${i}`}
-                  className="w-full flex items-center justify-between py-5 text-left group"
+                  className="w-full flex items-center justify-between py-6 text-left group"
                   onClick={() => setOpenFaq(openFaq === i ? null : i)}
                 >
-                  <span className="text-[14px] sm:text-[15px] font-medium text-[#3a3a5a] group-hover:text-[#1a1a2e] transition-colors pr-4">{item.q}</span>
-                  <span className="text-[18px] text-[#9a9ab0] shrink-0 leading-none transition-transform duration-200" style={{ transform: openFaq === i ? 'rotate(45deg)' : 'rotate(0deg)' }}>+</span>
+                  <span className="text-[14px] sm:text-[16px] text-[#3a3a5a] group-hover:text-[#1a1a2e] transition-colors pr-6">{item.q}</span>
+                  <span className="text-[16px] text-[#b0b0c0] shrink-0 leading-none transition-transform duration-200" style={{ transform: openFaq === i ? 'rotate(45deg)' : 'rotate(0deg)' }}>+</span>
                 </button>
                 {openFaq === i && (
-                  <div className="pb-5">
-                    <p className="text-[11px] sm:text-[13px] text-[#3a3a5a] leading-[1.6] sm:leading-[1.8] text-justify">{item.a}</p>
+                  <div className="pb-6">
+                    <p className="text-[12px] sm:text-[14px] text-[#6a6a8a] leading-[1.7] sm:leading-[1.8]">{item.a}</p>
                   </div>
                 )}
               </div>
             ))}
-          </div></div>
-          <SubscribeButton className="mt-10" onSubscribe={handleSubscribeClick} />
+          </div>
+          <SubscribeButton className="mt-14" onSubscribe={handleSubscribeClick} />
           <ScrollArrow targetId="sec-trust" />
         </div>
       </section>
 
 
-      {/* ═══════════════ 13. TRUST & COMPLIANCE ═══════════════ */}
-      <section id="sec-trust" className="relative z-20 px-6 sm:px-12 md:px-20 py-20 sm:py-28 text-center">
-
-        <div className="relative max-w-[800px] mx-auto">
-          <div className="rounded-2xl bg-white/50 backdrop-blur-sm px-4 sm:px-10 py-8 sm:py-10 mb-8 shadow-lg shadow-black/8">
-          <SectionLabel>Trust & Security</SectionLabel>
-          <h2 className="text-[26px] sm:text-[36px] md:text-[44px] leading-[0.9] mb-0 tracking-[-0.03em]" style={gradientText('180deg', 0.9, 0.5)}>
-            Your data. Your control. Always.
+      {/* ═══════════════ 13. TRUST ═══════════════ */}
+      <section id="sec-trust" className="relative z-20 px-6 sm:px-12 md:px-20 py-24 sm:py-36 text-center">
+        <div className="relative max-w-[720px] mx-auto">
+          <SectionLabel>Trust</SectionLabel>
+          <h2 className="text-[28px] sm:text-[40px] md:text-[52px] leading-[0.88] mb-14 sm:mb-20 tracking-[-0.04em]" style={gradientText('180deg', 0.9, 0.5)}>
+            Your data. Your control.
           </h2>
-          </div>
-          <div className={contentBlockStyle}><div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-y-12">
             {[
-              { icon: "⬡", title: "Encrypted", desc: "AES-256 encryption at rest and TLS 1.3 in transit" },
-              { icon: "◎", title: "Private", desc: "We never share data with lenders, brokers, or third parties" },
-              { icon: "◇", title: "Compliant", desc: "FCRA-aligned analysis and dispute letter generation" },
-              { icon: "▣", title: "No Credit Pull", desc: "We analyze your uploaded reports — zero impact on your score" },
+              { title: "Encrypted", desc: "AES-256 at rest, TLS 1.3 in transit" },
+              { title: "Private", desc: "Never shared with lenders or brokers" },
+              { title: "Compliant", desc: "FCRA-aligned analysis and disputes" },
+              { title: "No Pull", desc: "Zero impact on your credit score" },
             ].map((item) => (
-              <div key={item.title} className="p-5 rounded-xl bg-[#f8f8fc] border border-[#e0e0ea]">
-                <span className="text-[18px] text-[#8a8aa5] mb-3 block">{item.icon}</span>
-                <h3 className="text-[13px] text-[#3a3a5a] font-medium mb-1.5">{item.title}</h3>
-                <p className="text-[10px] sm:text-[11px] text-[#8a8aa5] leading-[1.5] sm:leading-[1.6] text-justify">{item.desc}</p>
+              <div key={item.title} className="flex flex-col items-center">
+                <h3 className="text-[14px] sm:text-[16px] text-[#2a2a4a] font-medium mb-2">{item.title}</h3>
+                <p className="text-[10px] sm:text-[11px] text-[#9a9ab8] leading-[1.5] max-w-[140px]">{item.desc}</p>
               </div>
             ))}
-          </div></div>
-          <SubscribeButton className="mt-10" onSubscribe={handleSubscribeClick} />
+          </div>
+          <SubscribeButton className="mt-14" onSubscribe={handleSubscribeClick} />
           <ScrollArrow targetId="sec-cta" />
         </div>
       </section>
 
 
       {/* ═══════════════ 14. FINAL CTA ═══════════════ */}
-      <section id="sec-cta" className="relative z-20 px-6 sm:px-12 md:px-20 py-24 sm:py-36">
-
-        <div className="relative max-w-[700px] mx-auto text-center">
-          <div className="rounded-2xl bg-white/50 backdrop-blur-sm px-4 sm:px-10 py-8 sm:py-10 mb-8 shadow-lg shadow-black/8">
+      <section id="sec-cta" className="relative z-20 px-6 sm:px-12 md:px-20 py-28 sm:py-40">
+        <div className="relative max-w-[640px] mx-auto text-center">
           <h2
-            className="text-[30px] sm:text-[44px] md:text-[56px] leading-[0.9] mb-6 tracking-[-0.04em]"
+            className="text-[32px] sm:text-[48px] md:text-[60px] leading-[0.88] mb-8 tracking-[-0.04em]"
             style={{ fontFamily: "'Satoshi', sans-serif", fontWeight: 400, ...gradientText('180deg', 1, 0.55) }}
             data-testid="text-final-cta"
           >
             Stop guessing.<br />Start knowing.
           </h2>
-          <p className="text-[12px] sm:text-[15px] text-[#6a6a8a] leading-[1.6] sm:leading-[1.8] mb-0 max-w-[480px] mx-auto text-justify">
-            Get your Capital Readiness Score, tier eligibility, exposure ceiling, and denial simulation. Subscribe today and unlock the full platform.
+          <p className="text-[13px] sm:text-[16px] text-[#5a5a7a] leading-[1.7] sm:leading-[1.9] mb-12 max-w-[480px] mx-auto">
+            Capital Readiness Score. Tier eligibility. Exposure ceiling. Denial simulation. All in one place.
           </p>
-          </div>
           <form onSubmit={handleLogin} className="w-full max-w-[440px] mx-auto mb-6">
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center bg-[#f5f5fa] border border-[#e0e0ea] rounded-2xl sm:rounded-full sm:h-[52px] sm:pl-5 sm:pr-1.5 overflow-hidden">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center bg-white/60 backdrop-blur-sm border border-[#e0e0ea]/50 rounded-2xl sm:rounded-full sm:h-[52px] sm:pl-5 sm:pr-1.5 overflow-hidden">
               <input
                 data-testid="input-email-bottom"
                 type="email"
                 placeholder="Enter your email"
-                className="flex-1 bg-transparent text-[14px] text-[#1a1a2e] placeholder:text-[#6a6a8a] outline-none px-4 py-3.5 sm:px-0 sm:py-0"
+                className="flex-1 bg-transparent text-[14px] text-[#1a1a2e] placeholder:text-[#9a9ab8] outline-none px-4 py-3.5 sm:px-0 sm:py-0"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
@@ -717,39 +654,32 @@ export default function LandingPage() {
               </button>
             </div>
           </form>
-          <p className="text-[11px] text-[#b0b0c0] tracking-wide">
-            Join 12,500+ founders already qualifying before they apply
+          <p className="text-[11px] text-[#b0b0c0] tracking-wide mb-6">
+            12,500+ founders already qualifying before they apply
           </p>
-          <SubscribeButton className="mt-6" onSubscribe={handleSubscribeClick} />
+          <SubscribeButton onSubscribe={handleSubscribeClick} />
         </div>
       </section>
 
       {/* ═══════════════ 15. FOOTER ═══════════════ */}
-      <footer className="relative z-20 px-4 sm:px-12 md:px-20 py-8 sm:py-14 text-center">
-
-        <div className="relative max-w-[900px] mx-auto">
-          <div className="rounded-2xl bg-white/50 backdrop-blur-sm px-4 sm:px-10 py-8 sm:py-10 shadow-lg shadow-black/8">
-            <div className="flex flex-col items-center gap-6 sm:flex-row sm:justify-between sm:gap-8 mb-8">
-              <div className="flex items-center gap-2.5">
-                <div className="w-6 h-6 rounded-full border-2 border-[#c0c0d0] flex items-center justify-center">
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#8a8aa5]"></span>
-                </div>
-                <ProfundrLogo size="sm" className="text-[#1a1a2e]" />
-              </div>
-              <div className="flex flex-wrap justify-center gap-4 sm:gap-8">
-                {["Privacy Policy", "Terms of Service", "Contact", "Support"].map((link) => (
-                  <span key={link} className="text-[10px] sm:text-[11px] text-[#8a8aa5] tracking-wide uppercase cursor-pointer hover:text-[#5a5a7a] transition-colors">{link}</span>
-                ))}
-              </div>
+      <footer className="relative z-20 px-4 sm:px-12 md:px-20 py-10 sm:py-16 text-center">
+        <div className="relative max-w-[720px] mx-auto">
+          <div className="flex flex-col items-center gap-6 sm:flex-row sm:justify-between sm:gap-8 mb-8">
+            <ProfundrLogo size="sm" className="text-[#1a1a2e]" />
+            <div className="flex flex-wrap justify-center gap-6 sm:gap-8">
+              {["Privacy", "Terms", "Contact", "Support"].map((link) => (
+                <span key={link} className="text-[10px] sm:text-[11px] text-[#9a9ab8] tracking-[0.15em] uppercase cursor-pointer hover:text-[#5a5a7a] transition-colors">{link}</span>
+              ))}
             </div>
-            <div className="flex flex-col items-center gap-3 sm:flex-row sm:justify-between sm:gap-4 pt-5 border-t border-[#e0e0ea]/50">
-              <p className="text-[10px] sm:text-[11px] text-[#9a9ab0]">
-                &copy; 2026 <span className="text-[#8a8aa5] font-medium">CMD Supply</span>. All rights reserved.
-              </p>
-              <p className="text-[9px] sm:text-[10px] text-[#b0b0c0] max-w-[400px] leading-[1.5] sm:leading-[1.6]">
-                This platform is not a lender, broker, or financial advisor. All analyses are for informational purposes only and do not constitute financial advice or guaranteed lending outcomes.
-              </p>
-            </div>
+          </div>
+          <div className="w-full h-px bg-gradient-to-r from-transparent via-[#d0d0de]/50 to-transparent mb-6" />
+          <div className="flex flex-col items-center gap-3 sm:flex-row sm:justify-between sm:gap-4">
+            <p className="text-[10px] text-[#a0a0b8]">
+              &copy; 2026 CMD Supply
+            </p>
+            <p className="text-[9px] text-[#b0b0c0] max-w-[400px] leading-[1.5]">
+              Not a lender, broker, or financial advisor. Analyses are informational only.
+            </p>
           </div>
         </div>
       </footer>
