@@ -500,6 +500,25 @@ function ProfileAvatar({ photo, name, size = 28, className = "" }: { photo?: str
   );
 }
 
+function FileAttachmentCard({ filename }: { filename: string }) {
+  const ext = filename.split('.').pop()?.toUpperCase() || 'FILE';
+  const isPdf = ext === 'PDF';
+  return (
+    <div className="inline-flex items-center gap-3 border border-[#d0d0d0] rounded-2xl px-4 py-3 bg-[#f9f9f9] max-w-[300px] mb-1.5">
+      <div className={`w-10 h-10 rounded-xl ${isPdf ? 'bg-[#ef4444]' : 'bg-[#6366f1]'} flex items-center justify-center shrink-0`}>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+          <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+          <polyline points="14,2 14,8 20,8" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      </div>
+      <div className="min-w-0 flex-1">
+        <p className="text-[13px] font-medium text-[#1a1a1a] truncate">{filename}</p>
+        <p className="text-[11px] text-[#888] uppercase">{ext}</p>
+      </div>
+    </div>
+  );
+}
+
 function ProfundrAvatar({ size = 28, className = "" }: { size?: number; className?: string }) {
   return (
     <div className={`rounded-lg bg-[#1a1a2e] flex items-center justify-center shrink-0 ${className}`} style={{ width: size, height: size }}>
@@ -1459,7 +1478,16 @@ export default function LandingPage() {
                           <div className="max-w-[85%]" data-testid={`message-team-${msg.id}`}>
                             <p className="text-[10px] text-[#6366f1] font-medium mb-0.5">{msg.senderName}</p>
                             <div className="bg-[#f0eeff] rounded-[20px] rounded-bl-[6px] px-4 py-2.5">
-                              <p className="text-[14px] text-[#1a1a1a] leading-[1.6] whitespace-pre-wrap">{renderMentionText(msg.content)}</p>
+                              {(() => {
+                                const attachMatch = msg.content.match(/\[Attached: (.+?)\]/);
+                                const textContent = msg.content.replace(/\n*\[Attached: .+?\]/, '').trim();
+                                return (
+                                  <>
+                                    {attachMatch && <FileAttachmentCard filename={attachMatch[1]} />}
+                                    {textContent && <p className="text-[14px] text-[#1a1a1a] leading-[1.6] whitespace-pre-wrap">{renderMentionText(textContent)}</p>}
+                                  </>
+                                );
+                              })()}
                             </div>
                           </div>
                         </div>
@@ -1475,9 +1503,16 @@ export default function LandingPage() {
                           {msg.role === "assistant" && msg.senderName && (
                             <p className="text-[10px] text-[#6366f1] font-medium mb-0.5">{msg.senderName}</p>
                           )}
-                          {msg.role === "user" ? (
-                            <p className="text-[14px] text-[#1a1a1a] leading-[1.6] whitespace-pre-wrap">{renderMentionText(msg.content)}</p>
-                          ) : (
+                          {msg.role === "user" ? (() => {
+                            const attachMatch = msg.content.match(/\[Attached: (.+?)\]/);
+                            const textContent = msg.content.replace(/\n*\[Attached: .+?\]/, '').trim();
+                            return (
+                              <>
+                                {attachMatch && <FileAttachmentCard filename={attachMatch[1]} />}
+                                {textContent && <p className="text-[14px] text-[#1a1a1a] leading-[1.6] whitespace-pre-wrap">{renderMentionText(textContent)}</p>}
+                              </>
+                            );
+                          })() : (
                             <FormatResponse content={msg.content} />
                           )}
                         </div>
@@ -1565,14 +1600,25 @@ export default function LandingPage() {
           )}
 
           {attachedFile && (
-            <div className="flex items-center gap-2 mb-2 px-1">
-              <div className="flex items-center gap-2 bg-[#e8e8e8] rounded-lg px-3 py-1.5 text-[12px] text-[#555]">
-                <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                  <path d="M7 1V10M3 6H11" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
-                  <rect x="2" y="2" width="10" height="10" rx="2" stroke="currentColor" strokeWidth="1.2" fill="none" />
-                </svg>
-                <span className="max-w-[200px] truncate">{attachedFile.name}</span>
-                <button onClick={() => setAttachedFile(null)} className="text-[#999] hover:text-[#666] ml-1" data-testid="button-remove-file">&times;</button>
+            <div className="mb-2 px-1" data-testid="attached-file-preview">
+              <div className="inline-flex items-center gap-3 border border-[#d0d0d0] rounded-2xl px-4 py-3 bg-[#f9f9f9] relative max-w-[320px]">
+                <div className="w-10 h-10 rounded-xl bg-[#ef4444] flex items-center justify-center shrink-0">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                    <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                    <polyline points="14,2 14,8 20,8" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="text-[13px] font-medium text-[#1a1a1a] truncate">{attachedFile.name}</p>
+                  <p className="text-[11px] text-[#888] uppercase">{attachedFile.isPdf ? 'PDF' : attachedFile.name.split('.').pop()?.toUpperCase() || 'FILE'}</p>
+                </div>
+                <button
+                  onClick={() => setAttachedFile(null)}
+                  className="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-[#666] text-white flex items-center justify-center text-[14px] hover:bg-[#444] transition-colors shadow-sm"
+                  data-testid="button-remove-file"
+                >
+                  &times;
+                </button>
               </div>
             </div>
           )}
