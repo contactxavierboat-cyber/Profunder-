@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useAuth } from "@/lib/store";
 import { ProfundrLogo } from "@/components/profundr-logo";
-import brushStrokeImg from "@assets/IMG_0425_1772173183157.jpeg";
 
 function SpaceBackground() {
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -262,16 +261,32 @@ export default function LandingPage() {
             </div>
 
             <div className="relative mb-6 sm:mb-8" data-testid="text-hero-headline">
-              <img
-                src={brushStrokeImg}
-                alt=""
-                className="absolute inset-0 w-full h-full object-contain pointer-events-none select-none"
-                style={{ filter: 'grayscale(1) brightness(0.25) contrast(1.2)', opacity: 0.85, transform: 'scale(1.3)' }}
+              <svg
+                className="absolute pointer-events-none select-none"
+                style={{ top: '50%', left: '50%', transform: 'translate(-50%, -50%) rotate(-3deg)', width: '115%', height: '130%' }}
+                viewBox="0 0 600 500"
+                preserveAspectRatio="none"
+                xmlns="http://www.w3.org/2000/svg"
                 aria-hidden="true"
-              />
+              >
+                <path d="M280,20 C320,15 370,25 400,50 C440,80 470,60 490,90 C520,130 540,110 550,160 C565,220 530,250 540,300 C548,340 520,370 500,400 C480,430 440,445 400,450 C360,455 320,440 280,445 C230,450 190,460 150,440 C110,420 80,390 60,350 C40,310 35,270 40,230 C45,190 55,150 70,120 C90,80 120,55 160,40 C200,25 240,25 280,20Z" fill="rgba(15,15,25,0.88)" />
+                <path d="M290,35 C340,28 385,42 420,70 C450,95 475,85 495,120 C520,160 535,145 540,200 C548,260 520,280 525,330 C530,365 505,390 480,415 C455,435 420,442 385,440 C345,438 310,425 270,430 C225,436 185,445 148,425 C115,408 90,378 72,340 C55,300 52,260 58,220 C65,178 78,140 100,112 C125,78 155,58 195,45 C235,32 260,38 290,35Z" fill="rgba(30,30,50,0.65)" />
+                <path d="M260,8 C290,5 310,12 340,18 C380,28 400,22 430,45 C455,65 480,55 500,80 C530,115 555,100 565,150 C575,200 558,230 560,280 C562,320 545,355 525,385 C500,420 465,450 420,460 C380,468 340,458 300,460 C255,462 215,470 175,455 C135,438 105,410 85,375 C60,330 45,285 42,240 C38,190 50,140 75,105 C100,70 140,45 185,30 C220,18 240,10 260,8Z" fill="rgba(50,50,70,0.35)" />
+                <path d="M200,15 C170,20 140,40 120,65 C95,95 75,110 60,145 C42,185 30,200 28,245 C25,295 38,320 50,360 C60,395 85,415 115,435 C150,455 175,458 210,455" fill="none" stroke="rgba(20,20,35,0.5)" strokeWidth="8" strokeLinecap="round" />
+                <path d="M400,460 C435,450 465,430 485,400 C510,365 528,340 540,300 C555,255 558,225 555,185 C550,140 535,118 515,90" fill="none" stroke="rgba(40,40,55,0.4)" strokeWidth="6" strokeLinecap="round" />
+                <path d="M310,15 C350,12 390,30 415,55 C445,85 465,75 485,105" fill="none" stroke="rgba(25,25,40,0.45)" strokeWidth="5" strokeLinecap="round" />
+                <ellipse cx="130" cy="60" rx="12" ry="8" fill="rgba(30,30,45,0.3)" transform="rotate(-15, 130, 60)" />
+                <ellipse cx="480" cy="55" rx="10" ry="6" fill="rgba(35,35,50,0.25)" transform="rotate(20, 480, 55)" />
+                <ellipse cx="100" cy="420" rx="8" ry="5" fill="rgba(25,25,40,0.2)" transform="rotate(-25, 100, 420)" />
+                <ellipse cx="530" cy="420" rx="9" ry="5" fill="rgba(40,40,55,0.2)" transform="rotate(15, 530, 420)" />
+                <circle cx="155" cy="35" r="3" fill="rgba(30,30,45,0.25)" />
+                <circle cx="460" cy="30" r="4" fill="rgba(35,35,50,0.2)" />
+                <circle cx="555" cy="170" r="3" fill="rgba(40,40,55,0.2)" />
+                <circle cx="75" cy="380" r="3" fill="rgba(25,25,40,0.15)" />
+              </svg>
               <h1
-                className="relative z-10 text-[48px] min-[400px]:text-[58px] sm:text-[68px] md:text-[88px] lg:text-[108px] uppercase italic leading-[0.85] text-center text-white"
-                style={{ fontFamily: "'Satoshi', sans-serif", fontWeight: 400, letterSpacing: '-0.06em', textShadow: '0 2px 20px rgba(0,0,0,0.3)' }}
+                className="relative z-10 text-[48px] min-[400px]:text-[58px] sm:text-[68px] md:text-[88px] lg:text-[108px] uppercase italic leading-[0.85] text-center text-white px-6 sm:px-10 py-6 sm:py-10"
+                style={{ fontFamily: "'Satoshi', sans-serif", fontWeight: 400, letterSpacing: '-0.06em', textShadow: '0 2px 16px rgba(0,0,0,0.4)' }}
               >
                 <span className="hidden sm:inline">Qualify<br />Before<br />You Apply</span><span className="sm:hidden">Qualify Before<br />You Apply</span>
               </h1>
