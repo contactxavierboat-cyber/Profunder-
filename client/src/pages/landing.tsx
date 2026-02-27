@@ -50,6 +50,7 @@ interface MissionData {
   suppressors: string[];
   helping: string[];
   hurting: string[];
+  bestNextMove: string | null;
 }
 
 interface DisputeItem {
@@ -172,11 +173,18 @@ function parseSingleMessageData(content: string): MissionData {
     }
   }
 
-  return { approvalIndex, band, phase, pillarScores, suppressors, helping, hurting };
+  let bestNextMove: string | null = null;
+  const moveMatch = cleanText.match(/Best\s*Next\s*Move[:\s]*([\s\S]*?)(?=\n\s*(?:What|Top|Primary|DISPUTE|Pillar)\b|\n\n|$)/i);
+  if (moveMatch) {
+    const moveLine = moveMatch[1].split("\n").map(l => l.trim()).filter(l => l.length > 5).join(" ").trim();
+    if (moveLine.length > 5) bestNextMove = moveLine;
+  }
+
+  return { approvalIndex, band, phase, pillarScores, suppressors, helping, hurting, bestNextMove };
 }
 
 function hasAnalysisData(data: MissionData): boolean {
-  return data.approvalIndex !== null || data.band !== null || data.phase !== null || data.pillarScores.length > 0 || data.suppressors.length > 0 || data.helping.length > 0 || data.hurting.length > 0;
+  return data.approvalIndex !== null || data.band !== null || data.phase !== null || data.pillarScores.length > 0 || data.suppressors.length > 0 || data.helping.length > 0 || data.hurting.length > 0 || data.bestNextMove !== null;
 }
 
 function getBandColor(band: string | null): string {
@@ -280,6 +288,36 @@ function FormatResponse({ content }: { content: string }) {
   );
 }
 
+function getApprovalSubtitle(index: number | null, band: string | null): string {
+  if (index === null) return "";
+  if (index >= 90) return "Optimized and approval-ready";
+  if (index >= 80) return "Strong profile with minor gaps";
+  if (index >= 70) return "Approval-ready, but not optimized";
+  if (index >= 55) return "Workable profile with visible pressure";
+  if (index >= 40) return "Significant blockers remain";
+  return "Profile requires remediation first";
+}
+
+function getBandSubtitle(band: string | null): string {
+  if (!band) return "";
+  const b = band.toLowerCase();
+  if (b === "exceptional") return "Premium approval readiness across products";
+  if (b === "strong") return "Can support most approval categories";
+  if (b === "viable") return "Can support selective approvals";
+  if (b === "borderline") return "May qualify with conditions or compensating factors";
+  if (b === "weak") return "Limited to secured or starter products";
+  return "Requires credit remediation before applying";
+}
+
+function getPhaseSubtitle(phase: string | null): string {
+  if (!phase) return "";
+  const p = phase.toLowerCase();
+  if (p.includes("funding")) return "Profile is ready — apply with precision";
+  if (p.includes("build")) return "Structure is forming — keep building";
+  if (p.includes("wait")) return "Not a no — just poor timing right now";
+  return "Address negatives before anything else";
+}
+
 function MissionDashboard({ data }: { data: MissionData }) {
   const bandColor = getBandColor(data.band);
   const phaseColor = getPhaseColor(data.phase);
@@ -296,7 +334,8 @@ function MissionDashboard({ data }: { data: MissionData }) {
               </span>
               <span className="text-[13px] text-[#ccc] font-mono">/100</span>
             </div>
-            <div className="mt-2.5 w-full h-1.5 bg-[#f0f0f0] rounded-full overflow-hidden">
+            <p className="text-[10px] text-[#777] mt-1.5 leading-snug">{getApprovalSubtitle(data.approvalIndex, data.band)}</p>
+            <div className="mt-2 w-full h-1.5 bg-[#f0f0f0] rounded-full overflow-hidden">
               <div className="h-full rounded-full transition-all duration-1000 ease-out" style={{ width: `${data.approvalIndex}%`, backgroundColor: bandColor }} />
             </div>
           </div>
@@ -304,19 +343,13 @@ function MissionDashboard({ data }: { data: MissionData }) {
 
         {data.band && (
           <div className="rounded-xl bg-white border border-[#e8e8e8] p-4 shadow-sm" data-testid="card-band">
-            <p className="text-[10px] text-[#999] tracking-[0.01em] font-medium mb-2">Band</p>
+            <p className="text-[10px] text-[#999] tracking-[0.01em] font-medium mb-2">Approval Strength</p>
             <p className="text-[20px] font-bold tracking-[-0.02em]" style={{ color: bandColor }} data-testid="text-band">
               {data.band}
             </p>
             <div className="flex items-center gap-1.5 mt-1">
               <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: bandColor }} />
-              <p className="text-[10px] text-[#999]">
-                {data.band === "Exceptional" ? "Premium approval readiness" :
-                 data.band === "Strong" ? "Strong approval probability" :
-                 data.band === "Viable" ? "Moderate approval potential" :
-                 data.band === "Borderline" ? "Conditional eligibility" :
-                 data.band === "Weak" ? "Limited product eligibility" : "Requires credit remediation"}
-              </p>
+              <p className="text-[10px] text-[#777]">{getBandSubtitle(data.band)}</p>
             </div>
           </div>
         )}
@@ -329,11 +362,7 @@ function MissionDashboard({ data }: { data: MissionData }) {
             </p>
             <div className="flex items-center gap-1.5 mt-1">
               <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: phaseColor }} />
-              <p className="text-[10px] text-[#999]">
-                {data.phase.toLowerCase().includes("funding") ? "Ready for controlled applications" :
-                 data.phase.toLowerCase().includes("build") ? "Strengthen structure before applying" :
-                 data.phase.toLowerCase().includes("wait") ? "Pause — timing pressure active" : "Address negatives before funding"}
-              </p>
+              <p className="text-[10px] text-[#777]">{getPhaseSubtitle(data.phase)}</p>
             </div>
           </div>
         )}
@@ -341,14 +370,15 @@ function MissionDashboard({ data }: { data: MissionData }) {
 
       {data.pillarScores.length > 0 && (
         <div className="rounded-xl bg-white border border-[#e8e8e8] p-4 shadow-sm" data-testid="card-pillar-scores">
-          <p className="text-[10px] text-[#999] tracking-[0.01em] font-medium mb-3">Pillar Scores</p>
+          <p className="text-[10px] text-[#999] tracking-[0.01em] font-medium mb-0.5">Pillar Scores</p>
+          <p className="text-[9px] text-[#bbb] mb-3">How your profile performs across core underwriting signals</p>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-x-4 gap-y-3">
             {data.pillarScores.map((pillar) => {
               const color = getPillarColor(pillar.value);
               return (
                 <div key={pillar.label} data-testid={`pillar-${pillar.label.toLowerCase().replace(/\s+/g, "-")}`}>
                   <div className="flex items-center justify-between mb-1">
-                    <span className="text-[10px] text-[#666]">{pillar.label}</span>
+                    <span className="text-[10px] text-[#666] font-medium">{pillar.label}</span>
                     <span className="text-[11px] font-bold font-mono" style={{ color }}>{pillar.value}</span>
                   </div>
                   <div className="w-full h-1.5 bg-[#f0f0f0] rounded-full overflow-hidden">
@@ -361,58 +391,64 @@ function MissionDashboard({ data }: { data: MissionData }) {
         </div>
       )}
 
-      {(data.suppressors.length > 0 || data.helping.length > 0 || data.hurting.length > 0) && (
+      {(data.suppressors.length > 0 || data.helping.length > 0 || data.bestNextMove) && (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
           {data.suppressors.length > 0 && (
             <div className="rounded-xl bg-white border border-[#e8e8e8] p-4 shadow-sm" data-testid="card-suppressors">
               <p className="text-[10px] text-[#999] tracking-[0.01em] font-medium mb-2.5">Top Approval Suppressors</p>
               <div className="space-y-2">
                 {data.suppressors.map((s, i) => (
-                  <div key={i} className="flex items-start gap-2">
-                    <div className="w-4 h-4 rounded bg-red-50 flex items-center justify-center shrink-0 mt-0.5">
-                      <span className="text-[8px] font-bold text-red-500">{i + 1}</span>
+                  <div key={i} className="flex items-start gap-2.5">
+                    <div className="w-5 h-5 rounded-md bg-red-50 flex items-center justify-center shrink-0 mt-0.5">
+                      <span className="text-[9px] font-bold text-red-500">{i + 1}</span>
                     </div>
-                    <p className="text-[11px] text-[#555] leading-[1.5]">{s}</p>
+                    <p className="text-[12px] text-[#444] leading-[1.55] font-medium">{s}</p>
                   </div>
                 ))}
               </div>
             </div>
           )}
 
-          {(data.helping.length > 0 || data.hurting.length > 0) && (
-            <div className="space-y-2">
-              {data.helping.length > 0 && (
-                <div className="rounded-xl bg-white border border-[#e8e8e8] p-4 shadow-sm" data-testid="card-helping">
-                  <p className="text-[10px] text-[#999] tracking-[0.01em] font-medium mb-2">What's Helping</p>
-                  <div className="space-y-1.5">
-                    {data.helping.map((h, i) => (
-                      <div key={i} className="flex items-start gap-2">
-                        <div className="w-3.5 h-3.5 rounded bg-green-50 flex items-center justify-center shrink-0 mt-0.5">
-                          <span className="text-[8px] text-green-600">+</span>
-                        </div>
-                        <p className="text-[10px] text-[#555] leading-[1.5]">{h}</p>
+          <div className="space-y-2">
+            {data.bestNextMove && (
+              <div className="rounded-xl bg-white border border-[#e8e8e8] p-4 shadow-sm" data-testid="card-best-next-move">
+                <p className="text-[10px] text-[#999] tracking-[0.01em] font-medium mb-2">Best Next Move</p>
+                <p className="text-[12px] text-[#333] leading-[1.6] font-medium">{data.bestNextMove}</p>
+              </div>
+            )}
+
+            {data.helping.length > 0 && (
+              <div className="rounded-xl bg-white border border-[#e8e8e8] p-4 shadow-sm" data-testid="card-helping">
+                <p className="text-[10px] text-[#999] tracking-[0.01em] font-medium mb-2">What's Helping</p>
+                <div className="space-y-1.5">
+                  {data.helping.map((h, i) => (
+                    <div key={i} className="flex items-start gap-2">
+                      <div className="w-4 h-4 rounded-md bg-green-50 flex items-center justify-center shrink-0 mt-0.5">
+                        <span className="text-[9px] text-green-600 font-bold">✓</span>
                       </div>
-                    ))}
-                  </div>
+                      <p className="text-[11px] text-[#555] leading-[1.5]">{h}</p>
+                    </div>
+                  ))}
                 </div>
-              )}
-              {data.hurting.length > 0 && (
-                <div className="rounded-xl bg-white border border-[#e8e8e8] p-4 shadow-sm" data-testid="card-hurting">
-                  <p className="text-[10px] text-[#999] tracking-[0.01em] font-medium mb-2">What's Hurting</p>
-                  <div className="space-y-1.5">
-                    {data.hurting.map((h, i) => (
-                      <div key={i} className="flex items-start gap-2">
-                        <div className="w-3.5 h-3.5 rounded bg-red-50 flex items-center justify-center shrink-0 mt-0.5">
-                          <span className="text-[8px] text-red-500">-</span>
-                        </div>
-                        <p className="text-[10px] text-[#555] leading-[1.5]">{h}</p>
-                      </div>
-                    ))}
-                  </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {data.hurting.length > 0 && (
+        <div className="rounded-xl bg-white border border-[#e8e8e8] p-4 shadow-sm" data-testid="card-hurting">
+          <p className="text-[10px] text-[#999] tracking-[0.01em] font-medium mb-2">What's Hurting</p>
+          <div className="space-y-1.5">
+            {data.hurting.map((h, i) => (
+              <div key={i} className="flex items-start gap-2">
+                <div className="w-4 h-4 rounded-md bg-red-50 flex items-center justify-center shrink-0 mt-0.5">
+                  <span className="text-[9px] text-red-500 font-bold">−</span>
                 </div>
-              )}
-            </div>
-          )}
+                <p className="text-[11px] text-[#555] leading-[1.5]">{h}</p>
+              </div>
+            ))}
+          </div>
         </div>
       )}
     </div>

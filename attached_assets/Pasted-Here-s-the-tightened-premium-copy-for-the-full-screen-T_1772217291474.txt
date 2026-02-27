@@ -1,0 +1,251 @@
+Here’s the **tightened premium copy** for the full screen.
+
+## Top row
+
+### Card 1
+
+**Approval Index**
+**74 / 100**
+**Approval-ready, but not optimized**
+
+This line under the score is important. It gives meaning fast.
+
+Other subtitle options:
+
+* **Moderate readiness with visible suppressors**
+* **Capable of selective approvals**
+* **Strong foundation, weak timing**
+
+Best one for this screen:
+**Approval-ready, but not optimized**
+
+---
+
+### Card 2
+
+Rename **Band** to:
+
+## **Approval Strength**
+
+Then keep:
+
+**Viable**
+**Can support selective approvals**
+
+Other options for the small line:
+
+* **Moderate approval potential**
+* **Workable profile with visible pressure**
+* **Strong enough for some approvals, not all**
+
+Best version:
+**Viable**
+**Can support selective approvals**
+
+---
+
+### Card 3
+
+**Current Phase**
+**Wait Phase**
+**Not a no — just poor timing right now**
+
+Other strong sublines:
+
+* **Pause applications until pressure cools**
+* **Structure is workable, timing is not**
+* **Timing pressure is suppressing readiness**
+
+Best version:
+**Wait Phase**
+**Not a no — just poor timing right now**
+
+That feels human and intelligent.
+
+---
+
+# Pillar Scores section
+
+Keep title:
+
+## **Pillar Scores**
+
+Optional tiny subtitle under title:
+**How your profile performs across core underwriting signals**
+
+That helps new users understand what they’re looking at.
+
+---
+
+## Rename pillars slightly for clarity
+
+Current names are good, but these are a bit cleaner:
+
+* **Payment Integrity**
+* **Utilization Control**
+* **File Stability**
+* **Credit Depth**
+* **Timing Risk**
+* **Lender Confidence**
+
+I’d keep these exactly.
+
+---
+
+# Top Approval Suppressors card
+
+Keep title:
+
+## **Top Approval Suppressors**
+
+Then tighten the bullets.
+
+### Revised copy
+
+1. **Bank of America card is reporting 87% utilization**
+2. **File is thin with limited true revolving depth**
+3. **Recent Bank of America account is reducing timing stability**
+
+This is better because it is:
+
+* more direct
+* more scannable
+* less wordy
+* more premium
+
+---
+
+# Add this missing card
+
+## **Best Next Move**
+
+**Pay Bank of America below 30%, let the recent account age, and avoid new applications until timing pressure drops.**
+
+Alternative version:
+**Reduce utilization first, let the new account season, and protect the file from additional inquiries.**
+
+Best version for your screen:
+**Pay Bank of America below 30%, let the recent account age, and avoid new applications until timing pressure drops.**
+
+---
+
+# Optional supporting card
+
+## **What’s Helping**
+
+* **Clean payment history**
+* **No collections or public records**
+* **Existing revolving exposure reporting clean on key account**
+
+This is useful because it keeps the engine from feeling purely negative.
+
+---
+
+# Full premium screen copy
+
+## Card 1
+
+**Approval Index**
+**74 / 100**
+**Approval-ready, but not optimized**
+
+## Card 2
+
+**Approval Strength**
+**Viable**
+**Can support selective approvals**
+
+## Card 3
+
+**Current Phase**
+**Wait Phase**
+**Not a no — just poor timing right now**
+
+## Section
+
+**Pillar Scores**
+**How your profile performs across core underwriting signals**
+
+## Card
+
+**Top Approval Suppressors**
+
+1. **Bank of America card is reporting 87% utilization**
+2. **File is thin with limited true revolving depth**
+3. **Recent Bank of America account is reducing timing stability**
+
+## Card
+
+**Best Next Move**
+**Pay Bank of America below 30%, let the recent account age, and avoid new applications until timing pressure drops.**
+
+## Optional Card
+
+**What’s Helping**
+
+* **Clean payment history**
+* **No collections or public records**
+* **Existing revolving exposure reporting clean on key account**
+
+---
+
+# Best label upgrades
+
+Replace these:
+
+* **Band** → **Approval Strength**
+* **Moderate approval potential** → **Can support selective approvals**
+* **Pause — timing pressure active** → **Not a no — just poor timing right now**
+
+Those 3 changes alone make the screen much stronger.
+
+---
+
+# If you want it even more premium
+
+You can make the cards slightly more “operator-like”:
+
+## Version B
+
+**Approval Index**
+74 / 100
+**Workable profile. Visible pressure remains.**
+
+**Approval Strength**
+Viable
+**Strong enough for selective approvals**
+
+**Current Phase**
+Wait Phase
+**Protect the file. Timing is still suppressing readiness.**
+
+That version feels more serious and luxury-tech.
+
+---
+
+# My recommendation
+
+Use this exact final set:
+
+**Approval Index**
+**74 / 100**
+**Approval-ready, but not optimized**
+
+**Approval Strength**
+**Viable**
+**Can support selective approvals**
+
+**Current Phase**
+**Wait Phase**
+**Not a no — just poor timing right now**
+
+**Top Approval Suppressors**
+
+1. **Bank of America card is reporting 87% utilization**
+2. **File is thin with limited true revolving depth**
+3. **Recent Bank of America account is reducing timing stability**
+
+**Best Next Move**
+**Pay Bank of America below 30%, let the recent account age, and avoid new applications until timing pressure drops.**
+
+Next, I can write the **exact copy for all six pillar tooltips/popups** so when users tap each pillar it explains what it means in premium, simple language.
