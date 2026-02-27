@@ -1518,14 +1518,18 @@ export async function registerRoutes(
       })).max(10).optional(),
       fileContent: z.string().max(15_000_000).nullable().optional(),
       attachment: z.enum(["credit_report", "bank_statement"]).nullable().optional(),
-      fileType: z.enum(["pdf", "text"]).nullable().optional()
+      fileType: z.enum(["pdf", "text"]).nullable().optional(),
+      teamContext: z.object({
+        senderName: z.string(),
+        partnerName: z.string(),
+      }).nullable().optional()
     }).safeParse(req.body);
 
     if (!body.success) {
       return res.status(400).json({ error: "Invalid message data" });
     }
 
-    const { content, history = [], fileContent, attachment, fileType } = body.data;
+    const { content, history = [], fileContent, attachment, fileType, teamContext } = body.data;
 
     let extractedText = "";
     let extractionMethod = "";
@@ -1567,7 +1571,23 @@ ${extractedText}
 --- END OF DOCUMENT ---`;
     }
 
-    const systemPrompt = FUNDABILITY_ENGINE_PROMPT + fileContext;
+    let teamContextPrompt = "";
+    if (teamContext) {
+      teamContextPrompt = `\n\n--- TEAM CHAT MODE ---
+You are in a GROUP CHAT with two people: "${teamContext.senderName}" and "${teamContext.partnerName}". This is a 3-way conversation between them and you (Profundr AI).
+
+CRITICAL RULES FOR GROUP CHAT:
+1. Every message from a human is prefixed with their name in brackets: [Name]. Use this to know who is speaking. For example, [${teamContext.senderName}] means ${teamContext.senderName} is talking, [${teamContext.partnerName}] means ${teamContext.partnerName} is talking.
+2. Always address the person who just spoke by name in your response. If ${teamContext.partnerName} asks a question, respond to ${teamContext.partnerName} by name. If ${teamContext.senderName} asks, respond to ${teamContext.senderName} by name.
+3. When both participants are active in the conversation, reference both by name. Acknowledge what each person said individually.
+4. If it's unclear who a question is about or for, ask: "Are you asking about your own profile, ${teamContext.senderName}, or about ${teamContext.partnerName}'s?"
+5. Keep each person's credit data, scores, and situations SEPARATE. Never mix up their profiles. If both upload reports, track them independently.
+6. Be conversational and natural — you're a knowledgeable third participant in this group chat, not a detached assistant. Facilitate productive discussion between the two participants.
+7. When one person shares data or asks for analysis, ask if the other person wants to share theirs too for comparison, when relevant.
+--- END TEAM CHAT MODE ---`;
+    }
+
+    const systemPrompt = FUNDABILITY_ENGINE_PROMPT + teamContextPrompt + fileContext;
 
     if (extractedText) {
       console.log(`[Guest Chat] Document provided: ${extractedText.length} chars via ${extractionMethod}`);
@@ -1579,7 +1599,7 @@ ${extractedText}
         messages: [
           { role: "system", content: systemPrompt },
           ...history.slice(-8),
-          { role: "user", content }
+          { role: "user", content: teamContext ? `[${teamContext.senderName}]: ${content}` : content }
         ],
         max_tokens: 4096,
       });

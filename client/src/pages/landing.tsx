@@ -1059,13 +1059,20 @@ export default function LandingPage() {
           const serverMsgs: TeamMessage[] = await histRes.json();
           history = serverMsgs.map(m => ({
             role: m.isAi ? "assistant" : "user",
-            content: m.senderId !== user.id && !m.isAi
-              ? `[Team member ${m.displayName}]: ${m.content}`
+            content: !m.isAi
+              ? `[${m.displayName}]: ${m.content}`
               : m.content,
           }));
         }
 
-        const payload: Record<string, unknown> = { content: text, history };
+        const payload: Record<string, unknown> = {
+          content: text,
+          history,
+          teamContext: {
+            senderName: user.displayName || user.email,
+            partnerName: activeTeamChat.displayName,
+          },
+        };
         if (file) {
           payload.fileContent = file.content;
           payload.attachment = "credit_report";
