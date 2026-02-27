@@ -400,7 +400,6 @@ export default function LandingPage() {
   const [nextId, setNextId] = useState(1);
   const [attachedFile, setAttachedFile] = useState<{ name: string; content: string; isPdf?: boolean } | null>(null);
   const [autoSendFile, setAutoSendFile] = useState(false);
-  const [showWelcome, setShowWelcome] = useState(true);
   const { user } = useAuth();
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -529,7 +528,9 @@ export default function LandingPage() {
               </svg>
               Upload credit report to get started
             </button>
-            <p className="text-[12px] text-[#999]">PDF, TXT, or CSV — your data stays private</p>
+            <p className="text-[11px] text-[#999] text-center max-w-[360px] leading-[1.6] mt-1" data-testid="text-upload-description">
+              Profundr is a digital underwriting engine that reviews your credit report like a bank would and shows your funding potential before you apply. No hard inquiry, no lending — just secure, clear analysis.
+            </p>
           </div>
         ) : (
           <div className="flex-1 w-full max-w-[720px] mx-auto overflow-y-auto px-4 pt-4 pb-2" data-testid="chat-messages">
@@ -677,42 +678,6 @@ export default function LandingPage() {
         </p>
       </div>
 
-      {showWelcome && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm px-4" onClick={() => setShowWelcome(false)} data-testid="welcome-overlay">
-          <div
-            className="relative w-full max-w-sm rounded-xl bg-white border border-[#e8e8e8] px-6 py-5 shadow-xl"
-            onClick={(e) => e.stopPropagation()} data-testid="welcome-popup"
-          >
-            <button
-              onClick={() => setShowWelcome(false)}
-              className="absolute top-3 right-3 w-6 h-6 flex items-center justify-center rounded-full text-[#ccc] hover:text-[#888] transition-colors"
-              data-testid="button-close-welcome"
-            >
-              <svg width="12" height="12" viewBox="0 0 14 14" fill="none">
-                <path d="M3 3L11 11M11 3L3 11" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-              </svg>
-            </button>
-
-            <ProfundrLogo size="md" variant="dark" />
-
-            <p className="text-[12px] text-[#888] leading-[1.7] mt-3 mb-5">
-              Profundr is a digital underwriting engine that reviews your credit report like a bank would and shows your funding potential before you apply. No hard inquiry, no lending — just secure, clear analysis.
-            </p>
-
-            <button
-              onClick={() => { setShowWelcome(false); setAutoSendFile(true); handleUploadClick(); }}
-              className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-[#1a1a2e] text-white rounded-full text-[12px] font-medium hover:bg-[#2a2a40] transition-colors"
-              data-testid="button-welcome-upload"
-            >
-              <svg width="14" height="14" viewBox="0 0 18 18" fill="none">
-                <path d="M9 3V12M9 3L5.5 6.5M9 3L12.5 6.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                <path d="M3 12V14C3 14.5523 3.44772 15 4 15H14C14.5523 15 15 14.5523 15 14V12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-              Upload credit report to get started
-            </button>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
