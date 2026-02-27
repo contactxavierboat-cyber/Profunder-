@@ -513,7 +513,7 @@ export default function LandingPage() {
 
       <main className="flex-1 flex flex-col items-center overflow-hidden">
         {!hasMessages && !isSending ? (
-          <div className="flex-1 flex flex-col items-center justify-center px-4 gap-6">
+          <div className="flex-1 flex flex-col items-center justify-center px-4 gap-4">
             <h1 className="text-[28px] sm:text-[36px] font-semibold text-[#1a1a1a] tracking-[-0.03em] text-center leading-tight" data-testid="text-hero-headline">
               How fundable are you?
             </h1>
@@ -528,8 +528,8 @@ export default function LandingPage() {
               </svg>
               Upload credit report to get started
             </button>
-            <p className="text-[11px] text-[#999] text-center max-w-[360px] leading-[1.6] mt-1" data-testid="text-upload-description">
-              Profundr is a digital underwriting engine that reviews your credit report like a bank would and shows your funding potential before you apply. No hard inquiry, no lending — just secure, clear analysis.
+            <p className="text-[11px] text-[#999] text-center max-w-[240px] leading-[1.6]" data-testid="text-upload-description">
+              Profundr reviews your credit report like a bank would and shows your funding potential before you apply. No hard inquiry, no lending — just secure, clear analysis.
             </p>
           </div>
         ) : (
