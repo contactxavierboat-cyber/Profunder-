@@ -67,6 +67,24 @@ const SubscribeButton = ({ className = "", onSubscribe }: { className?: string; 
   </button>
 );
 
+const TornPaperEdge = ({ flip = false }: { flip?: boolean }) => (
+  <div className={`relative z-30 w-full overflow-hidden pointer-events-none ${flip ? 'rotate-180' : ''}`} style={{ height: '60px', marginTop: flip ? '0' : '-30px', marginBottom: flip ? '-30px' : '0' }}>
+    <svg viewBox="0 0 1200 60" preserveAspectRatio="none" className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
+      <path
+        d="M0,30 Q15,8 30,28 Q45,48 60,25 Q75,2 90,22 Q105,42 120,18 Q135,0 150,26 Q165,52 180,20 Q195,0 210,32 Q225,55 240,15 Q255,0 270,28 Q285,50 300,22 Q315,0 330,30 Q345,55 360,18 Q375,0 390,25 Q405,48 420,12 Q435,0 450,32 Q465,58 480,20 Q495,0 510,28 Q525,50 540,16 Q555,0 570,30 Q585,52 600,22 Q615,0 630,26 Q645,48 660,14 Q675,0 690,28 Q705,55 720,18 Q735,0 750,30 Q765,52 780,20 Q795,0 810,25 Q825,48 840,15 Q855,0 870,32 Q885,55 900,18 Q915,0 930,28 Q945,50 960,22 Q975,0 990,26 Q1005,48 1020,16 Q1035,0 1050,30 Q1065,52 1080,20 Q1095,0 1110,28 Q1125,50 1140,18 Q1155,0 1170,25 Q1185,48 1200,30 L1200,60 L0,60 Z"
+        fill="white"
+        fillOpacity="0.35"
+      />
+      <path
+        d="M0,30 Q15,8 30,28 Q45,48 60,25 Q75,2 90,22 Q105,42 120,18 Q135,0 150,26 Q165,52 180,20 Q195,0 210,32 Q225,55 240,15 Q255,0 270,28 Q285,50 300,22 Q315,0 330,30 Q345,55 360,18 Q375,0 390,25 Q405,48 420,12 Q435,0 450,32 Q465,58 480,20 Q495,0 510,28 Q525,50 540,16 Q555,0 570,30 Q585,52 600,22 Q615,0 630,26 Q645,48 660,14 Q675,0 690,28 Q705,55 720,18 Q735,0 750,30 Q765,52 780,20 Q795,0 810,25 Q825,48 840,15 Q855,0 870,32 Q885,55 900,18 Q915,0 930,28 Q945,50 960,22 Q975,0 990,26 Q1005,48 1020,16 Q1035,0 1050,30 Q1065,52 1080,20 Q1095,0 1110,28 Q1125,50 1140,18 Q1155,0 1170,25 Q1185,48 1200,30"
+        fill="none"
+        stroke="rgba(180,180,200,0.2)"
+        strokeWidth="1"
+      />
+    </svg>
+  </div>
+);
+
 const ScrollArrow = ({ targetId }: { targetId: string }) => (
   <button
     onClick={() => document.getElementById(targetId)?.scrollIntoView({ behavior: 'smooth' })}
@@ -260,11 +278,8 @@ export default function LandingPage() {
             style={{ fontFamily: "'Satoshi', sans-serif", fontWeight: 400, letterSpacing: '-0.06em', backgroundImage: 'linear-gradient(180deg, #000000 0%, #3a3a5a 50%, #7a7a9a 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}
             data-testid="text-hero-headline"
           >
-            <span className="hidden sm:inline">Is Your<br />Business<br />Fundable?</span><span className="sm:hidden">Is Your Business<br />Fundable?</span>
+            <span className="hidden sm:inline">Qualify<br />Before<br />You Apply</span><span className="sm:hidden">Qualify Before<br />You Apply</span>
           </h1>
-          <p className="text-[13px] sm:text-[17px] tracking-[0.05em] text-[#5a5a7a] leading-[1.6] sm:leading-[1.8] max-w-[560px] mx-auto mb-8 sm:mb-10 px-1 sm:px-0">
-            Find Out Before You Apply.
-          </p>
           <p className="text-[12px] sm:text-[17px] text-[#5a5a7a] leading-[1.6] sm:leading-[1.8] max-w-[560px] mx-auto mb-8 sm:mb-10 px-1 sm:px-0">
             Know exactly where you stand before you submit a single funding application. We analyze your profile using real underwriting logic to determine your funding potential — before lenders ever see you. Stop guessing. Start qualifying.
           </p>
@@ -304,6 +319,7 @@ export default function LandingPage() {
           <ScrollArrow targetId="sec-problem" />
         </div>
       </section>
+      <TornPaperEdge />
 
       {/* ═══════════════ 2. PROBLEM / PAIN ═══════════════ */}
       <section id="sec-problem" className="relative z-20 px-6 sm:px-12 md:px-20 py-20 sm:py-28 text-center">
@@ -333,6 +349,7 @@ export default function LandingPage() {
         </div>
       </section>
 
+      <TornPaperEdge />
       {/* ═══════════════ 3. SOLUTION OVERVIEW ═══════════════ */}
       <section id="sec-solution" className="relative z-20 px-6 sm:px-12 md:px-20 py-20 sm:py-28 text-center">
 
@@ -366,6 +383,7 @@ export default function LandingPage() {
         </div>
       </section>
 
+      <TornPaperEdge />
       {/* ═══════════════ 4. HOW IT WORKS ═══════════════ */}
       <section id="how-it-works" className="relative z-20 px-6 sm:px-12 md:px-20 py-20 sm:py-28 text-center">
 
@@ -397,6 +415,7 @@ export default function LandingPage() {
         </div>
       </section>
 
+      <TornPaperEdge />
       {/* ═══════════════ 5. FUNDING OUTCOMES ═══════════════ */}
       <section id="features" className="relative z-20 px-6 sm:px-12 md:px-20 py-20 sm:py-28 text-center">
 
@@ -431,6 +450,7 @@ export default function LandingPage() {
         </div>
       </section>
 
+      <TornPaperEdge />
       {/* ═══════════════ 6. SOCIAL PROOF ═══════════════ */}
       <section id="results" className="relative z-20 px-6 sm:px-12 md:px-20 py-20 sm:py-28 text-center">
 
@@ -476,6 +496,7 @@ export default function LandingPage() {
         </div>
       </section>
 
+      <TornPaperEdge />
       {/* ═══════════════ 7. RISK REVERSAL ═══════════════ */}
       <section id="sec-risk" className="relative z-20 px-6 sm:px-12 md:px-20 py-20 sm:py-28 text-center">
 
@@ -516,6 +537,7 @@ export default function LandingPage() {
         </div>
       </section>
 
+      <TornPaperEdge />
       {/* ═══════════════ 8. FEATURE BREAKDOWN ═══════════════ */}
       <section id="sec-breakdown" className="relative z-20 px-6 sm:px-12 md:px-20 py-20 sm:py-28 text-center">
 
@@ -555,6 +577,7 @@ export default function LandingPage() {
         </div>
       </section>
 
+      <TornPaperEdge />
       {/* ═══════════════ 9. MODE DIFFERENTIATION ═══════════════ */}
       <section id="sec-modes" className="relative z-20 px-6 sm:px-12 md:px-20 py-20 sm:py-28 text-center">
 
@@ -606,6 +629,7 @@ export default function LandingPage() {
         </div>
       </section>
 
+      <TornPaperEdge />
       {/* ═══════════════ 10. TIER POSITIONING ═══════════════ */}
       <section id="sec-tiers" className="relative z-20 px-6 sm:px-12 md:px-20 py-20 sm:py-28 text-center">
 
@@ -635,6 +659,7 @@ export default function LandingPage() {
         </div>
       </section>
 
+      <TornPaperEdge />
       {/* ═══════════════ 11. CASE STUDY ═══════════════ */}
       <section id="sec-case" className="relative z-20 px-6 sm:px-12 md:px-20 py-20 sm:py-28 text-center">
 
@@ -669,6 +694,7 @@ export default function LandingPage() {
         </div>
       </section>
 
+      <TornPaperEdge />
       {/* ═══════════════ 12. FAQ / OBJECTION HANDLING ═══════════════ */}
       <section id="faq" className="relative z-20 px-6 sm:px-12 md:px-20 py-20 sm:py-28 text-center">
 
@@ -703,6 +729,7 @@ export default function LandingPage() {
         </div>
       </section>
 
+      <TornPaperEdge />
       {/* ═══════════════ 13. TRUST & COMPLIANCE ═══════════════ */}
       <section id="sec-trust" className="relative z-20 px-6 sm:px-12 md:px-20 py-20 sm:py-28 text-center">
 
@@ -732,6 +759,7 @@ export default function LandingPage() {
         </div>
       </section>
 
+      <TornPaperEdge />
       {/* ═══════════════ 14. FINAL CTA ═══════════════ */}
       <section id="sec-cta" className="relative z-20 px-6 sm:px-12 md:px-20 py-24 sm:py-36">
 
