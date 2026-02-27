@@ -318,12 +318,51 @@ function getPhaseSubtitle(phase: string | null): string {
   return "Address negatives before anything else";
 }
 
-function MissionDashboard({ data }: { data: MissionData }) {
+function MissionDashboard({ data, userName }: { data: MissionData; userName?: string }) {
   const bandColor = getBandColor(data.band);
   const phaseColor = getPhaseColor(data.phase);
+  const [downloadingReport, setDownloadingReport] = useState(false);
+
+  const handleDownloadReport = async () => {
+    setDownloadingReport(true);
+    try {
+      const res = await fetch("/api/analysis-report", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...data, userName }),
+      });
+      if (!res.ok) throw new Error("Server error");
+      const result = await res.json();
+      if (!result.downloadUrl) throw new Error("No download URL");
+      const a = document.createElement("a");
+      a.href = result.downloadUrl;
+      a.download = "profundr-analysis-report.pdf";
+      a.click();
+    } catch (e) {
+      console.error("Failed to download analysis report:", e);
+      alert("Failed to generate report. Please try again.");
+    } finally {
+      setDownloadingReport(false);
+    }
+  };
 
   return (
     <div className="w-full mt-4 space-y-2.5" data-testid="mission-dashboard-inline">
+      <div className="flex items-center justify-end mb-1">
+        <button
+          onClick={handleDownloadReport}
+          disabled={downloadingReport}
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#1a1a2e] text-white text-[11px] font-medium hover:bg-[#2a2a4e] transition-colors disabled:opacity-50"
+          data-testid="button-download-analysis-report"
+        >
+          {downloadingReport ? (
+            <svg className="w-3.5 h-3.5 animate-spin" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" strokeDasharray="31.4" strokeLinecap="round" /></svg>
+          ) : (
+            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v12m0 0l-4-4m4 4l4-4M4 18h16" /></svg>
+          )}
+          {downloadingReport ? "Generating..." : "Download Report"}
+        </button>
+      </div>
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
         {data.approvalIndex !== null && (
           <div className="rounded-xl bg-white border border-[#e8e8e8] p-4 shadow-sm" data-testid="card-approval-index">
@@ -1556,7 +1595,7 @@ export default function LandingPage() {
                       )}
                       {showDashboard && (
                         <div className="ml-10">
-                          <MissionDashboard data={msgData} />
+                          <MissionDashboard data={msgData} userName={user?.displayName || user?.email} />
                         </div>
                       )}
                       {disputes.length > 0 && (

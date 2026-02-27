@@ -1664,6 +1664,76 @@ CONVERSATIONAL RULES:
     }
   });
 
+  function drawBrainLogo(doc: InstanceType<typeof PDFDocument>, cx: number, cy: number, size: number) {
+    const s = size / 24;
+    doc.save();
+    const x0 = cx - size / 2;
+    const y0 = cy - size / 2;
+
+    doc.roundedRect(x0, y0, size, size, 4 * s).fill("#1a1a2e");
+
+    const lw = 1.0 * s;
+    doc.lineWidth(lw).strokeColor("white").lineCap("round").lineJoin("round");
+
+    const px = (v: number) => x0 + v * s;
+    const py = (v: number) => y0 + v * s;
+
+    doc.moveTo(px(12), py(4))
+      .bezierCurveTo(px(9), py(4), px(7), py(6), px(7), py(8.5))
+      .bezierCurveTo(px(7), py(9.5), px(6), py(10), px(5.5), py(10))
+      .bezierCurveTo(px(4), py(10), px(4), py(12), px(4), py(13))
+      .bezierCurveTo(px(4), py(14.5), px(5), py(15.5), px(6), py(16))
+      .bezierCurveTo(px(6), py(17), px(5.5), py(18), px(5.5), py(18.5))
+      .bezierCurveTo(px(5.5), py(20), px(7.5), py(21), px(9), py(21))
+      .bezierCurveTo(px(10), py(21), px(11), py(20.5), px(12), py(19.5))
+      .stroke();
+
+    doc.moveTo(px(12), py(4))
+      .bezierCurveTo(px(15), py(4), px(17), py(6), px(17), py(8.5))
+      .bezierCurveTo(px(17), py(9.5), px(18), py(10), px(18.5), py(10))
+      .bezierCurveTo(px(20), py(10), px(20), py(12), px(20), py(13))
+      .bezierCurveTo(px(20), py(14.5), px(19), py(15.5), px(18), py(16))
+      .bezierCurveTo(px(18), py(17), px(18.5), py(18), px(18.5), py(18.5))
+      .bezierCurveTo(px(18.5), py(20), px(16.5), py(21), px(15), py(21))
+      .bezierCurveTo(px(14), py(21), px(13), py(20.5), px(12), py(19.5))
+      .stroke();
+
+    doc.moveTo(px(12), py(4)).lineTo(px(12), py(19.5)).stroke();
+
+    doc.moveTo(px(7), py(10))
+      .bezierCurveTo(px(8.5), py(11), px(10), py(12.5), px(12), py(13))
+      .stroke();
+
+    doc.moveTo(px(17), py(10))
+      .bezierCurveTo(px(15.5), py(11), px(14), py(12.5), px(12), py(13))
+      .stroke();
+
+    doc.moveTo(px(6), py(16))
+      .bezierCurveTo(px(8), py(15.5), px(10), py(14.5), px(12), py(13))
+      .stroke();
+
+    doc.moveTo(px(18), py(16))
+      .bezierCurveTo(px(16), py(15.5), px(14), py(14.5), px(12), py(13))
+      .stroke();
+
+    doc.restore();
+  }
+
+  function drawPdfLetterhead(doc: InstanceType<typeof PDFDocument>) {
+    const pageWidth = doc.page.width;
+    const logoSize = 32;
+    try {
+      drawBrainLogo(doc, pageWidth / 2, 36, logoSize);
+    } catch (e) {
+      // fallback: no logo if path fails
+    }
+    doc.font("Helvetica-Bold").fontSize(16).fillColor("#1a1a2e")
+      .text("profundr.", 0, 58, { align: "center" });
+    doc.font("Helvetica").fontSize(7).fillColor("#999999")
+      .text("Capital Operating System", { align: "center" });
+    doc.moveDown(1.5);
+  }
+
   const pendingPdfs = new Map<string, { buffer: Buffer; created: number }>();
   setInterval(() => {
     const now = Date.now();
@@ -1725,11 +1795,7 @@ CONVERSATIONAL RULES:
 
         const bureauAddr = bureauAddresses[d.bureau] || bureauAddresses["All"];
 
-        doc.font("Helvetica-Bold").fontSize(22).fillColor("#1a1a2e")
-          .text("profundr.", { align: "center" });
-        doc.font("Helvetica").fontSize(8).fillColor("#999999")
-          .text("Digital Underwriting Engine", { align: "center" });
-        doc.moveDown(1.5);
+        drawPdfLetterhead(doc);
 
         doc.font("Helvetica").fontSize(10).fillColor("#333333")
           .text(userName)
@@ -1890,6 +1956,180 @@ CONVERSATIONAL RULES:
     } catch (error: any) {
       console.error("PDF generation error:", error);
       res.status(500).json({ error: "Failed to generate dispute letters" });
+    }
+  });
+
+  app.get("/api/analysis-report/:token", (req, res) => {
+    const pdf = pendingPdfs.get(req.params.token);
+    if (!pdf) return res.status(404).json({ error: "Download expired or not found" });
+    pendingPdfs.delete(req.params.token);
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader("Content-Disposition", "attachment; filename=profundr-analysis-report.pdf");
+    res.send(pdf.buffer);
+  });
+
+  app.post("/api/analysis-report", async (req, res) => {
+    const body = z.object({
+      approvalIndex: z.number().nullable(),
+      band: z.string().nullable(),
+      phase: z.string().nullable(),
+      pillarScores: z.array(z.object({ label: z.string(), value: z.number() })),
+      suppressors: z.array(z.string()),
+      helping: z.array(z.string()),
+      hurting: z.array(z.string()),
+      bestNextMove: z.string().nullable().optional(),
+      userName: z.string().max(100).optional(),
+    }).safeParse(req.body);
+
+    if (!body.success) {
+      return res.status(400).json({ error: "Invalid analysis data" });
+    }
+
+    const d = body.data;
+    const today = new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
+
+    try {
+      const doc = new PDFDocument({ size: "LETTER", margins: { top: 40, bottom: 40, left: 50, right: 50 } });
+      const chunks: Buffer[] = [];
+      doc.on("data", (chunk: Buffer) => chunks.push(chunk));
+      const pdfReady = new Promise<Buffer>((resolve) => {
+        doc.on("end", () => resolve(Buffer.concat(chunks)));
+      });
+
+      const pageWidth = doc.page.width - 100;
+
+      drawPdfLetterhead(doc);
+
+      doc.font("Helvetica-Bold").fontSize(14).fillColor("#1a1a2e")
+        .text("Credit Analysis Report", { align: "center" });
+      doc.font("Helvetica").fontSize(9).fillColor("#888888")
+        .text(today, { align: "center" });
+      if (d.userName) {
+        doc.font("Helvetica").fontSize(9).fillColor("#888888")
+          .text(`Prepared for: ${d.userName}`, { align: "center" });
+      }
+      doc.moveDown(1.2);
+
+      const drawCardBox = (startY: number, height: number) => {
+        doc.save();
+        doc.roundedRect(50, startY, pageWidth, height, 6)
+          .lineWidth(0.5).strokeColor("#ddd").stroke();
+        doc.restore();
+      };
+
+      if (d.approvalIndex !== null) {
+        const cardY = doc.y;
+        const barWidth = pageWidth - 40;
+
+        doc.font("Helvetica").fontSize(8).fillColor("#999").text("APPROVAL INDEX", 70, cardY + 10);
+        doc.font("Helvetica-Bold").fontSize(36).fillColor("#1a1a2e")
+          .text(`${d.approvalIndex}`, 70, cardY + 22);
+
+        if (d.band) {
+          doc.font("Helvetica").fontSize(9).fillColor("#666")
+            .text(`Approval Strength: ${d.band}`, 70, cardY + 62);
+        }
+
+        doc.save();
+        doc.roundedRect(70, cardY + 78, barWidth, 8, 4).fill("#f0f0f0");
+        const barColor = d.approvalIndex >= 80 ? "#22c55e" : d.approvalIndex >= 60 ? "#6366f1" : d.approvalIndex >= 40 ? "#f59e0b" : "#ef4444";
+        doc.roundedRect(70, cardY + 78, barWidth * (d.approvalIndex / 100), 8, 4).fill(barColor);
+        doc.restore();
+
+        drawCardBox(cardY, 96);
+        doc.y = cardY + 106;
+      }
+
+      if (d.phase) {
+        const cardY = doc.y;
+        doc.font("Helvetica").fontSize(8).fillColor("#999").text("CURRENT PHASE", 70, cardY + 10);
+        doc.font("Helvetica-Bold").fontSize(16).fillColor("#1a1a2e")
+          .text(d.phase, 70, cardY + 24);
+        drawCardBox(cardY, 52);
+        doc.y = cardY + 62;
+      }
+
+      if (d.pillarScores.length > 0) {
+        const cardY = doc.y;
+        doc.font("Helvetica").fontSize(8).fillColor("#999").text("PILLAR SCORES", 70, cardY + 10);
+        let y = cardY + 26;
+        const barW = pageWidth - 120;
+        for (const p of d.pillarScores) {
+          doc.font("Helvetica").fontSize(9).fillColor("#333").text(p.label, 70, y);
+          doc.font("Helvetica-Bold").fontSize(9).fillColor("#1a1a2e").text(`${p.value}`, pageWidth - 10, y, { align: "right", width: 40 });
+          doc.save();
+          doc.roundedRect(70, y + 14, barW, 6, 3).fill("#f0f0f0");
+          const pColor = p.value >= 80 ? "#22c55e" : p.value >= 60 ? "#6366f1" : p.value >= 40 ? "#f59e0b" : "#ef4444";
+          doc.roundedRect(70, y + 14, barW * (p.value / 100), 6, 3).fill(pColor);
+          doc.restore();
+          y += 28;
+        }
+        const totalH = y - cardY + 6;
+        drawCardBox(cardY, totalH);
+        doc.y = cardY + totalH + 10;
+      }
+
+      if (d.suppressors.length > 0) {
+        const cardY = doc.y;
+        doc.font("Helvetica").fontSize(8).fillColor("#999").text("TOP APPROVAL SUPPRESSORS", 70, cardY + 10);
+        let y = cardY + 26;
+        for (const s of d.suppressors) {
+          doc.font("Helvetica").fontSize(9).fillColor("#c0392b").text(`▸  ${s}`, 70, y, { width: pageWidth - 40 });
+          y = doc.y + 4;
+        }
+        const totalH = y - cardY + 6;
+        drawCardBox(cardY, totalH);
+        doc.y = cardY + totalH + 10;
+      }
+
+      if (d.bestNextMove) {
+        const cardY = doc.y;
+        doc.font("Helvetica").fontSize(8).fillColor("#999").text("BEST NEXT MOVE", 70, cardY + 10);
+        doc.font("Helvetica-Bold").fontSize(10).fillColor("#1a1a2e")
+          .text(d.bestNextMove, 70, cardY + 26, { width: pageWidth - 40 });
+        const totalH = doc.y - cardY + 14;
+        drawCardBox(cardY, totalH);
+        doc.y = cardY + totalH + 10;
+      }
+
+      if (d.helping.length > 0) {
+        const cardY = doc.y;
+        doc.font("Helvetica").fontSize(8).fillColor("#999").text("WHAT'S HELPING", 70, cardY + 10);
+        let y = cardY + 26;
+        for (const h of d.helping) {
+          doc.font("Helvetica").fontSize(9).fillColor("#27ae60").text(`✓  ${h}`, 70, y, { width: pageWidth - 40 });
+          y = doc.y + 4;
+        }
+        const totalH = y - cardY + 6;
+        drawCardBox(cardY, totalH);
+        doc.y = cardY + totalH + 10;
+      }
+
+      if (d.hurting.length > 0) {
+        const cardY = doc.y;
+        doc.font("Helvetica").fontSize(8).fillColor("#999").text("WHAT'S HURTING", 70, cardY + 10);
+        let y = cardY + 26;
+        for (const h of d.hurting) {
+          doc.font("Helvetica").fontSize(9).fillColor("#c0392b").text(`✗  ${h}`, 70, y, { width: pageWidth - 40 });
+          y = doc.y + 4;
+        }
+        const totalH = y - cardY + 6;
+        drawCardBox(cardY, totalH);
+        doc.y = cardY + totalH + 10;
+      }
+
+      doc.moveDown(1);
+      doc.fontSize(7).fillColor("#999999")
+        .text("Generated by Profundr. This report is for informational purposes only. Profundr is not a credit repair organization or law firm.", { align: "center" });
+
+      doc.end();
+      const pdfBuffer = await pdfReady;
+      const token = Date.now().toString(36) + Math.random().toString(36).slice(2, 10);
+      pendingPdfs.set(token, { buffer: pdfBuffer, created: Date.now() });
+      res.json({ downloadUrl: `/api/analysis-report/${token}` });
+    } catch (error: any) {
+      console.error("Analysis PDF error:", error);
+      res.status(500).json({ error: "Failed to generate analysis report" });
     }
   });
 
