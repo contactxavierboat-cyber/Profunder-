@@ -84,7 +84,6 @@ export default function SubscriptionPage() {
   };
 
   const handleActivate = async () => {
-    if (!priceId) return;
     setIsProcessing(true);
     if (needsProfile) {
       if (!profileUsername.trim() || profileUsername.trim().length < 3 || !profilePhone.trim()) {
@@ -116,11 +115,17 @@ export default function SubscriptionPage() {
       setSavingProfile(false);
     }
     try {
-      const res = await fetch("/api/create-checkout-session", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ priceId }) });
+      const res = await fetch("/api/activate-free", { method: "POST" });
       const data = await res.json();
-      if (data.url) { window.location.href = data.url; }
-      else { toast({ variant: "destructive", title: "Error", description: data.error || "Could not start checkout." }); setIsProcessing(false); }
-    } catch { toast({ variant: "destructive", title: "Error", description: "Could not start checkout." }); setIsProcessing(false); }
+      if (data.success) {
+        queryClient.invalidateQueries({ queryKey: ["/api/me"] });
+        toast({ title: "Membership Activated!", description: "Welcome to Profundr." });
+        setTimeout(() => setLocation("/"), 1500);
+      } else {
+        toast({ variant: "destructive", title: "Error", description: data.error || "Could not activate." });
+        setIsProcessing(false);
+      }
+    } catch { toast({ variant: "destructive", title: "Error", description: "Could not activate." }); setIsProcessing(false); }
   };
 
   const isActive = user?.subscriptionStatus === "active";
@@ -214,8 +219,7 @@ export default function SubscriptionPage() {
 
               <div className="bg-white rounded-2xl border border-[#eee] p-6 shadow-sm">
                 <div className="text-center mb-4">
-                  <span className="text-[32px] sm:text-[40px] font-semibold text-[#1a1a1a] tracking-tight">$50</span>
-                  <span className="text-[#999] text-[14px] ml-1">/month</span>
+                  <span className="text-[32px] sm:text-[40px] font-semibold text-[#1a1a1a] tracking-tight">Free</span>
                 </div>
                 <div className="space-y-3">
                   {features.map((feature, i) => (
@@ -257,8 +261,7 @@ export default function SubscriptionPage() {
                 <div className="px-6 sm:px-8 pt-7 pb-3 text-center">
                   <p className="text-[11px] text-[#999] uppercase tracking-[0.15em] font-semibold mb-3">Profundr Monthly</p>
                   <div className="mb-2">
-                    <span className="text-[40px] sm:text-[48px] font-semibold text-[#1a1a1a] tracking-tight" data-testid="text-price">$50</span>
-                    <span className="text-[#999] text-[14px] ml-1">/month</span>
+                    <span className="text-[40px] sm:text-[48px] font-semibold text-[#1a1a1a] tracking-tight" data-testid="text-price">Free</span>
                   </div>
                   <p className="text-[#aaa] text-[12px]">All-in-one fundability platform</p>
                 </div>
@@ -326,10 +329,10 @@ export default function SubscriptionPage() {
                     <button
                       data-testid="button-activate"
                       onClick={handleActivate}
-                      disabled={isProcessing || savingProfile || loadingPrice || !priceId || (needsProfile && (!profileUsername.trim() || profileUsername.trim().length < 3 || !profilePhone.trim()))}
+                      disabled={isProcessing || savingProfile || (needsProfile && (!profileUsername.trim() || profileUsername.trim().length < 3 || !profilePhone.trim()))}
                       className="w-full h-[48px] rounded-full bg-[#1a1a2e] text-white text-[14px] font-medium hover:bg-[#2a2a40] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                     >
-                      {isProcessing || savingProfile ? <Loader2 className="w-4 h-4 animate-spin" /> : <><CreditCard className="w-4 h-4" /> Activate Membership</>}
+                      {isProcessing || savingProfile ? <Loader2 className="w-4 h-4 animate-spin" /> : "Activate Free Membership"}
                     </button>
                   )}
                 </div>

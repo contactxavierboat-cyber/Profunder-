@@ -1357,6 +1357,16 @@ export async function registerRoutes(
     }
   });
 
+  app.post("/api/activate-free", requireAuth, async (req, res) => {
+    try {
+      const userId = req.session.userId!;
+      await storage.updateUser(userId, { subscriptionStatus: "active" });
+      res.json({ success: true });
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
   app.post("/api/check-subscription", requireAuth, async (req, res) => {
     try {
       const user = await storage.getUser(req.session.userId!);
