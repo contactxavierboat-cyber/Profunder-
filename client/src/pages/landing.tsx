@@ -67,21 +67,24 @@ const SubscribeButton = ({ className = "", onSubscribe }: { className?: string; 
   </button>
 );
 
-const TornPaperCard = ({ children }: { children: React.ReactNode }) => (
-  <div className="relative">
-    <svg className="absolute top-0 left-0 w-full pointer-events-none" style={{ height: '35px', transform: 'translateY(-100%) scaleY(-1)' }} viewBox="0 0 1200 40" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M0,40 L0,12 Q10,8 20,14 Q30,20 40,10 Q50,2 60,8 Q70,16 80,6 Q90,0 100,10 Q110,18 120,8 Q130,0 140,12 Q150,22 160,10 Q170,2 180,14 Q190,24 200,8 Q210,0 220,10 Q230,18 240,6 Q250,0 260,12 Q270,22 280,8 Q290,0 300,14 Q310,24 320,10 Q330,2 340,12 Q350,20 360,6 Q370,0 380,10 Q390,18 400,8 Q410,0 420,14 Q430,24 440,8 Q450,0 460,12 Q470,20 480,6 Q490,0 500,10 Q510,18 520,8 Q530,2 540,14 Q550,22 560,10 Q570,0 580,12 Q590,22 600,8 Q610,0 620,10 Q630,18 640,6 Q650,0 660,14 Q670,24 680,8 Q690,0 700,12 Q710,20 720,6 Q730,0 740,10 Q750,18 760,8 Q770,2 780,14 Q790,24 800,10 Q810,0 820,12 Q830,22 840,6 Q850,0 860,10 Q870,18 880,8 Q890,0 900,14 Q910,24 920,8 Q930,0 940,12 Q950,20 960,6 Q970,0 980,10 Q990,18 1000,8 Q1010,2 1020,14 Q1030,22 1040,10 Q1050,0 1060,12 Q1070,22 1080,8 Q1090,0 1100,10 Q1110,18 1120,6 Q1130,0 1140,14 Q1150,24 1160,8 Q1170,0 1180,12 Q1190,20 1200,10 L1200,40 Z" fill="rgba(255,255,255,0.55)" />
-      <path d="M0,12 Q10,8 20,14 Q30,20 40,10 Q50,2 60,8 Q70,16 80,6 Q90,0 100,10 Q110,18 120,8 Q130,0 140,12 Q150,22 160,10 Q170,2 180,14 Q190,24 200,8 Q210,0 220,10 Q230,18 240,6 Q250,0 260,12 Q270,22 280,8 Q290,0 300,14 Q310,24 320,10 Q330,2 340,12 Q350,20 360,6 Q370,0 380,10 Q390,18 400,8 Q410,0 420,14 Q430,24 440,8 Q450,0 460,12 Q470,20 480,6 Q490,0 500,10 Q510,18 520,8 Q530,2 540,14 Q550,22 560,10 Q570,0 580,12 Q590,22 600,8 Q610,0 620,10 Q630,18 640,6 Q650,0 660,14 Q670,24 680,8 Q690,0 700,12 Q710,20 720,6 Q730,0 740,10 Q750,18 760,8 Q770,2 780,14 Q790,24 800,10 Q810,0 820,12 Q830,22 840,6 Q850,0 860,10 Q870,18 880,8 Q890,0 900,14 Q910,24 920,8 Q930,0 940,12 Q950,20 960,6 Q970,0 980,10 Q990,18 1000,8 Q1010,2 1020,14 Q1030,22 1040,10 Q1050,0 1060,12 Q1070,22 1080,8 Q1090,0 1100,10 Q1110,18 1120,6 Q1130,0 1140,14 Q1150,24 1160,8 Q1170,0 1180,12 Q1190,20 1200,10" fill="none" stroke="rgba(160,160,185,0.25)" strokeWidth="1" />
-    </svg>
-    <div className="relative bg-white/55 backdrop-blur-sm px-4 sm:px-12 py-8 sm:py-14" style={{ boxShadow: '0 4px 30px rgba(0,0,0,0.06)' }}>
-      {children}
+const RippedPaperScrap = ({ children }: { children: React.ReactNode }) => {
+  const clipId = "ripped-paper-clip";
+  return (
+    <div className="relative inline-block" style={{ transform: 'rotate(-1.5deg)' }}>
+      <svg className="absolute inset-0 w-full h-full" viewBox="0 0 600 500" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg" style={{ filter: 'drop-shadow(0 8px 32px rgba(0,0,0,0.12)) drop-shadow(0 2px 8px rgba(0,0,0,0.08))' }}>
+        <defs>
+          <clipPath id={clipId} clipPathUnits="objectBoundingBox">
+            <path d="M0.04,0.02 C0.06,0.01 0.08,0.03 0.1,0.015 C0.13,0.005 0.15,0.02 0.18,0.008 C0.21,0 0.24,0.018 0.27,0.01 C0.3,0.003 0.33,0.022 0.36,0.012 C0.39,0.004 0.42,0.02 0.45,0.008 C0.48,0 0.51,0.015 0.54,0.006 C0.57,0 0.6,0.02 0.63,0.01 C0.66,0.003 0.69,0.018 0.72,0.008 C0.75,0 0.78,0.022 0.81,0.012 C0.84,0.004 0.87,0.018 0.9,0.008 C0.93,0 0.96,0.015 0.97,0.025 C0.98,0.04 0.99,0.06 0.985,0.08 C0.99,0.11 0.98,0.14 0.99,0.17 C0.995,0.2 0.985,0.23 0.99,0.26 C0.995,0.29 0.98,0.32 0.99,0.35 C0.995,0.38 0.985,0.41 0.99,0.44 C0.995,0.47 0.98,0.5 0.99,0.53 C0.995,0.56 0.985,0.59 0.99,0.62 C0.995,0.65 0.98,0.68 0.99,0.71 C0.995,0.74 0.985,0.77 0.99,0.8 C0.995,0.83 0.98,0.86 0.99,0.89 C0.985,0.92 0.99,0.95 0.975,0.97 C0.96,0.985 0.94,0.975 0.92,0.985 C0.89,0.995 0.86,0.98 0.83,0.99 C0.8,0.997 0.77,0.982 0.74,0.992 C0.71,0.998 0.68,0.98 0.65,0.99 C0.62,0.997 0.59,0.982 0.56,0.992 C0.53,0.998 0.5,0.98 0.47,0.99 C0.44,0.997 0.41,0.982 0.38,0.992 C0.35,0.998 0.32,0.98 0.29,0.99 C0.26,0.997 0.23,0.982 0.2,0.992 C0.17,0.998 0.14,0.98 0.11,0.99 C0.08,0.997 0.06,0.985 0.04,0.975 C0.025,0.96 0.015,0.94 0.01,0.92 C0.005,0.89 0.015,0.86 0.008,0.83 C0.003,0.8 0.015,0.77 0.008,0.74 C0.003,0.71 0.018,0.68 0.008,0.65 C0.003,0.62 0.015,0.59 0.008,0.56 C0.003,0.53 0.018,0.5 0.008,0.47 C0.003,0.44 0.015,0.41 0.008,0.38 C0.003,0.35 0.018,0.32 0.008,0.29 C0.003,0.26 0.015,0.23 0.008,0.2 C0.003,0.17 0.018,0.14 0.008,0.11 C0.003,0.08 0.015,0.06 0.02,0.04 Z" />
+          </clipPath>
+        </defs>
+        <rect width="600" height="500" fill="white" clipPath={`url(#${clipId})`} />
+      </svg>
+      <div className="relative z-10 px-6 sm:px-14 py-10 sm:py-16" style={{ clipPath: `url(#${clipId})` }}>
+        {children}
+      </div>
     </div>
-    <svg className="absolute bottom-0 left-0 w-full pointer-events-none" style={{ height: '35px', transform: 'translateY(100%)' }} viewBox="0 0 1200 40" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M0,0 L0,18 Q10,24 20,16 Q30,8 40,18 Q50,28 60,16 Q70,6 80,18 Q90,28 100,14 Q110,4 120,16 Q130,26 140,12 Q150,2 160,14 Q170,24 180,10 Q190,0 200,16 Q210,28 220,12 Q230,0 240,14 Q250,26 260,10 Q270,0 280,16 Q290,28 300,12 Q310,2 320,18 Q330,28 340,14 Q350,4 360,16 Q370,26 380,10 Q390,0 400,14 Q410,24 420,12 Q430,2 440,18 Q450,28 460,14 Q470,4 480,16 Q490,26 500,10 Q510,0 520,14 Q530,24 540,12 Q550,2 560,18 Q570,28 580,14 Q590,4 600,16 Q610,26 620,10 Q630,0 640,14 Q650,24 660,12 Q670,2 680,18 Q690,28 700,14 Q710,4 720,16 Q730,26 740,10 Q750,0 760,14 Q770,24 780,12 Q790,2 800,18 Q810,28 820,14 Q830,4 840,16 Q850,26 860,10 Q870,0 880,14 Q890,24 900,12 Q910,2 920,18 Q930,28 940,14 Q950,4 960,16 Q970,26 980,10 Q990,0 1000,14 Q1010,24 1020,12 Q1030,2 1040,18 Q1050,28 1060,14 Q1070,4 1080,16 Q1090,26 1100,10 Q1110,0 1120,14 Q1130,24 1140,12 Q1150,2 1160,18 Q1170,28 1180,14 Q1190,4 1200,16 L1200,0 Z" fill="rgba(255,255,255,0.55)" />
-      <path d="M0,18 Q10,24 20,16 Q30,8 40,18 Q50,28 60,16 Q70,6 80,18 Q90,28 100,14 Q110,4 120,16 Q130,26 140,12 Q150,2 160,14 Q170,24 180,10 Q190,0 200,16 Q210,28 220,12 Q230,0 240,14 Q250,26 260,10 Q270,0 280,16 Q290,28 300,12 Q310,2 320,18 Q330,28 340,14 Q350,4 360,16 Q370,26 380,10 Q390,0 400,14 Q410,24 420,12 Q430,2 440,18 Q450,28 460,14 Q470,4 480,16 Q490,26 500,10 Q510,0 520,14 Q530,24 540,12 Q550,2 560,18 Q570,28 580,14 Q590,4 600,16 Q610,26 620,10 Q630,0 640,14 Q650,24 660,12 Q670,2 680,18 Q690,28 700,14 Q710,4 720,16 Q730,26 740,10 Q750,0 760,14 Q770,24 780,12 Q790,2 800,18 Q810,28 820,14 Q830,4 840,16 Q850,26 860,10 Q870,0 880,14 Q890,24 900,12 Q910,2 920,18 Q930,28 940,14 Q950,4 960,16 Q970,26 980,10 Q990,0 1000,14 Q1010,24 1020,12 Q1030,2 1040,18 Q1050,28 1060,14 Q1070,4 1080,16 Q1090,26 1100,10 Q1110,0 1120,14 Q1130,24 1140,12 Q1150,2 1160,18 Q1170,28 1180,14 Q1190,4 1200,16" fill="none" stroke="rgba(160,160,185,0.25)" strokeWidth="1" />
-    </svg>
-  </div>
-);
+  );
+};
 
 const ScrollArrow = ({ targetId }: { targetId: string }) => (
   <button
@@ -268,20 +271,25 @@ export default function LandingPage() {
       {/* ═══════════════ 1. HERO ═══════════════ */}
       <section id="sec-hero" className="relative z-20 min-h-[90vh] flex flex-col items-center justify-center px-4 sm:px-12 md:px-20 lg:px-28 py-24 sm:py-28 text-center overflow-visible">
 
-        <div className="relative max-w-[900px] mx-auto">
-          <TornPaperCard>
-            <p className="text-[11px] tracking-[0.2em] uppercase text-[#6a6a8a] mb-6" data-testid="text-hero-label">Digital Underwriting Engine</p>
+        <div className="relative max-w-[900px] mx-auto flex flex-col items-center">
+          <RippedPaperScrap>
+            <p className="text-[11px] tracking-[0.2em] uppercase text-[#6a6a8a] mb-4 text-center" data-testid="text-hero-label">Digital Underwriting Engine</p>
             <h1
-              className="text-[48px] min-[400px]:text-[58px] sm:text-[68px] md:text-[88px] lg:text-[108px] uppercase italic leading-[0.85] mb-6 sm:mb-8 text-center"
+              className="text-[44px] min-[400px]:text-[54px] sm:text-[64px] md:text-[80px] lg:text-[96px] uppercase italic leading-[0.85] mb-4 sm:mb-6 text-center"
               style={{ fontFamily: "'Satoshi', sans-serif", fontWeight: 400, letterSpacing: '-0.06em', backgroundImage: 'linear-gradient(180deg, #000000 0%, #3a3a5a 50%, #7a7a9a 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}
               data-testid="text-hero-headline"
             >
-              <span className="hidden sm:inline">Qualify<br />Before<br />You Apply</span><span className="sm:hidden">Qualify Before<br />You Apply</span>
+              <span className="hidden sm:inline">Qualify<br />Before<br />You Apply</span><span className="sm:hidden">Qualify<br />Before<br />You Apply</span>
             </h1>
-            <p className="text-[12px] sm:text-[17px] text-[#5a5a7a] leading-[1.6] sm:leading-[1.8] max-w-[560px] mx-auto mb-8 sm:mb-10 px-1 sm:px-0">
-              Know exactly where you stand before you submit a single funding application. We analyze your profile using real underwriting logic to determine your funding potential — before lenders ever see you. Stop guessing. Start qualifying.
+            <p className="text-[11px] sm:text-[14px] text-[#6a6a8a] leading-[1.5] max-w-[400px] mx-auto text-center">
+              Know exactly where you stand before you submit a single funding application.
             </p>
+          </RippedPaperScrap>
 
+          <div className="mt-12 sm:mt-14 w-full max-w-[560px] text-center">
+            <p className="text-[12px] sm:text-[15px] text-[#5a5a7a] leading-[1.7] mb-8 px-2">
+              We analyze your profile using real underwriting logic to determine your funding potential — before lenders ever see you. Stop guessing. Start qualifying.
+            </p>
             <form onSubmit={handleLogin} className="w-full max-w-[440px] mx-auto mb-8">
               <div className="flex flex-col sm:flex-row items-stretch sm:items-center bg-[#f5f5fa] border border-[#e0e0ea] rounded-2xl sm:rounded-full sm:h-[52px] sm:pl-5 sm:pr-1.5 overflow-hidden">
                 <input
@@ -313,7 +321,7 @@ export default function LandingPage() {
               <span className="w-1 h-1 rounded-full bg-[#c0c0d0]"></span>
               <span>30 analyses / month</span>
             </div>
-          </TornPaperCard>
+          </div>
           <ScrollArrow targetId="sec-problem" />
         </div>
       </section>
