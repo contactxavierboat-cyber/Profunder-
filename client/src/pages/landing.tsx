@@ -263,26 +263,50 @@ export default function LandingPage() {
             <div className="relative mb-6 sm:mb-8" data-testid="text-hero-headline">
               <svg
                 className="absolute pointer-events-none select-none"
-                style={{ top: '50%', left: '50%', transform: 'translate(-50%, -50%) rotate(-3deg)', width: '115%', height: '130%' }}
-                viewBox="0 0 600 500"
+                style={{ top: '50%', left: '50%', transform: 'translate(-50%, -50%) rotate(-5deg)', width: '140%', height: '160%' }}
+                viewBox="0 0 800 600"
                 preserveAspectRatio="none"
                 xmlns="http://www.w3.org/2000/svg"
                 aria-hidden="true"
               >
-                <path d="M280,20 C320,15 370,25 400,50 C440,80 470,60 490,90 C520,130 540,110 550,160 C565,220 530,250 540,300 C548,340 520,370 500,400 C480,430 440,445 400,450 C360,455 320,440 280,445 C230,450 190,460 150,440 C110,420 80,390 60,350 C40,310 35,270 40,230 C45,190 55,150 70,120 C90,80 120,55 160,40 C200,25 240,25 280,20Z" fill="rgba(15,15,25,0.88)" />
-                <path d="M290,35 C340,28 385,42 420,70 C450,95 475,85 495,120 C520,160 535,145 540,200 C548,260 520,280 525,330 C530,365 505,390 480,415 C455,435 420,442 385,440 C345,438 310,425 270,430 C225,436 185,445 148,425 C115,408 90,378 72,340 C55,300 52,260 58,220 C65,178 78,140 100,112 C125,78 155,58 195,45 C235,32 260,38 290,35Z" fill="rgba(30,30,50,0.65)" />
-                <path d="M260,8 C290,5 310,12 340,18 C380,28 400,22 430,45 C455,65 480,55 500,80 C530,115 555,100 565,150 C575,200 558,230 560,280 C562,320 545,355 525,385 C500,420 465,450 420,460 C380,468 340,458 300,460 C255,462 215,470 175,455 C135,438 105,410 85,375 C60,330 45,285 42,240 C38,190 50,140 75,105 C100,70 140,45 185,30 C220,18 240,10 260,8Z" fill="rgba(50,50,70,0.35)" />
-                <path d="M200,15 C170,20 140,40 120,65 C95,95 75,110 60,145 C42,185 30,200 28,245 C25,295 38,320 50,360 C60,395 85,415 115,435 C150,455 175,458 210,455" fill="none" stroke="rgba(20,20,35,0.5)" strokeWidth="8" strokeLinecap="round" />
-                <path d="M400,460 C435,450 465,430 485,400 C510,365 528,340 540,300 C555,255 558,225 555,185 C550,140 535,118 515,90" fill="none" stroke="rgba(40,40,55,0.4)" strokeWidth="6" strokeLinecap="round" />
-                <path d="M310,15 C350,12 390,30 415,55 C445,85 465,75 485,105" fill="none" stroke="rgba(25,25,40,0.45)" strokeWidth="5" strokeLinecap="round" />
-                <ellipse cx="130" cy="60" rx="12" ry="8" fill="rgba(30,30,45,0.3)" transform="rotate(-15, 130, 60)" />
-                <ellipse cx="480" cy="55" rx="10" ry="6" fill="rgba(35,35,50,0.25)" transform="rotate(20, 480, 55)" />
-                <ellipse cx="100" cy="420" rx="8" ry="5" fill="rgba(25,25,40,0.2)" transform="rotate(-25, 100, 420)" />
-                <ellipse cx="530" cy="420" rx="9" ry="5" fill="rgba(40,40,55,0.2)" transform="rotate(15, 530, 420)" />
-                <circle cx="155" cy="35" r="3" fill="rgba(30,30,45,0.25)" />
-                <circle cx="460" cy="30" r="4" fill="rgba(35,35,50,0.2)" />
-                <circle cx="555" cy="170" r="3" fill="rgba(40,40,55,0.2)" />
-                <circle cx="75" cy="380" r="3" fill="rgba(25,25,40,0.15)" />
+                <defs>
+                  <filter id="brush-blur">
+                    <feTurbulence type="fractalNoise" baseFrequency="0.04" numOctaves="4" seed="3" result="noise" />
+                    <feDisplacementMap in="SourceGraphic" in2="noise" scale="18" xChannelSelector="R" yChannelSelector="G" />
+                  </filter>
+                  <filter id="splatter">
+                    <feTurbulence type="fractalNoise" baseFrequency="0.08" numOctaves="3" seed="7" result="noise" />
+                    <feDisplacementMap in="SourceGraphic" in2="noise" scale="12" />
+                  </filter>
+                </defs>
+
+                <path d="M120,280 C80,200 140,100 250,60 C360,20 500,40 580,120 C640,180 680,300 620,400 C560,480 420,520 300,500 C180,480 160,360 120,280Z" fill="rgba(10,10,20,0.85)" filter="url(#brush-blur)" />
+
+                <path d="M200,350 C150,250 80,180 160,90 C240,20 420,-10 560,80 C650,140 700,260 680,380 C660,470 550,540 400,530 C280,520 250,440 200,350Z" fill="rgba(25,25,45,0.55)" filter="url(#brush-blur)" transform="rotate(8, 400, 300)" />
+
+                <path d="M80,250 Q60,150 180,80 Q350,0 520,50 Q680,100 720,260 Q740,380 620,470 Q480,550 300,520 Q140,490 80,350Z" fill="rgba(50,50,75,0.3)" filter="url(#brush-blur)" transform="rotate(-3, 400, 300)" />
+
+                <path d="M150,300 C130,220 200,120 320,70 L500,60" fill="none" stroke="rgba(15,15,30,0.7)" strokeWidth="28" strokeLinecap="round" filter="url(#brush-blur)" />
+                <path d="M580,140 C650,220 660,350 600,440 L450,510" fill="none" stroke="rgba(20,20,40,0.5)" strokeWidth="22" strokeLinecap="round" filter="url(#brush-blur)" />
+                <path d="M250,480 C180,450 120,380 100,300" fill="none" stroke="rgba(30,30,55,0.4)" strokeWidth="18" strokeLinecap="round" filter="url(#brush-blur)" />
+
+                <path d="M350,25 C380,15 430,30 460,20" fill="none" stroke="rgba(15,15,30,0.5)" strokeWidth="10" strokeLinecap="round" filter="url(#splatter)" />
+                <path d="M620,450 C660,470 690,440 710,460" fill="none" stroke="rgba(25,25,45,0.35)" strokeWidth="8" strokeLinecap="round" filter="url(#splatter)" />
+
+                <g filter="url(#splatter)">
+                  <circle cx="100" cy="120" r="8" fill="rgba(15,15,30,0.5)" />
+                  <circle cx="680" cy="150" r="6" fill="rgba(20,20,40,0.4)" />
+                  <circle cx="90" cy="400" r="7" fill="rgba(15,15,30,0.35)" />
+                  <circle cx="700" cy="400" r="5" fill="rgba(25,25,45,0.3)" />
+                  <circle cx="200" cy="30" r="4" fill="rgba(20,20,35,0.4)" />
+                  <circle cx="600" cy="30" r="5" fill="rgba(15,15,30,0.35)" />
+                  <circle cx="150" cy="500" r="6" fill="rgba(20,20,40,0.3)" />
+                  <circle cx="650" cy="520" r="4" fill="rgba(25,25,45,0.25)" />
+                  <circle cx="50" cy="200" r="3" fill="rgba(15,15,30,0.3)" />
+                  <circle cx="750" cy="280" r="4" fill="rgba(20,20,40,0.25)" />
+                  <circle cx="300" cy="550" r="3" fill="rgba(15,15,30,0.2)" />
+                  <circle cx="500" cy="560" r="5" fill="rgba(25,25,45,0.2)" />
+                </g>
               </svg>
               <h1
                 className="relative z-10 text-[48px] min-[400px]:text-[58px] sm:text-[68px] md:text-[88px] lg:text-[108px] uppercase italic leading-[0.85] text-center text-white px-6 sm:px-10 py-6 sm:py-10"
