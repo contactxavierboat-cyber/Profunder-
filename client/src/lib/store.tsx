@@ -10,6 +10,7 @@ interface AuthContextType {
   user: SafeUser | null;
   isLoading: boolean;
   login: (email: string) => Promise<void>;
+  loginSilent: (email: string) => Promise<void>;
   logout: () => void;
   updateUser: (data: Record<string, any>) => Promise<void>;
   resetUsage: (userId: number) => Promise<void>;
@@ -95,6 +96,30 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       } else {
         setLocation('/subscription');
       }
+    },
+    onError: (error: Error) => {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+    }
+  });
+
+  const loginSilentMutation = useMutation({
+    mutationFn: async (email: string) => {
+      const res = await fetch("/api/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({ error: "Login failed" }));
+        throw new Error(err.error || "Login failed");
+      }
+      return res.json();
+    },
+    onSuccess: () => {
+      setIsLoggedIn(true);
+      localStorage.setItem("studio_logged_in", "true");
+      queryClient.invalidateQueries({ queryKey: ["/api/me"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/chat"] });
     },
     onError: (error: Error) => {
       toast({ title: "Error", description: error.message, variant: "destructive" });
@@ -193,6 +218,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       user: user || null, 
       isLoading: userLoading,
       login: (email: string) => loginMutation.mutateAsync(email),
+      loginSilent: (email: string) => loginSilentMutation.mutateAsync(email),
       logout,
       updateUser: updateMutation.mutateAsync,
       resetUsage,
