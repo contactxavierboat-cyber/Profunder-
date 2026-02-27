@@ -13,6 +13,7 @@ import Parser from "rss-parser";
 import { getUncachableStripeClient, getStripePublishableKey } from "./stripeClient";
 import { sql } from "drizzle-orm";
 import { promisify } from "util";
+import PDFDocument from "pdfkit";
 import { writeFile, readdir, readFile, unlink, mkdir } from "fs/promises";
 import path from "path";
 import { calculateFundingPhase, calculateCapitalReadiness, calculateSafeExposure, calculateBureauHealth, calculateApplicationWindow, simulateBankRating, simulatePledgeLoan, simulateCapitalStack } from "./capitalEngines";
@@ -420,21 +421,37 @@ RESPONSE APPROACH
 
 Tone: Professional. Conversational. Direct. Empowering. Realistic.`;
 
-const FUNDABILITY_ENGINE_PROMPT = `You are Profundr's Fundability Engine — a capital readiness simulation tool.
+const FUNDABILITY_ENGINE_PROMPT = `You are a Digital Underwriting and Credit Optimization Engine.
+
+Your role is to analyze an uploaded consumer credit report and produce:
+1. A full underwriting readiness assessment
+2. A structural funding capacity estimate
+3. A denial risk breakdown
+4. A prioritized repair strategy
+5. A funding readiness roadmap
+
+You do not rely on credit score. You evaluate only structural credit report data.
+You do not provide legal advice. You do not encourage false disputes. You do not instruct users to fabricate claims.
+All recommendations must remain compliant with FCRA and consumer protection law.
 
 RESPONSE STYLE (CRITICAL):
-- Be SHORT. Get to the numbers and actions immediately.
-- Never repeat or summarize what the user told you. They already know what they said.
-- Never recite extracted document contents back to the user.
-- Skip preambles like "Based on your data..." or "After analyzing your report..." — just give the results.
-- Use 2-4 word labels, not sentences, for section headers.
-- Each bullet point: one line max.
-- Total response: aim for 15-25 lines. Never exceed 35 lines.
+- Be SHORT and direct. Get to numbers and actions immediately.
+- Never repeat or summarize what the user told you.
+- Never recite extracted document contents back.
+- Skip preambles — just deliver results.
+- Use 2-4 word labels for section headers.
 - Write like a Bloomberg terminal, not an essay.
 
-WHEN YOU HAVE DATA — jump straight to:
+INPUT EXTRACTION — From uploaded credit reports, extract:
+Revolving: total limits, balances, aggregate/individual utilization %, count, highest/avg limit, ages, payment history.
+Installment: type, original amount, balance, payment history, age.
+Derogatories: lates (30/60/90/120+), charge-offs, collections, repos, bankruptcies, public records.
+Inquiries: total last 6mo, total last 12mo, velocity pattern.
+Age: oldest account, average age, accounts under 12mo.
 
-FUNDABILITY INDEX: [score]/100 — [Prime|Near Prime|Subprime|High Risk]
+WHEN YOU HAVE DATA — produce this structured output:
+
+FUNDABILITY INDEX: [score]/100 — [Strong|Moderate|Weak|High Risk]
 
 APPROVAL ODDS:
 - Bank Term Loan: X%
@@ -443,42 +460,55 @@ APPROVAL ODDS:
 - Credit Card: X%
 - MCA: X%
 
-BORROWING POWER: $X conservative / $X moderate / $X aggressive
+BORROWING POWER: Conservative: $X / Moderate: $X / Aggressive: $X
+
+DENIAL TRIGGERS:
+- [issue] — [why it matters to underwriters, severity]
 
 TOP RISKS:
 - [factor] — [one-line impact]
-- [factor] — [one-line impact]
+
+REPAIR PLAN:
+Phase 1 — Validation: [items to verify for accuracy, FCRA compliance gaps]
+Phase 2 — Dispute Priority: [ranked by impact, most recent damage first]
+Phase 3 — Optimization: [utilization targets, payment actions, inquiry pause]
+
+DISPUTE ITEMS:
+For each disputable item, output in this exact format:
+DISPUTE: [Creditor/Account Name] | [Account Number if available] | [Issue: e.g. "Late payment reported inaccurately", "Collection not validated", "Balance incorrect"] | [Bureau: Experian/Equifax/TransUnion/All] | [Dispute Reason: factual basis for dispute]
 
 NEXT MOVES (ranked by impact):
-1. [specific action] → +X points, X days
-2. [specific action] → +X points, X days
-3. [specific action] → +X points, X days
+1. [specific action] → [expected impact], [timeline]
+2. [specific action] → [expected impact], [timeline]
+3. [specific action] → [expected impact], [timeline]
 
-WHEN YOU NEED DATA — ask for it in a tight list:
+FUNDING ROADMAP:
+- [pre-funding checklist items with specific thresholds and timelines]
+
+WHEN YOU NEED DATA — ask in a tight list:
 "To run your analysis, I need:
-- FICO score
 - Total revolving limits & balances
 - Number of inquiries (last 6 & 12 months)
-- Any lates, collections, or public records
+- Any lates, collections, charge-offs, or public records
+- Account ages (oldest, newest)
 - Annual income & monthly debt payments"
 
-That's it. No explaining why each matters. No paragraphs.
-
-CALCULATION LOGIC (internal, don't explain to user):
+CALCULATION LOGIC (internal):
 Fundability Index weights: 35% payment history, 25% utilization, 15% file thickness/age, 10% inquiry velocity, 10% public records, 5% DTI.
 Penalties: Bankruptcy <24mo → cap at 45. Utilization >75% → -15. 3+ recent 30-day lates → -20. <3 tradelines → -10. 5+ inquiries in 6mo → -10.
-Tiers: 80-100 Prime, 65-79 Near Prime, 50-64 Subprime, <50 High Risk.
+Tiers: 80-100 Strong, 65-79 Moderate, 50-64 Weak, <50 High Risk.
+Underwriting: Aggregate util >30% flagged, >50% severe. Individual card >50% flagged, >75% severe. Thin file <3 revolving. Inquiry velocity 3+ in 6mo elevated, 5+ in 12mo high. Late within 12mo = downgrade. Charge-off within 24mo = major risk. Majority accounts <24mo = weak.
 
-Approval modeling: Bank term loan needs FICO 680+, util <50%, no 60+ lates, DTI <45%. Online lender: FICO 620+, util <70%. LOC: FICO 650+, stable revenue. Credit card: FICO 640+, util <60%. MCA: revenue-based.
-
-SCENARIO MODE: If user asks "what if" — show before/after numbers in 3 lines. Index delta, utilization delta, approval odds delta.
+SCENARIO MODE: If user asks "what if" — show before/after in 3 lines.
 
 RULES:
-- No legal advice. No guaranteed outcomes. Educational simulation only.
+- No legal advice. No guaranteed outcomes. Structural analysis only.
 - No credit repair scams, identity manipulation, or tradeline abuse.
-- No "may" or "might" — use numbers.
-- No emotional language or filler.
-- Never say "I see that" or "Looking at your report" — just deliver results.`;
+- No encouraging fraud or disputing accurate information falsely.
+- No recommending hiding debt or stacking beyond safe exposure.
+- You ARE allowed to: explain FCRA consumer rights, suggest lawful dispute of inaccuracies, recommend structural optimization, estimate safe exposure ranges.
+- Always state: "This is a structural underwriting analysis, not a lending decision."
+- No emotional language or filler. Use numbers, not "may" or "might".`;
 
 const MENTOR_PROFILES: Record<string, { name: string; keywords: string[]; systemPrompt: string; tagline: string; specialty: string }> = {
   nova_sage: {
@@ -1185,6 +1215,122 @@ export async function registerRoutes(
     } catch (error: any) {
       console.error("Guest chat OpenAI Error:", error);
       res.status(500).json({ error: "Error generating AI response. Please try again." });
+    }
+  });
+
+  app.post("/api/dispute-letters", async (req, res) => {
+    const body = z.object({
+      disputes: z.array(z.object({
+        creditor: z.string().max(200),
+        accountNumber: z.string().max(100),
+        issue: z.string().max(500),
+        bureau: z.string().max(50),
+        reason: z.string().max(1000)
+      })).min(1).max(20),
+      userName: z.string().max(100).optional(),
+      userAddress: z.string().max(300).optional()
+    }).safeParse(req.body);
+
+    if (!body.success) {
+      return res.status(400).json({ error: "Invalid dispute data" });
+    }
+
+    const { disputes, userName = "[YOUR NAME]", userAddress = "[YOUR ADDRESS]\n[CITY, STATE ZIP]" } = body.data;
+    const today = new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
+
+    const bureauAddresses: Record<string, string> = {
+      "Experian": "Experian\nP.O. Box 4500\nAllen, TX 75013",
+      "Equifax": "Equifax Information Services LLC\nP.O. Box 740256\nAtlanta, GA 30374",
+      "TransUnion": "TransUnion LLC\nConsumer Dispute Center\nP.O. Box 2000\nChester, PA 19016",
+      "All": "Experian / Equifax / TransUnion\n(Send to each bureau separately)"
+    };
+
+    try {
+      const doc = new PDFDocument({ size: "LETTER", margins: { top: 60, bottom: 60, left: 65, right: 65 } });
+      const chunks: Buffer[] = [];
+      doc.on("data", (chunk: Buffer) => chunks.push(chunk));
+
+      const pdfReady = new Promise<Buffer>((resolve) => {
+        doc.on("end", () => resolve(Buffer.concat(chunks)));
+      });
+
+      for (let i = 0; i < disputes.length; i++) {
+        const d = disputes[i];
+        if (i > 0) doc.addPage();
+
+        const bureauAddr = bureauAddresses[d.bureau] || bureauAddresses["All"];
+
+        doc.font("Helvetica").fontSize(9).fillColor("#888888")
+          .text("Generated by Profundr — Digital Underwriting Engine", { align: "center" });
+        doc.moveDown(1.5);
+
+        doc.font("Helvetica").fontSize(10).fillColor("#333333")
+          .text(userName)
+          .text(userAddress)
+          .moveDown(0.5)
+          .text(today)
+          .moveDown(1);
+
+        doc.text(bureauAddr)
+          .moveDown(1);
+
+        doc.font("Helvetica-Bold").fontSize(10).fillColor("#111111")
+          .text("Re: Dispute of Inaccurate Information — Request for Investigation")
+          .moveDown(0.8);
+
+        doc.font("Helvetica").fontSize(10).fillColor("#333333")
+          .text("To Whom It May Concern,")
+          .moveDown(0.6);
+
+        doc.text(
+          "I am writing to dispute inaccurate information on my credit report pursuant to my rights under the Fair Credit Reporting Act (FCRA), 15 U.S.C. § 1681. I am requesting that the following item be investigated and corrected or removed:",
+          { lineGap: 2 }
+        ).moveDown(0.8);
+
+        doc.font("Helvetica-Bold").fontSize(10)
+          .text("Account Details:", { underline: true })
+          .moveDown(0.4);
+        doc.font("Helvetica").fontSize(10).fillColor("#333333");
+        doc.text(`Creditor/Furnisher: ${d.creditor}`);
+        if (d.accountNumber && d.accountNumber !== "N/A") {
+          doc.text(`Account Number: ${d.accountNumber}`);
+        }
+        doc.text(`Reporting Bureau: ${d.bureau}`);
+        doc.moveDown(0.6);
+
+        doc.font("Helvetica-Bold").text("Nature of Dispute:", { underline: true }).moveDown(0.4);
+        doc.font("Helvetica").text(d.issue, { lineGap: 2 }).moveDown(0.6);
+
+        doc.font("Helvetica-Bold").text("Basis for Dispute:", { underline: true }).moveDown(0.4);
+        doc.font("Helvetica").text(d.reason, { lineGap: 2 }).moveDown(0.6);
+
+        doc.text(
+          "Under FCRA Section 611, you are required to conduct a reasonable investigation within 30 days of receiving this dispute. If the information cannot be verified, it must be deleted from my credit report.",
+          { lineGap: 2 }
+        ).moveDown(0.5);
+
+        doc.text(
+          "I request that you provide me with written notification of the results of your investigation, including a copy of my updated credit report if changes are made.",
+          { lineGap: 2 }
+        ).moveDown(1);
+
+        doc.text("Sincerely,").moveDown(1.5);
+        doc.text(userName);
+
+        doc.moveDown(1);
+        doc.fontSize(8).fillColor("#999999")
+          .text("This letter was generated for educational and consumer advocacy purposes. Profundr is not a law firm and does not provide legal advice.", { align: "center" });
+      }
+
+      doc.end();
+      const pdfBuffer = await pdfReady;
+
+      res.setHeader("Content-Type", "application/pdf");
+      res.setHeader("Content-Disposition", "attachment; filename=profundr-dispute-letters.pdf");
+      res.send(pdfBuffer);
+    } catch (error: any) {
+      console.error("PDF generation error:", error);
+      res.status(500).json({ error: "Failed to generate dispute letters" });
     }
   });
 

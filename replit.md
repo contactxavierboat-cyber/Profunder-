@@ -4,7 +4,9 @@
 Profundr is a subscription-based AI-powered fundability platform, envisioned as a "Capital Operating System." It guides users through a comprehensive five-phase funding journey (Repair → Build → Optimize → Apply → Scale) and integrates commercial bank-grade credit underwriting. Key features include the BASE44 Master Prompt for metric-based risk assessment, Safe Exposure monitoring, detailed Bureau Health tracking with per-bureau guidance, AI-powered dispute case management, and application window optimization. The platform also offers an AI chat workspace with specialized bot mentors, an AI-powered YouTube creator matching service (Creator Connect), and a secure messaging system. Profundr aims to provide users with a robust, data-driven approach to improving their fundability and navigating the capital landscape. Access to the dashboard is gated by a $50/month Stripe subscription.
 
 ## User Preferences
-- Landing page: ChatGPT-style minimal light interface (bg-[#f9f9f9]) with centered headline "How fundable are you?", chat input bar at bottom, suggestion pills, and real AI chat powered by existing /api/chat endpoint
+- Landing page: Light UI theme (bg-[#fafafa]) with centered headline "How fundable are you?", chat input bar at bottom, suggestion pills, and real AI chat powered by /api/chat/guest endpoint
+- AI system prompt: Digital Underwriting and Credit Optimization Engine with FCRA-compliant dispute letter generation
+- Dispute letters: AI outputs DISPUTE: items in structured format; frontend parses and offers PDF download via /api/dispute-letters endpoint (PDFKit)
 - Login from landing page uses `loginSilent` (no redirect) so users stay on chat
 - Inter font for UI, JetBrains Mono for data/metrics
 - Minimal fintech aesthetic - clean, infrastructure-focused
