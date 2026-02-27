@@ -219,7 +219,7 @@ export default function SubscriptionPage() {
             <div className="w-8 h-8 rounded-full border-2 border-[#c0c0d0] flex items-center justify-center">
               <span className="w-2 h-2 rounded-full bg-[#8a8aa5]"></span>
             </div>
-            <ProfundrLogo size="sm" className="text-[#1a1a2e]" />
+            <ProfundrLogo size="sm" variant="dark" />
           </div>
 
           <p className="text-[11px] tracking-[0.2em] uppercase text-[#7a7a9a] mb-4">

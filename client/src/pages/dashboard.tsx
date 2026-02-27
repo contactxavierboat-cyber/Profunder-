@@ -703,7 +703,7 @@ export default function DashboardPage() {
               <span className="absolute inset-0 rounded-full bg-[#3a3a5a]/15 animate-ping" />
               <span className="relative w-3 h-3 rounded-full bg-[#3a3a5a] shadow-[0_0_8px_rgba(58,58,90,0.4)]" />
             </span>
-            <ProfundrLogo size="sm" />
+            <ProfundrLogo size="sm" variant="dark" />
           </div>
           <button onClick={() => setSidebarOpen(false)} className="lg:hidden text-[#1a1a2e]/60 hover:text-[#1a1a2e]" data-testid="button-close-sidebar">
             <X className="w-4 h-4" />
@@ -2287,7 +2287,7 @@ export default function DashboardPage() {
             <div className="relative px-8 pt-8 pb-4">
               <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#1a1a2e] via-[#4a4a6a] to-[#8a8aa5]" />
               <div className="flex items-center gap-3 mb-4">
-                <ProfundrLogo size="lg" />
+                <ProfundrLogo size="lg" variant="dark" />
               </div>
               <p className="text-[11px] text-[#1a1a2e]/50 -mt-2 mb-2">Digital Underwriting Engine</p>
               <p className="text-[13px] text-[#1a1a2e]/70 leading-relaxed mb-2">
