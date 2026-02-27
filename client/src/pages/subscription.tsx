@@ -94,7 +94,7 @@ const gradientText = {
 const contentBlock = "relative z-10 rounded-2xl bg-white/80 backdrop-blur-md border border-white/40 shadow-[0_8px_32px_rgba(0,0,0,0.04),0_2px_8px_rgba(0,0,0,0.02)]";
 
 export default function SubscriptionPage() {
-  const { user, isLoading } = useAuth();
+  const { user, isLoading, loginSilent } = useAuth();
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const [isProcessing, setIsProcessing] = useState(false);
@@ -105,6 +105,8 @@ export default function SubscriptionPage() {
   const [profileUsername, setProfileUsername] = useState("");
   const [profilePhone, setProfilePhone] = useState("");
   const [savingProfile, setSavingProfile] = useState(false);
+  const [signupEmail, setSignupEmail] = useState("");
+  const [signingUp, setSigningUp] = useState(false);
   const needsProfile = user && !user.username;
 
   useEffect(() => {
@@ -141,7 +143,104 @@ export default function SubscriptionPage() {
     );
   }
 
-  if (!user) { setLocation("/"); return null; }
+  const handleSignup = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const email = signupEmail.trim();
+    if (!email) return;
+    setSigningUp(true);
+    try {
+      await loginSilent(email);
+      queryClient.invalidateQueries({ queryKey: ["/api/me"] });
+      toast({ title: "Account created", description: "Complete your profile to subscribe." });
+    } catch (err: any) {
+      toast({ variant: "destructive", title: "Error", description: err.message || "Sign up failed" });
+    } finally {
+      setSigningUp(false);
+    }
+  };
+
+  if (!user && !isLoading) {
+    return (
+      <div
+        className="min-h-[100dvh] flex flex-col items-center justify-center p-4 sm:p-6 relative overflow-hidden"
+        style={{ fontFamily: "'Inter', sans-serif", background: 'linear-gradient(180deg, #ffffff 0%, #f5f5fc 15%, #eef0fa 30%, #f8f8ff 45%, #f2f0fb 60%, #f6f5fc 75%, #f0eff8 88%, #eceaf5 100%)' }}
+      >
+        <BlobBackground />
+        <div className="relative z-20 w-full max-w-lg space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+          <div className="flex flex-col items-center text-center">
+            <div className="flex items-center gap-2.5 mb-6">
+              <div className="w-8 h-8 rounded-full border-2 border-[#c0c0d0] flex items-center justify-center">
+                <span className="w-2 h-2 rounded-full bg-[#8a8aa5]"></span>
+              </div>
+              <ProfundrLogo size="sm" variant="dark" />
+            </div>
+            <p className="text-[11px] tracking-[0.2em] uppercase text-[#7a7a9a] mb-4">Get Started</p>
+            <h1
+              className="text-[32px] sm:text-[44px] md:text-[52px] tracking-[-0.04em] mb-3"
+              style={gradientText}
+              data-testid="text-signup-title"
+            >
+              Subscribe
+            </h1>
+            <p className="text-[13px] sm:text-[15px] text-[#6a6a8a] leading-[1.7] max-w-[400px]">
+              Create your account to unlock AI-powered underwriting intelligence, credit repair, and funding readiness.
+            </p>
+          </div>
+
+          <div className={`${contentBlock} overflow-hidden`}>
+            <div className="w-full h-px bg-gradient-to-r from-transparent via-[#c0c0d0] to-transparent"></div>
+            <div className="px-6 sm:px-8 py-7 sm:py-9">
+              <p className="text-[11px] sm:text-[12px] text-[#7a7a9a] uppercase tracking-[0.15em] font-semibold mb-5 text-center">Sign Up with Email</p>
+              <form onSubmit={handleSignup} className="space-y-4">
+                <div className="relative">
+                  <svg className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#9a9ab0]" viewBox="0 0 16 16" fill="none">
+                    <rect x="1" y="3" width="14" height="10" rx="2" stroke="currentColor" strokeWidth="1.3" fill="none" />
+                    <path d="M1 5l7 4 7-4" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                  <input
+                    data-testid="input-signup-email"
+                    type="email"
+                    placeholder="Enter your email"
+                    className="w-full bg-[#f5f5fa] border border-[#e0e0ea] rounded-xl h-[48px] pl-10 pr-4 text-[14px] text-[#1a1a2e] placeholder:text-[#9a9ab0] outline-none focus:border-[#6a6a8a] transition-colors"
+                    value={signupEmail}
+                    onChange={(e) => setSignupEmail(e.target.value)}
+                    required
+                    disabled={signingUp}
+                  />
+                </div>
+                <button
+                  data-testid="button-signup"
+                  type="submit"
+                  disabled={signingUp || !signupEmail.trim()}
+                  className="w-full h-[48px] sm:h-[52px] rounded-full text-white text-[13px] sm:text-[14px] font-bold tracking-wide hover:opacity-90 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-[0_4px_20px_rgba(0,0,0,0.12)]"
+                  style={{ background: 'linear-gradient(135deg, #2a2a2a 0%, #0a0a0a 100%)' }}
+                >
+                  {signingUp ? <Loader2 className="w-4 h-4 animate-spin" /> : "Continue"}
+                </button>
+              </form>
+              <p className="text-[10px] text-[#aaa] text-center mt-4 leading-[1.6]">
+                By signing up you agree to our Terms of Service and Privacy Policy.
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center justify-center gap-2 text-[11px] sm:text-[12px] text-[#8a8aa5]">
+            <ShieldCheck className="w-3.5 h-3.5" />
+            <span>Secure & Private</span>
+          </div>
+
+          <div className="text-center">
+            <button
+              onClick={() => setLocation("/")}
+              className="text-[12px] text-[#8a8aa5] hover:text-[#5a5a7a] transition-colors tracking-wide"
+            >
+              ← Back to Home
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const handleManageBilling = async () => {
     setIsProcessing(true);

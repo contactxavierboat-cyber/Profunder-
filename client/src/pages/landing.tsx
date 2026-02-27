@@ -794,11 +794,11 @@ export default function LandingPage() {
               </div>
             ) : (
               <button
-                onClick={() => window.location.href = '/auth'}
+                onClick={() => window.location.href = '/subscription'}
                 className="rounded-full px-5 py-2 text-[13px] font-medium border border-[#ddd] text-[#555] hover:bg-[#f0f0f0] transition-colors"
-                data-testid="button-login"
+                data-testid="button-subscribe"
               >
-                Log in
+                Subscribe
               </button>
             )}
           </nav>
