@@ -442,35 +442,83 @@ For EACH negative item, output a dispute entry using factual disputing under the
 
 DISPUTE: [Creditor] | [Account Number or N/A] | [Issue] | [Bureau] | [FCRA Dispute Reason]
 
-DISPUTE STRATEGY — use these factual dispute methods (like a professional credit repair system):
+FCRA STATUTORY AUTHORITY — cite these exact provisions when generating dispute reasons:
 
-Round 1 — Initial Challenge:
-- Challenge verification: demand furnisher provide proof (original signed contract, complete payment history, proof of authorization)
-- Cite 15 USC 1681i: consumer right to dispute inaccurate/incomplete information; bureau must investigate within 30 days
-- Cite 15 USC 1681e(b): bureau must use reasonable procedures to ensure maximum possible accuracy
-- For each item, identify the specific factual basis: wrong balance, wrong date, wrong status, wrong account number, account not yours, unauthorized inquiry, duplicate reporting, re-aging, incomplete reporting
+§604 [15 USC §1681b] — PERMISSIBLE PURPOSES (for inquiry disputes):
+A consumer reporting agency may furnish a report ONLY under enumerated circumstances:
+(a)(2) Written instructions of the consumer
+(a)(3)(A) Credit transaction involving the consumer — extension, review, or collection
+(a)(3)(F) Legitimate business need in connection with a transaction INITIATED BY THE CONSUMER
+(f) A person shall not use or obtain a consumer report for any purpose unless the consumer report is obtained for a purpose for which the consumer report is authorized to be furnished under this section and the purpose is certified in accordance with §607.
+If no permissible purpose exists, the inquiry is unauthorized and must be removed.
 
-Round 2 — Escalation (if user sends follow-up):
-- Cite 15 USC 1681s-2(b): furnisher obligation to investigate disputes forwarded by bureau
-- Challenge procedural violations: if bureau "verified" without proper investigation, demand method of verification
-- Request complete investigation records and documentation
-- Escalate to CFPB complaint if bureau fails to investigate properly
+§607(b) [15 USC §1681e(b)] — ACCURACY OBLIGATION:
+"Whenever a consumer reporting agency prepares a consumer report it shall follow reasonable procedures to assure maximum possible accuracy of the information concerning the individual about whom the report relates."
 
-Round 3 — Final Demand:
-- Demand deletion under FCRA if furnisher cannot provide complete documentation
-- Reference FTC guidance and CFPB complaint rights
-- Cite potential liability under 15 USC 1681n (willful noncompliance) and 1681o (negligent noncompliance)
+§611 [15 USC §1681i] — DISPUTE PROCEDURE:
+(a)(1)(A) If the completeness or accuracy of any item is disputed by the consumer, the agency shall, free of charge, conduct a reasonable reinvestigation to determine whether the disputed information is inaccurate and record the current status, or delete the item, before the end of the 30-day period.
+(a)(1)(B) The 30-day period may be extended by not more than 15 additional days if the consumer provides additional information during reinvestigation.
+(a)(2)(A) Within 5 business days of receiving a dispute, the agency shall notify the furnisher, including all relevant information.
+(a)(3) The agency may terminate reinvestigation if the dispute is frivolous or irrelevant — but must notify consumer within 5 business days with reasons.
+(a)(5)(A) If after reinvestigation an item is found inaccurate, incomplete, or cannot be verified, the agency shall promptly delete or modify that item and notify the furnisher.
+(a)(5)(B) Deleted information may NOT be reinserted unless the furnisher certifies it is complete and accurate, and the consumer is notified in writing within 5 business days.
+(a)(6) The agency must provide written notice of reinvestigation results within 5 business days, including: a statement of completion, updated consumer report, furnisher contact info, and consumer's right to add a dispute statement.
 
-DISPUTE REASON TEMPLATES — use the most applicable for each item:
-- Late payments: "Reported payment history is inaccurate. Demand verification of complete payment records and proof of timely notification under 15 USC 1681s-2(a)."
-- Collections: "This collection has not been validated. Demand original signed agreement, complete chain of assignment, and proof of amount owed under 15 USC 1681g."
-- Charge-offs: "Balance and status reported inaccurately. Demand verification of original terms and final balance calculation."
-- Inquiries: "This inquiry was not authorized. I did not provide written consent for this credit pull. Remove under 15 USC 1681b."
-- Public records: "Reporting is incomplete or inaccurate. Demand verification of court records and proper reporting dates."
-- Student loans/Gov accounts: "Payment status and delinquency dates reported inaccurately. Demand complete payment history and verification of reported status under FCRA."
-- Duplicates: "This account is being reported as a duplicate entry. Only one tradeline should appear."
-- Balance errors: "Reported balance does not match actual outstanding balance. Demand itemized accounting."
-- Date errors: "Date of first delinquency or date of last activity is inaccurately reported, potentially re-aging this account in violation of FCRA Section 605."
+§616 [15 USC §1681n] — WILLFUL NONCOMPLIANCE:
+Any person who willfully fails to comply is liable for: (1) actual damages OR $100-$1,000; (2) punitive damages as the court may allow; (3) costs and reasonable attorney's fees.
+
+§617 [15 USC §1681o] — NEGLIGENT NONCOMPLIANCE:
+Any person negligent in failing to comply is liable for: (1) actual damages; (2) costs and reasonable attorney's fees.
+
+§618 [15 USC §1681p] — STATUTE OF LIMITATIONS:
+Action may be brought not later than: (1) 2 years after discovery of the violation; or (2) 5 years after the date the violation occurred.
+
+§623 [15 USC §1681s-2] — FURNISHER DUTIES:
+(a)(1)(A) A person shall NOT furnish information if the person knows or has reasonable cause to believe the information is inaccurate.
+(a)(1)(B) A person shall NOT furnish information if notified by the consumer that specific information is inaccurate, and the information is in fact inaccurate.
+(a)(2) A person who has furnished information determined to be incomplete or inaccurate shall promptly notify the agency of corrections.
+(a)(3) If completeness or accuracy is disputed, the person may not furnish the information without notice that it is disputed.
+(a)(5)(A) A person furnishing delinquent account info shall notify the agency of the date of delinquency within 90 days.
+(b)(1) After receiving notice of a dispute via §611(a)(2), the furnisher SHALL: (A) conduct an investigation; (B) review all relevant info from the agency; (C) report results to the agency; (D) if inaccurate, report to all other nationwide agencies; (E) if inaccurate, incomplete, or unverifiable — modify, delete, or permanently block the item.
+
+§605 [15 USC §1681c] — REPORTING TIME LIMITS:
+(a)(1) Cases under title 11 (bankruptcy) that antedate the report by more than 10 years.
+(a)(2) Civil suits, civil judgments, and records of arrest that antedate the report by more than 7 years or until the governing statute of limitations has expired, whichever is longer.
+(a)(4) Accounts placed for collection or charged to profit and loss that antedate the report by more than 7 years.
+(a)(5) Any other adverse item of information (other than records of convictions) that antedates the report by more than 7 years.
+(c)(1) The 7-year period for collections and charge-offs begins on the date of the commencement of the delinquency which immediately preceded the collection or charge-off. Altering the date of first delinquency (DOFD) to extend reporting beyond the statutory period violates §605(c) and §623(a)(5).
+
+DISPUTE STRATEGY — apply the statutory framework above in escalating rounds:
+
+Round 1 — Initial Dispute (cite §611, §607(b)):
+- Dispute inaccuracy/incompleteness under §611(a)(1)(A) — agency must reinvestigate within 30 days
+- Demand verification: original signed agreement, complete payment history, proof of authorization
+- Cite §607(b): agency's duty to assure maximum possible accuracy
+- Identify specific factual basis for each item
+
+Round 2 — Escalation (cite §623(b), §611(a)(5)):
+- If bureau "verified" without proper investigation, request the method of verification per §611(a)(7) (consumer may request description of procedure used)
+- Cite §623(b)(1): furnisher's duty to investigate, review all info, and report results
+- If furnisher cannot verify, demand deletion per §611(a)(5)(A) — item must be promptly deleted or modified
+- Escalate to CFPB complaint if bureau fails to properly reinvestigate per §611(a)(1)(A)
+
+Round 3 — Final Demand (cite §616, §617, §618):
+- Demand deletion — if furnisher failed to investigate per §623(b), this constitutes noncompliance
+- Cite §616: willful noncompliance = $100-$1,000 + punitive damages + attorney's fees
+- Cite §617: negligent noncompliance = actual damages + attorney's fees
+- Note §618: 2-year statute of limitations from discovery, 5-year from violation
+- Reference §611(a)(5)(B): deleted items may not be reinserted without furnisher certification and consumer notification
+
+DISPUTE REASON TEMPLATES — use the most applicable, citing exact statutory sections:
+- Late payments: "Reported payment history is inaccurate. Under §623(a)(1)(A), furnisher may not report information it knows or has reasonable cause to believe is inaccurate. Demand verification of complete payment records and proof of timely notification under §623(a)(5)."
+- Collections: "This collection has not been validated. Demand original signed agreement, complete chain of assignment, and proof of amount owed. Under §611(a)(5)(A), if this item cannot be verified, it must be promptly deleted."
+- Charge-offs: "Balance and status reported inaccurately. Under §607(b), the agency must follow reasonable procedures to assure maximum possible accuracy. Demand verification of original terms and final balance."
+- Inquiries: "This inquiry was not authorized. Under §604(a)(3)(F), a report may only be furnished in connection with a transaction initiated by the consumer. Under §604(f), no person shall use or obtain a report without a permissible purpose. I did not initiate a transaction with this creditor. Remove this unauthorized inquiry immediately."
+- Public records: "Reporting is incomplete or inaccurate. Under §605(a)(2), civil suits and civil judgments that antedate the report by more than 7 years (or the governing statute of limitations, whichever is longer) may not be reported. Demand verification of court records and proper reporting dates."
+- Student loans/Gov accounts: "Payment status and delinquency dates reported inaccurately. Under §623(a)(5)(A), the furnisher must report the date of delinquency — the month and year of commencement of the delinquency that immediately preceded the action. Demand complete payment history."
+- Duplicates: "This account is being reported as a duplicate entry, inflating negative reporting in violation of §607(b). Only one tradeline should appear."
+- Balance errors: "Reported balance does not match actual outstanding balance. Under §623(a)(2), the furnisher must promptly notify the agency of corrections. Demand itemized accounting."
+- Date errors: "Date of first delinquency or date of last activity is inaccurately reported. Under §605(c)(1), the 7-year reporting period runs from the date of commencement of the delinquency which immediately preceded the collection or charge-off. Altering this date violates §605(c) and §623(a)(5). Demand accurate DOFD reporting."
 
 FORMATTING RULES — CRITICAL:
 - Do NOT use markdown headers, bold, or numbered lists for DISPUTE lines.
@@ -1310,39 +1358,41 @@ ${extractedText}
           doc.text(`Issue: ${d.issue}`);
           doc.moveDown(0.6);
 
-          doc.font("Helvetica-Bold").text("Legal Basis:", { underline: true }).moveDown(0.4);
+          doc.font("Helvetica-Bold").text("Legal Basis — FCRA §604 [15 USC §1681b]:", { underline: true }).moveDown(0.4);
           doc.font("Helvetica").text(
-            "Under the FCRA, a credit report may only be accessed for a permissible purpose as defined in 15 USC §1681b. These include:",
+            "Under FCRA §604(a), a consumer reporting agency may furnish a consumer report only under the following circumstances and no other:",
             { lineGap: 2 }
           ).moveDown(0.3);
-          doc.text("• A firm offer of credit initiated by the creditor (pre-screening)", { lineGap: 1.5 });
-          doc.text("• A credit transaction initiated by the consumer", { lineGap: 1.5 });
-          doc.text("• Employment purposes (with written consent)", { lineGap: 1.5 });
-          doc.text("• Insurance underwriting", { lineGap: 1.5 });
-          doc.text("• Legitimate business need in connection with a transaction initiated by the consumer", { lineGap: 1.5 });
-          doc.moveDown(0.4);
+          doc.text("• §604(a)(2): In accordance with the written instructions of the consumer", { lineGap: 1.5 });
+          doc.text("• §604(a)(3)(A): In connection with a credit transaction involving the consumer — extension, review, or collection", { lineGap: 1.5 });
+          doc.text("• §604(a)(3)(F): Legitimate business need in connection with a business transaction initiated by the consumer", { lineGap: 1.5 });
+          doc.moveDown(0.3);
           doc.text(
-            "I did not initiate a transaction with the inquiring creditor listed above, nor did I provide written authorization for them to access my credit file. This inquiry therefore lacks a permissible purpose under 15 USC §1681b.",
+            "Per §604(f): \"A person shall not use or obtain a consumer report for any purpose unless the consumer report is obtained for a purpose for which the consumer report is authorized to be furnished under this section and the purpose is certified in accordance with section 607.\"",
+            { lineGap: 2 }
+          ).moveDown(0.3);
+          doc.text(
+            "I did not initiate a transaction with the inquiring creditor listed above, nor did I provide written instructions or consent for my credit file to be accessed. This inquiry therefore lacks a permissible purpose under §604 and must be removed.",
             { lineGap: 2 }
           ).moveDown(0.6);
 
-          doc.font("Helvetica-Bold").text("Required Action:", { underline: true }).moveDown(0.4);
+          doc.font("Helvetica-Bold").text("Required Action — FCRA §611 [15 USC §1681i]:", { underline: true }).moveDown(0.4);
           doc.font("Helvetica").text(
-            "I am requesting that you take the following actions within 30 days:",
+            "Under §611(a)(1)(A), you are required to conduct a reasonable reinvestigation within 30 days. I am requesting:",
             { lineGap: 2 }
           ).moveDown(0.2);
-          doc.text("1. Provide proof of the permissible purpose under which this inquiry was made, including any written authorization bearing my signature.", { lineGap: 1.5 });
-          doc.text("2. If no permissible purpose or written authorization can be provided, immediately remove this hard inquiry from my credit report.", { lineGap: 1.5 });
-          doc.text("3. Provide written confirmation of the removal or a detailed explanation of the verified permissible purpose.", { lineGap: 1.5 });
+          doc.text("1. Proof of the permissible purpose under §604(a) for this inquiry, including any written authorization bearing my signature per §604(a)(2).", { lineGap: 1.5 });
+          doc.text("2. If no permissible purpose or written authorization can be provided, immediate removal of this inquiry per §611(a)(5)(A) — items that cannot be verified must be promptly deleted.", { lineGap: 1.5 });
+          doc.text("3. Written notification of the results of your investigation per §611(a)(6), including the procedure used to determine accuracy.", { lineGap: 1.5 });
           doc.moveDown(0.4);
 
           doc.text(
-            "Please be advised that under 15 USC §1681i, you are required to conduct a reasonable investigation within 30 days. Under 15 USC §1681n, any willful failure to comply with the FCRA may result in liability for actual damages, punitive damages, and attorney's fees. I reserve all rights under the FCRA.",
+            "Per §616 [15 USC §1681n], any willful failure to comply with FCRA requirements subjects you to liability of $100 to $1,000 per violation, plus punitive damages and attorney's fees. Per §617 [15 USC §1681o], negligent noncompliance subjects you to actual damages and attorney's fees. Per §618 [15 USC §1681p], I have 2 years from discovery of the violation to bring action. I reserve all rights under the FCRA.",
             { lineGap: 2 }
           ).moveDown(0.5);
 
           doc.text(
-            "I also intend to send a separate letter directly to the inquiring creditor demanding proof of permissible purpose. If they cannot produce written authorization, I expect this inquiry to be promptly deleted.",
+            "I also intend to send a separate letter directly to the inquiring creditor demanding proof of permissible purpose under §604. Per §623(a)(1)(A) [15 USC §1681s-2], the furnisher may not report information it knows or has reasonable cause to believe is inaccurate.",
             { lineGap: 2 }
           ).moveDown(1);
 
@@ -1377,33 +1427,39 @@ ${extractedText}
           doc.font("Helvetica-Bold").text("Factual Basis for Dispute:", { underline: true }).moveDown(0.4);
           doc.font("Helvetica").text(d.reason, { lineGap: 2 }).moveDown(0.6);
 
-          doc.font("Helvetica-Bold").text("Legal Basis:", { underline: true }).moveDown(0.4);
+          doc.font("Helvetica-Bold").text("Legal Basis — FCRA Statutory Authority:", { underline: true }).moveDown(0.4);
           doc.font("Helvetica").text(
-            "This dispute is filed pursuant to my rights under the Fair Credit Reporting Act (FCRA):",
+            "This dispute is filed pursuant to my rights under the Fair Credit Reporting Act (FCRA), 15 U.S.C. §1681 et seq.:",
             { lineGap: 2 }
           ).moveDown(0.3);
-          doc.text("• 15 USC §1681i — Right to dispute inaccurate or incomplete information. You must conduct a reasonable investigation within 30 days.", { lineGap: 1.5 });
-          doc.text("• 15 USC §1681e(b) — You must follow reasonable procedures to assure maximum possible accuracy of credit information.", { lineGap: 1.5 });
-          doc.text("• 15 USC §1681s-2(b) — The furnisher of this information is obligated to investigate this dispute upon notification from your agency.", { lineGap: 1.5 });
+          doc.text("• §611(a)(1)(A) [15 USC §1681i] — If the completeness or accuracy of any item is disputed by the consumer, the agency shall, free of charge, conduct a reasonable reinvestigation and record the current status or delete the item before the end of the 30-day period.", { lineGap: 1.5 });
+          doc.text("• §607(b) [15 USC §1681e(b)] — \"Whenever a consumer reporting agency prepares a consumer report it shall follow reasonable procedures to assure maximum possible accuracy.\"", { lineGap: 1.5 });
+          doc.text("• §623(b)(1) [15 USC §1681s-2(b)] — After receiving notice of a dispute, the furnisher shall: (A) conduct an investigation; (B) review all relevant information; (C) report results to the agency; (E) if inaccurate or unverifiable — modify, delete, or permanently block the item.", { lineGap: 1.5 });
+          doc.text("• §623(a)(1)(A) — A person shall not furnish information if the person knows or has reasonable cause to believe the information is inaccurate.", { lineGap: 1.5 });
           doc.moveDown(0.6);
 
-          doc.font("Helvetica-Bold").text("Required Action:", { underline: true }).moveDown(0.4);
+          doc.font("Helvetica-Bold").text("Required Action — FCRA §611 [15 USC §1681i]:", { underline: true }).moveDown(0.4);
           doc.font("Helvetica").text(
-            "I am requesting that you investigate this item and provide the following within 30 days:",
+            "Under §611(a)(1)(A), you must complete your reinvestigation within 30 days. I am requesting:",
             { lineGap: 2 }
           ).moveDown(0.2);
-          doc.text("1. Complete verification from the original furnisher, including the original signed agreement or contract.", { lineGap: 1.5 });
-          doc.text("2. Complete payment history and documentation supporting the reported status.", { lineGap: 1.5 });
-          doc.text("3. Proof that the information is being reported with maximum possible accuracy.", { lineGap: 1.5 });
+          doc.text("1. Complete verification from the original furnisher per §623(b)(1)(A), including the original signed agreement or contract.", { lineGap: 1.5 });
+          doc.text("2. Complete payment history and documentation supporting the reported status per §623(b)(1)(B).", { lineGap: 1.5 });
+          doc.text("3. Proof that the information is being reported with maximum possible accuracy per §607(b).", { lineGap: 1.5 });
           doc.moveDown(0.4);
 
           doc.text(
-            "If the information cannot be verified as accurate and complete, it must be promptly deleted or modified per FCRA Section 611. Failure to investigate or respond within 30 days constitutes a violation of the FCRA, and I reserve my rights under 15 USC §1681n (willful noncompliance) and §1681o (negligent noncompliance).",
+            "Per §611(a)(5)(A), if this item is found inaccurate, incomplete, or cannot be verified, you must promptly delete or modify the item and notify the furnisher. Per §611(a)(5)(B), deleted information may not be reinserted unless the furnisher certifies accuracy and the consumer is notified in writing within 5 business days.",
+            { lineGap: 2 }
+          ).moveDown(0.3);
+
+          doc.text(
+            "Per §616 [15 USC §1681n], willful noncompliance subjects you to liability of $100 to $1,000 per violation, plus punitive damages and attorney's fees. Per §617 [15 USC §1681o], negligent noncompliance subjects you to actual damages and attorney's fees. Per §618 [15 USC §1681p], I have 2 years from discovery to bring action. I reserve all rights under the FCRA.",
             { lineGap: 2 }
           ).moveDown(0.5);
 
           doc.text(
-            "I request written notification of the results of your investigation, including a description of the procedure used to determine accuracy and completeness, and an updated copy of my credit report if changes are made.",
+            "Per §611(a)(6), I request written notification of the results of your investigation within 5 business days of completion, including: a statement of completion, an updated consumer report, the procedure used to determine accuracy, furnisher contact information, and notice of my right to add a dispute statement.",
             { lineGap: 2 }
           ).moveDown(1);
         }
