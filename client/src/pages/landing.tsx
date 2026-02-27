@@ -756,32 +756,25 @@ export default function LandingPage() {
       {showWelcome && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm px-4" onClick={() => setShowWelcome(false)} data-testid="welcome-overlay">
           <div
-            className="relative w-full max-w-md rounded-2xl bg-gradient-to-br from-[#111118] to-[#0d0d14] border border-[#1e1e30] p-8 shadow-2xl shadow-black/40"
+            className="relative w-full max-w-sm rounded-xl bg-[#111118] border border-[#1e1e30] px-6 py-5 shadow-2xl shadow-black/50"
             onClick={(e) => e.stopPropagation()}
             data-testid="welcome-popup"
           >
-            <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-indigo-500/30 to-transparent" />
-            <div className="absolute top-0 right-0 w-40 h-40 bg-gradient-to-bl from-indigo-500/6 to-transparent rounded-bl-full" />
-
             <button
               onClick={() => setShowWelcome(false)}
-              className="absolute top-4 right-4 w-7 h-7 flex items-center justify-center rounded-full text-[#555] hover:text-[#aaa] hover:bg-[#1e1e30] transition-colors"
+              className="absolute top-3 right-3 w-6 h-6 flex items-center justify-center rounded-full text-[#444] hover:text-[#888] transition-colors"
               data-testid="button-close-welcome"
             >
-              <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+              <svg width="12" height="12" viewBox="0 0 14 14" fill="none">
                 <path d="M3 3L11 11M11 3L3 11" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
               </svg>
             </button>
 
-            <div className="mb-5">
-              <ProfundrLogo size="lg" />
-            </div>
+            <ProfundrLogo size="md" />
 
-            <p className="text-[14px] text-[#b0b0c0] leading-[1.7] mb-6">
+            <p className="text-[12px] text-[#888] leading-[1.7] mt-3 mb-5">
               Profundr is a digital underwriting engine that reviews your credit report like a bank would and shows your funding potential before you apply. No hard inquiry, no lending — just secure, clear analysis.
             </p>
-
-            <p className="text-[11px] text-[#666] uppercase tracking-[0.15em] font-medium mb-4">Upload credit report to get started</p>
 
             <button
               onClick={() => {
@@ -789,17 +782,15 @@ export default function LandingPage() {
                 setAutoSendFile(true);
                 handleUploadClick();
               }}
-              className="w-full flex items-center justify-center gap-2.5 px-6 py-3.5 bg-gradient-to-r from-indigo-600 to-indigo-500 text-white rounded-full text-[14px] font-medium hover:from-indigo-500 hover:to-indigo-400 transition-all shadow-lg shadow-indigo-500/25"
+              className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-white text-[#0a0a0f] rounded-full text-[12px] font-medium hover:bg-[#e8e8e8] transition-colors"
               data-testid="button-welcome-upload"
             >
-              <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+              <svg width="14" height="14" viewBox="0 0 18 18" fill="none">
                 <path d="M9 3V12M9 3L5.5 6.5M9 3L12.5 6.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
                 <path d="M3 12V14C3 14.5523 3.44772 15 4 15H14C14.5523 15 15 14.5523 15 14V12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
-              Upload credit report
+              Upload credit report to get started
             </button>
-
-            <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-indigo-500/20 to-transparent" />
           </div>
         </div>
       )}
