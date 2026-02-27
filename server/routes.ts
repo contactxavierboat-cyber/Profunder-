@@ -1194,10 +1194,21 @@ export async function registerRoutes(
     if (manualEntryNeeded && attachment) {
       fileContext = `\n\nThe user uploaded a ${attachment === "bank_statement" ? "bank statement" : "credit report"}, but automated text extraction failed (the document may be an image-based or scanned PDF). Ask the user to manually provide the key data from their document. For a credit report, ask for: credit score, total revolving limits, total balances, number of inquiries, and any derogatory accounts. For a bank statement, ask for: average daily balance, monthly deposits, and any NSF/overdraft occurrences.`;
     } else if (extractedText) {
-      fileContext = `\n\nThe user has uploaded a ${attachment === "bank_statement" ? "bank statement" : "credit report"}. Here is the extracted text from the document (extracted via ${extractionMethod}):\n\n--- START OF DOCUMENT ---\n${extractedText}\n--- END OF DOCUMENT ---\n\nAnalyze this document thoroughly using the Fundability Engine framework. Calculate the Fundability Index, approval probabilities, estimated borrowing power, key risk drivers, and optimization roadmap based on the data extracted.`;
+      fileContext = `\n\nCRITICAL INSTRUCTION — DOCUMENT UPLOADED:
+The user has uploaded a ${attachment === "bank_statement" ? "bank statement" : "credit report"}. The extracted text is below. You MUST analyze this document NOW. Do NOT ask the user for data that could be in this document. Extract whatever credit data you can find — account names, balances, limits, payment history, inquiries, derogatories, public records — and produce your full analysis output (Fundability Index, Approval Odds, Borrowing Power, Denial Triggers, Top Risks, Repair Plan, Dispute Items, Next Moves, Funding Roadmap). If some fields are missing or unclear from the OCR, make reasonable estimates based on what IS available and note any assumptions. NEVER respond by asking for data when a document has been provided — always analyze first.
+
+Extraction method: ${extractionMethod}
+
+--- START OF DOCUMENT ---
+${extractedText}
+--- END OF DOCUMENT ---`;
     }
 
     const systemPrompt = FUNDABILITY_ENGINE_PROMPT + fileContext;
+
+    if (extractedText) {
+      console.log(`[Guest Chat] Document provided: ${extractedText.length} chars via ${extractionMethod}`);
+    }
 
     try {
       const response = await openai.chat.completions.create({
@@ -1207,7 +1218,7 @@ export async function registerRoutes(
           ...history.slice(-8),
           { role: "user", content }
         ],
-        max_tokens: 2048,
+        max_tokens: 4096,
       });
 
       const aiContent = response.choices[0]?.message?.content || "I'm sorry, I couldn't generate a response right now.";
