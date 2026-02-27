@@ -2445,6 +2445,117 @@ Respond to the latest question as the team's AI mentor. Be direct, helpful, and 
     }
   });
 
+  app.get("/api/team", requireAuth, async (req, res) => {
+    try {
+      const userId = req.session.userId!;
+      const friends = await storage.getFriends(userId);
+      const pending = await storage.getPendingRequests(userId);
+      res.json({
+        members: friends.map(f => ({ id: f.friend.id, friendshipId: f.friendship.id, displayName: f.friend.displayName || f.friend.email, email: f.friend.email })),
+        pending: pending.map(p => ({ id: p.requester.id, friendshipId: p.friendship.id, displayName: p.requester.displayName || p.requester.email, email: p.requester.email })),
+      });
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  app.post("/api/team/invite", requireAuth, async (req, res) => {
+    try {
+      const userId = req.session.userId!;
+      const { receiverId } = req.body;
+      if (!receiverId || typeof receiverId !== "number") return res.status(400).json({ error: "Invalid user ID" });
+      if (receiverId === userId) return res.status(400).json({ error: "Cannot invite yourself" });
+      const existing = await storage.getFriendship(userId, receiverId);
+      if (existing) return res.status(400).json({ error: "Already connected or invite pending" });
+      const friendship = await storage.sendFriendRequest(userId, receiverId);
+      res.json({ success: true, friendshipId: friendship.id });
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  app.post("/api/team/accept", requireAuth, async (req, res) => {
+    try {
+      const userId = req.session.userId!;
+      const { friendshipId } = req.body;
+      if (!friendshipId) return res.status(400).json({ error: "Missing friendship ID" });
+      await storage.acceptFriendRequest(friendshipId, userId);
+      res.json({ success: true });
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  app.post("/api/team/reject", requireAuth, async (req, res) => {
+    try {
+      const userId = req.session.userId!;
+      const { friendshipId } = req.body;
+      if (!friendshipId) return res.status(400).json({ error: "Missing friendship ID" });
+      await storage.rejectFriendRequest(friendshipId, userId);
+      res.json({ success: true });
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  app.delete("/api/team/:friendshipId", requireAuth, async (req, res) => {
+    try {
+      const userId = req.session.userId!;
+      const friendshipId = parseInt(req.params.friendshipId);
+      if (isNaN(friendshipId)) return res.status(400).json({ error: "Invalid ID" });
+      await storage.removeFriend(friendshipId, userId);
+      res.json({ success: true });
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  app.post("/api/team/message", requireAuth, async (req, res) => {
+    try {
+      const userId = req.session.userId!;
+      const { content } = req.body;
+      if (!content || typeof content !== "string") return res.status(400).json({ error: "Message required" });
+      const teamKey = `team_${userId}`;
+      const msg = await storage.createDirectMessage({ senderId: userId, receiverId: 0, conversationKey: teamKey, content, isAi: false });
+      const friends = await storage.getFriends(userId);
+      for (const f of friends) {
+        const friendKey = `team_${f.friend.id}`;
+        await storage.createDirectMessage({ senderId: userId, receiverId: f.friend.id, conversationKey: friendKey, content, isAi: false });
+      }
+      const user = await storage.getUser(userId);
+      res.json({ id: msg.id, senderId: userId, displayName: user?.displayName || user?.email || "User", content: msg.content, timestamp: msg.timestamp });
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  app.get("/api/team/messages", requireAuth, async (req, res) => {
+    try {
+      const userId = req.session.userId!;
+      const teamKey = `team_${userId}`;
+      const msgs = await storage.getDirectMessages(teamKey);
+      const friends = await storage.getFriends(userId);
+      const teamMemberIds = new Set(friends.map(f => f.friend.id));
+      const teamMsgs = msgs.filter(m => m.senderId === userId || teamMemberIds.has(m.senderId));
+      const userIds = [...new Set(teamMsgs.map(m => m.senderId))];
+      const usersMap: Record<number, { displayName: string; email: string }> = {};
+      for (const uid of userIds) {
+        const u = await storage.getUser(uid);
+        if (u) usersMap[uid] = { displayName: u.displayName || u.email, email: u.email };
+      }
+      res.json(teamMsgs.slice(-100).map(m => ({
+        id: m.id,
+        senderId: m.senderId,
+        displayName: usersMap[m.senderId]?.displayName || "User",
+        content: m.content,
+        isAi: m.isAi,
+        timestamp: m.timestamp,
+      })));
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
   const rssParser = new Parser({
     timeout: 3000,
     headers: { 'User-Agent': 'Mozilla/5.0 (compatible; Profundr-Feed/1.0)' },

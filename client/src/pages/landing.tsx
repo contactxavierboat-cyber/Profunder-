@@ -1,11 +1,36 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { useAuth } from "@/lib/store";
 import { ProfundrLogo } from "@/components/profundr-logo";
 
+interface TeamMember {
+  id: number;
+  friendshipId: number;
+  displayName: string;
+  email: string;
+}
+
+interface TeamInvite {
+  id: number;
+  friendshipId: number;
+  displayName: string;
+  email: string;
+}
+
+interface TeamMessage {
+  id: number;
+  senderId: number;
+  displayName: string;
+  content: string;
+  isAi: boolean;
+  timestamp: string;
+}
+
 interface GuestMessage {
   id: number;
-  role: "user" | "assistant";
+  role: "user" | "assistant" | "team";
   content: string;
+  senderName?: string;
+  senderId?: number;
 }
 
 interface PillarScore {
@@ -459,7 +484,175 @@ function saveDocs(docs: SavedDoc[]) {
   localStorage.setItem("profundr_docs", JSON.stringify(docs));
 }
 
-function DocsPanel({ docs, onClose, onDelete, onSave }: { docs: SavedDoc[]; onClose: () => void; onDelete: (id: string) => void; onSave: (doc: SavedDoc) => void }) {
+function TeamSection({ user }: { user: any }) {
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState<{ id: number; displayName: string; email: string }[]>([]);
+  const [searching, setSearching] = useState(false);
+  const [team, setTeam] = useState<{ members: TeamMember[]; pending: TeamInvite[] }>({ members: [], pending: [] });
+  const [showSearch, setShowSearch] = useState(false);
+  const [inviting, setInviting] = useState<number | null>(null);
+
+  const fetchTeam = useCallback(async () => {
+    if (!user) return;
+    try {
+      const res = await fetch("/api/team");
+      if (res.ok) setTeam(await res.json());
+    } catch {}
+  }, [user]);
+
+  useEffect(() => { fetchTeam(); }, [fetchTeam]);
+
+  const handleSearch = async (q: string) => {
+    setSearchQuery(q);
+    if (q.length < 2) { setSearchResults([]); setSearching(false); return; }
+    setSearching(true);
+    try {
+      const res = await fetch(`/api/users/search?q=${encodeURIComponent(q)}`);
+      if (res.ok) setSearchResults(await res.json());
+    } catch {}
+    setSearching(false);
+  };
+
+  const handleInvite = async (receiverId: number) => {
+    setInviting(receiverId);
+    try {
+      const res = await fetch("/api/team/invite", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ receiverId }) });
+      if (res.ok) { fetchTeam(); setSearchResults(prev => prev.filter(r => r.id !== receiverId)); }
+    } catch {}
+    setInviting(null);
+  };
+
+  const handleAccept = async (friendshipId: number) => {
+    try {
+      await fetch("/api/team/accept", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ friendshipId }) });
+      fetchTeam();
+    } catch {}
+  };
+
+  const handleReject = async (friendshipId: number) => {
+    try {
+      await fetch("/api/team/reject", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ friendshipId }) });
+      fetchTeam();
+    } catch {}
+  };
+
+  const handleRemove = async (friendshipId: number) => {
+    try {
+      await fetch(`/api/team/${friendshipId}`, { method: "DELETE" });
+      fetchTeam();
+    } catch {}
+  };
+
+  if (!user) {
+    return (
+      <div className="mb-4">
+        <div className="flex items-center gap-2 mb-2">
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><circle cx="4" cy="4" r="2" stroke="#6366f1" strokeWidth="1" fill="none" /><circle cx="8" cy="4" r="2" stroke="#6366f1" strokeWidth="1" fill="none" /><path d="M1 10c0-2 1.5-3 3-3s3 1 3 3" stroke="#6366f1" strokeWidth="0.8" fill="none" /></svg>
+          <span className="text-[11px] font-medium text-[#666] uppercase tracking-wider">Team</span>
+        </div>
+        <p className="text-[11px] text-[#bbb] pl-5 italic">Sign in to add team members</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="mb-4">
+      <div className="flex items-center gap-2 mb-2">
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><circle cx="4" cy="4" r="2" stroke="#6366f1" strokeWidth="1" fill="none" /><circle cx="8" cy="4" r="2" stroke="#6366f1" strokeWidth="1" fill="none" /><path d="M1 10c0-2 1.5-3 3-3s3 1 3 3" stroke="#6366f1" strokeWidth="0.8" fill="none" /></svg>
+        <span className="text-[11px] font-medium text-[#666] uppercase tracking-wider">Team</span>
+        <span className="text-[10px] text-[#aaa] ml-auto">{team.members.length}</span>
+      </div>
+
+      {team.pending.length > 0 && (
+        <div className="pl-5 mb-2 space-y-1">
+          {team.pending.map(inv => (
+            <div key={inv.friendshipId} className="flex items-center gap-1.5 py-1.5 rounded-lg bg-[#f8f7ff] px-2" data-testid={`team-invite-${inv.id}`}>
+              <div className="w-5 h-5 rounded-full bg-[#6366f1] text-white flex items-center justify-center text-[9px] font-bold shrink-0">
+                {inv.displayName[0]?.toUpperCase()}
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-[10px] text-[#444] truncate">{inv.displayName}</p>
+                <p className="text-[8px] text-[#999]">wants to join</p>
+              </div>
+              <button onClick={() => handleAccept(inv.friendshipId)} className="text-[9px] text-green-600 font-medium hover:underline" data-testid={`button-accept-invite-${inv.id}`}>Accept</button>
+              <button onClick={() => handleReject(inv.friendshipId)} className="text-[9px] text-red-400 font-medium hover:underline" data-testid={`button-reject-invite-${inv.id}`}>Decline</button>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {team.members.length === 0 ? (
+        <p className="text-[11px] text-[#bbb] pl-5 italic mb-2">No team members yet</p>
+      ) : (
+        <div className="space-y-1 mb-2">
+          {team.members.map(m => (
+            <div key={m.friendshipId} className="flex items-center gap-1.5 pl-5 py-1.5 rounded-lg hover:bg-[#f5f5f5] group transition-colors" data-testid={`team-member-${m.id}`}>
+              <div className="w-5 h-5 rounded-full bg-[#1a1a2e] text-white flex items-center justify-center text-[9px] font-bold shrink-0">
+                {m.displayName[0]?.toUpperCase()}
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-[11px] text-[#444] truncate">{m.displayName}</p>
+              </div>
+              <button onClick={() => handleRemove(m.friendshipId)} className="opacity-0 group-hover:opacity-100 text-[#ccc] hover:text-red-400 transition-all p-0.5" data-testid={`button-remove-member-${m.id}`}>
+                <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2 2l6 6M8 2l-6 6" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" /></svg>
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {showSearch ? (
+        <div className="pl-5 space-y-2">
+          <div className="relative">
+            <input
+              data-testid="input-team-search"
+              type="text"
+              placeholder="Search by email..."
+              className="w-full bg-[#f5f5f5] border border-[#e5e5e5] rounded-lg h-[32px] pl-3 pr-8 text-[11px] text-[#333] placeholder:text-[#aaa] outline-none focus:border-[#999] transition-colors"
+              value={searchQuery}
+              onChange={(e) => handleSearch(e.target.value)}
+              autoFocus
+            />
+            <button onClick={() => { setShowSearch(false); setSearchQuery(""); setSearchResults([]); }} className="absolute right-2 top-1/2 -translate-y-1/2 text-[#aaa] hover:text-[#666]">
+              <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2 2l6 6M8 2l-6 6" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" /></svg>
+            </button>
+          </div>
+          {searching && <p className="text-[10px] text-[#999]">Searching...</p>}
+          {searchResults.map(r => (
+            <div key={r.id} className="flex items-center gap-1.5 py-1 rounded-lg" data-testid={`search-result-${r.id}`}>
+              <div className="w-5 h-5 rounded-full bg-[#e0e0e0] text-[#666] flex items-center justify-center text-[9px] font-bold shrink-0">
+                {r.displayName[0]?.toUpperCase()}
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-[10px] text-[#444] truncate">{r.displayName}</p>
+                <p className="text-[8px] text-[#999] truncate">{r.email}</p>
+              </div>
+              <button
+                onClick={() => handleInvite(r.id)}
+                disabled={inviting === r.id}
+                className="text-[9px] text-[#6366f1] font-medium hover:underline disabled:opacity-50"
+                data-testid={`button-invite-${r.id}`}
+              >
+                {inviting === r.id ? "..." : "Invite"}
+              </button>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <button
+          onClick={() => setShowSearch(true)}
+          className="ml-5 flex items-center gap-1.5 text-[11px] text-[#6366f1] hover:text-[#4f46e5] font-medium transition-colors"
+          data-testid="button-add-team-member"
+        >
+          <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M5 1v8M1 5h8" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" /></svg>
+          Add Team Member
+        </button>
+      )}
+    </div>
+  );
+}
+
+function DocsPanel({ docs, onClose, onDelete, onSave, user }: { docs: SavedDoc[]; onClose: () => void; onDelete: (id: string) => void; onSave: (doc: SavedDoc) => void; user: any }) {
   const docInputRef = useRef<HTMLInputElement>(null);
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
 
@@ -613,6 +806,8 @@ function DocsPanel({ docs, onClose, onDelete, onSave }: { docs: SavedDoc[]; onCl
           items={otherDocs}
           icon={<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><rect x="2" y="1" width="8" height="10" rx="1" stroke="#999" strokeWidth="1" fill="none" /></svg>}
         />
+        <div className="w-full h-px bg-[#eee] my-3"></div>
+        <TeamSection user={user} />
       </div>
 
       <div className="px-4 py-3 border-t border-[#eee]">
@@ -642,10 +837,46 @@ export default function LandingPage() {
   const [autoSendFile, setAutoSendFile] = useState(false);
   const [docsOpen, setDocsOpen] = useState(false);
   const [savedDocs, setSavedDocs] = useState<SavedDoc[]>(loadSavedDocs);
+  const [teamTyping, setTeamTyping] = useState<string | null>(null);
+  const lastTeamMsgId = useRef(0);
   const { user } = useAuth();
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (!user) return;
+    const poll = async () => {
+      try {
+        const res = await fetch("/api/team/messages");
+        if (!res.ok) return;
+        const msgs: TeamMessage[] = await res.json();
+        if (msgs.length > 0) {
+          const otherMsgs = msgs.filter(m => m.senderId !== user.id);
+          const newMsgs = otherMsgs.filter(m => m.id > lastTeamMsgId.current);
+          if (newMsgs.length > 0) {
+            setGuestMessages(prev => {
+              const existingTeamIds = new Set(prev.filter(p => p.role === "team").map(p => p.id));
+              const teamMsgs: GuestMessage[] = newMsgs
+                .filter(m => !existingTeamIds.has(m.id + 100000))
+                .map(m => ({
+                  id: m.id + 100000,
+                  role: "team" as const,
+                  content: m.content,
+                  senderName: m.displayName,
+                  senderId: m.senderId,
+                }));
+              return teamMsgs.length > 0 ? [...prev, ...teamMsgs] : prev;
+            });
+          }
+          lastTeamMsgId.current = Math.max(...msgs.map(m => m.id));
+        }
+      } catch {}
+    };
+    poll();
+    const interval = setInterval(poll, 5000);
+    return () => clearInterval(interval);
+  }, [user]);
 
   const handleSaveDoc = (doc: SavedDoc) => {
     const updated = [doc, ...savedDocs];
@@ -700,12 +931,15 @@ export default function LandingPage() {
 
   const doSend = async (text: string, file?: { name: string; content: string; isPdf?: boolean } | null) => {
     const displayText = file ? `${text}\n\n[Attached: ${file.name}]` : text;
-    const userMsg: GuestMessage = { id: nextId, role: "user", content: displayText };
+    const userMsg: GuestMessage = { id: nextId, role: "user", content: displayText, senderName: user?.displayName || user?.email };
     setGuestMessages((prev) => [...prev, userMsg]);
     setNextId((n) => n + 1);
     setIsSending(true);
+    if (user) {
+      try { await fetch("/api/team/message", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ content: displayText }) }); } catch {}
+    }
     try {
-      const history = [...guestMessages, userMsg].map((m) => ({ role: m.role, content: m.content }));
+      const history = [...guestMessages, userMsg].map((m) => ({ role: m.role === "team" ? "user" : m.role, content: m.content }));
       const payload: Record<string, unknown> = { content: text, history };
       if (file) {
         payload.fileContent = file.content;
@@ -755,7 +989,7 @@ export default function LandingPage() {
         <>
           <div className="sm:hidden fixed inset-0 bg-black/30 z-40" onClick={() => setDocsOpen(false)} />
           <div className="fixed sm:relative z-50 sm:z-auto w-[280px] h-full shrink-0 transition-all" data-testid="docs-sidebar">
-            <DocsPanel docs={savedDocs} onClose={() => setDocsOpen(false)} onDelete={handleDeleteDoc} onSave={handleSaveDoc} />
+            <DocsPanel docs={savedDocs} onClose={() => setDocsOpen(false)} onDelete={handleDeleteDoc} onSave={handleSaveDoc} user={user} />
           </div>
         </>
       )}
@@ -770,8 +1004,11 @@ export default function LandingPage() {
                 title="My Documents"
                 data-testid="button-toggle-docs"
               >
-                <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-                  <path d="M2 5C2 4.44772 2.44772 4 3 4H7L8.5 6H15C15.5523 6 16 6.44772 16 7V13C16 13.5523 15.5523 14 15 14H3C2.44772 14 2 13.5523 2 13V5Z" stroke="currentColor" strokeWidth="1.3" fill="none" />
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M12 2C9.5 2 7.5 4 7.5 6.5c0 .5-.4 1-1 1C4.5 7.5 3 9.5 3 11.5c0 1.5.8 2.8 2 3.5 0 0-.5 1.5-.5 2.5C4.5 20 6.5 22 9 22c1.5 0 2.5-.5 3-1.5.5 1 1.5 1.5 3 1.5 2.5 0 4.5-2 4.5-4.5 0-1-.5-2.5-.5-2.5 1.2-.7 2-2 2-3.5 0-2-1.5-4-3.5-4-.6 0-1-.5-1-1C16.5 4 14.5 2 12 2z" />
+                  <path d="M12 2v20" />
+                  <path d="M7.5 7.5C9 8.5 10 10 10.5 12" />
+                  <path d="M16.5 7.5C15 8.5 14 10 13.5 12" />
                 </svg>
                 {savedDocs.length > 0 && (
                   <span className="absolute -top-0.5 -right-0.5 w-3.5 h-3.5 bg-[#1a1a2e] text-white rounded-full text-[8px] flex items-center justify-center font-bold">{savedDocs.length}</span>
@@ -833,8 +1070,21 @@ export default function LandingPage() {
 
                   return (
                     <div key={msg.id}>
+                      {msg.role === "team" ? (
+                        <div className="flex gap-3 justify-start">
+                          <div className="w-7 h-7 rounded-full bg-[#6366f1] text-white flex items-center justify-center text-[11px] font-bold shrink-0 mt-0.5" title={msg.senderName}>
+                            {msg.senderName?.[0]?.toUpperCase() || "T"}
+                          </div>
+                          <div className="max-w-[85%]" data-testid={`message-team-${msg.id}`}>
+                            <p className="text-[10px] text-[#6366f1] font-medium mb-0.5">{msg.senderName}</p>
+                            <div className="bg-[#f0eeff] rounded-[20px] rounded-bl-[6px] px-4 py-2.5">
+                              <p className="text-[14px] text-[#1a1a1a] leading-[1.6] whitespace-pre-wrap">{msg.content}</p>
+                            </div>
+                          </div>
+                        </div>
+                      ) : (
                       <div className={`flex gap-3 ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
-                        {msg.role !== "user" && (
+                        {msg.role === "assistant" && (
                           <div className="w-7 h-7 rounded-lg bg-[#1a1a2e] flex items-center justify-center shrink-0 mt-0.5">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                               <path d="M12 2C9.5 2 7.5 4 7.5 6.5c0 .5-.4 1-1 1C4.5 7.5 3 9.5 3 11.5c0 1.5.8 2.8 2 3.5 0 0-.5 1.5-.5 2.5C4.5 20 6.5 22 9 22c1.5 0 2.5-.5 3-1.5.5 1 1.5 1.5 3 1.5 2.5 0 4.5-2 4.5-4.5 0-1-.5-2.5-.5-2.5 1.2-.7 2-2 2-3.5 0-2-1.5-4-3.5-4-.6 0-1-.5-1-1C16.5 4 14.5 2 12 2z" />
@@ -857,6 +1107,7 @@ export default function LandingPage() {
                           )}
                         </div>
                       </div>
+                      )}
                       {showDashboard && (
                         <div className="ml-10">
                           <MissionDashboard data={msgData} />
