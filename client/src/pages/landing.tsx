@@ -1065,9 +1065,13 @@ export default function LandingPage() {
           }));
         }
 
+        const cleanTeamHistory = history.slice(-10).map(h => ({
+          role: (h.role === "user" || h.role === "assistant") ? h.role : "user" as const,
+          content: h.content,
+        }));
         const payload: Record<string, unknown> = {
           content: text,
-          history,
+          history: cleanTeamHistory,
           teamContext: {
             senderName: user.displayName || user.email,
             partnerName: activeTeamChat.displayName,
@@ -1155,7 +1159,11 @@ export default function LandingPage() {
         }));
       }
 
-      const payload: Record<string, unknown> = { content: text, history };
+      const cleanHistory = history.slice(-10).map(h => ({
+        role: (h.role === "user" || h.role === "assistant") ? h.role : "user" as const,
+        content: h.content,
+      }));
+      const payload: Record<string, unknown> = { content: text, history: cleanHistory };
       if (file) {
         payload.fileContent = file.content;
         payload.attachment = "credit_report";

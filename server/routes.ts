@@ -1515,7 +1515,7 @@ export async function registerRoutes(
       history: z.array(z.object({
         role: z.enum(["user", "assistant"]),
         content: z.string()
-      })).max(10).optional(),
+      })).max(50).optional(),
       fileContent: z.string().max(15_000_000).nullable().optional(),
       attachment: z.enum(["credit_report", "bank_statement"]).nullable().optional(),
       fileType: z.enum(["pdf", "text"]).nullable().optional(),
@@ -1526,6 +1526,7 @@ export async function registerRoutes(
     }).safeParse(req.body);
 
     if (!body.success) {
+      console.error("[Guest Chat] Validation error:", JSON.stringify(body.error.issues));
       return res.status(400).json({ error: "Invalid message data" });
     }
 
