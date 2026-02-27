@@ -1719,6 +1719,18 @@ CONVERSATIONAL RULES:
     doc.restore();
   }
 
+  function drawWatermark(doc: InstanceType<typeof PDFDocument>) {
+    const pw = doc.page.width;
+    const ph = doc.page.height;
+    doc.save();
+    doc.opacity(0.04);
+    doc.translate(pw / 2, ph / 2);
+    doc.rotate(-35);
+    doc.font("Helvetica-Bold").fontSize(72).fillColor("#1a1a2e")
+      .text("profundr.", -200, -30, { width: 400, align: "center" });
+    doc.restore();
+  }
+
   function drawPdfLetterhead(doc: InstanceType<typeof PDFDocument>) {
     const pageWidth = doc.page.width;
     const logoSize = 36;
@@ -1793,6 +1805,7 @@ CONVERSATIONAL RULES:
         const bureauAddr = bureauAddresses[d.bureau] || bureauAddresses["All"];
 
         drawPdfLetterhead(doc);
+        drawWatermark(doc);
 
         const j: PDFKit.Mixins.TextOptions = { align: "justify", lineGap: 2 };
         const c: PDFKit.Mixins.TextOptions = { align: "center" };
@@ -1999,6 +2012,7 @@ CONVERSATIONAL RULES:
       const pageWidth = doc.page.width - 100;
 
       drawPdfLetterhead(doc);
+      drawWatermark(doc);
 
       doc.font("Helvetica-Bold").fontSize(14).fillColor("#1a1a2e")
         .text("Credit Analysis Report", { align: "center" });
