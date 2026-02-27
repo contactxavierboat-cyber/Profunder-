@@ -260,13 +260,35 @@ export default function LandingPage() {
               <span className="text-[10px] sm:text-[11px] tracking-[0.15em] uppercase text-[#6a6a8a] font-medium" data-testid="text-hero-label">Digital Underwriting Engine</span>
             </div>
 
-            <h1
-              className="text-[48px] min-[400px]:text-[58px] sm:text-[68px] md:text-[88px] lg:text-[108px] uppercase italic leading-[0.85] mb-6 sm:mb-8 text-center"
-              style={{ fontFamily: "'Satoshi', sans-serif", fontWeight: 400, letterSpacing: '-0.06em', backgroundImage: 'linear-gradient(180deg, #000000 0%, #3a3a5a 50%, #7a7a9a 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}
-              data-testid="text-hero-headline"
-            >
-              <span className="hidden sm:inline">Qualify<br />Before<br />You Apply</span><span className="sm:hidden">Qualify Before<br />You Apply</span>
-            </h1>
+            <div className="flex flex-col items-center gap-2 sm:gap-3 mb-6 sm:mb-8" data-testid="text-hero-headline">
+              {["Qualify", "Before", "You Apply"].map((word, i) => (
+                <span key={word} className="relative inline-block px-4 sm:px-6 py-1 sm:py-2">
+                  <svg
+                    className="absolute inset-0 w-full h-full"
+                    viewBox="0 0 400 80"
+                    preserveAspectRatio="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d={
+                        i === 0
+                          ? "M8,40 C8,18 20,8 45,6 L340,4 C370,3 390,14 394,35 C396,52 385,68 355,72 L55,76 C25,78 6,65 8,40Z"
+                          : i === 1
+                          ? "M5,35 C3,15 18,5 50,8 L345,3 C378,2 395,18 393,42 C391,62 375,75 348,74 L50,77 C20,78 7,58 5,35Z"
+                          : "M10,42 C7,20 22,6 55,5 L350,8 C380,7 396,20 392,44 C388,64 370,76 342,75 L48,73 C18,74 12,60 10,42Z"
+                      }
+                      fill={`rgba(${i === 0 ? '20,20,35' : i === 1 ? '40,40,60' : '60,60,80'},${i === 0 ? '0.92' : i === 1 ? '0.85' : '0.78'})`}
+                    />
+                  </svg>
+                  <span
+                    className="relative z-10 text-[48px] min-[400px]:text-[58px] sm:text-[68px] md:text-[88px] lg:text-[108px] uppercase italic text-white"
+                    style={{ fontFamily: "'Satoshi', sans-serif", fontWeight: 400, letterSpacing: '-0.06em', lineHeight: 1 }}
+                  >
+                    {word}
+                  </span>
+                </span>
+              ))}
+            </div>
 
             <div className="w-12 h-px bg-gradient-to-r from-transparent via-[#9a9ab8] to-transparent mb-6 sm:mb-8" />
 
