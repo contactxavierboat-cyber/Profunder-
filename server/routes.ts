@@ -1719,6 +1719,12 @@ CONVERSATIONAL RULES:
     doc.restore();
   }
 
+  function drawPageBackground(doc: InstanceType<typeof PDFDocument>) {
+    doc.save();
+    doc.rect(0, 0, doc.page.width, doc.page.height).fill("#f5efe6");
+    doc.restore();
+  }
+
   function drawWatermark(doc: InstanceType<typeof PDFDocument>) {
     const pw = doc.page.width;
     const ph = doc.page.height;
@@ -1828,6 +1834,7 @@ CONVERSATIONAL RULES:
 
         const bureauAddr = bureauAddresses[d.bureau] || bureauAddresses["All"];
 
+        drawPageBackground(doc);
         drawPdfLetterhead(doc);
         drawWatermark(doc);
 
@@ -2035,6 +2042,7 @@ CONVERSATIONAL RULES:
 
       const pageWidth = doc.page.width - 100;
 
+      drawPageBackground(doc);
       drawPdfLetterhead(doc);
       drawWatermark(doc);
 
