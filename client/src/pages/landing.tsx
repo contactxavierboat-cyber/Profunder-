@@ -67,24 +67,46 @@ const SubscribeButton = ({ className = "", onSubscribe }: { className?: string; 
   </button>
 );
 
-const RippedPaperScrap = ({ children }: { children: React.ReactNode }) => {
-  const clipId = "ripped-paper-clip";
-  return (
-    <div className="relative inline-block" style={{ transform: 'rotate(-1.5deg)' }}>
-      <svg className="absolute inset-0 w-full h-full" viewBox="0 0 600 500" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg" style={{ filter: 'drop-shadow(0 8px 32px rgba(0,0,0,0.12)) drop-shadow(0 2px 8px rgba(0,0,0,0.08))' }}>
-        <defs>
-          <clipPath id={clipId} clipPathUnits="objectBoundingBox">
-            <path d="M0.04,0.02 C0.06,0.01 0.08,0.03 0.1,0.015 C0.13,0.005 0.15,0.02 0.18,0.008 C0.21,0 0.24,0.018 0.27,0.01 C0.3,0.003 0.33,0.022 0.36,0.012 C0.39,0.004 0.42,0.02 0.45,0.008 C0.48,0 0.51,0.015 0.54,0.006 C0.57,0 0.6,0.02 0.63,0.01 C0.66,0.003 0.69,0.018 0.72,0.008 C0.75,0 0.78,0.022 0.81,0.012 C0.84,0.004 0.87,0.018 0.9,0.008 C0.93,0 0.96,0.015 0.97,0.025 C0.98,0.04 0.99,0.06 0.985,0.08 C0.99,0.11 0.98,0.14 0.99,0.17 C0.995,0.2 0.985,0.23 0.99,0.26 C0.995,0.29 0.98,0.32 0.99,0.35 C0.995,0.38 0.985,0.41 0.99,0.44 C0.995,0.47 0.98,0.5 0.99,0.53 C0.995,0.56 0.985,0.59 0.99,0.62 C0.995,0.65 0.98,0.68 0.99,0.71 C0.995,0.74 0.985,0.77 0.99,0.8 C0.995,0.83 0.98,0.86 0.99,0.89 C0.985,0.92 0.99,0.95 0.975,0.97 C0.96,0.985 0.94,0.975 0.92,0.985 C0.89,0.995 0.86,0.98 0.83,0.99 C0.8,0.997 0.77,0.982 0.74,0.992 C0.71,0.998 0.68,0.98 0.65,0.99 C0.62,0.997 0.59,0.982 0.56,0.992 C0.53,0.998 0.5,0.98 0.47,0.99 C0.44,0.997 0.41,0.982 0.38,0.992 C0.35,0.998 0.32,0.98 0.29,0.99 C0.26,0.997 0.23,0.982 0.2,0.992 C0.17,0.998 0.14,0.98 0.11,0.99 C0.08,0.997 0.06,0.985 0.04,0.975 C0.025,0.96 0.015,0.94 0.01,0.92 C0.005,0.89 0.015,0.86 0.008,0.83 C0.003,0.8 0.015,0.77 0.008,0.74 C0.003,0.71 0.018,0.68 0.008,0.65 C0.003,0.62 0.015,0.59 0.008,0.56 C0.003,0.53 0.018,0.5 0.008,0.47 C0.003,0.44 0.015,0.41 0.008,0.38 C0.003,0.35 0.018,0.32 0.008,0.29 C0.003,0.26 0.015,0.23 0.008,0.2 C0.003,0.17 0.018,0.14 0.008,0.11 C0.003,0.08 0.015,0.06 0.02,0.04 Z" />
-          </clipPath>
-        </defs>
-        <rect width="600" height="500" fill="white" clipPath={`url(#${clipId})`} />
-      </svg>
-      <div className="relative z-10 px-6 sm:px-14 py-10 sm:py-16" style={{ clipPath: `url(#${clipId})` }}>
-        {children}
-      </div>
+const ripClipPath = `polygon(
+  4% 3%, 6% 0.5%, 9% 4%, 12% 0%, 15% 5%, 18% 1%, 21% 4.5%,
+  24% 0%, 27% 3.5%, 30% 0.5%, 33% 5%, 36% 1%, 39% 3%,
+  42% 0%, 45% 4%, 48% 0.5%, 51% 5%, 54% 1%, 57% 3.5%,
+  60% 0%, 63% 4.5%, 66% 0.5%, 69% 5%, 72% 1%, 75% 3%,
+  78% 0%, 81% 4%, 84% 0.5%, 87% 3.5%, 90% 0%, 93% 4%,
+  95% 1%, 97% 5%,
+  100% 4%, 99% 8%, 100% 12%, 98.5% 16%, 100% 20%,
+  98% 24%, 100% 28%, 99% 32%, 100% 36%, 98.5% 40%,
+  100% 44%, 98% 48%, 100% 52%, 99% 56%, 100% 60%,
+  98.5% 64%, 100% 68%, 98% 72%, 100% 76%, 99% 80%,
+  100% 84%, 98.5% 88%, 100% 92%, 98% 95%, 97% 97%,
+  95% 100%, 92% 96%, 89% 100%, 86% 97%, 83% 100%,
+  80% 96%, 77% 100%, 74% 97%, 71% 100%, 68% 96%,
+  65% 100%, 62% 97%, 59% 100%, 56% 96%, 53% 100%,
+  50% 97%, 47% 100%, 44% 96%, 41% 100%, 38% 97%,
+  35% 100%, 32% 96%, 29% 100%, 26% 97%, 23% 100%,
+  20% 96%, 17% 100%, 14% 97%, 11% 100%, 8% 97%,
+  5% 100%, 3% 96%,
+  0% 97%, 1% 92%, 0% 88%, 2% 84%, 0% 80%,
+  1.5% 76%, 0% 72%, 2% 68%, 0% 64%, 1% 60%,
+  0% 56%, 2% 52%, 0% 48%, 1.5% 44%, 0% 40%,
+  2% 36%, 0% 32%, 1% 28%, 0% 24%, 2% 20%,
+  0% 16%, 1.5% 12%, 0% 8%, 2% 5%
+)`;
+
+const RippedPaperScrap = ({ children }: { children: React.ReactNode }) => (
+  <div className="relative overflow-visible" style={{ transform: 'rotate(-2deg)' }}>
+    <div
+      className="absolute inset-0 bg-white"
+      style={{
+        clipPath: ripClipPath,
+        filter: 'drop-shadow(0 12px 40px rgba(0,0,0,0.18)) drop-shadow(0 4px 12px rgba(0,0,0,0.1))',
+      }}
+    />
+    <div className="relative z-10 overflow-visible px-8 sm:px-16 py-12 sm:py-20">
+      {children}
     </div>
-  );
-};
+  </div>
+);
 
 const ScrollArrow = ({ targetId }: { targetId: string }) => (
   <button
@@ -272,19 +294,33 @@ export default function LandingPage() {
       <section id="sec-hero" className="relative z-20 min-h-[90vh] flex flex-col items-center justify-center px-4 sm:px-12 md:px-20 lg:px-28 py-24 sm:py-28 text-center overflow-visible">
 
         <div className="relative max-w-[900px] mx-auto flex flex-col items-center">
-          <RippedPaperScrap>
-            <p className="text-[11px] tracking-[0.2em] uppercase text-[#6a6a8a] mb-4 text-center" data-testid="text-hero-label">Digital Underwriting Engine</p>
-            <h1
-              className="text-[44px] min-[400px]:text-[54px] sm:text-[64px] md:text-[80px] lg:text-[96px] uppercase italic leading-[0.85] mb-4 sm:mb-6 text-center"
-              style={{ fontFamily: "'Satoshi', sans-serif", fontWeight: 400, letterSpacing: '-0.06em', backgroundImage: 'linear-gradient(180deg, #000000 0%, #3a3a5a 50%, #7a7a9a 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}
-              data-testid="text-hero-headline"
-            >
-              <span className="hidden sm:inline">Qualify<br />Before<br />You Apply</span><span className="sm:hidden">Qualify<br />Before<br />You Apply</span>
-            </h1>
-            <p className="text-[11px] sm:text-[14px] text-[#6a6a8a] leading-[1.5] max-w-[400px] mx-auto text-center">
-              Know exactly where you stand before you submit a single funding application.
-            </p>
-          </RippedPaperScrap>
+          <div className="relative overflow-visible w-full max-w-[700px]">
+            <RippedPaperScrap>
+              <p className="text-[11px] tracking-[0.2em] uppercase text-[#6a6a8a] mb-6 text-center relative z-10" data-testid="text-hero-label">Digital Underwriting Engine</p>
+              <div className="relative overflow-visible flex items-center justify-center" style={{ minHeight: '200px' }}>
+                <h1
+                  className="text-[56px] min-[400px]:text-[68px] sm:text-[84px] md:text-[104px] lg:text-[124px] uppercase italic leading-[0.8] text-center whitespace-nowrap"
+                  style={{
+                    fontFamily: "'Satoshi', sans-serif",
+                    fontWeight: 400,
+                    letterSpacing: '-0.06em',
+                    backgroundImage: 'linear-gradient(180deg, #000000 0%, #3a3a5a 50%, #7a7a9a 100%)',
+                    WebkitBackgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent',
+                    backgroundClip: 'text',
+                    transform: 'rotate(2deg) scale(1.15)',
+                    margin: '0 -20%',
+                  }}
+                  data-testid="text-hero-headline"
+                >
+                  Qualify<br />Before<br />You Apply
+                </h1>
+              </div>
+              <p className="text-[11px] sm:text-[14px] text-[#6a6a8a] leading-[1.5] max-w-[380px] mx-auto text-center mt-6 relative z-10">
+                Know exactly where you stand before you submit a single funding application.
+              </p>
+            </RippedPaperScrap>
+          </div>
 
           <div className="mt-12 sm:mt-14 w-full max-w-[560px] text-center">
             <p className="text-[12px] sm:text-[15px] text-[#5a5a7a] leading-[1.7] mb-8 px-2">
