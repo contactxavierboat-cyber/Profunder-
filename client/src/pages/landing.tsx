@@ -71,31 +71,6 @@ const faqItems = [
   { q: "Can I use this to prepare for an SBA loan?", a: "Absolutely. We evaluate you against SBA 7(a) and 504 underwriting criteria. You'll see exactly where you stand, what flags exist, and what to fix before applying." },
 ];
 
-const proofMessages = [
-  "Jay just sought out tax advice from Marcus Allen.",
-  "$50K just funded",
-  "Sofia connected with branding expert Elena Cruz.",
-  "$100K just funded",
-  "David started a strategy session with Ryan Cole.",
-  "Mia asked investment insights from Andre Thompson.",
-  "$75K just funded",
-  "Liam requested growth advice from Chloe Bennett.",
-  "Aisha connected with startup mentor Victor Hale.",
-  "$200K just funded",
-  "Noah sought marketing guidance from Isabella Reed.",
-  "Emma started a leadership conversation with Daniel Brooks.",
-  "$35K just funded",
-  "Lucas tapped into real estate insights from Carter Hayes.",
-  "Ava requested funding strategy from Marcus Allen.",
-  "$150K just funded",
-  "Ethan connected with e-commerce expert Natalie Shaw.",
-  "Olivia sought content strategy advice from Jordan Blake.",
-  "Mason started a business scaling session with Priya Desai.",
-  "$90K just funded",
-  "$250K just funded",
-  "$120K just funded",
-  "$300K just funded",
-];
 
 export default function LandingPage() {
   const [email, setEmail] = useState("");
@@ -104,9 +79,6 @@ export default function LandingPage() {
   const [showLogin, setShowLogin] = useState(false);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const { login, user } = useAuth();
-  const [proofIndex, setProofIndex] = useState(0);
-  const [proofVisible, setProofVisible] = useState(true);
-
   const handleSubscribeClick = () => {
     if (user) {
       window.location.href = '/subscription';
@@ -115,16 +87,6 @@ export default function LandingPage() {
     }
   };
 
-  useEffect(() => {
-    const cycle = setInterval(() => {
-      setProofVisible(false);
-      setTimeout(() => {
-        setProofIndex((i) => (i + 1) % proofMessages.length);
-        setProofVisible(true);
-      }, 600);
-    }, 3500);
-    return () => clearInterval(cycle);
-  }, []);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -191,18 +153,6 @@ export default function LandingPage() {
           </div>
         </div>
       )}
-
-      <div
-        className="fixed bottom-6 left-6 z-50 flex items-center gap-2.5 px-4 py-2.5 rounded-xl bg-white border border-[#e0e0e8] shadow-lg shadow-black/8"
-        style={{
-          transition: "opacity 0.5s ease, transform 0.5s ease",
-          opacity: proofVisible ? 1 : 0,
-          transform: proofVisible ? "translateY(0)" : "translateY(8px)",
-        }}
-      >
-        <span className="w-2 h-2 rounded-full bg-[#2a2a2a] animate-pulse shrink-0"></span>
-        <span className="text-[12px] sm:text-[13px] text-[#3a3a5a] font-medium whitespace-nowrap">{proofMessages[proofIndex]}</span>
-      </div>
 
       <div className="sticky top-0 z-50 w-full flex justify-center px-3 sm:px-10 pt-3 sm:pt-4" data-testid="nav-top">
         <nav className="flex items-center justify-between w-full max-w-[900px] h-[46px] sm:h-[52px] bg-white/80 backdrop-blur-md rounded-full px-2 sm:px-2.5 pl-2.5 sm:pl-3 shadow-lg shadow-black/10 hover:bg-white/90 hover:shadow-xl hover:shadow-black/15 transition-all duration-300">
