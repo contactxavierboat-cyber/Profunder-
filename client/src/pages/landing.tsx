@@ -989,7 +989,7 @@ export default function LandingPage() {
           return;
         }
 
-        const newMsgs = msgs.filter(m => m.id > lastSeenId && m.senderId !== user.id);
+        const newMsgs = msgs.filter(m => m.id > lastSeenId);
         if (newMsgs.length > 0) {
           setGuestMessages(prev => {
             const existingIds = new Set(prev.map(p => p.id));
@@ -1129,29 +1129,20 @@ export default function LandingPage() {
       playNotificationSound();
 
       try {
-        const storeRes = await fetch("/api/team/chat/message", {
+        const storePromise = fetch("/api/team/chat/message", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ content: displayText, withUserId: activeTeamChat.id }),
-        });
-        if (storeRes.ok) {
-          const stored = await storeRes.json();
-          setTeamChatMessages(prev => prev.map(m => m.id === userMsg.id ? { ...m, id: stored.id + 100000 } : m));
-        }
+        }).then(r => r.ok ? r.json() : null).catch(() => null);
 
-        const histRes = await fetch(`/api/team/chat/messages?with=${activeTeamChat.id}`);
-        let history: { role: string; content: string }[] = [];
-        if (histRes.ok) {
-          const serverMsgs: TeamMessage[] = await histRes.json();
-          history = serverMsgs.map(m => ({
-            role: m.isAi ? "assistant" : "user",
-            content: !m.isAi
-              ? `[${m.displayName}]: ${m.content}`
-              : m.content,
-          }));
-        }
+        const localHistory = [...teamChatMessages, userMsg].map(m => ({
+          role: m.role === "assistant" ? "assistant" : "user",
+          content: m.role !== "assistant" && m.senderName
+            ? `[${m.senderName}]: ${m.content}`
+            : m.content,
+        }));
 
-        const cleanTeamHistory = history.slice(-10).map(h => ({
+        const cleanTeamHistory = localHistory.slice(-10).map(h => ({
           role: (h.role === "user" || h.role === "assistant") ? h.role : "user" as const,
           content: h.content,
         }));
@@ -1168,26 +1159,35 @@ export default function LandingPage() {
           payload.attachment = "credit_report";
           payload.fileType = file.isPdf ? "pdf" : "text";
         }
-        const res = await fetch("/api/chat/guest", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
-        });
+
+        const [res, stored] = await Promise.all([
+          fetch("/api/chat/guest", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
+          }),
+          storePromise,
+        ]);
+
+        if (stored) {
+          setTeamChatMessages(prev => prev.map(m => m.id === userMsg.id ? { ...m, id: stored.id + 100000 } : m));
+        }
+
         if (!res.ok) throw new Error("Failed");
         const data = await res.json();
         const aiMsg: GuestMessage = { id: nextId + 1, role: "assistant", content: data.content };
         setTeamChatMessages((prev) => [...prev, aiMsg]);
         setNextId((n) => n + 1);
 
-        const aiStoreRes = await fetch("/api/team/chat/message", {
+        fetch("/api/team/chat/message", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ content: data.content, withUserId: activeTeamChat.id, isAi: true }),
-        });
-        if (aiStoreRes.ok) {
-          const aiStored = await aiStoreRes.json();
-          setTeamChatMessages(prev => prev.map(m => m.id === aiMsg.id ? { ...m, id: aiStored.id + 100000 } : m));
-        }
+        }).then(r => r.ok ? r.json() : null)
+          .then(aiStored => {
+            if (aiStored) setTeamChatMessages(prev => prev.map(m => m.id === aiMsg.id ? { ...m, id: aiStored.id + 100000 } : m));
+          })
+          .catch(() => {});
       } catch {
         const errMsg: GuestMessage = { id: nextId + 1, role: "assistant", content: "Sorry, something went wrong. Please try again." };
         setTeamChatMessages((prev) => [...prev, errMsg]);
@@ -1203,41 +1203,21 @@ export default function LandingPage() {
     setNextId((n) => n + 1);
     setIsSending(true);
 
-    if (user) {
-      try {
-        const teamRes = await fetch("/api/team/message", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ content: displayText }) });
-        if (teamRes.ok) {
-          const stored = await teamRes.json();
-          setGuestMessages(prev => prev.map(m => m.id === userMsg.id ? { ...m, id: stored.id + 100000 } : m));
-        }
-      } catch {}
-    }
-
     try {
       let history: { role: string; content: string }[];
+
+      const storePromise = user
+        ? fetch("/api/team/message", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ content: displayText }) })
+            .then(r => r.ok ? r.json() : null)
+            .catch(() => null)
+        : Promise.resolve(null);
+
       if (user) {
-        try {
-          const histRes = await fetch("/api/team/messages");
-          if (histRes.ok) {
-            const serverMsgs: TeamMessage[] = await histRes.json();
-            history = serverMsgs.map(m => ({
-              role: m.isAi ? "assistant" : "user",
-              content: m.senderId !== user.id && !m.isAi
-                ? `[Team member ${m.displayName}]: ${m.content}`
-                : m.content,
-            }));
-          } else {
-            history = [...guestMessages, userMsg].map(m => ({
-              role: m.role === "team" ? "user" : m.role,
-              content: m.role === "team" ? `[Team member ${m.senderName || "Unknown"}]: ${m.content}` : m.content,
-            }));
-          }
-        } catch {
-          history = [...guestMessages, userMsg].map(m => ({
-            role: m.role === "team" ? "user" : m.role,
-            content: m.role === "team" ? `[Team member ${m.senderName || "Unknown"}]: ${m.content}` : m.content,
-          }));
-        }
+        const localHistory = [...guestMessages, userMsg].map(m => ({
+          role: m.role === "team" ? "user" : m.role,
+          content: m.role === "team" ? `[Team member ${m.senderName || "Unknown"}]: ${m.content}` : m.content,
+        }));
+        history = localHistory;
       } else {
         history = [...guestMessages, userMsg].map(m => ({
           role: m.role === "team" ? "user" : m.role,
@@ -1255,11 +1235,20 @@ export default function LandingPage() {
         payload.attachment = "credit_report";
         payload.fileType = file.isPdf ? "pdf" : "text";
       }
-      const res = await fetch("/api/chat/guest", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
+
+      const [res, stored] = await Promise.all([
+        fetch("/api/chat/guest", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        }),
+        storePromise,
+      ]);
+
+      if (stored) {
+        setGuestMessages(prev => prev.map(m => m.id === userMsg.id ? { ...m, id: stored.id + 100000 } : m));
+      }
+
       if (!res.ok) throw new Error("Failed to get response");
       const data = await res.json();
       const aiMsg: GuestMessage = { id: nextId + 1, role: "assistant", content: data.content };
@@ -1267,13 +1256,12 @@ export default function LandingPage() {
       setNextId((n) => n + 1);
 
       if (user) {
-        try {
-          const aiTeamRes = await fetch("/api/team/message", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ content: data.content, isAi: true }) });
-          if (aiTeamRes.ok) {
-            const aiStored = await aiTeamRes.json();
-            setGuestMessages(prev => prev.map(m => m.id === aiMsg.id ? { ...m, id: aiStored.id + 100000 } : m));
-          }
-        } catch {}
+        fetch("/api/team/message", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ content: data.content, isAi: true }) })
+          .then(r => r.ok ? r.json() : null)
+          .then(aiStored => {
+            if (aiStored) setGuestMessages(prev => prev.map(m => m.id === aiMsg.id ? { ...m, id: aiStored.id + 100000 } : m));
+          })
+          .catch(() => {});
       }
     } catch {
       const errMsg: GuestMessage = { id: nextId + 1, role: "assistant", content: "Sorry, something went wrong. Please try again." };
