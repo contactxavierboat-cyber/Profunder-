@@ -2476,8 +2476,14 @@ Respond to the latest question as the team's AI mentor. Be direct, helpful, and 
       if (!receiverId || typeof receiverId !== "number") return res.status(400).json({ error: "Invalid user ID" });
       if (receiverId === userId) return res.status(400).json({ error: "Cannot invite yourself" });
       const existing = await storage.getFriendship(userId, receiverId);
-      if (existing) return res.status(400).json({ error: "Already connected or invite pending" });
-      const friendship = await storage.sendFriendRequest(userId, receiverId);
+      if (existing) {
+        if (existing.status === "pending") {
+          await storage.acceptFriendRequest(existing.id, existing.receiverId);
+          return res.json({ success: true, friendshipId: existing.id });
+        }
+        return res.status(400).json({ error: "Already connected" });
+      }
+      const friendship = await storage.addTeamMember(userId, receiverId);
       res.json({ success: true, friendshipId: friendship.id });
     } catch (error: any) {
       res.status(500).json({ error: error.message });

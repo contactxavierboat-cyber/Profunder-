@@ -28,6 +28,7 @@ export interface IStorage {
   
   sendFriendRequest(requesterId: number, receiverId: number): Promise<Friendship>;
   acceptFriendRequest(friendshipId: number, userId: number): Promise<Friendship>;
+  addTeamMember(requesterId: number, receiverId: number): Promise<Friendship>;
   rejectFriendRequest(friendshipId: number, userId: number): Promise<void>;
   removeFriend(friendshipId: number, userId: number): Promise<void>;
   getFriends(userId: number): Promise<{ friendship: Friendship; friend: User }[]>;
@@ -134,8 +135,13 @@ export class DatabaseStorage implements IStorage {
     return friendship;
   }
 
+  async addTeamMember(requesterId: number, receiverId: number): Promise<Friendship> {
+    const [friendship] = await db.insert(friendships).values({ requesterId, receiverId, status: "accepted" }).returning();
+    return friendship;
+  }
+
   async acceptFriendRequest(friendshipId: number, userId: number): Promise<Friendship> {
-    const [friendship] = await db.update(friendships).set({ status: "accepted" }).where(and(eq(friendships.id, friendshipId), eq(friendships.receiverId, userId))).returning();
+    const [friendship] = await db.update(friendships).set({ status: "accepted" }).where(and(eq(friendships.id, friendshipId), or(eq(friendships.receiverId, userId), eq(friendships.requesterId, userId)))).returning();
     return friendship;
   }
 
