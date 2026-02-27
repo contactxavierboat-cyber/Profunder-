@@ -1725,18 +1725,31 @@ CONVERSATIONAL RULES:
     const savedY = doc.y;
     const savedX = doc.x;
     doc.save();
-    doc.opacity(0.045);
-    const cx = pw / 2;
-    const cy = ph / 2;
-    const angle = -35 * (Math.PI / 180);
+    doc.opacity(0.04);
+    doc.font("Helvetica-Bold").fontSize(24).fillColor("#1a1a2e");
     const text = "profundr.";
-    doc.font("Helvetica-Bold").fontSize(80).fillColor("#1a1a2e");
     const tw = doc.widthOfString(text);
     const th = doc.currentLineHeight();
-    const rx = cx - (tw / 2) * Math.cos(angle) + (th / 2) * Math.sin(angle);
-    const ry = cy - (tw / 2) * Math.sin(angle) - (th / 2) * Math.cos(angle);
-    doc.rotate(-35, { origin: [cx, cy] });
-    doc.text(text, cx - tw / 2, cy - th / 2, { lineBreak: false });
+    const spacingX = tw + 60;
+    const spacingY = th + 80;
+    const cos35 = Math.cos(-35 * Math.PI / 180);
+    const sin35 = Math.sin(-35 * Math.PI / 180);
+    for (let row = -4; row < 12; row++) {
+      for (let col = -4; col < 10; col++) {
+        const bx = col * spacingX;
+        const by = row * spacingY;
+        const rx = bx * cos35 - by * sin35;
+        const ry = bx * sin35 + by * cos35;
+        const px = rx - 100;
+        const py = ry - 200;
+        if (px > -tw && px < pw + tw && py > -th && py < ph + th) {
+          doc.save();
+          doc.rotate(-35, { origin: [px + tw / 2, py + th / 2] });
+          doc.text(text, px, py, { lineBreak: false });
+          doc.restore();
+        }
+      }
+    }
     doc.restore();
     doc.x = savedX;
     doc.y = savedY;
