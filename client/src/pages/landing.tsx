@@ -538,7 +538,7 @@ export default function LandingPage() {
                     <div className={`flex gap-3 ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
                       {msg.role !== "user" && (
                         <div className="w-7 h-7 rounded-lg bg-[#1a1a2e] flex items-center justify-center shrink-0 mt-0.5">
-                          <span className="text-[10px] font-bold text-white">P</span>
+                          <span className="w-2.5 h-2.5 rounded-full bg-white animate-pulse" />
                         </div>
                       )}
                       <div
@@ -584,7 +584,7 @@ export default function LandingPage() {
               {isSending && (
                 <div className="flex gap-3 justify-start">
                   <div className="w-7 h-7 rounded-lg bg-[#1a1a2e] flex items-center justify-center shrink-0 mt-0.5">
-                    <span className="text-[10px] font-bold text-white">P</span>
+                    <span className="w-2.5 h-2.5 rounded-full bg-white animate-pulse" />
                   </div>
                   <div className="flex items-center gap-1.5 py-2">
                     <span className="w-1.5 h-1.5 bg-[#999] rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
