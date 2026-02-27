@@ -255,8 +255,8 @@ export default function LandingPage() {
 
         <div className="relative max-w-[900px] mx-auto flex flex-col items-center">
 
-          <div className="relative w-full flex flex-col items-center">
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-[#d0d0de] bg-white/60 backdrop-blur-sm mb-8 sm:mb-10">
+          <div className="relative w-full rounded-2xl sm:rounded-3xl bg-white/70 backdrop-blur-xl border border-white/80 shadow-[0_8px_40px_rgba(0,0,0,0.06)] px-5 sm:px-12 py-10 sm:py-16 flex flex-col items-center">
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-[#d0d0de] bg-white/80 mb-8 sm:mb-10">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
               <span className="text-[10px] sm:text-[11px] tracking-[0.15em] uppercase text-[#6a6a8a] font-medium" data-testid="text-hero-label">Digital Underwriting Engine</span>
             </div>
@@ -274,38 +274,38 @@ export default function LandingPage() {
             <p className="text-[12px] sm:text-[16px] text-[#5a5a7a] leading-[1.7] sm:leading-[1.8] max-w-[520px] mx-auto mb-10 sm:mb-12 px-2 text-center">
               Know exactly where you stand before you submit a single funding application. We analyze your profile using real underwriting logic to determine your funding potential — before lenders ever see you.
             </p>
-          </div>
 
-          <form onSubmit={handleLogin} className="w-full max-w-[440px] mx-auto mb-8">
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center bg-[#f5f5fa] border border-[#e0e0ea] rounded-2xl sm:rounded-full sm:h-[52px] sm:pl-5 sm:pr-1.5 overflow-hidden">
-              <input
-                data-testid="input-email"
-                type="email"
-                placeholder="Enter your email"
-                className="flex-1 bg-transparent text-[14px] text-[#1a1a2e] placeholder:text-[#6a6a8a] outline-none px-4 py-3.5 sm:px-0 sm:py-0"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                disabled={isLoading}
-              />
-              <button
-                data-testid="button-join"
-                type="submit"
-                disabled={isLoading}
-                className="h-[44px] sm:h-[40px] px-6 sm:rounded-full text-white text-[13px] font-bold hover:opacity-90 transition-colors shrink-0 sm:border-t-0 mx-1.5 mb-1.5 sm:mb-0 sm:mx-0 rounded-xl sm:rounded-full tracking-wide"
-                style={{ background: 'linear-gradient(135deg, #2a2a2a 0%, #0a0a0a 100%)' }}
-              >
-                {isLoading ? "..." : "SUBSCRIBE"}
-              </button>
+            <form onSubmit={handleLogin} className="w-full max-w-[440px] mx-auto mb-8">
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center bg-[#f5f5fa] border border-[#e0e0ea] rounded-2xl sm:rounded-full sm:h-[52px] sm:pl-5 sm:pr-1.5 overflow-hidden">
+                <input
+                  data-testid="input-email"
+                  type="email"
+                  placeholder="Enter your email"
+                  className="flex-1 bg-transparent text-[14px] text-[#1a1a2e] placeholder:text-[#6a6a8a] outline-none px-4 py-3.5 sm:px-0 sm:py-0"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  disabled={isLoading}
+                />
+                <button
+                  data-testid="button-join"
+                  type="submit"
+                  disabled={isLoading}
+                  className="h-[44px] sm:h-[40px] px-6 sm:rounded-full text-white text-[13px] font-bold hover:opacity-90 transition-colors shrink-0 sm:border-t-0 mx-1.5 mb-1.5 sm:mb-0 sm:mx-0 rounded-xl sm:rounded-full tracking-wide"
+                  style={{ background: 'linear-gradient(135deg, #2a2a2a 0%, #0a0a0a 100%)' }}
+                >
+                  {isLoading ? "..." : "SUBSCRIBE"}
+                </button>
+              </div>
+            </form>
+
+            <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-6 text-[10px] sm:text-[11px] text-[#7a7a9a] tracking-wide font-mono">
+              <span className="flex items-center gap-1.5"><span className="text-[#9a9ab8]">&#x2713;</span> Full platform access</span>
+              <span className="w-px h-3 bg-[#d0d0de]"></span>
+              <span className="flex items-center gap-1.5"><span className="text-[#9a9ab8]">&#x2713;</span> Cancel anytime</span>
+              <span className="w-px h-3 bg-[#d0d0de]"></span>
+              <span className="flex items-center gap-1.5"><span className="text-[#9a9ab8]">&#x2713;</span> 30 analyses / month</span>
             </div>
-          </form>
-
-          <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-6 text-[10px] sm:text-[11px] text-[#7a7a9a] tracking-wide font-mono">
-            <span className="flex items-center gap-1.5"><span className="text-[#9a9ab8]">&#x2713;</span> Full platform access</span>
-            <span className="w-px h-3 bg-[#d0d0de]"></span>
-            <span className="flex items-center gap-1.5"><span className="text-[#9a9ab8]">&#x2713;</span> Cancel anytime</span>
-            <span className="w-px h-3 bg-[#d0d0de]"></span>
-            <span className="flex items-center gap-1.5"><span className="text-[#9a9ab8]">&#x2713;</span> 30 analyses / month</span>
           </div>
 
           <ScrollArrow targetId="sec-problem" />
