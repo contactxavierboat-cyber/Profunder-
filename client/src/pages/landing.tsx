@@ -1117,6 +1117,20 @@ export default function LandingPage() {
     const displayText = file ? `${text}\n\n[Attached: ${file.name}]` : text;
     const userMsg: GuestMessage = { id: nextId, role: "user", content: displayText, senderName: user?.displayName || user?.email };
 
+    if (file) {
+      const existingDoc = savedDocs.find(d => d.name === file.name && d.type === "credit_report");
+      if (!existingDoc) {
+        const fileDataUrl = file.isPdf ? `data:application/pdf;base64,${file.content}` : `data:text/plain;base64,${btoa(file.content)}`;
+        handleSaveDoc({
+          id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+          name: file.name,
+          type: "credit_report",
+          savedAt: Date.now(),
+          fileDataUrl,
+        });
+      }
+    }
+
     if (activeTeamChat && user) {
       setTeamChatMessages((prev) => [...prev, userMsg]);
       setNextId((n) => n + 1);
