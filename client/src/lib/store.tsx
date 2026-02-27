@@ -87,7 +87,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setIsLoggedIn(true);
       localStorage.setItem("studio_logged_in", "true");
       queryClient.invalidateQueries({ queryKey: ["/api/me"] });
-      toast({ title: "Welcome back", description: `Logged in as ${data.displayName || data.email}` });
+      toast({ title: "Welcome back", description: `Logged in as ${data.username || data.email}` });
       if (data.role === 'admin') {
         setLocation('/admin');
       } else if (data.subscriptionStatus === 'active') {
