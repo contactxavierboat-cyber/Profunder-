@@ -444,7 +444,7 @@ interface SavedDoc {
   name: string;
   type: "dispute_letter" | "credit_report" | "other";
   savedAt: number;
-  url?: string;
+  fileDataUrl?: string;
   disputes?: DisputeItem[];
 }
 
@@ -461,18 +461,63 @@ function saveDocs(docs: SavedDoc[]) {
 
 function DocsPanel({ docs, onClose, onDelete, onSave }: { docs: SavedDoc[]; onClose: () => void; onDelete: (id: string) => void; onSave: (doc: SavedDoc) => void }) {
   const docInputRef = useRef<HTMLInputElement>(null);
+  const [downloadingId, setDownloadingId] = useState<string | null>(null);
 
   const handleUploadDoc = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    const doc: SavedDoc = {
-      id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
-      name: file.name,
-      type: file.name.toLowerCase().includes("dispute") ? "dispute_letter" : file.name.toLowerCase().includes("credit") ? "credit_report" : "other",
-      savedAt: Date.now(),
+    const reader = new FileReader();
+    reader.onload = () => {
+      const doc: SavedDoc = {
+        id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+        name: file.name,
+        type: file.name.toLowerCase().includes("dispute") ? "dispute_letter" : file.name.toLowerCase().includes("credit") ? "credit_report" : "other",
+        savedAt: Date.now(),
+        fileDataUrl: reader.result as string,
+      };
+      onSave(doc);
     };
-    onSave(doc);
+    reader.readAsDataURL(file);
     if (docInputRef.current) docInputRef.current.value = "";
+  };
+
+  const handleDownload = async (doc: SavedDoc) => {
+    setDownloadingId(doc.id);
+    try {
+      if (doc.disputes && doc.disputes.length > 0) {
+        const res = await fetch("/api/dispute-letters", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ disputes: doc.disputes })
+        });
+        if (!res.ok) throw new Error("Failed to generate");
+        const data = await res.json();
+        if (data.downloadUrl) {
+          const pdfRes = await fetch(data.downloadUrl);
+          if (!pdfRes.ok) throw new Error("Download failed");
+          const blob = await pdfRes.blob();
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement("a");
+          a.href = url;
+          a.download = doc.name.endsWith(".pdf") ? doc.name : `${doc.name}.pdf`;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+        }
+      } else if (doc.fileDataUrl) {
+        const a = document.createElement("a");
+        a.href = doc.fileDataUrl;
+        a.download = doc.name;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+      }
+    } catch {
+      alert("Failed to download. Please try again.");
+    } finally {
+      setDownloadingId(null);
+    }
   };
 
   const disputeLetters = docs.filter(d => d.type === "dispute_letter");
@@ -495,25 +540,44 @@ function DocsPanel({ docs, onClose, onDelete, onSave }: { docs: SavedDoc[]; onCl
         <p className="text-[11px] text-[#bbb] pl-5 italic">No documents yet</p>
       ) : (
         <div className="space-y-1">
-          {items.map(doc => (
-            <div key={doc.id} className="flex items-center gap-2 pl-5 py-1.5 rounded-lg hover:bg-[#f5f5f5] group transition-colors" data-testid={`doc-item-${doc.id}`}>
-              <svg width="12" height="12" viewBox="0 0 12 12" fill="none" className="shrink-0">
-                <rect x="2" y="1" width="8" height="10" rx="1" stroke="#999" strokeWidth="1" fill="none" />
-                <path d="M4 4h4M4 6h4M4 8h2" stroke="#bbb" strokeWidth="0.8" strokeLinecap="round" />
-              </svg>
-              <div className="flex-1 min-w-0">
-                <p className="text-[11px] text-[#444] truncate">{doc.name}</p>
-                <p className="text-[9px] text-[#bbb]">{formatDate(doc.savedAt)}</p>
+          {items.map(doc => {
+            const canDownload = !!(doc.disputes?.length || doc.fileDataUrl);
+            const isDownloading = downloadingId === doc.id;
+            return (
+              <div key={doc.id} className="flex items-center gap-1.5 pl-5 py-1.5 rounded-lg hover:bg-[#f5f5f5] group transition-colors" data-testid={`doc-item-${doc.id}`}>
+                <svg width="12" height="12" viewBox="0 0 12 12" fill="none" className="shrink-0">
+                  <rect x="2" y="1" width="8" height="10" rx="1" stroke="#999" strokeWidth="1" fill="none" />
+                  <path d="M4 4h4M4 6h4M4 8h2" stroke="#bbb" strokeWidth="0.8" strokeLinecap="round" />
+                </svg>
+                <div className="flex-1 min-w-0">
+                  <p className="text-[11px] text-[#444] truncate">{doc.name}</p>
+                  <p className="text-[9px] text-[#bbb]">{formatDate(doc.savedAt)}</p>
+                </div>
+                {canDownload && (
+                  <button
+                    onClick={() => handleDownload(doc)}
+                    disabled={isDownloading}
+                    className="opacity-0 group-hover:opacity-100 text-[#aaa] hover:text-[#1a1a2e] transition-all p-0.5 disabled:opacity-50"
+                    title="Download"
+                    data-testid={`button-download-doc-${doc.id}`}
+                  >
+                    {isDownloading ? (
+                      <span className="text-[9px]">...</span>
+                    ) : (
+                      <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 2v6M6 8L4 6M6 8l2-2" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" /><path d="M2 9v1h8V9" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                    )}
+                  </button>
+                )}
+                <button
+                  onClick={() => onDelete(doc.id)}
+                  className="opacity-0 group-hover:opacity-100 text-[#ccc] hover:text-red-400 transition-all p-0.5"
+                  data-testid={`button-delete-doc-${doc.id}`}
+                >
+                  <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2 2l6 6M8 2l-6 6" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" /></svg>
+                </button>
               </div>
-              <button
-                onClick={() => onDelete(doc.id)}
-                className="opacity-0 group-hover:opacity-100 text-[#ccc] hover:text-red-400 transition-all p-0.5"
-                data-testid={`button-delete-doc-${doc.id}`}
-              >
-                <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2 2l6 6M8 2l-6 6" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" /></svg>
-              </button>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </div>
