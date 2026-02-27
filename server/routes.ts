@@ -1821,6 +1821,7 @@ CONVERSATIONAL RULES:
       const doc = new PDFDocument({ size: "LETTER", margins: { top: 60, bottom: 60, left: 65, right: 65 } });
       const chunks: Buffer[] = [];
       doc.on("data", (chunk: Buffer) => chunks.push(chunk));
+      doc.on("pageAdded", () => { drawPageBackground(doc); drawWatermark(doc); });
 
       const pdfReady = new Promise<Buffer>((resolve) => {
         doc.on("end", () => resolve(Buffer.concat(chunks)));
@@ -2036,6 +2037,7 @@ CONVERSATIONAL RULES:
       const doc = new PDFDocument({ size: "LETTER", margins: { top: 40, bottom: 40, left: 50, right: 50 } });
       const chunks: Buffer[] = [];
       doc.on("data", (chunk: Buffer) => chunks.push(chunk));
+      doc.on("pageAdded", () => { drawPageBackground(doc); drawWatermark(doc); });
       const pdfReady = new Promise<Buffer>((resolve) => {
         doc.on("end", () => resolve(Buffer.concat(chunks)));
       });
