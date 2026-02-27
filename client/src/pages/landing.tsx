@@ -67,46 +67,6 @@ const SubscribeButton = ({ className = "", onSubscribe }: { className?: string; 
   </button>
 );
 
-const ripClipPath = `polygon(
-  4% 3%, 6% 0.5%, 9% 4%, 12% 0%, 15% 5%, 18% 1%, 21% 4.5%,
-  24% 0%, 27% 3.5%, 30% 0.5%, 33% 5%, 36% 1%, 39% 3%,
-  42% 0%, 45% 4%, 48% 0.5%, 51% 5%, 54% 1%, 57% 3.5%,
-  60% 0%, 63% 4.5%, 66% 0.5%, 69% 5%, 72% 1%, 75% 3%,
-  78% 0%, 81% 4%, 84% 0.5%, 87% 3.5%, 90% 0%, 93% 4%,
-  95% 1%, 97% 5%,
-  100% 4%, 99% 8%, 100% 12%, 98.5% 16%, 100% 20%,
-  98% 24%, 100% 28%, 99% 32%, 100% 36%, 98.5% 40%,
-  100% 44%, 98% 48%, 100% 52%, 99% 56%, 100% 60%,
-  98.5% 64%, 100% 68%, 98% 72%, 100% 76%, 99% 80%,
-  100% 84%, 98.5% 88%, 100% 92%, 98% 95%, 97% 97%,
-  95% 100%, 92% 96%, 89% 100%, 86% 97%, 83% 100%,
-  80% 96%, 77% 100%, 74% 97%, 71% 100%, 68% 96%,
-  65% 100%, 62% 97%, 59% 100%, 56% 96%, 53% 100%,
-  50% 97%, 47% 100%, 44% 96%, 41% 100%, 38% 97%,
-  35% 100%, 32% 96%, 29% 100%, 26% 97%, 23% 100%,
-  20% 96%, 17% 100%, 14% 97%, 11% 100%, 8% 97%,
-  5% 100%, 3% 96%,
-  0% 97%, 1% 92%, 0% 88%, 2% 84%, 0% 80%,
-  1.5% 76%, 0% 72%, 2% 68%, 0% 64%, 1% 60%,
-  0% 56%, 2% 52%, 0% 48%, 1.5% 44%, 0% 40%,
-  2% 36%, 0% 32%, 1% 28%, 0% 24%, 2% 20%,
-  0% 16%, 1.5% 12%, 0% 8%, 2% 5%
-)`;
-
-const RippedPaperScrap = ({ children }: { children: React.ReactNode }) => (
-  <div className="relative overflow-visible" style={{ transform: 'rotate(-2deg)' }}>
-    <div
-      className="absolute inset-0 bg-white"
-      style={{
-        clipPath: ripClipPath,
-        filter: 'drop-shadow(0 12px 40px rgba(0,0,0,0.18)) drop-shadow(0 4px 12px rgba(0,0,0,0.1))',
-      }}
-    />
-    <div className="relative z-10 overflow-visible px-8 sm:px-16 py-12 sm:py-20">
-      {children}
-    </div>
-  </div>
-);
 
 const ScrollArrow = ({ targetId }: { targetId: string }) => (
   <button
@@ -291,73 +251,63 @@ export default function LandingPage() {
       </div>
 
       {/* ═══════════════ 1. HERO ═══════════════ */}
-      <section id="sec-hero" className="relative z-20 min-h-[90vh] flex flex-col items-center justify-center px-4 sm:px-12 md:px-20 lg:px-28 py-24 sm:py-28 text-center overflow-visible">
+      <section id="sec-hero" className="relative z-20 min-h-[90vh] flex flex-col items-center justify-center px-4 sm:px-12 md:px-20 lg:px-28 py-16 sm:py-20 text-center">
 
         <div className="relative max-w-[900px] mx-auto flex flex-col items-center">
-          <div className="relative overflow-visible w-full max-w-[700px]">
-            <RippedPaperScrap>
-              <p className="text-[11px] tracking-[0.2em] uppercase text-[#6a6a8a] mb-6 text-center relative z-10" data-testid="text-hero-label">Digital Underwriting Engine</p>
-              <div className="relative overflow-visible flex items-center justify-center" style={{ minHeight: '200px' }}>
-                <h1
-                  className="text-[56px] min-[400px]:text-[68px] sm:text-[84px] md:text-[104px] lg:text-[124px] uppercase italic leading-[0.8] text-center whitespace-nowrap"
-                  style={{
-                    fontFamily: "'Satoshi', sans-serif",
-                    fontWeight: 400,
-                    letterSpacing: '-0.06em',
-                    backgroundImage: 'linear-gradient(180deg, #000000 0%, #3a3a5a 50%, #7a7a9a 100%)',
-                    WebkitBackgroundClip: 'text',
-                    WebkitTextFillColor: 'transparent',
-                    backgroundClip: 'text',
-                    transform: 'rotate(2deg) scale(1.15)',
-                    margin: '0 -20%',
-                  }}
-                  data-testid="text-hero-headline"
-                >
-                  Qualify<br />Before<br />You Apply
-                </h1>
-              </div>
-              <p className="text-[11px] sm:text-[14px] text-[#6a6a8a] leading-[1.5] max-w-[380px] mx-auto text-center mt-6 relative z-10">
-                Know exactly where you stand before you submit a single funding application.
-              </p>
-            </RippedPaperScrap>
-          </div>
 
-          <div className="mt-12 sm:mt-14 w-full max-w-[560px] text-center">
-            <p className="text-[12px] sm:text-[15px] text-[#5a5a7a] leading-[1.7] mb-8 px-2">
-              We analyze your profile using real underwriting logic to determine your funding potential — before lenders ever see you. Stop guessing. Start qualifying.
-            </p>
-            <form onSubmit={handleLogin} className="w-full max-w-[440px] mx-auto mb-8">
-              <div className="flex flex-col sm:flex-row items-stretch sm:items-center bg-[#f5f5fa] border border-[#e0e0ea] rounded-2xl sm:rounded-full sm:h-[52px] sm:pl-5 sm:pr-1.5 overflow-hidden">
-                <input
-                  data-testid="input-email"
-                  type="email"
-                  placeholder="Enter your email"
-                  className="flex-1 bg-transparent text-[14px] text-[#1a1a2e] placeholder:text-[#6a6a8a] outline-none px-4 py-3.5 sm:px-0 sm:py-0"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  disabled={isLoading}
-                />
-                <button
-                  data-testid="button-join"
-                  type="submit"
-                  disabled={isLoading}
-                  className="h-[44px] sm:h-[40px] px-6 sm:rounded-full text-white text-[13px] font-bold hover:opacity-90 transition-colors shrink-0 sm:border-t-0 mx-1.5 mb-1.5 sm:mb-0 sm:mx-0 rounded-xl sm:rounded-full tracking-wide"
-                  style={{ background: 'linear-gradient(135deg, #2a2a2a 0%, #0a0a0a 100%)' }}
-                >
-                  {isLoading ? "..." : "SUBSCRIBE"}
-                </button>
-              </div>
-            </form>
-
-            <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-6 text-[10px] sm:text-[11px] text-[#7a7a9a] tracking-wide">
-              <span>Full platform access</span>
-              <span className="w-1 h-1 rounded-full bg-[#c0c0d0]"></span>
-              <span>Cancel anytime</span>
-              <span className="w-1 h-1 rounded-full bg-[#c0c0d0]"></span>
-              <span>30 analyses / month</span>
+          <div className="relative w-full flex flex-col items-center">
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-[#d0d0de] bg-white/60 backdrop-blur-sm mb-8 sm:mb-10">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+              <span className="text-[10px] sm:text-[11px] tracking-[0.15em] uppercase text-[#6a6a8a] font-medium" data-testid="text-hero-label">Digital Underwriting Engine</span>
             </div>
+
+            <h1
+              className="text-[48px] min-[400px]:text-[58px] sm:text-[68px] md:text-[88px] lg:text-[108px] uppercase italic leading-[0.85] mb-6 sm:mb-8 text-center"
+              style={{ fontFamily: "'Satoshi', sans-serif", fontWeight: 400, letterSpacing: '-0.06em', backgroundImage: 'linear-gradient(180deg, #000000 0%, #3a3a5a 50%, #7a7a9a 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}
+              data-testid="text-hero-headline"
+            >
+              <span className="hidden sm:inline">Qualify<br />Before<br />You Apply</span><span className="sm:hidden">Qualify Before<br />You Apply</span>
+            </h1>
+
+            <div className="w-12 h-px bg-gradient-to-r from-transparent via-[#9a9ab8] to-transparent mb-6 sm:mb-8" />
+
+            <p className="text-[12px] sm:text-[16px] text-[#5a5a7a] leading-[1.7] sm:leading-[1.8] max-w-[520px] mx-auto mb-10 sm:mb-12 px-2 text-center">
+              Know exactly where you stand before you submit a single funding application. We analyze your profile using real underwriting logic to determine your funding potential — before lenders ever see you.
+            </p>
           </div>
+
+          <form onSubmit={handleLogin} className="w-full max-w-[440px] mx-auto mb-8">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center bg-[#f5f5fa] border border-[#e0e0ea] rounded-2xl sm:rounded-full sm:h-[52px] sm:pl-5 sm:pr-1.5 overflow-hidden">
+              <input
+                data-testid="input-email"
+                type="email"
+                placeholder="Enter your email"
+                className="flex-1 bg-transparent text-[14px] text-[#1a1a2e] placeholder:text-[#6a6a8a] outline-none px-4 py-3.5 sm:px-0 sm:py-0"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                disabled={isLoading}
+              />
+              <button
+                data-testid="button-join"
+                type="submit"
+                disabled={isLoading}
+                className="h-[44px] sm:h-[40px] px-6 sm:rounded-full text-white text-[13px] font-bold hover:opacity-90 transition-colors shrink-0 sm:border-t-0 mx-1.5 mb-1.5 sm:mb-0 sm:mx-0 rounded-xl sm:rounded-full tracking-wide"
+                style={{ background: 'linear-gradient(135deg, #2a2a2a 0%, #0a0a0a 100%)' }}
+              >
+                {isLoading ? "..." : "SUBSCRIBE"}
+              </button>
+            </div>
+          </form>
+
+          <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-6 text-[10px] sm:text-[11px] text-[#7a7a9a] tracking-wide font-mono">
+            <span className="flex items-center gap-1.5"><span className="text-[#9a9ab8]">&#x2713;</span> Full platform access</span>
+            <span className="w-px h-3 bg-[#d0d0de]"></span>
+            <span className="flex items-center gap-1.5"><span className="text-[#9a9ab8]">&#x2713;</span> Cancel anytime</span>
+            <span className="w-px h-3 bg-[#d0d0de]"></span>
+            <span className="flex items-center gap-1.5"><span className="text-[#9a9ab8]">&#x2713;</span> 30 analyses / month</span>
+          </div>
+
           <ScrollArrow targetId="sec-problem" />
         </div>
       </section>
