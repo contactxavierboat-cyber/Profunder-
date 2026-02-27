@@ -1224,6 +1224,23 @@ ${extractedText}
     }
   });
 
+  const pendingPdfs = new Map<string, { buffer: Buffer; created: number }>();
+  setInterval(() => {
+    const now = Date.now();
+    for (const [key, val] of pendingPdfs) {
+      if (now - val.created > 5 * 60 * 1000) pendingPdfs.delete(key);
+    }
+  }, 60_000);
+
+  app.get("/api/dispute-letters/:token", (req, res) => {
+    const pdf = pendingPdfs.get(req.params.token);
+    if (!pdf) return res.status(404).json({ error: "Download expired or not found" });
+    pendingPdfs.delete(req.params.token);
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader("Content-Disposition", "attachment; filename=profundr-dispute-letters.pdf");
+    res.send(pdf.buffer);
+  });
+
   app.post("/api/dispute-letters", async (req, res) => {
     const body = z.object({
       disputes: z.array(z.object({
@@ -1331,9 +1348,9 @@ ${extractedText}
       doc.end();
       const pdfBuffer = await pdfReady;
 
-      res.setHeader("Content-Type", "application/pdf");
-      res.setHeader("Content-Disposition", "attachment; filename=profundr-dispute-letters.pdf");
-      res.send(pdfBuffer);
+      const token = Date.now().toString(36) + Math.random().toString(36).slice(2, 10);
+      pendingPdfs.set(token, { buffer: pdfBuffer, created: Date.now() });
+      res.json({ downloadUrl: `/api/dispute-letters/${token}` });
     } catch (error: any) {
       console.error("PDF generation error:", error);
       res.status(500).json({ error: "Failed to generate dispute letters" });

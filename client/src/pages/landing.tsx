@@ -359,13 +359,10 @@ function DisputeDownloadButton({ disputes }: { disputes: DisputeItem[] }) {
         body: JSON.stringify({ disputes })
       });
       if (!res.ok) throw new Error("Failed to generate");
-      const blob = await res.blob();
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = "profundr-dispute-letters.pdf";
-      a.click();
-      URL.revokeObjectURL(url);
+      const data = await res.json();
+      if (data.downloadUrl) {
+        window.open(data.downloadUrl, "_blank");
+      }
     } catch {
       alert("Failed to generate dispute letters. Please try again.");
     } finally {
