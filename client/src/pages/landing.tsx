@@ -485,8 +485,8 @@ export default function LandingPage() {
     <div className="relative min-h-[100dvh] flex flex-col bg-[#fafafa]" style={{ fontFamily: "'Inter', sans-serif" }}>
       <input ref={fileInputRef} type="file" accept=".pdf,.txt,.csv" className="hidden" onChange={handleFileSelect} data-testid="input-file-upload" />
 
-      <nav className="flex items-center justify-between px-4 sm:px-6 py-3 shrink-0 border-b border-[#eee]" data-testid="nav-top">
-        <div className="flex items-center gap-2" data-testid="nav-logo">
+      <nav className="relative flex items-center justify-end px-4 sm:px-6 py-3 shrink-0 border-b border-[#eee]" data-testid="nav-top">
+        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2" data-testid="nav-logo">
           <ProfundrLogo size="md" variant="dark" />
         </div>
         {user ? (
