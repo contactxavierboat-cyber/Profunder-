@@ -705,17 +705,7 @@ export async function registerRoutes(
 
   (async () => {
     try {
-      const allUsers = await storage.getAllUsers();
-      let updated = 0;
-      for (const u of allUsers) {
-        if (!u.displayName) {
-          await storage.updateUser(u.id, { displayName: generateAnonName() });
-          updated++;
-        }
-      }
-      if (updated > 0) console.log(`Assigned anonymous names to ${updated} existing users`);
     } catch (err) {
-      console.error("Failed to assign anonymous names:", err);
     }
   })();
 
@@ -754,7 +744,7 @@ export async function registerRoutes(
       user = await storage.createUser({
         email,
         password: "placeholder",
-        displayName: generateAnonName(),
+        displayName: null,
         role: "user",
         subscriptionStatus: "inactive",
         monthlyUsage: 0,
@@ -767,10 +757,6 @@ export async function registerRoutes(
         hasCreditReport: false,
         hasBankStatement: false,
       });
-    }
-
-    if (!user.displayName) {
-      user = await storage.updateUser(user.id, { displayName: generateAnonName() });
     }
 
     req.session.userId = user.id;

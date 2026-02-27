@@ -94,7 +94,7 @@ const gradientText = {
 const contentBlock = "relative z-10 rounded-2xl bg-white/80 backdrop-blur-md border border-white/40 shadow-[0_8px_32px_rgba(0,0,0,0.04),0_2px_8px_rgba(0,0,0,0.02)]";
 
 export default function SubscriptionPage() {
-  const { user } = useAuth();
+  const { user, isLoading } = useAuth();
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const [isProcessing, setIsProcessing] = useState(false);
@@ -132,6 +132,14 @@ export default function SubscriptionPage() {
       .catch(() => {})
       .finally(() => setLoadingPrice(false));
   }, []);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-[100dvh] flex items-center justify-center" style={{ fontFamily: "'Inter', sans-serif", background: 'linear-gradient(180deg, #ffffff 0%, #f5f5fc 15%, #eef0fa 30%, #f8f8ff 45%, #f2f0fb 60%, #f6f5fc 75%, #f0eff8 88%, #eceaf5 100%)' }}>
+        <Loader2 className="w-6 h-6 animate-spin text-[#7a7a9a]" />
+      </div>
+    );
+  }
 
   if (!user) { setLocation("/"); return null; }
 
