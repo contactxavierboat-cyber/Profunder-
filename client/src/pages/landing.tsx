@@ -1102,11 +1102,11 @@ export default function LandingPage() {
               <div className="flex items-center gap-3">
                 <span className="text-[12px] text-[#999] hidden sm:inline" data-testid="text-user-email">{user.email}</span>
                 <button
-                  onClick={() => window.location.href = '/subscription'}
+                  onClick={() => { logout(); window.location.href = '/'; }}
                   className="rounded-full px-4 py-1.5 text-[12px] font-medium bg-[#1a1a2e] text-white hover:bg-[#2a2a40] transition-colors"
-                  data-testid="button-subscription"
+                  data-testid="button-signout"
                 >
-                  Subscription
+                  Sign Out
                 </button>
               </div>
             ) : (
