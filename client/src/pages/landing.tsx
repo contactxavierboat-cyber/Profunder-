@@ -186,15 +186,15 @@ function FormatResponse({ content }: { content: string }) {
     .replace(/^-{2,}/gm, "");
 
   const isMetricLine = (line: string): boolean => {
-    const t = line.trim();
+    const t = line.trim().replace(/^[-•–—]\s*/, "");
     if (!t) return true;
-    if (/^FUNDABILITY\s*INDEX/i.test(t)) return true;
-    if (/^APPROVAL\s*ODDS/i.test(t)) return true;
-    if (/^BORROWING\s*POWER/i.test(t)) return true;
-    if (/^DISPUTE\s*ITEMS?\s*:?/i.test(t)) return true;
-    if (/^[-•]\s*(Bank\s*Term|Online\s*Lender|Business\s*LOC|Credit\s*Card|MCA)\s*:/i.test(t)) return true;
-    if (/^(Bank\s*Term|Online\s*Lender|Business\s*LOC|Credit\s*Card|MCA)\s*:/i.test(t)) return true;
-    if (/^Conservative\s*:/i.test(t)) return true;
+    if (/FUNDABILITY\s*INDEX/i.test(t)) return true;
+    if (/APPROVAL\s*ODDS/i.test(t)) return true;
+    if (/BORROWING\s*POWER/i.test(t)) return true;
+    if (/DISPUTE\s*ITEMS?\s*:?$/i.test(t)) return true;
+    if (/^(Bank\s*Term\s*Loan|Online\s*Lender|Business\s*LOC|Credit\s*Card|MCA)\s*:/i.test(t)) return true;
+    if (/(Bank\s*Term\s*Loan|Online\s*Lender|Business\s*LOC|Credit\s*Card|MCA)\s*:\s*\d+%/i.test(t)) return true;
+    if (/Conservative\s*:/i.test(t)) return true;
     if (/^\d+\s*\/\s*100/i.test(t)) return true;
     return false;
   };
