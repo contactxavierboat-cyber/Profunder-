@@ -2559,7 +2559,7 @@ Respond to the latest question as the team's AI mentor. Be direct, helpful, and 
         const u = await storage.getUser(uid);
         if (u) usersMap[uid] = { displayName: u.displayName || u.email, email: u.email };
       }
-      res.json(teamMsgs.slice(-100).map(m => ({
+      res.json(teamMsgs.slice(-200).map(m => ({
         id: m.id,
         senderId: m.senderId,
         displayName: usersMap[m.senderId]?.displayName || "User",
