@@ -1548,9 +1548,9 @@ export default function LandingPage() {
             <div className="flex flex-wrap justify-center gap-2 mb-3">
               {[
                 "Analyze my credit profile",
-                "What band am I in?",
+                "Find my approval blockers",
                 "Run a denial simulation",
-                "How do I improve my score?",
+                "Show me what to fix first",
               ].map((suggestion) => (
                 <button
                   key={suggestion}
