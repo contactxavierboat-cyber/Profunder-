@@ -449,7 +449,7 @@ function MissionDashboard({ data }: { data: MissionData }) {
   );
 }
 
-function DisputeDownloadButton({ disputes }: { disputes: DisputeItem[] }) {
+function DisputeDownloadButton({ disputes, onSave }: { disputes: DisputeItem[]; onSave?: (disputes: DisputeItem[]) => void }) {
   const [downloading, setDownloading] = useState(false);
 
   const handleDownload = async () => {
@@ -474,6 +474,7 @@ function DisputeDownloadButton({ disputes }: { disputes: DisputeItem[] }) {
         a.click();
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
+        onSave?.(disputes);
       }
     } catch {
       alert("Failed to generate dispute letters. Please try again.");
@@ -835,7 +836,7 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
                   <button
                     onClick={() => handleDownload(doc)}
                     disabled={isDownloading}
-                    className="opacity-0 group-hover:opacity-100 text-[#aaa] hover:text-[#1a1a2e] transition-all p-0.5 disabled:opacity-50"
+                    className={`${doc.disputes?.length ? 'opacity-100 text-[#6366f1]' : 'opacity-0 group-hover:opacity-100 text-[#aaa]'} hover:text-[#1a1a2e] transition-all p-0.5 disabled:opacity-50`}
                     title="Download"
                     data-testid={`button-download-doc-${doc.id}`}
                   >
@@ -1562,17 +1563,7 @@ export default function LandingPage() {
                               ))}
                             </div>
                             <div className="flex items-center gap-2 flex-wrap">
-                              <DisputeDownloadButton disputes={disputes} />
-                              <button
-                                onClick={() => handleSaveDisputeLetters(disputes)}
-                                className="mt-3 flex items-center gap-2 px-4 py-2 bg-white text-[#555] border border-[#ddd] rounded-lg text-[12px] font-medium hover:bg-[#f5f5f5] transition-colors"
-                                data-testid="button-save-to-docs"
-                              >
-                                <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
-                                  <path d="M2 4C2 3.44772 2.44772 3 3 3H6L7.5 5H13C13.5523 5 14 5.44772 14 6V12C14 12.5523 13.5523 13 13 13H3C2.44772 13 2 12.5523 2 12V4Z" stroke="currentColor" strokeWidth="1.2" fill="none" />
-                                </svg>
-                                Save to Docs
-                              </button>
+                              <DisputeDownloadButton disputes={disputes} onSave={handleSaveDisputeLetters} />
                             </div>
                           </div>
                         </div>
