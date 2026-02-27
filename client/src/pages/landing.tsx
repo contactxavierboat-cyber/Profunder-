@@ -1,40 +1,18 @@
 import { useState, useEffect, useRef } from "react";
 import { useAuth } from "@/lib/store";
 import { ProfundrLogo } from "@/components/profundr-logo";
+import heroBgImg from "@assets/IMG_0426_1772173506429.jpeg";
 
 function SpaceBackground() {
-  const videoRef = useRef<HTMLVideoElement>(null);
-
-  useEffect(() => {
-    const video = videoRef.current;
-    if (!video) return;
-    video.playbackRate = 1.0;
-    let rafId: number;
-    const ease = () => {
-      if (video.playbackRate > 0.4) {
-        video.playbackRate = Math.max(0.4, video.playbackRate - 0.005);
-        rafId = requestAnimationFrame(ease);
-      }
-    };
-    rafId = requestAnimationFrame(ease);
-    return () => cancelAnimationFrame(rafId);
-  }, []);
-
   return (
     <div className="fixed inset-0 pointer-events-none overflow-hidden" style={{ zIndex: 1 }}>
-      <video
-        ref={videoRef}
-        autoPlay
-        loop
-        muted
-        playsInline
+      <img
+        src={heroBgImg}
+        alt=""
         className="absolute top-1/2 left-1/2 min-w-full min-h-full object-cover"
-        style={{
-          transform: 'translate(-50%, -50%)',
-        }}
-      >
-        <source src="/marble-bg.mp4" type="video/mp4" />
-      </video>
+        style={{ transform: 'translate(-50%, -50%)' }}
+        aria-hidden="true"
+      />
     </div>
   );
 }
