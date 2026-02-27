@@ -39,9 +39,9 @@ Profundr is a subscription-based AI-powered fundability platform, envisioned as 
 - **Messages / DM System:** Pure team member direct messaging system. Users add team members, then message them directly.
 - **Buddy Panel (Team Members):** Right-side panel strictly for team member management — add members, accept/decline invites, view online members, click to open DM. No AI mentors in buddy panel.
 - **UI/UX:** Adheres to a minimal fintech aesthetic with a white-to-lavender gradient background, frosted glass content blocks, and distinct fonts for UI and data.
-- **Team Collaboration:** Team section in the docs panel allows adding team members by email search. Team members can collaborate alongside AI in the shared chat — their messages appear with purple profile avatars and display names. Team messages are polled every 5 seconds. Uses the friendships table for team relationships.
-- **Authentication & Subscription:** Session-based authentication with a mandatory $50/month Stripe subscription paywall. No dashboard — subscribers are redirected to the front page which is the full product.
-- **Navigation:** Brain icon (top-left) opens the docs/team panel. "Subscribe" button for guests, "Subscription" button for logged-in users.
+- **Team Collaboration:** Team section in the docs panel allows adding team members by email search with auto-accept (no pending state). Click a team member to open an inline DM input — messages go to the main AI chat for both users. Team messages polled every 5s with purple avatars. AI responses are also shared with team members. Uses the friendships table for team relationships and directMessages table with `team_{userId}` conversation keys.
+- **Authentication & Subscription:** Session-based auth. Subscription is currently FREE (auto-activated on sign-in via `/api/activate-free`). Stripe product/price preserved but bypassed. No dashboard — subscribers are redirected to the front page which is the full product.
+- **Navigation:** Brain icon (top-left) opens the docs/team panel. "Sign In" button for guests, "Subscription" button for logged-in users.
 
 ### Data Model Highlights
 - **Users:** Stores subscription status, credit profile fields, funding phase, and monthly AI usage.

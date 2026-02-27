@@ -484,13 +484,17 @@ function saveDocs(docs: SavedDoc[]) {
   localStorage.setItem("profundr_docs", JSON.stringify(docs));
 }
 
-function TeamSection({ user }: { user: any }) {
+function TeamSection({ user, onSendDM }: { user: any; onSendDM?: (content: string, toMember: TeamMember) => void }) {
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<{ id: number; displayName: string; email: string }[]>([]);
   const [searching, setSearching] = useState(false);
   const [team, setTeam] = useState<{ members: TeamMember[]; pending: TeamInvite[] }>({ members: [], pending: [] });
   const [showSearch, setShowSearch] = useState(false);
   const [inviting, setInviting] = useState<number | null>(null);
+  const [dmTarget, setDmTarget] = useState<TeamMember | null>(null);
+  const [dmText, setDmText] = useState("");
+  const [dmSending, setDmSending] = useState(false);
+  const dmInputRef = useRef<HTMLInputElement>(null);
 
   const fetchTeam = useCallback(async () => {
     if (!user) return;
@@ -543,6 +547,22 @@ function TeamSection({ user }: { user: any }) {
     } catch {}
   };
 
+  const handleSendDM = async () => {
+    if (!dmText.trim() || !dmTarget || dmSending) return;
+    setDmSending(true);
+    try {
+      await fetch("/api/team/message", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ content: dmText.trim() }),
+      });
+      if (onSendDM) onSendDM(dmText.trim(), dmTarget);
+      setDmText("");
+    } catch {}
+    setDmSending(false);
+    dmInputRef.current?.focus();
+  };
+
   if (!user) {
     return (
       <div className="mb-4">
@@ -586,16 +606,55 @@ function TeamSection({ user }: { user: any }) {
       ) : (
         <div className="space-y-1 mb-2">
           {team.members.map(m => (
-            <div key={m.friendshipId} className="flex items-center gap-1.5 pl-5 py-1.5 rounded-lg hover:bg-[#f5f5f5] group transition-colors" data-testid={`team-member-${m.id}`}>
-              <div className="w-5 h-5 rounded-full bg-[#1a1a2e] text-white flex items-center justify-center text-[9px] font-bold shrink-0">
-                {m.displayName[0]?.toUpperCase()}
+            <div key={m.friendshipId}>
+              <div
+                className={`flex items-center gap-1.5 pl-5 py-1.5 rounded-lg hover:bg-[#f5f5f5] group transition-colors cursor-pointer ${dmTarget?.id === m.id ? 'bg-[#f0eeff]' : ''}`}
+                onClick={() => { setDmTarget(dmTarget?.id === m.id ? null : m); setTimeout(() => dmInputRef.current?.focus(), 100); }}
+                data-testid={`team-member-${m.id}`}
+              >
+                <div className={`w-5 h-5 rounded-full ${dmTarget?.id === m.id ? 'bg-[#6366f1]' : 'bg-[#1a1a2e]'} text-white flex items-center justify-center text-[9px] font-bold shrink-0`}>
+                  {m.displayName[0]?.toUpperCase()}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-[11px] text-[#444] truncate">{m.displayName}</p>
+                </div>
+                <button
+                  onClick={(e) => { e.stopPropagation(); setDmTarget(dmTarget?.id === m.id ? null : m); setTimeout(() => dmInputRef.current?.focus(), 100); }}
+                  className="opacity-0 group-hover:opacity-100 text-[#6366f1] hover:text-[#4f46e5] transition-all p-0.5 mr-1"
+                  title="Send message"
+                  data-testid={`button-dm-${m.id}`}
+                >
+                  <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M1 3.5C1 2.67 1.67 2 2.5 2h5C8.33 2 9 2.67 9 3.5v3C9 7.33 8.33 8 7.5 8h-3L2.5 9.5V8H2.5C1.67 8 1 7.33 1 6.5v-3z" stroke="currentColor" strokeWidth="1" fill="none" /></svg>
+                </button>
+                <button onClick={(e) => { e.stopPropagation(); handleRemove(m.friendshipId); }} className="opacity-0 group-hover:opacity-100 text-[#ccc] hover:text-red-400 transition-all p-0.5" data-testid={`button-remove-member-${m.id}`}>
+                  <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2 2l6 6M8 2l-6 6" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" /></svg>
+                </button>
               </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-[11px] text-[#444] truncate">{m.displayName}</p>
-              </div>
-              <button onClick={() => handleRemove(m.friendshipId)} className="opacity-0 group-hover:opacity-100 text-[#ccc] hover:text-red-400 transition-all p-0.5" data-testid={`button-remove-member-${m.id}`}>
-                <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2 2l6 6M8 2l-6 6" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" /></svg>
-              </button>
+              {dmTarget?.id === m.id && (
+                <div className="pl-5 pr-2 mt-1 mb-2">
+                  <form onSubmit={(e) => { e.preventDefault(); handleSendDM(); }} className="flex gap-1.5">
+                    <input
+                      ref={dmInputRef}
+                      data-testid="input-dm-message"
+                      type="text"
+                      placeholder={`Message ${m.displayName}...`}
+                      className="flex-1 bg-[#f5f5f5] border border-[#e5e5e5] rounded-lg h-[30px] px-3 text-[11px] text-[#333] placeholder:text-[#aaa] outline-none focus:border-[#6366f1] transition-colors"
+                      value={dmText}
+                      onChange={(e) => setDmText(e.target.value)}
+                      disabled={dmSending}
+                    />
+                    <button
+                      type="submit"
+                      disabled={!dmText.trim() || dmSending}
+                      className="h-[30px] px-3 rounded-lg bg-[#6366f1] text-white text-[10px] font-medium hover:bg-[#4f46e5] disabled:opacity-50 disabled:cursor-not-allowed transition-colors shrink-0"
+                      data-testid="button-send-dm"
+                    >
+                      {dmSending ? "..." : "Send"}
+                    </button>
+                  </form>
+                  <p className="text-[9px] text-[#aaa] mt-1 pl-1">Message appears in main chat for both of you</p>
+                </div>
+              )}
             </div>
           ))}
         </div>
@@ -633,7 +692,7 @@ function TeamSection({ user }: { user: any }) {
                 className="text-[9px] text-[#6366f1] font-medium hover:underline disabled:opacity-50"
                 data-testid={`button-invite-${r.id}`}
               >
-                {inviting === r.id ? "..." : "Invite"}
+                {inviting === r.id ? "..." : "Add"}
               </button>
             </div>
           ))}
@@ -652,7 +711,7 @@ function TeamSection({ user }: { user: any }) {
   );
 }
 
-function DocsPanel({ docs, onClose, onDelete, onSave, user }: { docs: SavedDoc[]; onClose: () => void; onDelete: (id: string) => void; onSave: (doc: SavedDoc) => void; user: any }) {
+function DocsPanel({ docs, onClose, onDelete, onSave, user, onSendDM }: { docs: SavedDoc[]; onClose: () => void; onDelete: (id: string) => void; onSave: (doc: SavedDoc) => void; user: any; onSendDM?: (content: string, toMember: TeamMember) => void }) {
   const docInputRef = useRef<HTMLInputElement>(null);
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
 
@@ -807,7 +866,7 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user }: { docs: SavedDoc[]
           icon={<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><rect x="2" y="1" width="8" height="10" rx="1" stroke="#999" strokeWidth="1" fill="none" /></svg>}
         />
         <div className="w-full h-px bg-[#eee] my-3"></div>
-        <TeamSection user={user} />
+        <TeamSection user={user} onSendDM={onSendDM} />
       </div>
 
       <div className="px-4 py-3 border-t border-[#eee]">
@@ -1006,7 +1065,11 @@ export default function LandingPage() {
         <>
           <div className="sm:hidden fixed inset-0 bg-black/30 z-40" onClick={() => setDocsOpen(false)} />
           <div className="fixed sm:relative z-50 sm:z-auto w-[280px] h-full shrink-0 transition-all" data-testid="docs-sidebar">
-            <DocsPanel docs={savedDocs} onClose={() => setDocsOpen(false)} onDelete={handleDeleteDoc} onSave={handleSaveDoc} user={user} />
+            <DocsPanel docs={savedDocs} onClose={() => setDocsOpen(false)} onDelete={handleDeleteDoc} onSave={handleSaveDoc} user={user} onSendDM={(content, member) => {
+              const dmMsg: GuestMessage = { id: nextId, role: "user", content, senderName: user?.displayName || user?.email };
+              setGuestMessages(prev => [...prev, dmMsg]);
+              setNextId(n => n + 1);
+            }} />
           </div>
         </>
       )}
