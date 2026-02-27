@@ -160,6 +160,23 @@ function getTierColor(tier: string | null): string {
   return "#ef4444";
 }
 
+function toTitleCase(text: string): string {
+  const small = new Set(["a","an","the","and","but","or","for","nor","on","at","to","by","in","of","is","not"]);
+  return text
+    .toLowerCase()
+    .split(/\s+/)
+    .map((word, i) => {
+      if (i === 0 || !small.has(word)) return word.charAt(0).toUpperCase() + word.slice(1);
+      return word;
+    })
+    .join(" ");
+}
+
+function normalizeCase(text: string): string {
+  if (text === text.toUpperCase() && text.length > 3) return toTitleCase(text);
+  return text;
+}
+
 function FormatResponse({ content }: { content: string }) {
   const cleaned = content
     .replace(/\*\*\*/g, "")
@@ -184,8 +201,8 @@ function FormatResponse({ content }: { content: string }) {
 
         if (isTitle) {
           return (
-            <p key={i} className="text-[13px] font-semibold text-[#1a1a2e] tracking-wide uppercase">
-              {trimmed}
+            <p key={i} className="text-[13px] font-semibold text-[#1a1a2e] tracking-wide">
+              {toTitleCase(trimmed)}
             </p>
           );
         }
@@ -195,17 +212,17 @@ function FormatResponse({ content }: { content: string }) {
               {lines.map((line, j) => {
                 const bulletMatch = line.match(/^\s*[-•]\s*(.*)/);
                 const numMatch = line.match(/^\s*\d+[.)]\s*(.*)/);
-                if (bulletMatch) return <p key={j} className="pl-4 text-[14px] text-[#444] leading-[1.65]">{"\u2022"} {bulletMatch[1]}</p>;
+                if (bulletMatch) return <p key={j} className="pl-4 text-[14px] text-[#444] leading-[1.65]">{"\u2022"} {normalizeCase(bulletMatch[1])}</p>;
                 if (numMatch) {
                   const num = line.match(/^\s*(\d+)/)?.[1];
-                  return <p key={j} className="pl-4 text-[14px] text-[#444] leading-[1.65]">{num}. {numMatch[1]}</p>;
+                  return <p key={j} className="pl-4 text-[14px] text-[#444] leading-[1.65]">{num}. {normalizeCase(numMatch[1])}</p>;
                 }
-                return <p key={j} className="text-[14px] text-[#444] leading-[1.65]">{line}</p>;
+                return <p key={j} className="text-[14px] text-[#444] leading-[1.65]">{normalizeCase(line)}</p>;
               })}
             </div>
           );
         }
-        return <p key={i} className="text-[14px] text-[#444] leading-[1.65]">{trimmed}</p>;
+        return <p key={i} className="text-[14px] text-[#444] leading-[1.65]">{normalizeCase(trimmed)}</p>;
       })}
     </div>
   );
@@ -217,7 +234,7 @@ function MissionDashboard({ data, tierColor }: { data: MissionData; tierColor: s
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
         {data.fundabilityIndex !== null && (
           <div className="rounded-xl bg-white border border-[#e8e8e8] p-4 shadow-sm" data-testid="card-fundability-index">
-            <p className="text-[9px] text-[#999] uppercase tracking-[0.12em] font-medium mb-2">Fundability Index</p>
+            <p className="text-[10px] text-[#999] tracking-[0.01em] font-medium mb-2">Fundability Index</p>
             <div className="flex items-baseline gap-1.5">
               <span className="text-[28px] font-bold leading-none font-mono tracking-tight" style={{ color: tierColor }} data-testid="text-fundability-score">
                 {data.fundabilityIndex}
@@ -232,7 +249,7 @@ function MissionDashboard({ data, tierColor }: { data: MissionData; tierColor: s
 
         {data.riskTier && (
           <div className="rounded-xl bg-white border border-[#e8e8e8] p-4 shadow-sm" data-testid="card-risk-tier">
-            <p className="text-[9px] text-[#999] uppercase tracking-[0.12em] font-medium mb-2">Risk Classification</p>
+            <p className="text-[10px] text-[#999] tracking-[0.01em] font-medium mb-2">Risk Classification</p>
             <p className="text-[20px] font-bold tracking-[-0.02em]" style={{ color: tierColor }} data-testid="text-risk-tier">
               {data.riskTier}
             </p>
@@ -249,7 +266,7 @@ function MissionDashboard({ data, tierColor }: { data: MissionData; tierColor: s
 
         {data.borrowingPower && (
           <div className="rounded-xl bg-white border border-[#e8e8e8] p-4 shadow-sm" data-testid="card-borrowing-power">
-            <p className="text-[9px] text-[#999] uppercase tracking-[0.12em] font-medium mb-2">Borrowing Power</p>
+            <p className="text-[10px] text-[#999] tracking-[0.01em] font-medium mb-2">Borrowing Power</p>
             <p className="text-[20px] font-bold text-[#1a1a1a] font-mono tracking-tight" data-testid="text-borrowing-moderate">
               {data.borrowingPower.moderate}
             </p>
@@ -264,7 +281,7 @@ function MissionDashboard({ data, tierColor }: { data: MissionData; tierColor: s
 
       {data.approvalOdds.length > 0 && (
         <div className="rounded-xl bg-white border border-[#e8e8e8] p-4 shadow-sm" data-testid="card-approval-odds">
-          <p className="text-[9px] text-[#999] uppercase tracking-[0.12em] font-medium mb-3">Approval Probability</p>
+          <p className="text-[10px] text-[#999] tracking-[0.01em] font-medium mb-3">Approval Probability</p>
           <div className="grid grid-cols-5 gap-2">
             {data.approvalOdds.map((item) => {
               const pct = parseInt(item.value);
@@ -283,7 +300,7 @@ function MissionDashboard({ data, tierColor }: { data: MissionData; tierColor: s
                       <span className="text-[9px] font-bold font-mono" style={{ color }} data-testid={`text-odds-${item.label.toLowerCase().replace(/\s+/g, "-")}`}>{pct}%</span>
                     </div>
                   </div>
-                  <p className="text-[7px] text-[#999] uppercase tracking-wider leading-tight">{item.label}</p>
+                  <p className="text-[8px] text-[#999] tracking-wide leading-tight">{item.label}</p>
                 </div>
               );
             })}
@@ -295,7 +312,7 @@ function MissionDashboard({ data, tierColor }: { data: MissionData; tierColor: s
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
           {data.topRisks.length > 0 && (
             <div className="rounded-xl bg-white border border-[#e8e8e8] p-4 shadow-sm" data-testid="card-top-risks">
-              <p className="text-[9px] text-[#999] uppercase tracking-[0.12em] font-medium mb-2.5">Risk Factors</p>
+              <p className="text-[10px] text-[#999] tracking-[0.01em] font-medium mb-2.5">Risk Factors</p>
               <div className="space-y-2">
                 {data.topRisks.map((risk, i) => (
                   <div key={i} className="flex items-start gap-2">
@@ -311,7 +328,7 @@ function MissionDashboard({ data, tierColor }: { data: MissionData; tierColor: s
 
           {data.nextMoves.length > 0 && (
             <div className="rounded-xl bg-white border border-[#e8e8e8] p-4 shadow-sm" data-testid="card-next-moves">
-              <p className="text-[9px] text-[#999] uppercase tracking-[0.12em] font-medium mb-2.5">Next Moves</p>
+              <p className="text-[10px] text-[#999] tracking-[0.01em] font-medium mb-2.5">Next Moves</p>
               <div className="space-y-2">
                 {data.nextMoves.map((move, i) => (
                   <div key={i} className="flex items-start gap-2">
@@ -546,7 +563,7 @@ export default function LandingPage() {
                     {disputes.length > 0 && (
                       <div className="ml-10 mt-3">
                         <div className="rounded-xl bg-white border border-[#e8e8e8] p-4 shadow-sm" data-testid="card-disputes">
-                          <p className="text-[9px] text-[#999] uppercase tracking-[0.12em] font-medium mb-2.5">Dispute Letters Ready</p>
+                          <p className="text-[10px] text-[#999] tracking-[0.01em] font-medium mb-2.5">Dispute Letters Ready</p>
                           <div className="space-y-2 mb-1">
                             {disputes.map((d, i) => (
                               <div key={i} className="flex items-start gap-2">
