@@ -1,0 +1,162 @@
+Update the landing / first page to add a **soft paywall flow** tied to the main action buttons.
+
+## Goal
+
+Allow visitors to experience **2 free sample interactions** before requiring authentication / subscription.
+
+This should feel premium, controlled, and intentional — not cheap or spammy.
+
+## Buttons this applies to
+
+Apply this logic to all primary action buttons **except** the dedicated **Sign In** button.
+
+Examples:
+
+* Analyze my credit profile
+* Find my approval blockers
+* Run a denial simulation
+* Show me what to fix first
+* Any similar analysis / strategy button on the first page
+
+The **Sign In** button should always remain available and should never count as a sample use.
+
+---
+
+## Sample access logic
+
+### First click
+
+If the visitor is not signed in:
+
+* allow the action
+* show a **real sample response**
+* at the bottom of the response, show a subtle but strong CTA:
+
+  * “You’ve unlocked 1 of 2 complimentary previews. Sign in to save your results and access full underwriting intelligence.”
+
+### Second click
+
+If the visitor is still not signed in:
+
+* allow the action again
+* show the **best sample response possible**
+* make this second response feel valuable, sharp, and emotionally compelling
+* at the end of the response, show a stronger CTA block / modal:
+
+  * headline: **Your final complimentary preview is complete**
+  * body: **To continue, sign in and unlock the full Profundr system — Approval Index, suppressors, strategy, and full profile intelligence.**
+  * buttons:
+
+    * **Sign In**
+    * **Subscribe**
+* clearly indicate that free previews are now exhausted
+
+### Third click
+
+On the third attempt on any non-Sign-In action button:
+
+* do not run the analysis
+* send the user directly to the **Sign In / Subscribe page**
+* show a premium lock message:
+
+  * **Initiation required**
+  * **Your complimentary previews have been used. Enter Profundr to continue.**
+
+---
+
+## Important behavior rules
+
+* Sample count should be shared across all qualifying buttons
+* Example: if user clicks “Analyze my profile” once and “Run a denial simulation” once, that equals 2 free previews total
+* On the third attempt across any of those buttons, redirect to Sign In / Subscribe
+* Track this state cleanly for guest users using persistent local/session state
+* If the user signs in, remove the guest preview restriction and allow the full flow based on account/subscription status
+
+---
+
+## UX / product behavior
+
+Add a small premium indicator near the action area:
+
+**2 complimentary previews available**
+
+After first sample:
+**1 complimentary preview remaining**
+
+After second sample:
+**Complimentary previews exhausted**
+
+This should feel exclusive and deliberate.
+
+---
+
+## Tone / personality for CTA
+
+Use the attached Profundr personality:
+
+* dominant
+* premium
+* intelligent
+* emotionally perceptive
+* slightly mythic
+* direct
+* high-standard
+* not needy
+* not pushy in a cheap way
+
+The paywall language should feel like **initiation**, not begging.
+
+Do not sound like a generic SaaS popup.
+
+---
+
+## CTA copy examples
+
+### After first sample
+
+**You’ve seen the surface.**
+This is 1 of 2 complimentary previews. Sign in to unlock deeper analysis, saved results, and the full Profundr system.
+
+### After second sample
+
+**Your final complimentary preview is complete.**
+You’ve seen enough to know there’s depth here. Sign in to enter the full system — Approval Index, suppressors, timing, phase logic, and next-move strategy.
+
+### On locked third attempt
+
+**Initiation required.**
+Your complimentary previews have been used. Sign in or subscribe to continue.
+
+---
+
+## Sign In / Subscribe page copy
+
+Use elevated language.
+
+Headline:
+**Enter Profundr**
+
+Subheadline:
+Access full digital underwriting intelligence — Approval Index, denial simulation, approval blockers, next-move strategy, and deeper financial identity analysis.
+
+Buttons:
+
+* **Sign In**
+* **Subscribe**
+
+Optional microcopy:
+**The first two previews were complimentary. Full access begins here.**
+
+---
+
+## Product intent
+
+This should increase conversion by:
+
+* letting the user feel real value first
+* creating curiosity and momentum
+* making the lock feel earned
+* making entry feel premium and inevitable
+
+Do not make this feel like a cheap paywall.
+Make it feel like the user is crossing from surface access into the real Profundr system.

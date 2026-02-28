@@ -1094,6 +1094,13 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
   );
 }
 
+function getGuestPreviewCount(): number {
+  try { return parseInt(localStorage.getItem("profundr_previews") || "0", 10); } catch { return 0; }
+}
+function setGuestPreviewCount(n: number) {
+  try { localStorage.setItem("profundr_previews", String(n)); } catch {}
+}
+
 export default function LandingPage() {
   const [input, setInput] = useState("");
   const [isSending, setIsSending] = useState(false);
@@ -1107,6 +1114,8 @@ export default function LandingPage() {
   const [teamChatMessages, setTeamChatMessages] = useState<GuestMessage[]>([]);
   const [mentionDropdown, setMentionDropdown] = useState<{ show: boolean; query: string; startIdx: number }>({ show: false, query: "", startIdx: 0 });
   const [mentionSelected, setMentionSelected] = useState(0);
+  const [previewCount, setPreviewCount] = useState(getGuestPreviewCount);
+  const [showInitiationGate, setShowInitiationGate] = useState(false);
   const teamConvoLoaded = useRef(false);
   const teamChatLoaded = useRef(false);
   const { user, logout } = useAuth();
@@ -1284,6 +1293,10 @@ export default function LandingPage() {
       const content = isPdf ? (result.split(",")[1] || result) : result;
       const fileData = { name: file.name, content, isPdf };
       if (shouldAutoSend) {
+        if (!user && previewCount >= 2) {
+          setShowInitiationGate(true);
+          return;
+        }
         doSend("Analyze my credit report and generate my AIS.", fileData);
       } else {
         setAttachedFile(fileData);
@@ -1440,7 +1453,20 @@ export default function LandingPage() {
 
       if (!res.ok) throw new Error("Failed to get response");
       const data = await res.json();
-      const aiMsg: GuestMessage = { id: nextId + 1, role: "assistant", content: data.content };
+      let responseContent = data.content;
+
+      if (!user) {
+        const newCount = previewCount + 1;
+        setPreviewCount(newCount);
+        setGuestPreviewCount(newCount);
+        if (newCount === 1) {
+          responseContent += "\n\n---\n\n*You've seen the surface. This is 1 of 2 complimentary previews. Sign in to unlock deeper analysis, saved results, and the full Profundr system.*";
+        } else if (newCount === 2) {
+          responseContent += "\n\n---\n\n**Your final complimentary preview is complete.**\n\nYou've seen enough to know there's depth here. Sign in to enter the full system — AIS, suppressors, timing, phase logic, and next-move strategy.";
+        }
+      }
+
+      const aiMsg: GuestMessage = { id: nextId + 1, role: "assistant", content: responseContent };
       setGuestMessages((prev) => [...prev, aiMsg]);
       setNextId((n) => n + 1);
 
@@ -1466,6 +1492,12 @@ export default function LandingPage() {
     const text = messageText || input.trim();
     if (isSending) return;
     if (!text && !attachedFile) return;
+
+    if (!user && previewCount >= 2) {
+      setShowInitiationGate(true);
+      return;
+    }
+
     const file = attachedFile;
     const msg = text || "Analyze my credit report and generate my AIS.";
     setInput("");
@@ -1884,6 +1916,12 @@ export default function LandingPage() {
             </div>
           </form>
 
+          {!user && (
+            <p className="text-center text-[10px] text-[#bbb] mt-1 tracking-wide" data-testid="text-preview-counter">
+              {previewCount === 0 ? "2 complimentary previews available" : previewCount === 1 ? "1 complimentary preview remaining" : "Complimentary previews exhausted"}
+            </p>
+          )}
+
           <p className="text-center text-[11px] text-[#aaa] mt-3 leading-[1.5]" data-testid="text-footer-legal">
             Profundr is a capital intelligence platform, not a lender.{" "}
             <span className="underline cursor-pointer hover:text-[#888] transition-colors">Terms</span> &middot;{" "}
@@ -1891,6 +1929,53 @@ export default function LandingPage() {
           </p>
         </div>
       </div>
+
+      {showInitiationGate && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm" data-testid="modal-initiation-gate">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-[420px] w-[90%] p-8 text-center relative">
+            <button
+              onClick={() => setShowInitiationGate(false)}
+              className="absolute top-4 right-4 text-[#ccc] hover:text-[#666] transition-colors"
+              data-testid="button-close-initiation"
+            >
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                <path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+              </svg>
+            </button>
+
+            <div className="mb-6">
+              <ProfundrAvatar size={48} className="mx-auto mb-4" />
+              <h2 className="text-[22px] font-bold text-[#1a1a2e] tracking-[-0.02em] mb-2" data-testid="text-initiation-headline">
+                Enter Profundr
+              </h2>
+              <p className="text-[13px] text-[#777] leading-[1.6] max-w-[320px] mx-auto">
+                Access full digital underwriting intelligence — AIS, denial simulation, approval blockers, next-move strategy, and deeper financial identity analysis.
+              </p>
+            </div>
+
+            <div className="space-y-2.5 mb-5">
+              <button
+                onClick={() => { setShowInitiationGate(false); window.location.href = '/subscription'; }}
+                className="w-full py-3 bg-[#1a1a2e] text-white rounded-full text-[14px] font-medium hover:bg-[#2a2a40] transition-colors"
+                data-testid="button-initiation-signin"
+              >
+                Sign In
+              </button>
+              <button
+                onClick={() => { setShowInitiationGate(false); window.location.href = '/subscription'; }}
+                className="w-full py-3 border border-[#ddd] text-[#555] rounded-full text-[14px] font-medium hover:bg-[#f0f0f0] transition-colors"
+                data-testid="button-initiation-subscribe"
+              >
+                Subscribe
+              </button>
+            </div>
+
+            <p className="text-[10px] text-[#bbb] tracking-wide">
+              The first two previews were complimentary. Full access begins here.
+            </p>
+          </div>
+        </div>
+      )}
 
     </div>
   );
