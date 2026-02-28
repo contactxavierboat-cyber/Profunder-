@@ -266,103 +266,6 @@ function normalizeCase(text: string): string {
   return text;
 }
 
-function VoicePlayButton({ text }: { text: string }) {
-  const [playing, setPlaying] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
-  const urlRef = useRef<string | null>(null);
-
-  const cleanup = useCallback(() => {
-    if (audioRef.current) {
-      audioRef.current.pause();
-      audioRef.current.removeAttribute("src");
-      audioRef.current = null;
-    }
-    if (urlRef.current) {
-      URL.revokeObjectURL(urlRef.current);
-      urlRef.current = null;
-    }
-  }, []);
-
-  const handlePlay = async () => {
-    if (playing) {
-      cleanup();
-      setPlaying(false);
-      return;
-    }
-
-    setLoading(true);
-    try {
-      cleanup();
-
-      const cleanText = text
-        .replace(/\*\*/g, "")
-        .replace(/\*/g, "")
-        .replace(/^DISPUTE:.*$/gm, "")
-        .replace(/^---+$/gm, "")
-        .replace(/\[.*?\]/g, "")
-        .replace(/#{1,4}\s/g, "")
-        .trim()
-        .slice(0, 4500);
-
-      const res = await fetch("/api/voice/speak", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text: cleanText }),
-      });
-
-      if (!res.ok) {
-        setLoading(false);
-        return;
-      }
-
-      const blob = await res.blob();
-      const url = URL.createObjectURL(blob);
-      urlRef.current = url;
-      const audio = new Audio(url);
-      audioRef.current = audio;
-
-      audio.onended = () => {
-        setPlaying(false);
-        cleanup();
-      };
-      audio.onerror = () => {
-        setPlaying(false);
-        setLoading(false);
-        cleanup();
-      };
-
-      await audio.play();
-      setPlaying(true);
-    } catch {
-      setPlaying(false);
-      cleanup();
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  return (
-    <button
-      onClick={handlePlay}
-      disabled={loading}
-      data-testid="btn-voice-play"
-      className={`inline-flex items-center justify-center w-6 h-6 rounded-full transition-all ${
-        playing ? "bg-[#0a0f2e] text-white" : "bg-[#f0f0f0] text-[#666] hover:bg-[#e0e0e0] hover:text-[#333]"
-      } ${loading ? "opacity-50 cursor-wait" : "cursor-pointer"}`}
-      title={playing ? "Stop" : "Listen"}
-    >
-      {loading ? (
-        <svg width="12" height="12" viewBox="0 0 12 12" className="animate-spin"><circle cx="6" cy="6" r="5" stroke="currentColor" strokeWidth="1.5" fill="none" strokeDasharray="20" strokeDashoffset="10" /></svg>
-      ) : playing ? (
-        <svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor"><rect x="1" y="1" width="3" height="8" rx="0.5" /><rect x="6" y="1" width="3" height="8" rx="0.5" /></svg>
-      ) : (
-        <svg width="10" height="10" viewBox="0 0 12 12" fill="currentColor"><path d="M3 1.5v9l7.5-4.5L3 1.5z" /></svg>
-      )}
-    </button>
-  );
-}
-
 function FormatResponse({ content }: { content: string }) {
   const cleaned = content
     .replace(/\*\*\*/g, "")
@@ -1213,9 +1116,6 @@ export default function LandingPage() {
   const [mentionSelected, setMentionSelected] = useState(0);
   const [previewCount, setPreviewCount] = useState(getGuestPreviewCount);
   const [showInitiationGate, setShowInitiationGate] = useState(false);
-  const [voiceSetupOpen, setVoiceSetupOpen] = useState(false);
-  const [voiceStatus, setVoiceStatus] = useState<{ hasVoice: boolean; voiceId: string | null; serviceConfigured: boolean } | null>(null);
-  const [voiceUploading, setVoiceUploading] = useState(false);
   const teamConvoLoaded = useRef(false);
   const teamChatLoaded = useRef(false);
   const { user, logout } = useAuth();
@@ -1378,15 +1278,6 @@ export default function LandingPage() {
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [guestMessages, teamChatMessages]);
-
-  useEffect(() => {
-    if (voiceSetupOpen && user && voiceStatus === null) {
-      fetch("/api/voice/status")
-        .then(r => r.ok ? r.json() : null)
-        .then(data => { if (data) setVoiceStatus(data); })
-        .catch(() => {});
-    }
-  }, [voiceSetupOpen, user, voiceStatus]);
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -1739,14 +1630,6 @@ export default function LandingPage() {
             {user ? (
               <div className="flex items-center gap-3">
                 <span className="text-[12px] text-[#999] hidden sm:inline" data-testid="text-user-email">{user.email}</span>
-                <button
-                  onClick={() => setVoiceSetupOpen(true)}
-                  className="w-7 h-7 rounded-full bg-[#f0f0f0] hover:bg-[#e0e0e0] flex items-center justify-center transition-colors"
-                  title="Voice Setup"
-                  data-testid="button-voice-setup"
-                >
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#666" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" x2="12" y1="19" y2="22"/></svg>
-                </button>
                 <label className="cursor-pointer relative group" title="Change profile photo" data-testid="button-profile-photo">
                   <ProfileAvatar photo={user.profilePhoto} name={user.displayName || user.email} size={30} />
                   <div className="absolute inset-0 rounded-full bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
@@ -1875,14 +1758,7 @@ export default function LandingPage() {
                               </>
                             );
                           })() : (
-                            <>
-                              <FormatResponse content={msg.content} />
-                              {user && (
-                                <div className="mt-1.5 flex items-center gap-1">
-                                  <VoicePlayButton text={msg.content} />
-                                </div>
-                              )}
-                            </>
+                            <FormatResponse content={msg.content} />
                           )}
                         </div>
                         {msg.role === "user" && (
@@ -2097,127 +1973,6 @@ export default function LandingPage() {
             <p className="text-[10px] text-[#bbb] tracking-wide">
               The first two previews were complimentary. Full access begins here.
             </p>
-          </div>
-        </div>
-      )}
-
-      {voiceSetupOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm" data-testid="modal-voice-setup">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-[440px] w-[90%] p-8 relative">
-            <button
-              onClick={() => setVoiceSetupOpen(false)}
-              className="absolute top-4 right-4 text-[#ccc] hover:text-[#666] transition-colors"
-              data-testid="button-close-voice-setup"
-            >
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                <path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-              </svg>
-            </button>
-
-            <div className="mb-6 text-center">
-              <div className="w-12 h-12 rounded-full bg-[#f0f0f0] flex items-center justify-center mx-auto mb-3">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#1a1a2e" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" x2="12" y1="19" y2="22"/></svg>
-              </div>
-              <h2 className="text-[20px] font-bold text-[#1a1a2e] tracking-[-0.02em] mb-1" data-testid="text-voice-setup-title">
-                Voice Setup
-              </h2>
-              <p className="text-[13px] text-[#777] leading-[1.6]">
-                Clone your voice so team members hear you — not a generic AI — guiding them through their financial journey.
-              </p>
-            </div>
-
-            {voiceStatus === null ? (
-              <div className="text-center py-4">
-                <p className="text-[12px] text-[#999]">Checking voice status...</p>
-              </div>
-            ) : !voiceStatus.serviceConfigured ? (
-              <div className="text-center py-4">
-                <p className="text-[13px] text-[#666] mb-2">Voice service is not yet configured.</p>
-                <p className="text-[11px] text-[#999]">An ElevenLabs API key is needed to enable voice cloning.</p>
-              </div>
-            ) : voiceStatus.hasVoice ? (
-              <div>
-                <div className="flex items-center gap-3 bg-[#f0fdf4] rounded-xl p-4 mb-4">
-                  <div className="w-8 h-8 rounded-full bg-[#10b981] flex items-center justify-center shrink-0">
-                    <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 8l4 4 6-7" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
-                  </div>
-                  <div>
-                    <p className="text-[13px] font-medium text-[#166534]" data-testid="text-voice-ready">Voice Ready</p>
-                    <p className="text-[11px] text-[#15803d]">Your cloned voice is active. AI responses can be played in your voice.</p>
-                  </div>
-                </div>
-                <button
-                  onClick={async () => {
-                    if (!confirm("Remove your cloned voice? You can always create a new one.")) return;
-                    await fetch("/api/voice/clone", { method: "DELETE" });
-                    setVoiceStatus({ ...voiceStatus, hasVoice: false, voiceId: null });
-                  }}
-                  className="w-full py-2.5 border border-[#e5e5e5] text-[#888] rounded-full text-[12px] font-medium hover:bg-[#f5f5f5] transition-colors"
-                  data-testid="button-remove-voice"
-                >
-                  Remove Voice
-                </button>
-              </div>
-            ) : (
-              <div>
-                <p className="text-[12px] text-[#666] mb-3">
-                  Upload a voice sample (30 seconds to 5 minutes of clear speech). Formats: MP3, WAV, WebM.
-                </p>
-                <label className={`flex flex-col items-center justify-center border-2 border-dashed rounded-xl p-6 cursor-pointer transition-colors ${voiceUploading ? 'border-[#1a1a2e] bg-[#f8f8ff]' : 'border-[#ddd] hover:border-[#999] hover:bg-[#fafafa]'}`}>
-                  {voiceUploading ? (
-                    <>
-                      <svg width="20" height="20" viewBox="0 0 20 20" className="animate-spin mb-2"><circle cx="10" cy="10" r="8" stroke="#1a1a2e" strokeWidth="2" fill="none" strokeDasharray="32" strokeDashoffset="12" /></svg>
-                      <p className="text-[12px] text-[#1a1a2e] font-medium" data-testid="text-voice-uploading">Cloning your voice...</p>
-                    </>
-                  ) : (
-                    <>
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#999" strokeWidth="2" strokeLinecap="round" className="mb-2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" x2="12" y1="3" y2="15"/></svg>
-                      <p className="text-[12px] text-[#666]">Click to upload voice sample</p>
-                      <p className="text-[10px] text-[#aaa] mt-1">MP3, WAV, or WebM</p>
-                    </>
-                  )}
-                  <input
-                    type="file"
-                    accept="audio/mp3,audio/wav,audio/webm,audio/mpeg,.mp3,.wav,.webm"
-                    className="hidden"
-                    disabled={voiceUploading}
-                    data-testid="input-voice-upload"
-                    onChange={async (e) => {
-                      const file = e.target.files?.[0];
-                      if (!file) return;
-                      if (file.size > 25 * 1024 * 1024) { alert("File too large (max 25MB)"); return; }
-                      setVoiceUploading(true);
-                      try {
-                        const reader = new FileReader();
-                        reader.onload = async () => {
-                          const base64 = (reader.result as string).split(",")[1] || reader.result as string;
-                          const res = await fetch("/api/voice/clone", {
-                            method: "POST",
-                            headers: { "Content-Type": "application/json" },
-                            body: JSON.stringify({
-                              name: (user?.displayName || user?.email || "User") + " Voice",
-                              audioBase64: base64,
-                              audioType: file.type || "audio/webm",
-                            }),
-                          });
-                          if (res.ok) {
-                            const data = await res.json();
-                            setVoiceStatus({ ...voiceStatus!, hasVoice: true, voiceId: data.voiceId });
-                          } else {
-                            alert("Voice cloning failed. Try a different audio file.");
-                          }
-                          setVoiceUploading(false);
-                        };
-                        reader.readAsDataURL(file);
-                      } catch {
-                        alert("Upload failed. Please try again.");
-                        setVoiceUploading(false);
-                      }
-                    }}
-                  />
-                </label>
-              </div>
-            )}
           </div>
         </div>
       )}
