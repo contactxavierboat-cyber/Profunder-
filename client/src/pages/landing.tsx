@@ -52,10 +52,13 @@ interface FinancialIdentityData {
 }
 
 interface ProjectedFundingData {
+  bureau: string | null;
   currentExposure: string | null;
-  projectedAmount: string | null;
-  bestCaseAmount: string | null;
+  highestLimit: string | null;
+  perBureauProjection: string | null;
+  bestCasePerBureau: string | null;
   readinessLevel: string | null;
+  inquirySlots: string | null;
   timeline: string | null;
   keyBlockers: string[];
 }
@@ -64,6 +67,7 @@ interface MissionData {
   approvalIndex: number | null;
   band: string | null;
   phase: string | null;
+  bureauSource: string | null;
   pillarScores: PillarScore[];
   suppressors: string[];
   helping: string[];
@@ -151,6 +155,17 @@ function parseSingleMessageData(content: string): MissionData {
     if (m) { phase = m[1]; break; }
   }
 
+  let bureauSource: string | null = null;
+  const bureauSourcePatterns = [
+    /Bureau\s*Source[:\s]*(Experian|Equifax|TransUnion|Unknown)/i,
+    /Source\s*Bureau[:\s]*(Experian|Equifax|TransUnion)/i,
+    /Report\s*(?:Source|Bureau)[:\s]*(Experian|Equifax|TransUnion)/i,
+  ];
+  for (const p of bureauSourcePatterns) {
+    const m = cleanText.match(p);
+    if (m && m[1].toLowerCase() !== "unknown") { bureauSource = m[1]; break; }
+  }
+
   const pillarScores: PillarScore[] = [];
   const pillarPatterns = [
     { label: "Payment Integrity", pattern: /Payment\s*Integrity[:\s]*(\d+)/i },
@@ -226,20 +241,26 @@ function parseSingleMessageData(content: string): MissionData {
   }
 
   let projectedFunding: ProjectedFundingData | null = null;
-  const pfSection = cleanText.match(/Projected\s*Funding[:\s]*([\s\S]*?)(?=\n\s*(?:Top\s*Approval|Best\s*Next|What['']?s\s*Helping|What['']?s\s*Hurting|DISPUTE|Verdict)\b|\n\n\n|$)/i);
+  const pfSection = cleanText.match(/Projected\s*Funding[:\s]*(?:\(Per[\s-]*Bureau\))?[:\s]*([\s\S]*?)(?=\n\s*(?:Top\s*Approval|Best\s*Next|What['']?s\s*Helping|What['']?s\s*Hurting|DISPUTE|Verdict)\b|\n\n\n|$)/i);
   if (pfSection) {
     const pfText = pfSection[1];
+    const bureauMatch = pfText.match(/(?:Bureau)[:\s]*(Experian|Equifax|TransUnion)/i);
     const currentExposureMatch = pfText.match(/(?:Current\s*Exposure|Current\s*Revolving)[:\s]*(.*?)(?:\n|$)/i);
-    const projectedMatch = pfText.match(/(?:Projected\s*Amount|Projected\s*Funding\s*Amount|Conservative\s*Estimate)[:\s]*(.*?)(?:\n|$)/i);
-    const bestCaseMatch = pfText.match(/(?:Best[\s-]*Case|Best[\s-]*Case\s*(?:Scenario|Amount|Funding))[:\s]*(.*?)(?:\n|$)/i);
+    const highestLimitMatch = pfText.match(/(?:Highest\s*Limit|Highest\s*(?:Credit\s*)?Limit)[:\s]*(.*?)(?:\n|$)/i);
+    const projectedMatch = pfText.match(/(?:Per[\s-]*Bureau\s*Projection|Projected\s*Amount|Projected\s*Funding\s*Amount)[:\s]*(.*?)(?:\n|$)/i);
+    const bestCaseMatch = pfText.match(/(?:Best[\s-]*Case\s*Per[\s-]*Bureau|Best[\s-]*Case|Best[\s-]*Case\s*(?:Scenario|Amount|Funding))[:\s]*(.*?)(?:\n|$)/i);
     const readinessMatch = pfText.match(/(?:Readiness|Readiness\s*Level|Funding\s*Readiness)[:\s]*(.*?)(?:\n|$)/i);
+    const inquirySlotsMatch = pfText.match(/(?:Inquiry\s*Slots?\s*(?:Available|Remaining)?)[:\s]*(.*?)(?:\n|$)/i);
     const timelineMatch = pfText.match(/(?:Timeline|Estimated\s*Timeline|Time\s*to\s*Ready)[:\s]*(.*?)(?:\n|$)/i);
-    const blockersMatch = pfText.match(/(?:Key\s*Blockers?|Blockers?|What['']?s\s*Blocking)[:\s]*([\s\S]*?)(?=\n\s*(?:Readiness|Timeline|Best|Projected|Current)\b|\n\n|$)/i);
+    const blockersMatch = pfText.match(/(?:Key\s*Blockers?|Blockers?|What['']?s\s*Blocking)[:\s]*([\s\S]*?)(?=\n\s*(?:Readiness|Timeline|Best|Projected|Current|Inquiry)\b|\n\n|$)/i);
 
+    const bur = bureauMatch?.[1]?.trim() || bureauSource;
     const ce = currentExposureMatch?.[1]?.trim() || null;
+    const hl = highestLimitMatch?.[1]?.trim() || null;
     const pa = projectedMatch?.[1]?.trim() || null;
     const bc = bestCaseMatch?.[1]?.trim() || null;
     const rl = readinessMatch?.[1]?.trim() || null;
+    const is_ = inquirySlotsMatch?.[1]?.trim() || null;
     const tl = timelineMatch?.[1]?.trim() || null;
     const keyBlockers: string[] = [];
     if (blockersMatch) {
@@ -250,12 +271,12 @@ function parseSingleMessageData(content: string): MissionData {
       }
     }
 
-    if (ce || pa || bc || rl || tl || keyBlockers.length > 0) {
-      projectedFunding = { currentExposure: ce, projectedAmount: pa, bestCaseAmount: bc, readinessLevel: rl, timeline: tl, keyBlockers };
+    if (ce || hl || pa || bc || rl || tl || keyBlockers.length > 0) {
+      projectedFunding = { bureau: bur, currentExposure: ce, highestLimit: hl, perBureauProjection: pa, bestCasePerBureau: bc, readinessLevel: rl, inquirySlots: is_, timeline: tl, keyBlockers };
     }
   }
 
-  return { approvalIndex, band, phase, pillarScores, suppressors, helping, hurting, bestNextMove, financialIdentity, projectedFunding };
+  return { approvalIndex, band, phase, bureauSource, pillarScores, suppressors, helping, hurting, bestNextMove, financialIdentity, projectedFunding };
 }
 
 function hasAnalysisData(data: MissionData): boolean {
@@ -505,6 +526,7 @@ function ProjectedFundingCard({ data, phase }: { data: ProjectedFundingData; pha
   const readinessColor = getReadinessColor(data.readinessLevel);
   const isFundingReady = phase?.toLowerCase().includes("funding");
   const [expanded, setExpanded] = useState(false);
+  const bureauLabel = data.bureau || "Per-Bureau";
 
   return (
     <>
@@ -513,9 +535,14 @@ function ProjectedFundingCard({ data, phase }: { data: ProjectedFundingData; pha
         data-testid="card-projected-funding"
         onClick={() => setExpanded(!expanded)}
       >
-        <p className="text-[10px] text-[#999] tracking-[0.01em] font-medium mb-2">Projected Funding</p>
+        <div className="flex items-center justify-between mb-2">
+          <p className="text-[10px] text-[#999] tracking-[0.01em] font-medium">Projected Funding</p>
+          {data.bureau && (
+            <span className="text-[8px] font-bold uppercase tracking-widest px-1.5 py-0.5 rounded-full bg-[#f0f0f0] text-[#666]" data-testid="text-funding-bureau">{data.bureau}</span>
+          )}
+        </div>
         <p className="text-[18px] font-bold font-mono tracking-[-0.02em] text-[#10b981] leading-tight" data-testid="text-best-case-amount">
-          {data.bestCaseAmount || data.projectedAmount || "—"}
+          {data.bestCasePerBureau || data.perBureauProjection || "—"}
         </p>
         <div className="flex items-center gap-1.5 mt-1">
           {data.readinessLevel && (
@@ -543,52 +570,61 @@ function ProjectedFundingCard({ data, phase }: { data: ProjectedFundingData; pha
                   <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
                 </svg>
               </div>
-              <p className="text-[10px] text-[#999] tracking-[0.01em] font-medium">Projected Funding Breakdown</p>
+              <p className="text-[10px] text-[#999] tracking-[0.01em] font-medium">{bureauLabel} Funding Breakdown</p>
             </div>
-            <button onClick={() => setExpanded(false)} className="text-[#ccc] hover:text-[#666] transition-colors" data-testid="button-close-funding-detail">
+            <button onClick={(e) => { e.stopPropagation(); setExpanded(false); }} className="text-[#ccc] hover:text-[#666] transition-colors" data-testid="button-close-funding-detail">
               <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" /></svg>
             </button>
           </div>
 
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-            {data.bestCaseAmount && (
+            {data.bestCasePerBureau && (
               <div data-testid="pf-best-case">
-                <p className="text-[9px] text-[#bbb] font-medium mb-0.5">Best-Case Funding</p>
-                <p className="text-[22px] font-black font-mono tracking-[-0.02em] text-[#10b981] leading-none">{data.bestCaseAmount}</p>
-                <p className="text-[9px] text-[#aaa] mt-1">Fully optimized profile</p>
+                <p className="text-[9px] text-[#bbb] font-medium mb-0.5">Best-Case {bureauLabel}</p>
+                <p className="text-[22px] font-black font-mono tracking-[-0.02em] text-[#10b981] leading-none">{data.bestCasePerBureau}</p>
+                <p className="text-[9px] text-[#aaa] mt-1">5 approvals at full limit match</p>
               </div>
             )}
 
-            {data.projectedAmount && (
+            {data.perBureauProjection && (
               <div data-testid="pf-projected-amount">
-                <p className="text-[9px] text-[#bbb] font-medium mb-0.5">Current Projection</p>
-                <p className="text-[16px] font-bold font-mono tracking-[-0.02em] text-[#333]">{data.projectedAmount}</p>
-                <p className="text-[9px] text-[#aaa] mt-1">Based on current profile</p>
+                <p className="text-[9px] text-[#bbb] font-medium mb-0.5">{bureauLabel} Projection</p>
+                <p className="text-[16px] font-bold font-mono tracking-[-0.02em] text-[#333]">{data.perBureauProjection}</p>
+                <p className="text-[9px] text-[#aaa] mt-1">3-5 approvals at 60-80% match</p>
               </div>
             )}
 
-            {data.currentExposure && (
-              <div data-testid="pf-current-exposure">
-                <p className="text-[9px] text-[#bbb] font-medium mb-0.5">Current Exposure</p>
-                <p className="text-[13px] text-[#333] font-medium font-mono">{data.currentExposure}</p>
+            {data.highestLimit && (
+              <div data-testid="pf-highest-limit">
+                <p className="text-[9px] text-[#bbb] font-medium mb-0.5">Highest Limit</p>
+                <p className="text-[13px] text-[#333] font-bold font-mono">{data.highestLimit}</p>
+                {data.currentExposure && <p className="text-[9px] text-[#aaa] mt-0.5">{data.currentExposure} total</p>}
               </div>
             )}
 
-            {data.readinessLevel && (
-              <div data-testid="pf-readiness">
-                <p className="text-[9px] text-[#bbb] font-medium mb-0.5">Readiness</p>
-                <div className="flex items-center gap-1.5">
-                  <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: readinessColor }} />
-                  <p className="text-[12px] font-bold" style={{ color: readinessColor }}>{data.readinessLevel}</p>
+            <div>
+              {data.readinessLevel && (
+                <div data-testid="pf-readiness">
+                  <p className="text-[9px] text-[#bbb] font-medium mb-0.5">Readiness</p>
+                  <div className="flex items-center gap-1.5">
+                    <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: readinessColor }} />
+                    <p className="text-[12px] font-bold" style={{ color: readinessColor }}>{data.readinessLevel}</p>
+                  </div>
                 </div>
-                {data.timeline && <p className="text-[9px] text-[#aaa] mt-0.5">{data.timeline}</p>}
-              </div>
-            )}
+              )}
+              {data.inquirySlots && (
+                <div className="mt-1.5" data-testid="pf-inquiry-slots">
+                  <p className="text-[9px] text-[#bbb] font-medium mb-0.5">Inquiry Slots</p>
+                  <p className="text-[12px] text-[#333] font-medium">{data.inquirySlots}</p>
+                </div>
+              )}
+              {data.timeline && <p className="text-[9px] text-[#aaa] mt-1">{data.timeline}</p>}
+            </div>
           </div>
 
           {data.keyBlockers.length > 0 && (
             <div className="mt-3 pt-3 border-t border-[#f0f0f0]" data-testid="pf-blockers">
-              <p className="text-[9px] text-[#bbb] font-medium mb-1.5">Key Blockers to Best-Case</p>
+              <p className="text-[9px] text-[#bbb] font-medium mb-1.5">Key Blockers on {bureauLabel}</p>
               <div className="space-y-1.5">
                 {data.keyBlockers.map((b, i) => (
                   <div key={i} className="flex items-start gap-2">
@@ -655,9 +691,14 @@ function MissionDashboard({ data, userName }: { data: MissionData; userName?: st
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
         {data.approvalIndex !== null && (
           <div className="rounded-xl bg-gradient-to-br from-[#1a1a2e] to-[#16213e] p-5 shadow-lg col-span-1 sm:col-span-3" data-testid="card-approval-index">
-            <div className="flex items-center gap-2 mb-3">
-              <span className="text-[11px] font-bold tracking-[0.15em] text-white/50 uppercase">AIS</span>
-              <span className="text-[9px] text-white/30 tracking-wide">Approval Index Score</span>
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <span className="text-[11px] font-bold tracking-[0.15em] text-white/50 uppercase">AIS</span>
+                <span className="text-[9px] text-white/30 tracking-wide">Approval Index Score</span>
+              </div>
+              {data.bureauSource && (
+                <span className="text-[9px] font-bold uppercase tracking-widest px-2 py-1 rounded-full bg-white/10 text-white/60" data-testid="text-ais-bureau">{data.bureauSource}</span>
+              )}
             </div>
             <div className="flex items-baseline gap-2">
               <span className="text-[56px] font-black leading-none font-mono tracking-tighter text-white" data-testid="text-approval-score">

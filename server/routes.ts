@@ -1324,22 +1324,43 @@ Profile Type classification:
 Identity Strength scoring (0-100):
 Start at 50. Add: +10 if 5+ tradelines, +10 if avg age >3yr, +10 if exposure >$15k, +10 if clean payment history, +5 if 3+ bankcards, +5 if oldest account >7yr, +5 if mix of revolving + installment, +5 if consistent reporting across all 3 bureaus. Deduct: -10 if thin file, -10 if any derogatory, -5 per collection, -5 if <2yr avg age, -5 if AU-heavy, -5 if single bureau reporting. Cap at 100.
 
-Projected Funding:
-- Current Exposure: [e.g., "$24,000 total revolving"]
-- Projected Amount: [conservative estimate based on current profile — what they could realistically access NOW, e.g., "$5,000–$15,000"]
-- Best-Case Amount: [maximum projected funding when profile is fully optimized and all blockers resolved, e.g., "$60,000–$120,000"]
-- Readiness Level: [Not Ready|Early Stage|Building|Near Ready|Funding Ready]
-- Timeline: [estimated time to reach best-case readiness, e.g., "6–12 months" or "3–6 months" or "Ready now"]
+Bureau Source: [which bureau this report is from — Experian, Equifax, or TransUnion. Determine from the document header, letterhead, or report format. If unclear, state "Unknown"]
+
+Projected Funding (Per-Bureau):
+- Bureau: [same bureau as identified above — Experian, Equifax, or TransUnion]
+- Current Exposure: [total revolving credit on THIS bureau, e.g., "$24,000"]
+- Highest Limit: [highest single credit limit on this bureau, e.g., "$10,000"]
+- Per-Bureau Projection: [realistic funding from one application round on this bureau — based on 3-5 new bank card approvals matching 60-80% of highest limit]
+- Best-Case Per-Bureau: [optimistic — 5 approvals at full limit match on this bureau when profile is fully optimized]
+- Readiness Level: [Not Ready|Early Stage|Building|Near Ready|Funding Ready — for THIS bureau specifically]
+- Inquiry Slots Available: [how many more hard pulls this bureau can absorb before velocity risk — based on existing inquiry count in last 6-12 months]
+- Timeline: [estimated time to reach best-case readiness on this bureau, e.g., "6–12 months" or "3–6 months" or "Ready now"]
 - Key Blockers:
-1. [what must be fixed first, e.g., "Utilization above 30% on primary revolving accounts"]
+1. [what must be fixed on THIS bureau first, e.g., "3 hard inquiries in last 6 months — only 2 slots remaining"]
 2. [second blocker]
 3. [third blocker if applicable]
 
-PROJECTED FUNDING CALCULATION LOGIC:
-Current Projection = Based on current revolving limits, utilization, and lender confidence. Consider: existing limits x approval likelihood based on current AIS. If AIS < 60, projection is conservative ($0–$10k range). If AIS 60-74, moderate ($10k–$40k). If AIS 75-84, strong ($40k–$100k). If AIS 85+, premium ($100k+).
-Best-Case = Calculated as: (highest existing limit x 2.5) + (projected new tradeline capacity based on profile type). For Thin File/Starter: $25k–$75k best case. For Established: $75k–$200k. For Seasoned: $150k–$400k. For Premium: $250k–$750k+. Adjust based on payment integrity, utilization headroom, and credit depth.
-Readiness Level: Not Ready = AIS < 55 or active derogatory items. Early Stage = AIS 55-64. Building = AIS 65-74. Near Ready = AIS 75-84. Funding Ready = AIS 85+ with clean file.
-Timeline: Based on how long it takes to resolve key blockers. Utilization fix = 1-2 months. Seasoning new accounts = 6-12 months. Removing derogatories = 3-6 months per round.
+PER-BUREAU FUNDING CALCULATION LOGIC:
+The average user applies to banks that pull ONE specific bureau per round. Funding capacity is bureau-specific, not cross-bureau.
+
+Per-Bureau Projection formula:
+1. Identify the highest single credit limit on this bureau
+2. Banks that pull this bureau will typically match 60-80% of the highest existing limit
+3. A single bureau can realistically support 3-5 new bank card approvals in one application round
+4. Per-Bureau Projection = (highest limit × 0.7 average match rate) × (3-5 realistic approvals) = range
+5. Example: $10,000 highest limit → ($7,000 × 3) to ($7,000 × 5) = $21,000–$35,000 conservative range
+
+Best-Case Per-Bureau formula:
+1. Assumes profile is fully optimized (clean file, low utilization, strong seasoning)
+2. Best-Case = (highest limit × 1.0 full match) × 5 approvals
+3. Example: $10,000 highest limit → $50,000 best case on this one bureau
+4. Adjust upward if highest limit is likely to increase with optimization (e.g., CLI requests granted)
+
+Inquiry Slots: Most bureaus tolerate 5-6 hard pulls per 12 months before velocity suppresses approvals. Count existing inquiries in last 12 months and subtract from 5 to get available slots. If 0-1 slots remain, readiness drops.
+
+Readiness Level (per-bureau): Not Ready = active derogatories on this bureau OR 0 inquiry slots. Early Stage = AIS < 65 on this bureau file. Building = AIS 65-74 or fewer than 3 inquiry slots. Near Ready = AIS 75-84 with 3+ slots. Funding Ready = AIS 85+ with clean file on this bureau and 3+ inquiry slots.
+
+Timeline: Utilization fix = 1-2 months. Removing derogatories on this bureau = 3-6 months per round. Seasoning new accounts = 6-12 months. Inquiry aging (to free slots) = 6-12 months.
 
 Top Approval Suppressors:
 1. [suppressor]
@@ -2197,7 +2218,7 @@ export async function registerRoutes(
       fileContext = `\n\nCRITICAL INSTRUCTION — DOCUMENT UPLOADED:
 The user has uploaded a ${attachment === "bank_statement" ? "bank statement" : "credit report"}. The extracted text is below.
 
-YOU MUST PRODUCE YOUR FULL ANALYSIS IN THIS RESPONSE. DO NOT say "one moment," "let me analyze," "diving in," or any deferral language. DO NOT ask the user for data — the document is right here. Analyze it NOW and output the complete structured response format: AIS (Approval Index Score), Band, Phase, Pillar Scores, Financial Identity, Projected Funding (Current Exposure, Projected Amount, Best-Case Amount, Readiness Level, Timeline, Key Blockers), Top Approval Suppressors, verdict, and all DISPUTE lines. If some fields are missing or unclear from OCR, make reasonable estimates based on what IS available and note assumptions. There is NO second pass — this response IS the analysis.
+YOU MUST PRODUCE YOUR FULL ANALYSIS IN THIS RESPONSE. DO NOT say "one moment," "let me analyze," "diving in," or any deferral language. DO NOT ask the user for data — the document is right here. Analyze it NOW and output the complete structured response format: Bureau Source, AIS (Approval Index Score), Band, Phase, Pillar Scores, Financial Identity, Projected Funding Per-Bureau (Bureau, Current Exposure, Highest Limit, Per-Bureau Projection, Best-Case Per-Bureau, Readiness Level, Inquiry Slots Available, Timeline, Key Blockers), Top Approval Suppressors, verdict, and all DISPUTE lines. If some fields are missing or unclear from OCR, make reasonable estimates based on what IS available and note assumptions. There is NO second pass — this response IS the analysis.
 
 Extraction method: ${extractionMethod}
 
@@ -2670,6 +2691,7 @@ COMMUNICATION STYLE:
       approvalIndex: z.number().nullable(),
       band: z.string().nullable(),
       phase: z.string().nullable(),
+      bureauSource: z.string().nullable().optional(),
       pillarScores: z.array(z.object({ label: z.string(), value: z.number() })),
       suppressors: z.array(z.string()),
       helping: z.array(z.string()),
@@ -2683,6 +2705,17 @@ COMMUNICATION STYLE:
         bureauFootprint: z.string().nullable(),
         identityStrength: z.number().nullable(),
         lenderPerception: z.string().nullable(),
+      }).nullable().optional(),
+      projectedFunding: z.object({
+        bureau: z.string().nullable(),
+        currentExposure: z.string().nullable(),
+        highestLimit: z.string().nullable(),
+        perBureauProjection: z.string().nullable(),
+        bestCasePerBureau: z.string().nullable(),
+        readinessLevel: z.string().nullable(),
+        inquirySlots: z.string().nullable(),
+        timeline: z.string().nullable(),
+        keyBlockers: z.array(z.string()),
       }).nullable().optional(),
     }).safeParse(req.body);
 
@@ -2716,6 +2749,10 @@ COMMUNICATION STYLE:
         doc.font("Helvetica").fontSize(9).fillColor("#888888")
           .text(`Prepared for: ${d.userName}`, { align: "center" });
       }
+      if (d.bureauSource) {
+        doc.font("Helvetica-Bold").fontSize(9).fillColor("#666666")
+          .text(`Bureau: ${d.bureauSource}`, { align: "center" });
+      }
       doc.moveDown(1.2);
 
       const drawCardBox = (startY: number, height: number) => {
@@ -2736,6 +2773,10 @@ COMMUNICATION STYLE:
 
         doc.font("Helvetica-Bold").fontSize(11).fillColor("rgba(255,255,255,0.4)").text("AIS", 70, cardY + 14);
         doc.font("Helvetica").fontSize(7).fillColor("rgba(255,255,255,0.25)").text("APPROVAL INDEX SCORE", 70 + 30, cardY + 16);
+        if (d.bureauSource) {
+          doc.font("Helvetica-Bold").fontSize(8).fillColor("rgba(255,255,255,0.5)")
+            .text(d.bureauSource.toUpperCase(), pageWidth - 10, cardY + 14, { align: "right", width: 80 });
+        }
 
         doc.font("Helvetica-Bold").fontSize(64).fillColor("#ffffff");
         const scoreText = `${d.approvalIndex}`;
@@ -2820,6 +2861,51 @@ COMMUNICATION STYLE:
           doc.font("Helvetica").fontSize(8).fillColor("#888").text("Lender Perception", 70, y);
           doc.font("Helvetica-Oblique").fontSize(9).fillColor("#444").text(fi.lenderPerception, 70, y + 12, { width: pageWidth - 40 });
           y = doc.y + 8;
+        }
+        const totalH = y - cardY + 6;
+        drawCardBox(cardY, totalH);
+        doc.y = cardY + totalH + 10;
+      }
+
+      if (d.projectedFunding) {
+        const pf = d.projectedFunding;
+        const bureauName = pf.bureau || d.bureauSource || "Per-Bureau";
+        const cardY = doc.y;
+        doc.font("Helvetica").fontSize(8).fillColor("#999").text(`PROJECTED FUNDING — ${bureauName.toUpperCase()}`, 70, cardY + 10);
+        let y = cardY + 26;
+
+        if (pf.bestCasePerBureau) {
+          doc.font("Helvetica").fontSize(8).fillColor("#888").text(`Best-Case ${bureauName}`, 70, y);
+          doc.font("Helvetica-Bold").fontSize(20).fillColor("#10b981").text(pf.bestCasePerBureau, 70, y + 12);
+          doc.font("Helvetica").fontSize(7).fillColor("#aaa").text("5 approvals at full limit match", 70, y + 34);
+          y += 50;
+        }
+        if (pf.perBureauProjection) {
+          doc.font("Helvetica").fontSize(8).fillColor("#888").text(`${bureauName} Projection`, 70, y);
+          doc.font("Helvetica-Bold").fontSize(14).fillColor("#1a1a2e").text(pf.perBureauProjection, 70, y + 12);
+          doc.font("Helvetica").fontSize(7).fillColor("#aaa").text("3-5 approvals at 60-80% match", 70, y + 28);
+          y += 42;
+        }
+        const detailItems = [
+          { label: "Highest Limit", value: pf.highestLimit },
+          { label: "Current Exposure", value: pf.currentExposure },
+          { label: "Readiness Level", value: pf.readinessLevel },
+          { label: "Inquiry Slots Available", value: pf.inquirySlots },
+          { label: "Timeline", value: pf.timeline },
+        ].filter(item => item.value);
+        for (const item of detailItems) {
+          doc.font("Helvetica").fontSize(8).fillColor("#888").text(item.label, 70, y);
+          doc.font("Helvetica").fontSize(9).fillColor("#333").text(item.value!, 200, y, { width: pageWidth - 160 });
+          y += 16;
+        }
+        if (pf.keyBlockers.length > 0) {
+          y += 4;
+          doc.font("Helvetica").fontSize(8).fillColor("#888").text(`Key Blockers on ${bureauName}`, 70, y);
+          y += 14;
+          for (const b of pf.keyBlockers) {
+            doc.font("Helvetica").fontSize(9).fillColor("#555").text(`▸  ${b}`, 70, y, { width: pageWidth - 40 });
+            y = doc.y + 4;
+          }
         }
         const totalH = y - cardY + 6;
         drawCardBox(cardY, totalH);
