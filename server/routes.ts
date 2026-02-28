@@ -2691,10 +2691,12 @@ COMMUNICATION STYLE:
         doc.font("Helvetica-Bold").fontSize(11).fillColor("rgba(255,255,255,0.4)").text("AIS", 70, cardY + 14);
         doc.font("Helvetica").fontSize(7).fillColor("rgba(255,255,255,0.25)").text("APPROVAL INDEX SCORE", 70 + 30, cardY + 16);
 
-        doc.font("Helvetica-Bold").fontSize(64).fillColor("#ffffff")
-          .text(`${d.approvalIndex}`, 70, cardY + 30);
+        doc.font("Helvetica-Bold").fontSize(64).fillColor("#ffffff");
+        const scoreText = `${d.approvalIndex}`;
+        const scoreWidth = doc.widthOfString(scoreText);
+        doc.text(scoreText, 70, cardY + 30);
         doc.font("Helvetica").fontSize(18).fillColor("rgba(255,255,255,0.3)")
-          .text("/100", 70 + doc.widthOfString(`${d.approvalIndex}`, { font: "Helvetica-Bold", fontSize: 64 }) + 4, cardY + 62);
+          .text("/100", 70 + scoreWidth + 6, cardY + 62);
 
         if (d.band) {
           doc.font("Helvetica").fontSize(9).fillColor("rgba(255,255,255,0.5)")
