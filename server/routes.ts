@@ -1090,6 +1090,27 @@ Every response must be short and sweet. This is not optional. This is how you ta
 Short does not mean shallow. It means sharp. It means you respect the person's time and trust them to absorb what you give them.
 
 ====================================================
+GROUNDED VOICE — NON-NEGOTIABLE STYLE OVERRIDE
+====================================================
+
+This overrides any prior instruction that conflicts. This is how you sound:
+
+You are grounded. You are direct. You are plain-spoken. You are calm. You are supportive without performing support. You sound like a smart person who genuinely cares — not a system trying to sound smart.
+
+RULES:
+- Use everyday words. If a simpler word works, use it.
+- No filler. No throat-clearing. No "Great question." No "Let's dive in." No "I appreciate you sharing that." Start with the thing that matters.
+- When someone does something well, name the specific thing. "You got that utilization from 72% down to 18% in six weeks" — not "Great job!"
+- When the news is bad, say it flat and move straight to what can be done. No softening. No apology tour.
+- Short sentences by default. Longer only when the idea genuinely needs room.
+- Match the person's level. If they know the terminology, use it. If they do not, translate it naturally without making them feel behind.
+- No corporate language. No motivational-poster energy. No "unlock your potential." No "exciting journey." Those phrases are empty calories.
+- Conviction is allowed. Urgency is allowed. But it must be earned from the person's actual situation — never generic.
+- Sound like someone who just got off the phone with you and thought: "That person actually listened. They told me what I needed to hear."
+- Do not repeat yourself. If you said it, it is said.
+- Do not over-explain. Trust the person to keep up.
+
+====================================================
 FINAL STANDARD
 ====================================================
 
@@ -2126,27 +2147,33 @@ export async function registerRoutes(
 
     if (fileContent && attachment) {
       try {
+        console.log(`[Guest Chat] File received: attachment=${attachment}, fileType=${fileType}, contentLength=${fileContent.length}`);
         const isPdf = fileType === "pdf" || (fileContent.length > 100 && !fileContent.includes("\n"));
         if (isPdf) {
           const buffer = Buffer.from(fileContent, "base64");
+          console.log(`[Guest Chat] PDF buffer size: ${buffer.length} bytes`);
           const result = await processPdfBuffer(buffer);
           extractedText = result.text;
           extractionMethod = result.method;
           manualEntryNeeded = result.method === "manual_entry_needed";
+          console.log(`[Guest Chat] Extraction result: method=${result.method}, textLength=${extractedText.length}, manualEntry=${manualEntryNeeded}`);
         } else {
           extractedText = fileContent.slice(0, EXTRACTION_MAX_CHARS);
           extractionMethod = "raw_text";
+          console.log(`[Guest Chat] Raw text extraction: ${extractedText.length} chars`);
         }
       } catch (err) {
-        console.error("Guest file parsing error:", err);
+        console.error("[Guest Chat] File parsing error:", err);
         manualEntryNeeded = true;
         extractionMethod = "manual_entry_needed";
       }
+    } else if (attachment && !fileContent) {
+      console.warn(`[Guest Chat] Attachment type '${attachment}' specified but no fileContent received`);
     }
 
     let fileContext = "";
     if (manualEntryNeeded && attachment) {
-      fileContext = `\n\nThe user uploaded a ${attachment === "bank_statement" ? "bank statement" : "credit report"}, but automated text extraction failed (the document may be an image-based or scanned PDF). Ask the user to manually provide the key data from their document. For a credit report, ask for: credit score, total revolving limits, total balances, number of inquiries, and any derogatory accounts. For a bank statement, ask for: average daily balance, monthly deposits, and any NSF/overdraft occurrences.`;
+      fileContext = `\n\nThe user uploaded a ${attachment === "bank_statement" ? "bank statement" : "credit report"}, but automated text extraction failed (the document may be an image-based or scanned PDF). DO NOT say you cannot read files — the system tried to extract text and it did not work for this particular document. Ask the user to try re-uploading or to manually provide the key data from their document. For a credit report, ask for: credit score, total revolving limits, total balances, number of inquiries, and any derogatory accounts. For a bank statement, ask for: average daily balance, monthly deposits, and any NSF/overdraft occurrences. NEVER say you lack the ability to read files — you do have that ability, it just did not work this time.`;
     } else if (extractedText) {
       fileContext = `\n\nCRITICAL INSTRUCTION — DOCUMENT UPLOADED:
 The user has uploaded a ${attachment === "bank_statement" ? "bank statement" : "credit report"}. The extracted text is below.
@@ -7402,6 +7429,186 @@ Include: sender placeholder [YOUR NAME/ADDRESS], date, bureau address, account d
     } catch (error: any) {
       console.error("Dispute Letter Generation Error:", error);
       res.status(500).json({ error: "Failed to generate dispute letter" });
+    }
+  });
+
+  // ====================================================
+  // VOICE AI — ElevenLabs Voice Clone & TTS
+  // ====================================================
+
+  app.post("/api/voice/clone", requireAuth, async (req: Request, res: Response) => {
+    const userId = (req.session as any).userId;
+    if (!userId) return res.status(401).json({ error: "Not authenticated" });
+
+    const apiKey = process.env.ELEVENLABS_API_KEY;
+    if (!apiKey) return res.status(503).json({ error: "Voice service not configured" });
+
+    try {
+      const body = z.object({
+        name: z.string().min(1).max(100),
+        audioBase64: z.string().min(100),
+        audioType: z.string().default("audio/webm"),
+      }).safeParse(req.body);
+
+      if (!body.success) return res.status(400).json({ error: "Invalid voice data" });
+
+      const { name, audioBase64, audioType } = body.data;
+
+      if (audioBase64.length > 35_000_000) {
+        return res.status(413).json({ error: "Audio file too large (max 25MB)" });
+      }
+
+      const audioBuffer = Buffer.from(audioBase64, "base64");
+
+      if (audioBuffer.length > 25 * 1024 * 1024) {
+        return res.status(413).json({ error: "Audio file too large (max 25MB)" });
+      }
+
+      const ext = audioType.includes("mp3") ? "mp3" : audioType.includes("wav") ? "wav" : "webm";
+      const formBoundary = "----ElevenLabsBoundary" + Date.now();
+      const fileName = `voice_sample.${ext}`;
+
+      const formParts: Buffer[] = [];
+      formParts.push(Buffer.from(`--${formBoundary}\r\nContent-Disposition: form-data; name="name"\r\n\r\n${name}\r\n`));
+      formParts.push(Buffer.from(`--${formBoundary}\r\nContent-Disposition: form-data; name="files"; filename="${fileName}"\r\nContent-Type: ${audioType}\r\n\r\n`));
+      formParts.push(audioBuffer);
+      formParts.push(Buffer.from(`\r\n--${formBoundary}--\r\n`));
+
+      const formBody = Buffer.concat(formParts);
+
+      const response = await fetch("https://api.elevenlabs.io/v1/voices/add", {
+        method: "POST",
+        headers: {
+          "xi-api-key": apiKey,
+          "Content-Type": `multipart/form-data; boundary=${formBoundary}`,
+        },
+        body: formBody,
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error("[Voice Clone] ElevenLabs error:", response.status, errorText);
+        return res.status(502).json({ error: "Voice cloning failed" });
+      }
+
+      const data = await response.json() as { voice_id: string };
+      await storage.updateUser(userId, { voiceId: data.voice_id });
+      console.log(`[Voice Clone] Voice created for user ${userId}: ${data.voice_id}`);
+
+      res.json({ voiceId: data.voice_id });
+    } catch (error: any) {
+      console.error("[Voice Clone] Error:", error);
+      res.status(500).json({ error: "Voice cloning failed" });
+    }
+  });
+
+  app.get("/api/voice/status", requireAuth, async (req: Request, res: Response) => {
+    const userId = (req.session as any).userId;
+    if (!userId) return res.status(401).json({ error: "Not authenticated" });
+
+    const user = await storage.getUser(userId);
+    if (!user) return res.status(404).json({ error: "User not found" });
+
+    const configured = !!process.env.ELEVENLABS_API_KEY;
+    res.json({
+      hasVoice: !!user.voiceId,
+      voiceId: user.voiceId || null,
+      serviceConfigured: configured,
+    });
+  });
+
+  app.delete("/api/voice/clone", requireAuth, async (req: Request, res: Response) => {
+    const userId = (req.session as any).userId;
+    if (!userId) return res.status(401).json({ error: "Not authenticated" });
+
+    const user = await storage.getUser(userId);
+    if (!user?.voiceId) return res.status(404).json({ error: "No voice to delete" });
+
+    const apiKey = process.env.ELEVENLABS_API_KEY;
+    if (apiKey) {
+      try {
+        await fetch(`https://api.elevenlabs.io/v1/voices/${user.voiceId}`, {
+          method: "DELETE",
+          headers: { "xi-api-key": apiKey },
+        });
+      } catch (err) {
+        console.error("[Voice Delete] ElevenLabs cleanup error:", err);
+      }
+    }
+
+    await storage.updateUser(userId, { voiceId: null });
+    res.json({ success: true });
+  });
+
+  app.post("/api/voice/speak", requireAuth, async (req: Request, res: Response) => {
+    const userId = (req.session as any).userId;
+    if (!userId) return res.status(401).json({ error: "Not authenticated" });
+
+    const apiKey = process.env.ELEVENLABS_API_KEY;
+    if (!apiKey) return res.status(503).json({ error: "Voice service not configured" });
+
+    const body = z.object({
+      text: z.string().min(1).max(5000),
+      voiceId: z.string().optional(),
+    }).safeParse(req.body);
+
+    if (!body.success) return res.status(400).json({ error: "Invalid request" });
+
+    const user = await storage.getUser(userId);
+    if (!user) return res.status(404).json({ error: "User not found" });
+
+    const voiceId = body.data.voiceId || user.voiceId || "21m00Tcm4TlvDq8ikWAM";
+
+    try {
+      const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voiceId}/stream`, {
+        method: "POST",
+        headers: {
+          "xi-api-key": apiKey,
+          "Content-Type": "application/json",
+          "Accept": "audio/mpeg",
+        },
+        body: JSON.stringify({
+          text: body.data.text,
+          model_id: "eleven_turbo_v2_5",
+          voice_settings: {
+            stability: 0.5,
+            similarity_boost: 0.75,
+            style: 0.0,
+            use_speaker_boost: true,
+          },
+        }),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error("[Voice Speak] ElevenLabs error:", response.status, errorText);
+        return res.status(502).json({ error: "Text-to-speech failed" });
+      }
+
+      res.setHeader("Content-Type", "audio/mpeg");
+      res.setHeader("Transfer-Encoding", "chunked");
+      res.setHeader("Cache-Control", "no-cache");
+
+      const reader = response.body?.getReader();
+      if (!reader) return res.status(502).json({ error: "No stream available" });
+
+      const pump = async () => {
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) { res.end(); return; }
+          if (!res.writableEnded) res.write(Buffer.from(value));
+        }
+      };
+
+      pump().catch((err) => {
+        console.error("[Voice Speak] Stream error:", err);
+        if (!res.headersSent) res.status(500).json({ error: "Stream failed" });
+        else res.end();
+      });
+
+    } catch (error: any) {
+      console.error("[Voice Speak] Error:", error);
+      res.status(500).json({ error: "Text-to-speech failed" });
     }
   });
 

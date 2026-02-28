@@ -74,6 +74,9 @@ export const users = pgTable("users", {
   accountsOlderThan5Years: integer("accounts_older_than_5_years"),
   avgOpenAccountAgeYears: integer("avg_open_account_age_years"),
   
+  // Voice Clone (ElevenLabs)
+  voiceId: text("voice_id"),
+
   // Stripe
   stripeCustomerId: text("stripe_customer_id"),
 
