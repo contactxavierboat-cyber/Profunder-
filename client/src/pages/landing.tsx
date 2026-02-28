@@ -1297,12 +1297,12 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
       </div>
 
       <div className="flex-1 overflow-y-auto px-4 py-3">
-        {aisReport && hasAnalysisData(aisReport) && (
-          <div className="mb-4">
-            <div className="flex items-center gap-2 mb-2">
-              <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="5" stroke="#333" strokeWidth="1" fill="none" /><path d="M6 3v3l2 1" stroke="#333" strokeWidth="0.8" strokeLinecap="round" strokeLinejoin="round" /></svg>
-              <span className="text-[11px] font-medium text-[#666] uppercase tracking-wider">AIS Report</span>
-            </div>
+        <div className="mb-4">
+          <div className="flex items-center gap-2 mb-2">
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="5" stroke="#333" strokeWidth="1" fill="none" /><path d="M6 3v3l2 1" stroke="#333" strokeWidth="0.8" strokeLinecap="round" strokeLinejoin="round" /></svg>
+            <span className="text-[11px] font-medium text-[#666] uppercase tracking-wider">AIS Report</span>
+          </div>
+          {aisReport && hasAnalysisData(aisReport) ? (
             <button
               onClick={onOpenAis}
               className="w-full flex items-center gap-3 pl-5 py-2.5 rounded-lg hover:bg-[#f5f5f5] transition-colors group"
@@ -1319,8 +1319,12 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
                 <path d="M3 1l4 4-4 4" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
             </button>
-          </div>
-        )}
+          ) : (
+            <div className="pl-5 py-2.5">
+              <p className="text-[10px] text-[#bbb] leading-[1.5]">Upload a credit report to generate your Approval Index Score</p>
+            </div>
+          )}
+        </div>
 
         <DocGroup
           title="Dispute Letters"
