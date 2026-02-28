@@ -1163,7 +1163,7 @@ function TeamSection({ user, onOpenTeamChat, activeTeamChatId }: { user: any; on
   );
 }
 
-function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, activeTeamChatId, aisReport, panelTab, setPanelTab }: { docs: SavedDoc[]; onClose: () => void; onDelete: (id: string) => void; onSave: (doc: SavedDoc) => void; user: any; onOpenTeamChat?: (member: TeamMember) => void; activeTeamChatId?: number | null; aisReport: MissionData | null; panelTab: "workspace" | "ais"; setPanelTab: (tab: "workspace" | "ais") => void }) {
+function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, activeTeamChatId, aisReport, onOpenAis }: { docs: SavedDoc[]; onClose: () => void; onDelete: (id: string) => void; onSave: (doc: SavedDoc) => void; user: any; onOpenTeamChat?: (member: TeamMember) => void; activeTeamChatId?: number | null; aisReport: MissionData | null; onOpenAis: () => void }) {
   const docInputRef = useRef<HTMLInputElement>(null);
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
 
@@ -1296,79 +1296,65 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
         </button>
       </div>
 
-      <div className="flex border-b border-[#eee]">
-        <button
-          onClick={() => setPanelTab("workspace")}
-          className={`flex-1 py-2.5 text-[11px] font-medium tracking-wide transition-colors ${panelTab === "workspace" ? "text-[#333] border-b-2 border-[#333]" : "text-[#aaa] hover:text-[#666]"}`}
-          data-testid="tab-workspace"
-        >
-          Workspace
-        </button>
-        <button
-          onClick={() => setPanelTab("ais")}
-          className={`flex-1 py-2.5 text-[11px] font-medium tracking-wide transition-colors relative ${panelTab === "ais" ? "text-[#333] border-b-2 border-[#333]" : "text-[#aaa] hover:text-[#666]"}`}
-          data-testid="tab-ais"
-        >
-          Approval Index Score
-          {aisReport && aisReport.approvalIndex !== null && panelTab !== "ais" && (
-            <span className="ml-1 inline-flex w-1.5 h-1.5 rounded-full bg-[#e85d3a]" />
-          )}
-        </button>
+      <div className="flex-1 overflow-y-auto px-4 py-3">
+        {aisReport && hasAnalysisData(aisReport) && (
+          <div className="mb-4">
+            <div className="flex items-center gap-2 mb-2">
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="5" stroke="#333" strokeWidth="1" fill="none" /><path d="M6 3v3l2 1" stroke="#333" strokeWidth="0.8" strokeLinecap="round" strokeLinejoin="round" /></svg>
+              <span className="text-[11px] font-medium text-[#666] uppercase tracking-wider">AIS Report</span>
+            </div>
+            <button
+              onClick={onOpenAis}
+              className="w-full flex items-center gap-3 pl-5 py-2.5 rounded-lg hover:bg-[#f5f5f5] transition-colors group"
+              data-testid="button-open-ais"
+            >
+              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#1a1a1a] to-[#2a2a2a] flex items-center justify-center shrink-0">
+                <span className="text-[11px] font-bold text-white font-mono">{aisReport.approvalIndex}</span>
+              </div>
+              <div className="flex-1 min-w-0 text-left">
+                <p className="text-[11px] text-[#333] font-medium">Approval Index Score</p>
+                <p className="text-[9px] text-[#999]">{aisReport.band || "Score"} · {aisReport.phase || "View report"}</p>
+              </div>
+              <svg width="10" height="10" viewBox="0 0 10 10" fill="none" className="text-[#ccc] group-hover:text-[#666] transition-colors mr-1 shrink-0">
+                <path d="M3 1l4 4-4 4" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </button>
+          </div>
+        )}
+
+        <DocGroup
+          title="Dispute Letters"
+          items={disputeLetters}
+          icon={<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 3h8M2 6h6M2 9h4" stroke="#f97316" strokeWidth="1.2" strokeLinecap="round" /></svg>}
+        />
+        <DocGroup
+          title="Credit Reports"
+          items={creditReports}
+          icon={<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><rect x="2" y="1" width="8" height="10" rx="1" stroke="#3b82f6" strokeWidth="1" fill="none" /><path d="M4 4h4M4 6h4" stroke="#3b82f6" strokeWidth="0.8" strokeLinecap="round" /></svg>}
+        />
+        <DocGroup
+          title="Other"
+          items={otherDocs}
+          icon={<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><rect x="2" y="1" width="8" height="10" rx="1" stroke="#999" strokeWidth="1" fill="none" /></svg>}
+        />
+        <div className="w-full h-px bg-[#eee] my-3"></div>
+        <TeamSection user={user} onOpenTeamChat={onOpenTeamChat} activeTeamChatId={activeTeamChatId} />
       </div>
 
-      {panelTab === "workspace" ? (
-        <>
-          <div className="flex-1 overflow-y-auto px-4 py-3">
-            <DocGroup
-              title="Dispute Letters"
-              items={disputeLetters}
-              icon={<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 3h8M2 6h6M2 9h4" stroke="#f97316" strokeWidth="1.2" strokeLinecap="round" /></svg>}
-            />
-            <DocGroup
-              title="Credit Reports"
-              items={creditReports}
-              icon={<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><rect x="2" y="1" width="8" height="10" rx="1" stroke="#3b82f6" strokeWidth="1" fill="none" /><path d="M4 4h4M4 6h4" stroke="#3b82f6" strokeWidth="0.8" strokeLinecap="round" /></svg>}
-            />
-            <DocGroup
-              title="Other"
-              items={otherDocs}
-              icon={<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><rect x="2" y="1" width="8" height="10" rx="1" stroke="#999" strokeWidth="1" fill="none" /></svg>}
-            />
-            <div className="w-full h-px bg-[#eee] my-3"></div>
-            <TeamSection user={user} onOpenTeamChat={onOpenTeamChat} activeTeamChatId={activeTeamChatId} />
-          </div>
-
-          <div className="px-4 py-3 border-t border-[#eee]">
-            <input ref={docInputRef} type="file" className="hidden" onChange={handleUploadDoc} data-testid="input-doc-upload" />
-            <button
-              onClick={() => docInputRef.current?.click()}
-              className="w-full flex items-center justify-center gap-2 py-2 text-[12px] font-medium text-[#666] border border-dashed border-[#ddd] rounded-lg hover:bg-[#f5f5f5] hover:border-[#ccc] transition-colors"
-              data-testid="button-add-doc"
-            >
-              <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 2v8M2 6h8" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" /></svg>
-              Add Document
-            </button>
-            <p className="text-[9px] text-[#bbb] text-center mt-2 leading-[1.5]">
-              Save dispute letters and reports here for easy access
-            </p>
-          </div>
-        </>
-      ) : (
-        <div className="flex-1 overflow-y-auto px-4 py-4">
-          {aisReport && hasAnalysisData(aisReport) ? (
-            <MissionDashboard data={aisReport} compact />
-          ) : (
-            <div className="flex flex-col items-center justify-center h-full text-center px-4">
-              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" className="mb-3 text-[#ddd]">
-                <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="1.5" />
-                <path d="M12 7v5l3 3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-              <p className="text-[12px] text-[#999] font-medium mb-1">No AIS Report Yet</p>
-              <p className="text-[10px] text-[#bbb] leading-[1.5]">Upload a credit report in the chat to generate your Approval Index Score</p>
-            </div>
-          )}
-        </div>
-      )}
+      <div className="px-4 py-3 border-t border-[#eee]">
+        <input ref={docInputRef} type="file" className="hidden" onChange={handleUploadDoc} data-testid="input-doc-upload" />
+        <button
+          onClick={() => docInputRef.current?.click()}
+          className="w-full flex items-center justify-center gap-2 py-2 text-[12px] font-medium text-[#666] border border-dashed border-[#ddd] rounded-lg hover:bg-[#f5f5f5] hover:border-[#ccc] transition-colors"
+          data-testid="button-add-doc"
+        >
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 2v8M2 6h8" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" /></svg>
+          Add Document
+        </button>
+        <p className="text-[9px] text-[#bbb] text-center mt-2 leading-[1.5]">
+          Save dispute letters and reports here for easy access
+        </p>
+      </div>
     </div>
   );
 }
@@ -1401,7 +1387,7 @@ export default function LandingPage() {
       return saved ? JSON.parse(saved) : null;
     } catch { return null; }
   });
-  const [panelTab, setPanelTab] = useState<"workspace" | "ais">("workspace");
+  const [showAisOverlay, setShowAisOverlay] = useState(false);
   const teamConvoLoaded = useRef(false);
   const teamChatLoaded = useRef(false);
   const { user, logout } = useAuth();
@@ -1774,8 +1760,6 @@ export default function LandingPage() {
       if (hasAnalysisData(parsedAis) && parsedAis.approvalIndex !== null) {
         setAisReport(parsedAis);
         try { localStorage.setItem("profundr_ais_report", JSON.stringify(parsedAis)); } catch {}
-        setDocsOpen(true);
-        setPanelTab("ais");
       }
 
       if (user) {
@@ -1905,8 +1889,8 @@ export default function LandingPage() {
       {docsOpen && (
         <>
           <div className="sm:hidden fixed inset-0 bg-black/30 z-40" onClick={() => setDocsOpen(false)} />
-          <div className={`fixed sm:relative z-50 sm:z-auto ${panelTab === "ais" ? "w-[420px]" : "w-[280px]"} h-full shrink-0 transition-all`} data-testid="docs-sidebar">
-            <DocsPanel docs={savedDocs} onClose={() => setDocsOpen(false)} onDelete={handleDeleteDoc} onSave={handleSaveDoc} user={user} onOpenTeamChat={handleOpenTeamChat} activeTeamChatId={activeTeamChat?.id} aisReport={aisReport} panelTab={panelTab} setPanelTab={setPanelTab} />
+          <div className="fixed sm:relative z-50 sm:z-auto w-[280px] h-full shrink-0 transition-all" data-testid="docs-sidebar">
+            <DocsPanel docs={savedDocs} onClose={() => setDocsOpen(false)} onDelete={handleDeleteDoc} onSave={handleSaveDoc} user={user} onOpenTeamChat={handleOpenTeamChat} activeTeamChatId={activeTeamChat?.id} aisReport={aisReport} onOpenAis={() => setShowAisOverlay(true)} />
           </div>
         </>
       )}
@@ -1992,7 +1976,23 @@ export default function LandingPage() {
             </div>
           )}
 
-          {!hasMessages && !isSending ? (
+          {showAisOverlay && aisReport && hasAnalysisData(aisReport) ? (
+            <div className="w-full max-w-[720px] mx-auto px-4 pt-4 pb-2">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setShowAisOverlay(false)}
+                    className="w-7 h-7 flex items-center justify-center rounded-lg text-[#999] hover:text-[#555] hover:bg-[#eee] transition-colors"
+                    data-testid="button-close-ais-overlay"
+                  >
+                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M9 3L4 7l5 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                  </button>
+                  <span className="text-[13px] font-semibold text-[#333]">Approval Index Score</span>
+                </div>
+              </div>
+              <MissionDashboard data={aisReport} userName={user?.displayName || user?.email} />
+            </div>
+          ) : !hasMessages && !isSending ? (
             <div className="flex-1 flex flex-col items-center justify-center px-4 gap-4 min-h-[calc(100dvh-180px)]">
               <h1 className="text-[28px] sm:text-[36px] font-semibold text-[#1a1a1a] tracking-[-0.03em] text-center leading-tight" data-testid="text-hero-headline">
                 Are you fundable?
