@@ -286,28 +286,28 @@ function hasAnalysisData(data: MissionData): boolean {
 function getBandColor(band: string | null): string {
   if (!band) return "#999";
   const b = band.toLowerCase();
-  if (b === "exceptional") return "#6366f1";
-  if (b === "strong") return "#818cf8";
-  if (b === "viable") return "#a78bfa";
-  if (b === "borderline") return "#c4b5fd";
-  if (b === "weak") return "#7c3aed";
-  return "#5b21b6";
+  if (b === "exceptional") return "#1a1a1a";
+  if (b === "strong") return "#333333";
+  if (b === "viable") return "#555555";
+  if (b === "borderline") return "#777777";
+  if (b === "weak") return "#999999";
+  return "#999999";
 }
 
 function getPhaseColor(phase: string | null): string {
   if (!phase) return "#999";
   const p = phase.toLowerCase();
-  if (p.includes("funding")) return "#6366f1";
-  if (p.includes("build")) return "#818cf8";
-  if (p.includes("wait")) return "#a78bfa";
-  return "#7c3aed";
+  if (p.includes("funding")) return "#1a1a1a";
+  if (p.includes("build")) return "#444444";
+  if (p.includes("wait")) return "#777777";
+  return "#555555";
 }
 
 function getPillarColor(value: number): string {
-  if (value >= 85) return "#6366f1";
-  if (value >= 70) return "#818cf8";
-  if (value >= 50) return "#a78bfa";
-  return "#c4b5fd";
+  if (value >= 85) return "#1a1a1a";
+  if (value >= 70) return "#444444";
+  if (value >= 50) return "#777777";
+  return "#aaaaaa";
 }
 
 function toTitleCase(text: string): string {
@@ -419,11 +419,11 @@ function getPhaseSubtitle(phase: string | null): string {
 function getProfileTypeColor(type: string | null): string {
   if (!type) return "#999";
   const t = type.toLowerCase();
-  if (t.includes("premium")) return "#6366f1";
-  if (t.includes("seasoned")) return "#818cf8";
-  if (t.includes("established")) return "#a78bfa";
-  if (t.includes("starter")) return "#c4b5fd";
-  if (t.includes("thin")) return "#7c3aed";
+  if (t.includes("premium")) return "#1a1a1a";
+  if (t.includes("seasoned")) return "#333333";
+  if (t.includes("established")) return "#555555";
+  if (t.includes("starter")) return "#777777";
+  if (t.includes("thin")) return "#999999";
   return "#999";
 }
 
@@ -439,10 +439,10 @@ function getProfileTypeSubtitle(type: string | null): string {
 }
 
 function getIdentityStrengthColor(value: number): string {
-  if (value >= 85) return "#6366f1";
-  if (value >= 70) return "#818cf8";
-  if (value >= 50) return "#a78bfa";
-  return "#c4b5fd";
+  if (value >= 85) return "#1a1a1a";
+  if (value >= 70) return "#444444";
+  if (value >= 50) return "#777777";
+  return "#aaaaaa";
 }
 
 function FinancialIdentityCard({ data }: { data: FinancialIdentityData }) {
@@ -450,8 +450,8 @@ function FinancialIdentityCard({ data }: { data: FinancialIdentityData }) {
   return (
     <div className="rounded-xl bg-white border border-[#e8e8e8] p-4 shadow-sm" data-testid="card-financial-identity">
       <div className="flex items-center gap-2 mb-3">
-        <div className="w-5 h-5 rounded-md bg-[#f0eeff] flex items-center justify-center">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#6366f1" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <div className="w-5 h-5 rounded-md bg-[#f0f0f0] flex items-center justify-center">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#333333" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
             <circle cx="12" cy="7" r="4" />
           </svg>
@@ -516,10 +516,10 @@ function FinancialIdentityCard({ data }: { data: FinancialIdentityData }) {
 function getReadinessColor(level: string | null): string {
   if (!level) return "#999";
   const l = level.toLowerCase();
-  if (l.includes("ready") || l.includes("strong") || l.includes("high")) return "#10b981";
-  if (l.includes("near") || l.includes("moderate") || l.includes("close")) return "#f59e0b";
-  if (l.includes("not") || l.includes("low") || l.includes("weak") || l.includes("early")) return "#ef4444";
-  return "#7c3aed";
+  if (l.includes("ready") || l.includes("strong") || l.includes("high")) return "#1a1a1a";
+  if (l.includes("near") || l.includes("moderate") || l.includes("close")) return "#555555";
+  if (l.includes("not") || l.includes("low") || l.includes("weak") || l.includes("early")) return "#999999";
+  return "#666666";
 }
 
 function ProjectedFundingCard({ data, phase }: { data: ProjectedFundingData; phase: string | null }) {
@@ -541,7 +541,7 @@ function ProjectedFundingCard({ data, phase }: { data: ProjectedFundingData; pha
             <span className="text-[8px] font-bold uppercase tracking-widest px-1.5 py-0.5 rounded-full bg-[#f0f0f0] text-[#666]" data-testid="text-funding-bureau">{data.bureau}</span>
           )}
         </div>
-        <p className="text-[18px] font-bold font-mono tracking-[-0.02em] text-[#10b981] leading-tight" data-testid="text-best-case-amount">
+        <p className="text-[18px] font-bold font-mono tracking-[-0.02em] text-[#1a1a1a] leading-tight" data-testid="text-best-case-amount">
           {data.bestCasePerBureau || data.perBureauProjection || "—"}
         </p>
         <div className="flex items-center gap-1.5 mt-1">
@@ -553,8 +553,8 @@ function ProjectedFundingCard({ data, phase }: { data: ProjectedFundingData; pha
           )}
           {isFundingReady && !data.readinessLevel && (
             <>
-              <div className="w-1.5 h-1.5 rounded-full bg-[#10b981]" />
-              <p className="text-[10px] text-[#10b981] font-medium">Funding Ready</p>
+              <div className="w-1.5 h-1.5 rounded-full bg-[#1a1a1a]" />
+              <p className="text-[10px] text-[#1a1a1a] font-medium">Funding Ready</p>
             </>
           )}
         </div>
@@ -564,8 +564,8 @@ function ProjectedFundingCard({ data, phase }: { data: ProjectedFundingData; pha
         <div className="col-span-1 sm:col-span-3 rounded-xl bg-white border border-[#e8e8e8] p-4 shadow-sm" data-testid="card-projected-funding-expanded">
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
-              <div className="w-5 h-5 rounded-md bg-[#f0fdf4] flex items-center justify-center">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#10b981" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <div className="w-5 h-5 rounded-md bg-[#f0f0f0] flex items-center justify-center">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#333333" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <line x1="12" y1="1" x2="12" y2="23" />
                   <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
                 </svg>
@@ -581,7 +581,7 @@ function ProjectedFundingCard({ data, phase }: { data: ProjectedFundingData; pha
             {data.bestCasePerBureau && (
               <div data-testid="pf-best-case">
                 <p className="text-[9px] text-[#bbb] font-medium mb-0.5">Best-Case {bureauLabel}</p>
-                <p className="text-[22px] font-black font-mono tracking-[-0.02em] text-[#10b981] leading-none">{data.bestCasePerBureau}</p>
+                <p className="text-[22px] font-black font-mono tracking-[-0.02em] text-[#1a1a1a] leading-none">{data.bestCasePerBureau}</p>
                 <p className="text-[9px] text-[#aaa] mt-1">5 approvals at full limit match</p>
               </div>
             )}
@@ -628,8 +628,8 @@ function ProjectedFundingCard({ data, phase }: { data: ProjectedFundingData; pha
               <div className="space-y-1.5">
                 {data.keyBlockers.map((b, i) => (
                   <div key={i} className="flex items-start gap-2">
-                    <div className="w-4 h-4 rounded-sm bg-[#fef2f2] flex items-center justify-center shrink-0 mt-0.5">
-                      <span className="text-[8px] font-bold text-[#ef4444]">{i + 1}</span>
+                    <div className="w-4 h-4 rounded-sm bg-[#f0f0f0] flex items-center justify-center shrink-0 mt-0.5">
+                      <span className="text-[8px] font-bold text-[#555555]">{i + 1}</span>
                     </div>
                     <p className="text-[11px] text-[#555] leading-[1.5]">{b}</p>
                   </div>
@@ -677,7 +677,7 @@ function MissionDashboard({ data, userName }: { data: MissionData; userName?: st
         <button
           onClick={handleDownloadReport}
           disabled={downloadingReport}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#1a1a2e] text-white text-[11px] font-medium hover:bg-[#2a2a4e] transition-colors disabled:opacity-50"
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#333333] text-white text-[11px] font-medium hover:bg-[#444444] transition-colors disabled:opacity-50"
           data-testid="button-download-analysis-report"
         >
           {downloadingReport ? (
@@ -690,7 +690,7 @@ function MissionDashboard({ data, userName }: { data: MissionData; userName?: st
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
         {data.approvalIndex !== null && (
-          <div className="rounded-xl bg-gradient-to-br from-[#1a1a2e] to-[#16213e] p-5 shadow-lg col-span-1 sm:col-span-3" data-testid="card-approval-index">
+          <div className="rounded-xl bg-gradient-to-br from-[#1a1a1a] to-[#2a2a2a] p-5 shadow-lg col-span-1 sm:col-span-3" data-testid="card-approval-index">
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2">
                 <span className="text-[11px] font-bold tracking-[0.15em] text-white/50 uppercase">AIS</span>
@@ -777,8 +777,8 @@ function MissionDashboard({ data, userName }: { data: MissionData; userName?: st
           <div className="space-y-2">
             {data.suppressors.map((s, i) => (
               <div key={i} className="flex items-start gap-2.5">
-                <div className="w-5 h-5 rounded-md bg-[#f0eeff] flex items-center justify-center shrink-0 mt-0.5">
-                  <span className="text-[9px] font-bold text-[#7c3aed]">{i + 1}</span>
+                <div className="w-5 h-5 rounded-md bg-[#f0f0f0] flex items-center justify-center shrink-0 mt-0.5">
+                  <span className="text-[9px] font-bold text-[#555555]">{i + 1}</span>
                 </div>
                 <p className="text-[12px] text-[#444] leading-[1.55] font-medium">{s}</p>
               </div>
@@ -800,8 +800,8 @@ function MissionDashboard({ data, userName }: { data: MissionData; userName?: st
           <div className="space-y-1.5">
             {data.helping.map((h, i) => (
               <div key={i} className="flex items-start gap-2">
-                <div className="w-4 h-4 rounded-md bg-[#f0eeff] flex items-center justify-center shrink-0 mt-0.5">
-                  <span className="text-[9px] text-[#6366f1] font-bold">✓</span>
+                <div className="w-4 h-4 rounded-md bg-[#f0f0f0] flex items-center justify-center shrink-0 mt-0.5">
+                  <span className="text-[9px] text-[#333333] font-bold">✓</span>
                 </div>
                 <p className="text-[11px] text-[#555] leading-[1.5]">{h}</p>
               </div>
@@ -816,8 +816,8 @@ function MissionDashboard({ data, userName }: { data: MissionData; userName?: st
           <div className="space-y-1.5">
             {data.hurting.map((h, i) => (
               <div key={i} className="flex items-start gap-2">
-                <div className="w-4 h-4 rounded-md bg-[#f5f0ff] flex items-center justify-center shrink-0 mt-0.5">
-                  <span className="text-[9px] text-[#a78bfa] font-bold">−</span>
+                <div className="w-4 h-4 rounded-md bg-[#f0f0f0] flex items-center justify-center shrink-0 mt-0.5">
+                  <span className="text-[9px] text-[#777777] font-bold">−</span>
                 </div>
                 <p className="text-[11px] text-[#555] leading-[1.5]">{h}</p>
               </div>
@@ -867,7 +867,7 @@ function DisputeDownloadButton({ disputes, onSave }: { disputes: DisputeItem[]; 
     <button
       onClick={handleDownload}
       disabled={downloading}
-      className="mt-3 flex items-center gap-2 px-4 py-2 bg-[#1a1a2e] text-white rounded-lg text-[12px] font-medium hover:bg-[#2a2a40] transition-colors disabled:opacity-50"
+      className="mt-3 flex items-center gap-2 px-4 py-2 bg-[#333333] text-white rounded-lg text-[12px] font-medium hover:bg-[#444444] transition-colors disabled:opacity-50"
       data-testid="button-download-disputes"
     >
       <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
