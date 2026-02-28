@@ -63,3 +63,4 @@ Profundr is a subscription-based AI-powered fundability platform, envisioned as 
 - **PostgreSQL:** Primary database for persistent storage.
 - **Drizzle ORM:** Used for database interaction with PostgreSQL.
 - **YouTube (indirectly):** Creator Connect uses AI to match creators, implying interaction with YouTube data without direct API key integration.
+- **ElevenLabs (NOT YET CONNECTED):** Voice cloning for AI responses. User has dismissed the Replit integration 3 times. When user is ready: either complete the Replit ElevenLabs connector flow, or provide an API key to store as secret `ELEVENLABS_API_KEY`. Once connected, build: voice clone upload flow (store voice_id on user profile), POST /api/voice/speak TTS endpoint, play button on AI messages using existing useAudioPlayback hook.
