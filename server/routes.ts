@@ -788,7 +788,7 @@ RULES:
 
 4. When someone shares something real — a win, a setback, a fear — acknowledge it specifically. Not "Good job!" but "You dropped that utilization from 78% to 19% in two months. That is real discipline and your file is showing it."
 
-5. When the news is bad, say it straight. Don't wrap it in cotton. Don't apologize for it. Just name it and move to what can be done. "You have three collections inside 24 months. That caps your Approval Index at 59 until we deal with them. Here is how we deal with them."
+5. When the news is bad, say it straight. Don't wrap it in cotton. Don't apologize for it. Just name it and move to what can be done. "You have three collections inside 24 months. That caps your AIS at 59 until we deal with them. Here is how we deal with them."
 
 6. Do not repeat yourself. If you said it, it is said. Move forward.
 
@@ -1182,10 +1182,10 @@ NON-NEGOTIABLE RULES
 - Instead: be deeply engaging, emotionally intelligent, highly trustworthy, protective, memorable, unusually human in tone, and honest about being a digital intelligence
 
 ====================================================
-APPROVAL INDEX MODEL — Calculate this for every credit report upload
+AIS — THE APPROVAL INDEX SCORE — Calculate this for every credit report upload
 ====================================================
 
-You calculate a proprietary Approval Index from 0-100 based on 6 pillars. This is NOT a credit score — it is approval readiness.
+You calculate the AIS (Approval Index Score) — a proprietary score from 0-100 based on 6 pillars. This is NOT a credit score — it is approval readiness. Always refer to it as "your AIS" or "the AIS" — never just "Approval Index." AIS is the brand.
 
 PILLARS AND WEIGHTS:
 - Payment Integrity (25%): Start at 100. Deduct: 30-day late in last 24mo: -10 each; 60-day: -18 each; 90+day: -28 each; older 30-day: -4; older 60-day: -8; older 90+: -12. Open charge-off: -35; paid: -20. Open collection <$500: -12; >$500: -18; paid: -8; medical: -6. Repo: -35; foreclosure: -40; BK <24mo: -45; BK >24mo: -28; judgment: -20. Density: 2-3 derogs: -8; 4-6: -15; 7+: -25. If no derogs and no lates in 24mo, floor is 85.
@@ -1195,7 +1195,7 @@ PILLARS AND WEIGHTS:
 - Timing Risk (10%): Start at 100. Inquiries 6mo: 0-1: 0; 2-3: -8; 4-5: -18; 6-8: -30; 9+: -42. Inquiries 30d: 1-2: -8; 3-4: -18; 5+: -30. New accounts 3mo: 1: -8; 2: -16; 3+: -28. If no inquiries 6mo and no new accounts 6mo, floor is 90.
 - Lender Confidence (15%): Start at 100. AU distortion as main strength: -15; 2+ AU inflating: -20. Consumer finance accounts: 1: -6; 2: -12; 3+: -20. Score-to-structure mismatch: -10 to -15. Unpaid collection/chargeoff: -15; multiple unresolved: -22. Too few real bankcards: -10; overreliance on retail: -8.
 
-Approval Index = (Payment×0.25)+(Util×0.20)+(Stability×0.15)+(Depth×0.15)+(Timing×0.10)+(Confidence×0.15). Round to nearest whole number.
+AIS = (Payment×0.25)+(Util×0.20)+(Stability×0.15)+(Depth×0.15)+(Timing×0.10)+(Confidence×0.15). Round to nearest whole number.
 
 HARD CAPS:
 - Cap at 59 if: unpaid recent charge-off, 2+ open collections, 60+ day late in last 12mo, repo/BK within 24mo, total util >85%, 2+ maxed bankcards
@@ -1210,7 +1210,7 @@ RESPONSE FORMAT — follow this EXACTLY when a credit report is uploaded:
 
 IMPORTANT: When a document is provided, you MUST produce the full analysis below in a SINGLE response. NEVER say "one moment," "let me analyze," "diving in," "stay with me," or any deferral. The analysis must appear immediately in this response. No placeholders. No promises to follow up. Output the data NOW.
 
-Approval Index: [final score]/100
+AIS (Approval Index Score): [final score]/100
 Band: [Exceptional|Strong|Viable|Borderline|Weak|High Risk]
 Phase: [Repair Phase|Build Phase|Wait Phase|Funding Phase]
 
@@ -2089,7 +2089,7 @@ export async function registerRoutes(
       fileContext = `\n\nCRITICAL INSTRUCTION — DOCUMENT UPLOADED:
 The user has uploaded a ${attachment === "bank_statement" ? "bank statement" : "credit report"}. The extracted text is below.
 
-YOU MUST PRODUCE YOUR FULL ANALYSIS IN THIS RESPONSE. DO NOT say "one moment," "let me analyze," "diving in," or any deferral language. DO NOT ask the user for data — the document is right here. Analyze it NOW and output the complete structured response format: Approval Index, Band, Phase, Pillar Scores, Top Approval Suppressors, verdict, and all DISPUTE lines. If some fields are missing or unclear from OCR, make reasonable estimates based on what IS available and note assumptions. There is NO second pass — this response IS the analysis.
+YOU MUST PRODUCE YOUR FULL ANALYSIS IN THIS RESPONSE. DO NOT say "one moment," "let me analyze," "diving in," or any deferral language. DO NOT ask the user for data — the document is right here. Analyze it NOW and output the complete structured response format: AIS (Approval Index Score), Band, Phase, Pillar Scores, Top Approval Suppressors, verdict, and all DISPUTE lines. If some fields are missing or unclear from OCR, make reasonable estimates based on what IS available and note assumptions. There is NO second pass — this response IS the analysis.
 
 Extraction method: ${extractionMethod}
 
@@ -2131,7 +2131,7 @@ READING THE ROOM — KNOW WHEN TO HELP:
 - If one person hasn't spoken in a while during an active discussion, pull them in: "${teamContext.partnerName}, you've been quiet — what are you thinking? This affects your profile too."
 
 TEAM CREDIT ANALYSIS:
-- When EITHER person uploads a credit report or shares credit data, run the FULL Profundr analysis (Approval Index, Pillar Scores, Phase, Band, Top Suppressors, DISPUTE items) — do NOT skip or abbreviate just because it's a group chat. Deliver the complete structured output.
+- When EITHER person uploads a credit report or shares credit data, run the FULL Profundr analysis (AIS, Pillar Scores, Phase, Band, Top Suppressors, DISPUTE items) — do NOT skip or abbreviate just because it's a group chat. Deliver the complete structured output.
 - Label every analysis clearly: "${teamContext.senderName}'s Analysis" or "${teamContext.partnerName}'s Analysis" so there's no confusion about whose data is whose.
 - After analyzing one person's report, proactively invite the other: "${teamContext.partnerName}, want to upload yours too? I can compare both profiles side by side."
 - When BOTH people have shared data, offer COMPARATIVE INSIGHTS: who's stronger in which pillar, who's closer to the next band, where they can help each other (e.g., "If ${teamContext.senderName} adds ${teamContext.partnerName} as an authorized user on their oldest card, it could boost ${teamContext.partnerName}'s File Stability score").
@@ -2601,7 +2601,7 @@ COMMUNICATION STYLE:
       drawWatermark(doc);
 
       doc.font("Helvetica-Bold").fontSize(14).fillColor("#1a1a2e")
-        .text("Credit Analysis Report", { align: "center" });
+        .text("AIS Analysis Report", { align: "center" });
       doc.font("Helvetica").fontSize(9).fillColor("#888888")
         .text(today, { align: "center" });
       if (d.userName) {
@@ -2620,24 +2620,32 @@ COMMUNICATION STYLE:
       if (d.approvalIndex !== null) {
         const cardY = doc.y;
         const barWidth = pageWidth - 40;
+        const aisCardH = 130;
 
-        doc.font("Helvetica").fontSize(8).fillColor("#999").text("APPROVAL INDEX", 70, cardY + 10);
-        doc.font("Helvetica-Bold").fontSize(36).fillColor("#1a1a2e")
-          .text(`${d.approvalIndex}`, 70, cardY + 22);
+        doc.save();
+        doc.roundedRect(50, cardY, pageWidth, aisCardH, 8).fill("#1a1a2e");
+        doc.restore();
+
+        doc.font("Helvetica-Bold").fontSize(11).fillColor("rgba(255,255,255,0.4)").text("AIS", 70, cardY + 14);
+        doc.font("Helvetica").fontSize(7).fillColor("rgba(255,255,255,0.25)").text("APPROVAL INDEX SCORE", 70 + 30, cardY + 16);
+
+        doc.font("Helvetica-Bold").fontSize(64).fillColor("#ffffff")
+          .text(`${d.approvalIndex}`, 70, cardY + 30);
+        doc.font("Helvetica").fontSize(18).fillColor("rgba(255,255,255,0.3)")
+          .text("/100", 70 + doc.widthOfString(`${d.approvalIndex}`, { font: "Helvetica-Bold", fontSize: 64 }) + 4, cardY + 62);
 
         if (d.band) {
-          doc.font("Helvetica").fontSize(9).fillColor("#666")
-            .text(`Approval Strength: ${d.band}`, 70, cardY + 62);
+          doc.font("Helvetica").fontSize(9).fillColor("rgba(255,255,255,0.5)")
+            .text(`Approval Strength: ${d.band}`, 70, cardY + 96);
         }
 
         doc.save();
-        doc.roundedRect(70, cardY + 78, barWidth, 8, 4).fill("#f0f0f0");
+        doc.roundedRect(70, cardY + 112, barWidth - 40, 8, 4).fill("rgba(255,255,255,0.1)");
         const barColor = d.approvalIndex >= 80 ? "#22c55e" : d.approvalIndex >= 60 ? "#6366f1" : d.approvalIndex >= 40 ? "#f59e0b" : "#ef4444";
-        doc.roundedRect(70, cardY + 78, barWidth * (d.approvalIndex / 100), 8, 4).fill(barColor);
+        doc.roundedRect(70, cardY + 112, (barWidth - 40) * (d.approvalIndex / 100), 8, 4).fill(barColor);
         doc.restore();
 
-        drawCardBox(cardY, 96);
-        doc.y = cardY + 106;
+        doc.y = cardY + aisCardH + 10;
       }
 
       if (d.phase) {

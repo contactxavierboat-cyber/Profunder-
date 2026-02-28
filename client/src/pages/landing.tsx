@@ -112,6 +112,8 @@ function parseSingleMessageData(content: string): MissionData {
   let phase: string | null = null;
 
   const indexPatterns = [
+    /AIS\s*(?:\(Approval\s*Index\s*Score\))?[:\s]*(\d+)\s*\/?\s*100/i,
+    /Approval\s*Index\s*Score[:\s]*(\d+)\s*\/?\s*100/i,
     /Approval\s*Index[:\s]*(\d+)\s*\/?\s*100/i,
     /FUNDABILITY\s*INDEX[:\s]*(\d+)\s*\/?\s*100/i,
     /(\d+)\s*\/\s*100/i,
@@ -497,16 +499,19 @@ function MissionDashboard({ data, userName }: { data: MissionData; userName?: st
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
         {data.approvalIndex !== null && (
-          <div className="rounded-xl bg-white border border-[#e8e8e8] p-4 shadow-sm" data-testid="card-approval-index">
-            <p className="text-[10px] text-[#999] tracking-[0.01em] font-medium mb-2">Approval Index</p>
-            <div className="flex items-baseline gap-1.5">
-              <span className="text-[28px] font-bold leading-none font-mono tracking-tight" style={{ color: bandColor }} data-testid="text-approval-score">
+          <div className="rounded-xl bg-gradient-to-br from-[#1a1a2e] to-[#16213e] p-5 shadow-lg col-span-1 sm:col-span-3" data-testid="card-approval-index">
+            <div className="flex items-center gap-2 mb-3">
+              <span className="text-[11px] font-bold tracking-[0.15em] text-white/50 uppercase">AIS</span>
+              <span className="text-[9px] text-white/30 tracking-wide">Approval Index Score</span>
+            </div>
+            <div className="flex items-baseline gap-2">
+              <span className="text-[56px] font-black leading-none font-mono tracking-tighter text-white" data-testid="text-approval-score">
                 {data.approvalIndex}
               </span>
-              <span className="text-[13px] text-[#ccc] font-mono">/100</span>
+              <span className="text-[18px] text-white/30 font-mono font-light">/100</span>
             </div>
-            <p className="text-[10px] text-[#777] mt-1.5 leading-snug">{getApprovalSubtitle(data.approvalIndex, data.band)}</p>
-            <div className="mt-2 w-full h-1.5 bg-[#f0f0f0] rounded-full overflow-hidden">
+            <p className="text-[11px] text-white/50 mt-2 leading-snug">{getApprovalSubtitle(data.approvalIndex, data.band)}</p>
+            <div className="mt-3 w-full h-2 bg-white/10 rounded-full overflow-hidden">
               <div className="h-full rounded-full transition-all duration-1000 ease-out" style={{ width: `${data.approvalIndex}%`, backgroundColor: bandColor }} />
             </div>
           </div>
@@ -1279,7 +1284,7 @@ export default function LandingPage() {
       const content = isPdf ? (result.split(",")[1] || result) : result;
       const fileData = { name: file.name, content, isPdf };
       if (shouldAutoSend) {
-        doSend("Analyze my credit report and generate my Approval Index.", fileData);
+        doSend("Analyze my credit report and generate my AIS.", fileData);
       } else {
         setAttachedFile(fileData);
       }
@@ -1462,7 +1467,7 @@ export default function LandingPage() {
     if (isSending) return;
     if (!text && !attachedFile) return;
     const file = attachedFile;
-    const msg = text || "Analyze my credit report and generate my Approval Index.";
+    const msg = text || "Analyze my credit report and generate my AIS.";
     setInput("");
     setAttachedFile(null);
     doSend(msg, file);
