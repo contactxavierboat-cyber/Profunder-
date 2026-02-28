@@ -522,14 +522,14 @@ function getReadinessColor(level: string | null): string {
   return "#666666";
 }
 
-function ProjectedFundingCard({ data, phase }: { data: ProjectedFundingData; phase: string | null }) {
+function ProjectedFundingCard({ data, phase, compact }: { data: ProjectedFundingData; phase: string | null; compact?: boolean }) {
   const readinessColor = getReadinessColor(data.readinessLevel);
   const isFundingReady = phase?.toLowerCase().includes("funding");
   const [expanded, setExpanded] = useState(false);
   const bureauLabel = data.bureau || "Per-Bureau";
 
   return (
-    <>
+    <div className={compact ? "col-span-2" : ""}>
       <div
         className="rounded-xl bg-white border border-[#e8e8e8] p-4 shadow-sm cursor-pointer hover:border-[#d0d0d0] transition-colors"
         data-testid="card-projected-funding"
@@ -561,7 +561,7 @@ function ProjectedFundingCard({ data, phase }: { data: ProjectedFundingData; pha
       </div>
 
       {expanded && (
-        <div className="col-span-1 sm:col-span-3 rounded-xl bg-white border border-[#e8e8e8] p-4 shadow-sm" data-testid="card-projected-funding-expanded">
+        <div className="rounded-xl bg-white border border-[#e8e8e8] p-4 shadow-sm mt-2" data-testid="card-projected-funding-expanded">
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
               <div className="w-5 h-5 rounded-md bg-[#f0f0f0] flex items-center justify-center">
@@ -577,7 +577,7 @@ function ProjectedFundingCard({ data, phase }: { data: ProjectedFundingData; pha
             </button>
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+          <div className={`grid ${compact ? 'grid-cols-2' : 'grid-cols-2 sm:grid-cols-4'} gap-4`}>
             {data.bestCasePerBureau && (
               <div data-testid="pf-best-case">
                 <p className="text-[9px] text-[#bbb] font-medium mb-0.5">Best-Case {bureauLabel}</p>
@@ -639,7 +639,7 @@ function ProjectedFundingCard({ data, phase }: { data: ProjectedFundingData; pha
           )}
         </div>
       )}
-    </>
+    </div>
   );
 }
 
@@ -740,7 +740,7 @@ function MissionDashboard({ data, userName, compact }: { data: MissionData; user
         )}
 
         {data.projectedFunding && (
-          <ProjectedFundingCard data={data.projectedFunding} phase={data.phase} />
+          <ProjectedFundingCard data={data.projectedFunding} phase={data.phase} compact={compact} />
         )}
       </div>
 
