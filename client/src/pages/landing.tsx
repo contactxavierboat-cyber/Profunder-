@@ -42,6 +42,15 @@ interface PillarScore {
   value: number;
 }
 
+interface FinancialIdentityData {
+  profileType: string | null;
+  creditAge: string | null;
+  exposureLevel: string | null;
+  bureauFootprint: string | null;
+  identityStrength: number | null;
+  lenderPerception: string | null;
+}
+
 interface MissionData {
   approvalIndex: number | null;
   band: string | null;
@@ -51,6 +60,7 @@ interface MissionData {
   helping: string[];
   hurting: string[];
   bestNextMove: string | null;
+  financialIdentity: FinancialIdentityData | null;
 }
 
 interface DisputeItem {
@@ -180,11 +190,34 @@ function parseSingleMessageData(content: string): MissionData {
     if (moveLine.length > 5) bestNextMove = moveLine;
   }
 
-  return { approvalIndex, band, phase, pillarScores, suppressors, helping, hurting, bestNextMove };
+  let financialIdentity: FinancialIdentityData | null = null;
+  const fiSection = cleanText.match(/Financial\s*Identity[:\s]*([\s\S]*?)(?=\n\s*(?:Approval\s*Index|Top\s*Approval|Best\s*Next|What['']?s\s*Helping|What['']?s\s*Hurting|DISPUTE)\b|\n\n\n|$)/i);
+  if (fiSection) {
+    const fiText = fiSection[1];
+    const profileTypeMatch = fiText.match(/Profile\s*Type[:\s]*(.*?)(?:\n|$)/i);
+    const creditAgeMatch = fiText.match(/Credit\s*Age[:\s]*(.*?)(?:\n|$)/i);
+    const exposureMatch = fiText.match(/(?:Exposure\s*Level|Total\s*Exposure|Revolving\s*Exposure)[:\s]*(.*?)(?:\n|$)/i);
+    const bureauMatch = fiText.match(/(?:Bureau\s*Footprint|Tradeline\s*Count|Bureau\s*Presence)[:\s]*(.*?)(?:\n|$)/i);
+    const strengthMatch = fiText.match(/(?:Identity\s*Strength|Financial\s*Identity\s*Score)[:\s]*(\d+)/i);
+    const perceptionMatch = fiText.match(/(?:Lender\s*Perception|How\s*Lenders\s*See\s*You)[:\s]*(.*?)(?:\n|$)/i);
+
+    const pt = profileTypeMatch?.[1]?.trim() || null;
+    const ca = creditAgeMatch?.[1]?.trim() || null;
+    const el = exposureMatch?.[1]?.trim() || null;
+    const bf = bureauMatch?.[1]?.trim() || null;
+    const is_ = strengthMatch ? parseInt(strengthMatch[1]) : null;
+    const lp = perceptionMatch?.[1]?.trim() || null;
+
+    if (pt || ca || el || bf || is_ !== null || lp) {
+      financialIdentity = { profileType: pt, creditAge: ca, exposureLevel: el, bureauFootprint: bf, identityStrength: is_, lenderPerception: lp };
+    }
+  }
+
+  return { approvalIndex, band, phase, pillarScores, suppressors, helping, hurting, bestNextMove, financialIdentity };
 }
 
 function hasAnalysisData(data: MissionData): boolean {
-  return data.approvalIndex !== null || data.band !== null || data.phase !== null || data.pillarScores.length > 0 || data.suppressors.length > 0 || data.helping.length > 0 || data.hurting.length > 0 || data.bestNextMove !== null;
+  return data.approvalIndex !== null || data.band !== null || data.phase !== null || data.pillarScores.length > 0 || data.suppressors.length > 0 || data.helping.length > 0 || data.hurting.length > 0 || data.bestNextMove !== null || data.financialIdentity !== null;
 }
 
 function getBandColor(band: string | null): string {
@@ -253,6 +286,8 @@ function FormatResponse({ content }: { content: string }) {
     if (/Best\s*Next\s*Move/i.test(t)) return true;
     if (/What\s*Not\s*[Tt]o\s*Do/i.test(t)) return true;
     if (/Primary\s*Diagnosis/i.test(t)) return true;
+    if (/Financial\s*Identity/i.test(t)) return true;
+    if (/^(Profile\s*Type|Credit\s*Age|Exposure\s*Level|Total\s*Exposure|Revolving\s*Exposure|Bureau\s*Footprint|Tradeline\s*Count|Bureau\s*Presence|Identity\s*Strength|Financial\s*Identity\s*Score|Lender\s*Perception|How\s*Lenders\s*See\s*You)[:\s]/i.test(t)) return true;
     if (/APPROVAL\s*ODDS/i.test(t)) return true;
     if (/BORROWING\s*POWER/i.test(t)) return true;
     if (/DISPUTE\s*ITEMS?\s*:?$/i.test(t)) return true;
@@ -316,6 +351,103 @@ function getPhaseSubtitle(phase: string | null): string {
   if (p.includes("build")) return "Structure is forming — keep building";
   if (p.includes("wait")) return "Not a no — just poor timing right now";
   return "Address negatives before anything else";
+}
+
+function getProfileTypeColor(type: string | null): string {
+  if (!type) return "#999";
+  const t = type.toLowerCase();
+  if (t.includes("premium")) return "#6366f1";
+  if (t.includes("seasoned")) return "#818cf8";
+  if (t.includes("established")) return "#a78bfa";
+  if (t.includes("starter")) return "#c4b5fd";
+  if (t.includes("thin")) return "#7c3aed";
+  return "#999";
+}
+
+function getProfileTypeSubtitle(type: string | null): string {
+  if (!type) return "";
+  const t = type.toLowerCase();
+  if (t.includes("premium")) return "Deep history, strong limits, clean record";
+  if (t.includes("seasoned")) return "Mature file with meaningful tradeline depth";
+  if (t.includes("established")) return "Solid foundation — room to optimize";
+  if (t.includes("starter")) return "Building blocks are in place — keep adding";
+  if (t.includes("thin")) return "Lenders can barely see you — build visibility first";
+  return "";
+}
+
+function getIdentityStrengthColor(value: number): string {
+  if (value >= 85) return "#6366f1";
+  if (value >= 70) return "#818cf8";
+  if (value >= 50) return "#a78bfa";
+  return "#c4b5fd";
+}
+
+function FinancialIdentityCard({ data }: { data: FinancialIdentityData }) {
+  const ptColor = getProfileTypeColor(data.profileType);
+  return (
+    <div className="rounded-xl bg-white border border-[#e8e8e8] p-4 shadow-sm" data-testid="card-financial-identity">
+      <div className="flex items-center gap-2 mb-3">
+        <div className="w-5 h-5 rounded-md bg-[#f0eeff] flex items-center justify-center">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#6366f1" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+            <circle cx="12" cy="7" r="4" />
+          </svg>
+        </div>
+        <p className="text-[10px] text-[#999] tracking-[0.01em] font-medium">Financial Identity</p>
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        {data.profileType && (
+          <div data-testid="fi-profile-type">
+            <p className="text-[9px] text-[#bbb] font-medium mb-0.5">Profile Type</p>
+            <p className="text-[15px] font-bold tracking-[-0.02em]" style={{ color: ptColor }}>{data.profileType}</p>
+            <p className="text-[9px] text-[#999] mt-0.5">{getProfileTypeSubtitle(data.profileType)}</p>
+          </div>
+        )}
+
+        {data.identityStrength !== null && (
+          <div data-testid="fi-identity-strength">
+            <p className="text-[9px] text-[#bbb] font-medium mb-0.5">Identity Strength</p>
+            <div className="flex items-baseline gap-1">
+              <span className="text-[22px] font-bold font-mono leading-none" style={{ color: getIdentityStrengthColor(data.identityStrength) }}>{data.identityStrength}</span>
+              <span className="text-[11px] text-[#ccc] font-mono">/100</span>
+            </div>
+            <div className="mt-1.5 w-full h-1.5 bg-[#f0f0f0] rounded-full overflow-hidden">
+              <div className="h-full rounded-full transition-all duration-1000 ease-out" style={{ width: `${data.identityStrength}%`, backgroundColor: getIdentityStrengthColor(data.identityStrength) }} />
+            </div>
+          </div>
+        )}
+
+        {data.creditAge && (
+          <div data-testid="fi-credit-age">
+            <p className="text-[9px] text-[#bbb] font-medium mb-0.5">Credit Age</p>
+            <p className="text-[12px] text-[#333] font-medium leading-snug">{data.creditAge}</p>
+          </div>
+        )}
+
+        {data.exposureLevel && (
+          <div data-testid="fi-exposure-level">
+            <p className="text-[9px] text-[#bbb] font-medium mb-0.5">Exposure Level</p>
+            <p className="text-[12px] text-[#333] font-medium leading-snug">{data.exposureLevel}</p>
+          </div>
+        )}
+
+        {data.bureauFootprint && (
+          <div data-testid="fi-bureau-footprint">
+            <p className="text-[9px] text-[#bbb] font-medium mb-0.5">Bureau Footprint</p>
+            <p className="text-[12px] text-[#333] font-medium leading-snug">{data.bureauFootprint}</p>
+          </div>
+        )}
+      </div>
+
+      {data.lenderPerception && (
+        <div className="mt-3 pt-3 border-t border-[#f0f0f0]" data-testid="fi-lender-perception">
+          <p className="text-[9px] text-[#bbb] font-medium mb-1">Lender Perception</p>
+          <p className="text-[12px] text-[#444] leading-[1.6] italic">{data.lenderPerception}</p>
+        </div>
+      )}
+    </div>
+  );
 }
 
 function MissionDashboard({ data, userName }: { data: MissionData; userName?: string }) {
@@ -428,6 +560,10 @@ function MissionDashboard({ data, userName }: { data: MissionData; userName?: st
             })}
           </div>
         </div>
+      )}
+
+      {data.financialIdentity && (
+        <FinancialIdentityCard data={data.financialIdentity} />
       )}
 
       {data.suppressors.length > 0 && (

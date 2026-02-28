@@ -1065,6 +1065,25 @@ Pillar Scores:
 - Timing Risk: [0-100]
 - Lender Confidence: [0-100]
 
+Financial Identity:
+- Profile Type: [Thin File|Starter|Established|Seasoned|Premium]
+- Credit Age: [e.g., "3.4 years average, 8 years oldest"]
+- Exposure Level: [e.g., "$12,500 total revolving exposure"]
+- Bureau Footprint: [e.g., "7 tradelines across 3 bureaus"]
+- Identity Strength: [0-100]
+- Lender Perception: [One clear sentence describing how a real lender would see this profile right now, e.g., "Moderate-risk borrower with thin revolving history and recent inquiry pressure"]
+
+FINANCIAL IDENTITY SCORING:
+Profile Type classification:
+- Thin File: <3 tradelines or <1 year oldest account
+- Starter: 3-5 tradelines, 1-3 years history, limited exposure
+- Established: 6-10 tradelines, 3-7 years history, $8k-25k exposure
+- Seasoned: 10+ tradelines, 7-15 years history, $25k-75k exposure
+- Premium: 12+ tradelines, 15+ years history, $75k+ exposure, clean record
+
+Identity Strength scoring (0-100):
+Start at 50. Add: +10 if 5+ tradelines, +10 if avg age >3yr, +10 if exposure >$15k, +10 if clean payment history, +5 if 3+ bankcards, +5 if oldest account >7yr, +5 if mix of revolving + installment, +5 if consistent reporting across all 3 bureaus. Deduct: -10 if thin file, -10 if any derogatory, -5 per collection, -5 if <2yr avg age, -5 if AU-heavy, -5 if single bureau reporting. Cap at 100.
+
 Top Approval Suppressors:
 1. [suppressor]
 2. [suppressor]
@@ -2389,6 +2408,14 @@ COMMUNICATION STYLE:
       hurting: z.array(z.string()),
       bestNextMove: z.string().nullable().optional(),
       userName: z.string().max(100).optional(),
+      financialIdentity: z.object({
+        profileType: z.string().nullable(),
+        creditAge: z.string().nullable(),
+        exposureLevel: z.string().nullable(),
+        bureauFootprint: z.string().nullable(),
+        identityStrength: z.number().nullable(),
+        lenderPerception: z.string().nullable(),
+      }).nullable().optional(),
     }).safeParse(req.body);
 
     if (!body.success) {
@@ -2476,6 +2503,48 @@ COMMUNICATION STYLE:
           doc.roundedRect(70, y + 14, barW * (p.value / 100), 6, 3).fill(pColor);
           doc.restore();
           y += 28;
+        }
+        const totalH = y - cardY + 6;
+        drawCardBox(cardY, totalH);
+        doc.y = cardY + totalH + 10;
+      }
+
+      if (d.financialIdentity) {
+        const fi = d.financialIdentity;
+        const cardY = doc.y;
+        doc.font("Helvetica").fontSize(8).fillColor("#999").text("FINANCIAL IDENTITY", 70, cardY + 10);
+        let y = cardY + 26;
+
+        if (fi.profileType) {
+          doc.font("Helvetica").fontSize(8).fillColor("#888").text("Profile Type", 70, y);
+          doc.font("Helvetica-Bold").fontSize(12).fillColor("#1a1a2e").text(fi.profileType, 70, y + 12);
+          y += 32;
+        }
+        if (fi.identityStrength !== null) {
+          doc.font("Helvetica").fontSize(8).fillColor("#888").text("Identity Strength", 70, y);
+          doc.font("Helvetica-Bold").fontSize(18).fillColor("#1a1a2e").text(`${fi.identityStrength}/100`, 70, y + 12);
+          const barW = pageWidth - 120;
+          doc.save();
+          doc.roundedRect(70, y + 34, barW, 6, 3).fill("#f0f0f0");
+          const isColor = fi.identityStrength >= 80 ? "#22c55e" : fi.identityStrength >= 60 ? "#6366f1" : fi.identityStrength >= 40 ? "#f59e0b" : "#ef4444";
+          doc.roundedRect(70, y + 34, barW * (fi.identityStrength / 100), 6, 3).fill(isColor);
+          doc.restore();
+          y += 48;
+        }
+        const detailItems = [
+          { label: "Credit Age", value: fi.creditAge },
+          { label: "Exposure Level", value: fi.exposureLevel },
+          { label: "Bureau Footprint", value: fi.bureauFootprint },
+        ].filter(item => item.value);
+        for (const item of detailItems) {
+          doc.font("Helvetica").fontSize(8).fillColor("#888").text(item.label, 70, y);
+          doc.font("Helvetica").fontSize(9).fillColor("#333").text(item.value!, 70, y + 12, { width: pageWidth - 40 });
+          y = doc.y + 8;
+        }
+        if (fi.lenderPerception) {
+          doc.font("Helvetica").fontSize(8).fillColor("#888").text("Lender Perception", 70, y);
+          doc.font("Helvetica-Oblique").fontSize(9).fillColor("#444").text(fi.lenderPerception, 70, y + 12, { width: pageWidth - 40 });
+          y = doc.y + 8;
         }
         const totalH = y - cardY + 6;
         drawCardBox(cardY, totalH);
