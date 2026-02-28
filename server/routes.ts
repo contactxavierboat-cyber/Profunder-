@@ -2288,7 +2288,7 @@ COMMUNICATION STYLE:
 
   function drawPageBackground(doc: InstanceType<typeof PDFDocument>) {
     doc.save();
-    doc.rect(0, 0, doc.page.width, doc.page.height).fill("#f5efe6");
+    doc.rect(0, 0, doc.page.width, doc.page.height).fill("#f7f7f7");
     doc.restore();
   }
 
@@ -2681,8 +2681,7 @@ COMMUNICATION STYLE:
 
         doc.save();
         doc.roundedRect(70, cardY + 112, barWidth - 40, 8, 4).fill("rgba(255,255,255,0.1)");
-        const barColor = d.approvalIndex >= 80 ? "#22c55e" : d.approvalIndex >= 60 ? "#6366f1" : d.approvalIndex >= 40 ? "#f59e0b" : "#ef4444";
-        doc.roundedRect(70, cardY + 112, (barWidth - 40) * (d.approvalIndex / 100), 8, 4).fill(barColor);
+        doc.roundedRect(70, cardY + 112, (barWidth - 40) * (d.approvalIndex / 100), 8, 4).fill("#ffffff");
         doc.restore();
 
         doc.y = cardY + aisCardH + 10;
@@ -2706,9 +2705,8 @@ COMMUNICATION STYLE:
           doc.font("Helvetica").fontSize(9).fillColor("#333").text(p.label, 70, y);
           doc.font("Helvetica-Bold").fontSize(9).fillColor("#1a1a2e").text(`${p.value}`, pageWidth - 10, y, { align: "right", width: 40 });
           doc.save();
-          doc.roundedRect(70, y + 14, barW, 6, 3).fill("#f0f0f0");
-          const pColor = p.value >= 80 ? "#22c55e" : p.value >= 60 ? "#6366f1" : p.value >= 40 ? "#f59e0b" : "#ef4444";
-          doc.roundedRect(70, y + 14, barW * (p.value / 100), 6, 3).fill(pColor);
+          doc.roundedRect(70, y + 14, barW, 6, 3).fill("#e0e0e0");
+          doc.roundedRect(70, y + 14, barW * (p.value / 100), 6, 3).fill("#333333");
           doc.restore();
           y += 28;
         }
@@ -2733,9 +2731,8 @@ COMMUNICATION STYLE:
           doc.font("Helvetica-Bold").fontSize(18).fillColor("#1a1a2e").text(`${fi.identityStrength}/100`, 70, y + 12);
           const barW = pageWidth - 120;
           doc.save();
-          doc.roundedRect(70, y + 34, barW, 6, 3).fill("#f0f0f0");
-          const isColor = fi.identityStrength >= 80 ? "#22c55e" : fi.identityStrength >= 60 ? "#6366f1" : fi.identityStrength >= 40 ? "#f59e0b" : "#ef4444";
-          doc.roundedRect(70, y + 34, barW * (fi.identityStrength / 100), 6, 3).fill(isColor);
+          doc.roundedRect(70, y + 34, barW, 6, 3).fill("#e0e0e0");
+          doc.roundedRect(70, y + 34, barW * (fi.identityStrength / 100), 6, 3).fill("#333333");
           doc.restore();
           y += 48;
         }
@@ -2764,7 +2761,7 @@ COMMUNICATION STYLE:
         doc.font("Helvetica").fontSize(8).fillColor("#999").text("TOP APPROVAL SUPPRESSORS", 70, cardY + 10);
         let y = cardY + 26;
         for (const s of d.suppressors) {
-          doc.font("Helvetica").fontSize(9).fillColor("#c0392b").text(`▸  ${s}`, 70, y, { width: pageWidth - 40 });
+          doc.font("Helvetica").fontSize(9).fillColor("#333").text(`▸  ${s}`, 70, y, { width: pageWidth - 40 });
           y = doc.y + 4;
         }
         const totalH = y - cardY + 6;
@@ -2787,7 +2784,7 @@ COMMUNICATION STYLE:
         doc.font("Helvetica").fontSize(8).fillColor("#999").text("WHAT'S HELPING", 70, cardY + 10);
         let y = cardY + 26;
         for (const h of d.helping) {
-          doc.font("Helvetica").fontSize(9).fillColor("#27ae60").text(`✓  ${h}`, 70, y, { width: pageWidth - 40 });
+          doc.font("Helvetica").fontSize(9).fillColor("#333").text(`✓  ${h}`, 70, y, { width: pageWidth - 40 });
           y = doc.y + 4;
         }
         const totalH = y - cardY + 6;
@@ -2800,7 +2797,7 @@ COMMUNICATION STYLE:
         doc.font("Helvetica").fontSize(8).fillColor("#999").text("WHAT'S HURTING", 70, cardY + 10);
         let y = cardY + 26;
         for (const h of d.hurting) {
-          doc.font("Helvetica").fontSize(9).fillColor("#c0392b").text(`✗  ${h}`, 70, y, { width: pageWidth - 40 });
+          doc.font("Helvetica").fontSize(9).fillColor("#555").text(`✗  ${h}`, 70, y, { width: pageWidth - 40 });
           y = doc.y + 4;
         }
         const totalH = y - cardY + 6;
