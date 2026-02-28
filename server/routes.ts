@@ -2077,22 +2077,37 @@ export async function registerRoutes(
 
     if (fileContent && attachment) {
       try {
+        console.log(`[Auth Chat] File received: attachment=${attachment}, contentLength=${fileContent.length}`);
         const isPdf = fileContent.length > 100 && !fileContent.includes("\n");
         if (isPdf) {
           const buffer = Buffer.from(fileContent, "base64");
+          console.log(`[Auth Chat] PDF buffer size: ${buffer.length} bytes`);
           const result = await processPdfBuffer(buffer);
           extractedText = result.text;
           extractionMethod = result.method;
           manualEntryNeeded = result.method === "manual_entry_needed";
+          console.log(`[Auth Chat] Extraction result: method=${result.method}, textLength=${extractedText.length}, manualEntry=${manualEntryNeeded}`);
         } else {
           extractedText = fileContent.slice(0, EXTRACTION_MAX_CHARS);
           extractionMethod = "raw_text";
+          console.log(`[Auth Chat] Raw text extraction: ${extractedText.length} chars`);
         }
       } catch (err) {
-        console.error("File parsing error:", err);
+        console.error("[Auth Chat] File parsing error:", err);
         manualEntryNeeded = true;
         extractionMethod = "manual_entry_needed";
       }
+    } else if (attachment && !fileContent) {
+      console.warn(`[Auth Chat] Attachment type '${attachment}' specified but no fileContent received`);
+      manualEntryNeeded = true;
+      extractionMethod = "manual_entry_needed";
+    }
+
+    if (extractedText && extractedText.replace(/\s/g, "").length < EXTRACTION_MIN_CHARS) {
+      console.warn(`[Auth Chat] Extracted text too short (${extractedText.length} chars), treating as manual entry needed`);
+      extractedText = "";
+      manualEntryNeeded = true;
+      extractionMethod = "manual_entry_needed";
     }
 
     let displayContent: string;
@@ -2127,9 +2142,23 @@ export async function registerRoutes(
 
     let fileContext = "";
     if (manualEntryNeeded && attachment) {
-      fileContext = `\n\nThe user uploaded a ${attachment === "bank_statement" ? "bank statement" : "credit report"}, but automated text extraction failed (the document may be an image-based or scanned PDF). Ask the user to manually provide the key data from their document. For a credit report, ask for: credit score, total revolving limits, total balances, number of inquiries, and any derogatory accounts. For a bank statement, ask for: average daily balance, monthly deposits, and any NSF/overdraft occurrences.`;
+      fileContext = `\n\nThe user uploaded a ${attachment === "bank_statement" ? "bank statement" : "credit report"}, but automated text extraction failed (the document may be an image-based or scanned PDF). DO NOT say you cannot read files — the system tried to extract text and it did not work for this particular document. Ask the user to try re-uploading or to manually provide the key data from their document. For a credit report, ask for: credit score, total revolving limits, total balances, number of inquiries, and any derogatory accounts. For a bank statement, ask for: average daily balance, monthly deposits, and any NSF/overdraft occurrences. NEVER say you lack the ability to read files — you do have that ability, it just did not work this time.`;
     } else if (extractedText) {
-      fileContext = `\n\nThe user has uploaded a ${attachment === "bank_statement" ? "bank statement" : "credit report"}. Here is the extracted text from the document (extracted via ${extractionMethod}):\n\n--- START OF DOCUMENT ---\n${extractedText}\n--- END OF DOCUMENT ---\n\nAnalyze this document thoroughly and incorporate your findings into your mentorship advice.`;
+      fileContext = `\n\nCRITICAL INSTRUCTION — DOCUMENT UPLOADED:
+The user has uploaded a ${attachment === "bank_statement" ? "bank statement" : "credit report"}. The extracted text is below.
+
+YOU MUST PRODUCE YOUR FULL ANALYSIS IN THIS RESPONSE. DO NOT say "one moment," "let me analyze," "diving in," or any deferral language. DO NOT ask the user for data — the document is right here. Analyze it NOW and output the complete structured response format: Bureau Source, AIS (Approval Index Score), Band, Phase, Pillar Scores, Financial Identity, Projected Funding Per-Bureau (Bureau, Current Exposure, Highest Limit, Per-Bureau Projection, Best-Case Per-Bureau, Readiness Level, Inquiry Slots Available, Timeline, Key Blockers), Top Approval Suppressors, verdict, and all DISPUTE lines. If some fields are missing or unclear from OCR, make reasonable estimates based on what IS available and note assumptions. There is NO second pass — this response IS the analysis.
+
+Extraction method: ${extractionMethod}
+
+--- START OF DOCUMENT ---
+${extractedText}
+--- END OF DOCUMENT ---`;
+    }
+
+    if (!fileContext && displayContent.includes("[Attached")) {
+      console.warn(`[Auth Chat] Message references attachment but no fileContext was generated. attachment=${attachment}, fileContent length=${fileContent?.length || 0}`);
+      fileContext = `\n\nThe user's message references an attached file but no file data was received by the server. This is a technical issue — DO NOT say you cannot read files or access attachments. Instead, say something like: "It looks like the file didn't come through on my end. Can you try uploading it again? Just click the upload button and select the file — I'll analyze it as soon as it arrives." Be helpful and reassuring, not technical.`;
     }
 
     let systemPrompt: string;
@@ -2217,6 +2246,13 @@ export async function registerRoutes(
       extractionMethod = "manual_entry_needed";
     }
 
+    if (extractedText && extractedText.replace(/\s/g, "").length < EXTRACTION_MIN_CHARS) {
+      console.warn(`[Guest Chat] Extracted text too short (${extractedText.length} chars), treating as manual entry needed`);
+      extractedText = "";
+      manualEntryNeeded = true;
+      extractionMethod = "manual_entry_needed";
+    }
+
     let fileContext = "";
     if (manualEntryNeeded && attachment) {
       fileContext = `\n\nThe user uploaded a ${attachment === "bank_statement" ? "bank statement" : "credit report"}, but automated text extraction failed (the document may be an image-based or scanned PDF). DO NOT say you cannot read files — the system tried to extract text and it did not work for this particular document. Ask the user to try re-uploading or to manually provide the key data from their document. For a credit report, ask for: credit score, total revolving limits, total balances, number of inquiries, and any derogatory accounts. For a bank statement, ask for: average daily balance, monthly deposits, and any NSF/overdraft occurrences. NEVER say you lack the ability to read files — you do have that ability, it just did not work this time.`;
@@ -2299,6 +2335,11 @@ COMMUNICATION STYLE:
 - Every message should feel like being in a room with a trusted advisor who cuts through noise — listens carefully, thinks clearly, and tells them what matters.
 - RESPONSE LENGTH: Every response must be short and sweet. Keep it tight. Say what matters. Stop. Density over length. If you can say it in 2 sentences, do not use 5.
 --- END TEAM CHAT MODE ---`;
+    }
+
+    if (!fileContext && content.includes("[Attached:")) {
+      console.warn(`[Guest Chat] Message references attachment but no fileContext was generated. attachment=${attachment}, fileContent length=${fileContent?.length || 0}`);
+      fileContext = `\n\nThe user's message references an attached file but no file data was received by the server. This is a technical issue — DO NOT say you cannot read files or access attachments. Instead, say something like: "It looks like the file didn't come through on my end. Can you try uploading it again? Just click the upload button and select the file — I'll analyze it as soon as it arrives." Be helpful and reassuring, not technical.`;
     }
 
     const systemPrompt = FUNDABILITY_ENGINE_PROMPT + teamContextPrompt + fileContext;

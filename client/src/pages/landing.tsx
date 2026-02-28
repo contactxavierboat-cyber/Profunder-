@@ -1499,7 +1499,15 @@ export default function LandingPage() {
     const reader = new FileReader();
     reader.onload = () => {
       const result = reader.result as string;
+      if (!result || result.length < 10) {
+        alert("Could not read this file. Please try again or use a different file.");
+        return;
+      }
       const content = isPdf ? (result.split(",")[1] || result) : result;
+      if (!content || content.length < 10) {
+        alert("File appears to be empty or unreadable. Please try a different file.");
+        return;
+      }
       const fileData = { name: file.name, content, isPdf };
       if (shouldAutoSend) {
         if (!user && previewCount >= 2) {
@@ -1511,11 +1519,17 @@ export default function LandingPage() {
         setAttachedFile(fileData);
       }
     };
+    reader.onerror = () => {
+      alert("Failed to read this file. Please try again.");
+    };
     isPdf ? reader.readAsDataURL(file) : reader.readAsText(file);
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
   const doSend = async (text: string, file?: { name: string; content: string; isPdf?: boolean } | null) => {
+    if (file && (!file.content || file.content.length < 10)) {
+      file = null;
+    }
     const displayText = file ? `${text}\n\n[Attached: ${file.name}]` : text;
     const userMsg: GuestMessage = { id: nextId, role: "user", content: displayText, senderName: user?.displayName || user?.email };
 
