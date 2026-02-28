@@ -51,6 +51,15 @@ interface FinancialIdentityData {
   lenderPerception: string | null;
 }
 
+interface ProjectedFundingData {
+  currentExposure: string | null;
+  projectedAmount: string | null;
+  bestCaseAmount: string | null;
+  readinessLevel: string | null;
+  timeline: string | null;
+  keyBlockers: string[];
+}
+
 interface MissionData {
   approvalIndex: number | null;
   band: string | null;
@@ -61,6 +70,7 @@ interface MissionData {
   hurting: string[];
   bestNextMove: string | null;
   financialIdentity: FinancialIdentityData | null;
+  projectedFunding: ProjectedFundingData | null;
 }
 
 interface DisputeItem {
@@ -215,11 +225,41 @@ function parseSingleMessageData(content: string): MissionData {
     }
   }
 
-  return { approvalIndex, band, phase, pillarScores, suppressors, helping, hurting, bestNextMove, financialIdentity };
+  let projectedFunding: ProjectedFundingData | null = null;
+  const pfSection = cleanText.match(/Projected\s*Funding[:\s]*([\s\S]*?)(?=\n\s*(?:Top\s*Approval|Best\s*Next|What['']?s\s*Helping|What['']?s\s*Hurting|DISPUTE|Verdict)\b|\n\n\n|$)/i);
+  if (pfSection) {
+    const pfText = pfSection[1];
+    const currentExposureMatch = pfText.match(/(?:Current\s*Exposure|Current\s*Revolving)[:\s]*(.*?)(?:\n|$)/i);
+    const projectedMatch = pfText.match(/(?:Projected\s*Amount|Projected\s*Funding\s*Amount|Conservative\s*Estimate)[:\s]*(.*?)(?:\n|$)/i);
+    const bestCaseMatch = pfText.match(/(?:Best[\s-]*Case|Best[\s-]*Case\s*(?:Scenario|Amount|Funding))[:\s]*(.*?)(?:\n|$)/i);
+    const readinessMatch = pfText.match(/(?:Readiness|Readiness\s*Level|Funding\s*Readiness)[:\s]*(.*?)(?:\n|$)/i);
+    const timelineMatch = pfText.match(/(?:Timeline|Estimated\s*Timeline|Time\s*to\s*Ready)[:\s]*(.*?)(?:\n|$)/i);
+    const blockersMatch = pfText.match(/(?:Key\s*Blockers?|Blockers?|What['']?s\s*Blocking)[:\s]*([\s\S]*?)(?=\n\s*(?:Readiness|Timeline|Best|Projected|Current)\b|\n\n|$)/i);
+
+    const ce = currentExposureMatch?.[1]?.trim() || null;
+    const pa = projectedMatch?.[1]?.trim() || null;
+    const bc = bestCaseMatch?.[1]?.trim() || null;
+    const rl = readinessMatch?.[1]?.trim() || null;
+    const tl = timelineMatch?.[1]?.trim() || null;
+    const keyBlockers: string[] = [];
+    if (blockersMatch) {
+      const lines = blockersMatch[1].split("\n").filter(l => l.trim().match(/^[-•\d]/));
+      for (const line of lines.slice(0, 4)) {
+        const cleaned = line.replace(/^\s*[-•]\s*/, "").replace(/^\s*\d+[.)]\s*/, "").trim();
+        if (cleaned.length > 3) keyBlockers.push(cleaned);
+      }
+    }
+
+    if (ce || pa || bc || rl || tl || keyBlockers.length > 0) {
+      projectedFunding = { currentExposure: ce, projectedAmount: pa, bestCaseAmount: bc, readinessLevel: rl, timeline: tl, keyBlockers };
+    }
+  }
+
+  return { approvalIndex, band, phase, pillarScores, suppressors, helping, hurting, bestNextMove, financialIdentity, projectedFunding };
 }
 
 function hasAnalysisData(data: MissionData): boolean {
-  return data.approvalIndex !== null || data.band !== null || data.phase !== null || data.pillarScores.length > 0 || data.suppressors.length > 0 || data.helping.length > 0 || data.hurting.length > 0 || data.bestNextMove !== null || data.financialIdentity !== null;
+  return data.approvalIndex !== null || data.band !== null || data.phase !== null || data.pillarScores.length > 0 || data.suppressors.length > 0 || data.helping.length > 0 || data.hurting.length > 0 || data.bestNextMove !== null || data.financialIdentity !== null || data.projectedFunding !== null;
 }
 
 function getBandColor(band: string | null): string {
@@ -452,6 +492,121 @@ function FinancialIdentityCard({ data }: { data: FinancialIdentityData }) {
   );
 }
 
+function getReadinessColor(level: string | null): string {
+  if (!level) return "#999";
+  const l = level.toLowerCase();
+  if (l.includes("ready") || l.includes("strong") || l.includes("high")) return "#10b981";
+  if (l.includes("near") || l.includes("moderate") || l.includes("close")) return "#f59e0b";
+  if (l.includes("not") || l.includes("low") || l.includes("weak") || l.includes("early")) return "#ef4444";
+  return "#7c3aed";
+}
+
+function ProjectedFundingCard({ data, phase }: { data: ProjectedFundingData; phase: string | null }) {
+  const readinessColor = getReadinessColor(data.readinessLevel);
+  const isFundingReady = phase?.toLowerCase().includes("funding");
+  const [expanded, setExpanded] = useState(false);
+
+  return (
+    <>
+      <div
+        className="rounded-xl bg-white border border-[#e8e8e8] p-4 shadow-sm cursor-pointer hover:border-[#d0d0d0] transition-colors"
+        data-testid="card-projected-funding"
+        onClick={() => setExpanded(!expanded)}
+      >
+        <p className="text-[10px] text-[#999] tracking-[0.01em] font-medium mb-2">Projected Funding</p>
+        <p className="text-[18px] font-bold font-mono tracking-[-0.02em] text-[#10b981] leading-tight" data-testid="text-best-case-amount">
+          {data.bestCaseAmount || data.projectedAmount || "—"}
+        </p>
+        <div className="flex items-center gap-1.5 mt-1">
+          {data.readinessLevel && (
+            <>
+              <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: readinessColor }} />
+              <p className="text-[10px] text-[#777]">{data.readinessLevel}{data.timeline ? ` · ${data.timeline}` : ""}</p>
+            </>
+          )}
+          {isFundingReady && !data.readinessLevel && (
+            <>
+              <div className="w-1.5 h-1.5 rounded-full bg-[#10b981]" />
+              <p className="text-[10px] text-[#10b981] font-medium">Funding Ready</p>
+            </>
+          )}
+        </div>
+      </div>
+
+      {expanded && (
+        <div className="col-span-1 sm:col-span-3 rounded-xl bg-white border border-[#e8e8e8] p-4 shadow-sm" data-testid="card-projected-funding-expanded">
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <div className="w-5 h-5 rounded-md bg-[#f0fdf4] flex items-center justify-center">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#10b981" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="12" y1="1" x2="12" y2="23" />
+                  <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+                </svg>
+              </div>
+              <p className="text-[10px] text-[#999] tracking-[0.01em] font-medium">Projected Funding Breakdown</p>
+            </div>
+            <button onClick={() => setExpanded(false)} className="text-[#ccc] hover:text-[#666] transition-colors" data-testid="button-close-funding-detail">
+              <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" /></svg>
+            </button>
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            {data.bestCaseAmount && (
+              <div data-testid="pf-best-case">
+                <p className="text-[9px] text-[#bbb] font-medium mb-0.5">Best-Case Funding</p>
+                <p className="text-[22px] font-black font-mono tracking-[-0.02em] text-[#10b981] leading-none">{data.bestCaseAmount}</p>
+                <p className="text-[9px] text-[#aaa] mt-1">Fully optimized profile</p>
+              </div>
+            )}
+
+            {data.projectedAmount && (
+              <div data-testid="pf-projected-amount">
+                <p className="text-[9px] text-[#bbb] font-medium mb-0.5">Current Projection</p>
+                <p className="text-[16px] font-bold font-mono tracking-[-0.02em] text-[#333]">{data.projectedAmount}</p>
+                <p className="text-[9px] text-[#aaa] mt-1">Based on current profile</p>
+              </div>
+            )}
+
+            {data.currentExposure && (
+              <div data-testid="pf-current-exposure">
+                <p className="text-[9px] text-[#bbb] font-medium mb-0.5">Current Exposure</p>
+                <p className="text-[13px] text-[#333] font-medium font-mono">{data.currentExposure}</p>
+              </div>
+            )}
+
+            {data.readinessLevel && (
+              <div data-testid="pf-readiness">
+                <p className="text-[9px] text-[#bbb] font-medium mb-0.5">Readiness</p>
+                <div className="flex items-center gap-1.5">
+                  <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: readinessColor }} />
+                  <p className="text-[12px] font-bold" style={{ color: readinessColor }}>{data.readinessLevel}</p>
+                </div>
+                {data.timeline && <p className="text-[9px] text-[#aaa] mt-0.5">{data.timeline}</p>}
+              </div>
+            )}
+          </div>
+
+          {data.keyBlockers.length > 0 && (
+            <div className="mt-3 pt-3 border-t border-[#f0f0f0]" data-testid="pf-blockers">
+              <p className="text-[9px] text-[#bbb] font-medium mb-1.5">Key Blockers to Best-Case</p>
+              <div className="space-y-1.5">
+                {data.keyBlockers.map((b, i) => (
+                  <div key={i} className="flex items-start gap-2">
+                    <div className="w-4 h-4 rounded-sm bg-[#fef2f2] flex items-center justify-center shrink-0 mt-0.5">
+                      <span className="text-[8px] font-bold text-[#ef4444]">{i + 1}</span>
+                    </div>
+                    <p className="text-[11px] text-[#555] leading-[1.5]">{b}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+    </>
+  );
+}
+
 function MissionDashboard({ data, userName }: { data: MissionData; userName?: string }) {
   const bandColor = getBandColor(data.band);
   const phaseColor = getPhaseColor(data.phase);
@@ -541,6 +696,10 @@ function MissionDashboard({ data, userName }: { data: MissionData; userName?: st
               <p className="text-[10px] text-[#777]">{getPhaseSubtitle(data.phase)}</p>
             </div>
           </div>
+        )}
+
+        {data.projectedFunding && (
+          <ProjectedFundingCard data={data.projectedFunding} phase={data.phase} />
         )}
       </div>
 
