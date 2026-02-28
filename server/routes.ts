@@ -2169,6 +2169,8 @@ export async function registerRoutes(
       }
     } else if (attachment && !fileContent) {
       console.warn(`[Guest Chat] Attachment type '${attachment}' specified but no fileContent received`);
+      manualEntryNeeded = true;
+      extractionMethod = "manual_entry_needed";
     }
 
     let fileContext = "";
