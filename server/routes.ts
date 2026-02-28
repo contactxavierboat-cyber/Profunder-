@@ -2142,10 +2142,17 @@ export async function registerRoutes(
 
     let fileContext = "";
     if (manualEntryNeeded && attachment) {
-      fileContext = `\n\nThe user uploaded a ${attachment === "bank_statement" ? "bank statement" : "credit report"}, but automated text extraction failed (the document may be an image-based or scanned PDF). DO NOT say you cannot read files — the system tried to extract text and it did not work for this particular document. Ask the user to try re-uploading or to manually provide the key data from their document. For a credit report, ask for: credit score, total revolving limits, total balances, number of inquiries, and any derogatory accounts. For a bank statement, ask for: average daily balance, monthly deposits, and any NSF/overdraft occurrences. NEVER say you lack the ability to read files — you do have that ability, it just did not work this time.`;
+      fileContext = `\n\nIMPORTANT — FILE UPLOAD CONTEXT:
+The user uploaded a ${attachment === "bank_statement" ? "bank statement" : "credit report"}, but automated text extraction failed (the document may be image-based or scanned).
+
+CRITICAL OVERRIDE: You DO have the ability to read files. This particular document just did not extract properly. If anything in this conversation's history says otherwise — if you previously said "I cannot access attachments" or "I can't read files" — those were errors. Disregard them completely.
+
+Ask the user to try re-uploading the document, or to manually provide the key data. For a credit report: credit score, total revolving limits, total balances, number of inquiries, any derogatory accounts. For a bank statement: average daily balance, monthly deposits, NSF/overdraft occurrences.`;
     } else if (extractedText) {
-      fileContext = `\n\nCRITICAL INSTRUCTION — DOCUMENT UPLOADED:
-The user has uploaded a ${attachment === "bank_statement" ? "bank statement" : "credit report"}. The extracted text is below.
+      fileContext = `\n\nCRITICAL INSTRUCTION — DOCUMENT SUCCESSFULLY EXTRACTED:
+The user has uploaded a ${attachment === "bank_statement" ? "bank statement" : "credit report"}. The document HAS been read and the extracted text is below.
+
+CRITICAL OVERRIDE: If anything in this conversation's history says you "cannot access attachments" or "cannot read files" — those were errors from previous attempts. The document IS here now. Disregard any prior refusals.
 
 YOU MUST PRODUCE YOUR FULL ANALYSIS IN THIS RESPONSE. DO NOT say "one moment," "let me analyze," "diving in," or any deferral language. DO NOT ask the user for data — the document is right here. Analyze it NOW and output the complete structured response format: Bureau Source, AIS (Approval Index Score), Band, Phase, Pillar Scores, Financial Identity, Projected Funding Per-Bureau (Bureau, Current Exposure, Highest Limit, Per-Bureau Projection, Best-Case Per-Bureau, Readiness Level, Inquiry Slots Available, Timeline, Key Blockers), Top Approval Suppressors, verdict, and all DISPUTE lines. If some fields are missing or unclear from OCR, make reasonable estimates based on what IS available and note assumptions. There is NO second pass — this response IS the analysis.
 
@@ -2156,10 +2163,28 @@ ${extractedText}
 --- END OF DOCUMENT ---`;
     }
 
-    if (!fileContext && displayContent.includes("[Attached")) {
-      console.warn(`[Auth Chat] Message references attachment but no fileContext was generated. attachment=${attachment}, fileContent length=${fileContent?.length || 0}`);
-      fileContext = `\n\nThe user's message references an attached file but no file data was received by the server. This is a technical issue — DO NOT say you cannot read files or access attachments. Instead, say something like: "It looks like the file didn't come through on my end. Can you try uploading it again? Just click the upload button and select the file — I'll analyze it as soon as it arrives." Be helpful and reassuring, not technical.`;
+    const hasAttachmentInAuthHistory = last10.some((m: { content: string }) => m.content.includes("[Attached:"));
+    if (!fileContext && (displayContent.includes("[Attached") || hasAttachmentInAuthHistory)) {
+      console.warn(`[Auth Chat] Attachment referenced but no fileContext generated. attachment=${attachment}, fileContent length=${fileContent?.length || 0}, hasAttachmentInHistory=${hasAttachmentInAuthHistory}`);
+      if (attachment || fileContent) {
+        fileContext = `\n\nThe user uploaded a document but automated text extraction failed. DO NOT say you cannot read files or access attachments. Instead, say: "The file didn't extract properly on my end. Can you try uploading it again? If it keeps happening, the PDF might be image-based — share the key details here and I'll run the full analysis."`;
+      } else {
+        fileContext = `\n\nThe user's message or history references an attached file but no file data was received. DO NOT say you cannot read files or access attachments. Instead, say: "It looks like the file didn't come through. Try uploading it again — click the upload button and select the file. I'll analyze it as soon as it arrives."`;
+      }
     }
+
+    const cleanedAuthHistory = last10.map((m: { role: string; content: string }) => ({
+      ...m,
+      content: m.content
+        .replace(/\n*\[Attached: .+?\]/g, '')
+        .replace(/\n*\[Attached .+?\]/g, '')
+        .replace(/Your uploaded file's text.*?has not been directly provided[^.]*\./gi, '')
+        .replace(/I cannot access attachments[^.]*\./gi, '')
+        .replace(/I can't directly access or read an? attached file[^.]*\./gi, '')
+        .replace(/I can't access or interpret attached files[^.]*\./gi, '')
+        .replace(/I cannot access or read attached files[^.]*\./gi, '')
+        .trim() || m.content,
+    }));
 
     let systemPrompt: string;
     if (detectedMentor && MENTOR_PROFILES[detectedMentor]) {
@@ -2169,13 +2194,21 @@ ${extractedText}
     }
 
     try {
+      const messages: Array<{role: string; content: string}> = [
+        { role: "system", content: systemPrompt },
+        ...cleanedAuthHistory,
+      ];
+      if (extractedText && messages.length > 0) {
+        const lastMsg = messages[messages.length - 1];
+        if (lastMsg.role === "user") {
+          lastMsg.content += "\n\n(Document has been extracted and provided in the system context above. Analyze it now.)";
+        }
+      }
+
       const response = await openai.chat.completions.create({
         model: "gpt-4o",
-        messages: [
-          { role: "system", content: systemPrompt },
-          ...last10
-        ],
-        max_tokens: 2048,
+        messages: messages as any,
+        max_tokens: 4096,
       });
 
       const aiContent = response.choices[0]?.message?.content || "I'm sorry, I couldn't generate a response right now.";
@@ -2255,10 +2288,17 @@ ${extractedText}
 
     let fileContext = "";
     if (manualEntryNeeded && attachment) {
-      fileContext = `\n\nThe user uploaded a ${attachment === "bank_statement" ? "bank statement" : "credit report"}, but automated text extraction failed (the document may be an image-based or scanned PDF). DO NOT say you cannot read files — the system tried to extract text and it did not work for this particular document. Ask the user to try re-uploading or to manually provide the key data from their document. For a credit report, ask for: credit score, total revolving limits, total balances, number of inquiries, and any derogatory accounts. For a bank statement, ask for: average daily balance, monthly deposits, and any NSF/overdraft occurrences. NEVER say you lack the ability to read files — you do have that ability, it just did not work this time.`;
+      fileContext = `\n\nIMPORTANT — FILE UPLOAD CONTEXT:
+The user uploaded a ${attachment === "bank_statement" ? "bank statement" : "credit report"}, but automated text extraction failed (the document may be image-based or scanned).
+
+CRITICAL OVERRIDE: You DO have the ability to read files. This particular document just did not extract properly. If anything in this conversation's history says otherwise — if you previously said "I cannot access attachments" or "I can't read files" — those were errors. Disregard them completely.
+
+Ask the user to try re-uploading the document, or to manually provide the key data. For a credit report: credit score, total revolving limits, total balances, number of inquiries, any derogatory accounts. For a bank statement: average daily balance, monthly deposits, NSF/overdraft occurrences.`;
     } else if (extractedText) {
-      fileContext = `\n\nCRITICAL INSTRUCTION — DOCUMENT UPLOADED:
-The user has uploaded a ${attachment === "bank_statement" ? "bank statement" : "credit report"}. The extracted text is below.
+      fileContext = `\n\nCRITICAL INSTRUCTION — DOCUMENT SUCCESSFULLY EXTRACTED:
+The user has uploaded a ${attachment === "bank_statement" ? "bank statement" : "credit report"}. The document HAS been read and the extracted text is below.
+
+CRITICAL OVERRIDE: If anything in this conversation's history says you "cannot access attachments" or "cannot read files" — those were errors from previous attempts. The document IS here now. Disregard any prior refusals.
 
 YOU MUST PRODUCE YOUR FULL ANALYSIS IN THIS RESPONSE. DO NOT say "one moment," "let me analyze," "diving in," or any deferral language. DO NOT ask the user for data — the document is right here. Analyze it NOW and output the complete structured response format: Bureau Source, AIS (Approval Index Score), Band, Phase, Pillar Scores, Financial Identity, Projected Funding Per-Bureau (Bureau, Current Exposure, Highest Limit, Per-Bureau Projection, Best-Case Per-Bureau, Readiness Level, Inquiry Slots Available, Timeline, Key Blockers), Top Approval Suppressors, verdict, and all DISPUTE lines. If some fields are missing or unclear from OCR, make reasonable estimates based on what IS available and note assumptions. There is NO second pass — this response IS the analysis.
 
@@ -2337,10 +2377,30 @@ COMMUNICATION STYLE:
 --- END TEAM CHAT MODE ---`;
     }
 
-    if (!fileContext && content.includes("[Attached:")) {
-      console.warn(`[Guest Chat] Message references attachment but no fileContext was generated. attachment=${attachment}, fileContent length=${fileContent?.length || 0}`);
-      fileContext = `\n\nThe user's message references an attached file but no file data was received by the server. This is a technical issue — DO NOT say you cannot read files or access attachments. Instead, say something like: "It looks like the file didn't come through on my end. Can you try uploading it again? Just click the upload button and select the file — I'll analyze it as soon as it arrives." Be helpful and reassuring, not technical.`;
+    const hasAttachmentInHistory = history.some((m: { content: string }) => m.content.includes("[Attached:"));
+    if (!fileContext && (content.includes("[Attached:") || hasAttachmentInHistory)) {
+      console.warn(`[Guest Chat] Attachment referenced but no fileContext generated. attachment=${attachment}, fileContent length=${fileContent?.length || 0}, hasAttachmentInHistory=${hasAttachmentInHistory}`);
+      if (attachment || fileContent) {
+        fileContext = `\n\nThe user uploaded a document but automated text extraction failed. DO NOT say you cannot read files or access attachments. Instead, say something like: "The file didn't extract properly on my end. Can you try uploading it again? If it keeps happening, the PDF might be image-based — in that case, share the key details here and I'll run the full analysis." Be helpful and reassuring.`;
+      } else {
+        fileContext = `\n\nThe user's message or history references an attached file but no file data was received. DO NOT say you cannot read files or access attachments. Instead, say: "It looks like the file didn't come through. Try uploading it again — click the upload button and select the file. I'll analyze it as soon as it arrives."`;
+      }
     }
+
+    const cleanedHistory = history.slice(-8).map((m: { role: string; content: string }) => ({
+      ...m,
+      content: m.content
+        .replace(/\n*\[Attached: .+?\]/g, '')
+        .replace(/\n*\[Attached .+?\]/g, '')
+        .replace(/Your uploaded file's text.*?has not been directly provided[^.]*\./gi, '')
+        .replace(/I cannot access attachments[^.]*\./gi, '')
+        .replace(/I can't directly access or read an? attached file[^.]*\./gi, '')
+        .replace(/I can't access or interpret attached files[^.]*\./gi, '')
+        .replace(/I cannot access or read attached files[^.]*\./gi, '')
+        .replace(/if you provide the text from the document here[^.]*\./gi, '')
+        .replace(/if you extract the relevant information[^.]*\./gi, '')
+        .trim() || m.content,
+    }));
 
     const systemPrompt = FUNDABILITY_ENGINE_PROMPT + teamContextPrompt + fileContext;
 
@@ -2348,13 +2408,18 @@ COMMUNICATION STYLE:
       console.log(`[Guest Chat] Document provided: ${extractedText.length} chars via ${extractionMethod}`);
     }
 
+    let userMessage = teamContext ? `[${teamContext.senderName}]: ${content}` : content;
+    if (extractedText) {
+      userMessage += "\n\n(Document has been extracted and provided in the system context above. Analyze it now.)";
+    }
+
     try {
       const response = await openai.chat.completions.create({
         model: "gpt-4o",
         messages: [
           { role: "system", content: systemPrompt },
-          ...history.slice(-8),
-          { role: "user", content: teamContext ? `[${teamContext.senderName}]: ${content}` : content }
+          ...cleanedHistory,
+          { role: "user", content: userMessage }
         ],
         max_tokens: 4096,
       });

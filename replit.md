@@ -58,6 +58,7 @@ Profundr is a subscription-based AI-powered fundability platform, envisioned as 
 - **monthlyUsage** increments changed from read-then-write to atomic SQL (`SET monthlyUsage = monthlyUsage + 1`) to prevent race conditions
 - **parseInt validation** added to dispute and alert route params to reject NaN values
 - **Session secret** fallback changed from hardcoded string to crypto-random, improving security
+- **PDF upload "can't access attachments" fix:** History contamination caused AI to learn refusal patterns from previous failed uploads. Fix: (1) History cleaning strips `[Attached:]` markers and refusal phrases before sending to OpenAI, (2) CRITICAL OVERRIDE prompts in fileContext tell AI to disregard prior refusals when document IS provided, (3) Safety net checks both message content AND history for attachment references, (4) Applied to both auth chat (`/api/chat`) and guest chat (`/api/chat/guest`) endpoints.
 
 ## External Dependencies
 - **Stripe:** For managing user subscriptions and payment processing.
