@@ -696,7 +696,16 @@ function loadSavedDocs(): SavedDoc[] {
 }
 
 function saveDocs(docs: SavedDoc[]) {
-  localStorage.setItem("profundr_docs", JSON.stringify(docs));
+  try {
+    localStorage.setItem("profundr_docs", JSON.stringify(docs));
+  } catch {
+    try {
+      const trimmed = docs.slice(-20);
+      localStorage.setItem("profundr_docs", JSON.stringify(trimmed));
+    } catch {
+      localStorage.removeItem("profundr_docs");
+    }
+  }
 }
 
 function ProfileAvatar({ photo, name, size = 28, className = "" }: { photo?: string | null; name?: string; size?: number; className?: string }) {
