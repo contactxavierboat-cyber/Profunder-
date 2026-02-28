@@ -33,6 +33,7 @@ export interface IStorage {
   removeFriend(friendshipId: number, userId: number): Promise<void>;
   getFriends(userId: number): Promise<{ friendship: Friendship; friend: User }[]>;
   getPendingRequests(userId: number): Promise<{ friendship: Friendship; requester: User }[]>;
+  getSentPendingRequests(userId: number): Promise<{ friendship: Friendship; receiver: User }[]>;
   getFriendship(userId1: number, userId2: number): Promise<Friendship | undefined>;
   searchUsers(query: string, currentUserId: number): Promise<User[]>;
   
@@ -141,7 +142,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async acceptFriendRequest(friendshipId: number, userId: number): Promise<Friendship> {
-    const [friendship] = await db.update(friendships).set({ status: "accepted" }).where(and(eq(friendships.id, friendshipId), or(eq(friendships.receiverId, userId), eq(friendships.requesterId, userId)))).returning();
+    const [friendship] = await db.update(friendships).set({ status: "accepted" }).where(and(eq(friendships.id, friendshipId), eq(friendships.receiverId, userId), eq(friendships.status, "pending"))).returning();
     return friendship;
   }
 
@@ -165,6 +166,11 @@ export class DatabaseStorage implements IStorage {
   async getPendingRequests(userId: number): Promise<{ friendship: Friendship; requester: User }[]> {
     const results = await db.select().from(friendships).innerJoin(users, eq(friendships.requesterId, users.id)).where(and(eq(friendships.receiverId, userId), eq(friendships.status, "pending")));
     return results.map(r => ({ friendship: r.friendships, requester: r.users }));
+  }
+
+  async getSentPendingRequests(userId: number): Promise<{ friendship: Friendship; receiver: User }[]> {
+    const results = await db.select().from(friendships).innerJoin(users, eq(friendships.receiverId, users.id)).where(and(eq(friendships.requesterId, userId), eq(friendships.status, "pending")));
+    return results.map(r => ({ friendship: r.friendships, receiver: r.users }));
   }
 
   async getFriendship(userId1: number, userId2: number): Promise<Friendship | undefined> {

@@ -3736,9 +3736,11 @@ Respond to the latest question as the team's AI advisor. Be direct, helpful, and
       const userId = req.session.userId!;
       const friends = await storage.getFriends(userId);
       const pending = await storage.getPendingRequests(userId);
+      const sent = await storage.getSentPendingRequests(userId);
       res.json({
         members: friends.map(f => ({ id: f.friend.id, friendshipId: f.friendship.id, displayName: f.friend.displayName || f.friend.email, email: f.friend.email, profilePhoto: f.friend.profilePhoto || null })),
         pending: pending.map(p => ({ id: p.requester.id, friendshipId: p.friendship.id, displayName: p.requester.displayName || p.requester.email, email: p.requester.email, profilePhoto: p.requester.profilePhoto || null })),
+        sent: sent.map(s => ({ id: s.receiver.id, friendshipId: s.friendship.id, displayName: s.receiver.displayName || s.receiver.email, email: s.receiver.email, profilePhoto: s.receiver.profilePhoto || null })),
       });
     } catch (error: any) {
       res.status(500).json({ error: error.message });
@@ -3753,14 +3755,17 @@ Respond to the latest question as the team's AI advisor. Be direct, helpful, and
       if (receiverId === userId) return res.status(400).json({ error: "Cannot invite yourself" });
       const existing = await storage.getFriendship(userId, receiverId);
       if (existing) {
-        if (existing.status === "pending") {
-          await storage.acceptFriendRequest(existing.id, existing.receiverId);
-          return res.json({ success: true, friendshipId: existing.id });
+        if (existing.status === "pending" && existing.receiverId === userId) {
+          await storage.acceptFriendRequest(existing.id, userId);
+          return res.json({ success: true, friendshipId: existing.id, status: "accepted" });
+        }
+        if (existing.status === "pending" && existing.requesterId === userId) {
+          return res.status(400).json({ error: "Invite already sent — waiting for their response" });
         }
         return res.status(400).json({ error: "Already connected" });
       }
-      const friendship = await storage.addTeamMember(userId, receiverId);
-      res.json({ success: true, friendshipId: friendship.id });
+      const friendship = await storage.sendFriendRequest(userId, receiverId);
+      res.json({ success: true, friendshipId: friendship.id, status: "pending" });
     } catch (error: any) {
       res.status(500).json({ error: error.message });
     }

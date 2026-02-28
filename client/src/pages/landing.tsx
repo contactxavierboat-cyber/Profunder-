@@ -958,7 +958,7 @@ function TeamSection({ user, onOpenTeamChat, activeTeamChatId }: { user: any; on
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<{ id: number; displayName: string; email: string }[]>([]);
   const [searching, setSearching] = useState(false);
-  const [team, setTeam] = useState<{ members: TeamMember[]; pending: TeamInvite[] }>({ members: [], pending: [] });
+  const [team, setTeam] = useState<{ members: TeamMember[]; pending: TeamInvite[]; sent: TeamInvite[] }>({ members: [], pending: [], sent: [] });
   const [showSearch, setShowSearch] = useState(false);
   const [inviting, setInviting] = useState<number | null>(null);
 
@@ -971,6 +971,12 @@ function TeamSection({ user, onOpenTeamChat, activeTeamChatId }: { user: any; on
   }, [user]);
 
   useEffect(() => { fetchTeam(); }, [fetchTeam]);
+
+  useEffect(() => {
+    if (!user) return;
+    const interval = setInterval(fetchTeam, 5000);
+    return () => clearInterval(interval);
+  }, [user, fetchTeam]);
 
   const handleSearch = async (q: string) => {
     setSearchQuery(q);
@@ -987,10 +993,20 @@ function TeamSection({ user, onOpenTeamChat, activeTeamChatId }: { user: any; on
     setInviting(receiverId);
     try {
       const res = await fetch("/api/team/invite", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ receiverId }) });
-      if (res.ok) { fetchTeam(); setSearchResults(prev => prev.filter(r => r.id !== receiverId)); }
+      if (res.ok) { fetchTeam(); setSearchResults(prev => prev.filter(r => r.id !== receiverId)); setSearchQuery(""); }
     } catch {}
     setInviting(null);
   };
+
+  const existingIds = useMemo(() => {
+    const ids = new Set<number>();
+    team.members.forEach(m => ids.add(m.id));
+    team.pending.forEach(p => ids.add(p.id));
+    (team.sent || []).forEach(s => ids.add(s.id));
+    return ids;
+  }, [team]);
+
+  const filteredSearchResults = useMemo(() => searchResults.filter(r => !existingIds.has(r.id)), [searchResults, existingIds]);
 
   const handleAccept = async (friendshipId: number) => {
     try {
@@ -1031,20 +1047,40 @@ function TeamSection({ user, onOpenTeamChat, activeTeamChatId }: { user: any; on
       <div className="flex items-center gap-2 mb-2">
         <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><circle cx="4" cy="4" r="2" stroke="#6366f1" strokeWidth="1" fill="none" /><circle cx="8" cy="4" r="2" stroke="#6366f1" strokeWidth="1" fill="none" /><path d="M1 10c0-2 1.5-3 3-3s3 1 3 3" stroke="#6366f1" strokeWidth="0.8" fill="none" /></svg>
         <span className="text-[11px] font-medium text-[#666] uppercase tracking-wider">Team</span>
+        {team.pending.length > 0 && (
+          <span className="ml-1 w-4 h-4 rounded-full bg-[#e85d3a] text-white text-[8px] font-bold flex items-center justify-center animate-pulse" data-testid="badge-pending-invites">{team.pending.length}</span>
+        )}
         <span className="text-[10px] text-[#aaa] ml-auto">{team.members.length}</span>
       </div>
 
       {team.pending.length > 0 && (
         <div className="pl-5 mb-2 space-y-1">
+          <p className="text-[9px] text-[#999] uppercase tracking-wider font-medium mb-1">Incoming Requests</p>
           {team.pending.map(inv => (
-            <div key={inv.friendshipId} className="flex items-center gap-1.5 py-1.5 rounded-lg bg-[#f8f7ff] px-2" data-testid={`team-invite-${inv.id}`}>
-              <ProfileAvatar photo={inv.profilePhoto} name={inv.displayName} size={20} className="!bg-[#6366f1]" />
+            <div key={inv.friendshipId} className="flex items-center gap-1.5 py-1.5 rounded-lg bg-[#fff8f0] border border-[#f0e0c8] px-2" data-testid={`team-invite-${inv.id}`}>
+              <ProfileAvatar photo={inv.profilePhoto} name={inv.displayName} size={20} />
+              <div className="flex-1 min-w-0">
+                <p className="text-[10px] text-[#444] truncate font-medium">{inv.displayName}</p>
+                <p className="text-[8px] text-[#999]">wants to be your teammate</p>
+              </div>
+              <button onClick={() => handleAccept(inv.friendshipId)} className="text-[9px] bg-[#333] text-white px-2 py-0.5 rounded font-medium hover:bg-[#444] transition-colors" data-testid={`button-accept-invite-${inv.id}`}>Accept</button>
+              <button onClick={() => handleReject(inv.friendshipId)} className="text-[9px] text-[#999] font-medium hover:text-[#666] transition-colors" data-testid={`button-reject-invite-${inv.id}`}>Decline</button>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {team.sent && team.sent.length > 0 && (
+        <div className="pl-5 mb-2 space-y-1">
+          <p className="text-[9px] text-[#999] uppercase tracking-wider font-medium mb-1">Sent Requests</p>
+          {team.sent.map(inv => (
+            <div key={inv.friendshipId} className="flex items-center gap-1.5 py-1.5 rounded-lg bg-[#f5f5f5] px-2" data-testid={`team-sent-${inv.id}`}>
+              <ProfileAvatar photo={inv.profilePhoto} name={inv.displayName} size={20} />
               <div className="flex-1 min-w-0">
                 <p className="text-[10px] text-[#444] truncate">{inv.displayName}</p>
-                <p className="text-[8px] text-[#999]">wants to join</p>
+                <p className="text-[8px] text-[#b0a070] font-medium">Pending acceptance</p>
               </div>
-              <button onClick={() => handleAccept(inv.friendshipId)} className="text-[9px] text-green-600 font-medium hover:underline" data-testid={`button-accept-invite-${inv.id}`}>Accept</button>
-              <button onClick={() => handleReject(inv.friendshipId)} className="text-[9px] text-red-400 font-medium hover:underline" data-testid={`button-reject-invite-${inv.id}`}>Decline</button>
+              <button onClick={() => handleRemove(inv.friendshipId)} className="text-[9px] text-[#ccc] hover:text-[#999] font-medium transition-colors" data-testid={`button-cancel-invite-${inv.id}`}>Cancel</button>
             </div>
           ))}
         </div>
@@ -1093,7 +1129,7 @@ function TeamSection({ user, onOpenTeamChat, activeTeamChatId }: { user: any; on
             </button>
           </div>
           {searching && <p className="text-[10px] text-[#999]">Searching...</p>}
-          {searchResults.map(r => (
+          {filteredSearchResults.map(r => (
             <div key={r.id} className="flex items-center gap-1.5 py-1 rounded-lg" data-testid={`search-result-${r.id}`}>
               <div className="w-5 h-5 rounded-full bg-[#e0e0e0] text-[#666] flex items-center justify-center text-[9px] font-bold shrink-0">
                 {r.displayName[0]?.toUpperCase()}
