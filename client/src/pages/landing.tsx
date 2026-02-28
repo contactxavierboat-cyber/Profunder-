@@ -688,9 +688,9 @@ function MissionDashboard({ data, userName, compact }: { data: MissionData; user
           {downloadingReport ? "Generating..." : "Download Report"}
         </button>
       </div>
-      <div className={`grid ${compact ? 'grid-cols-1' : 'grid-cols-1 sm:grid-cols-3'} gap-2`}>
+      <div className={`grid ${compact ? 'grid-cols-2' : 'grid-cols-1 sm:grid-cols-3'} gap-2`}>
         {data.approvalIndex !== null && (
-          <div className={`rounded-xl bg-gradient-to-br from-[#1a1a1a] to-[#2a2a2a] p-5 shadow-lg ${compact ? 'col-span-1' : 'col-span-1 sm:col-span-3'}`} data-testid="card-approval-index">
+          <div className={`rounded-xl bg-gradient-to-br from-[#1a1a1a] to-[#2a2a2a] p-5 shadow-lg ${compact ? 'col-span-2' : 'col-span-1 sm:col-span-3'}`} data-testid="card-approval-index">
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2">
                 <span className="text-[11px] font-bold tracking-[0.15em] text-white/50 uppercase">AIS</span>
@@ -1354,7 +1354,7 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
           </div>
         </>
       ) : (
-        <div className="flex-1 overflow-y-auto px-3 py-3">
+        <div className="flex-1 overflow-y-auto px-4 py-4">
           {aisReport && hasAnalysisData(aisReport) ? (
             <MissionDashboard data={aisReport} compact />
           ) : (
@@ -1905,7 +1905,7 @@ export default function LandingPage() {
       {docsOpen && (
         <>
           <div className="sm:hidden fixed inset-0 bg-black/30 z-40" onClick={() => setDocsOpen(false)} />
-          <div className="fixed sm:relative z-50 sm:z-auto w-[280px] h-full shrink-0 transition-all" data-testid="docs-sidebar">
+          <div className={`fixed sm:relative z-50 sm:z-auto ${panelTab === "ais" ? "w-[420px]" : "w-[280px]"} h-full shrink-0 transition-all`} data-testid="docs-sidebar">
             <DocsPanel docs={savedDocs} onClose={() => setDocsOpen(false)} onDelete={handleDeleteDoc} onSave={handleSaveDoc} user={user} onOpenTeamChat={handleOpenTeamChat} activeTeamChatId={activeTeamChat?.id} aisReport={aisReport} panelTab={panelTab} setPanelTab={setPanelTab} />
           </div>
         </>
