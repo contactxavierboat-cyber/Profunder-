@@ -174,10 +174,10 @@ export default function SubscriptionPage() {
       <div className="flex-1 overflow-y-auto px-4 py-8">
         <div className="w-full max-w-[440px] mx-auto space-y-6">
           <div className="text-center">
-            <h1 className="text-[28px] sm:text-[36px] font-semibold text-[#1a1a1a] tracking-[-0.03em] leading-tight mb-3" data-testid="text-signin-title">
-              Unlock Profundr
-            </h1>
-            <p className="text-[13px] text-[#888] leading-[1.7] max-w-[340px] mx-auto">
+            <div className="mb-3" data-testid="text-signin-title">
+              <ProfundrLogo size="lg" variant="dark" />
+            </div>
+            <p className="text-[13px] text-[#888] leading-[1.7] max-w-[340px] mx-auto text-justify">
               The full capital intelligence system. Everything you need to understand, repair, and expand your financial position.
             </p>
           </div>
