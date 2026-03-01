@@ -1395,6 +1395,7 @@ export default function LandingPage() {
   const teamConvoLoaded = useRef(false);
   const teamChatLoaded = useRef(false);
   const lastSeenMsgId = useRef(0);
+  const isSendingRef = useRef(false);
   const { user, logout } = useAuth();
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -1434,6 +1435,7 @@ export default function LandingPage() {
     if (!user) return;
 
     const poll = async () => {
+      if (isSendingRef.current) return;
       try {
         const res = await fetch("/api/team/messages");
         if (!res.ok) return;
@@ -1618,6 +1620,7 @@ export default function LandingPage() {
       setTeamChatMessages((prev) => [...prev, userMsg]);
       setNextId((n) => n + 1);
       setIsSending(true);
+      isSendingRef.current = true;
       playNotificationSound();
 
       try {
@@ -1671,23 +1674,26 @@ export default function LandingPage() {
         setTeamChatMessages((prev) => [...prev, aiMsg]);
         setNextId((n) => n + 1);
 
-        fetch("/api/team/chat/message", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ content: data.content, withUserId: activeTeamChat.id, isAi: true }),
-        }).then(r => r.ok ? r.json() : null)
-          .then(aiStored => {
+        try {
+          const aiStoreRes2 = await fetch("/api/team/chat/message", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ content: data.content, withUserId: activeTeamChat.id, isAi: true }),
+          });
+          if (aiStoreRes2.ok) {
+            const aiStored = await aiStoreRes2.json();
             if (aiStored) {
               setTeamChatMessages(prev => prev.map(m => m.id === aiMsg.id ? { ...m, id: aiStored.id + 100000 } : m));
             }
-          })
-          .catch(() => {});
+          }
+        } catch {}
       } catch {
         const errMsg: GuestMessage = { id: nextId + 1, role: "assistant", content: "Sorry, something went wrong. Please try again." };
         setTeamChatMessages((prev) => [...prev, errMsg]);
         setNextId((n) => n + 1);
       } finally {
         setIsSending(false);
+        isSendingRef.current = false;
         inputRef.current?.focus();
       }
       return;
@@ -1696,6 +1702,7 @@ export default function LandingPage() {
     setGuestMessages((prev) => [...prev, userMsg]);
     setNextId((n) => n + 1);
     setIsSending(true);
+    isSendingRef.current = true;
 
     try {
       let history: { role: string; content: string }[];
@@ -1770,15 +1777,16 @@ export default function LandingPage() {
       }
 
       if (user) {
-        fetch("/api/team/message", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ content: data.content, isAi: true }) })
-          .then(r => r.ok ? r.json() : null)
-          .then(aiStored => {
+        try {
+          const aiStoreRes = await fetch("/api/team/message", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ content: data.content, isAi: true }) });
+          if (aiStoreRes.ok) {
+            const aiStored = await aiStoreRes.json();
             if (aiStored) {
               lastSeenMsgId.current = Math.max(lastSeenMsgId.current, aiStored.id);
               setGuestMessages(prev => prev.map(m => m.id === aiMsg.id ? { ...m, id: aiStored.id + 100000 } : m));
             }
-          })
-          .catch(() => {});
+          }
+        } catch {}
       }
     } catch {
       const errMsg: GuestMessage = { id: nextId + 1, role: "assistant", content: "Sorry, something went wrong. Please try again." };
@@ -1786,6 +1794,7 @@ export default function LandingPage() {
       setNextId((n) => n + 1);
     } finally {
       setIsSending(false);
+      isSendingRef.current = false;
       inputRef.current?.focus();
     }
   };
