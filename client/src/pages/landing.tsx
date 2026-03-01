@@ -1319,8 +1319,8 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
     if (!pf?.readinessLevel) return null;
     const r = pf.readinessLevel.toLowerCase();
     if (r.includes("not ready") || r.includes("blocked")) return "Pre-Qualification Blocked";
-    if (r.includes("early") || r.includes("marginal")) return "Early-Stage Positioning";
-    if (r.includes("near") || r.includes("moderate")) return "Building";
+    if (r.includes("early") || r.includes("marginal")) return "Calibration";
+    if (r.includes("near") || r.includes("moderate") || r.includes("build")) return "Building";
     if (r.includes("ready") || r.includes("strong")) return "Qualification Ready";
     return pf.readinessLevel;
   };
@@ -1366,7 +1366,7 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
               <div className="mt-3 pt-2.5 border-t border-white/10 flex flex-col gap-1.5">
                 {suppressorCount > 0 && (
                   <p className="text-[9px] text-white/50">
-                    Approval Suppressors: <span className="text-white/80 font-medium">{suppressorCount} Active</span>
+                    Active Approval Suppressors: <span className="text-white/80 font-medium">{suppressorCount}</span>
                   </p>
                 )}
                 {pf?.readinessLevel && (
@@ -1389,7 +1389,10 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
                   ].map(t => (
                     <div key={t.label} className="flex items-center justify-between">
                       <span className="text-[8px] text-white/35">{t.label}</span>
-                      <span className={`text-[8px] font-medium ${aisScore >= t.value ? "text-emerald-400/80" : "text-white/50"}`}>{t.value}</span>
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-[7px] text-white/20">→</span>
+                        <span className={`text-[8px] font-medium ${aisScore >= t.value ? "text-emerald-400/80" : "text-white/50"}`}>{t.value}</span>
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -1491,7 +1494,12 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
                       </div>
                       <div className="flex flex-col gap-0.5">
                         <p className="text-[8px] text-[#999]">Data Modeled: <span className="text-[#555] font-medium">{formatDate(doc.savedAt)}</span></p>
-                        {hasAis && <p className="text-[8px] text-[#999]">Active Risk Flags: <span className="text-[#555] font-medium">{riskCount}</span></p>}
+                        {hasAis && (
+                          <>
+                            <p className="text-[8px] text-[#999]">Active Risk Flags: <span className="text-[#555] font-medium">{riskCount}</span></p>
+                            <p className="text-[8px] text-[#999]">Inquiry Velocity: <span className="text-[#555] font-medium">{riskCount >= 2 ? "Elevated" : riskCount === 1 ? "Moderate" : "Stable"}</span></p>
+                          </>
+                        )}
                       </div>
                     </div>
                   );
@@ -1547,13 +1555,22 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
             {aisReport?.suppressors && aisReport.suppressors.length > 0 && (
               <div className="mt-2.5">
                 <p className="text-[8px] text-[#aaa] uppercase tracking-wider font-semibold mb-1.5">Denial Risk Drivers</p>
-                <div className="rounded-lg bg-[#fafafa] border border-[#eee] p-2.5 space-y-1">
-                  {aisReport.suppressors.slice(0, 4).map((s, i) => (
-                    <div key={i} className="flex items-start gap-2">
-                      <span className="text-[7px] text-red-400 mt-0.5">●</span>
-                      <p className="text-[9px] text-[#555] leading-[1.4]">{s}</p>
-                    </div>
-                  ))}
+                <div className="rounded-lg bg-[#fafafa] border border-[#eee] p-2.5 space-y-1.5">
+                  {aisReport.suppressors.slice(0, 4).map((s, i) => {
+                    const institutional = s
+                      .replace(/high utilization/i, "Revolver Utilization Above Institutional Tolerance")
+                      .replace(/limited tradelines?/i, "Thin Primary Trade Line Depth")
+                      .replace(/(?:heavy|excess)\s*(?:reliance on\s*)?AU\s*accounts?/i, "Excess Authorized User Weighting")
+                      .replace(/too many inquiries/i, "Inquiry Velocity Above Safe Threshold")
+                      .replace(/thin (?:credit )?file/i, "Insufficient Account Depth")
+                      .replace(/short credit (?:history|age)/i, "Insufficient File Seasoning");
+                    return (
+                      <div key={i} className="flex items-start gap-2">
+                        <span className="text-[6px] text-red-400/70 mt-[3px]">●</span>
+                        <p className="text-[9px] text-[#555] leading-[1.4]">{institutional}</p>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             )}
