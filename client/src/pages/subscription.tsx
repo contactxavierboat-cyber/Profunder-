@@ -184,6 +184,16 @@ export default function SubscriptionPage() {
 
           <div className="bg-white rounded-2xl border border-[#eee] p-6 sm:p-8 shadow-sm">
             <div className="text-center mb-6">
+              <div className="w-12 h-12 rounded-lg bg-[#1a1a2e] flex items-center justify-center mx-auto mb-4">
+                <svg width="27" height="27" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M12 2C9.5 2 7.5 4 7.5 6.5c0 .5-.4 1-1 1C4.5 7.5 3 9.5 3 11.5c0 1.5.8 2.8 2 3.5 0 0-.5 1.5-.5 2.5C4.5 20 6.5 22 9 22c1.5 0 2.5-.5 3-1.5.5 1 1.5 1.5 3 1.5 2.5 0 4.5-2 4.5-4.5 0-1-.5-2.5-.5-2.5 1.2-.7 2-2 2-3.5 0-2-1.5-4-3.5-4-.6 0-1-.5-1-1C16.5 4 14.5 2 12 2z" />
+                  <path d="M12 2v20" />
+                  <path d="M7.5 7.5C9 8.5 10 10 10.5 12" />
+                  <path d="M16.5 7.5C15 8.5 14 10 13.5 12" />
+                  <path d="M5 15c2-.5 3.5-1 5-3" />
+                  <path d="M19 15c-2-.5-3.5-1-5-3" />
+                </svg>
+              </div>
               <span className="text-[32px] font-bold text-[#1a1a1a]" data-testid="text-price">{formattedPrice}</span>
               <span className="text-[14px] text-[#888]">/month</span>
             </div>
