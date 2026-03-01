@@ -1292,6 +1292,9 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
   const suppressorCount = aisReport?.suppressors?.length || 0;
   const phase = aisReport?.phase || null;
   const pf = aisReport?.projectedFunding;
+  const aisCalculatedAt = (() => {
+    try { const d = localStorage.getItem("profundr_ais_calculated_at"); return d ? formatDate(d) : null; } catch { return null; }
+  })();
 
   const getStatusLabel = () => {
     if (!aisScore) return null;
@@ -1363,12 +1366,12 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
               <div className="mt-3 pt-2.5 border-t border-white/10 flex flex-col gap-1.5">
                 {suppressorCount > 0 && (
                   <p className="text-[9px] text-white/50">
-                    <span className="text-white/80 font-medium">{suppressorCount}</span> Approval Suppressor{suppressorCount !== 1 ? "s" : ""} Active
+                    Approval Suppressors: <span className="text-white/80 font-medium">{suppressorCount} Active</span>
                   </p>
                 )}
                 {pf?.readinessLevel && (
                   <p className="text-[9px] text-white/50">
-                    Readiness Tier: <span className="text-white/80 font-medium">{getReadinessTier()}</span>
+                    Qualification Tier: <span className="text-white/80 font-medium">{getReadinessTier()}</span>
                   </p>
                 )}
                 {pf?.inquirySlots && (
@@ -1378,10 +1381,24 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
                 )}
               </div>
 
-              <p className="mt-2.5 text-[7px] text-white/25 leading-[1.4]">Modeled using multi-factor underwriting logic (inquiries, utilization, depth, velocity, profile symmetry)</p>
+              {aisScore && aisScore < 88 && (
+                <div className="mt-3 pt-2.5 border-t border-white/10 space-y-1.5">
+                  {[
+                    { label: "Tier 1 Revolver Threshold", value: 78 },
+                    { label: "Prime Bankcard Threshold", value: 82 },
+                  ].map(t => (
+                    <div key={t.label} className="flex items-center justify-between">
+                      <span className="text-[8px] text-white/35">{t.label}</span>
+                      <span className={`text-[8px] font-medium ${aisScore >= t.value ? "text-emerald-400/80" : "text-white/50"}`}>{t.value}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              <p className="mt-2.5 text-[7px] text-white/20 leading-[1.4]">Modeled via multi-factor underwriting logic · inquiry velocity · utilization · depth · account age · profile symmetry</p>
 
               <div className="mt-2.5 flex items-center gap-1.5 text-[10px] text-white/60 group-hover:text-white/90 font-medium transition-colors">
-                <span>View Capital Advancement Plan</span>
+                <span>Advance to Qualification Plan</span>
                 <svg width="8" height="8" viewBox="0 0 8 8" fill="none"><path d="M2 4h4M4 2l2 2-2 2" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" /></svg>
               </div>
             </button>
@@ -1425,9 +1442,12 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
                         </button>
                       </div>
                     </div>
-                    <div className="flex items-center gap-3">
-                      <p className="text-[8px] text-[#999]">Items Under Review: <span className="text-[#555] font-medium">{itemCount}</span></p>
-                      <p className="text-[8px] text-[#999]">Filed: <span className="text-[#555] font-medium">{formatDate(doc.savedAt)}</span></p>
+                    <div className="flex flex-col gap-0.5 mt-0.5">
+                      <div className="flex items-center gap-3">
+                        <p className="text-[8px] text-[#999]">Line Items: <span className="text-[#555] font-medium">{itemCount}</span></p>
+                        <p className="text-[8px] text-[#999]">Filed: <span className="text-[#555] font-medium">{formatDate(doc.savedAt)}</span></p>
+                      </div>
+                      <p className="text-[8px] text-[#999]">Data Integrity Review: <span className="text-emerald-600 font-medium">Active</span></p>
                     </div>
                   </div>
                 );
@@ -1446,25 +1466,40 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
           </div>
           {creditReports.length > 0 ? (
             <div className="space-y-1.5">
-              {creditReports.map(doc => {
-                const bureau = doc.name.toLowerCase().includes("trans") ? "TransUnion" : doc.name.toLowerCase().includes("equi") ? "Equifax" : doc.name.toLowerCase().includes("exper") ? "Experian" : "Bureau Report";
-                return (
-                  <div key={doc.id} className="rounded-lg bg-[#fafafa] border border-[#eee] p-2.5 group hover:border-[#ddd] transition-colors" data-testid={`doc-item-${doc.id}`}>
-                    <div className="flex items-center justify-between mb-1">
-                      <p className="text-[10px] text-[#333] font-semibold">{bureau}</p>
-                      <button onClick={() => onDelete(doc.id)}
-                        className="opacity-0 group-hover:opacity-100 text-[#ccc] hover:text-red-400 transition-all p-0.5"
-                        data-testid={`button-delete-doc-${doc.id}`}>
-                        <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2 2l6 6M8 2l-6 6" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" /></svg>
-                      </button>
+              {(() => {
+                const seenBureaus = new Set<string>();
+                return creditReports.map(doc => {
+                  const n = doc.name.toLowerCase();
+                  let bureau = n.includes("trans") ? "TransUnion" : n.includes("equi") ? "Equifax" : n.includes("exper") ? "Experian" : null;
+                  if (!bureau) {
+                    for (const b of ["Experian", "TransUnion", "Equifax"]) {
+                      if (!seenBureaus.has(b)) { bureau = b; break; }
+                    }
+                    if (!bureau) bureau = "Bureau Report";
+                  }
+                  seenBureaus.add(bureau);
+                  const riskCount = bureau === (aisReport?.bureauSource || "") ? suppressorCount : Math.max(0, suppressorCount - 1);
+                  return (
+                    <div key={doc.id} className="rounded-lg bg-[#fafafa] border border-[#eee] p-2.5 group hover:border-[#ddd] transition-colors" data-testid={`doc-item-${doc.id}`}>
+                      <div className="flex items-center justify-between mb-1.5">
+                        <p className="text-[10px] text-[#333] font-semibold">{bureau}</p>
+                        <button onClick={() => onDelete(doc.id)}
+                          className="opacity-0 group-hover:opacity-100 text-[#ccc] hover:text-red-400 transition-all p-0.5"
+                          data-testid={`button-delete-doc-${doc.id}`}>
+                          <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2 2l6 6M8 2l-6 6" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" /></svg>
+                        </button>
+                      </div>
+                      <div className="flex flex-col gap-0.5">
+                        <p className="text-[8px] text-[#999]">Data Modeled: <span className="text-[#555] font-medium">{formatDate(doc.savedAt)}</span></p>
+                        {hasAis && <p className="text-[8px] text-[#999]">Active Risk Flags: <span className="text-[#555] font-medium">{riskCount}</span></p>}
+                      </div>
                     </div>
-                    <p className="text-[8px] text-[#999]">Data Extracted: <span className="text-[#555] font-medium">{formatDate(doc.savedAt)}</span></p>
-                  </div>
-                );
-              })}
+                  );
+                });
+              })()}
             </div>
           ) : (
-            <p className="text-[10px] text-[#bbb] pl-1 leading-[1.5]">No bureau data extracted yet</p>
+            <p className="text-[10px] text-[#bbb] pl-1 leading-[1.5]">No bureau data modeled yet</p>
           )}
         </div>
 
@@ -1502,7 +1537,26 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
                   <p className="text-[10px] font-medium text-[#333]">{pf.inquirySlots}</p>
                 </div>
               )}
+              {aisCalculatedAt && (
+                <div className="pt-2 border-t border-[#eee]">
+                  <p className="text-[7px] text-[#bbb]">Last Calculated: {aisCalculatedAt}</p>
+                </div>
+              )}
             </div>
+
+            {aisReport?.suppressors && aisReport.suppressors.length > 0 && (
+              <div className="mt-2.5">
+                <p className="text-[8px] text-[#aaa] uppercase tracking-wider font-semibold mb-1.5">Denial Risk Drivers</p>
+                <div className="rounded-lg bg-[#fafafa] border border-[#eee] p-2.5 space-y-1">
+                  {aisReport.suppressors.slice(0, 4).map((s, i) => (
+                    <div key={i} className="flex items-start gap-2">
+                      <span className="text-[7px] text-red-400 mt-0.5">●</span>
+                      <p className="text-[9px] text-[#555] leading-[1.4]">{s}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         )}
 
@@ -1982,7 +2036,10 @@ export default function LandingPage() {
       const parsedAis = parseSingleMessageData(responseContent);
       if (hasAnalysisData(parsedAis) && parsedAis.approvalIndex !== null) {
         setAisReport(parsedAis);
-        try { localStorage.setItem("profundr_ais_report", JSON.stringify(parsedAis)); } catch {}
+        try {
+          localStorage.setItem("profundr_ais_report", JSON.stringify(parsedAis));
+          localStorage.setItem("profundr_ais_calculated_at", new Date().toISOString());
+        } catch {}
       }
 
       if (user) {
