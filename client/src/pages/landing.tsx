@@ -1295,18 +1295,19 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
 
   const getStatusLabel = () => {
     if (!aisScore) return null;
-    if (aisScore >= 80) return "Above Institutional Threshold";
-    if (aisScore >= 65) return "Approaching Qualification Range";
+    if (aisScore >= 88) return "Prime Qualification Range";
+    if (aisScore >= 78) return "Above Institutional Threshold";
+    if (aisScore >= 65) return "Near Institutional Threshold";
     if (aisScore >= 50) return "Below Institutional Threshold";
-    return "Sub-Threshold — Correction Required";
+    return "Sub-Threshold · Correction Required";
   };
 
   const getPhaseAction = () => {
     if (!phase) return null;
     const p = phase.toLowerCase();
-    if (p.includes("repair")) return "Optimization Phase";
-    if (p.includes("build")) return "Positioning Phase";
-    if (p.includes("wait")) return "Strategic Hold";
+    if (p.includes("repair")) return "Optimization & Correction";
+    if (p.includes("build")) return "Positioning & Calibration";
+    if (p.includes("wait")) return "Strategic Hold · Preserve File";
     if (p.includes("fund")) return "Qualification Window Open";
     return phase;
   };
@@ -1316,9 +1317,17 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
     const r = pf.readinessLevel.toLowerCase();
     if (r.includes("not ready") || r.includes("blocked")) return "Pre-Qualification Blocked";
     if (r.includes("early") || r.includes("marginal")) return "Early-Stage Positioning";
+    if (r.includes("near") || r.includes("moderate")) return "Building";
     if (r.includes("ready") || r.includes("strong")) return "Qualification Ready";
     return pf.readinessLevel;
   };
+
+  const thresholdBars = aisScore ? [
+    { label: "Tier 2 Revolvers", threshold: 65 },
+    { label: "Tier 1 Revolvers", threshold: 78 },
+    { label: "Prime Bankcards", threshold: 82 },
+    { label: "Premium Charge", threshold: 88 },
+  ] : [];
 
   return (
     <div className="h-full flex flex-col bg-white border-r border-[#eee]" data-testid="docs-panel">
