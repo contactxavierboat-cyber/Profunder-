@@ -155,7 +155,7 @@ export default function SubscriptionPage() {
   const formattedPrice = priceData ? `$${(priceData.unit_amount / 100).toFixed(0)}` : "$50";
 
   return (
-    <div className="h-[100dvh] flex flex-col bg-[#fafafa]" style={{ fontFamily: "'Inter', sans-serif" }}>
+    <div className="min-h-[100dvh] h-[100dvh] flex flex-col bg-[#fafafa]" style={{ fontFamily: "'Inter', sans-serif" }}>
       <nav className="sticky top-0 z-30 bg-[#fafafa]/95 backdrop-blur-sm flex items-center justify-between px-4 sm:px-6 py-3 border-b border-[#eee]" data-testid="nav-top">
         <div className="flex items-center gap-2">
           <button onClick={() => setLocation("/")} data-testid="nav-logo">
@@ -171,8 +171,8 @@ export default function SubscriptionPage() {
         </button>
       </nav>
 
-      <div className="flex-1 flex flex-col items-center justify-center px-4 py-8 overflow-y-auto">
-        <div className="w-full max-w-[440px] space-y-6">
+      <div className="flex-1 overflow-y-auto px-4 py-8">
+        <div className="w-full max-w-[440px] mx-auto space-y-6">
           <div className="text-center">
             <h1 className="text-[28px] sm:text-[36px] font-semibold text-[#1a1a1a] tracking-[-0.03em] leading-tight mb-3" data-testid="text-signin-title">
               Unlock Profundr
@@ -184,14 +184,14 @@ export default function SubscriptionPage() {
 
           <div className="bg-white rounded-2xl border border-[#eee] p-6 sm:p-8 shadow-sm">
             <div className="text-center mb-6">
-              <div className="w-14 h-14 rounded-2xl bg-[#1a1a2e] flex items-center justify-center mx-auto mb-4">
-                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M9.5 2a5.5 5.5 0 00-4.88 8.06A3.5 3.5 0 004 13.5a3.5 3.5 0 002.02 3.18A4 4 0 0010 20h1V4a5.5 5.5 0 00-1.5-2z" />
-                  <path d="M14.5 2a5.5 5.5 0 014.88 8.06A3.5 3.5 0 0120 13.5a3.5 3.5 0 01-2.02 3.18A4 4 0 0114 20h-1V4a5.5 5.5 0 011.5-2z" />
-                  <path d="M7 10h4" />
-                  <path d="M13 10h4" />
-                  <path d="M8 14h3" />
-                  <path d="M13 14h3" />
+              <div className="w-12 h-12 rounded-lg bg-[#1a1a2e] flex items-center justify-center mx-auto mb-4">
+                <svg width={48 * 0.57} height={48 * 0.57} viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M12 2C9.5 2 7.5 4 7.5 6.5c0 .5-.4 1-1 1C4.5 7.5 3 9.5 3 11.5c0 1.5.8 2.8 2 3.5 0 0-.5 1.5-.5 2.5C4.5 20 6.5 22 9 22c1.5 0 2.5-.5 3-1.5.5 1 1.5 1.5 3 1.5 2.5 0 4.5-2 4.5-4.5 0-1-.5-2.5-.5-2.5 1.2-.7 2-2 2-3.5 0-2-1.5-4-3.5-4-.6 0-1-.5-1-1C16.5 4 14.5 2 12 2z" />
+                  <path d="M12 2v20" />
+                  <path d="M7.5 7.5C9 8.5 10 10 10.5 12" />
+                  <path d="M16.5 7.5C15 8.5 14 10 13.5 12" />
+                  <path d="M5 15c2-.5 3.5-1 5-3" />
+                  <path d="M19 15c-2-.5-3.5-1-5-3" />
                 </svg>
               </div>
               <span className="text-[32px] font-bold text-[#1a1a1a]" data-testid="text-price">{formattedPrice}</span>
