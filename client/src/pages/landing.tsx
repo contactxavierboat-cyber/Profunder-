@@ -1477,29 +1477,29 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
               </svg>
               <span className="text-[10px] font-semibold text-[#555] uppercase tracking-wider">Funding Strategy Matrix</span>
             </div>
-            <div className="rounded-lg bg-[#fafafa] border border-[#eee] p-3 space-y-2">
+            <div className="rounded-lg bg-[#fafafa] border border-[#eee] p-3 space-y-2.5">
               {pf.readinessLevel && (
-                <div className="flex justify-between items-center">
-                  <span className="text-[9px] text-[#999]">Qualification Tier</span>
-                  <span className="text-[10px] font-medium text-[#333]">{getReadinessTier()}</span>
+                <div>
+                  <p className="text-[8px] text-[#aaa] uppercase tracking-wider mb-0.5">Qualification Tier</p>
+                  <p className="text-[10px] font-medium text-[#333]">{getReadinessTier()}</p>
                 </div>
               )}
               {pf.bestCasePerBureau && (
-                <div className="flex justify-between items-center">
-                  <span className="text-[9px] text-[#999]">Maximum Modeled Exposure</span>
-                  <span className="text-[10px] font-bold font-mono text-[#333]">{pf.bestCasePerBureau}</span>
+                <div>
+                  <p className="text-[8px] text-[#aaa] uppercase tracking-wider mb-0.5">Maximum Modeled Exposure</p>
+                  <p className="text-[10px] font-bold font-mono text-[#333]">{pf.bestCasePerBureau}</p>
                 </div>
               )}
               {pf.timeline && (
-                <div className="flex justify-between items-center">
-                  <span className="text-[9px] text-[#999]">Projected Capital Window</span>
-                  <span className="text-[10px] font-medium text-[#333]">{pf.timeline}</span>
+                <div>
+                  <p className="text-[8px] text-[#aaa] uppercase tracking-wider mb-0.5">Projected Capital Window</p>
+                  <p className="text-[10px] font-medium text-[#333]">{pf.timeline}</p>
                 </div>
               )}
               {pf.inquirySlots && (
-                <div className="flex justify-between items-center">
-                  <span className="text-[9px] text-[#999]">Inquiry Capacity</span>
-                  <span className="text-[10px] font-medium text-[#333]">{pf.inquirySlots}</span>
+                <div>
+                  <p className="text-[8px] text-[#aaa] uppercase tracking-wider mb-0.5">Inquiry Capacity</p>
+                  <p className="text-[10px] font-medium text-[#333]">{pf.inquirySlots}</p>
                 </div>
               )}
             </div>
