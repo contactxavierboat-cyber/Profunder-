@@ -577,37 +577,37 @@ function ProjectedFundingCard({ data, phase, compact }: { data: ProjectedFunding
             </button>
           </div>
 
-          <div className={`grid ${compact ? 'grid-cols-2' : 'grid-cols-2 sm:grid-cols-4'} gap-4`}>
+          <div className="grid grid-cols-2 gap-x-4 gap-y-3">
             {data.bestCasePerBureau && (
-              <div data-testid="pf-best-case">
+              <div className="min-w-0" data-testid="pf-best-case">
                 <p className="text-[9px] text-[#bbb] font-medium mb-0.5">Best-Case {bureauLabel}</p>
-                <p className="text-[22px] font-black font-mono tracking-[-0.02em] text-[#1a1a1a] leading-none">{data.bestCasePerBureau}</p>
+                <p className="text-[18px] font-black font-mono tracking-[-0.02em] text-[#1a1a1a] leading-tight truncate">{data.bestCasePerBureau}</p>
                 <p className="text-[9px] text-[#aaa] mt-1">5 approvals at full limit match</p>
               </div>
             )}
 
             {data.perBureauProjection && (
-              <div data-testid="pf-projected-amount">
+              <div className="min-w-0" data-testid="pf-projected-amount">
                 <p className="text-[9px] text-[#bbb] font-medium mb-0.5">{bureauLabel} Projection</p>
-                <p className="text-[16px] font-bold font-mono tracking-[-0.02em] text-[#333]">{data.perBureauProjection}</p>
-                <p className="text-[9px] text-[#aaa] mt-1">3-5 approvals at 60-80% match</p>
+                <p className="text-[14px] font-bold font-mono tracking-[-0.02em] text-[#333] truncate">{data.perBureauProjection}</p>
+                <p className="text-[9px] text-[#aaa] mt-1">3-5 approvals at 60-80% match rate</p>
               </div>
             )}
 
             {data.highestLimit && (
-              <div data-testid="pf-highest-limit">
+              <div className="min-w-0" data-testid="pf-highest-limit">
                 <p className="text-[9px] text-[#bbb] font-medium mb-0.5">Highest Limit</p>
-                <p className="text-[13px] text-[#333] font-bold font-mono">{data.highestLimit}</p>
+                <p className="text-[13px] text-[#333] font-bold font-mono truncate">{data.highestLimit}</p>
                 {data.currentExposure && <p className="text-[9px] text-[#aaa] mt-0.5">{data.currentExposure} total</p>}
               </div>
             )}
 
-            <div>
+            <div className="min-w-0">
               {data.readinessLevel && (
                 <div data-testid="pf-readiness">
-                  <p className="text-[9px] text-[#bbb] font-medium mb-0.5">Readiness</p>
+                  <p className="text-[9px] text-[#bbb] font-medium mb-0.5">Readiness Level</p>
                   <div className="flex items-center gap-1.5">
-                    <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: readinessColor }} />
+                    <div className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: readinessColor }} />
                     <p className="text-[12px] font-bold" style={{ color: readinessColor }}>{data.readinessLevel}</p>
                   </div>
                 </div>
@@ -615,10 +615,10 @@ function ProjectedFundingCard({ data, phase, compact }: { data: ProjectedFunding
               {data.inquirySlots && (
                 <div className="mt-1.5" data-testid="pf-inquiry-slots">
                   <p className="text-[9px] text-[#bbb] font-medium mb-0.5">Inquiry Slots</p>
-                  <p className="text-[12px] text-[#333] font-medium">{data.inquirySlots}</p>
+                  <p className="text-[11px] text-[#333] font-medium leading-snug">{data.inquirySlots}</p>
                 </div>
               )}
-              {data.timeline && <p className="text-[9px] text-[#aaa] mt-1">{data.timeline}</p>}
+              {data.timeline && <p className="text-[9px] text-[#aaa] mt-1 leading-snug">{data.timeline}</p>}
             </div>
           </div>
 
