@@ -171,43 +171,65 @@ export default function SubscriptionPage() {
         </button>
       </nav>
 
-      <div className="flex-1 flex flex-col items-center justify-center px-4">
-        <div className="w-full max-w-[380px] space-y-6">
+      <div className="flex-1 flex flex-col items-center justify-center px-4 py-8 overflow-y-auto">
+        <div className="w-full max-w-[440px] space-y-6">
           <div className="text-center">
             <h1 className="text-[28px] sm:text-[36px] font-semibold text-[#1a1a1a] tracking-[-0.03em] leading-tight mb-3" data-testid="text-signin-title">
               Unlock Profundr
             </h1>
-            <p className="text-[13px] text-[#888] leading-[1.7] max-w-[300px] mx-auto">
-              Full access to AIS scoring, dispute generation, funding projections, and unlimited analysis.
+            <p className="text-[13px] text-[#888] leading-[1.7] max-w-[340px] mx-auto">
+              The full capital intelligence system. Everything you need to understand, repair, and expand your financial position.
             </p>
           </div>
 
           <div className="bg-white rounded-2xl border border-[#eee] p-6 sm:p-8 shadow-sm">
-            <div className="text-center mb-5">
+            <div className="text-center mb-6">
               <span className="text-[32px] font-bold text-[#1a1a1a]" data-testid="text-price">{formattedPrice}</span>
               <span className="text-[14px] text-[#888]">/month</span>
             </div>
 
-            <div className="space-y-2 mb-5">
-              <div className="flex items-center gap-2 text-[12px] text-[#555]">
-                <svg className="w-3.5 h-3.5 text-[#1a1a2e] flex-shrink-0" viewBox="0 0 14 14" fill="none"><path d="M3 7l3 3 5-5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
-                <span>Unlimited credit report analysis</span>
+            <div className="space-y-4 mb-6">
+              <div className="flex gap-3" data-testid="feature-capital-readiness">
+                <svg className="w-4 h-4 text-[#1a1a2e] flex-shrink-0 mt-0.5" viewBox="0 0 14 14" fill="none"><path d="M3 7l3 3 5-5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                <div>
+                  <p className="text-[13px] font-medium text-[#1a1a1a]">Capital Readiness Index</p>
+                  <p className="text-[11px] text-[#888] leading-[1.5] mt-0.5">A lender-behavior simulation that ranks how fundable you are right now — based on real underwriting triggers.</p>
+                </div>
               </div>
-              <div className="flex items-center gap-2 text-[12px] text-[#555]">
-                <svg className="w-3.5 h-3.5 text-[#1a1a2e] flex-shrink-0" viewBox="0 0 14 14" fill="none"><path d="M3 7l3 3 5-5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
-                <span>AIS scoring and phase classification</span>
+              <div className="flex gap-3" data-testid="feature-risk-signal">
+                <svg className="w-4 h-4 text-[#1a1a2e] flex-shrink-0 mt-0.5" viewBox="0 0 14 14" fill="none"><path d="M3 7l3 3 5-5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                <div>
+                  <p className="text-[13px] font-medium text-[#1a1a1a]">Risk Signal Scan</p>
+                  <p className="text-[11px] text-[#888] leading-[1.5] mt-0.5">Detects hidden denial triggers — utilization spikes, thin-file gaps, inquiry stacking, seasoning issues, and structural weaknesses most consumers miss.</p>
+                </div>
               </div>
-              <div className="flex items-center gap-2 text-[12px] text-[#555]">
-                <svg className="w-3.5 h-3.5 text-[#1a1a2e] flex-shrink-0" viewBox="0 0 14 14" fill="none"><path d="M3 7l3 3 5-5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
-                <span>FCRA-compliant dispute letters</span>
+              <div className="flex gap-3" data-testid="feature-dispute-engine">
+                <svg className="w-4 h-4 text-[#1a1a2e] flex-shrink-0 mt-0.5" viewBox="0 0 14 14" fill="none"><path d="M3 7l3 3 5-5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                <div>
+                  <p className="text-[13px] font-medium text-[#1a1a1a]">Precision Dispute Engine</p>
+                  <p className="text-[11px] text-[#888] leading-[1.5] mt-0.5">Strategic, FCRA-aligned correction workflows that target data integrity flaws — not random template letters.</p>
+                </div>
               </div>
-              <div className="flex items-center gap-2 text-[12px] text-[#555]">
-                <svg className="w-3.5 h-3.5 text-[#1a1a2e] flex-shrink-0" viewBox="0 0 14 14" fill="none"><path d="M3 7l3 3 5-5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
-                <span>Per-bureau funding projections</span>
+              <div className="flex gap-3" data-testid="feature-approval-strategy">
+                <svg className="w-4 h-4 text-[#1a1a2e] flex-shrink-0 mt-0.5" viewBox="0 0 14 14" fill="none"><path d="M3 7l3 3 5-5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                <div>
+                  <p className="text-[13px] font-medium text-[#1a1a1a]">Approval Strategy Map</p>
+                  <p className="text-[11px] text-[#888] leading-[1.5] mt-0.5">Product timing, exposure sequencing, and positioning logic designed to increase approval odds before you apply.</p>
+                </div>
               </div>
-              <div className="flex items-center gap-2 text-[12px] text-[#555]">
-                <svg className="w-3.5 h-3.5 text-[#1a1a2e] flex-shrink-0" viewBox="0 0 14 14" fill="none"><path d="M3 7l3 3 5-5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
-                <span>Team collaboration and saved docs</span>
+              <div className="flex gap-3" data-testid="feature-funding-blueprint">
+                <svg className="w-4 h-4 text-[#1a1a2e] flex-shrink-0 mt-0.5" viewBox="0 0 14 14" fill="none"><path d="M3 7l3 3 5-5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                <div>
+                  <p className="text-[13px] font-medium text-[#1a1a1a]">Funding Growth Blueprint</p>
+                  <p className="text-[11px] text-[#888] leading-[1.5] mt-0.5">Step-by-step capital stacking roadmap — optimize utilization, strengthen anchors, improve profile symmetry, and raise your exposure ceiling.</p>
+                </div>
+              </div>
+              <div className="flex gap-3" data-testid="feature-underwriter-view">
+                <svg className="w-4 h-4 text-[#1a1a2e] flex-shrink-0 mt-0.5" viewBox="0 0 14 14" fill="none"><path d="M3 7l3 3 5-5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                <div>
+                  <p className="text-[13px] font-medium text-[#1a1a1a]">Underwriter View</p>
+                  <p className="text-[11px] text-[#888] leading-[1.5] mt-0.5">See your profile the way a credit analyst does — risk layers, behavioral patterns, stability markers, and automated denial simulations.</p>
+                </div>
               </div>
             </div>
 
