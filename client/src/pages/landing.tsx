@@ -1430,6 +1430,17 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
                 const canDownload = !!(doc.disputes?.length || doc.fileDataUrl);
                 const isDownloading = downloadingId === doc.id;
                 const itemCount = doc.disputes?.length || 0;
+                const categories = new Set<string>();
+                doc.disputes?.forEach((d: any) => {
+                  const text = `${d.issue || ""} ${d.reason || ""} ${d.creditor || ""}`.toLowerCase();
+                  if (/inquir|hard\s*pull|credit\s*pull/i.test(text)) categories.add("Inquiries");
+                  else if (/collection|collect|sold.*debt/i.test(text)) categories.add("Collections");
+                  else if (/charge.?off/i.test(text)) categories.add("Charge-Offs");
+                  else if (/late|delinquen|past.?due/i.test(text)) categories.add("Late Payments");
+                  else if (/student.*loan|dept.*ed|education|mohela|navient/i.test(text)) categories.add("Student Loans");
+                  else categories.add("Other");
+                });
+                const letterCount = categories.size;
                 return (
                   <div key={doc.id} className="rounded-lg bg-[#fafafa] border border-[#eee] p-2.5 group hover:border-[#ddd] transition-colors" data-testid={`doc-item-${doc.id}`}>
                     <div className="flex items-center justify-between mb-1">
@@ -1453,10 +1464,16 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
                     </div>
                     <div className="flex flex-col gap-0.5 mt-0.5">
                       <div className="flex items-center gap-3">
-                        <p className="text-[8px] text-[#999]">Line Items: <span className="text-[#555] font-medium">{itemCount}</span></p>
-                        <p className="text-[8px] text-[#999]">Filed: <span className="text-[#555] font-medium">{formatDate(doc.savedAt)}</span></p>
+                        <p className="text-[8px] text-[#999]">Dispute Items: <span className="text-[#555] font-medium">{itemCount}</span></p>
+                        <p className="text-[8px] text-[#999]">Consolidated Letters: <span className="text-[#555] font-medium">{letterCount}</span></p>
                       </div>
-                      <p className="text-[8px] text-[#999]">Data Integrity Review: <span className="text-emerald-600 font-medium">Active</span></p>
+                      {categories.size > 0 && (
+                        <p className="text-[8px] text-[#999]">Categories: <span className="text-[#555] font-medium">{Array.from(categories).join(" · ")}</span></p>
+                      )}
+                      <div className="flex items-center gap-3 mt-0.5">
+                        <p className="text-[8px] text-[#999]">Filed: <span className="text-[#555] font-medium">{formatDate(doc.savedAt)}</span></p>
+                        <p className="text-[8px] text-[#999]">Data Integrity Review: <span className="text-emerald-600 font-medium">Active</span></p>
+                      </div>
                     </div>
                   </div>
                 );
