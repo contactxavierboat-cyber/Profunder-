@@ -1382,6 +1382,9 @@ export default function LandingPage() {
   const [activeTeamChat, setActiveTeamChat] = useState<TeamMember | null>(null);
   const [teamChatMessages, setTeamChatMessages] = useState<GuestMessage[]>([]);
   const [mentionDropdown, setMentionDropdown] = useState<{ show: boolean; query: string; startIdx: number }>({ show: false, query: "", startIdx: 0 });
+  const [showBrainHint, setShowBrainHint] = useState(() => {
+    try { return !localStorage.getItem("profundr_brain_hint_dismissed"); } catch { return true; }
+  });
   const [mentionSelected, setMentionSelected] = useState(0);
   const [previewCount, setPreviewCount] = useState(getGuestPreviewCount);
   const [showInitiationGate, setShowInitiationGate] = useState(false);
@@ -1918,19 +1921,51 @@ export default function LandingPage() {
         <div className="flex-1 overflow-y-auto" data-testid="main-scroll-area">
           <nav className="sticky top-0 z-30 bg-[#fafafa]/95 backdrop-blur-sm flex items-center justify-between px-4 sm:px-6 py-3 border-b border-[#eee]" data-testid="nav-top">
             <div className="flex items-center gap-2">
-              <button
-                onClick={() => setDocsOpen(!docsOpen)}
-                className="relative w-8 h-8 flex items-center justify-center rounded-lg text-[#888] hover:text-[#555] hover:bg-[#eee] transition-colors mr-1"
-                title="Workspace"
-                data-testid="button-toggle-docs"
-              >
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M12 2C9.5 2 7.5 4 7.5 6.5c0 .5-.4 1-1 1C4.5 7.5 3 9.5 3 11.5c0 1.5.8 2.8 2 3.5 0 0-.5 1.5-.5 2.5C4.5 20 6.5 22 9 22c1.5 0 2.5-.5 3-1.5.5 1 1.5 1.5 3 1.5 2.5 0 4.5-2 4.5-4.5 0-1-.5-2.5-.5-2.5 1.2-.7 2-2 2-3.5 0-2-1.5-4-3.5-4-.6 0-1-.5-1-1C16.5 4 14.5 2 12 2z" />
-                  <path d="M12 2v20" />
-                  <path d="M7.5 7.5C9 8.5 10 10 10.5 12" />
-                  <path d="M16.5 7.5C15 8.5 14 10 13.5 12" />
-                </svg>
-              </button>
+              <div className="relative">
+                <button
+                  onClick={() => {
+                    setDocsOpen(!docsOpen);
+                    if (showBrainHint) {
+                      setShowBrainHint(false);
+                      try { localStorage.setItem("profundr_brain_hint_dismissed", "1"); } catch {}
+                    }
+                  }}
+                  className="relative w-8 h-8 flex items-center justify-center rounded-lg text-[#888] hover:text-[#555] hover:bg-[#eee] transition-colors mr-1"
+                  title="Workspace"
+                  data-testid="button-toggle-docs"
+                >
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M12 2C9.5 2 7.5 4 7.5 6.5c0 .5-.4 1-1 1C4.5 7.5 3 9.5 3 11.5c0 1.5.8 2.8 2 3.5 0 0-.5 1.5-.5 2.5C4.5 20 6.5 22 9 22c1.5 0 2.5-.5 3-1.5.5 1 1.5 1.5 3 1.5 2.5 0 4.5-2 4.5-4.5 0-1-.5-2.5-.5-2.5 1.2-.7 2-2 2-3.5 0-2-1.5-4-3.5-4-.6 0-1-.5-1-1C16.5 4 14.5 2 12 2z" />
+                    <path d="M12 2v20" />
+                    <path d="M7.5 7.5C9 8.5 10 10 10.5 12" />
+                    <path d="M16.5 7.5C15 8.5 14 10 13.5 12" />
+                  </svg>
+                </button>
+                {showBrainHint && !docsOpen && (
+                  <div
+                    className="absolute top-full left-0 mt-2 z-50 animate-in fade-in slide-in-from-top-1 duration-300"
+                    data-testid="popup-brain-hint"
+                  >
+                    <div className="relative bg-[#1a1a2e] text-white rounded-xl px-4 py-3 shadow-lg" style={{ width: "220px" }}>
+                      <div className="absolute -top-[6px] left-4 w-3 h-3 bg-[#1a1a2e] rotate-45" />
+                      <p className="text-[12px] leading-[1.5] font-medium">
+                        Tap the brain for your dashboard, documents, team, and full capabilities.
+                      </p>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setShowBrainHint(false);
+                          try { localStorage.setItem("profundr_brain_hint_dismissed", "1"); } catch {}
+                        }}
+                        className="mt-2 text-[10px] text-white/60 hover:text-white/90 transition-colors"
+                        data-testid="button-dismiss-brain-hint"
+                      >
+                        Got it
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
               <div data-testid="nav-logo">
                 <ProfundrLogo size="md" variant="dark" />
               </div>
