@@ -1,0 +1,168 @@
+Good. This is clean — but it still feels like a **document storage dashboard**, not a capital command center.
+
+Right now it says:
+“Here are your files.”
+
+It needs to say:
+“You are in Repair Phase. Here’s how we move to Approval.”
+
+Let’s upgrade this into something that feels like a $100M underwriting system.
+
+---
+
+## 🔥 Immediate Observations
+
+1. **“Approval Index Score – 59”**
+
+   * Good visual.
+   * But “Borderline · Repair Phase” is passive.
+   * It should feel diagnostic + strategic.
+
+2. **Dispute Letters Section**
+
+   * Looks like storage.
+   * Should feel like an active system.
+
+3. **Credit Reports**
+
+   * Just showing a PDF file name lowers perceived intelligence.
+   * It should say what was extracted from it.
+
+4. **No clear next action**
+
+   * There’s no dominant CTA guiding the user.
+
+---
+
+# 🔥 Upgrade the Structure
+
+### Replace “Dashboard” with:
+
+**Capital Command Center**
+
+---
+
+## 1️⃣ AIS Report Section — Make It Dynamic
+
+Instead of:
+
+> Approval Index Score
+> Borderline · Repair Phase
+
+Use:
+
+**Capital Readiness: 59 / 100**
+Status: **Structural Weakness Detected**
+Phase: **Active Optimization Required**
+
+Then add under it:
+
+• 3 Risk Signals Identified
+• 1 Bureau Requires Correction
+• 2 Approval Triggers Below Threshold
+
+Add a button:
+
+**View Optimization Plan →**
+
+Now it feels like intelligence.
+
+---
+
+## 2️⃣ Rename “Dispute Letters”
+
+“Dispute Letters” sounds 2010 credit repair.
+
+Rename to:
+
+**Correction Engine™**
+
+And instead of showing a file:
+
+**Active Correction Cycle – Round 1**
+Status: Awaiting Bureau Response
+Next Escalation Window: March 29, 2026
+
+Button:
+
+**View Correction Strategy →**
+
+---
+
+## 3️⃣ Rename “Credit Reports”
+
+Instead of listing:
+
+> transuni22.pdf
+
+Make it:
+
+**Bureau Intelligence Extracted**
+
+TransUnion
+Last Scan: 03/01/2026
+Accounts Analyzed: 14
+High-Risk Signals: 2
+
+Button:
+
+**View Risk Breakdown →**
+
+You never want to show raw file names in fintech UI. It cheapens authority.
+
+---
+
+## 4️⃣ Add Missing Section (CRITICAL)
+
+You need this:
+
+### Funding Strategy
+
+Current Tier: Near-Prime
+Recommended Wait Period: 21 Days
+Optimal Product Type: Revolver ≤ $5K
+Approval Probability (Today): Moderate
+
+Button:
+
+**Run Approval Simulation →**
+
+---
+
+## 5️⃣ Bottom CTA (Very Important)
+
+Instead of “+ Add Document”
+
+Make it:
+
+**Upload New Bureau Data to Recalculate Capital Readiness**
+
+or
+
+**Recalculate Approval Index**
+
+This reinforces the intelligence engine positioning.
+
+---
+
+# 💎 Psychological Shift
+
+Right now:
+You built a tool.
+
+You need to make it feel like:
+A private underwriting terminal.
+
+Your brand is not credit repair.
+It is capital intelligence.
+
+---
+
+If you want next, I can:
+
+• Redesign the entire left drawer structure
+• Reword every section to feel institutional
+• Build a conversion-optimized dashboard hierarchy
+• Or help you increase perceived valuation through UI language
+
+Your move.
