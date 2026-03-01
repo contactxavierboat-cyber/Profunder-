@@ -1737,12 +1737,22 @@ export async function registerRoutes(
         return res.status(400).json({ error: "priceId is required" });
       }
 
-      const { db: checkDb } = await import("./db");
-      const priceCheck = await checkDb.execute(
-        sql`SELECT id FROM stripe.prices WHERE id = ${priceId} AND active = true`
-      );
-      if (priceCheck.rows.length === 0) {
-        return res.status(400).json({ error: "Invalid or inactive price" });
+      try {
+        const { db: checkDb } = await import("./db");
+        const priceCheck = await checkDb.execute(
+          sql`SELECT id FROM stripe.prices WHERE id = ${priceId} AND active = true`
+        );
+        if (priceCheck.rows.length === 0) {
+          const stripePrice = await stripe.prices.retrieve(priceId);
+          if (!stripePrice || !stripePrice.active) {
+            return res.status(400).json({ error: "Invalid or inactive price" });
+          }
+        }
+      } catch (priceErr: any) {
+        if (priceErr?.statusCode === 404 || priceErr?.code === 'resource_missing') {
+          return res.status(400).json({ error: "Invalid or inactive price" });
+        }
+        throw priceErr;
       }
 
       const baseUrl = `${req.protocol}://${req.get('host')}`;
