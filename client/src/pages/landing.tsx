@@ -2248,7 +2248,7 @@ export default function LandingPage() {
             </div>
           )}
 
-          {showInputHint && guestMessages.length === 0 && !activeTeamChat && (
+          {showInputHint && !activeTeamChat && (
             <div className="flex justify-center mb-2 animate-in fade-in slide-in-from-bottom-1 duration-300" data-testid="popup-input-hint">
               <div className="relative bg-[#1a1a2e] text-white rounded-xl px-4 py-3 shadow-lg" style={{ maxWidth: "300px" }}>
                 <p className="text-[12px] leading-[1.5] font-medium text-center">
