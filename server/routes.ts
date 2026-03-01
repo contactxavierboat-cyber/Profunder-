@@ -49,7 +49,7 @@ function generateAnonName(): string {
 }
 
 const EXTRACTION_MIN_CHARS = 200;
-const EXTRACTION_MAX_CHARS = 30000;
+const EXTRACTION_MAX_CHARS = 50000;
 const TMP_DIR = "/tmp/pdf-processing";
 
 async function ensureTmpDir() {
@@ -1078,11 +1078,25 @@ Top Approval Suppressors:
 
 Then write your verdict — 2-3 sentences max. Sound like a real operator protecting the file. State whether they are fundable or not, the current phase, and the key structural reasons. No numbers, no scores, no data regurgitation in this text. Do not label it "Verdict:".
 
-Then output dispute items — THIS IS CRITICAL. Scan EVERY line of the uploaded document for ALL negative items. Do not skip any. Catch everything: late payments (30/60/90/120+), collections (including sold/transferred), charge-offs, delinquencies (including student loans, Dept of Education, government accounts), repos, bankruptcies, judgments, liens, public records, unauthorized inquiries, balance/date discrepancies, accounts in forbearance with prior negatives.
+Then output dispute items — THIS IS CRITICAL AND NON-NEGOTIABLE. You MUST scan EVERY SINGLE LINE of the uploaded document from top to bottom. Do NOT stop early. Do NOT summarize. Do NOT group multiple accounts into one entry. Each account with any negative mark gets its own separate dispute entry.
+
+Catch EVERYTHING — no exceptions:
+- Late payments (30/60/90/120+ days) on ANY account type
+- Collections (open, paid, sold, transferred, medical, utility, telecom)
+- Charge-offs (open or paid)
+- Student loan delinquencies — list EACH individual Dept of Education / ED / MOHELA / Navient / Nelnet / Great Lakes / FedLoan account separately. Student loans often appear as 5-15+ separate tradelines. Every single one with a negative mark must get its own dispute entry.
+- Repos, bankruptcies, judgments, liens, tax liens, civil judgments
+- Public records of any kind
+- Unauthorized or unrecognized hard inquiries
+- Balance/date discrepancies, status contradictions
+- Accounts in forbearance or deferment that still show prior negative history
+- Any account where the payment history grid shows missed payments, even if the current status says "current" or "pays as agreed"
+
+If a creditor (like Dept of Education) has multiple accounts, list EACH ONE individually with its own account number and specific issue. Do NOT say "multiple Dept of Ed accounts have late payments" — instead, list account #1, account #2, account #3, etc. each as a separate DISPUTE line.
 
 For EACH negative item, output a dispute entry using factual disputing under the FCRA:
 
-DISPUTE: [Creditor] | [Account Number or N/A] | [Issue] | [Bureau] | [FCRA Dispute Reason]
+DISPUTE: [Creditor] | [Account Number or N/A] | [Issue — be specific: e.g. "30-day late reported 04/2023" not just "late payment"] | [Bureau] | [FCRA Dispute Reason]
 
 ====================================================
 WHEN NO DOCUMENT IS PROVIDED — CONVERSATIONAL MODE
@@ -1999,7 +2013,9 @@ Extraction method: ${extractionMethod}
 
 --- START OF DOCUMENT ---
 ${extractedText}
---- END OF DOCUMENT ---`;
+--- END OF DOCUMENT ---
+
+FINAL REMINDER: You MUST list EVERY negative item found in the document above as a separate DISPUTE entry. If there are 10 Dept of Education accounts with late payments, output 10 separate DISPUTE lines. If there are 15 negative items total, output 15 DISPUTE lines. Do NOT consolidate, summarize, or skip any. Count them as you go.`;
     }
 
     const hasAttachmentInAuthHistory = last10.some((m: { content: string }) => m.content.includes("[Attached:"));
@@ -2145,7 +2161,9 @@ Extraction method: ${extractionMethod}
 
 --- START OF DOCUMENT ---
 ${extractedText}
---- END OF DOCUMENT ---`;
+--- END OF DOCUMENT ---
+
+FINAL REMINDER: You MUST list EVERY negative item found in the document above as a separate DISPUTE entry. If there are 10 Dept of Education accounts with late payments, output 10 separate DISPUTE lines. If there are 15 negative items total, output 15 DISPUTE lines. Do NOT consolidate, summarize, or skip any. Count them as you go.`;
     }
 
     let teamContextPrompt = "";
