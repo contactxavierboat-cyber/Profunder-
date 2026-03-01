@@ -1295,20 +1295,29 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
 
   const getStatusLabel = () => {
     if (!aisScore) return null;
-    if (aisScore >= 80) return "Strong Position";
-    if (aisScore >= 65) return "Moderate Risk Detected";
-    if (aisScore >= 50) return "Structural Weakness Detected";
-    return "Critical Risk Detected";
+    if (aisScore >= 80) return "Above Institutional Threshold";
+    if (aisScore >= 65) return "Approaching Qualification Range";
+    if (aisScore >= 50) return "Below Institutional Threshold";
+    return "Sub-Threshold — Correction Required";
   };
 
   const getPhaseAction = () => {
     if (!phase) return null;
     const p = phase.toLowerCase();
-    if (p.includes("repair")) return "Active Optimization Required";
-    if (p.includes("build")) return "Profile Strengthening In Progress";
-    if (p.includes("wait")) return "Strategic Hold — Preserve File";
-    if (p.includes("fund")) return "Funding Window Open";
+    if (p.includes("repair")) return "Optimization Phase";
+    if (p.includes("build")) return "Positioning Phase";
+    if (p.includes("wait")) return "Strategic Hold";
+    if (p.includes("fund")) return "Qualification Window Open";
     return phase;
+  };
+
+  const getReadinessTier = () => {
+    if (!pf?.readinessLevel) return null;
+    const r = pf.readinessLevel.toLowerCase();
+    if (r.includes("not ready") || r.includes("blocked")) return "Pre-Qualification Blocked";
+    if (r.includes("early") || r.includes("marginal")) return "Early-Stage Positioning";
+    if (r.includes("ready") || r.includes("strong")) return "Qualification Ready";
+    return pf.readinessLevel;
   };
 
   return (
@@ -1345,23 +1354,25 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
               <div className="mt-3 pt-2.5 border-t border-white/10 flex flex-col gap-1.5">
                 {suppressorCount > 0 && (
                   <p className="text-[9px] text-white/50">
-                    <span className="text-white/80 font-medium">{suppressorCount}</span> approval suppressor{suppressorCount !== 1 ? "s" : ""} identified
+                    <span className="text-white/80 font-medium">{suppressorCount}</span> Approval Suppressor{suppressorCount !== 1 ? "s" : ""} Active
                   </p>
                 )}
                 {pf?.readinessLevel && (
                   <p className="text-[9px] text-white/50">
-                    Readiness: <span className="text-white/80 font-medium">{pf.readinessLevel}</span>
+                    Readiness Tier: <span className="text-white/80 font-medium">{getReadinessTier()}</span>
                   </p>
                 )}
                 {pf?.inquirySlots && (
                   <p className="text-[9px] text-white/50">
-                    Inquiry slots: <span className="text-white/80 font-medium">{pf.inquirySlots}</span>
+                    Inquiry Capacity: <span className="text-white/80 font-medium">{pf.inquirySlots}</span>
                   </p>
                 )}
               </div>
 
-              <div className="mt-3 flex items-center gap-1.5 text-[10px] text-white/60 group-hover:text-white/90 font-medium transition-colors">
-                <span>View Optimization Plan</span>
+              <p className="mt-2.5 text-[7px] text-white/25 leading-[1.4]">Modeled using multi-factor underwriting logic (inquiries, utilization, depth, velocity, profile symmetry)</p>
+
+              <div className="mt-2.5 flex items-center gap-1.5 text-[10px] text-white/60 group-hover:text-white/90 font-medium transition-colors">
+                <span>View Capital Advancement Plan</span>
                 <svg width="8" height="8" viewBox="0 0 8 8" fill="none"><path d="M2 4h4M4 2l2 2-2 2" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" /></svg>
               </div>
             </button>
@@ -1379,39 +1390,42 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
             {disputeLetters.length > 0 && <span className="text-[9px] text-white bg-[#1a1a2e] rounded-full px-1.5 py-0.5 font-medium ml-auto">{disputeLetters.length}</span>}
           </div>
           {disputeLetters.length > 0 ? (
-            <div className="space-y-1">
+            <div className="space-y-1.5">
               {disputeLetters.map((doc, i) => {
                 const canDownload = !!(doc.disputes?.length || doc.fileDataUrl);
                 const isDownloading = downloadingId === doc.id;
+                const itemCount = doc.disputes?.length || 0;
                 return (
-                  <div key={doc.id} className="flex items-center gap-2 pl-1 py-2 rounded-lg hover:bg-[#f5f5f5] group transition-colors" data-testid={`doc-item-${doc.id}`}>
-                    <div className="w-6 h-6 rounded-md bg-[#f0f0f0] flex items-center justify-center shrink-0">
-                      <span className="text-[8px] font-bold text-[#555]">{i + 1}</span>
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-[10px] text-[#444] font-medium truncate">Correction Cycle {i + 1}</p>
-                      <p className="text-[8px] text-[#aaa]">{formatDate(doc.savedAt)} · {doc.disputes?.length || 0} items</p>
-                    </div>
-                    {canDownload && (
-                      <button onClick={() => handleDownload(doc)} disabled={isDownloading}
-                        className="text-[#1a1a2e] opacity-70 hover:opacity-100 transition-all p-0.5 disabled:opacity-30"
-                        title="Download" data-testid={`button-download-doc-${doc.id}`}>
-                        {isDownloading ? <span className="text-[9px]">...</span> : (
-                          <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 2v6M6 8L4 6M6 8l2-2" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" /><path d="M2 9v1h8V9" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                  <div key={doc.id} className="rounded-lg bg-[#fafafa] border border-[#eee] p-2.5 group hover:border-[#ddd] transition-colors" data-testid={`doc-item-${doc.id}`}>
+                    <div className="flex items-center justify-between mb-1">
+                      <p className="text-[10px] text-[#333] font-semibold">Bureau Challenge — Cycle {i + 1}</p>
+                      <div className="flex items-center gap-1">
+                        {canDownload && (
+                          <button onClick={() => handleDownload(doc)} disabled={isDownloading}
+                            className="text-[#1a1a2e] opacity-70 hover:opacity-100 transition-all p-0.5 disabled:opacity-30"
+                            title="Download" data-testid={`button-download-doc-${doc.id}`}>
+                            {isDownloading ? <span className="text-[9px]">...</span> : (
+                              <svg width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M6 2v6M6 8L4 6M6 8l2-2" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" /><path d="M2 9v1h8V9" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                            )}
+                          </button>
                         )}
-                      </button>
-                    )}
-                    <button onClick={() => onDelete(doc.id)}
-                      className="opacity-0 group-hover:opacity-100 text-[#ccc] hover:text-red-400 transition-all p-0.5"
-                      data-testid={`button-delete-doc-${doc.id}`}>
-                      <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2 2l6 6M8 2l-6 6" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" /></svg>
-                    </button>
+                        <button onClick={() => onDelete(doc.id)}
+                          className="opacity-0 group-hover:opacity-100 text-[#ccc] hover:text-red-400 transition-all p-0.5"
+                          data-testid={`button-delete-doc-${doc.id}`}>
+                          <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2 2l6 6M8 2l-6 6" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" /></svg>
+                        </button>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <p className="text-[8px] text-[#999]">Items Under Review: <span className="text-[#555] font-medium">{itemCount}</span></p>
+                      <p className="text-[8px] text-[#999]">Filed: <span className="text-[#555] font-medium">{formatDate(doc.savedAt)}</span></p>
+                    </div>
                   </div>
                 );
               })}
             </div>
           ) : (
-            <p className="text-[10px] text-[#bbb] pl-1 leading-[1.5]">Dispute letters will appear here after analysis</p>
+            <p className="text-[10px] text-[#bbb] pl-1 leading-[1.5]">Bureau correction letters generate automatically after analysis</p>
           )}
         </div>
 
@@ -1422,29 +1436,26 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
             {creditReports.length > 0 && <span className="text-[9px] text-[#666] bg-[#f0f0f0] rounded-full px-1.5 py-0.5 font-medium ml-auto">{creditReports.length}</span>}
           </div>
           {creditReports.length > 0 ? (
-            <div className="space-y-1">
+            <div className="space-y-1.5">
               {creditReports.map(doc => {
                 const bureau = doc.name.toLowerCase().includes("trans") ? "TransUnion" : doc.name.toLowerCase().includes("equi") ? "Equifax" : doc.name.toLowerCase().includes("exper") ? "Experian" : "Bureau Report";
                 return (
-                  <div key={doc.id} className="flex items-center gap-2 pl-1 py-2 rounded-lg hover:bg-[#f5f5f5] group transition-colors" data-testid={`doc-item-${doc.id}`}>
-                    <div className="w-6 h-6 rounded-md bg-[#f0f0f0] flex items-center justify-center shrink-0">
-                      <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><rect x="1" y="0.5" width="8" height="9" rx="1" stroke="#555" strokeWidth="0.8" fill="none" /></svg>
+                  <div key={doc.id} className="rounded-lg bg-[#fafafa] border border-[#eee] p-2.5 group hover:border-[#ddd] transition-colors" data-testid={`doc-item-${doc.id}`}>
+                    <div className="flex items-center justify-between mb-1">
+                      <p className="text-[10px] text-[#333] font-semibold">{bureau}</p>
+                      <button onClick={() => onDelete(doc.id)}
+                        className="opacity-0 group-hover:opacity-100 text-[#ccc] hover:text-red-400 transition-all p-0.5"
+                        data-testid={`button-delete-doc-${doc.id}`}>
+                        <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2 2l6 6M8 2l-6 6" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" /></svg>
+                      </button>
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-[10px] text-[#444] font-medium truncate">{bureau}</p>
-                      <p className="text-[8px] text-[#aaa]">Scanned {formatDate(doc.savedAt)}</p>
-                    </div>
-                    <button onClick={() => onDelete(doc.id)}
-                      className="opacity-0 group-hover:opacity-100 text-[#ccc] hover:text-red-400 transition-all p-0.5"
-                      data-testid={`button-delete-doc-${doc.id}`}>
-                      <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2 2l6 6M8 2l-6 6" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" /></svg>
-                    </button>
+                    <p className="text-[8px] text-[#999]">Data Extracted: <span className="text-[#555] font-medium">{formatDate(doc.savedAt)}</span></p>
                   </div>
                 );
               })}
             </div>
           ) : (
-            <p className="text-[10px] text-[#bbb] pl-1 leading-[1.5]">No bureau data uploaded yet</p>
+            <p className="text-[10px] text-[#bbb] pl-1 leading-[1.5]">No bureau data extracted yet</p>
           )}
         </div>
 
@@ -1455,30 +1466,30 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
                 <line x1="12" y1="1" x2="12" y2="23" />
                 <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
               </svg>
-              <span className="text-[10px] font-semibold text-[#555] uppercase tracking-wider">Funding Strategy</span>
+              <span className="text-[10px] font-semibold text-[#555] uppercase tracking-wider">Funding Strategy Matrix</span>
             </div>
             <div className="rounded-lg bg-[#fafafa] border border-[#eee] p-3 space-y-2">
               {pf.readinessLevel && (
                 <div className="flex justify-between items-center">
-                  <span className="text-[9px] text-[#999]">Readiness</span>
-                  <span className="text-[10px] font-medium text-[#333]">{pf.readinessLevel}</span>
+                  <span className="text-[9px] text-[#999]">Qualification Tier</span>
+                  <span className="text-[10px] font-medium text-[#333]">{getReadinessTier()}</span>
                 </div>
               )}
               {pf.bestCasePerBureau && (
                 <div className="flex justify-between items-center">
-                  <span className="text-[9px] text-[#999]">Best-Case Projection</span>
+                  <span className="text-[9px] text-[#999]">Maximum Modeled Exposure</span>
                   <span className="text-[10px] font-bold font-mono text-[#333]">{pf.bestCasePerBureau}</span>
                 </div>
               )}
               {pf.timeline && (
                 <div className="flex justify-between items-center">
-                  <span className="text-[9px] text-[#999]">Timeline</span>
+                  <span className="text-[9px] text-[#999]">Projected Capital Window</span>
                   <span className="text-[10px] font-medium text-[#333]">{pf.timeline}</span>
                 </div>
               )}
               {pf.inquirySlots && (
                 <div className="flex justify-between items-center">
-                  <span className="text-[9px] text-[#999]">Inquiry Slots</span>
+                  <span className="text-[9px] text-[#999]">Inquiry Capacity</span>
                   <span className="text-[10px] font-medium text-[#333]">{pf.inquirySlots}</span>
                 </div>
               )}
@@ -1523,10 +1534,10 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
           data-testid="button-add-doc"
         >
           <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 2v8M2 6h8" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" /></svg>
-          Upload Bureau Data
+          Upload New Bureau Data
         </button>
         <p className="text-[9px] text-[#bbb] text-center mt-2 leading-[1.5]">
-          Recalculate Capital Readiness with new data
+          Recalculate Capital Readiness Index
         </p>
       </div>
     </div>
