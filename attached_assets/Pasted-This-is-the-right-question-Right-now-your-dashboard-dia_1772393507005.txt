@@ -1,0 +1,173 @@
+This is the right question.
+
+Right now your dashboard diagnoses and models.
+
+The missing piece is:
+
+👉 **Directed Action Control**
+👉 The exact moves that advance someone from 72 → 78 → 82.
+
+This is where you turn intelligence into execution.
+
+---
+
+# 🔥 SECTION NAME
+
+Don’t call it “Next Moves.” Too generic.
+
+Use one of these:
+
+**Capital Advancement Protocol**
+**Readiness Acceleration Plan**
+**Qualification Upgrade Path**
+**Institutional Advancement Steps**
+**Approval Progression Roadmap**
+
+Best fit for your tone:
+
+👉 **Capital Advancement Protocol**
+
+---
+
+# 🔥 HOW IT SHOULD APPEAR IN UI
+
+---
+
+## CAPITAL ADVANCEMENT PROTOCOL
+
+Objective: Move from Tier: Building → Institutional Threshold (78+)
+
+### Priority Level: High-Impact Suppressor Removal
+
+---
+
+### 🔴 Move 1 — Normalize Revolver Utilization
+
+Current: 87% (Bank of America)
+Target: ≤ 30% (Ideal: 10–15%)
+
+Impact:
++4 to +7 readiness points
+Removes primary approval suppressor
+Improves underwriting symmetry
+
+Estimated Timeline: 30–60 days
+
+---
+
+### 🟠 Move 2 — Reduce Inquiry Velocity
+
+Current: 7 in last 2 months
+Action: No new applications for 90 days
+
+Impact:
+Stabilizes risk modeling
+Improves Tier 1 eligibility probability
+
+---
+
+### 🟡 Move 3 — Strengthen Primary Trade Depth
+
+Current: 4 tradelines
+Target: 6–8 primary accounts
+
+Action Window: After suppressor normalization
+Strategy: Revolver-first, staggered 60–90 days apart
+
+Impact:
++3 to +5 readiness points
+Improves limit matching potential
+
+---
+
+### 🟢 Move 4 — Reduce Authorized User Weighting
+
+Current: Heavy AU reliance
+
+Action:
+Shift utilization weight to primary accounts
+Avoid reliance for qualification modeling
+
+Impact:
+Improves institutional scoring confidence
+
+---
+
+# 🔥 ADD A PROGRESSION ESTIMATE
+
+Under the list:
+
+If Moves 1–2 Completed:
+Projected Readiness: 78–80
+
+If Moves 1–4 Completed:
+Projected Readiness: 82–85
+
+This gives them a visible ladder.
+
+---
+
+# 🔥 ADD A SMART VISUAL ELEMENT
+
+Under Capital Readiness 72:
+
+Next Milestone: Tier 1 Revolver Eligibility (78)
+
+That single line increases motivation dramatically.
+
+---
+
+# 🔥 IF YOU WANT TO GO EVEN MORE ADVANCED
+
+Add this:
+
+### Readiness Delta Tracker
+
+Move 1 Completion → +6
+Move 2 Completion → +3
+Move 3 Completion → +4
+
+Projected Score After Execution: 85
+
+Now it feels algorithmic.
+
+---
+
+# 🧠 Important Psychological Framing
+
+Don’t say:
+“Fix this.”
+
+Say:
+“Normalize.”
+“Stabilize.”
+“Strengthen.”
+“Calibrate.”
+
+That’s institutional language.
+
+---
+
+# 🚀 What This Does For You
+
+This section:
+
+• Increases retention
+• Increases subscription stickiness
+• Makes your score feel real
+• Turns the system into a roadmap
+• Justifies monthly billing
+
+Without this section, your dashboard diagnoses.
+
+With this section, your platform transforms.
+
+---
+
+If you want next, I can:
+
+• Build a fully structured 4-Phase Capital Readiness System
+• Design the algorithm logic behind readiness delta scoring
+• Or create a premium “Institutional Mode” upsell layer
+
+Where are we taking this?

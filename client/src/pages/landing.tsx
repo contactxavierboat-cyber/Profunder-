@@ -1398,10 +1398,16 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
                 </div>
               )}
 
-              <p className="mt-2.5 text-[7px] text-white/20 leading-[1.4]">Modeled via multi-factor underwriting logic · inquiry velocity · utilization · depth · account age · profile symmetry</p>
+              {aisScore && aisScore < 88 && (
+                <p className="mt-2.5 text-[9px] text-white/50">
+                  Next Milestone: <span className="text-white/70 font-medium">{aisScore < 78 ? "Tier 1 Revolver Eligibility (78)" : aisScore < 82 ? "Prime Bankcard Eligibility (82)" : "Premium Charge Eligibility (88)"}</span>
+                </p>
+              )}
+
+              <p className="mt-2 text-[7px] text-white/20 leading-[1.4]">Modeled via multi-factor underwriting logic · inquiry velocity · utilization · depth · account age · profile symmetry</p>
 
               <div className="mt-2.5 flex items-center gap-1.5 text-[10px] text-white/60 group-hover:text-white/90 font-medium transition-colors">
-                <span>Advance to Qualification Plan</span>
+                <span>View Advancement Protocol</span>
                 <svg width="8" height="8" viewBox="0 0 8 8" fill="none"><path d="M2 4h4M4 2l2 2-2 2" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" /></svg>
               </div>
             </button>
@@ -1574,6 +1580,100 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
                 </div>
               </div>
             )}
+          </div>
+        )}
+
+        {hasAis && aisScore && aisScore < 88 && aisReport?.suppressors && aisReport.suppressors.length > 0 && (
+          <div className="mb-4">
+            <div className="flex items-center gap-2 mb-2">
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 1v10M1 6h10" stroke="#333" strokeWidth="1.2" strokeLinecap="round" /><circle cx="6" cy="6" r="5" stroke="#333" strokeWidth="0.8" fill="none" /></svg>
+              <span className="text-[10px] font-semibold text-[#555] uppercase tracking-wider">Capital Advancement Protocol</span>
+            </div>
+
+            <div className="rounded-lg bg-[#fafafa] border border-[#eee] p-3 mb-2">
+              <p className="text-[8px] text-[#aaa] uppercase tracking-wider mb-1">Objective</p>
+              <p className="text-[9px] text-[#333] font-medium">
+                {aisScore < 78 ? "Advance from Building → Institutional Threshold (78+)" : aisScore < 82 ? "Advance from Threshold → Prime Qualification (82+)" : "Advance from Prime → Premium Charge Range (88+)"}
+              </p>
+            </div>
+
+            <div className="space-y-2">
+              {(() => {
+                const priorities = ["High", "High", "Medium", "Low"];
+                const colors = ["#ef4444", "#f97316", "#eab308", "#22c55e"];
+                const dots = ["🔴", "🟠", "🟡", "🟢"];
+                const moveTemplates: { pattern: RegExp; title: string; action: string; impact: string; delta: string; timeline: string }[] = [
+                  { pattern: /utiliz/i, title: "Normalize Revolver Utilization", action: "Reduce revolving balances to ≤30% (ideal: 10–15%)", impact: "Removes primary approval suppressor · Improves underwriting symmetry", delta: "+4 to +7", timeline: "30–60 days" },
+                  { pattern: /inquir/i, title: "Stabilize Inquiry Velocity", action: "No new applications for 90 days", impact: "Stabilizes risk modeling · Improves Tier 1 eligibility probability", delta: "+2 to +4", timeline: "90 days" },
+                  { pattern: /tradeline|account.*depth|thin.*file|insufficient.*depth/i, title: "Strengthen Primary Trade Depth", action: "Add 2–4 primary revolvers, staggered 60–90 days apart", impact: "Improves limit matching potential · Strengthens file profile", delta: "+3 to +5", timeline: "6–12 months" },
+                  { pattern: /authorized.*user|AU.*account|AU.*weight/i, title: "Reduce Authorized User Weighting", action: "Shift utilization weight to primary accounts", impact: "Improves institutional scoring confidence", delta: "+1 to +3", timeline: "Ongoing" },
+                  { pattern: /payment|late|delinquen/i, title: "Calibrate Payment Integrity", action: "Maintain 100% on-time payment cadence across all accounts", impact: "Strengthens lender confidence signal", delta: "+2 to +4", timeline: "6+ months" },
+                  { pattern: /age|season|young|new.*account/i, title: "Increase File Seasoning", action: "Allow existing accounts to age without new applications", impact: "Improves average age of accounts · Stabilizes file depth", delta: "+2 to +3", timeline: "6–12 months" },
+                  { pattern: /collection|charge.?off|deroga/i, title: "Resolve Derogatory Entries", action: "Initiate bureau challenge on reportable negative items", impact: "Removes institutional scoring penalties", delta: "+3 to +6", timeline: "30–90 days" },
+                ];
+
+                const moves: { title: string; action: string; impact: string; delta: string; timeline: string; priority: string; color: string; dot: string }[] = [];
+                const used = new Set<number>();
+
+                for (const s of aisReport!.suppressors) {
+                  if (moves.length >= 4) break;
+                  const sl = s.toLowerCase();
+                  for (let ti = 0; ti < moveTemplates.length; ti++) {
+                    if (used.has(ti)) continue;
+                    if (moveTemplates[ti].pattern.test(sl)) {
+                      used.add(ti);
+                      const idx = moves.length;
+                      moves.push({ ...moveTemplates[ti], priority: priorities[idx], color: colors[idx], dot: dots[idx] });
+                      break;
+                    }
+                  }
+                }
+
+                if (moves.length === 0) {
+                  for (let ti = 0; ti < Math.min(3, moveTemplates.length); ti++) {
+                    moves.push({ ...moveTemplates[ti], priority: priorities[ti], color: colors[ti], dot: dots[ti] });
+                  }
+                }
+
+                const totalDeltaLow = moves.reduce((sum, m) => sum + parseInt(m.delta.match(/\+(\d+)/)?.[1] || "0"), 0);
+                const totalDeltaHigh = moves.reduce((sum, m) => sum + parseInt(m.delta.match(/(\d+)$/)?.[1] || "0"), 0);
+
+                return (
+                  <>
+                    {moves.map((move, i) => (
+                      <div key={i} className="rounded-lg border border-[#eee] bg-white p-2.5" data-testid={`protocol-move-${i}`}>
+                        <div className="flex items-center gap-2 mb-1.5">
+                          <span className="text-[9px]">{move.dot}</span>
+                          <p className="text-[10px] text-[#333] font-semibold flex-1">Move {i + 1} — {move.title}</p>
+                        </div>
+                        <div className="pl-5 space-y-1">
+                          <p className="text-[8px] text-[#999]">Action: <span className="text-[#555]">{move.action}</span></p>
+                          <p className="text-[8px] text-[#999]">Impact: <span className="text-[#555]">{move.impact}</span></p>
+                          <div className="flex items-center gap-3 mt-1">
+                            <p className="text-[8px] text-[#999]">Readiness Delta: <span className="text-[#333] font-semibold">{move.delta}</span></p>
+                            <p className="text-[8px] text-[#999]">Timeline: <span className="text-[#555] font-medium">{move.timeline}</span></p>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+
+                    <div className="rounded-lg bg-[#1a1a2e] p-3 space-y-1.5">
+                      <p className="text-[8px] text-white/40 uppercase tracking-wider font-semibold">Progression Estimate</p>
+                      {moves.length >= 2 && (
+                        <div className="flex items-center justify-between">
+                          <span className="text-[8px] text-white/50">Moves 1–2 Completed</span>
+                          <span className="text-[9px] text-white/80 font-medium">{Math.min(100, aisScore + totalDeltaLow)}–{Math.min(100, aisScore + Math.round(totalDeltaHigh * 0.6))}</span>
+                        </div>
+                      )}
+                      <div className="flex items-center justify-between">
+                        <span className="text-[8px] text-white/50">All Moves Completed</span>
+                        <span className="text-[9px] text-white/80 font-bold">{Math.min(100, aisScore + totalDeltaLow)}–{Math.min(100, aisScore + totalDeltaHigh)}</span>
+                      </div>
+                    </div>
+                  </>
+                );
+              })()}
+            </div>
           </div>
         )}
 
