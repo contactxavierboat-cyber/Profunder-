@@ -1394,6 +1394,7 @@ export default function LandingPage() {
   const [showAisOverlay, setShowAisOverlay] = useState(false);
   const teamConvoLoaded = useRef(false);
   const teamChatLoaded = useRef(false);
+  const lastSeenMsgId = useRef(0);
   const { user, logout } = useAuth();
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -1431,7 +1432,6 @@ export default function LandingPage() {
 
   useEffect(() => {
     if (!user) return;
-    let lastSeenId = 0;
 
     const poll = async () => {
       try {
@@ -1445,11 +1445,11 @@ export default function LandingPage() {
           const allMsgs = msgs.map(m => teamMsgToGuestMsg(m, user.id));
           setGuestMessages(allMsgs);
           setNextId(Math.max(...msgs.map(m => m.id)) + 100002);
-          lastSeenId = Math.max(...msgs.map(m => m.id));
+          lastSeenMsgId.current = Math.max(...msgs.map(m => m.id));
           return;
         }
 
-        const newMsgs = msgs.filter(m => m.id > lastSeenId);
+        const newMsgs = msgs.filter(m => m.id > lastSeenMsgId.current);
         if (newMsgs.length > 0) {
           setGuestMessages(prev => {
             const existingIds = new Set(prev.map(p => p.id));
@@ -1459,7 +1459,7 @@ export default function LandingPage() {
             return incoming.length > 0 ? [...prev, ...incoming] : prev;
           });
         }
-        lastSeenId = Math.max(...msgs.map(m => m.id));
+        lastSeenMsgId.current = Math.max(...msgs.map(m => m.id));
       } catch {}
     };
 
@@ -1677,7 +1677,9 @@ export default function LandingPage() {
           body: JSON.stringify({ content: data.content, withUserId: activeTeamChat.id, isAi: true }),
         }).then(r => r.ok ? r.json() : null)
           .then(aiStored => {
-            if (aiStored) setTeamChatMessages(prev => prev.map(m => m.id === aiMsg.id ? { ...m, id: aiStored.id + 100000 } : m));
+            if (aiStored) {
+              setTeamChatMessages(prev => prev.map(m => m.id === aiMsg.id ? { ...m, id: aiStored.id + 100000 } : m));
+            }
           })
           .catch(() => {});
       } catch {
@@ -1738,6 +1740,7 @@ export default function LandingPage() {
       ]);
 
       if (stored) {
+        lastSeenMsgId.current = Math.max(lastSeenMsgId.current, stored.id);
         setGuestMessages(prev => prev.map(m => m.id === userMsg.id ? { ...m, id: stored.id + 100000 } : m));
       }
 
@@ -1770,7 +1773,10 @@ export default function LandingPage() {
         fetch("/api/team/message", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ content: data.content, isAi: true }) })
           .then(r => r.ok ? r.json() : null)
           .then(aiStored => {
-            if (aiStored) setGuestMessages(prev => prev.map(m => m.id === aiMsg.id ? { ...m, id: aiStored.id + 100000 } : m));
+            if (aiStored) {
+              lastSeenMsgId.current = Math.max(lastSeenMsgId.current, aiStored.id);
+              setGuestMessages(prev => prev.map(m => m.id === aiMsg.id ? { ...m, id: aiStored.id + 100000 } : m));
+            }
           })
           .catch(() => {});
       }
