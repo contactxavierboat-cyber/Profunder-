@@ -1760,9 +1760,9 @@ export default function LandingPage() {
         setPreviewCount(newCount);
         setGuestPreviewCount(newCount);
         if (newCount === 1) {
-          responseContent += "\n\n---\n\n*You've seen the surface. This is 1 of 2 complimentary previews. Sign in to unlock deeper analysis, saved results, and the full Profundr system.*";
+          responseContent += "\n\n---\n\n*This is 1 of 2 complimentary previews. Subscribe to unlock the full system — AIS, dispute letters, funding projections, and unlimited analysis.*";
         } else if (newCount === 2) {
-          responseContent += "\n\n---\n\n**Your final complimentary preview is complete.**\n\nYou've seen enough to know there's depth here. Sign in to enter the full system — AIS, suppressors, timing, phase logic, and next-move strategy.";
+          responseContent += "\n\n---\n\n**Your final complimentary preview is complete.**\n\nSubscribe to access the full system — AIS scoring, dispute generation, funding projections, and unlimited analysis. $50/mo, cancel anytime.";
         }
       }
 
@@ -2270,10 +2270,10 @@ export default function LandingPage() {
             <div className="mb-6">
               <ProfundrAvatar size={48} className="mx-auto mb-4" />
               <h2 className="text-[22px] font-bold text-[#1a1a2e] tracking-[-0.02em] mb-2" data-testid="text-initiation-headline">
-                Enter Profundr
+                Unlock Profundr
               </h2>
               <p className="text-[13px] text-[#777] leading-[1.6] max-w-[320px] mx-auto">
-                Access full digital underwriting intelligence — AIS, denial simulation, approval blockers, next-move strategy, and deeper financial identity analysis.
+                Your complimentary previews are complete. Subscribe to access full AIS scoring, dispute generation, funding projections, and unlimited analysis.
               </p>
             </div>
 
@@ -2281,21 +2281,14 @@ export default function LandingPage() {
               <button
                 onClick={() => { setShowInitiationGate(false); window.location.href = '/subscription'; }}
                 className="w-full py-3 bg-[#1a1a2e] text-white rounded-full text-[14px] font-medium hover:bg-[#2a2a40] transition-colors"
-                data-testid="button-initiation-signin"
-              >
-                Sign In
-              </button>
-              <button
-                onClick={() => { setShowInitiationGate(false); window.location.href = '/subscription'; }}
-                className="w-full py-3 border border-[#ddd] text-[#555] rounded-full text-[14px] font-medium hover:bg-[#f0f0f0] transition-colors"
                 data-testid="button-initiation-subscribe"
               >
-                Subscribe
+                Subscribe — $50/mo
               </button>
             </div>
 
             <p className="text-[10px] text-[#bbb] tracking-wide">
-              The first two previews were complimentary. Full access begins here.
+              Secure payment via Stripe. Cancel anytime.
             </p>
           </div>
         </div>

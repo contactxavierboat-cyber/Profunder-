@@ -1835,6 +1835,21 @@ export async function registerRoutes(
         return res.json({ active: true });
       }
 
+      try {
+        const stripe = await getUncachableStripeClient();
+        const subs = await stripe.subscriptions.list({
+          customer: user.stripeCustomerId,
+          status: "active",
+          limit: 1,
+        });
+        if (subs.data.length > 0) {
+          await storage.updateUser(user.id, { subscriptionStatus: "active" });
+          return res.json({ active: true });
+        }
+      } catch (stripeErr: any) {
+        console.error("Stripe API check fallback error:", stripeErr.message);
+      }
+
       if (user.subscriptionStatus === "active") {
         await storage.updateUser(user.id, { subscriptionStatus: "inactive" });
       }
