@@ -1403,9 +1403,22 @@ export default function LandingPage() {
   const lastSeenMsgId = useRef(0);
   const isSendingRef = useRef(false);
   const { user, logout } = useAuth();
+  const prevUserRef = useRef<typeof user>(undefined);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (user && !prevUserRef.current) {
+      setShowBrainHint(true);
+      setShowInputHint(true);
+      try {
+        sessionStorage.removeItem("profundr_brain_hint_dismissed");
+        sessionStorage.removeItem("profundr_input_hint_dismissed");
+      } catch {}
+    }
+    prevUserRef.current = user;
+  }, [user]);
 
   const teamMsgToGuestMsg = useCallback((m: TeamMessage, userId: number): GuestMessage => {
     if (m.isAi) {

@@ -118,6 +118,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     onSuccess: () => {
       setIsLoggedIn(true);
       localStorage.setItem("studio_logged_in", "true");
+      try {
+        sessionStorage.removeItem("profundr_brain_hint_dismissed");
+        sessionStorage.removeItem("profundr_input_hint_dismissed");
+      } catch {}
       queryClient.invalidateQueries({ queryKey: ["/api/me"] });
       queryClient.invalidateQueries({ queryKey: ["/api/chat"] });
     },
