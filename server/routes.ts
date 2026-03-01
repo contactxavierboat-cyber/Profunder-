@@ -1795,10 +1795,29 @@ export async function registerRoutes(
             WHERE p.active = true AND pr.active = true
             ORDER BY pr.unit_amount ASC LIMIT 1`
       );
-      if (result.rows.length === 0) {
+      if (result.rows.length > 0) {
+        return res.json(result.rows[0]);
+      }
+
+      const stripe = await getUncachableStripeClient();
+      const products = await stripe.products.list({ active: true, limit: 1 });
+      if (products.data.length === 0) {
         return res.status(404).json({ error: "No active subscription price found" });
       }
-      res.json(result.rows[0]);
+      const product = products.data[0];
+      const prices = await stripe.prices.list({ product: product.id, active: true, limit: 1 });
+      if (prices.data.length === 0) {
+        return res.status(404).json({ error: "No active subscription price found" });
+      }
+      const price = prices.data[0];
+      res.json({
+        product_id: product.id,
+        name: product.name,
+        price_id: price.id,
+        unit_amount: price.unit_amount,
+        currency: price.currency,
+        recurring: price.recurring,
+      });
     } catch (error: any) {
       console.error("Price fetch error:", error);
       res.status(500).json({ error: "Failed to fetch price" });
