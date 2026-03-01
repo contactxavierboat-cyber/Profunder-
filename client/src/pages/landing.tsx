@@ -1383,7 +1383,10 @@ export default function LandingPage() {
   const [teamChatMessages, setTeamChatMessages] = useState<GuestMessage[]>([]);
   const [mentionDropdown, setMentionDropdown] = useState<{ show: boolean; query: string; startIdx: number }>({ show: false, query: "", startIdx: 0 });
   const [showBrainHint, setShowBrainHint] = useState(() => {
-    try { return !localStorage.getItem("profundr_brain_hint_dismissed"); } catch { return true; }
+    try { return !sessionStorage.getItem("profundr_brain_hint_dismissed"); } catch { return true; }
+  });
+  const [showInputHint, setShowInputHint] = useState(() => {
+    try { return !sessionStorage.getItem("profundr_input_hint_dismissed"); } catch { return true; }
   });
   const [mentionSelected, setMentionSelected] = useState(0);
   const [previewCount, setPreviewCount] = useState(getGuestPreviewCount);
@@ -1927,7 +1930,7 @@ export default function LandingPage() {
                     setDocsOpen(!docsOpen);
                     if (showBrainHint) {
                       setShowBrainHint(false);
-                      try { localStorage.setItem("profundr_brain_hint_dismissed", "1"); } catch {}
+                      try { sessionStorage.setItem("profundr_brain_hint_dismissed", "1"); } catch {}
                     }
                   }}
                   className="relative w-8 h-8 flex items-center justify-center rounded-lg text-[#888] hover:text-[#555] hover:bg-[#eee] transition-colors mr-1"
@@ -1955,7 +1958,7 @@ export default function LandingPage() {
                         onClick={(e) => {
                           e.stopPropagation();
                           setShowBrainHint(false);
-                          try { localStorage.setItem("profundr_brain_hint_dismissed", "1"); } catch {}
+                          try { sessionStorage.setItem("profundr_brain_hint_dismissed", "1"); } catch {}
                         }}
                         className="mt-2 text-[10px] text-white/60 hover:text-white/90 transition-colors"
                         data-testid="button-dismiss-brain-hint"
@@ -2245,6 +2248,27 @@ export default function LandingPage() {
             </div>
           )}
 
+          {showInputHint && guestMessages.length === 0 && !activeTeamChat && (
+            <div className="flex justify-center mb-2 animate-in fade-in slide-in-from-bottom-1 duration-300" data-testid="popup-input-hint">
+              <div className="relative bg-[#1a1a2e] text-white rounded-xl px-4 py-3 shadow-lg" style={{ maxWidth: "300px" }}>
+                <p className="text-[12px] leading-[1.5] font-medium text-center">
+                  Ask credit repair or funding questions, or upload your report for a full analysis.
+                </p>
+                <button
+                  onClick={() => {
+                    setShowInputHint(false);
+                    try { sessionStorage.setItem("profundr_input_hint_dismissed", "1"); } catch {}
+                  }}
+                  className="block mx-auto mt-2 text-[10px] text-white/60 hover:text-white/90 transition-colors"
+                  data-testid="button-dismiss-input-hint"
+                >
+                  Got it
+                </button>
+                <div className="absolute -bottom-[6px] left-1/2 -translate-x-1/2 w-3 h-3 bg-[#1a1a2e] rotate-45" />
+              </div>
+            </div>
+          )}
+
           <form onSubmit={handleSubmit} className="w-full">
             <div className="flex items-center bg-[#f0f0f0] rounded-full h-[52px] pl-1.5 pr-1.5 border border-[#e5e5e5] shadow-sm focus-within:border-[#ccc] transition-colors">
               <button
@@ -2261,6 +2285,7 @@ export default function LandingPage() {
                 placeholder={attachedFile ? "Add a message about your report..." : activeTeamChat ? `Message team chat with ${activeTeamChat.displayName}... (type @ to mention)` : "Ask about your funding readiness..."}
                 className="flex-1 bg-transparent text-[14px] text-[#1a1a1a] placeholder:text-[#999] outline-none px-2"
                 value={input} onChange={handleInputChange} onKeyDown={handleInputKeyDown} disabled={isSending}
+                onFocus={() => { if (showInputHint) { setShowInputHint(false); try { sessionStorage.setItem("profundr_input_hint_dismissed", "1"); } catch {} } }}
               />
               <button
                 data-testid="button-send" type="submit" disabled={isSending || (!input.trim() && !attachedFile)}
