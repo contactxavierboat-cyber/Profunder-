@@ -472,8 +472,8 @@ function FinancialIdentityCard({ data }: { data: FinancialIdentityData }) {
           <div data-testid="fi-identity-strength">
             <p className="text-[9px] text-[#bbb] font-medium mb-0.5">Identity Strength</p>
             <div className="flex items-baseline gap-1">
-              <span className="text-[22px] font-bold font-mono leading-none" style={{ color: getIdentityStrengthColor(data.identityStrength) }}>{data.identityStrength}</span>
-              <span className="text-[11px] text-[#ccc] font-mono">/100</span>
+              <span className="text-[22px] font-bold leading-none" style={{ color: getIdentityStrengthColor(data.identityStrength) }}>{data.identityStrength}</span>
+              <span className="text-[11px] text-[#ccc]">/100</span>
             </div>
             <div className="mt-1.5 w-full h-1.5 bg-[#f0f0f0] rounded-full overflow-hidden">
               <div className="h-full rounded-full transition-all duration-1000 ease-out" style={{ width: `${data.identityStrength}%`, backgroundColor: getIdentityStrengthColor(data.identityStrength) }} />
@@ -541,7 +541,7 @@ function ProjectedFundingCard({ data, phase, compact }: { data: ProjectedFunding
             <span className="text-[8px] font-bold uppercase tracking-widest px-1.5 py-0.5 rounded-full bg-[#f0f0f0] text-[#666]" data-testid="text-funding-bureau">{data.bureau}</span>
           )}
         </div>
-        <p className="text-[18px] font-bold font-mono tracking-[-0.02em] text-[#1a1a1a] leading-tight" data-testid="text-best-case-amount">
+        <p className="text-[18px] font-bold tracking-[-0.02em] text-[#1a1a1a] leading-tight" data-testid="text-best-case-amount">
           {data.bestCasePerBureau || data.perBureauProjection || "—"}
         </p>
         <div className="flex items-center gap-1.5 mt-1">
@@ -581,7 +581,7 @@ function ProjectedFundingCard({ data, phase, compact }: { data: ProjectedFunding
             {data.bestCasePerBureau && (
               <div className="min-w-0" data-testid="pf-best-case">
                 <p className="text-[9px] text-[#bbb] font-medium mb-0.5">Best-Case {bureauLabel}</p>
-                <p className="text-[18px] font-black font-mono tracking-[-0.02em] text-[#1a1a1a] leading-tight truncate">{data.bestCasePerBureau}</p>
+                <p className="text-[18px] font-bold tracking-[-0.02em] text-[#1a1a1a] leading-tight truncate">{data.bestCasePerBureau}</p>
                 <p className="text-[9px] text-[#aaa] mt-1">5 approvals at full limit match</p>
               </div>
             )}
@@ -589,7 +589,7 @@ function ProjectedFundingCard({ data, phase, compact }: { data: ProjectedFunding
             {data.perBureauProjection && (
               <div className="min-w-0" data-testid="pf-projected-amount">
                 <p className="text-[9px] text-[#bbb] font-medium mb-0.5">{bureauLabel} Projection</p>
-                <p className="text-[14px] font-bold font-mono tracking-[-0.02em] text-[#333] truncate">{data.perBureauProjection}</p>
+                <p className="text-[14px] font-bold tracking-[-0.02em] text-[#333] truncate">{data.perBureauProjection}</p>
                 <p className="text-[9px] text-[#aaa] mt-1">3-5 approvals at 60-80% match rate</p>
               </div>
             )}
@@ -597,7 +597,7 @@ function ProjectedFundingCard({ data, phase, compact }: { data: ProjectedFunding
             {data.highestLimit && (
               <div className="min-w-0" data-testid="pf-highest-limit">
                 <p className="text-[9px] text-[#bbb] font-medium mb-0.5">Highest Limit</p>
-                <p className="text-[13px] text-[#333] font-bold font-mono truncate">{data.highestLimit}</p>
+                <p className="text-[13px] text-[#333] font-bold truncate">{data.highestLimit}</p>
                 {data.currentExposure && <p className="text-[9px] text-[#aaa] mt-0.5">{data.currentExposure} total</p>}
               </div>
             )}
@@ -701,10 +701,10 @@ function MissionDashboard({ data, userName, compact }: { data: MissionData; user
               )}
             </div>
             <div className="flex items-baseline gap-2">
-              <span className="text-[56px] font-black leading-none font-mono tracking-tighter text-white" data-testid="text-approval-score">
+              <span className="text-[56px] font-bold leading-none tracking-tighter text-white" data-testid="text-approval-score">
                 {data.approvalIndex}
               </span>
-              <span className="text-[18px] text-white/30 font-mono font-light">/100</span>
+              <span className="text-[18px] text-white/30 font-light">/100</span>
             </div>
             <p className="text-[11px] text-white/50 mt-2 leading-snug">{getApprovalSubtitle(data.approvalIndex, data.band)}</p>
             <div className="mt-3 w-full h-2 bg-white/10 rounded-full overflow-hidden">
@@ -755,7 +755,7 @@ function MissionDashboard({ data, userName, compact }: { data: MissionData; user
                 <div key={pillar.label} data-testid={`pillar-${pillar.label.toLowerCase().replace(/\s+/g, "-")}`}>
                   <div className="flex items-center justify-between mb-1">
                     <span className="text-[10px] text-[#666] font-medium">{pillar.label}</span>
-                    <span className="text-[11px] font-bold font-mono" style={{ color }}>{pillar.value}</span>
+                    <span className="text-[11px] font-bold" style={{ color }}>{pillar.value}</span>
                   </div>
                   <div className="w-full h-1.5 bg-[#f0f0f0] rounded-full overflow-hidden">
                     <div className="h-full rounded-full transition-all duration-1000 ease-out" style={{ width: `${pillar.value}%`, backgroundColor: color }} />
@@ -1354,7 +1354,7 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
                 </svg>
               </div>
               <div className="flex items-baseline gap-1.5 mb-1">
-                <span className="text-[28px] font-black font-mono text-white leading-none" data-testid="text-ais-score">{aisScore}</span>
+                <span className="text-[28px] font-bold text-white leading-none" data-testid="text-ais-score">{aisScore}</span>
                 <span className="text-[13px] font-medium text-white/40">/ 100</span>
               </div>
               <p className="text-[10px] text-white/70 font-medium mb-0.5" data-testid="text-ais-status">{getStatusLabel()}</p>
@@ -1487,7 +1487,7 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
               {pf.bestCasePerBureau && (
                 <div>
                   <p className="text-[8px] text-[#aaa] uppercase tracking-wider mb-0.5">Maximum Modeled Exposure</p>
-                  <p className="text-[10px] font-bold font-mono text-[#333]">{pf.bestCasePerBureau}</p>
+                  <p className="text-[10px] font-bold text-[#333]">{pf.bestCasePerBureau}</p>
                 </div>
               )}
               {pf.timeline && (

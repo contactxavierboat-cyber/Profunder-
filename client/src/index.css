@@ -73,7 +73,7 @@ section[id] {
 
 @theme inline {
   --font-sans: "Inter", sans-serif;
-  --font-mono: "JetBrains Mono", monospace;
+  --font-mono: "Inter", sans-serif;
 
   --radius-sm: 0.25rem;
   --radius-md: 0.5rem;
