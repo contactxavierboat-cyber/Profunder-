@@ -1,7 +1,5 @@
 import Stripe from 'stripe';
 
-let connectionSettings: any;
-
 async function fetchCredentialsForEnvironment(environment: string) {
   const hostname = process.env.REPLIT_CONNECTORS_HOSTNAME;
   const xReplitToken = process.env.REPL_IDENTITY
@@ -11,7 +9,7 @@ async function fetchCredentialsForEnvironment(environment: string) {
       : null;
 
   if (!xReplitToken) {
-    throw new Error('X-Replit-Token not found for repl/depl');
+    return null;
   }
 
   const connectorName = 'stripe';
@@ -42,6 +40,13 @@ async function fetchCredentialsForEnvironment(environment: string) {
 }
 
 async function getCredentials() {
+  if (process.env.STRIPE_SECRET_KEY && process.env.STRIPE_PUBLISHABLE_KEY) {
+    return {
+      publishableKey: process.env.STRIPE_PUBLISHABLE_KEY,
+      secretKey: process.env.STRIPE_SECRET_KEY,
+    };
+  }
+
   const isProduction = process.env.REPLIT_DEPLOYMENT === '1';
   const targetEnvironment = isProduction ? 'production' : 'development';
 
@@ -53,7 +58,7 @@ async function getCredentials() {
   }
 
   if (!creds) {
-    throw new Error(`Stripe connection not found`);
+    throw new Error(`Stripe connection not found. Set STRIPE_SECRET_KEY and STRIPE_PUBLISHABLE_KEY environment variables.`);
   }
 
   return creds;

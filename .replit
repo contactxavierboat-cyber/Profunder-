@@ -48,3 +48,9 @@ waitForPort = 5000
 stack = "MOCKUP_JS"
 mockupState = "FULLSTACK"
 integrations = ["javascript_openai_ai_integrations:2.0.0", "stripe:2.0.0"]
+
+[userenv]
+
+[userenv.shared]
+STRIPE_PUBLISHABLE_KEY = "pk_live_51T6CzqRJvLY04pOldWGumr1q7Kqa83um3Wqdn6dOslYo9zo3gY317ImCTfo1qJgkgZqYD1oG9HiBkRXQAOyYa7mI00nXXSrx9O"
+STRIPE_SECRET_KEY = "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"
