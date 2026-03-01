@@ -195,7 +195,7 @@ export default function SubscriptionPage() {
                 </svg>
               </div>
               <span className="text-[32px] font-bold text-[#1a1a1a]" data-testid="text-price">{formattedPrice}</span>
-              <span className="text-[14px] text-[#888]">/month</span>
+              <span className="text-[32px] font-bold text-[#1a1a1a]">/month</span>
             </div>
 
             <div className="space-y-4 mb-6">
