@@ -1166,6 +1166,7 @@ function TeamSection({ user, onOpenTeamChat, activeTeamChatId }: { user: any; on
 function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, activeTeamChatId, aisReport, onOpenAis }: { docs: SavedDoc[]; onClose: () => void; onDelete: (id: string) => void; onSave: (doc: SavedDoc) => void; user: any; onOpenTeamChat?: (member: TeamMember) => void; activeTeamChatId?: number | null; aisReport: MissionData | null; onOpenAis: () => void }) {
   const docInputRef = useRef<HTMLInputElement>(null);
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
+  const [expandedBureau, setExpandedBureau] = useState<string | null>(null);
 
   const handleUploadDoc = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -1505,10 +1506,24 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
                   }
                   seenBureaus.add(bureau);
                   const riskCount = bureau === (aisReport?.bureauSource || "") ? suppressorCount : Math.max(0, suppressorCount - 1);
+                  const isSource = bureau === (aisReport?.bureauSource || "");
+                  const isExpanded = expandedBureau === bureau;
                   return (
-                    <div key={doc.id} className="rounded-lg bg-[#fafafa] border border-[#eee] p-2.5 group hover:border-[#ddd] transition-colors" data-testid={`doc-item-${doc.id}`}>
+                    <div key={doc.id} className={`rounded-lg border p-2.5 group transition-all ${isExpanded ? "bg-white border-[#ccc] shadow-sm" : "bg-[#fafafa] border-[#eee] hover:border-[#ddd]"}`} data-testid={`doc-item-${doc.id}`}>
                       <div className="flex items-center justify-between mb-1.5">
-                        <p className="text-[10px] text-[#333] font-semibold">{bureau}</p>
+                        <button
+                          onClick={() => hasAis ? setExpandedBureau(isExpanded ? null : bureau) : undefined}
+                          className={`flex items-center gap-1.5 text-left ${hasAis ? "cursor-pointer" : "cursor-default"}`}
+                          data-testid={`button-expand-bureau-${bureau?.toLowerCase()}`}
+                        >
+                          {hasAis && (
+                            <svg width="8" height="8" viewBox="0 0 8 8" fill="none" className={`transition-transform ${isExpanded ? "rotate-90" : ""}`}>
+                              <path d="M2 1l4 3-4 3" stroke="#999" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
+                            </svg>
+                          )}
+                          <p className="text-[10px] text-[#333] font-semibold">{bureau}</p>
+                          {isSource && hasAis && <span className="text-[7px] text-white bg-[#1a1a2e] rounded px-1 py-[1px] font-medium">SOURCE</span>}
+                        </button>
                         <button onClick={() => onDelete(doc.id)}
                           className="opacity-0 group-hover:opacity-100 text-[#ccc] hover:text-red-400 transition-all p-0.5"
                           data-testid={`button-delete-doc-${doc.id}`}>
@@ -1524,6 +1539,73 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
                           </>
                         )}
                       </div>
+                      {isExpanded && hasAis && aisReport && (
+                        <div className="mt-2 pt-2 border-t border-[#e8e8e8] space-y-2.5">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <p className="text-[7px] text-[#aaa] uppercase tracking-wider">Approval Index</p>
+                              <p className="text-[16px] font-bold text-[#1a1a2e] leading-none mt-0.5">{aisReport.approvalIndex ?? "—"}<span className="text-[9px] text-[#999] font-normal ml-0.5">/ 100</span></p>
+                            </div>
+                            <div className="text-right">
+                              <p className="text-[7px] text-[#aaa] uppercase tracking-wider">Band</p>
+                              <p className="text-[10px] font-semibold text-[#333] mt-0.5">{aisReport.band || "—"}</p>
+                            </div>
+                          </div>
+                          {aisReport.phase && (
+                            <div>
+                              <p className="text-[7px] text-[#aaa] uppercase tracking-wider">Phase</p>
+                              <p className="text-[10px] font-medium text-[#333] mt-0.5">{aisReport.phase}</p>
+                            </div>
+                          )}
+                          {aisReport.pillarScores?.length > 0 && (
+                            <div>
+                              <p className="text-[7px] text-[#aaa] uppercase tracking-wider mb-1">Pillar Scores</p>
+                              <div className="space-y-1">
+                                {aisReport.pillarScores.map((p, pi) => (
+                                  <div key={pi} className="flex items-center gap-2">
+                                    <p className="text-[8px] text-[#666] w-[80px] truncate">{p.label}</p>
+                                    <div className="flex-1 h-[4px] bg-[#eee] rounded-full overflow-hidden">
+                                      <div
+                                        className="h-full rounded-full transition-all"
+                                        style={{
+                                          width: `${p.value}%`,
+                                          backgroundColor: p.value >= 80 ? "#1a1a2e" : p.value >= 60 ? "#555" : p.value >= 40 ? "#999" : "#ccc"
+                                        }}
+                                      />
+                                    </div>
+                                    <p className="text-[8px] text-[#555] font-semibold w-[20px] text-right">{p.value}</p>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                          {aisReport.suppressors?.length > 0 && (
+                            <div>
+                              <p className="text-[7px] text-[#aaa] uppercase tracking-wider mb-0.5">Risk Drivers</p>
+                              {aisReport.suppressors.slice(0, 3).map((s, si) => (
+                                <p key={si} className="text-[8px] text-[#777] leading-[1.5]">· {s}</p>
+                              ))}
+                              {aisReport.suppressors.length > 3 && (
+                                <p className="text-[7px] text-[#aaa] mt-0.5">+{aisReport.suppressors.length - 3} more</p>
+                              )}
+                            </div>
+                          )}
+                          {aisReport.financialIdentity && (
+                            <div>
+                              <p className="text-[7px] text-[#aaa] uppercase tracking-wider mb-0.5">Financial Identity</p>
+                              {aisReport.financialIdentity.profileType && <p className="text-[8px] text-[#555]">Profile: <span className="font-medium text-[#333]">{aisReport.financialIdentity.profileType}</span></p>}
+                              {aisReport.financialIdentity.creditAge && <p className="text-[8px] text-[#555]">Credit Age: <span className="font-medium text-[#333]">{aisReport.financialIdentity.creditAge}</span></p>}
+                              {aisReport.financialIdentity.lenderPerception && <p className="text-[8px] text-[#555]">Lender View: <span className="font-medium text-[#333]">{aisReport.financialIdentity.lenderPerception}</span></p>}
+                              {aisReport.financialIdentity.identityStrength !== null && (
+                                <p className="text-[8px] text-[#555]">Strength: <span className="font-medium text-[#333]">{aisReport.financialIdentity.identityStrength}/100</span></p>
+                              )}
+                            </div>
+                          )}
+                          {!isSource && (
+                            <p className="text-[7px] text-[#bbb] italic">Data modeled from {aisReport.bureauSource || "primary"} bureau source</p>
+                          )}
+                        </div>
+                      )}
                     </div>
                   );
                 });
