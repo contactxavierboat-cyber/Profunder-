@@ -1303,61 +1303,58 @@ function PerfectProfileTab({ aisReport }: { aisReport: MissionData | null }) {
   const totalSlotCount = allSlots.reduce((s, g) => s + g.slots.length, 0);
 
   return (
-    <div className="space-y-4" data-testid="perfect-profile-tab">
-      <div className="rounded-xl bg-gradient-to-br from-[#1a1a2e] to-[#2a2a40] p-4">
-        <p className="text-[9px] text-white/50 uppercase tracking-wider font-semibold mb-2">The Perfect Profile</p>
+    <div className="space-y-3" data-testid="perfect-profile-tab">
+      <div className="rounded-xl bg-gradient-to-br from-[#1a1a2e] to-[#2a2a40] p-3.5">
         <div className="flex items-center gap-3">
-          <div className="relative w-[44px] h-[44px]">
+          <div className="relative w-[40px] h-[40px]">
             <svg viewBox="0 0 36 36" className="w-full h-full -rotate-90">
-              <circle cx="18" cy="18" r="15.5" fill="none" stroke="rgba(255,255,255,0.1)" strokeWidth="3" />
+              <circle cx="18" cy="18" r="15.5" fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="3" />
               <circle cx="18" cy="18" r="15.5" fill="none" stroke={pct >= 80 ? "#4ade80" : pct >= 50 ? "#fbbf24" : "#f87171"} strokeWidth="3" strokeDasharray={`${pct * 0.974} 100`} strokeLinecap="round" />
             </svg>
-            <span className="absolute inset-0 flex items-center justify-center text-[11px] font-bold text-white">{pct}%</span>
+            <span className="absolute inset-0 flex items-center justify-center text-[10px] font-bold text-white">{pct}%</span>
           </div>
           <div>
-            <p className="text-[14px] font-bold text-white">{filledSlots}<span className="text-[11px] font-normal text-white/60"> / {totalSlotCount} slots filled</span></p>
-            <p className="text-[9px] text-white/40">{metFields} of {totalFields} criteria met</p>
+            <p className="text-[12px] font-bold text-white leading-tight">{filledSlots}<span className="text-[10px] font-normal text-white/50"> / {totalSlotCount} slots</span></p>
+            <p className="text-[8px] text-white/35 mt-0.5">{metFields} of {totalFields} criteria met</p>
           </div>
         </div>
       </div>
 
       {allSlots.map((group, gi) => (
         <div key={gi}>
-          <p className="text-[8px] text-[#aaa] uppercase tracking-wider font-semibold mb-1.5">{group.title}</p>
-          <div className="space-y-2">
+          <p className="text-[7px] text-[#aaa] uppercase tracking-[0.08em] font-semibold mb-1">{group.title}</p>
+          <div className="space-y-1.5">
             {group.slots.map((slot, si) => {
               const slotMet = slot.fields.filter(f => f.met).length;
               const slotTotal = slot.fields.length;
               return (
-                <div key={si} className={`rounded-lg border overflow-hidden ${slot.filled ? "border-[#1a1a2e]/20 bg-white" : "border-[#e8e8e8] bg-[#fafafa]"}`} data-testid={`slot-${gi}-${si}`}>
-                  <div className={`flex items-center justify-between px-3 py-2 ${slot.filled ? "bg-[#1a1a2e]" : "bg-[#f0f0f0]"}`}>
-                    <div className="flex items-center gap-2">
-                      <div className={`w-[14px] h-[14px] rounded flex items-center justify-center ${slot.filled ? "bg-white/20" : "bg-[#ddd]"}`}>
+                <div key={si} className={`rounded-lg overflow-hidden ${slot.filled ? "border border-[#1a1a2e]/15 bg-white" : "border border-dashed border-[#ddd] bg-[#f7f7f7]"}`} data-testid={`slot-${gi}-${si}`}>
+                  <div className={`flex items-center justify-between px-2.5 py-1.5 ${slot.filled ? "bg-[#1a1a2e]" : "bg-[#efefef]"}`}>
+                    <div className="flex items-center gap-1.5">
+                      <div className={`w-[12px] h-[12px] rounded flex items-center justify-center ${slot.filled ? "bg-white/20" : "bg-[#d8d8d8]"}`}>
                         {slot.filled ? (
-                          <svg width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2 5l2.5 2.5L8 3" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                          <svg width="7" height="7" viewBox="0 0 10 10" fill="none"><path d="M2 5l2.5 2.5L8 3" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
                         ) : (
-                          <svg width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M5 2v6M2 5h6" stroke="#999" strokeWidth="1.2" strokeLinecap="round" /></svg>
+                          <svg width="7" height="7" viewBox="0 0 10 10" fill="none"><path d="M5 2v6M2 5h6" stroke="#aaa" strokeWidth="1.2" strokeLinecap="round" /></svg>
                         )}
                       </div>
-                      <p className={`text-[10px] font-semibold ${slot.filled ? "text-white" : "text-[#888]"}`}>{slot.name}</p>
+                      <p className={`text-[9px] font-semibold ${slot.filled ? "text-white" : "text-[#999]"}`}>{slot.name}</p>
+                      <span className={`text-[7px] font-medium ml-0.5 ${slot.filled ? "text-white/40" : "text-[#c0c0c0]"}`}>{slotMet}/{slotTotal}</span>
                     </div>
-                    <p className={`text-[8px] font-medium ${slot.filled ? "text-white/60" : "text-[#bbb]"}`}>{slotMet}/{slotTotal}</p>
                   </div>
                   <div>
                     {slot.fields.map((field, fi2) => (
-                      <div key={fi2} className={`flex items-center px-3 py-[7px] ${fi2 > 0 ? "border-t border-[#f0f0f0]" : ""}`}>
-                        <div className={`w-[12px] h-[12px] rounded-sm flex items-center justify-center shrink-0 mr-2.5 ${field.met ? "bg-[#1a1a2e]" : "border border-[#ddd] bg-white"}`}>
+                      <div key={fi2} className={`grid items-center px-2.5 py-[5px] ${fi2 > 0 ? "border-t border-[#f0f0f0]" : ""}`} style={{ gridTemplateColumns: "18px 1fr auto" }}>
+                        <div className={`w-[10px] h-[10px] rounded-[2px] flex items-center justify-center ${field.met ? "bg-[#2d6a4f]" : "border border-[#ddd] bg-white"}`}>
                           {field.met && (
-                            <svg width="7" height="7" viewBox="0 0 10 10" fill="none"><path d="M2 5l2.5 2.5L8 3" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                            <svg width="6" height="6" viewBox="0 0 10 10" fill="none"><path d="M2 5l2.5 2.5L8 3" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
                           )}
                         </div>
-                        <div className="flex-1 min-w-0 flex items-baseline justify-between gap-2">
-                          <p className="text-[9px] text-[#777] shrink-0">{field.label}</p>
-                          <div className="flex items-center gap-1.5 min-w-0">
-                            <span className="text-[8px] text-[#bbb] truncate">{field.ideal}</span>
-                            <span className="text-[8px] text-[#ccc]">→</span>
-                            <span className={`text-[8px] font-semibold truncate ${field.met ? "text-[#1a1a2e]" : "text-[#c0392b]"}`}>{field.actual || "Empty"}</span>
-                          </div>
+                        <p className="text-[8px] text-[#777]">{field.label}</p>
+                        <div className="flex items-center gap-1 justify-end pl-2">
+                          <span className="text-[7px] text-[#c0c0c0]">{field.ideal}</span>
+                          <span className="text-[7px] text-[#ddd] mx-px">|</span>
+                          <span className={`text-[8px] font-semibold ${field.met ? "text-[#2d6a4f]" : field.actual ? "text-[#c0392b]" : "text-[#ccc] italic font-normal"}`}>{field.actual || "—"}</span>
                         </div>
                       </div>
                     ))}
