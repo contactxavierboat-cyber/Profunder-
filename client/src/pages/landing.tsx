@@ -1209,11 +1209,13 @@ function PerfectProfileTab({ aisReport }: { aisReport: MissionData | null }) {
   const [expandedSection, setExpandedSection] = useState<string | null>("revolving");
   if (!aisReport || !hasAnalysisData(aisReport)) {
     return (
-      <div className="flex flex-col items-center justify-center py-12 px-4 text-center">
-        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#ccc" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M12 2C9.5 2 7.5 4 7.5 6.5c0 .5-.4 1-1 1C4.5 7.5 3 9.5 3 11.5c0 1.5.8 2.8 2 3.5 0 0-.5 1.5-.5 2.5C4.5 20 6.5 22 9 22c1.5 0 2.5-.5 3-1.5.5 1 1.5 1.5 3 1.5 2.5 0 4.5-2 4.5-4.5 0-1-.5-2.5-.5-2.5 1.2-.7 2-2 2-3.5 0-2-1.5-4-3.5-4-.6 0-1-.5-1-1C16.5 4 14.5 2 12 2z" />
-        </svg>
-        <p className="text-[11px] text-[#999] mt-3 leading-[1.5]">Upload a credit report to see how your profile fills the perfect tradeline structure.</p>
+      <div className="flex flex-col items-center justify-center py-10 px-4 text-center">
+        <div className="w-[28px] h-[28px] rounded-md bg-[#f5f5f5] border border-[#e8e8e8] flex items-center justify-center">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#bbb" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M12 5v14M5 12h14" />
+          </svg>
+        </div>
+        <p className="text-[9px] text-[#999] mt-2.5 leading-[1.6]">Upload a credit report to generate your profile match.</p>
       </div>
     );
   }
@@ -1308,38 +1310,50 @@ function PerfectProfileTab({ aisReport }: { aisReport: MissionData | null }) {
   const factorsMet = factorChecks.filter(f => f.met).length;
   const pct = totalMarkers > 0 ? Math.round((metMarkers / totalMarkers) * 100) : (factorsMet > 0 ? Math.round((factorsMet / factorChecks.length) * 100) : 0);
 
+  const accentColor = pct >= 80 ? "#2d6a4f" : pct >= 50 ? "#c9a227" : "#c0392b";
+
   return (
-    <div className="space-y-1.5" data-testid="perfect-profile-tab">
-      <div className="rounded-xl bg-gradient-to-br from-[#1a1a2e] to-[#2a2a40] p-2.5">
-        <div className="flex items-center gap-2">
-          <div className="relative w-[34px] h-[34px] flex-shrink-0">
-            <svg viewBox="0 0 36 36" className="w-full h-full -rotate-90">
-              <circle cx="18" cy="18" r="15.5" fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="2.5" />
-              <circle cx="18" cy="18" r="15.5" fill="none" stroke={pct >= 80 ? "#4ade80" : pct >= 50 ? "#fbbf24" : "#f87171"} strokeWidth="2.5" strokeDasharray={`${pct * 0.974} 100`} strokeLinecap="round" />
-            </svg>
-            <div className="absolute inset-0 flex flex-col items-center justify-center">
-              <span className="text-[10px] font-bold text-white leading-none">{pct}%</span>
+    <div className="space-y-[6px]" data-testid="perfect-profile-tab">
+      <div className="rounded-lg bg-gradient-to-br from-[#1a1a2e] to-[#252540] p-3">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <div className="relative w-[36px] h-[36px] flex-shrink-0">
+              <svg viewBox="0 0 36 36" className="w-full h-full -rotate-90">
+                <circle cx="18" cy="18" r="15.5" fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="2" />
+                <circle cx="18" cy="18" r="15.5" fill="none" stroke={accentColor} strokeWidth="2" strokeDasharray={`${pct * 0.974} 100`} strokeLinecap="round" />
+              </svg>
+              <div className="absolute inset-0 flex items-center justify-center">
+                <span className="text-[11px] font-bold text-white leading-none" style={{ fontVariantNumeric: "tabular-nums" }}>{pct}</span>
+              </div>
+            </div>
+            <div className="min-w-0">
+              <p className="text-[7px] uppercase tracking-[0.12em] text-white/25 font-medium leading-none">Profile Match</p>
+              <p className="text-[11px] font-semibold text-white leading-tight mt-0.5" style={{ fontVariantNumeric: "tabular-nums" }}>{tradelines.length > 0 ? metMarkers : factorsMet}<span className="text-[9px] font-normal text-white/30">/{tradelines.length > 0 ? totalMarkers : factorChecks.length}</span></p>
             </div>
           </div>
-          <div className="min-w-0">
-            <p className="text-[7px] uppercase tracking-[0.08em] text-white/25 font-medium leading-none">Profile Match</p>
-            <p className="text-[10px] font-bold text-white leading-tight mt-0.5">{tradelines.length > 0 ? metMarkers : factorsMet}<span className="text-[8px] font-normal text-white/35">/{tradelines.length > 0 ? totalMarkers : factorChecks.length} {tradelines.length > 0 ? "markers" : "factors"} met</span></p>
-            <p className="text-[7px] text-white/25 mt-px leading-none">{tradelines.length > 0 ? `${tradelines.length} accounts · ` : ""}{factorsMet}/{factorChecks.length} factors clear</p>
+          <div className="text-right">
+            <p className="text-[7px] uppercase tracking-[0.1em] text-white/20">Factors</p>
+            <p className="text-[10px] font-semibold text-white" style={{ fontVariantNumeric: "tabular-nums" }}>{factorsMet}<span className="text-[8px] font-normal text-white/25">/{factorChecks.length}</span></p>
           </div>
         </div>
       </div>
 
-      <div className="flex flex-wrap gap-x-0.5 gap-y-0.5 px-0.5">
-        {factorChecks.map((f, i) => (
-          <div key={i} className="flex items-center gap-[3px] px-1.5 py-[2px] rounded-full" style={{ background: f.met ? "#2d6a4f10" : f.warn ? "#d9770610" : "#dc262610" }}>
-            <div className="w-[5px] h-[5px] rounded-full" style={{ background: f.met ? "#2d6a4f" : f.warn ? "#d97706" : "#dc2626" }} />
-            <span className="text-[7px] font-medium" style={{ color: f.met ? "#2d6a4f" : f.warn ? "#d97706" : "#dc2626" }}>{f.label}</span>
-            <span className="text-[6px] text-[#aaa]">{f.detail}</span>
-          </div>
-        ))}
+      <div className="grid grid-cols-4 gap-[3px]">
+        {factorChecks.map((f, i) => {
+          const fColor = f.met ? "#2d6a4f" : f.warn ? "#c9a227" : "#c0392b";
+          return (
+            <div key={i} className="flex items-center gap-[4px] px-[6px] py-[3px] rounded-md bg-[#f8f8fa] border border-[#eee]">
+              <div className="w-[4px] h-[4px] rounded-full flex-shrink-0" style={{ background: fColor }} />
+              <div className="min-w-0">
+                <p className="text-[6px] text-[#999] leading-none truncate">{f.label}</p>
+                <p className="text-[7px] font-semibold leading-none mt-[1px] truncate" style={{ color: fColor }}>{f.detail}</p>
+              </div>
+            </div>
+          );
+        })}
       </div>
 
-      <div className="space-y-1">
+      <div className="space-y-[3px]">
         {allCards.map((card, ci) => {
           const cardMet = card.markers.filter(m => m.met).length;
           const cardTotal = card.markers.length;
@@ -1347,25 +1361,23 @@ function PerfectProfileTab({ aisReport }: { aisReport: MissionData | null }) {
           const isAU = /\bau\b/i.test(card.ownership);
           const isClosed_ = card.markers.some(m => m.label === "Status" && m.actual === "Closed");
           return (
-            <div key={ci} className={`rounded-lg overflow-hidden ${allMet ? "border border-[#2d6a4f]/20" : "border border-[#e5e5e5]"}`} data-testid={`account-card-${ci}`}>
-              <div className={`flex items-center justify-between px-2 py-[5px] ${allMet ? "bg-[#2d6a4f]" : isClosed_ ? "bg-[#888]" : isAU ? "bg-[#6366f1]" : "bg-[#1a1a2e]"}`}>
-                <div className="flex items-center gap-1 min-w-0">
+            <div key={ci} className={`rounded-md overflow-hidden border ${allMet ? "border-[#2d6a4f]/25" : "border-[#eaeaea]"}`} data-testid={`account-card-${ci}`}>
+              <div className={`flex items-center justify-between px-2 py-[4px] ${allMet ? "bg-[#2d6a4f]" : isClosed_ ? "bg-[#6b6b7b]" : isAU ? "bg-[#4a4a6a]" : "bg-[#1a1a2e]"}`}>
+                <div className="flex items-center gap-1.5 min-w-0">
                   <p className="text-[9px] font-semibold text-white truncate">{card.creditor}</p>
-                  <span className="text-[6px] text-white/30 flex-shrink-0">{card.type}</span>
-                  {isAU && <span className="text-[6px] font-bold text-white/50 bg-white/10 px-1 py-px rounded">AU</span>}
-                  {isClosed_ && <span className="text-[6px] font-bold text-white/50 bg-white/10 px-1 py-px rounded">CLOSED</span>}
+                  <span className="text-[6px] uppercase tracking-wider text-white/25 flex-shrink-0">{card.type}</span>
+                  {isAU && <span className="text-[5px] font-bold uppercase tracking-wider text-white/50 bg-white/10 px-1 py-px rounded-sm">AU</span>}
+                  {isClosed_ && <span className="text-[5px] font-bold uppercase tracking-wider text-white/50 bg-white/10 px-1 py-px rounded-sm">Closed</span>}
                 </div>
-                <span className="text-[7px] text-white/35 flex-shrink-0 ml-1">{cardMet}/{cardTotal}</span>
+                <span className="text-[7px] font-medium text-white/30 flex-shrink-0 ml-1" style={{ fontVariantNumeric: "tabular-nums" }}>{cardMet}/{cardTotal}</span>
               </div>
-              <div className="grid grid-cols-4 px-2 py-[4px] gap-x-1">
+              <div className="grid grid-cols-4 bg-[#fafafa]">
                 {card.markers.map((m, mi) => (
-                  <div key={mi} className="flex items-center gap-[3px]">
-                    <div className={`w-[6px] h-[6px] rounded-[1px] flex items-center justify-center flex-shrink-0 ${m.met ? "bg-[#2d6a4f]" : "bg-[#e0e0e0]"}`}>
-                      {m.met && <svg width="4" height="4" viewBox="0 0 10 10" fill="none"><path d="M2 5l2.5 2.5L8 3" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" /></svg>}
-                    </div>
-                    <div className="flex flex-col min-w-0">
-                      <span className="text-[6px] text-[#aaa] leading-none">{m.label}</span>
-                      <span className={`text-[8px] font-semibold leading-tight truncate ${m.met ? "text-[#2d6a4f]" : "text-[#c0392b]"}`}>{m.actual}</span>
+                  <div key={mi} className="flex flex-col items-center py-[5px] px-1" style={{ borderRight: mi < card.markers.length - 1 ? "1px solid #f0f0f0" : "none" }}>
+                    <span className="text-[6px] text-[#aaa] leading-none mb-[2px]">{m.label}</span>
+                    <span className="text-[8px] font-semibold leading-none truncate max-w-full" style={{ color: m.met ? "#2d6a4f" : "#c0392b", fontVariantNumeric: "tabular-nums" }}>{m.actual}</span>
+                    <div className="w-full h-[1px] mt-[3px] rounded-full" style={{ background: m.met ? "#2d6a4f15" : "#c0392b10" }}>
+                      <div className="h-full rounded-full" style={{ width: m.met ? "100%" : "30%", background: m.met ? "#2d6a4f" : "#c0392b" }} />
                     </div>
                   </div>
                 ))}
@@ -1375,9 +1387,9 @@ function PerfectProfileTab({ aisReport }: { aisReport: MissionData | null }) {
         })}
 
         {tradelines.length === 0 && (
-          <div className="rounded-lg border border-dashed border-[#d5d5d5] bg-[#f7f7f7] p-2.5 text-center">
-            <p className="text-[9px] text-[#999] font-medium">Tradeline details not yet available</p>
-            <p className="text-[8px] text-[#ccc] mt-0.5 leading-[1.5] italic font-light">Re-upload your credit report to generate the full account match report.</p>
+          <div className="rounded-md border border-dashed border-[#ddd] bg-[#fafafa] p-3 text-center">
+            <p className="text-[8px] text-[#999] font-medium">Awaiting tradeline data</p>
+            <p className="text-[7px] text-[#bbb] mt-0.5 leading-[1.5]">Re-upload your credit report for the full account match report.</p>
           </div>
         )}
       </div>
