@@ -1287,10 +1287,18 @@ function PerfectProfileTab({ aisReport }: { aisReport: MissionData | null }) {
   const totalMarkers = allCards.reduce((s, c) => s + c.markers.length, 0);
   const metMarkers = allCards.reduce((s, c) => s + c.markers.filter(m => m.met).length, 0);
 
+  const utilScore = getPillar("utilization");
+  const depthScore = getPillar("depth") || getPillar("credit");
+  const utilMet = tradelines.length > 0 ? utilPct <= 5 : utilScore !== null ? utilScore >= 85 : false;
+  const utilWarn = tradelines.length > 0 ? utilPct <= 30 : utilScore !== null ? utilScore >= 60 : false;
+  const utilDetail = tradelines.length > 0 ? `${utilPct}%` : utilScore !== null ? `Score ${utilScore}` : "—";
+  const revDetail = tradelines.length > 0 ? `${revolvingAccounts.length} open` : depthScore !== null ? `Depth ${depthScore}` : "—";
+  const instDetail = tradelines.length > 0 ? `${installmentAccounts.length} open` : "—";
+
   const factorChecks = [
-    { label: "Revolving", met: revolvingAccounts.length >= 5, warn: revolvingAccounts.length >= 3, detail: `${revolvingAccounts.length} open` },
-    { label: "Installment", met: installmentAccounts.length >= 2, warn: installmentAccounts.length >= 1, detail: `${installmentAccounts.length} open` },
-    { label: "Utilization", met: utilPct <= 5, warn: utilPct <= 30, detail: `${utilPct}%` },
+    { label: "Revolving", met: tradelines.length > 0 ? revolvingAccounts.length >= 5 : (depthScore ?? 0) >= 80, warn: tradelines.length > 0 ? revolvingAccounts.length >= 3 : (depthScore ?? 0) >= 55, detail: revDetail },
+    { label: "Installment", met: tradelines.length > 0 ? installmentAccounts.length >= 2 : (depthScore ?? 0) >= 80, warn: tradelines.length > 0 ? installmentAccounts.length >= 1 : (depthScore ?? 0) >= 55, detail: instDetail },
+    { label: "Utilization", met: utilMet, warn: utilWarn, detail: utilDetail },
     { label: "Payments", met: !hasLates, warn: false, detail: hasLates ? "Issues" : "Clean" },
     { label: "Inquiries", met: !hasInquiries, warn: false, detail: hasInquiries ? "High" : "Low" },
     { label: "Derogatories", met: !hasCollections && !hasChargeOffs, warn: false, detail: hasCollections || hasChargeOffs ? "Found" : "Clear" },
@@ -1298,7 +1306,7 @@ function PerfectProfileTab({ aisReport }: { aisReport: MissionData | null }) {
     { label: "Records", met: !hasPublicRecords, warn: false, detail: hasPublicRecords ? "Found" : "Clear" },
   ];
   const factorsMet = factorChecks.filter(f => f.met).length;
-  const pct = totalMarkers > 0 ? Math.round((metMarkers / totalMarkers) * 100) : 0;
+  const pct = totalMarkers > 0 ? Math.round((metMarkers / totalMarkers) * 100) : (factorsMet > 0 ? Math.round((factorsMet / factorChecks.length) * 100) : 0);
 
   const renderMarkerDot = (met: boolean) => (
     <div className={`w-[8px] h-[8px] rounded-full flex items-center justify-center flex-shrink-0 ${met ? "bg-[#2d6a4f]" : "bg-[#e5e5e5]"}`}>
@@ -1321,8 +1329,8 @@ function PerfectProfileTab({ aisReport }: { aisReport: MissionData | null }) {
           </div>
           <div className="min-w-0">
             <p className="text-[7px] uppercase tracking-[0.1em] text-white/30 font-medium leading-none">Fundability Match</p>
-            <p className="text-[11px] font-bold text-white leading-tight mt-0.5">{metMarkers}<span className="text-[9px] font-normal text-white/40">/{totalMarkers} markers met</span></p>
-            <p className="text-[7px] text-white/30 mt-px">{tradelines.length} accounts · {factorsMet}/{factorChecks.length} factors clear</p>
+            <p className="text-[11px] font-bold text-white leading-tight mt-0.5">{tradelines.length > 0 ? metMarkers : factorsMet}<span className="text-[9px] font-normal text-white/40">/{tradelines.length > 0 ? totalMarkers : factorChecks.length} {tradelines.length > 0 ? "markers" : "factors"} met</span></p>
+            <p className="text-[7px] text-white/30 mt-px">{tradelines.length > 0 ? `${tradelines.length} accounts · ` : ""}{factorsMet}/{factorChecks.length} factors clear</p>
           </div>
         </div>
       </div>
@@ -1373,8 +1381,9 @@ function PerfectProfileTab({ aisReport }: { aisReport: MissionData | null }) {
         })}
 
         {tradelines.length === 0 && (
-          <div className="text-center py-6">
-            <p className="text-[9px] text-[#bbb] italic">No tradelines parsed from report</p>
+          <div className="rounded-lg border border-dashed border-[#ddd] bg-[#fafafa] p-3 text-center">
+            <p className="text-[9px] text-[#999] font-medium">Tradeline details not yet available</p>
+            <p className="text-[8px] text-[#bbb] mt-1 leading-[1.5]">Re-upload your credit report to generate the full account match report. Each account will be listed with fundability markers.</p>
           </div>
         )}
       </div>

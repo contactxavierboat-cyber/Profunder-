@@ -1073,23 +1073,27 @@ Readiness Level (per-bureau): Not Ready = active derogatories on this bureau OR 
 
 Timeline: Utilization fix = 1-2 months. Removing derogatories on this bureau = 3-6 months per round. Seasoning new accounts = 6-12 months. Inquiry aging (to free slots) = 6-12 months.
 
-Account Tradelines:
-List EVERY account on the report — open, closed, and authorized user. For each, output one line in this exact format:
+**MANDATORY — Account Tradelines (DO NOT SKIP THIS SECTION):**
+You MUST list EVERY account from the credit report as structured TRADELINE lines. This is required for the Perfect Profile match report. Without these lines, the analysis is incomplete.
+
+For each account on the report — open, closed, and authorized user — output one line in this EXACT format:
 TRADELINE: [Creditor Name] | [Type: Revolving/Installment/Mortgage/HELOC/LOC/Other] | [Ownership: Primary/AU] | [Status: Open/Closed] | [Limit or Original Amount, e.g. $5,000] | [Current Balance, e.g. $1,200] | [Account Age, e.g. 3yr 2mo] | [Payment Status: Current/30-day late/60-day late/90-day late/Collection/Charge-off/Paid]
 
-Example:
+Example (do not copy these — use real data from the report):
 TRADELINE: Chase Sapphire | Revolving | Primary | Open | $12,000 | $800 | 4yr 6mo | Current
 TRADELINE: Capital One Quicksilver | Revolving | AU | Open | $8,500 | $0 | 7yr 1mo | Current
 TRADELINE: Toyota Financial | Installment | Primary | Closed | $28,000 | $0 | 2yr 3mo | Paid
-TRADELINE: Best Buy | Revolving | Primary | Closed | $2,000 | $0 | 5yr 0mo | Paid
 
 Rules:
-- Include EVERY account — open AND closed. Do not skip any
-- Authorized User accounts MUST be marked as "AU" in the Ownership field
-- Closed accounts MUST be marked as "Closed" in the Status field
-- Open accounts MUST be marked as "Open" in the Status field
-- If limit/balance is not clearly stated, use best estimate from the report data
-- If account age cannot be determined precisely, estimate from date opened
+- You MUST include EVERY account — open AND closed. Do not skip any.
+- Each line MUST start with "TRADELINE:" followed by exactly 8 pipe-delimited fields.
+- Authorized User accounts MUST be marked as "AU" in the Ownership field.
+- Closed accounts MUST be marked as "Closed" in the Status field.
+- Open accounts MUST be marked as "Open" in the Status field.
+- If limit/balance is not clearly stated, use best estimate from the report data.
+- If account age cannot be determined precisely, estimate from date opened.
+- Output the TRADELINE lines BEFORE the Top Approval Suppressors section.
+- NEVER omit this section. Even if only 1 account exists, output it.
 
 Top Approval Suppressors:
 1. [suppressor]
