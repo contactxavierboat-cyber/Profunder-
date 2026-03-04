@@ -2212,139 +2212,101 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
         </>)}
 
         {panelTab === "command" && (<>
-        {hasAis && pf && (
-          <div className="mb-4">
+        {hasAis && aisReport && (
+          <div className="mb-4" data-testid="next-moves-section">
             <div className="flex items-center gap-2 mb-2">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#333" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <line x1="12" y1="1" x2="12" y2="23" />
-                <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
-              </svg>
-              <span className="text-[10px] font-semibold text-[#555] uppercase tracking-wider">Funding Strategy Matrix</span>
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 2h8v8H2z" stroke="#333" strokeWidth="1" fill="none" rx="1" /><path d="M4 5l1.5 1.5L8 4" stroke="#333" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" /></svg>
+              <span className="text-[10px] font-semibold text-[#555] uppercase tracking-wider">Next Moves</span>
             </div>
-            <div className="rounded-lg bg-[#fafafa] border border-[#eee] p-3 space-y-2.5">
-              {pf.readinessLevel && (
-                <div>
-                  <p className="text-[8px] text-[#aaa] uppercase tracking-wider mb-0.5">Qualification Tier</p>
-                  <p className="text-[10px] font-medium text-[#333]">{getReadinessTier()}</p>
+
+            {(() => {
+              const tradelines = aisReport.openTradelines || [];
+              const parseAge = (age: string): number => { const m = age.match(/(\d+)\s*yr/i); return m ? parseInt(m[1]) : 0; };
+              const isPrimary = (o: string) => /primary/i.test(o);
+              const isAU = (o: string) => /\bau\b|authorized/i.test(o);
+              const isRev = (t: string) => /revolv|credit\s*card|loc\b|heloc/i.test(t);
+              const isInst = (t: string) => /install|auto|student|mortgage|personal\s*loan/i.test(t);
+
+              const primaryRev = tradelines.filter(tl => isRev(tl.type) && isPrimary(tl.ownership));
+              const primaryInst = tradelines.filter(tl => isInst(tl.type) && isPrimary(tl.ownership));
+              const auCount = tradelines.filter(tl => isAU(tl.ownership)).length;
+
+              const totalLimit = primaryRev.reduce((s, tl) => s + (parseInt(tl.limit.replace(/[^0-9]/g, "")) || 0), 0);
+              const totalBal = primaryRev.reduce((s, tl) => s + (parseInt(tl.balance.replace(/[^0-9]/g, "")) || 0), 0);
+              const avgUtil = totalLimit > 0 ? Math.round((totalBal / totalLimit) * 100) : 0;
+              const avgAge = tradelines.length > 0 ? Math.round(tradelines.reduce((s, tl) => s + parseAge(tl.age), 0) / tradelines.length) : 0;
+              const highLimitCount = primaryRev.filter(tl => (parseInt(tl.limit.replace(/[^0-9]/g, "")) || 0) >= 10000).length;
+              const inquiryCount = aisReport.projectedFunding?.inquirySlots ? parseInt(String(aisReport.projectedFunding.inquirySlots).replace(/[^0-9]/g, "")) || 0 : 0;
+
+              type GoalItem = { label: string; goal: string; current: string; met: boolean; priority: number; nextMove: string };
+              const goals: GoalItem[] = [
+                { label: "Primary Revolvers", goal: "5 accounts", current: `${primaryRev.length} accounts`, met: primaryRev.length >= 5, priority: primaryRev.length >= 5 ? 0 : 5 - primaryRev.length, nextMove: primaryRev.length >= 5 ? "Maintain current positions" : `Open ${5 - primaryRev.length} more primary revolving account${5 - primaryRev.length > 1 ? "s" : ""}, stagger 60–90 days apart` },
+                { label: "Primary Installments", goal: "2 accounts", current: `${primaryInst.length} account${primaryInst.length !== 1 ? "s" : ""}`, met: primaryInst.length >= 2, priority: primaryInst.length >= 2 ? 0 : 2 - primaryInst.length, nextMove: primaryInst.length >= 2 ? "Maintain current positions" : `Add ${2 - primaryInst.length} primary installment account${2 - primaryInst.length > 1 ? "s" : ""}` },
+                { label: "Revolver Limits", goal: "$10,000+ each", current: `${highLimitCount} of ${primaryRev.length} at goal`, met: highLimitCount >= primaryRev.length && primaryRev.length > 0, priority: primaryRev.length > 0 ? primaryRev.length - highLimitCount : 3, nextMove: highLimitCount >= primaryRev.length && primaryRev.length > 0 ? "All limits meet threshold" : "Request CLI increases on sub-$10K cards or allow organic growth" },
+                { label: "Utilization", goal: "< 5% aggregate", current: `${avgUtil}%`, met: avgUtil <= 5, priority: avgUtil <= 5 ? 0 : avgUtil > 30 ? 4 : 2, nextMove: avgUtil <= 5 ? "Maintain low utilization" : avgUtil > 30 ? "Pay down revolving balances to under 5% of total limits" : "Reduce balances slightly to reach < 5% target" },
+                { label: "Average Age", goal: "5+ years", current: `${avgAge} year${avgAge !== 1 ? "s" : ""}`, met: avgAge >= 5, priority: avgAge >= 5 ? 0 : 1, nextMove: avgAge >= 5 ? "File seasoning meets target" : "Hold existing accounts open — avoid new applications to preserve average age" },
+                { label: "AU Dependency", goal: "Minimal", current: auCount > 0 ? `${auCount} AU account${auCount > 1 ? "s" : ""}` : "None", met: auCount <= 1, priority: auCount <= 1 ? 0 : auCount >= 3 ? 3 : 1, nextMove: auCount <= 1 ? "AU weighting acceptable" : "Shift utilization to primary accounts — reduce AU reliance over time" },
+              ];
+
+              const sortedGoals = [...goals].sort((a, b) => b.priority - a.priority);
+              const metCount = goals.filter(g => g.met).length;
+              const totalGoals = goals.length;
+
+              return (
+                <div className="space-y-2">
+                  <div className="rounded-xl bg-gradient-to-br from-[#1a1a2e] to-[#252540] p-2.5">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-[7px] uppercase tracking-[0.12em] text-white/35 font-semibold">Goal Sheet</p>
+                        <p className="text-[11px] font-bold text-white mt-0.5" style={{ fontVariantNumeric: "tabular-nums" }}>{metCount} <span className="text-[9px] font-normal text-white/40">/ {totalGoals} met</span></p>
+                      </div>
+                      <div className="flex gap-0.5">
+                        {goals.map((g, gi) => (
+                          <div key={gi} className={`w-[6px] h-[18px] rounded-sm ${g.met ? "bg-[#2d6a4f]" : "bg-white/10"}`} />
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
+                  {sortedGoals.map((g, gi) => (
+                    <div key={gi} className={`rounded-lg border p-2.5 ${g.met ? "bg-white border-[#e5e5e5]" : "bg-[#fffbf5] border-[#f0e0c0]"}`} data-testid={`goal-item-${gi}`}>
+                      <div className="flex items-center gap-1.5 mb-1">
+                        <div className={`w-[10px] h-[10px] rounded-[2px] flex items-center justify-center flex-shrink-0 ${g.met ? "bg-[#2d6a4f]" : "border border-[#ddd] bg-white"}`}>
+                          {g.met && <svg width="6" height="6" viewBox="0 0 10 10" fill="none"><path d="M2 5l2.5 2.5L8 3" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>}
+                        </div>
+                        <span className="text-[9px] font-semibold text-[#333]">{g.label}</span>
+                        {!g.met && <span className="text-[7px] text-[#c9a227] font-semibold ml-auto uppercase tracking-wider">Action Needed</span>}
+                      </div>
+                      <div className="grid grid-cols-2 gap-x-2 pl-[18px] mb-1">
+                        <div>
+                          <p className="text-[7px] text-[#aaa] uppercase tracking-wider">Goal</p>
+                          <p className="text-[8px] text-[#555] font-medium">{g.goal}</p>
+                        </div>
+                        <div>
+                          <p className="text-[7px] text-[#aaa] uppercase tracking-wider">Current</p>
+                          <p className={`text-[8px] font-medium ${g.met ? "text-[#2d6a4f]" : "text-[#c0392b]"}`}>{g.current}</p>
+                        </div>
+                      </div>
+                      <div className="pl-[18px] pt-1 border-t border-[#f0f0f0]">
+                        <p className="text-[7px] text-[#aaa] uppercase tracking-wider mb-0.5">Next Move</p>
+                        <p className="text-[8px] text-[#555] leading-[1.5]">{g.nextMove}</p>
+                      </div>
+                    </div>
+                  ))}
                 </div>
-              )}
-              {pf.bestCasePerBureau && (
-                <div>
-                  <p className="text-[8px] text-[#aaa] uppercase tracking-wider mb-0.5">Maximum Modeled Exposure</p>
-                  <p className="text-[10px] font-bold text-[#333]">{pf.bestCasePerBureau}</p>
-                </div>
-              )}
-              {pf.timeline && (
-                <div>
-                  <p className="text-[8px] text-[#aaa] uppercase tracking-wider mb-0.5">Projected Capital Window</p>
-                  <p className="text-[10px] font-medium text-[#333]">{pf.timeline}</p>
-                </div>
-              )}
-              {pf.inquirySlots && (
-                <div>
-                  <p className="text-[8px] text-[#aaa] uppercase tracking-wider mb-0.5">Inquiry Capacity</p>
-                  <p className="text-[10px] font-medium text-[#333]">{pf.inquirySlots}</p>
-                </div>
-              )}
-              {aisCalculatedAt && (
-                <div className="pt-2 border-t border-[#eee]">
-                  <p className="text-[7px] text-[#bbb]">Last Calculated: {aisCalculatedAt}</p>
-                </div>
-              )}
-            </div>
+              );
+            })()}
           </div>
         )}
 
-        {hasAis && aisScore && aisScore < 88 && aisReport?.suppressors && aisReport.suppressors.length > 0 && (
+        {!hasAis && (
           <div className="mb-4">
             <div className="flex items-center gap-2 mb-2">
-              <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 1v10M1 6h10" stroke="#333" strokeWidth="1.2" strokeLinecap="round" /><circle cx="6" cy="6" r="5" stroke="#333" strokeWidth="0.8" fill="none" /></svg>
-              <span className="text-[10px] font-semibold text-[#555] uppercase tracking-wider">Capital Advancement Protocol</span>
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 2h8v8H2z" stroke="#333" strokeWidth="1" fill="none" rx="1" /><path d="M4 5l1.5 1.5L8 4" stroke="#333" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" /></svg>
+              <span className="text-[10px] font-semibold text-[#555] uppercase tracking-wider">Next Moves</span>
             </div>
-
-            <div className="rounded-lg bg-[#fafafa] border border-[#eee] p-3 mb-2">
-              <p className="text-[8px] text-[#aaa] uppercase tracking-wider mb-1">Objective</p>
-              <p className="text-[9px] text-[#333] font-medium">
-                {aisScore < 78 ? "Advance from Building → Institutional Threshold (78+)" : aisScore < 82 ? "Advance from Threshold → Prime Qualification (82+)" : "Advance from Prime → Premium Charge Range (88+)"}
-              </p>
-            </div>
-
-            <div className="space-y-2">
-              {(() => {
-                const priorities = ["High", "High", "Medium", "Low"];
-                const colors = ["#ef4444", "#f97316", "#eab308", "#22c55e"];
-                const dots = ["🔴", "🟠", "🟡", "🟢"];
-                const moveTemplates: { pattern: RegExp; title: string; action: string; impact: string; delta: string; timeline: string }[] = [
-                  { pattern: /utiliz/i, title: "Normalize Revolver Utilization", action: "Reduce revolving balances to ≤30% (ideal: 10–15%)", impact: "Removes primary approval suppressor · Improves underwriting symmetry", delta: "+4 to +7", timeline: "30–60 days" },
-                  { pattern: /inquir/i, title: "Stabilize Inquiry Velocity", action: "No new applications for 90 days", impact: "Stabilizes risk modeling · Improves Tier 1 eligibility probability", delta: "+2 to +4", timeline: "90 days" },
-                  { pattern: /tradeline|account.*depth|thin.*file|insufficient.*depth/i, title: "Strengthen Primary Trade Depth", action: "Add 2–4 primary revolvers, staggered 60–90 days apart", impact: "Improves limit matching potential · Strengthens file profile", delta: "+3 to +5", timeline: "6–12 months" },
-                  { pattern: /authorized.*user|AU.*account|AU.*weight/i, title: "Reduce Authorized User Weighting", action: "Shift utilization weight to primary accounts", impact: "Improves institutional scoring confidence", delta: "+1 to +3", timeline: "Ongoing" },
-                  { pattern: /payment|late|delinquen/i, title: "Calibrate Payment Integrity", action: "Maintain 100% on-time payment cadence across all accounts", impact: "Strengthens lender confidence signal", delta: "+2 to +4", timeline: "6+ months" },
-                  { pattern: /age|season|young|new.*account/i, title: "Increase File Seasoning", action: "Allow existing accounts to age without new applications", impact: "Improves average age of accounts · Stabilizes file depth", delta: "+2 to +3", timeline: "6–12 months" },
-                  { pattern: /collection|charge.?off|deroga/i, title: "Resolve Derogatory Entries", action: "Initiate bureau challenge on reportable negative items", impact: "Removes institutional scoring penalties", delta: "+3 to +6", timeline: "30–90 days" },
-                ];
-
-                const moves: { title: string; action: string; impact: string; delta: string; timeline: string; priority: string; color: string; dot: string }[] = [];
-                const used = new Set<number>();
-
-                for (const s of aisReport!.suppressors) {
-                  if (moves.length >= 4) break;
-                  const sl = s.toLowerCase();
-                  for (let ti = 0; ti < moveTemplates.length; ti++) {
-                    if (used.has(ti)) continue;
-                    if (moveTemplates[ti].pattern.test(sl)) {
-                      used.add(ti);
-                      const idx = moves.length;
-                      moves.push({ ...moveTemplates[ti], priority: priorities[idx], color: colors[idx], dot: dots[idx] });
-                      break;
-                    }
-                  }
-                }
-
-                if (moves.length === 0) {
-                  for (let ti = 0; ti < Math.min(3, moveTemplates.length); ti++) {
-                    moves.push({ ...moveTemplates[ti], priority: priorities[ti], color: colors[ti], dot: dots[ti] });
-                  }
-                }
-
-                const totalDeltaLow = moves.reduce((sum, m) => sum + parseInt(m.delta.match(/\+(\d+)/)?.[1] || "0"), 0);
-                const totalDeltaHigh = moves.reduce((sum, m) => sum + parseInt(m.delta.match(/(\d+)$/)?.[1] || "0"), 0);
-
-                return (
-                  <>
-                    {moves.map((move, i) => (
-                      <div key={i} className="rounded-lg border border-[#eee] bg-white p-2.5" data-testid={`protocol-move-${i}`}>
-                        <div className="flex items-center gap-2 mb-1.5">
-                          <span className="text-[9px]">{move.dot}</span>
-                          <p className="text-[10px] text-[#333] font-semibold flex-1">Move {i + 1} — {move.title}</p>
-                        </div>
-                        <div className="pl-5 space-y-1">
-                          <p className="text-[8px] text-[#999]">Action: <span className="text-[#555]">{move.action}</span></p>
-                          <p className="text-[8px] text-[#999]">Impact: <span className="text-[#555]">{move.impact}</span></p>
-                          <div className="flex items-center gap-3 mt-1">
-                            <p className="text-[8px] text-[#999]">Readiness Delta: <span className="text-[#333] font-semibold">{move.delta}</span></p>
-                            <p className="text-[8px] text-[#999]">Timeline: <span className="text-[#555] font-medium">{move.timeline}</span></p>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-
-                    <div className="rounded-lg bg-[#1a1a2e] p-3 space-y-1.5">
-                      <p className="text-[8px] text-white/40 uppercase tracking-wider font-semibold">Progression Estimate</p>
-                      {moves.length >= 2 && (
-                        <div className="flex items-center justify-between">
-                          <span className="text-[8px] text-white/50">Moves 1–2 Completed</span>
-                          <span className="text-[9px] text-white/80 font-medium">{Math.min(100, aisScore + totalDeltaLow)}–{Math.min(100, aisScore + Math.round(totalDeltaHigh * 0.6))}</span>
-                        </div>
-                      )}
-                      <div className="flex items-center justify-between">
-                        <span className="text-[8px] text-white/50">All Moves Completed</span>
-                        <span className="text-[9px] text-white/80 font-bold">{Math.min(100, aisScore + totalDeltaLow)}–{Math.min(100, aisScore + totalDeltaHigh)}</span>
-                      </div>
-                    </div>
-                  </>
-                );
-              })()}
+            <div className="rounded-lg border border-dashed border-[#ddd] p-3 text-center">
+              <p className="text-[9px] text-[#999] leading-[1.5]">Upload a credit report to generate your goal sheet and next moves</p>
             </div>
           </div>
         )}
