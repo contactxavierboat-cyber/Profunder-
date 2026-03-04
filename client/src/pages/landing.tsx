@@ -1316,26 +1316,27 @@ function PerfectProfileTab({ aisReport }: { aisReport: MissionData | null }) {
     const headerLabel = `${card.creditor}${isAU ? " (AU)" : ""}`;
     return (
       <div key={ci} className="rounded-lg overflow-hidden border border-[#e5e5e5]" data-testid={`account-card-${ci}`}>
-        <div className="flex items-center justify-between px-3 py-[6px] bg-[#1a1a2e]">
-          <div className="flex items-center gap-1.5 min-w-0">
-            <div className={`w-[14px] h-[14px] rounded-full flex items-center justify-center flex-shrink-0 ${cardMet === cardTotal ? "bg-[#2d6a4f]" : "border border-white/20"}`}>
-              {cardMet === cardTotal && <svg width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2 5l2.5 2.5L8 3" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>}
+        <div className="flex items-center justify-between px-2.5 py-[5px] bg-[#1a1a2e]">
+          <div className="flex items-center gap-1 min-w-0">
+            <div className={`w-[12px] h-[12px] rounded-full flex items-center justify-center flex-shrink-0 ${cardMet === cardTotal ? "bg-[#2d6a4f]" : "border border-white/20"}`}>
+              {cardMet === cardTotal && <svg width="7" height="7" viewBox="0 0 10 10" fill="none"><path d="M2 5l2.5 2.5L8 3" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>}
             </div>
-            <p className="text-[11px] font-bold text-white truncate">{headerLabel}</p>
+            <p className="text-[9px] font-bold text-white truncate">{headerLabel}</p>
           </div>
-          <span className="text-[10px] text-white/40 flex-shrink-0 ml-2" style={{ fontVariantNumeric: "tabular-nums" }}>{cardMet}/{cardTotal}</span>
+          <span className="text-[8px] text-white/40 flex-shrink-0 ml-1" style={{ fontVariantNumeric: "tabular-nums" }}>{cardMet}/{cardTotal}</span>
         </div>
         <div className="bg-white divide-y divide-[#f0f0f0]">
           {card.markers.map((m, mi) => (
-            <div key={mi} className="flex items-center px-3 py-[7px]">
-              <div className={`w-[14px] h-[14px] rounded-[3px] flex items-center justify-center flex-shrink-0 ${m.met ? "bg-[#2d6a4f]" : "border border-[#ddd] bg-white"}`}>
-                {m.met && <svg width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2 5l2.5 2.5L8 3" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>}
+            <div key={mi} className="grid grid-cols-[10px_52px_1fr] items-center gap-x-2 px-2.5 py-[5px]">
+              <div className={`w-[10px] h-[10px] rounded-[2px] flex items-center justify-center flex-shrink-0 ${m.met ? "bg-[#2d6a4f]" : "border border-[#ddd] bg-white"}`}>
+                {m.met && <svg width="6" height="6" viewBox="0 0 10 10" fill="none"><path d="M2 5l2.5 2.5L8 3" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>}
               </div>
-              <span className="text-[11px] text-[#333] ml-3 font-medium">{m.label}</span>
-              <div className="flex-1" />
-              <span className="text-[10px] text-[#aaa] mr-1">{m.ideal}</span>
-              <span className="text-[10px] text-[#ddd] mx-1">|</span>
-              <span className={`text-[11px] font-bold ${m.met ? "text-[#2d6a4f]" : "text-[#c0392b]"}`} style={{ fontVariantNumeric: "tabular-nums" }}>{m.actual}</span>
+              <span className="text-[8px] text-[#555] font-medium">{m.label}</span>
+              <div className="flex items-center justify-end gap-1.5">
+                <span className="text-[8px] text-[#aaa]">{m.ideal}</span>
+                <span className="w-[1px] h-[10px] bg-[#e5e5e5]" />
+                <span className={`text-[8px] font-bold min-w-[40px] text-right ${m.met ? "text-[#2d6a4f]" : "text-[#c0392b]"}`} style={{ fontVariantNumeric: "tabular-nums" }}>{m.actual}</span>
+              </div>
             </div>
           ))}
         </div>
@@ -1344,25 +1345,26 @@ function PerfectProfileTab({ aisReport }: { aisReport: MissionData | null }) {
   };
 
   const renderEmptySlot = (label: string, idx: number, rows: { label: string; ideal: string }[]) => (
-    <div key={`empty-${idx}`} className="rounded-lg overflow-hidden border border-dashed border-[#ddd]">
-      <div className="flex items-center justify-between px-3 py-[6px] bg-[#f5f5f5]">
-        <div className="flex items-center gap-1.5 min-w-0">
-          <div className="w-[14px] h-[14px] rounded-full border border-[#ccc] flex items-center justify-center flex-shrink-0">
-            <svg width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M5 2v6M2 5h6" stroke="#ccc" strokeWidth="1.5" strokeLinecap="round" /></svg>
+    <div key={`empty-${idx}`} className="rounded-lg overflow-hidden border border-dashed border-[#d5d5d5]">
+      <div className="flex items-center justify-between px-2.5 py-[5px] bg-[#f7f7f7]">
+        <div className="flex items-center gap-1 min-w-0">
+          <div className="w-[12px] h-[12px] rounded-full border border-[#ccc] flex items-center justify-center flex-shrink-0">
+            <svg width="7" height="7" viewBox="0 0 10 10" fill="none"><path d="M5 2v6M2 5h6" stroke="#ccc" strokeWidth="1.5" strokeLinecap="round" /></svg>
           </div>
-          <p className="text-[11px] font-bold text-[#999]">{label}</p>
+          <p className="text-[9px] font-bold text-[#aaa]">{label}</p>
         </div>
-        <span className="text-[10px] text-[#ccc]" style={{ fontVariantNumeric: "tabular-nums" }}>0/{rows.length}</span>
+        <span className="text-[8px] text-[#ccc]" style={{ fontVariantNumeric: "tabular-nums" }}>0/{rows.length}</span>
       </div>
-      <div className="bg-white divide-y divide-[#f5f5f5]">
+      <div className="bg-[#fcfcfc] divide-y divide-[#f2f2f2]">
         {rows.map((r, ri) => (
-          <div key={ri} className="flex items-center px-3 py-[7px]">
-            <div className="w-[14px] h-[14px] rounded-[3px] border border-[#e5e5e5] bg-white flex-shrink-0" />
-            <span className="text-[11px] text-[#ccc] ml-3">{r.label}</span>
-            <div className="flex-1" />
-            <span className="text-[10px] text-[#ddd]">{r.ideal}</span>
-            <span className="text-[10px] text-[#e5e5e5] mx-1">|</span>
-            <span className="text-[10px] text-[#ddd]">—</span>
+          <div key={ri} className="grid grid-cols-[10px_52px_1fr] items-center gap-x-2 px-2.5 py-[5px]">
+            <div className="w-[10px] h-[10px] rounded-[2px] border border-[#e8e8e8] bg-white flex-shrink-0" />
+            <span className="text-[8px] text-[#ccc] font-medium">{r.label}</span>
+            <div className="flex items-center justify-end gap-1.5">
+              <span className="text-[8px] text-[#d5d5d5]">{r.ideal}</span>
+              <span className="w-[1px] h-[10px] bg-[#eee]" />
+              <span className="text-[8px] text-[#ccc] italic font-light min-w-[40px] text-right">Empty</span>
+            </div>
           </div>
         ))}
       </div>
@@ -1373,28 +1375,29 @@ function PerfectProfileTab({ aisReport }: { aisReport: MissionData | null }) {
   const emptyInstCount = Math.max(0, idealInstSlots - filledPrimaryInstSlots);
 
   return (
-    <div className="space-y-4" data-testid="perfect-profile-tab">
-      <div className="rounded-xl bg-gradient-to-br from-[#1a1a2e] to-[#252540] p-4">
-        <div className="flex items-center gap-3">
-          <div className="relative w-[44px] h-[44px] flex-shrink-0">
+    <div className="space-y-3" data-testid="perfect-profile-tab">
+      <div className="rounded-xl bg-gradient-to-br from-[#1a1a2e] to-[#252540] p-3">
+        <div className="flex items-center gap-2.5">
+          <div className="relative w-[40px] h-[40px] flex-shrink-0">
             <svg viewBox="0 0 36 36" className="w-full h-full -rotate-90">
               <circle cx="18" cy="18" r="15.5" fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="2.5" />
               <circle cx="18" cy="18" r="15.5" fill="none" stroke={accentColor} strokeWidth="2.5" strokeDasharray={`${pct * 0.974} 100`} strokeLinecap="round" />
             </svg>
             <div className="absolute inset-0 flex items-center justify-center">
-              <span className="text-[13px] font-bold text-white leading-none" style={{ fontVariantNumeric: "tabular-nums" }}>{pct}%</span>
+              <span className="text-[12px] font-bold text-white leading-none" style={{ fontVariantNumeric: "tabular-nums" }}>{pct}%</span>
             </div>
           </div>
           <div className="min-w-0">
-            <p className="text-[14px] font-bold text-white leading-tight"><span style={{ fontVariantNumeric: "tabular-nums" }}>{filledSlots}</span> <span className="text-[12px] font-normal text-white/40">/ {totalSlots} slots</span></p>
-            <p className="text-[11px] text-white/35 mt-0.5">{metCriteria} of {totalCriteria} criteria met</p>
+            <p className="text-[7px] uppercase tracking-[0.12em] text-white/35 font-semibold mb-0.5">Profile Match</p>
+            <p className="text-[12px] font-bold text-white leading-tight"><span style={{ fontVariantNumeric: "tabular-nums" }}>{filledSlots}</span> <span className="text-[10px] font-normal text-white/40">/ {totalSlots} slots</span></p>
+            <p className="text-[9px] text-white/30 mt-0.5" style={{ fontVariantNumeric: "tabular-nums" }}>{metCriteria} of {totalCriteria} criteria met</p>
           </div>
         </div>
       </div>
 
       <div>
-        <p className="text-[9px] uppercase tracking-[0.15em] text-[#999] font-semibold mb-2 px-0.5">Revolving Accounts</p>
-        <div className="space-y-2">
+        <p className="text-[8px] uppercase tracking-[0.15em] text-[#999] font-semibold mb-1.5 px-0.5">Revolving Accounts</p>
+        <div className="space-y-1.5">
           {primaryRevCards.map((card, i) => renderCard(card, i))}
           {emptyRevCount > 0 && Array.from({ length: emptyRevCount }).map((_, i) => renderEmptySlot("Revolving Card", filledPrimaryRevSlots + i, emptyRevSlotRows))}
         </div>
@@ -1402,16 +1405,16 @@ function PerfectProfileTab({ aisReport }: { aisReport: MissionData | null }) {
 
       {auCards.length > 0 && (
         <div>
-          <p className="text-[9px] uppercase tracking-[0.15em] text-[#999] font-semibold mb-2 px-0.5">Authorized User Accounts <span className="normal-case tracking-normal font-normal text-[8px] text-[#bbb]">(not counted toward slots)</span></p>
-          <div className="space-y-2">
+          <p className="text-[8px] uppercase tracking-[0.15em] text-[#999] font-semibold mb-1.5 px-0.5">Authorized User Accounts <span className="normal-case tracking-normal font-normal text-[7px] text-[#bbb]">(not counted toward slots)</span></p>
+          <div className="space-y-1.5">
             {auCards.map((card, i) => renderCard(card, primaryRevCards.length + i))}
           </div>
         </div>
       )}
 
       <div>
-        <p className="text-[9px] uppercase tracking-[0.15em] text-[#999] font-semibold mb-2 px-0.5">Installment Accounts</p>
-        <div className="space-y-2">
+        <p className="text-[8px] uppercase tracking-[0.15em] text-[#999] font-semibold mb-1.5 px-0.5">Installment Accounts</p>
+        <div className="space-y-1.5">
           {primaryInstCards.map((card, i) => renderCard(card, primaryRevCards.length + auCards.length + i))}
           {emptyInstCount > 0 && Array.from({ length: emptyInstCount }).map((_, i) => renderEmptySlot("Installment Loan", filledPrimaryInstSlots + i, emptyInstSlotRows))}
         </div>
@@ -1419,8 +1422,8 @@ function PerfectProfileTab({ aisReport }: { aisReport: MissionData | null }) {
 
       {(otherCards.length > 0 || nonPrimaryInstCards.length > 0) && (
         <div>
-          <p className="text-[9px] uppercase tracking-[0.15em] text-[#999] font-semibold mb-2 px-0.5">Other Accounts</p>
-          <div className="space-y-2">
+          <p className="text-[8px] uppercase tracking-[0.15em] text-[#999] font-semibold mb-1.5 px-0.5">Other Accounts</p>
+          <div className="space-y-1.5">
             {[...nonPrimaryInstCards, ...otherCards].map((card, i) => renderCard(card, primaryRevCards.length + auCards.length + primaryInstCards.length + i))}
           </div>
         </div>
