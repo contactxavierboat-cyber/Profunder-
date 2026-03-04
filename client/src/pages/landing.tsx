@@ -1220,20 +1220,7 @@ function PerfectProfileTab({ aisReport }: { aisReport: MissionData | null }) {
     );
   }
 
-  const fi = aisReport.financialIdentity;
-  const pf = aisReport.projectedFunding;
-  const allNeg = [...(aisReport.suppressors || []), ...(aisReport.hurting || [])].join(" ").toLowerCase();
-  const getPillar = (k: string) => aisReport.pillarScores?.find(p => p.label.toLowerCase().includes(k))?.value ?? null;
-
-  const hasCollections = /\bcollections?\b/i.test(allNeg);
-  const hasChargeOffs = /charge.?offs?/i.test(allNeg);
-  const hasInquiries = /\binquir|\bhard.?pull/i.test(allNeg);
-  const paymentScore = getPillar("payment");
-  const lateRegex = /\blate\s+payments?|\bdelinquen|\bpast.?due|\b30\s*days?\s*late|\b60\s*days?\s*late|\b90\s*days?\s*late/i;
-  const hasLates = paymentScore !== null ? (paymentScore < 70 && lateRegex.test(allNeg)) : lateRegex.test(allNeg);
-
   const tradelines = aisReport.openTradelines || [];
-  const primaryAccounts = tradelines.filter(t => /primary/i.test(t.ownership) && !/closed/i.test(t.accountStatus));
 
   const parseAge = (age: string): number => {
     const yrMatch = age.match(/(\d+)\s*yr/i);
@@ -1242,157 +1229,175 @@ function PerfectProfileTab({ aisReport }: { aisReport: MissionData | null }) {
 
   const isCurrent = (status: string) => /current|pays?\s*as\s*agreed/i.test(status) && !/late|delinq|collection|charge/i.test(status);
 
-  const auFromTradelines = tradelines.filter(t => /\bau\b/i.test(t.ownership));
-  const hasAU = auFromTradelines.length > 0 || /authorized.?user/i.test(allNeg);
-  const auCount = auFromTradelines.length;
-  const hasPublicRecords = /public.?record|bankrupt|judgment|lien/i.test(allNeg);
-
-  const revolvingAccounts = tradelines.filter(t => /revolv|credit\s*card|loc\b|heloc/i.test(t.type) && !/closed/i.test(t.accountStatus));
-  const installmentAccounts = tradelines.filter(t => /install|auto|student|mortgage|personal\s*loan/i.test(t.type) && !/closed/i.test(t.accountStatus));
-  const closedAccounts = tradelines.filter(t => /closed/i.test(t.accountStatus));
-
-  const revLimits = revolvingAccounts.map(t => parseInt(t.limit.replace(/[^0-9]/g, ""))).filter(n => !isNaN(n));
-  const revBalances = revolvingAccounts.map(t => parseInt(t.balance.replace(/[^0-9]/g, ""))).filter(n => !isNaN(n));
-  const totalLimit = revLimits.reduce((s, n) => s + n, 0);
-  const totalBalance = revBalances.reduce((s, n) => s + n, 0);
-  const utilPct = totalLimit > 0 ? Math.round((totalBalance / totalLimit) * 100) : 0;
-
   type AccountCard = {
     creditor: string;
     type: string;
     ownership: string;
+    category: "revolving" | "installment" | "other";
     markers: { label: string; ideal: string; actual: string; met: boolean }[];
   };
 
   const buildAccountCard = (tl: TradeLine): AccountCard => {
     const isRevolving = /revolv|credit\s*card|loc\b|heloc/i.test(tl.type);
+    const isInstallment = /install|auto|student|mortgage|personal\s*loan/i.test(tl.type);
     const isClosed_ = /closed/i.test(tl.accountStatus);
     const ageYears = parseAge(tl.age);
     const limitNum = parseInt(tl.limit.replace(/[^0-9]/g, ""));
     const balNum = parseInt(tl.balance.replace(/[^0-9]/g, ""));
     const utilizationForCard = !isNaN(limitNum) && limitNum > 0 && !isNaN(balNum) ? Math.round((balNum / limitNum) * 100) : null;
+    const isPrimary = /primary/i.test(tl.ownership);
+
+    const markers: AccountCard["markers"] = [
+      { label: "Limit", ideal: isRevolving ? "$10,000+" : "—", actual: tl.limit, met: isRevolving ? (!isNaN(limitNum) && limitNum >= 10000) : true },
+      ...(isRevolving ? [{ label: "Balance", ideal: "< 5% of limit", actual: tl.balance, met: utilizationForCard !== null ? utilizationForCard <= 5 : false }] : [{ label: "Balance", ideal: "$0", actual: tl.balance, met: !isNaN(balNum) && balNum === 0 }]),
+      { label: "Age", ideal: isRevolving ? "5+ years" : "2+ years", actual: tl.age, met: isRevolving ? ageYears >= 5 : ageYears >= 2 },
+      { label: "Status", ideal: "Current", actual: isClosed_ ? "Closed" : tl.paymentStatus, met: isClosed_ ? !/late|delinq|collection|charge/i.test(tl.paymentStatus) : isCurrent(tl.paymentStatus) },
+      { label: "Ownership", ideal: "Primary", actual: isPrimary ? "Primary" : /\bau\b|authorized/i.test(tl.ownership) ? "Authorized User" : tl.ownership, met: isPrimary },
+    ];
 
     return {
       creditor: tl.creditor,
       type: tl.type,
       ownership: tl.ownership,
-      markers: [
-        { label: "Limit", ideal: isRevolving ? "$10K+" : "—", actual: tl.limit, met: isRevolving ? (!isNaN(limitNum) && limitNum >= 10000) : true },
-        ...(isRevolving ? [{ label: "Utilization", ideal: "< 5%", actual: utilizationForCard !== null ? `${utilizationForCard}%` : tl.balance, met: utilizationForCard !== null ? utilizationForCard <= 5 : false }] : [{ label: "Balance", ideal: "$0", actual: tl.balance, met: !isNaN(balNum) && balNum === 0 }]),
-        { label: "Age", ideal: isRevolving ? "5+ yr" : "2+ yr", actual: tl.age, met: isRevolving ? ageYears >= 5 : ageYears >= 2 },
-        { label: "Status", ideal: "Current", actual: isClosed_ ? "Closed" : tl.paymentStatus, met: isClosed_ ? !/late|delinq|collection|charge/i.test(tl.paymentStatus) : isCurrent(tl.paymentStatus) },
-      ],
+      category: isRevolving ? "revolving" : isInstallment ? "installment" : "other",
+      markers,
     };
   };
 
   const allCards = tradelines.map(buildAccountCard);
+  const revCards = allCards.filter(c => c.category === "revolving");
+  const instCards = allCards.filter(c => c.category === "installment");
+  const otherCards = allCards.filter(c => c.category === "other");
   const totalMarkers = allCards.reduce((s, c) => s + c.markers.length, 0);
   const metMarkers = allCards.reduce((s, c) => s + c.markers.filter(m => m.met).length, 0);
 
-  const utilScore = getPillar("utilization");
-  const depthScore = getPillar("depth") || getPillar("credit");
-  const utilMet = tradelines.length > 0 ? utilPct <= 5 : utilScore !== null ? utilScore >= 85 : false;
-  const utilWarn = tradelines.length > 0 ? utilPct <= 30 : utilScore !== null ? utilScore >= 60 : false;
-  const utilDetail = tradelines.length > 0 ? `${utilPct}%` : utilScore !== null ? `Score ${utilScore}` : "—";
-  const revDetail = tradelines.length > 0 ? `${revolvingAccounts.length} open` : depthScore !== null ? `Depth ${depthScore}` : "—";
-  const instDetail = tradelines.length > 0 ? `${installmentAccounts.length} open` : "—";
-
-  const factorChecks = [
-    { label: "Revolving", met: tradelines.length > 0 ? revolvingAccounts.length >= 5 : (depthScore ?? 0) >= 80, warn: tradelines.length > 0 ? revolvingAccounts.length >= 3 : (depthScore ?? 0) >= 55, detail: revDetail },
-    { label: "Installment", met: tradelines.length > 0 ? installmentAccounts.length >= 2 : (depthScore ?? 0) >= 80, warn: tradelines.length > 0 ? installmentAccounts.length >= 1 : (depthScore ?? 0) >= 55, detail: instDetail },
-    { label: "Utilization", met: utilMet, warn: utilWarn, detail: utilDetail },
-    { label: "Payments", met: !hasLates, warn: false, detail: hasLates ? "Issues" : "Clean" },
-    { label: "Inquiries", met: !hasInquiries, warn: false, detail: hasInquiries ? "High" : "Low" },
-    { label: "Derogatories", met: !hasCollections && !hasChargeOffs, warn: false, detail: hasCollections || hasChargeOffs ? "Found" : "Clear" },
-    { label: "AU", met: !hasAU, warn: false, detail: hasAU ? `${auCount}` : "None" },
-    { label: "Records", met: !hasPublicRecords, warn: false, detail: hasPublicRecords ? "Found" : "Clear" },
-  ];
-  const factorsMet = factorChecks.filter(f => f.met).length;
-  const pct = totalMarkers > 0 ? Math.round((metMarkers / totalMarkers) * 100) : (factorsMet > 0 ? Math.round((factorsMet / factorChecks.length) * 100) : 0);
+  const idealRevSlots = 5;
+  const idealInstSlots = 2;
+  const filledRevSlots = revCards.length;
+  const filledInstSlots = instCards.length;
+  const totalSlots = idealRevSlots + idealInstSlots;
+  const filledSlots = Math.min(filledRevSlots, idealRevSlots) + Math.min(filledInstSlots, idealInstSlots) + otherCards.length;
+  const totalCriteria = totalSlots * 5;
+  const metCriteria = totalMarkers > 0 ? metMarkers : 0;
+  const pct = totalCriteria > 0 ? Math.round((metCriteria / totalCriteria) * 100) : 0;
 
   const accentColor = pct >= 80 ? "#2d6a4f" : pct >= 50 ? "#c9a227" : "#c0392b";
 
-  return (
-    <div className="space-y-[6px]" data-testid="perfect-profile-tab">
-      <div className="rounded-lg bg-gradient-to-br from-[#1a1a2e] to-[#252540] p-3">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <div className="relative w-[36px] h-[36px] flex-shrink-0">
-              <svg viewBox="0 0 36 36" className="w-full h-full -rotate-90">
-                <circle cx="18" cy="18" r="15.5" fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="2" />
-                <circle cx="18" cy="18" r="15.5" fill="none" stroke={accentColor} strokeWidth="2" strokeDasharray={`${pct * 0.974} 100`} strokeLinecap="round" />
-              </svg>
-              <div className="absolute inset-0 flex items-center justify-center">
-                <span className="text-[11px] font-bold text-white leading-none" style={{ fontVariantNumeric: "tabular-nums" }}>{pct}</span>
-              </div>
+  const emptySlotRows = [
+    { label: "Amount", ideal: "—", actual: "—" },
+    { label: "Balance", ideal: "$0", actual: "—" },
+    { label: "Age", ideal: "2+ years", actual: "—" },
+    { label: "Status", ideal: "Current", actual: "—" },
+    { label: "Ownership", ideal: "Primary", actual: "—" },
+  ];
+
+  const renderCard = (card: AccountCard, ci: number) => {
+    const cardMet = card.markers.filter(m => m.met).length;
+    const cardTotal = card.markers.length;
+    const isAU = /\bau\b|authorized/i.test(card.ownership);
+    const headerLabel = `${card.creditor}${isAU ? " (AU)" : ""}`;
+    return (
+      <div key={ci} className="rounded-lg overflow-hidden border border-[#e5e5e5]" data-testid={`account-card-${ci}`}>
+        <div className="flex items-center justify-between px-3 py-[6px] bg-[#1a1a2e]">
+          <div className="flex items-center gap-1.5 min-w-0">
+            <div className={`w-[14px] h-[14px] rounded-full flex items-center justify-center flex-shrink-0 ${cardMet === cardTotal ? "bg-[#2d6a4f]" : "border border-white/20"}`}>
+              {cardMet === cardTotal && <svg width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2 5l2.5 2.5L8 3" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>}
             </div>
-            <div className="min-w-0">
-              <p className="text-[7px] uppercase tracking-[0.12em] text-white/25 font-medium leading-none">Profile Match</p>
-              <p className="text-[11px] font-semibold text-white leading-tight mt-0.5" style={{ fontVariantNumeric: "tabular-nums" }}>{tradelines.length > 0 ? metMarkers : factorsMet}<span className="text-[9px] font-normal text-white/30">/{tradelines.length > 0 ? totalMarkers : factorChecks.length}</span></p>
+            <p className="text-[11px] font-bold text-white truncate">{headerLabel}</p>
+          </div>
+          <span className="text-[10px] text-white/40 flex-shrink-0 ml-2" style={{ fontVariantNumeric: "tabular-nums" }}>{cardMet}/{cardTotal}</span>
+        </div>
+        <div className="bg-white divide-y divide-[#f0f0f0]">
+          {card.markers.map((m, mi) => (
+            <div key={mi} className="flex items-center px-3 py-[7px]">
+              <div className={`w-[14px] h-[14px] rounded-[3px] flex items-center justify-center flex-shrink-0 ${m.met ? "bg-[#2d6a4f]" : "border border-[#ddd] bg-white"}`}>
+                {m.met && <svg width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M2 5l2.5 2.5L8 3" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>}
+              </div>
+              <span className="text-[11px] text-[#333] ml-3 font-medium">{m.label}</span>
+              <div className="flex-1" />
+              <span className="text-[10px] text-[#aaa] mr-1">{m.ideal}</span>
+              <span className="text-[10px] text-[#ddd] mx-1">|</span>
+              <span className={`text-[11px] font-bold ${m.met ? "text-[#2d6a4f]" : "text-[#c0392b]"}`} style={{ fontVariantNumeric: "tabular-nums" }}>{m.actual}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  };
+
+  const renderEmptySlot = (label: string, idx: number) => (
+    <div key={`empty-${idx}`} className="rounded-lg overflow-hidden border border-dashed border-[#ddd]">
+      <div className="flex items-center justify-between px-3 py-[6px] bg-[#f5f5f5]">
+        <div className="flex items-center gap-1.5 min-w-0">
+          <div className="w-[14px] h-[14px] rounded-full border border-[#ccc] flex items-center justify-center flex-shrink-0">
+            <svg width="8" height="8" viewBox="0 0 10 10" fill="none"><path d="M5 2v6M2 5h6" stroke="#ccc" strokeWidth="1.5" strokeLinecap="round" /></svg>
+          </div>
+          <p className="text-[11px] font-bold text-[#999]">{label}</p>
+        </div>
+        <span className="text-[10px] text-[#ccc]" style={{ fontVariantNumeric: "tabular-nums" }}>0/{emptySlotRows.length}</span>
+      </div>
+      <div className="bg-white divide-y divide-[#f5f5f5]">
+        {emptySlotRows.map((r, ri) => (
+          <div key={ri} className="flex items-center px-3 py-[7px]">
+            <div className="w-[14px] h-[14px] rounded-[3px] border border-[#e5e5e5] bg-white flex-shrink-0" />
+            <span className="text-[11px] text-[#ccc] ml-3">{r.label}</span>
+            <div className="flex-1" />
+            <span className="text-[10px] text-[#ddd]">—</span>
+            <span className="text-[10px] text-[#e5e5e5] mx-1">|</span>
+            <span className="text-[10px] text-[#ddd]">—</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+
+  const emptyRevCount = Math.max(0, idealRevSlots - filledRevSlots);
+  const emptyInstCount = Math.max(0, idealInstSlots - filledInstSlots);
+
+  return (
+    <div className="space-y-4" data-testid="perfect-profile-tab">
+      <div className="rounded-xl bg-gradient-to-br from-[#1a1a2e] to-[#252540] p-4">
+        <div className="flex items-center gap-3">
+          <div className="relative w-[44px] h-[44px] flex-shrink-0">
+            <svg viewBox="0 0 36 36" className="w-full h-full -rotate-90">
+              <circle cx="18" cy="18" r="15.5" fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="2.5" />
+              <circle cx="18" cy="18" r="15.5" fill="none" stroke={accentColor} strokeWidth="2.5" strokeDasharray={`${pct * 0.974} 100`} strokeLinecap="round" />
+            </svg>
+            <div className="absolute inset-0 flex items-center justify-center">
+              <span className="text-[13px] font-bold text-white leading-none" style={{ fontVariantNumeric: "tabular-nums" }}>{pct}%</span>
             </div>
           </div>
-          <div className="text-right">
-            <p className="text-[7px] uppercase tracking-[0.1em] text-white/20">Factors</p>
-            <p className="text-[10px] font-semibold text-white" style={{ fontVariantNumeric: "tabular-nums" }}>{factorsMet}<span className="text-[8px] font-normal text-white/25">/{factorChecks.length}</span></p>
+          <div className="min-w-0">
+            <p className="text-[14px] font-bold text-white leading-tight"><span style={{ fontVariantNumeric: "tabular-nums" }}>{filledSlots}</span> <span className="text-[12px] font-normal text-white/40">/ {totalSlots} slots</span></p>
+            <p className="text-[11px] text-white/35 mt-0.5">{metCriteria} of {totalCriteria} criteria met</p>
           </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-4 gap-[3px]">
-        {factorChecks.map((f, i) => {
-          const fColor = f.met ? "#2d6a4f" : f.warn ? "#c9a227" : "#c0392b";
-          return (
-            <div key={i} className="flex items-center gap-[4px] px-[6px] py-[3px] rounded-md bg-[#f8f8fa] border border-[#eee]">
-              <div className="w-[4px] h-[4px] rounded-full flex-shrink-0" style={{ background: fColor }} />
-              <div className="min-w-0">
-                <p className="text-[6px] text-[#999] leading-none truncate">{f.label}</p>
-                <p className="text-[7px] font-semibold leading-none mt-[1px] truncate" style={{ color: fColor }}>{f.detail}</p>
-              </div>
-            </div>
-          );
-        })}
+      <div>
+        <p className="text-[9px] uppercase tracking-[0.15em] text-[#999] font-semibold mb-2 px-0.5">Revolving Accounts</p>
+        <div className="space-y-2">
+          {revCards.map((card, i) => renderCard(card, i))}
+          {emptyRevCount > 0 && Array.from({ length: emptyRevCount }).map((_, i) => renderEmptySlot("Revolving Card", filledRevSlots + i))}
+        </div>
       </div>
 
-      <div className="space-y-[3px]">
-        {allCards.map((card, ci) => {
-          const cardMet = card.markers.filter(m => m.met).length;
-          const cardTotal = card.markers.length;
-          const allMet = cardMet === cardTotal;
-          const isAU = /\bau\b/i.test(card.ownership);
-          const isClosed_ = card.markers.some(m => m.label === "Status" && m.actual === "Closed");
-          return (
-            <div key={ci} className={`rounded-md overflow-hidden border ${allMet ? "border-[#2d6a4f]/25" : "border-[#eaeaea]"}`} data-testid={`account-card-${ci}`}>
-              <div className={`flex items-center justify-between px-2 py-[4px] ${allMet ? "bg-[#2d6a4f]" : isClosed_ ? "bg-[#6b6b7b]" : isAU ? "bg-[#4a4a6a]" : "bg-[#1a1a2e]"}`}>
-                <div className="flex items-center gap-1.5 min-w-0">
-                  <p className="text-[9px] font-semibold text-white truncate">{card.creditor}</p>
-                  <span className="text-[6px] uppercase tracking-wider text-white/25 flex-shrink-0">{card.type}</span>
-                  {isAU && <span className="text-[5px] font-bold uppercase tracking-wider text-white/50 bg-white/10 px-1 py-px rounded-sm">AU</span>}
-                  {isClosed_ && <span className="text-[5px] font-bold uppercase tracking-wider text-white/50 bg-white/10 px-1 py-px rounded-sm">Closed</span>}
-                </div>
-                <span className="text-[7px] font-medium text-white/30 flex-shrink-0 ml-1" style={{ fontVariantNumeric: "tabular-nums" }}>{cardMet}/{cardTotal}</span>
-              </div>
-              <div className="grid grid-cols-4 bg-[#fafafa]">
-                {card.markers.map((m, mi) => (
-                  <div key={mi} className="flex flex-col items-center py-[5px] px-1" style={{ borderRight: mi < card.markers.length - 1 ? "1px solid #f0f0f0" : "none" }}>
-                    <span className="text-[6px] text-[#aaa] leading-none mb-[2px]">{m.label}</span>
-                    <span className="text-[8px] font-semibold leading-none truncate max-w-full" style={{ color: m.met ? "#2d6a4f" : "#c0392b", fontVariantNumeric: "tabular-nums" }}>{m.actual}</span>
-                    <div className="w-full h-[1px] mt-[3px] rounded-full" style={{ background: m.met ? "#2d6a4f15" : "#c0392b10" }}>
-                      <div className="h-full rounded-full" style={{ width: m.met ? "100%" : "30%", background: m.met ? "#2d6a4f" : "#c0392b" }} />
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          );
-        })}
+      <div>
+        <p className="text-[9px] uppercase tracking-[0.15em] text-[#999] font-semibold mb-2 px-0.5">Installment Accounts</p>
+        <div className="space-y-2">
+          {instCards.map((card, i) => renderCard(card, revCards.length + i))}
+          {emptyInstCount > 0 && Array.from({ length: emptyInstCount }).map((_, i) => renderEmptySlot("Installment Loan", filledInstSlots + i))}
+        </div>
+      </div>
 
-        {tradelines.length === 0 && (
-          <div className="rounded-md border border-dashed border-[#ddd] bg-[#fafafa] p-3 text-center">
-            <p className="text-[8px] text-[#999] font-medium">Awaiting tradeline data</p>
-            <p className="text-[7px] text-[#bbb] mt-0.5 leading-[1.5]">Re-upload your credit report for the full account match report.</p>
+      {otherCards.length > 0 && (
+        <div>
+          <p className="text-[9px] uppercase tracking-[0.15em] text-[#999] font-semibold mb-2 px-0.5">Other Accounts</p>
+          <div className="space-y-2">
+            {otherCards.map((card, i) => renderCard(card, revCards.length + instCards.length + i))}
           </div>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 }
