@@ -1205,14 +1205,8 @@ function TeamSection({ user, onOpenTeamChat, activeTeamChatId }: { user: any; on
   );
 }
 
-interface AccountSlot {
-  name: string;
-  fields: { label: string; ideal: string; actual: string | null; met: boolean }[];
-  filled: boolean;
-}
-
 function PerfectProfileTab({ aisReport }: { aisReport: MissionData | null }) {
-  const [expandedSection, setExpandedSection] = useState<string | null>("primary");
+  const [expandedSection, setExpandedSection] = useState<string | null>("revolving");
   if (!aisReport || !hasAnalysisData(aisReport)) {
     return (
       <div className="flex flex-col items-center justify-center py-12 px-4 text-center">
@@ -1238,8 +1232,6 @@ function PerfectProfileTab({ aisReport }: { aisReport: MissionData | null }) {
 
   const tradelines = aisReport.openTradelines || [];
   const primaryAccounts = tradelines.filter(t => /primary/i.test(t.ownership) && !/closed/i.test(t.accountStatus));
-  const auAccounts = tradelines.filter(t => /\bau\b/i.test(t.ownership) && !/closed/i.test(t.accountStatus));
-  const closedAccounts = tradelines.filter(t => /closed/i.test(t.accountStatus));
 
   const parseAge = (age: string): number => {
     const yrMatch = age.match(/(\d+)\s*yr/i);
@@ -1248,67 +1240,149 @@ function PerfectProfileTab({ aisReport }: { aisReport: MissionData | null }) {
 
   const isCurrent = (status: string) => /current|pays?\s*as\s*agreed/i.test(status) && !/late|delinq|collection|charge/i.test(status);
 
-  const buildTradelineSlot = (tl: TradeLine): AccountSlot => {
-    const isAU = /\bau\b/i.test(tl.ownership);
-    const isClosed = /closed/i.test(tl.accountStatus);
-    const ageYears = parseAge(tl.age);
-    const current = isCurrent(tl.paymentStatus);
-    const isRevolving = /revolv|loc|heloc/i.test(tl.type);
-    return {
-      name: tl.creditor,
-      filled: true,
-      fields: [
-        { label: "Type", ideal: "—", actual: tl.type, met: true },
-        ...(isRevolving ? [
-          { label: "Limit", ideal: "$10,000+", actual: tl.limit, met: (() => { const n = parseInt(tl.limit.replace(/[^0-9]/g, "")); return !isNaN(n) && n >= 10000; })() },
-          { label: "Balance", ideal: "< 5% of limit", actual: tl.balance, met: (() => { const b = parseInt(tl.balance.replace(/[^0-9]/g, "")); const l = parseInt(tl.limit.replace(/[^0-9]/g, "")); return !isNaN(b) && !isNaN(l) && l > 0 ? (b / l) <= 0.05 : b === 0; })() },
-        ] : [
-          { label: "Amount", ideal: "—", actual: tl.limit, met: true },
-          { label: "Balance", ideal: "$0", actual: tl.balance, met: (() => { const b = parseInt(tl.balance.replace(/[^0-9]/g, "")); return !isNaN(b) && b === 0; })() },
-        ]),
-        { label: "Age", ideal: isRevolving ? "5+ years" : "2+ years", actual: tl.age, met: isRevolving ? ageYears >= 5 : ageYears >= 2 },
-        { label: "Payment", ideal: "Current", actual: isClosed ? (tl.paymentStatus || "Closed") : tl.paymentStatus, met: isClosed ? !/late|delinq|collection|charge/i.test(tl.paymentStatus) : current },
-      ],
-    };
-  };
+  const auFromTradelines = tradelines.filter(t => /\bau\b/i.test(t.ownership));
+  const hasAU = auFromTradelines.length > 0 || /authorized.?user/i.test(allNeg);
+  const auCount = auFromTradelines.length;
+  const hasPublicRecords = /public.?record|bankrupt|judgment|lien/i.test(allNeg);
 
-  const profileSlots: AccountSlot[] = [
+  const revolvingAccounts = tradelines.filter(t => /revolv|credit\s*card|loc\b|heloc/i.test(t.type) && !/closed/i.test(t.accountStatus));
+  const installmentAccounts = tradelines.filter(t => /install|auto|student|mortgage|personal\s*loan/i.test(t.type) && !/closed/i.test(t.accountStatus));
+  const avgAge = (() => {
+    const ages = primaryAccounts.map(t => parseAge(t.age)).filter(a => a > 0);
+    return ages.length > 0 ? (ages.reduce((s, a) => s + a, 0) / ages.length) : 0;
+  })();
+  const oldestAge = Math.max(...primaryAccounts.map(t => parseAge(t.age)), 0);
+  const newestAge = primaryAccounts.length > 0 ? Math.min(...primaryAccounts.map(t => parseAge(t.age))) : 0;
+
+  const revLimits = revolvingAccounts.map(t => parseInt(t.limit.replace(/[^0-9]/g, ""))).filter(n => !isNaN(n));
+  const revBalances = revolvingAccounts.map(t => parseInt(t.balance.replace(/[^0-9]/g, ""))).filter(n => !isNaN(n));
+  const totalLimit = revLimits.reduce((s, n) => s + n, 0);
+  const totalBalance = revBalances.reduce((s, n) => s + n, 0);
+  const utilPct = totalLimit > 0 ? Math.round((totalBalance / totalLimit) * 100) : 0;
+
+  const allCurrentPayments = primaryAccounts.filter(t => isCurrent(t.paymentStatus)).length;
+
+  type FactorTab = { key: string; label: string; color: string; icon: string; status: "met" | "warn" | "fail"; detail: string; fields: { label: string; ideal: string; actual: string | null; met: boolean }[] };
+
+  const factorTabs: FactorTab[] = [
     {
-      name: "Profile Metrics",
-      filled: aisReport.approvalIndex !== null,
+      key: "revolving", label: "Revolving Accounts", color: "#2563eb",
+      icon: "M3 5h10M3 8h10M3 11h10",
+      status: revolvingAccounts.length >= 5 ? "met" : revolvingAccounts.length >= 3 ? "warn" : "fail",
+      detail: `${revolvingAccounts.length} open`,
+      fields: [
+        { label: "Count", ideal: "5+ open", actual: `${revolvingAccounts.length} open`, met: revolvingAccounts.length >= 5 },
+        ...revolvingAccounts.map(t => ({
+          label: t.creditor, ideal: "$10K+ limit",
+          actual: t.limit,
+          met: (() => { const n = parseInt(t.limit.replace(/[^0-9]/g, "")); return !isNaN(n) && n >= 10000; })(),
+        })),
+      ],
+    },
+    {
+      key: "installment", label: "Installment Accounts", color: "#7c3aed",
+      icon: "M4 3v10M8 6v7M12 4v9",
+      status: installmentAccounts.length >= 2 ? "met" : installmentAccounts.length >= 1 ? "warn" : "fail",
+      detail: `${installmentAccounts.length} open`,
+      fields: [
+        { label: "Count", ideal: "2+ open", actual: `${installmentAccounts.length} open`, met: installmentAccounts.length >= 2 },
+        ...installmentAccounts.map(t => ({
+          label: t.creditor, ideal: "Current",
+          actual: t.paymentStatus,
+          met: isCurrent(t.paymentStatus),
+        })),
+      ],
+    },
+    {
+      key: "age", label: "Credit Age", color: "#059669",
+      icon: "M8 2v6l3 3",
+      status: avgAge >= 5 ? "met" : avgAge >= 2 ? "warn" : "fail",
+      detail: avgAge > 0 ? `${avgAge.toFixed(1)} yr avg` : "—",
+      fields: [
+        { label: "Average Age", ideal: "5+ years", actual: avgAge > 0 ? `${avgAge.toFixed(1)} years` : null, met: avgAge >= 5 },
+        { label: "Oldest Account", ideal: "10+ years", actual: oldestAge > 0 ? `${oldestAge} years` : null, met: oldestAge >= 10 },
+        { label: "Newest Account", ideal: "2+ years", actual: newestAge > 0 ? `${newestAge} years` : null, met: newestAge >= 2 },
+      ],
+    },
+    {
+      key: "utilization", label: "Utilization", color: "#0891b2",
+      icon: "M2 13h12M4 13V7M8 13V4M12 13V9",
+      status: utilPct <= 5 ? "met" : utilPct <= 30 ? "warn" : "fail",
+      detail: `${utilPct}%`,
+      fields: [
+        { label: "Overall Utilization", ideal: "< 5%", actual: `${utilPct}%`, met: utilPct <= 5 },
+        { label: "Total Limits", ideal: "$50K+", actual: totalLimit > 0 ? `$${totalLimit.toLocaleString()}` : null, met: totalLimit >= 50000 },
+        { label: "Total Balances", ideal: "Minimal", actual: `$${totalBalance.toLocaleString()}`, met: totalBalance === 0 || utilPct <= 5 },
+      ],
+    },
+    {
+      key: "payments", label: "Payment History", color: "#16a34a",
+      icon: "M2 5l2.5 2.5L8 3M2 10l2.5 2.5L8 8",
+      status: !hasLates ? "met" : "fail",
+      detail: !hasLates ? "Clean" : "Issues",
+      fields: [
+        { label: "Late Payments", ideal: "0 in 24 months", actual: hasLates ? "Found on file" : "Clear", met: !hasLates },
+        { label: "Current Accounts", ideal: "100%", actual: primaryAccounts.length > 0 ? `${allCurrentPayments}/${primaryAccounts.length}` : null, met: primaryAccounts.length > 0 && allCurrentPayments === primaryAccounts.length },
+      ],
+    },
+    {
+      key: "inquiries", label: "Inquiries", color: "#d97706",
+      icon: "M10 4L6 12M8 4h4v4",
+      status: !hasInquiries ? "met" : "fail",
+      detail: !hasInquiries ? "Low" : "Elevated",
+      fields: [
+        { label: "Hard Inquiries", ideal: "0–1 in 12 months", actual: hasInquiries ? "Elevated" : "Low", met: !hasInquiries },
+      ],
+    },
+    {
+      key: "derogatories", label: "Derogatories", color: "#dc2626",
+      icon: "M8 2l6 12H2L8 2zM8 7v3M8 11.5v.5",
+      status: !hasCollections && !hasChargeOffs ? "met" : "fail",
+      detail: !hasCollections && !hasChargeOffs ? "Clear" : "Found",
+      fields: [
+        { label: "Collections", ideal: "0 accounts", actual: hasCollections ? "Found on file" : "Clear", met: !hasCollections },
+        { label: "Charge-Offs", ideal: "0 accounts", actual: hasChargeOffs ? "Found on file" : "Clear", met: !hasChargeOffs },
+      ],
+    },
+    {
+      key: "au", label: "AU Accounts", color: "#6366f1",
+      icon: "M5 8a3 3 0 106 0 3 3 0 00-6 0M3 14c0-2.8 2.2-5 5-5s5 2.2 5 5",
+      status: !hasAU ? "met" : "warn",
+      detail: hasAU ? (auCount > 0 ? `${auCount} found` : "Detected") : "None",
+      fields: [
+        { label: "AU Dependency", ideal: "None", actual: hasAU ? (auCount > 0 ? `${auCount} AU account${auCount > 1 ? "s" : ""}` : "Detected") : "Clear", met: !hasAU },
+        ...auFromTradelines.map(t => ({
+          label: t.creditor, ideal: "Remove if possible", actual: t.limit, met: false,
+        })),
+      ],
+    },
+    {
+      key: "publicrecords", label: "Public Records", color: "#78716c",
+      icon: "M3 3h10v10H3V3zM6 6h4M6 9h4",
+      status: !hasPublicRecords ? "met" : "fail",
+      detail: !hasPublicRecords ? "Clear" : "Found",
+      fields: [
+        { label: "Bankruptcies / Liens", ideal: "None", actual: hasPublicRecords ? "Found" : "Clear", met: !hasPublicRecords },
+      ],
+    },
+    {
+      key: "identity", label: "Score & Identity", color: "#1a1a2e",
+      icon: "M8 1.5L2.5 4v4c0 3.5 2.3 5.5 5.5 7 3.2-1.5 5.5-3.5 5.5-7V4L8 1.5z",
+      status: (aisReport.approvalIndex ?? 0) >= 90 ? "met" : (aisReport.approvalIndex ?? 0) >= 70 ? "warn" : "fail",
+      detail: aisReport.approvalIndex !== null ? `AIS ${aisReport.approvalIndex}` : "—",
       fields: [
         { label: "AIS", ideal: "90+ / 100", actual: aisReport.approvalIndex !== null ? `${aisReport.approvalIndex} / 100` : null, met: (aisReport.approvalIndex ?? 0) >= 90 },
         { label: "Band", ideal: "Exceptional", actual: aisReport.band, met: aisReport.band?.toLowerCase() === "exceptional" },
         { label: "Phase", ideal: "Funding Phase", actual: aisReport.phase, met: /fund/i.test(aisReport.phase || "") },
         { label: "Identity Strength", ideal: "85+", actual: fi?.identityStrength != null ? `${fi.identityStrength}` : null, met: (fi?.identityStrength ?? 0) >= 85 },
-        { label: "Lender Perception", ideal: "Low-risk borrower", actual: fi?.lenderPerception || null, met: /low.?risk|favorable|strong|excellent|premium/i.test(fi?.lenderPerception || "") },
         { label: "Profile Type", ideal: "Premium / Seasoned", actual: fi?.profileType || null, met: /premium|seasoned/i.test(fi?.profileType || "") },
       ],
     },
-  ];
-
-  const auFromTradelines = tradelines.filter(t => /\bau\b/i.test(t.ownership));
-  const hasAU = auFromTradelines.length > 0 || /authorized.?user/i.test(allNeg);
-  const auCount = auFromTradelines.length;
-  const cleanFileSlots: AccountSlot[] = [
     {
-      name: "File Hygiene",
-      filled: !hasCollections && !hasChargeOffs && !hasLates && !hasInquiries && !hasAU,
-      fields: [
-        { label: "Collections", ideal: "0 accounts", actual: hasCollections ? "Found on file" : "Clear", met: !hasCollections },
-        { label: "Charge-Offs", ideal: "0 accounts", actual: hasChargeOffs ? "Found on file" : "Clear", met: !hasChargeOffs },
-        { label: "Late Payments", ideal: "0 in 24 months", actual: hasLates ? "Found on file" : "Clear", met: !hasLates },
-        { label: "Hard Inquiries", ideal: "0–1 in 12 months", actual: hasInquiries ? "Elevated" : "Low", met: !hasInquiries },
-        { label: "AU Dependency", ideal: "None", actual: hasAU ? (auCount > 0 ? `${auCount} AU account${auCount > 1 ? "s" : ""}` : "Detected") : "Clear", met: !hasAU },
-        { label: "Public Records", ideal: "None", actual: /public.?record|bankrupt|judgment|lien/i.test(allNeg) ? "Found" : "Clear", met: !/public.?record|bankrupt|judgment|lien/i.test(allNeg) },
-      ],
-    },
-  ];
-
-  const fundingSlots: AccountSlot[] = [
-    {
-      name: "Capital Readiness",
-      filled: /ready|strong|qualified/i.test(pf?.readinessLevel || "") && (aisReport.suppressors?.length || 0) === 0,
+      key: "capital", label: "Capital Readiness", color: "#b45309",
+      icon: "M8 2c0 0-4 2-4 8h8c0-6-4-8-4-8zM6 10l-2 3M10 10l2 3",
+      status: /ready|strong|qualified/i.test(pf?.readinessLevel || "") ? "met" : "warn",
+      detail: pf?.readinessLevel || "—",
       fields: [
         { label: "Readiness", ideal: "Qualification Ready", actual: pf?.readinessLevel || null, met: /ready|strong|qualified/i.test(pf?.readinessLevel || "") },
         { label: "Modeled Exposure", ideal: "Upper range", actual: pf?.bestCasePerBureau || pf?.currentExposure || null, met: !!(pf?.bestCasePerBureau) },
@@ -1318,128 +1392,85 @@ function PerfectProfileTab({ aisReport }: { aisReport: MissionData | null }) {
     },
   ];
 
-  const metricSlots = [
-    { title: "Score & Identity", slots: profileSlots },
-    { title: "File Hygiene", slots: cleanFileSlots },
-    { title: "Capital Readiness", slots: fundingSlots },
-  ];
+  const totalFactorFields = factorTabs.reduce((s, f) => s + f.fields.length, 0);
+  const metFactorFields = factorTabs.reduce((s, f) => s + f.fields.filter(fd => fd.met).length, 0);
+  const pct = totalFactorFields > 0 ? Math.round((metFactorFields / totalFactorFields) * 100) : 0;
+  const metFactors = factorTabs.filter(f => f.status === "met").length;
 
-  const totalMetricFields = metricSlots.reduce((s, g) => s + g.slots.reduce((s2, sl) => s2 + sl.fields.length, 0), 0);
-  const metMetricFields = metricSlots.reduce((s, g) => s + g.slots.reduce((s2, sl) => s2 + sl.fields.filter(f => f.met).length, 0), 0);
-  const pct = totalMetricFields > 0 ? Math.round((metMetricFields / totalMetricFields) * 100) : 0;
-
-  const renderSlot = (slot: AccountSlot, gi: number, si: number) => {
-    const slotMet = slot.fields.filter(f => f.met).length;
-    const slotTotal = slot.fields.length;
-    return (
-      <div key={si} className={`rounded-lg overflow-hidden ${slot.filled ? "border border-[#1a1a2e]/15 bg-white" : "border border-dashed border-[#ddd] bg-[#f7f7f7]"}`} data-testid={`slot-${gi}-${si}`}>
-        <div className={`flex items-center justify-between px-2.5 py-1.5 ${slot.filled ? "bg-[#1a1a2e]" : "bg-[#efefef]"}`}>
-          <div className="flex items-center gap-1.5">
-            <div className={`w-[12px] h-[12px] rounded flex items-center justify-center ${slot.filled ? "bg-white/20" : "bg-[#d8d8d8]"}`}>
-              {slot.filled ? (
-                <svg width="7" height="7" viewBox="0 0 10 10" fill="none"><path d="M2 5l2.5 2.5L8 3" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
-              ) : (
-                <svg width="7" height="7" viewBox="0 0 10 10" fill="none"><path d="M5 2v6M2 5h6" stroke="#aaa" strokeWidth="1.2" strokeLinecap="round" /></svg>
-              )}
-            </div>
-            <p className={`text-[9px] font-semibold ${slot.filled ? "text-white" : "text-[#999]"}`}>{slot.name}</p>
-            <span className={`text-[7px] font-medium ml-0.5 ${slot.filled ? "text-white/40" : "text-[#c0c0c0]"}`}>{slotMet}/{slotTotal}</span>
-          </div>
-        </div>
-        <div>
-          {slot.fields.map((field, fi2) => (
-            <div key={fi2} className={`grid items-center px-2.5 py-[5px] ${fi2 > 0 ? "border-t border-[#f0f0f0]" : ""}`} style={{ gridTemplateColumns: "18px 1fr auto" }}>
-              <div className={`w-[10px] h-[10px] rounded-[2px] flex items-center justify-center ${field.met ? "bg-[#2d6a4f]" : "border border-[#ddd] bg-white"}`}>
-                {field.met && (
-                  <svg width="6" height="6" viewBox="0 0 10 10" fill="none"><path d="M2 5l2.5 2.5L8 3" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
-                )}
-              </div>
-              <p className="text-[8px] text-[#777]">{field.label}</p>
-              <div className="flex items-center gap-1 justify-end pl-2">
-                <span className="text-[7px] text-[#c0c0c0]">{field.ideal}</span>
-                <span className="text-[7px] text-[#ddd] mx-px">|</span>
-                <span className={`text-[8px] font-semibold ${field.met ? "text-[#2d6a4f]" : field.actual ? "text-[#c0392b]" : "text-[#ccc] italic font-normal"}`}>{field.actual || "—"}</span>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    );
+  const statusDot = (s: "met" | "warn" | "fail") => {
+    const c = s === "met" ? "#2d6a4f" : s === "warn" ? "#d97706" : "#dc2626";
+    return <div className="w-[6px] h-[6px] rounded-full flex-shrink-0" style={{ background: c }} />;
   };
 
-  const accountSections = [
-    { key: "primary", label: "Primary Accounts", accounts: primaryAccounts, color: "#1a1a2e", icon: "shield" },
-    { key: "au", label: "Authorized User", accounts: auAccounts, color: "#6366f1", icon: "user" },
-    { key: "closed", label: "Closed Accounts", accounts: closedAccounts, color: "#888", icon: "lock" },
-  ];
-
   return (
-    <div className="space-y-3" data-testid="perfect-profile-tab">
-      <div className="rounded-xl bg-gradient-to-br from-[#1a1a2e] to-[#2a2a40] p-3.5">
-        <div className="flex items-center gap-3">
-          <div className="relative w-[40px] h-[40px]">
+    <div className="space-y-0.5" data-testid="perfect-profile-tab">
+      <div className="rounded-xl bg-gradient-to-br from-[#1a1a2e] to-[#2a2a40] p-3 mb-1.5">
+        <div className="flex items-center gap-2.5">
+          <div className="relative w-[38px] h-[38px] flex-shrink-0">
             <svg viewBox="0 0 36 36" className="w-full h-full -rotate-90">
-              <circle cx="18" cy="18" r="15.5" fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="3" />
-              <circle cx="18" cy="18" r="15.5" fill="none" stroke={pct >= 80 ? "#4ade80" : pct >= 50 ? "#fbbf24" : "#f87171"} strokeWidth="3" strokeDasharray={`${pct * 0.974} 100`} strokeLinecap="round" />
+              <circle cx="18" cy="18" r="15.5" fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="2.5" />
+              <circle cx="18" cy="18" r="15.5" fill="none" stroke={pct >= 80 ? "#4ade80" : pct >= 50 ? "#fbbf24" : "#f87171"} strokeWidth="2.5" strokeDasharray={`${pct * 0.974} 100`} strokeLinecap="round" />
             </svg>
-            <span className="absolute inset-0 flex items-center justify-center text-[10px] font-bold text-white">{pct}%</span>
+            <div className="absolute inset-0 flex flex-col items-center justify-center">
+              <span className="text-[10px] font-bold text-white leading-none">{pct}%</span>
+            </div>
           </div>
-          <div>
-            <p className="text-[12px] font-bold text-white leading-tight">{tradelines.length}<span className="text-[10px] font-normal text-white/50"> tradelines</span></p>
-            <p className="text-[8px] text-white/35 mt-0.5">{primaryAccounts.length} primary · {auAccounts.length} AU · {closedAccounts.length} closed</p>
+          <div className="min-w-0">
+            <p className="text-[7px] uppercase tracking-[0.1em] text-white/30 font-medium leading-none">Profile Match</p>
+            <p className="text-[11px] font-bold text-white leading-tight mt-0.5">{metFactors}<span className="text-[9px] font-normal text-white/40">/{factorTabs.length} factors met</span></p>
+            <p className="text-[7px] text-white/30 mt-px">{metFactorFields}/{totalFactorFields} fields passing</p>
           </div>
         </div>
       </div>
 
-      {accountSections.map((section) => {
-        const isOpen = expandedSection === section.key;
-        const slots = section.accounts.map(buildTradelineSlot);
+      {factorTabs.map((factor) => {
+        const isOpen = expandedSection === factor.key;
+        const metCount = factor.fields.filter(f => f.met).length;
         return (
-          <div key={section.key}>
+          <div key={factor.key}>
             <button
-              onClick={() => setExpandedSection(isOpen ? null : section.key)}
-              className="w-full flex items-center justify-between px-2.5 py-2 rounded-lg transition-colors hover:bg-[#f5f5f5]"
+              onClick={() => setExpandedSection(isOpen ? null : factor.key)}
+              className="w-full flex items-center justify-between px-2 py-[6px] rounded-lg transition-colors hover:bg-[#f8f8f8]"
               style={{ background: isOpen ? "#f5f5f5" : "transparent" }}
-              data-testid={`toggle-${section.key}-accounts`}
+              data-testid={`toggle-${factor.key}`}
             >
-              <div className="flex items-center gap-2">
-                <div className="w-[18px] h-[18px] rounded flex items-center justify-center" style={{ background: section.color + "15" }}>
-                  {section.icon === "shield" && (
-                    <svg width="10" height="10" viewBox="0 0 16 16" fill="none"><path d="M8 1.5L2.5 4v4c0 3.5 2.3 5.5 5.5 7 3.2-1.5 5.5-3.5 5.5-7V4L8 1.5z" stroke={section.color} strokeWidth="1.2" fill="none" /></svg>
-                  )}
-                  {section.icon === "user" && (
-                    <svg width="10" height="10" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="5" r="3" stroke={section.color} strokeWidth="1.2" /><path d="M3 14c0-2.8 2.2-5 5-5s5 2.2 5 5" stroke={section.color} strokeWidth="1.2" strokeLinecap="round" /></svg>
-                  )}
-                  {section.icon === "lock" && (
-                    <svg width="10" height="10" viewBox="0 0 16 16" fill="none"><rect x="3" y="7" width="10" height="7" rx="1.5" stroke={section.color} strokeWidth="1.2" /><path d="M5 7V5a3 3 0 016 0v2" stroke={section.color} strokeWidth="1.2" strokeLinecap="round" /></svg>
-                  )}
+              <div className="flex items-center gap-1.5">
+                {statusDot(factor.status)}
+                <div className="w-[14px] h-[14px] rounded flex items-center justify-center" style={{ background: factor.color + "10" }}>
+                  <svg width="9" height="9" viewBox="0 0 16 16" fill="none"><path d={factor.icon} stroke={factor.color} strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" fill="none" /></svg>
                 </div>
-                <span className="text-[9px] font-semibold" style={{ color: section.color }}>{section.label}</span>
-                <span className="text-[8px] font-medium text-[#bbb] ml-0.5">{section.accounts.length}</span>
+                <span className="text-[9px] font-semibold" style={{ color: factor.color }}>{factor.label}</span>
               </div>
-              <svg width="10" height="10" viewBox="0 0 10 10" fill="none" className={`transition-transform ${isOpen ? "rotate-180" : ""}`}>
-                <path d="M2.5 3.5L5 6.5L7.5 3.5" stroke="#999" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
+              <div className="flex items-center gap-1.5">
+                <span className="text-[7px] font-medium text-[#bbb]">{factor.detail}</span>
+                <span className="text-[7px] text-[#ddd]">{metCount}/{factor.fields.length}</span>
+                <svg width="8" height="8" viewBox="0 0 10 10" fill="none" className={`transition-transform ${isOpen ? "rotate-180" : ""}`}>
+                  <path d="M2.5 3.5L5 6.5L7.5 3.5" stroke="#ccc" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </div>
             </button>
             {isOpen && (
-              <div className="space-y-1.5 mt-1">
-                {slots.length > 0 ? slots.map((slot, si) => renderSlot(slot, accountSections.indexOf(section), si)) : (
-                  <p className="text-[8px] text-[#bbb] italic text-center py-3">No {section.label.toLowerCase()} found</p>
-                )}
+              <div className="ml-[22px] mr-1 mt-0.5 mb-1 rounded-lg overflow-hidden border border-[#eee] bg-white">
+                {factor.fields.map((field, fi) => (
+                  <div key={fi} className={`grid items-center px-2.5 py-[5px] ${fi > 0 ? "border-t border-[#f5f5f5]" : ""}`} style={{ gridTemplateColumns: "16px 1fr auto" }}>
+                    <div className={`w-[10px] h-[10px] rounded-[2px] flex items-center justify-center ${field.met ? "bg-[#2d6a4f]" : "border border-[#ddd] bg-white"}`}>
+                      {field.met && (
+                        <svg width="6" height="6" viewBox="0 0 10 10" fill="none"><path d="M2 5l2.5 2.5L8 3" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                      )}
+                    </div>
+                    <p className="text-[8px] text-[#666] truncate">{field.label}</p>
+                    <div className="flex items-center gap-1 justify-end pl-2">
+                      <span className="text-[7px] text-[#c0c0c0]">{field.ideal}</span>
+                      <span className="text-[7px] text-[#e0e0e0] mx-px">|</span>
+                      <span className={`text-[8px] font-semibold ${field.met ? "text-[#2d6a4f]" : field.actual ? "text-[#c0392b]" : "text-[#ccc] italic font-normal"}`}>{field.actual || "—"}</span>
+                    </div>
+                  </div>
+                ))}
               </div>
             )}
           </div>
         );
       })}
-
-      {metricSlots.map((group, gi) => (
-        <div key={gi}>
-          <p className="text-[7px] text-[#aaa] uppercase tracking-[0.08em] font-semibold mb-1">{group.title}</p>
-          <div className="space-y-1.5">
-            {group.slots.map((slot, si) => renderSlot(slot, gi + 10, si))}
-          </div>
-        </div>
-      ))}
     </div>
   );
 }
