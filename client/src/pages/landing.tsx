@@ -1308,17 +1308,11 @@ function PerfectProfileTab({ aisReport }: { aisReport: MissionData | null }) {
   const factorsMet = factorChecks.filter(f => f.met).length;
   const pct = totalMarkers > 0 ? Math.round((metMarkers / totalMarkers) * 100) : (factorsMet > 0 ? Math.round((factorsMet / factorChecks.length) * 100) : 0);
 
-  const renderMarkerDot = (met: boolean) => (
-    <div className={`w-[8px] h-[8px] rounded-full flex items-center justify-center flex-shrink-0 ${met ? "bg-[#2d6a4f]" : "bg-[#e5e5e5]"}`}>
-      {met && <svg width="5" height="5" viewBox="0 0 10 10" fill="none"><path d="M2 5l2.5 2.5L8 3" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" /></svg>}
-    </div>
-  );
-
   return (
-    <div className="space-y-2" data-testid="perfect-profile-tab">
-      <div className="rounded-xl bg-gradient-to-br from-[#1a1a2e] to-[#2a2a40] p-3">
-        <div className="flex items-center gap-2.5">
-          <div className="relative w-[38px] h-[38px] flex-shrink-0">
+    <div className="space-y-1.5" data-testid="perfect-profile-tab">
+      <div className="rounded-xl bg-gradient-to-br from-[#1a1a2e] to-[#2a2a40] p-2.5">
+        <div className="flex items-center gap-2">
+          <div className="relative w-[34px] h-[34px] flex-shrink-0">
             <svg viewBox="0 0 36 36" className="w-full h-full -rotate-90">
               <circle cx="18" cy="18" r="15.5" fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="2.5" />
               <circle cx="18" cy="18" r="15.5" fill="none" stroke={pct >= 80 ? "#4ade80" : pct >= 50 ? "#fbbf24" : "#f87171"} strokeWidth="2.5" strokeDasharray={`${pct * 0.974} 100`} strokeLinecap="round" />
@@ -1328,16 +1322,16 @@ function PerfectProfileTab({ aisReport }: { aisReport: MissionData | null }) {
             </div>
           </div>
           <div className="min-w-0">
-            <p className="text-[7px] uppercase tracking-[0.1em] text-white/30 font-medium leading-none">Fundability Match</p>
-            <p className="text-[11px] font-bold text-white leading-tight mt-0.5">{tradelines.length > 0 ? metMarkers : factorsMet}<span className="text-[9px] font-normal text-white/40">/{tradelines.length > 0 ? totalMarkers : factorChecks.length} {tradelines.length > 0 ? "markers" : "factors"} met</span></p>
-            <p className="text-[7px] text-white/30 mt-px">{tradelines.length > 0 ? `${tradelines.length} accounts · ` : ""}{factorsMet}/{factorChecks.length} factors clear</p>
+            <p className="text-[7px] uppercase tracking-[0.08em] text-white/25 font-medium leading-none">Profile Match</p>
+            <p className="text-[10px] font-bold text-white leading-tight mt-0.5">{tradelines.length > 0 ? metMarkers : factorsMet}<span className="text-[8px] font-normal text-white/35">/{tradelines.length > 0 ? totalMarkers : factorChecks.length} {tradelines.length > 0 ? "markers" : "factors"} met</span></p>
+            <p className="text-[7px] text-white/25 mt-px leading-none">{tradelines.length > 0 ? `${tradelines.length} accounts · ` : ""}{factorsMet}/{factorChecks.length} factors clear</p>
           </div>
         </div>
       </div>
 
-      <div className="flex flex-wrap gap-x-1 gap-y-0.5 px-0.5">
+      <div className="flex flex-wrap gap-x-0.5 gap-y-0.5 px-0.5">
         {factorChecks.map((f, i) => (
-          <div key={i} className="flex items-center gap-[3px] px-1.5 py-[3px] rounded-full" style={{ background: f.met ? "#2d6a4f10" : f.warn ? "#d9770610" : "#dc262610" }}>
+          <div key={i} className="flex items-center gap-[3px] px-1.5 py-[2px] rounded-full" style={{ background: f.met ? "#2d6a4f10" : f.warn ? "#d9770610" : "#dc262610" }}>
             <div className="w-[5px] h-[5px] rounded-full" style={{ background: f.met ? "#2d6a4f" : f.warn ? "#d97706" : "#dc2626" }} />
             <span className="text-[7px] font-medium" style={{ color: f.met ? "#2d6a4f" : f.warn ? "#d97706" : "#dc2626" }}>{f.label}</span>
             <span className="text-[6px] text-[#aaa]">{f.detail}</span>
@@ -1345,7 +1339,7 @@ function PerfectProfileTab({ aisReport }: { aisReport: MissionData | null }) {
         ))}
       </div>
 
-      <div className="space-y-1.5">
+      <div className="space-y-1">
         {allCards.map((card, ci) => {
           const cardMet = card.markers.filter(m => m.met).length;
           const cardTotal = card.markers.length;
@@ -1354,24 +1348,24 @@ function PerfectProfileTab({ aisReport }: { aisReport: MissionData | null }) {
           const isClosed_ = card.markers.some(m => m.label === "Status" && m.actual === "Closed");
           return (
             <div key={ci} className={`rounded-lg overflow-hidden ${allMet ? "border border-[#2d6a4f]/20" : "border border-[#e5e5e5]"}`} data-testid={`account-card-${ci}`}>
-              <div className={`flex items-center justify-between px-2.5 py-[6px] ${allMet ? "bg-[#2d6a4f]" : isClosed_ ? "bg-[#888]" : isAU ? "bg-[#6366f1]" : "bg-[#1a1a2e]"}`}>
-                <div className="flex items-center gap-1.5 min-w-0">
+              <div className={`flex items-center justify-between px-2 py-[5px] ${allMet ? "bg-[#2d6a4f]" : isClosed_ ? "bg-[#888]" : isAU ? "bg-[#6366f1]" : "bg-[#1a1a2e]"}`}>
+                <div className="flex items-center gap-1 min-w-0">
                   <p className="text-[9px] font-semibold text-white truncate">{card.creditor}</p>
-                  <span className="text-[7px] text-white/40 flex-shrink-0">{card.type}</span>
-                </div>
-                <div className="flex items-center gap-1 flex-shrink-0">
+                  <span className="text-[6px] text-white/30 flex-shrink-0">{card.type}</span>
                   {isAU && <span className="text-[6px] font-bold text-white/50 bg-white/10 px-1 py-px rounded">AU</span>}
                   {isClosed_ && <span className="text-[6px] font-bold text-white/50 bg-white/10 px-1 py-px rounded">CLOSED</span>}
-                  <span className="text-[7px] text-white/40">{cardMet}/{cardTotal}</span>
                 </div>
+                <span className="text-[7px] text-white/35 flex-shrink-0 ml-1">{cardMet}/{cardTotal}</span>
               </div>
-              <div className="flex items-center px-2.5 py-[5px] gap-3">
+              <div className="grid grid-cols-4 px-2 py-[4px] gap-x-1">
                 {card.markers.map((m, mi) => (
                   <div key={mi} className="flex items-center gap-[3px]">
-                    {renderMarkerDot(m.met)}
-                    <div className="flex flex-col">
+                    <div className={`w-[6px] h-[6px] rounded-[1px] flex items-center justify-center flex-shrink-0 ${m.met ? "bg-[#2d6a4f]" : "bg-[#e0e0e0]"}`}>
+                      {m.met && <svg width="4" height="4" viewBox="0 0 10 10" fill="none"><path d="M2 5l2.5 2.5L8 3" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" /></svg>}
+                    </div>
+                    <div className="flex flex-col min-w-0">
                       <span className="text-[6px] text-[#aaa] leading-none">{m.label}</span>
-                      <span className={`text-[8px] font-semibold leading-tight ${m.met ? "text-[#2d6a4f]" : "text-[#c0392b]"}`}>{m.actual}</span>
+                      <span className={`text-[8px] font-semibold leading-tight truncate ${m.met ? "text-[#2d6a4f]" : "text-[#c0392b]"}`}>{m.actual}</span>
                     </div>
                   </div>
                 ))}
@@ -1381,9 +1375,9 @@ function PerfectProfileTab({ aisReport }: { aisReport: MissionData | null }) {
         })}
 
         {tradelines.length === 0 && (
-          <div className="rounded-lg border border-dashed border-[#ddd] bg-[#fafafa] p-3 text-center">
+          <div className="rounded-lg border border-dashed border-[#d5d5d5] bg-[#f7f7f7] p-2.5 text-center">
             <p className="text-[9px] text-[#999] font-medium">Tradeline details not yet available</p>
-            <p className="text-[8px] text-[#bbb] mt-1 leading-[1.5]">Re-upload your credit report to generate the full account match report. Each account will be listed with fundability markers.</p>
+            <p className="text-[8px] text-[#ccc] mt-0.5 leading-[1.5] italic font-light">Re-upload your credit report to generate the full account match report.</p>
           </div>
         )}
       </div>
