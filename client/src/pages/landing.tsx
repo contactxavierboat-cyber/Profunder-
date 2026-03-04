@@ -1436,7 +1436,6 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
   const docInputRef = useRef<HTMLInputElement>(null);
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
   const [expandedBureau, setExpandedBureau] = useState<string | null>(null);
-  const [panelTab, setPanelTab] = useState<"command" | "perfect">("command");
 
   const handleUploadDoc = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -1504,60 +1503,6 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
     return `${d.getMonth() + 1}/${d.getDate()}/${d.getFullYear()}`;
   };
 
-  const DocGroup = ({ title, items, icon }: { title: string; items: SavedDoc[]; icon: React.ReactNode }) => (
-    <div className="mb-4">
-      <div className="flex items-center gap-2 mb-2">
-        {icon}
-        <span className="text-[11px] font-medium text-[#666] uppercase tracking-wider">{title}</span>
-        <span className="text-[10px] text-[#aaa] ml-auto">{items.length}</span>
-      </div>
-      {items.length === 0 ? (
-        <p className="text-[11px] text-[#bbb] pl-5 italic">No documents yet</p>
-      ) : (
-        <div className="space-y-1">
-          {items.map(doc => {
-            const canDownload = !!(doc.disputes?.length || doc.fileDataUrl);
-            const isDownloading = downloadingId === doc.id;
-            return (
-              <div key={doc.id} className="flex items-center gap-1.5 pl-5 py-1.5 rounded-lg hover:bg-[#f5f5f5] group transition-colors" data-testid={`doc-item-${doc.id}`}>
-                <svg width="12" height="12" viewBox="0 0 12 12" fill="none" className="shrink-0">
-                  <rect x="2" y="1" width="8" height="10" rx="1" stroke="#999" strokeWidth="1" fill="none" />
-                  <path d="M4 4h4M4 6h4M4 8h2" stroke="#bbb" strokeWidth="0.8" strokeLinecap="round" />
-                </svg>
-                <div className="flex-1 min-w-0">
-                  <p className="text-[11px] text-[#444] truncate">{doc.name}</p>
-                  <p className="text-[9px] text-[#bbb]">{formatDate(doc.savedAt)}</p>
-                </div>
-                {canDownload && (
-                  <button
-                    onClick={() => handleDownload(doc)}
-                    disabled={isDownloading}
-                    className={`${doc.disputes?.length ? 'opacity-100 text-[#6366f1]' : 'opacity-0 group-hover:opacity-100 text-[#aaa]'} hover:text-[#1a1a2e] transition-all p-0.5 disabled:opacity-50`}
-                    title="Download"
-                    data-testid={`button-download-doc-${doc.id}`}
-                  >
-                    {isDownloading ? (
-                      <span className="text-[9px]">...</span>
-                    ) : (
-                      <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 2v6M6 8L4 6M6 8l2-2" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" /><path d="M2 9v1h8V9" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" /></svg>
-                    )}
-                  </button>
-                )}
-                <button
-                  onClick={() => onDelete(doc.id)}
-                  className="opacity-0 group-hover:opacity-100 text-[#ccc] hover:text-red-400 transition-all p-0.5"
-                  data-testid={`button-delete-doc-${doc.id}`}
-                >
-                  <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2 2l6 6M8 2l-6 6" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" /></svg>
-                </button>
-              </div>
-            );
-          })}
-        </div>
-      )}
-    </div>
-  );
-
   const aisScore = aisReport?.approvalIndex;
   const hasAis = aisReport && hasAnalysisData(aisReport);
   const suppressorCount = aisReport?.suppressors?.length || 0;
@@ -1596,13 +1541,6 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
     return pf.readinessLevel;
   };
 
-  const thresholdBars = aisScore ? [
-    { label: "Tier 2 Revolvers", threshold: 65 },
-    { label: "Tier 1 Revolvers", threshold: 78 },
-    { label: "Prime Bankcards", threshold: 82 },
-    { label: "Premium Charge", threshold: 88 },
-  ] : [];
-
   return (
     <div className="h-full flex flex-col bg-white border-r border-[#eee]" data-testid="docs-panel">
       <div className="flex items-center justify-between px-4 py-3 border-b border-[#eee]">
@@ -1619,104 +1557,65 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
         </button>
       </div>
 
-      <div className="flex items-center gap-1 px-4 py-2 border-b border-[#eee]">
-        <button
-          onClick={() => setPanelTab("command")}
-          className={`px-3 py-1.5 rounded-md text-[10px] font-semibold transition-all ${panelTab === "command" ? "bg-[#1a1a2e] text-white" : "text-[#999] hover:text-[#555] hover:bg-[#f0f0f0]"}`}
-          data-testid="tab-command"
-        >
-          Command
-        </button>
-        <button
-          onClick={() => setPanelTab("perfect")}
-          className={`px-3 py-1.5 rounded-md text-[10px] font-semibold transition-all ${panelTab === "perfect" ? "bg-[#1a1a2e] text-white" : "text-[#999] hover:text-[#555] hover:bg-[#f0f0f0]"}`}
-          data-testid="tab-perfect-profile"
-        >
-          Perfect Profile
-        </button>
-      </div>
-
       <div className="flex-1 overflow-y-auto px-4 py-3">
 
-        {panelTab === "perfect" ? (
-          <PerfectProfileTab aisReport={aisReport} />
-        ) : (
-        <>
-
-        <div className="mb-4">
+        <div className="mb-3">
           {hasAis ? (
             <button
               onClick={onOpenAis}
-              className="w-full text-left rounded-xl bg-gradient-to-br from-[#1a1a2e] to-[#2a2a40] p-4 hover:from-[#22223a] hover:to-[#333350] transition-all group"
+              className="w-full text-left rounded-xl bg-gradient-to-br from-[#1a1a2e] to-[#2a2a40] p-3 hover:from-[#22223a] hover:to-[#333350] transition-all group"
               data-testid="button-open-ais"
             >
-              <div className="flex items-center justify-between mb-2">
-                <p className="text-[9px] font-medium text-white/50 uppercase tracking-widest">Capital Readiness</p>
+              <div className="flex items-center justify-between mb-1.5">
+                <p className="text-[8px] font-medium text-white/50 uppercase tracking-widest">Capital Readiness</p>
                 <svg width="10" height="10" viewBox="0 0 10 10" fill="none" className="text-white/30 group-hover:text-white/60 transition-colors shrink-0">
                   <path d="M3 1l4 4-4 4" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
               </div>
               <div className="flex items-baseline gap-1.5 mb-1">
-                <span className="text-[28px] font-bold text-white leading-none" data-testid="text-ais-score">{aisScore}</span>
-                <span className="text-[13px] font-medium text-white/40">/ 100</span>
+                <span className="text-[24px] font-bold text-white leading-none" data-testid="text-ais-score">{aisScore}</span>
+                <span className="text-[11px] font-medium text-white/40">/ 100</span>
               </div>
-              <p className="text-[10px] text-white/70 font-medium mb-0.5" data-testid="text-ais-status">{getStatusLabel()}</p>
-              <p className="text-[9px] text-white/40">{getPhaseAction()}</p>
+              <p className="text-[9px] text-white/70 font-medium mb-0.5" data-testid="text-ais-status">{getStatusLabel()}</p>
+              <p className="text-[8px] text-white/40">{getPhaseAction()}</p>
 
-              <div className="mt-3 pt-2.5 border-t border-white/10 flex flex-col gap-1.5">
+              <div className="mt-2 pt-2 border-t border-white/10 grid grid-cols-2 gap-x-3 gap-y-1">
                 {suppressorCount > 0 && (
-                  <p className="text-[9px] text-white/50">
-                    Active Approval Suppressors: <span className="text-white/80 font-medium">{suppressorCount}</span>
+                  <p className="text-[8px] text-white/50">
+                    Suppressors: <span className="text-white/80 font-medium">{suppressorCount}</span>
                   </p>
                 )}
                 {pf?.readinessLevel && (
-                  <p className="text-[9px] text-white/50">
-                    Qualification Tier: <span className="text-white/80 font-medium">{getReadinessTier()}</span>
+                  <p className="text-[8px] text-white/50">
+                    Tier: <span className="text-white/80 font-medium">{getReadinessTier()}</span>
                   </p>
                 )}
                 {pf?.inquirySlots && (
-                  <p className="text-[9px] text-white/50">
-                    Inquiry Capacity: <span className="text-white/80 font-medium">{pf.inquirySlots}</span>
+                  <p className="text-[8px] text-white/50">
+                    Inquiries: <span className="text-white/80 font-medium">{pf.inquirySlots}</span>
                   </p>
                 )}
               </div>
 
               {aisScore && aisScore < 88 && (
-                <div className="mt-3 pt-2.5 border-t border-white/10 space-y-1.5">
-                  {[
-                    { label: "Tier 1 Revolver Threshold", value: 78 },
-                    { label: "Prime Bankcard Threshold", value: 82 },
-                  ].map(t => (
-                    <div key={t.label} className="flex items-center justify-between">
-                      <span className="text-[8px] text-white/35">{t.label}</span>
-                      <div className="flex items-center gap-1.5">
-                        <span className="text-[7px] text-white/20">→</span>
-                        <span className={`text-[8px] font-medium ${aisScore >= t.value ? "text-emerald-400/80" : "text-white/50"}`}>{t.value}</span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-
-              {aisScore && aisScore < 88 && (
-                <p className="mt-2.5 text-[9px] text-white/50">
-                  Next Milestone: <span className="text-white/70 font-medium">{aisScore < 78 ? "Tier 1 Revolver Eligibility (78)" : aisScore < 82 ? "Prime Bankcard Eligibility (82)" : "Premium Charge Eligibility (88)"}</span>
+                <p className="mt-2 text-[8px] text-white/50">
+                  Next: <span className="text-white/70 font-medium">{aisScore < 78 ? "Tier 1 (78)" : aisScore < 82 ? "Prime (82)" : "Premium (88)"}</span>
                 </p>
               )}
 
-              <p className="mt-2 text-[7px] text-white/20 leading-[1.4]">Modeled via multi-factor underwriting logic · inquiry velocity · utilization · depth · account age · profile symmetry</p>
-
-              <div className="mt-2.5 flex items-center gap-1.5 text-[10px] text-white/60 group-hover:text-white/90 font-medium transition-colors">
-                <span>View Advancement Protocol</span>
+              <div className="mt-2 flex items-center gap-1.5 text-[9px] text-white/60 group-hover:text-white/90 font-medium transition-colors">
+                <span>View Full Analysis</span>
                 <svg width="8" height="8" viewBox="0 0 8 8" fill="none"><path d="M2 4h4M4 2l2 2-2 2" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" /></svg>
               </div>
             </button>
           ) : (
-            <div className="rounded-xl border border-dashed border-[#ddd] p-4 text-center">
-              <p className="text-[10px] text-[#999] leading-[1.5]">Upload a credit report to activate your Capital Readiness Index</p>
+            <div className="rounded-xl border border-dashed border-[#ddd] p-3 text-center">
+              <p className="text-[9px] text-[#999] leading-[1.5]">Upload a credit report to activate your Capital Readiness Index</p>
             </div>
           )}
         </div>
+
+        <PerfectProfileTab aisReport={aisReport} />
 
         <div className="mb-4">
           <div className="flex items-center gap-2 mb-2">
@@ -2102,8 +2001,6 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
 
         <div className="w-full h-px bg-[#eee] my-3"></div>
         <TeamSection user={user} onOpenTeamChat={onOpenTeamChat} activeTeamChatId={activeTeamChatId} />
-        </>
-        )}
       </div>
 
       <div className="px-4 py-3 border-t border-[#eee]">
