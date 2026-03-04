@@ -1247,12 +1247,7 @@ function PerfectProfileTab({ aisReport }: { aisReport: MissionData | null }) {
 
   const revolvingAccounts = tradelines.filter(t => /revolv|credit\s*card|loc\b|heloc/i.test(t.type) && !/closed/i.test(t.accountStatus));
   const installmentAccounts = tradelines.filter(t => /install|auto|student|mortgage|personal\s*loan/i.test(t.type) && !/closed/i.test(t.accountStatus));
-  const avgAge = (() => {
-    const ages = primaryAccounts.map(t => parseAge(t.age)).filter(a => a > 0);
-    return ages.length > 0 ? (ages.reduce((s, a) => s + a, 0) / ages.length) : 0;
-  })();
-  const oldestAge = Math.max(...primaryAccounts.map(t => parseAge(t.age)), 0);
-  const newestAge = primaryAccounts.length > 0 ? Math.min(...primaryAccounts.map(t => parseAge(t.age))) : 0;
+  const closedAccounts = tradelines.filter(t => /closed/i.test(t.accountStatus));
 
   const revLimits = revolvingAccounts.map(t => parseInt(t.limit.replace(/[^0-9]/g, ""))).filter(n => !isNaN(n));
   const revBalances = revolvingAccounts.map(t => parseInt(t.balance.replace(/[^0-9]/g, ""))).filter(n => !isNaN(n));
@@ -1260,151 +1255,60 @@ function PerfectProfileTab({ aisReport }: { aisReport: MissionData | null }) {
   const totalBalance = revBalances.reduce((s, n) => s + n, 0);
   const utilPct = totalLimit > 0 ? Math.round((totalBalance / totalLimit) * 100) : 0;
 
-  const allCurrentPayments = primaryAccounts.filter(t => isCurrent(t.paymentStatus)).length;
-
-  type FactorTab = { key: string; label: string; color: string; icon: string; status: "met" | "warn" | "fail"; detail: string; fields: { label: string; ideal: string; actual: string | null; met: boolean }[] };
-
-  const factorTabs: FactorTab[] = [
-    {
-      key: "revolving", label: "Revolving Accounts", color: "#2563eb",
-      icon: "M3 5h10M3 8h10M3 11h10",
-      status: revolvingAccounts.length >= 5 ? "met" : revolvingAccounts.length >= 3 ? "warn" : "fail",
-      detail: `${revolvingAccounts.length} open`,
-      fields: [
-        { label: "Count", ideal: "5+ open", actual: `${revolvingAccounts.length} open`, met: revolvingAccounts.length >= 5 },
-        ...revolvingAccounts.map(t => ({
-          label: t.creditor, ideal: "$10K+ limit",
-          actual: t.limit,
-          met: (() => { const n = parseInt(t.limit.replace(/[^0-9]/g, "")); return !isNaN(n) && n >= 10000; })(),
-        })),
-      ],
-    },
-    {
-      key: "installment", label: "Installment Accounts", color: "#7c3aed",
-      icon: "M4 3v10M8 6v7M12 4v9",
-      status: installmentAccounts.length >= 2 ? "met" : installmentAccounts.length >= 1 ? "warn" : "fail",
-      detail: `${installmentAccounts.length} open`,
-      fields: [
-        { label: "Count", ideal: "2+ open", actual: `${installmentAccounts.length} open`, met: installmentAccounts.length >= 2 },
-        ...installmentAccounts.map(t => ({
-          label: t.creditor, ideal: "Current",
-          actual: t.paymentStatus,
-          met: isCurrent(t.paymentStatus),
-        })),
-      ],
-    },
-    {
-      key: "age", label: "Credit Age", color: "#059669",
-      icon: "M8 2v6l3 3",
-      status: avgAge >= 5 ? "met" : avgAge >= 2 ? "warn" : "fail",
-      detail: avgAge > 0 ? `${avgAge.toFixed(1)} yr avg` : "—",
-      fields: [
-        { label: "Average Age", ideal: "5+ years", actual: avgAge > 0 ? `${avgAge.toFixed(1)} years` : null, met: avgAge >= 5 },
-        { label: "Oldest Account", ideal: "10+ years", actual: oldestAge > 0 ? `${oldestAge} years` : null, met: oldestAge >= 10 },
-        { label: "Newest Account", ideal: "2+ years", actual: newestAge > 0 ? `${newestAge} years` : null, met: newestAge >= 2 },
-      ],
-    },
-    {
-      key: "utilization", label: "Utilization", color: "#0891b2",
-      icon: "M2 13h12M4 13V7M8 13V4M12 13V9",
-      status: utilPct <= 5 ? "met" : utilPct <= 30 ? "warn" : "fail",
-      detail: `${utilPct}%`,
-      fields: [
-        { label: "Overall Utilization", ideal: "< 5%", actual: `${utilPct}%`, met: utilPct <= 5 },
-        { label: "Total Limits", ideal: "$50K+", actual: totalLimit > 0 ? `$${totalLimit.toLocaleString()}` : null, met: totalLimit >= 50000 },
-        { label: "Total Balances", ideal: "Minimal", actual: `$${totalBalance.toLocaleString()}`, met: totalBalance === 0 || utilPct <= 5 },
-      ],
-    },
-    {
-      key: "payments", label: "Payment History", color: "#16a34a",
-      icon: "M2 5l2.5 2.5L8 3M2 10l2.5 2.5L8 8",
-      status: !hasLates ? "met" : "fail",
-      detail: !hasLates ? "Clean" : "Issues",
-      fields: [
-        { label: "Late Payments", ideal: "0 in 24 months", actual: hasLates ? "Found on file" : "Clear", met: !hasLates },
-        { label: "Current Accounts", ideal: "100%", actual: primaryAccounts.length > 0 ? `${allCurrentPayments}/${primaryAccounts.length}` : null, met: primaryAccounts.length > 0 && allCurrentPayments === primaryAccounts.length },
-      ],
-    },
-    {
-      key: "inquiries", label: "Inquiries", color: "#d97706",
-      icon: "M10 4L6 12M8 4h4v4",
-      status: !hasInquiries ? "met" : "fail",
-      detail: !hasInquiries ? "Low" : "Elevated",
-      fields: [
-        { label: "Hard Inquiries", ideal: "0–1 in 12 months", actual: hasInquiries ? "Elevated" : "Low", met: !hasInquiries },
-      ],
-    },
-    {
-      key: "derogatories", label: "Derogatories", color: "#dc2626",
-      icon: "M8 2l6 12H2L8 2zM8 7v3M8 11.5v.5",
-      status: !hasCollections && !hasChargeOffs ? "met" : "fail",
-      detail: !hasCollections && !hasChargeOffs ? "Clear" : "Found",
-      fields: [
-        { label: "Collections", ideal: "0 accounts", actual: hasCollections ? "Found on file" : "Clear", met: !hasCollections },
-        { label: "Charge-Offs", ideal: "0 accounts", actual: hasChargeOffs ? "Found on file" : "Clear", met: !hasChargeOffs },
-      ],
-    },
-    {
-      key: "au", label: "AU Accounts", color: "#6366f1",
-      icon: "M5 8a3 3 0 106 0 3 3 0 00-6 0M3 14c0-2.8 2.2-5 5-5s5 2.2 5 5",
-      status: !hasAU ? "met" : "warn",
-      detail: hasAU ? (auCount > 0 ? `${auCount} found` : "Detected") : "None",
-      fields: [
-        { label: "AU Dependency", ideal: "None", actual: hasAU ? (auCount > 0 ? `${auCount} AU account${auCount > 1 ? "s" : ""}` : "Detected") : "Clear", met: !hasAU },
-        ...auFromTradelines.map(t => ({
-          label: t.creditor, ideal: "Remove if possible", actual: t.limit, met: false,
-        })),
-      ],
-    },
-    {
-      key: "publicrecords", label: "Public Records", color: "#78716c",
-      icon: "M3 3h10v10H3V3zM6 6h4M6 9h4",
-      status: !hasPublicRecords ? "met" : "fail",
-      detail: !hasPublicRecords ? "Clear" : "Found",
-      fields: [
-        { label: "Bankruptcies / Liens", ideal: "None", actual: hasPublicRecords ? "Found" : "Clear", met: !hasPublicRecords },
-      ],
-    },
-    {
-      key: "identity", label: "Score & Identity", color: "#1a1a2e",
-      icon: "M8 1.5L2.5 4v4c0 3.5 2.3 5.5 5.5 7 3.2-1.5 5.5-3.5 5.5-7V4L8 1.5z",
-      status: (aisReport.approvalIndex ?? 0) >= 90 ? "met" : (aisReport.approvalIndex ?? 0) >= 70 ? "warn" : "fail",
-      detail: aisReport.approvalIndex !== null ? `AIS ${aisReport.approvalIndex}` : "—",
-      fields: [
-        { label: "AIS", ideal: "90+ / 100", actual: aisReport.approvalIndex !== null ? `${aisReport.approvalIndex} / 100` : null, met: (aisReport.approvalIndex ?? 0) >= 90 },
-        { label: "Band", ideal: "Exceptional", actual: aisReport.band, met: aisReport.band?.toLowerCase() === "exceptional" },
-        { label: "Phase", ideal: "Funding Phase", actual: aisReport.phase, met: /fund/i.test(aisReport.phase || "") },
-        { label: "Identity Strength", ideal: "85+", actual: fi?.identityStrength != null ? `${fi.identityStrength}` : null, met: (fi?.identityStrength ?? 0) >= 85 },
-        { label: "Profile Type", ideal: "Premium / Seasoned", actual: fi?.profileType || null, met: /premium|seasoned/i.test(fi?.profileType || "") },
-      ],
-    },
-    {
-      key: "capital", label: "Capital Readiness", color: "#b45309",
-      icon: "M8 2c0 0-4 2-4 8h8c0-6-4-8-4-8zM6 10l-2 3M10 10l2 3",
-      status: /ready|strong|qualified/i.test(pf?.readinessLevel || "") ? "met" : "warn",
-      detail: pf?.readinessLevel || "—",
-      fields: [
-        { label: "Readiness", ideal: "Qualification Ready", actual: pf?.readinessLevel || null, met: /ready|strong|qualified/i.test(pf?.readinessLevel || "") },
-        { label: "Modeled Exposure", ideal: "Upper range", actual: pf?.bestCasePerBureau || pf?.currentExposure || null, met: !!(pf?.bestCasePerBureau) },
-        { label: "Risk Drivers", ideal: "0 active", actual: (aisReport.suppressors?.length || 0) === 0 ? "None" : `${aisReport.suppressors?.length} active`, met: (aisReport.suppressors?.length || 0) === 0 },
-        { label: "Timeline", ideal: "Immediate", actual: pf?.timeline || null, met: /immediate|now|ready|0.?month/i.test(pf?.timeline || "") },
-      ],
-    },
-  ];
-
-  const totalFactorFields = factorTabs.reduce((s, f) => s + f.fields.length, 0);
-  const metFactorFields = factorTabs.reduce((s, f) => s + f.fields.filter(fd => fd.met).length, 0);
-  const pct = totalFactorFields > 0 ? Math.round((metFactorFields / totalFactorFields) * 100) : 0;
-  const metFactors = factorTabs.filter(f => f.status === "met").length;
-
-  const statusDot = (s: "met" | "warn" | "fail") => {
-    const c = s === "met" ? "#2d6a4f" : s === "warn" ? "#d97706" : "#dc2626";
-    return <div className="w-[6px] h-[6px] rounded-full flex-shrink-0" style={{ background: c }} />;
+  type AccountCard = {
+    creditor: string;
+    type: string;
+    ownership: string;
+    markers: { label: string; ideal: string; actual: string; met: boolean }[];
   };
 
+  const buildAccountCard = (tl: TradeLine): AccountCard => {
+    const isRevolving = /revolv|credit\s*card|loc\b|heloc/i.test(tl.type);
+    const isClosed_ = /closed/i.test(tl.accountStatus);
+    const ageYears = parseAge(tl.age);
+    const limitNum = parseInt(tl.limit.replace(/[^0-9]/g, ""));
+    const balNum = parseInt(tl.balance.replace(/[^0-9]/g, ""));
+    const utilizationForCard = !isNaN(limitNum) && limitNum > 0 && !isNaN(balNum) ? Math.round((balNum / limitNum) * 100) : null;
+
+    return {
+      creditor: tl.creditor,
+      type: tl.type,
+      ownership: tl.ownership,
+      markers: [
+        { label: "Limit", ideal: isRevolving ? "$10K+" : "—", actual: tl.limit, met: isRevolving ? (!isNaN(limitNum) && limitNum >= 10000) : true },
+        ...(isRevolving ? [{ label: "Utilization", ideal: "< 5%", actual: utilizationForCard !== null ? `${utilizationForCard}%` : tl.balance, met: utilizationForCard !== null ? utilizationForCard <= 5 : false }] : [{ label: "Balance", ideal: "$0", actual: tl.balance, met: !isNaN(balNum) && balNum === 0 }]),
+        { label: "Age", ideal: isRevolving ? "5+ yr" : "2+ yr", actual: tl.age, met: isRevolving ? ageYears >= 5 : ageYears >= 2 },
+        { label: "Status", ideal: "Current", actual: isClosed_ ? "Closed" : tl.paymentStatus, met: isClosed_ ? !/late|delinq|collection|charge/i.test(tl.paymentStatus) : isCurrent(tl.paymentStatus) },
+      ],
+    };
+  };
+
+  const allCards = tradelines.map(buildAccountCard);
+  const totalMarkers = allCards.reduce((s, c) => s + c.markers.length, 0);
+  const metMarkers = allCards.reduce((s, c) => s + c.markers.filter(m => m.met).length, 0);
+
+  const factorChecks = [
+    { label: "Revolving", met: revolvingAccounts.length >= 5, warn: revolvingAccounts.length >= 3, detail: `${revolvingAccounts.length} open` },
+    { label: "Installment", met: installmentAccounts.length >= 2, warn: installmentAccounts.length >= 1, detail: `${installmentAccounts.length} open` },
+    { label: "Utilization", met: utilPct <= 5, warn: utilPct <= 30, detail: `${utilPct}%` },
+    { label: "Payments", met: !hasLates, warn: false, detail: hasLates ? "Issues" : "Clean" },
+    { label: "Inquiries", met: !hasInquiries, warn: false, detail: hasInquiries ? "High" : "Low" },
+    { label: "Derogatories", met: !hasCollections && !hasChargeOffs, warn: false, detail: hasCollections || hasChargeOffs ? "Found" : "Clear" },
+    { label: "AU", met: !hasAU, warn: false, detail: hasAU ? `${auCount}` : "None" },
+    { label: "Records", met: !hasPublicRecords, warn: false, detail: hasPublicRecords ? "Found" : "Clear" },
+  ];
+  const factorsMet = factorChecks.filter(f => f.met).length;
+  const pct = totalMarkers > 0 ? Math.round((metMarkers / totalMarkers) * 100) : 0;
+
+  const renderMarkerDot = (met: boolean) => (
+    <div className={`w-[8px] h-[8px] rounded-full flex items-center justify-center flex-shrink-0 ${met ? "bg-[#2d6a4f]" : "bg-[#e5e5e5]"}`}>
+      {met && <svg width="5" height="5" viewBox="0 0 10 10" fill="none"><path d="M2 5l2.5 2.5L8 3" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" /></svg>}
+    </div>
+  );
+
   return (
-    <div className="space-y-0.5" data-testid="perfect-profile-tab">
-      <div className="rounded-xl bg-gradient-to-br from-[#1a1a2e] to-[#2a2a40] p-3 mb-1.5">
+    <div className="space-y-2" data-testid="perfect-profile-tab">
+      <div className="rounded-xl bg-gradient-to-br from-[#1a1a2e] to-[#2a2a40] p-3">
         <div className="flex items-center gap-2.5">
           <div className="relative w-[38px] h-[38px] flex-shrink-0">
             <svg viewBox="0 0 36 36" className="w-full h-full -rotate-90">
@@ -1416,61 +1320,64 @@ function PerfectProfileTab({ aisReport }: { aisReport: MissionData | null }) {
             </div>
           </div>
           <div className="min-w-0">
-            <p className="text-[7px] uppercase tracking-[0.1em] text-white/30 font-medium leading-none">Profile Match</p>
-            <p className="text-[11px] font-bold text-white leading-tight mt-0.5">{metFactors}<span className="text-[9px] font-normal text-white/40">/{factorTabs.length} factors met</span></p>
-            <p className="text-[7px] text-white/30 mt-px">{metFactorFields}/{totalFactorFields} fields passing</p>
+            <p className="text-[7px] uppercase tracking-[0.1em] text-white/30 font-medium leading-none">Fundability Match</p>
+            <p className="text-[11px] font-bold text-white leading-tight mt-0.5">{metMarkers}<span className="text-[9px] font-normal text-white/40">/{totalMarkers} markers met</span></p>
+            <p className="text-[7px] text-white/30 mt-px">{tradelines.length} accounts · {factorsMet}/{factorChecks.length} factors clear</p>
           </div>
         </div>
       </div>
 
-      {factorTabs.map((factor) => {
-        const isOpen = expandedSection === factor.key;
-        const metCount = factor.fields.filter(f => f.met).length;
-        return (
-          <div key={factor.key}>
-            <button
-              onClick={() => setExpandedSection(isOpen ? null : factor.key)}
-              className="w-full flex items-center justify-between px-2 py-[6px] rounded-lg transition-colors hover:bg-[#f8f8f8]"
-              style={{ background: isOpen ? "#f5f5f5" : "transparent" }}
-              data-testid={`toggle-${factor.key}`}
-            >
-              <div className="flex items-center gap-1.5">
-                {statusDot(factor.status)}
-                <div className="w-[14px] h-[14px] rounded flex items-center justify-center" style={{ background: factor.color + "10" }}>
-                  <svg width="9" height="9" viewBox="0 0 16 16" fill="none"><path d={factor.icon} stroke={factor.color} strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" fill="none" /></svg>
+      <div className="flex flex-wrap gap-x-1 gap-y-0.5 px-0.5">
+        {factorChecks.map((f, i) => (
+          <div key={i} className="flex items-center gap-[3px] px-1.5 py-[3px] rounded-full" style={{ background: f.met ? "#2d6a4f10" : f.warn ? "#d9770610" : "#dc262610" }}>
+            <div className="w-[5px] h-[5px] rounded-full" style={{ background: f.met ? "#2d6a4f" : f.warn ? "#d97706" : "#dc2626" }} />
+            <span className="text-[7px] font-medium" style={{ color: f.met ? "#2d6a4f" : f.warn ? "#d97706" : "#dc2626" }}>{f.label}</span>
+            <span className="text-[6px] text-[#aaa]">{f.detail}</span>
+          </div>
+        ))}
+      </div>
+
+      <div className="space-y-1.5">
+        {allCards.map((card, ci) => {
+          const cardMet = card.markers.filter(m => m.met).length;
+          const cardTotal = card.markers.length;
+          const allMet = cardMet === cardTotal;
+          const isAU = /\bau\b/i.test(card.ownership);
+          const isClosed_ = card.markers.some(m => m.label === "Status" && m.actual === "Closed");
+          return (
+            <div key={ci} className={`rounded-lg overflow-hidden ${allMet ? "border border-[#2d6a4f]/20" : "border border-[#e5e5e5]"}`} data-testid={`account-card-${ci}`}>
+              <div className={`flex items-center justify-between px-2.5 py-[6px] ${allMet ? "bg-[#2d6a4f]" : isClosed_ ? "bg-[#888]" : isAU ? "bg-[#6366f1]" : "bg-[#1a1a2e]"}`}>
+                <div className="flex items-center gap-1.5 min-w-0">
+                  <p className="text-[9px] font-semibold text-white truncate">{card.creditor}</p>
+                  <span className="text-[7px] text-white/40 flex-shrink-0">{card.type}</span>
                 </div>
-                <span className="text-[9px] font-semibold" style={{ color: factor.color }}>{factor.label}</span>
+                <div className="flex items-center gap-1 flex-shrink-0">
+                  {isAU && <span className="text-[6px] font-bold text-white/50 bg-white/10 px-1 py-px rounded">AU</span>}
+                  {isClosed_ && <span className="text-[6px] font-bold text-white/50 bg-white/10 px-1 py-px rounded">CLOSED</span>}
+                  <span className="text-[7px] text-white/40">{cardMet}/{cardTotal}</span>
+                </div>
               </div>
-              <div className="flex items-center gap-1.5">
-                <span className="text-[7px] font-medium text-[#bbb]">{factor.detail}</span>
-                <span className="text-[7px] text-[#ddd]">{metCount}/{factor.fields.length}</span>
-                <svg width="8" height="8" viewBox="0 0 10 10" fill="none" className={`transition-transform ${isOpen ? "rotate-180" : ""}`}>
-                  <path d="M2.5 3.5L5 6.5L7.5 3.5" stroke="#ccc" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-              </div>
-            </button>
-            {isOpen && (
-              <div className="ml-[22px] mr-1 mt-0.5 mb-1 rounded-lg overflow-hidden border border-[#eee] bg-white">
-                {factor.fields.map((field, fi) => (
-                  <div key={fi} className={`grid items-center px-2.5 py-[5px] ${fi > 0 ? "border-t border-[#f5f5f5]" : ""}`} style={{ gridTemplateColumns: "16px 1fr auto" }}>
-                    <div className={`w-[10px] h-[10px] rounded-[2px] flex items-center justify-center ${field.met ? "bg-[#2d6a4f]" : "border border-[#ddd] bg-white"}`}>
-                      {field.met && (
-                        <svg width="6" height="6" viewBox="0 0 10 10" fill="none"><path d="M2 5l2.5 2.5L8 3" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
-                      )}
-                    </div>
-                    <p className="text-[8px] text-[#666] truncate">{field.label}</p>
-                    <div className="flex items-center gap-1 justify-end pl-2">
-                      <span className="text-[7px] text-[#c0c0c0]">{field.ideal}</span>
-                      <span className="text-[7px] text-[#e0e0e0] mx-px">|</span>
-                      <span className={`text-[8px] font-semibold ${field.met ? "text-[#2d6a4f]" : field.actual ? "text-[#c0392b]" : "text-[#ccc] italic font-normal"}`}>{field.actual || "—"}</span>
+              <div className="flex items-center px-2.5 py-[5px] gap-3">
+                {card.markers.map((m, mi) => (
+                  <div key={mi} className="flex items-center gap-[3px]">
+                    {renderMarkerDot(m.met)}
+                    <div className="flex flex-col">
+                      <span className="text-[6px] text-[#aaa] leading-none">{m.label}</span>
+                      <span className={`text-[8px] font-semibold leading-tight ${m.met ? "text-[#2d6a4f]" : "text-[#c0392b]"}`}>{m.actual}</span>
                     </div>
                   </div>
                 ))}
               </div>
-            )}
+            </div>
+          );
+        })}
+
+        {tradelines.length === 0 && (
+          <div className="text-center py-6">
+            <p className="text-[9px] text-[#bbb] italic">No tradelines parsed from report</p>
           </div>
-        );
-      })}
+        )}
+      </div>
     </div>
   );
 }
