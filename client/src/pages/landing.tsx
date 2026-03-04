@@ -1246,13 +1246,20 @@ function PerfectProfileTab({ aisReport }: { aisReport: MissionData | null }) {
     const balNum = parseInt(tl.balance.replace(/[^0-9]/g, ""));
     const utilizationForCard = !isNaN(limitNum) && limitNum > 0 && !isNaN(balNum) ? Math.round((balNum / limitNum) * 100) : null;
     const isPrimary = /primary/i.test(tl.ownership);
+    const isAU = /\bau\b|authorized/i.test(tl.ownership);
 
-    const markers: AccountCard["markers"] = [
-      { label: "Limit", ideal: isRevolving ? "$10,000+" : "—", actual: tl.limit, met: isRevolving ? (!isNaN(limitNum) && limitNum >= 10000) : true },
-      ...(isRevolving ? [{ label: "Balance", ideal: "< 5% of limit", actual: tl.balance, met: utilizationForCard !== null ? utilizationForCard <= 5 : false }] : [{ label: "Balance", ideal: "$0", actual: tl.balance, met: !isNaN(balNum) && balNum === 0 }]),
-      { label: "Age", ideal: isRevolving ? "5+ years" : "2+ years", actual: tl.age, met: isRevolving ? ageYears >= 5 : ageYears >= 2 },
+    const markers: AccountCard["markers"] = isRevolving ? [
+      { label: "Limit", ideal: "$10,000+", actual: tl.limit, met: !isNaN(limitNum) && limitNum >= 10000 },
+      { label: "Balance", ideal: "< 5% of limit", actual: utilizationForCard !== null ? `${utilizationForCard}%` : tl.balance, met: utilizationForCard !== null ? utilizationForCard <= 5 : false },
+      { label: "Age", ideal: "5+ years", actual: tl.age, met: ageYears >= 5 },
       { label: "Status", ideal: "Current", actual: isClosed_ ? "Closed" : tl.paymentStatus, met: isClosed_ ? !/late|delinq|collection|charge/i.test(tl.paymentStatus) : isCurrent(tl.paymentStatus) },
-      { label: "Ownership", ideal: "Primary", actual: isPrimary ? "Primary" : /\bau\b|authorized/i.test(tl.ownership) ? "Authorized User" : tl.ownership, met: isPrimary },
+      { label: "Ownership", ideal: "Primary", actual: isAU ? "Authorized User" : isPrimary ? "Primary" : tl.ownership, met: isPrimary },
+    ] : [
+      { label: "Amount", ideal: "$5,000+", actual: tl.limit, met: !isNaN(limitNum) && limitNum >= 5000 },
+      { label: "Balance", ideal: "$0", actual: tl.balance, met: !isNaN(balNum) && balNum === 0 },
+      { label: "Age", ideal: "2+ years", actual: tl.age, met: ageYears >= 2 },
+      { label: "Status", ideal: "Current", actual: isClosed_ ? "Closed" : tl.paymentStatus, met: isClosed_ ? !/late|delinq|collection|charge/i.test(tl.paymentStatus) : isCurrent(tl.paymentStatus) },
+      { label: "Ownership", ideal: "Primary", actual: isAU ? "Authorized User" : isPrimary ? "Primary" : tl.ownership, met: isPrimary },
     ];
 
     return {
@@ -1265,30 +1272,41 @@ function PerfectProfileTab({ aisReport }: { aisReport: MissionData | null }) {
   };
 
   const allCards = tradelines.map(buildAccountCard);
-  const revCards = allCards.filter(c => c.category === "revolving");
-  const instCards = allCards.filter(c => c.category === "installment");
-  const otherCards = allCards.filter(c => c.category === "other");
-  const totalMarkers = allCards.reduce((s, c) => s + c.markers.length, 0);
-  const metMarkers = allCards.reduce((s, c) => s + c.markers.filter(m => m.met).length, 0);
+  const isAUOwnership = (o: string) => /\bau\b|authorized/i.test(o);
+  const isPrimaryOwnership = (o: string) => /primary/i.test(o);
+  const primaryRevCards = allCards.filter(c => c.category === "revolving" && isPrimaryOwnership(c.ownership));
+  const auCards = allCards.filter(c => isAUOwnership(c.ownership));
+  const primaryInstCards = allCards.filter(c => c.category === "installment" && isPrimaryOwnership(c.ownership));
+  const nonPrimaryInstCards = allCards.filter(c => c.category === "installment" && !isPrimaryOwnership(c.ownership) && !isAUOwnership(c.ownership));
+  const otherCards = allCards.filter(c => c.category === "other" && !isAUOwnership(c.ownership));
 
   const idealRevSlots = 5;
   const idealInstSlots = 2;
-  const filledRevSlots = revCards.length;
-  const filledInstSlots = instCards.length;
+  const filledPrimaryRevSlots = primaryRevCards.length;
+  const filledPrimaryInstSlots = primaryInstCards.length;
   const totalSlots = idealRevSlots + idealInstSlots;
-  const filledSlots = Math.min(filledRevSlots, idealRevSlots) + Math.min(filledInstSlots, idealInstSlots) + otherCards.length;
+  const filledSlots = Math.min(filledPrimaryRevSlots, idealRevSlots) + Math.min(filledPrimaryInstSlots, idealInstSlots);
+
+  const countableCards = [...primaryRevCards.slice(0, idealRevSlots), ...primaryInstCards.slice(0, idealInstSlots)];
   const totalCriteria = totalSlots * 5;
-  const metCriteria = totalMarkers > 0 ? metMarkers : 0;
+  const metCriteria = countableCards.reduce((s, c) => s + c.markers.filter(m => m.met).length, 0);
   const pct = totalCriteria > 0 ? Math.round((metCriteria / totalCriteria) * 100) : 0;
 
   const accentColor = pct >= 80 ? "#2d6a4f" : pct >= 50 ? "#c9a227" : "#c0392b";
 
-  const emptySlotRows = [
-    { label: "Amount", ideal: "—", actual: "—" },
-    { label: "Balance", ideal: "$0", actual: "—" },
-    { label: "Age", ideal: "2+ years", actual: "—" },
-    { label: "Status", ideal: "Current", actual: "—" },
-    { label: "Ownership", ideal: "Primary", actual: "—" },
+  const emptyRevSlotRows = [
+    { label: "Limit", ideal: "$10,000+" },
+    { label: "Balance", ideal: "< 5% of limit" },
+    { label: "Age", ideal: "5+ years" },
+    { label: "Status", ideal: "Current" },
+    { label: "Ownership", ideal: "Primary" },
+  ];
+  const emptyInstSlotRows = [
+    { label: "Amount", ideal: "$5,000+" },
+    { label: "Balance", ideal: "$0" },
+    { label: "Age", ideal: "2+ years" },
+    { label: "Status", ideal: "Current" },
+    { label: "Ownership", ideal: "Primary" },
   ];
 
   const renderCard = (card: AccountCard, ci: number) => {
@@ -1325,7 +1343,7 @@ function PerfectProfileTab({ aisReport }: { aisReport: MissionData | null }) {
     );
   };
 
-  const renderEmptySlot = (label: string, idx: number) => (
+  const renderEmptySlot = (label: string, idx: number, rows: { label: string; ideal: string }[]) => (
     <div key={`empty-${idx}`} className="rounded-lg overflow-hidden border border-dashed border-[#ddd]">
       <div className="flex items-center justify-between px-3 py-[6px] bg-[#f5f5f5]">
         <div className="flex items-center gap-1.5 min-w-0">
@@ -1334,15 +1352,15 @@ function PerfectProfileTab({ aisReport }: { aisReport: MissionData | null }) {
           </div>
           <p className="text-[11px] font-bold text-[#999]">{label}</p>
         </div>
-        <span className="text-[10px] text-[#ccc]" style={{ fontVariantNumeric: "tabular-nums" }}>0/{emptySlotRows.length}</span>
+        <span className="text-[10px] text-[#ccc]" style={{ fontVariantNumeric: "tabular-nums" }}>0/{rows.length}</span>
       </div>
       <div className="bg-white divide-y divide-[#f5f5f5]">
-        {emptySlotRows.map((r, ri) => (
+        {rows.map((r, ri) => (
           <div key={ri} className="flex items-center px-3 py-[7px]">
             <div className="w-[14px] h-[14px] rounded-[3px] border border-[#e5e5e5] bg-white flex-shrink-0" />
             <span className="text-[11px] text-[#ccc] ml-3">{r.label}</span>
             <div className="flex-1" />
-            <span className="text-[10px] text-[#ddd]">—</span>
+            <span className="text-[10px] text-[#ddd]">{r.ideal}</span>
             <span className="text-[10px] text-[#e5e5e5] mx-1">|</span>
             <span className="text-[10px] text-[#ddd]">—</span>
           </div>
@@ -1351,8 +1369,8 @@ function PerfectProfileTab({ aisReport }: { aisReport: MissionData | null }) {
     </div>
   );
 
-  const emptyRevCount = Math.max(0, idealRevSlots - filledRevSlots);
-  const emptyInstCount = Math.max(0, idealInstSlots - filledInstSlots);
+  const emptyRevCount = Math.max(0, idealRevSlots - filledPrimaryRevSlots);
+  const emptyInstCount = Math.max(0, idealInstSlots - filledPrimaryInstSlots);
 
   return (
     <div className="space-y-4" data-testid="perfect-profile-tab">
@@ -1377,24 +1395,33 @@ function PerfectProfileTab({ aisReport }: { aisReport: MissionData | null }) {
       <div>
         <p className="text-[9px] uppercase tracking-[0.15em] text-[#999] font-semibold mb-2 px-0.5">Revolving Accounts</p>
         <div className="space-y-2">
-          {revCards.map((card, i) => renderCard(card, i))}
-          {emptyRevCount > 0 && Array.from({ length: emptyRevCount }).map((_, i) => renderEmptySlot("Revolving Card", filledRevSlots + i))}
+          {primaryRevCards.map((card, i) => renderCard(card, i))}
+          {emptyRevCount > 0 && Array.from({ length: emptyRevCount }).map((_, i) => renderEmptySlot("Revolving Card", filledPrimaryRevSlots + i, emptyRevSlotRows))}
         </div>
       </div>
+
+      {auCards.length > 0 && (
+        <div>
+          <p className="text-[9px] uppercase tracking-[0.15em] text-[#999] font-semibold mb-2 px-0.5">Authorized User Accounts <span className="normal-case tracking-normal font-normal text-[8px] text-[#bbb]">(not counted toward slots)</span></p>
+          <div className="space-y-2">
+            {auCards.map((card, i) => renderCard(card, primaryRevCards.length + i))}
+          </div>
+        </div>
+      )}
 
       <div>
         <p className="text-[9px] uppercase tracking-[0.15em] text-[#999] font-semibold mb-2 px-0.5">Installment Accounts</p>
         <div className="space-y-2">
-          {instCards.map((card, i) => renderCard(card, revCards.length + i))}
-          {emptyInstCount > 0 && Array.from({ length: emptyInstCount }).map((_, i) => renderEmptySlot("Installment Loan", filledInstSlots + i))}
+          {primaryInstCards.map((card, i) => renderCard(card, primaryRevCards.length + auCards.length + i))}
+          {emptyInstCount > 0 && Array.from({ length: emptyInstCount }).map((_, i) => renderEmptySlot("Installment Loan", filledPrimaryInstSlots + i, emptyInstSlotRows))}
         </div>
       </div>
 
-      {otherCards.length > 0 && (
+      {(otherCards.length > 0 || nonPrimaryInstCards.length > 0) && (
         <div>
           <p className="text-[9px] uppercase tracking-[0.15em] text-[#999] font-semibold mb-2 px-0.5">Other Accounts</p>
           <div className="space-y-2">
-            {otherCards.map((card, i) => renderCard(card, revCards.length + instCards.length + i))}
+            {[...nonPrimaryInstCards, ...otherCards].map((card, i) => renderCard(card, primaryRevCards.length + auCards.length + primaryInstCards.length + i))}
           </div>
         </div>
       )}
