@@ -1185,49 +1185,59 @@ function PerfectProfileTab({ aisReport }: { aisReport: MissionData | null }) {
   const pf = aisReport.projectedFunding;
   const allNeg = [...(aisReport.suppressors || []), ...(aisReport.hurting || [])].join(" ").toLowerCase();
   const allPos = (aisReport.helping || []).join(" ").toLowerCase();
+  const allText = [allPos, allNeg, fi?.bureauFootprint || "", fi?.exposureLevel || "", fi?.profileType || "", pf?.currentExposure || "", pf?.highestLimit || ""].join(" ").toLowerCase();
   const getPillar = (k: string) => aisReport.pillarScores?.find(p => p.label.toLowerCase().includes(k))?.value ?? null;
 
-  const hasCollections = /collection/i.test(allNeg);
-  const hasChargeOffs = /charge.?off/i.test(allNeg);
-  const hasLates = /late|delinquen|past.?due/i.test(allNeg);
-  const hasInquiries = /inquir|hard.?pull/i.test(allNeg);
+  const hasCollections = /\bcollections?\b/i.test(allNeg);
+  const hasChargeOffs = /charge.?offs?/i.test(allNeg);
+  const hasInquiries = /\binquir|\bhard.?pull/i.test(allNeg);
   const hasAU = /authorized.?user/i.test(allNeg);
   const utilScore = getPillar("utilization");
   const depthScore = getPillar("depth");
   const paymentScore = getPillar("payment");
+  const stabilityScore = getPillar("stability");
+  const lenderScore = getPillar("lender");
+  const lateRegex = /\blate\s+payments?|\bdelinquen|\bpast.?due|\b30\s*days?\s*late|\b60\s*days?\s*late|\b90\s*days?\s*late/i;
+  const hasLates = paymentScore !== null ? (paymentScore < 70 && lateRegex.test(allNeg)) : lateRegex.test(allNeg);
   const creditAgeYears = (() => { const m = fi?.creditAge?.match(/(\d+)/); return m ? parseInt(m[1]) : 0; })();
-  const hasRevolvers = /revolv|credit\s*card|bankcard/i.test(allPos) || (depthScore !== null && depthScore >= 60);
-  const hasInstallment = /installment|auto|mortgage|loan/i.test(allPos) || (depthScore !== null && depthScore >= 70);
+  const revolverKeywords = /revolv|credit\s*card|bankcard|visa|mastercard|amex|discover|capital\s*one|chase|citi/i.test(allText);
+  const hasRevolvers = revolverKeywords || (depthScore !== null && depthScore >= 40 && utilScore !== null && utilScore > 0);
+  const installmentKeywords = /installment|auto\s*(loan)?|mortgage|student|personal\s*loan|navient|sallie|nelnet|fedloan/i.test(allText);
+  const hasInstallment = installmentKeywords || (depthScore !== null && depthScore >= 50 && stabilityScore !== null && stabilityScore >= 40);
+
+  const utilLabel = utilScore !== null ? (utilScore >= 80 ? "Low utilization" : utilScore >= 50 ? "Moderate" : "High") : null;
+  const paymentLabel = paymentScore !== null ? (paymentScore >= 85 ? "Strong" : paymentScore >= 60 ? "Mixed" : "Needs work") : null;
+  const statusLabel = hasLates ? "Late payments found" : "Current";
 
   const revolverSlots: AccountSlot[] = [
     {
       name: "Bank Revolver 1",
       filled: hasRevolvers,
       fields: [
-        { label: "Limit", ideal: "$10,000–$15,000", actual: hasRevolvers ? (pf?.highestLimit || "On file") : null, met: hasRevolvers },
-        { label: "Balance", ideal: "$0 – 5% of limit", actual: (utilScore ?? 0) >= 80 ? "Low utilization" : (utilScore ?? 0) >= 50 ? "Moderate" : "High", met: (utilScore ?? 0) >= 80 },
-        { label: "Age", ideal: "5+ years", actual: creditAgeYears >= 5 ? `${creditAgeYears}yr avg` : creditAgeYears > 0 ? `${creditAgeYears}yr avg` : null, met: creditAgeYears >= 5 },
-        { label: "Status", ideal: "Open · Current", actual: hasLates ? "Late payments found" : "Current", met: !hasLates },
+        { label: "Limit", ideal: "$10,000–$15,000", actual: hasRevolvers ? (pf?.highestLimit || pf?.currentExposure || "Detected") : null, met: hasRevolvers },
+        { label: "Balance", ideal: "$0 – 5% of limit", actual: utilLabel, met: (utilScore ?? 0) >= 80 },
+        { label: "Age", ideal: "5+ years", actual: creditAgeYears > 0 ? `${creditAgeYears}yr avg` : null, met: creditAgeYears >= 5 },
+        { label: "Status", ideal: "Open · Current", actual: hasRevolvers ? statusLabel : null, met: !hasLates },
       ],
     },
     {
       name: "Bank Revolver 2",
-      filled: hasRevolvers && (depthScore ?? 0) >= 70,
+      filled: hasRevolvers && (depthScore ?? 0) >= 65,
       fields: [
-        { label: "Limit", ideal: "$10,000–$20,000", actual: (depthScore ?? 0) >= 70 ? "On file" : null, met: (depthScore ?? 0) >= 70 },
-        { label: "Balance", ideal: "$0 – 5% of limit", actual: (utilScore ?? 0) >= 80 ? "Low" : "Elevated", met: (utilScore ?? 0) >= 80 },
-        { label: "Age", ideal: "3+ years", actual: creditAgeYears >= 3 ? `${creditAgeYears}yr avg` : creditAgeYears > 0 ? `${creditAgeYears}yr avg` : null, met: creditAgeYears >= 3 },
-        { label: "Status", ideal: "Open · Current", actual: hasLates ? "Late payments found" : "Current", met: !hasLates },
+        { label: "Limit", ideal: "$10,000–$20,000", actual: (depthScore ?? 0) >= 65 ? "Detected" : null, met: (depthScore ?? 0) >= 65 },
+        { label: "Balance", ideal: "$0 – 5% of limit", actual: utilLabel, met: (utilScore ?? 0) >= 80 },
+        { label: "Age", ideal: "3+ years", actual: creditAgeYears > 0 ? `${creditAgeYears}yr avg` : null, met: creditAgeYears >= 3 },
+        { label: "Status", ideal: "Open · Current", actual: (depthScore ?? 0) >= 65 ? statusLabel : null, met: !hasLates },
       ],
     },
     {
       name: "Bank Revolver 3",
-      filled: hasRevolvers && (depthScore ?? 0) >= 80,
+      filled: hasRevolvers && (depthScore ?? 0) >= 78,
       fields: [
-        { label: "Limit", ideal: "$15,000–$25,000", actual: (depthScore ?? 0) >= 80 ? "On file" : null, met: (depthScore ?? 0) >= 80 },
-        { label: "Balance", ideal: "$0 – 3% of limit", actual: (utilScore ?? 0) >= 85 ? "Minimal" : "Above target", met: (utilScore ?? 0) >= 85 },
-        { label: "Age", ideal: "5+ years", actual: creditAgeYears >= 5 ? `${creditAgeYears}yr avg` : creditAgeYears > 0 ? `${creditAgeYears}yr avg` : null, met: creditAgeYears >= 5 },
-        { label: "Status", ideal: "Open · Current", actual: hasLates ? "Late payments found" : "Current", met: !hasLates },
+        { label: "Limit", ideal: "$15,000–$25,000", actual: (depthScore ?? 0) >= 78 ? "Detected" : null, met: (depthScore ?? 0) >= 78 },
+        { label: "Balance", ideal: "$0 – 3% of limit", actual: utilLabel, met: (utilScore ?? 0) >= 85 },
+        { label: "Age", ideal: "5+ years", actual: creditAgeYears > 0 ? `${creditAgeYears}yr avg` : null, met: creditAgeYears >= 5 },
+        { label: "Status", ideal: "Open · Current", actual: (depthScore ?? 0) >= 78 ? statusLabel : null, met: !hasLates },
       ],
     },
   ];
@@ -1237,10 +1247,10 @@ function PerfectProfileTab({ aisReport }: { aisReport: MissionData | null }) {
       name: "Installment Loan",
       filled: hasInstallment,
       fields: [
-        { label: "Type", ideal: "Auto / Personal / Mortgage", actual: hasInstallment ? "On file" : null, met: hasInstallment },
-        { label: "Payment History", ideal: "100% on-time", actual: (paymentScore ?? 0) >= 85 ? "Strong" : (paymentScore ?? 0) >= 60 ? "Mixed" : "Weak", met: (paymentScore ?? 0) >= 85 },
-        { label: "Age", ideal: "2+ years", actual: creditAgeYears >= 2 ? `${creditAgeYears}yr avg` : creditAgeYears > 0 ? `${creditAgeYears}yr avg` : null, met: creditAgeYears >= 2 },
-        { label: "Status", ideal: "Open or Paid · Current", actual: hasLates ? "Late payments found" : "Current", met: !hasLates },
+        { label: "Type", ideal: "Auto / Personal / Mortgage", actual: hasInstallment ? (fi?.exposureLevel || "Detected") : null, met: hasInstallment },
+        { label: "Payment History", ideal: "100% on-time", actual: paymentLabel, met: (paymentScore ?? 0) >= 85 },
+        { label: "Age", ideal: "2+ years", actual: creditAgeYears > 0 ? `${creditAgeYears}yr avg` : null, met: creditAgeYears >= 2 },
+        { label: "Status", ideal: "Open or Paid · Current", actual: hasInstallment ? statusLabel : null, met: !hasLates },
       ],
     },
   ];
@@ -1248,7 +1258,7 @@ function PerfectProfileTab({ aisReport }: { aisReport: MissionData | null }) {
   const profileSlots: AccountSlot[] = [
     {
       name: "Profile Metrics",
-      filled: (aisReport.approvalIndex ?? 0) >= 70,
+      filled: aisReport.approvalIndex !== null,
       fields: [
         { label: "AIS", ideal: "90+ / 100", actual: aisReport.approvalIndex !== null ? `${aisReport.approvalIndex} / 100` : null, met: (aisReport.approvalIndex ?? 0) >= 90 },
         { label: "Band", ideal: "Exceptional", actual: aisReport.band, met: aisReport.band?.toLowerCase() === "exceptional" },
