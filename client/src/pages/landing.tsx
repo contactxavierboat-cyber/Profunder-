@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, useCallback, useMemo } from "react";
+import ReactMarkdown from "react-markdown";
 import { useAuth } from "@/lib/store";
 import { ProfundrLogo } from "@/components/profundr-logo";
 
@@ -371,59 +372,41 @@ function normalizeCase(text: string): string {
 
 function FormatResponse({ content }: { content: string }) {
   const cleaned = content
-    .replace(/\*\*\*/g, "")
-    .replace(/\*\*/g, "")
-    .replace(/\*/g, "")
     .replace(/^---+$/gm, "")
-    .replace(/^-{2,}/gm, "");
+    .replace(/^={3,}.*$/gm, "");
 
-  const isMetricLine = (line: string): boolean => {
-    const t = line.trim().replace(/^[-•–—]\s*/, "");
-    if (!t) return true;
-    if (/Approval\s*Index/i.test(t)) return true;
-    if (/FUNDABILITY\s*INDEX/i.test(t)) return true;
-    if (/^Band[:\s]/i.test(t)) return true;
-    if (/^Phase[:\s]/i.test(t)) return true;
-    if (/Pillar\s*Scores?/i.test(t)) return true;
-    if (/^(Payment\s*Integrity|Utilization\s*Control|File\s*Stability|Credit\s*Depth|Timing\s*Risk|Lender\s*Confidence)[:\s]*\d+/i.test(t)) return true;
-    if (/Top\s*Approval\s*Suppressors?/i.test(t)) return true;
-    if (/What['']?s\s*(Helping|Hurting)/i.test(t)) return true;
-    if (/Best\s*Next\s*Move/i.test(t)) return true;
-    if (/What\s*Not\s*[Tt]o\s*Do/i.test(t)) return true;
-    if (/Primary\s*Diagnosis/i.test(t)) return true;
-    if (/Financial\s*Identity/i.test(t)) return true;
-    if (/^(Profile\s*Type|Credit\s*Age|Exposure\s*Level|Total\s*Exposure|Revolving\s*Exposure|Bureau\s*Footprint|Tradeline\s*Count|Bureau\s*Presence|Identity\s*Strength|Financial\s*Identity\s*Score|Lender\s*Perception|How\s*Lenders\s*See\s*You)[:\s]/i.test(t)) return true;
-    if (/APPROVAL\s*ODDS/i.test(t)) return true;
-    if (/BORROWING\s*POWER/i.test(t)) return true;
-    if (/DISPUTE\s*ITEMS?\s*:?$/i.test(t)) return true;
-    if (/^(Bank\s*Term\s*Loan|Online\s*Lender|Business\s*LOC|Credit\s*Card|MCA)\s*:/i.test(t)) return true;
-    if (/Conservative\s*:/i.test(t)) return true;
-    if (/^\d+\s*\/\s*100/i.test(t)) return true;
-    if (/^(Exceptional|Strong|Viable|Borderline|Weak|High Risk)$/i.test(t)) return true;
-    if (/^(Repair|Build|Wait|Funding)\s*Phase$/i.test(t)) return true;
-    return false;
-  };
-
-  const allLines = cleaned.split("\n");
-  const verdictLines = allLines.filter(l => {
+  const lines = cleaned.split("\n");
+  const filteredLines = lines.filter(l => {
     const t = l.trim();
-    if (!t) return false;
-    if (isMetricLine(t)) return false;
     if (/^DISPUTE:/i.test(t)) return false;
+    if (/^TRADELINE:/i.test(t)) return false;
     const stripped = t.replace(/^\d+[\.\)]\s*/, "").replace(/^[-•]\s*/, "");
     if (/^DISPUTE:/i.test(stripped)) return false;
-    if (/^(Key\s*Next\s*Steps|Dispute\s*Items|Dispute\s*Strategy|Legal\s*Basis|Required\s*Action|Round\s*\d)/i.test(stripped)) return false;
-    if (/^(Focus on|Submit disputes|Lower your|Please provide additional)/i.test(stripped)) return false;
-    if (/^Verdict:?\s*$/i.test(stripped)) return false;
-    if (/^(Top\s*Approval\s*Suppressors?|What['']?s\s*Helping|What['']?s\s*Hurting|Best\s*Next\s*Move|What\s*Not\s*[Tt]o\s*Do|Primary\s*Diagnosis|Pillar\s*Scores?)/i.test(stripped)) return false;
+    if (/^TRADELINE:/i.test(stripped)) return false;
     return true;
   });
 
+  const markdown = filteredLines.join("\n").trim();
+
   return (
-    <div className="space-y-2">
-      {verdictLines.map((line, i) => (
-        <p key={i} className="text-[14px] text-[#444] leading-[1.65]">{normalizeCase(line.trim())}</p>
-      ))}
+    <div className="profundr-report" data-testid="format-response">
+      <ReactMarkdown
+        components={{
+          h1: ({ children }) => <h1 className="text-[17px] font-bold text-[#1a1a2e] leading-tight mb-1 mt-3 first:mt-0">{children}</h1>,
+          h2: ({ children }) => <h2 className="text-[14px] font-bold text-[#1a1a2e] leading-tight mb-1 mt-3 uppercase tracking-wide">{children}</h2>,
+          h3: ({ children }) => <h3 className="text-[13px] font-semibold text-[#333] leading-tight mb-1 mt-2">{children}</h3>,
+          p: ({ children }) => <p className="text-[13px] text-[#444] leading-[1.65] mb-1.5">{children}</p>,
+          strong: ({ children }) => <strong className="font-semibold text-[#1a1a2e]">{children}</strong>,
+          em: ({ children }) => <em className="italic text-[#555]">{children}</em>,
+          ul: ({ children }) => <ul className="list-disc list-outside pl-4 mb-1.5 space-y-0.5">{children}</ul>,
+          ol: ({ children }) => <ol className="list-decimal list-outside pl-4 mb-1.5 space-y-0.5">{children}</ol>,
+          li: ({ children }) => <li className="text-[13px] text-[#444] leading-[1.55]">{children}</li>,
+          hr: () => <hr className="border-t border-[#e5e5e5] my-2" />,
+          blockquote: ({ children }) => <blockquote className="border-l-2 border-[#1a1a2e] pl-3 my-1.5 text-[12px] text-[#555] italic">{children}</blockquote>,
+        }}
+      >
+        {markdown}
+      </ReactMarkdown>
     </div>
   );
 }
