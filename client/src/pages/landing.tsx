@@ -387,24 +387,85 @@ function filterMarkdown(content: string): string {
   return filteredLines.join("\n").trim();
 }
 
-const mdComponents = {
-  h1: ({ children }: any) => <h1 className="text-[17px] font-bold text-[#1a1a2e] leading-tight mb-1 mt-3 first:mt-0">{children}</h1>,
-  h2: ({ children }: any) => <h2 className="text-[14px] font-bold text-[#1a1a2e] leading-tight mb-1 mt-3 uppercase tracking-wide">{children}</h2>,
-  h3: ({ children }: any) => <h3 className="text-[13px] font-semibold text-[#333] leading-tight mb-1 mt-2">{children}</h3>,
-  p: ({ children }: any) => <p className="text-[13px] text-[#444] leading-[1.65] mb-1.5">{children}</p>,
+const cardMdComponents = {
+  h3: ({ children }: any) => <h3 className="text-[12px] font-semibold text-[#1a1a2e] leading-tight mb-1 mt-1.5">{children}</h3>,
+  p: ({ children }: any) => <p className="text-[12px] text-[#444] leading-[1.6] mb-1">{children}</p>,
   strong: ({ children }: any) => <strong className="font-semibold text-[#1a1a2e]">{children}</strong>,
   em: ({ children }: any) => <em className="italic text-[#555]">{children}</em>,
-  ul: ({ children }: any) => <ul className="list-disc list-outside pl-4 mb-1.5 space-y-0.5">{children}</ul>,
-  ol: ({ children }: any) => <ol className="list-decimal list-outside pl-4 mb-1.5 space-y-0.5">{children}</ol>,
-  li: ({ children }: any) => <li className="text-[13px] text-[#444] leading-[1.55]">{children}</li>,
-  hr: () => <hr className="border-t border-[#e5e5e5] my-2" />,
-  blockquote: ({ children }: any) => <blockquote className="border-l-2 border-[#1a1a2e] pl-3 my-1.5 text-[12px] text-[#555] italic">{children}</blockquote>,
+  ul: ({ children }: any) => <ul className="list-disc list-outside pl-3.5 mb-1 space-y-0.5">{children}</ul>,
+  ol: ({ children }: any) => <ol className="list-decimal list-outside pl-3.5 mb-1 space-y-0.5">{children}</ol>,
+  li: ({ children }: any) => <li className="text-[12px] text-[#444] leading-[1.55]">{children}</li>,
+  hr: () => <hr className="border-t border-[#e8e8e8] my-1.5" />,
+  blockquote: ({ children }: any) => <blockquote className="border-l-2 border-[#1a1a2e] pl-2.5 my-1 text-[11px] text-[#555] italic">{children}</blockquote>,
 };
+
+function parseIntoCardSections(md: string): { title: string | null; intro: string; sections: { heading: string; body: string }[] } {
+  const lines = md.split("\n");
+  let title: string | null = null;
+  let intro = "";
+  const sections: { heading: string; body: string }[] = [];
+  let currentHeading: string | null = null;
+  let currentBody: string[] = [];
+
+  for (const line of lines) {
+    const h1Match = line.match(/^#\s+(.+)$/);
+    const h2Match = line.match(/^##\s+(.+)$/);
+
+    if (h1Match && !title && sections.length === 0) {
+      title = h1Match[1].trim();
+      continue;
+    }
+
+    if (h2Match) {
+      if (currentHeading !== null) {
+        sections.push({ heading: currentHeading, body: currentBody.join("\n").trim() });
+      } else if (currentBody.length > 0) {
+        intro = currentBody.join("\n").trim();
+      }
+      currentHeading = h2Match[1].trim();
+      currentBody = [];
+      continue;
+    }
+
+    currentBody.push(line);
+  }
+
+  if (currentHeading !== null) {
+    sections.push({ heading: currentHeading, body: currentBody.join("\n").trim() });
+  } else if (currentBody.length > 0) {
+    if (!intro) {
+      intro = currentBody.join("\n").trim();
+    } else {
+      intro += "\n" + currentBody.join("\n").trim();
+    }
+  }
+
+  return { title, intro: intro.trim(), sections };
+}
+
+const sectionIcons: Record<string, React.ReactNode> = {
+  default: <svg width="10" height="10" viewBox="0 0 16 16" fill="none"><rect x="2" y="2" width="12" height="12" rx="2" stroke="#999" strokeWidth="1.2"/><path d="M5 6h6M5 8h4" stroke="#999" strokeWidth="1" strokeLinecap="round"/></svg>,
+  score: <svg width="10" height="10" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="5.5" stroke="#999" strokeWidth="1.2"/><path d="M8 5v3l2 1.5" stroke="#999" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round"/></svg>,
+  recommendation: <svg width="10" height="10" viewBox="0 0 16 16" fill="none"><path d="M8 3l1.5 3 3.5.5-2.5 2.5.5 3.5L8 11l-3 1.5.5-3.5L3 6.5l3.5-.5z" stroke="#999" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round"/></svg>,
+  action: <svg width="10" height="10" viewBox="0 0 16 16" fill="none"><path d="M4 8h8M8 4v8" stroke="#999" strokeWidth="1.2" strokeLinecap="round"/></svg>,
+  risk: <svg width="10" height="10" viewBox="0 0 16 16" fill="none"><path d="M8 3L2.5 13h11L8 3z" stroke="#999" strokeWidth="1.1" strokeLinecap="round" strokeLinejoin="round"/><path d="M8 7v2.5" stroke="#999" strokeWidth="1.2" strokeLinecap="round"/><circle cx="8" cy="11" r="0.5" fill="#999"/></svg>,
+  summary: <svg width="10" height="10" viewBox="0 0 16 16" fill="none"><rect x="3" y="2" width="10" height="12" rx="1.5" stroke="#999" strokeWidth="1.1"/><path d="M5.5 5h5M5.5 7.5h3.5M5.5 10h4.5" stroke="#999" strokeWidth="0.9" strokeLinecap="round"/></svg>,
+};
+
+function getSectionIcon(heading: string): React.ReactNode {
+  const h = heading.toLowerCase();
+  if (/score|index|ais|rating|grade/i.test(h)) return sectionIcons.score;
+  if (/recommend|next|step|action|path|strategy|protocol/i.test(h)) return sectionIcons.recommendation;
+  if (/add|open|build|improve|increase/i.test(h)) return sectionIcons.action;
+  if (/risk|warn|alert|concern|negative|derog/i.test(h)) return sectionIcons.risk;
+  if (/summary|overview|conclusion|result|finding/i.test(h)) return sectionIcons.summary;
+  return sectionIcons.default;
+}
 
 function FormatResponse({ content }: { content: string }) {
   return (
     <div className="profundr-report" data-testid="format-response">
-      <ReactMarkdown components={mdComponents}>{filterMarkdown(content)}</ReactMarkdown>
+      <ReactMarkdown components={cardMdComponents}>{filterMarkdown(content)}</ReactMarkdown>
     </div>
   );
 }
@@ -509,41 +570,80 @@ function BrandedResponse({ content, userQuestion, msgId }: { content: string; us
   };
 
   const markdown = filterMarkdown(content);
+  const { title, intro, sections } = parseIntoCardSections(markdown);
+  const hasCards = sections.length > 0;
 
   return (
     <div ref={reportRef} data-testid={`branded-response-${msgId}`}>
-      <div className="flex items-center gap-2 mb-2 pb-1.5 border-b border-[#1a1a2e]/10">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1a1a2e" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="shrink-0">
-          <path d="M12 2C9.5 2 7.5 4 7.5 6.5c0 .5-.4 1-1 1C4.5 7.5 3 9.5 3 11.5c0 1.5.8 2.8 2 3.5 0 0-.5 1.5-.5 2.5C4.5 20 6.5 22 9 22c1.5 0 2.5-.5 3-1.5.5 1 1.5 1.5 3 1.5 2.5 0 4.5-2 4.5-4.5 0-1-.5-2.5-.5-2.5 1.2-.7 2-2 2-3.5 0-2-1.5-4-3.5-4-.6 0-1-.5-1-1C16.5 4 14.5 2 12 2z" />
-          <path d="M12 2v20" /><path d="M7.5 7.5C9 8.5 10 10 10.5 12" /><path d="M16.5 7.5C15 8.5 14 10 13.5 12" />
-        </svg>
-        <span className="text-[11px] font-bold text-[#1a1a2e] tracking-[-0.01em]">Profundr</span>
-        <span className="text-[9px] text-[#bbb] ml-auto">Capital Intelligence</span>
-      </div>
-
-      <div className="profundr-report">
-        <ReactMarkdown components={mdComponents}>{markdown}</ReactMarkdown>
-      </div>
-
-      <div className="flex items-center justify-between mt-2 pt-1.5 border-t border-[#1a1a2e]/10">
-        <div className="flex items-center gap-1.5">
-          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#ccc" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="shrink-0">
+      <div className="rounded-xl bg-gradient-to-br from-[#1a1a2e] to-[#252540] px-3.5 py-2.5 mb-2">
+        <div className="flex items-center gap-2">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 opacity-60">
             <path d="M12 2C9.5 2 7.5 4 7.5 6.5c0 .5-.4 1-1 1C4.5 7.5 3 9.5 3 11.5c0 1.5.8 2.8 2 3.5 0 0-.5 1.5-.5 2.5C4.5 20 6.5 22 9 22c1.5 0 2.5-.5 3-1.5.5 1 1.5 1.5 3 1.5 2.5 0 4.5-2 4.5-4.5 0-1-.5-2.5-.5-2.5 1.2-.7 2-2 2-3.5 0-2-1.5-4-3.5-4-.6 0-1-.5-1-1C16.5 4 14.5 2 12 2z" />
             <path d="M12 2v20" /><path d="M7.5 7.5C9 8.5 10 10 10.5 12" /><path d="M16.5 7.5C15 8.5 14 10 13.5 12" />
           </svg>
-          <span className="text-[8px] text-[#ccc]">profundr.com</span>
+          <div className="min-w-0 flex-1">
+            {title ? (
+              <>
+                <p className="text-[13px] font-bold text-white leading-tight truncate">{title}</p>
+                <p className="text-[8px] text-white/35 mt-0.5">Profundr Capital Intelligence</p>
+              </>
+            ) : (
+              <>
+                <p className="text-[11px] font-bold text-white leading-tight">Profundr</p>
+                <p className="text-[8px] text-white/35 mt-0.5">Capital Intelligence</p>
+              </>
+            )}
+          </div>
+          {hasCards && <span className="text-[8px] text-white/25 flex-shrink-0" style={{ fontVariantNumeric: "tabular-nums" }}>{sections.length} sections</span>}
+        </div>
+      </div>
+
+      {intro && (
+        <div className="rounded-lg bg-[#fafafa] border border-[#eee] px-3 py-2.5 mb-1.5">
+          <ReactMarkdown components={cardMdComponents}>{intro}</ReactMarkdown>
+        </div>
+      )}
+
+      {hasCards ? (
+        <div className="space-y-1.5">
+          {sections.map((sec, si) => (
+            <div key={si} className="rounded-lg border border-[#e8e8e8] overflow-hidden bg-white" data-testid={`response-card-${msgId}-${si}`}>
+              <div className="flex items-center gap-1.5 px-3 py-1.5 bg-[#fafafa] border-b border-[#f0f0f0]">
+                <span className="flex-shrink-0 opacity-50">{getSectionIcon(sec.heading)}</span>
+                <span className="text-[9px] font-bold text-[#1a1a2e] uppercase tracking-[0.08em] truncate">{sec.heading}</span>
+                <span className="text-[7px] text-[#ccc] ml-auto flex-shrink-0" style={{ fontVariantNumeric: "tabular-nums" }}>{si + 1}/{sections.length}</span>
+              </div>
+              <div className="px-3 py-2">
+                <ReactMarkdown components={cardMdComponents}>{sec.body}</ReactMarkdown>
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : !intro ? (
+        <div className="rounded-lg bg-[#fafafa] border border-[#eee] px-3 py-2.5">
+          <ReactMarkdown components={cardMdComponents}>{title ? markdown.replace(/^#\s+.+$/m, "").trim() : markdown}</ReactMarkdown>
+        </div>
+      ) : null}
+
+      <div className="flex items-center justify-between mt-2 px-1">
+        <div className="flex items-center gap-1.5">
+          <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#ccc" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="shrink-0">
+            <path d="M12 2C9.5 2 7.5 4 7.5 6.5c0 .5-.4 1-1 1C4.5 7.5 3 9.5 3 11.5c0 1.5.8 2.8 2 3.5 0 0-.5 1.5-.5 2.5C4.5 20 6.5 22 9 22c1.5 0 2.5-.5 3-1.5.5 1 1.5 1.5 3 1.5 2.5 0 4.5-2 4.5-4.5 0-1-.5-2.5-.5-2.5 1.2-.7 2-2 2-3.5 0-2-1.5-4-3.5-4-.6 0-1-.5-1-1C16.5 4 14.5 2 12 2z" />
+            <path d="M12 2v20" /><path d="M7.5 7.5C9 8.5 10 10 10.5 12" /><path d="M16.5 7.5C15 8.5 14 10 13.5 12" />
+          </svg>
+          <span className="text-[7px] text-[#ccc]">profundr.com</span>
         </div>
         <button
           onClick={handleDownloadPdf}
           disabled={downloading}
-          className="flex items-center gap-1 px-2 py-1 rounded-md text-[9px] font-medium text-[#1a1a2e] hover:bg-[#f5f5f5] transition-colors disabled:opacity-40"
+          className="flex items-center gap-1 px-2 py-0.5 rounded-md text-[9px] font-medium text-[#1a1a2e] hover:bg-[#f5f5f5] transition-colors disabled:opacity-40"
           data-testid={`button-download-report-${msgId}`}
         >
           {downloading ? (
             <span className="text-[8px] text-[#999]">Generating...</span>
           ) : (
             <>
-              <svg width="10" height="10" viewBox="0 0 12 12" fill="none"><path d="M6 2v6M6 8L4 6M6 8l2-2" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" /><path d="M2 9v1h8V9" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" /></svg>
+              <svg width="9" height="9" viewBox="0 0 12 12" fill="none"><path d="M6 2v6M6 8L4 6M6 8l2-2" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" /><path d="M2 9v1h8V9" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" /></svg>
               <span>PDF</span>
             </>
           )}
