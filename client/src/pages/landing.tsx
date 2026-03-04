@@ -1200,10 +1200,13 @@ function PerfectProfileTab({ aisReport }: { aisReport: MissionData | null }) {
   const lateRegex = /\blate\s+payments?|\bdelinquen|\bpast.?due|\b30\s*days?\s*late|\b60\s*days?\s*late|\b90\s*days?\s*late/i;
   const hasLates = paymentScore !== null ? (paymentScore < 70 && lateRegex.test(allNeg)) : lateRegex.test(allNeg);
   const creditAgeYears = (() => { const m = fi?.creditAge?.match(/(\d+)/); return m ? parseInt(m[1]) : 0; })();
-  const revolverKeywords = /revolv|credit\s*card|bankcard|visa|mastercard|amex|discover|capital\s*one|chase|citi/i.test(allText);
-  const hasRevolvers = revolverKeywords || (depthScore !== null && depthScore >= 40 && utilScore !== null && utilScore > 0);
+  const revolverKeywords = /revolv|credit\s*card|bankcard|visa|mastercard|amex|discover|capital\s*one|chase|citi|tradeline|bankcard/i.test(allText);
+  const depthImpliesRevolvers = depthScore !== null && depthScore > 0;
+  const utilImpliesRevolvers = utilScore !== null && utilScore > 0;
+  const hasRevolvers = revolverKeywords || depthImpliesRevolvers || utilImpliesRevolvers;
   const installmentKeywords = /installment|auto\s*(loan)?|mortgage|student|personal\s*loan|navient|sallie|nelnet|fedloan/i.test(allText);
-  const hasInstallment = installmentKeywords || (depthScore !== null && depthScore >= 50 && stabilityScore !== null && stabilityScore >= 40);
+  const hasPillarData = aisReport.pillarScores?.length >= 3;
+  const hasInstallment = installmentKeywords || (hasPillarData && stabilityScore !== null && stabilityScore > 0);
 
   const utilLabel = utilScore !== null ? (utilScore >= 80 ? "Low utilization" : utilScore >= 50 ? "Moderate" : "High") : null;
   const paymentLabel = paymentScore !== null ? (paymentScore >= 85 ? "Strong" : paymentScore >= 60 ? "Mixed" : "Needs work") : null;
@@ -1222,22 +1225,22 @@ function PerfectProfileTab({ aisReport }: { aisReport: MissionData | null }) {
     },
     {
       name: "Bank Revolver 2",
-      filled: hasRevolvers && (depthScore ?? 0) >= 65,
+      filled: hasRevolvers && (depthScore ?? 0) >= 50,
       fields: [
-        { label: "Limit", ideal: "$10,000–$20,000", actual: (depthScore ?? 0) >= 65 ? "Detected" : null, met: (depthScore ?? 0) >= 65 },
+        { label: "Limit", ideal: "$10,000–$20,000", actual: (depthScore ?? 0) >= 50 ? "Detected" : null, met: (depthScore ?? 0) >= 50 },
         { label: "Balance", ideal: "$0 – 5% of limit", actual: utilLabel, met: (utilScore ?? 0) >= 80 },
         { label: "Age", ideal: "3+ years", actual: creditAgeYears > 0 ? `${creditAgeYears}yr avg` : null, met: creditAgeYears >= 3 },
-        { label: "Status", ideal: "Open · Current", actual: (depthScore ?? 0) >= 65 ? statusLabel : null, met: !hasLates },
+        { label: "Status", ideal: "Open · Current", actual: (depthScore ?? 0) >= 50 ? statusLabel : null, met: !hasLates },
       ],
     },
     {
       name: "Bank Revolver 3",
-      filled: hasRevolvers && (depthScore ?? 0) >= 78,
+      filled: hasRevolvers && (depthScore ?? 0) >= 70,
       fields: [
-        { label: "Limit", ideal: "$15,000–$25,000", actual: (depthScore ?? 0) >= 78 ? "Detected" : null, met: (depthScore ?? 0) >= 78 },
+        { label: "Limit", ideal: "$15,000–$25,000", actual: (depthScore ?? 0) >= 70 ? "Detected" : null, met: (depthScore ?? 0) >= 70 },
         { label: "Balance", ideal: "$0 – 3% of limit", actual: utilLabel, met: (utilScore ?? 0) >= 85 },
         { label: "Age", ideal: "5+ years", actual: creditAgeYears > 0 ? `${creditAgeYears}yr avg` : null, met: creditAgeYears >= 5 },
-        { label: "Status", ideal: "Open · Current", actual: (depthScore ?? 0) >= 78 ? statusLabel : null, met: !hasLates },
+        { label: "Status", ideal: "Open · Current", actual: (depthScore ?? 0) >= 70 ? statusLabel : null, met: !hasLates },
       ],
     },
   ];
