@@ -370,11 +370,10 @@ function normalizeCase(text: string): string {
   return text;
 }
 
-function FormatResponse({ content }: { content: string }) {
+function filterMarkdown(content: string): string {
   const cleaned = content
     .replace(/^---+$/gm, "")
     .replace(/^={3,}.*$/gm, "");
-
   const lines = cleaned.split("\n");
   const filteredLines = lines.filter(l => {
     const t = l.trim();
@@ -385,28 +384,171 @@ function FormatResponse({ content }: { content: string }) {
     if (/^TRADELINE:/i.test(stripped)) return false;
     return true;
   });
+  return filteredLines.join("\n").trim();
+}
 
-  const markdown = filteredLines.join("\n").trim();
+const mdComponents = {
+  h1: ({ children }: any) => <h1 className="text-[17px] font-bold text-[#1a1a2e] leading-tight mb-1 mt-3 first:mt-0">{children}</h1>,
+  h2: ({ children }: any) => <h2 className="text-[14px] font-bold text-[#1a1a2e] leading-tight mb-1 mt-3 uppercase tracking-wide">{children}</h2>,
+  h3: ({ children }: any) => <h3 className="text-[13px] font-semibold text-[#333] leading-tight mb-1 mt-2">{children}</h3>,
+  p: ({ children }: any) => <p className="text-[13px] text-[#444] leading-[1.65] mb-1.5">{children}</p>,
+  strong: ({ children }: any) => <strong className="font-semibold text-[#1a1a2e]">{children}</strong>,
+  em: ({ children }: any) => <em className="italic text-[#555]">{children}</em>,
+  ul: ({ children }: any) => <ul className="list-disc list-outside pl-4 mb-1.5 space-y-0.5">{children}</ul>,
+  ol: ({ children }: any) => <ol className="list-decimal list-outside pl-4 mb-1.5 space-y-0.5">{children}</ol>,
+  li: ({ children }: any) => <li className="text-[13px] text-[#444] leading-[1.55]">{children}</li>,
+  hr: () => <hr className="border-t border-[#e5e5e5] my-2" />,
+  blockquote: ({ children }: any) => <blockquote className="border-l-2 border-[#1a1a2e] pl-3 my-1.5 text-[12px] text-[#555] italic">{children}</blockquote>,
+};
 
+function FormatResponse({ content }: { content: string }) {
   return (
     <div className="profundr-report" data-testid="format-response">
-      <ReactMarkdown
-        components={{
-          h1: ({ children }) => <h1 className="text-[17px] font-bold text-[#1a1a2e] leading-tight mb-1 mt-3 first:mt-0">{children}</h1>,
-          h2: ({ children }) => <h2 className="text-[14px] font-bold text-[#1a1a2e] leading-tight mb-1 mt-3 uppercase tracking-wide">{children}</h2>,
-          h3: ({ children }) => <h3 className="text-[13px] font-semibold text-[#333] leading-tight mb-1 mt-2">{children}</h3>,
-          p: ({ children }) => <p className="text-[13px] text-[#444] leading-[1.65] mb-1.5">{children}</p>,
-          strong: ({ children }) => <strong className="font-semibold text-[#1a1a2e]">{children}</strong>,
-          em: ({ children }) => <em className="italic text-[#555]">{children}</em>,
-          ul: ({ children }) => <ul className="list-disc list-outside pl-4 mb-1.5 space-y-0.5">{children}</ul>,
-          ol: ({ children }) => <ol className="list-decimal list-outside pl-4 mb-1.5 space-y-0.5">{children}</ol>,
-          li: ({ children }) => <li className="text-[13px] text-[#444] leading-[1.55]">{children}</li>,
-          hr: () => <hr className="border-t border-[#e5e5e5] my-2" />,
-          blockquote: ({ children }) => <blockquote className="border-l-2 border-[#1a1a2e] pl-3 my-1.5 text-[12px] text-[#555] italic">{children}</blockquote>,
-        }}
-      >
-        {markdown}
-      </ReactMarkdown>
+      <ReactMarkdown components={mdComponents}>{filterMarkdown(content)}</ReactMarkdown>
+    </div>
+  );
+}
+
+function BrandedResponse({ content, userQuestion, msgId }: { content: string; userQuestion?: string; msgId: number }) {
+  const reportRef = useRef<HTMLDivElement>(null);
+  const [downloading, setDownloading] = useState(false);
+
+  const handleDownloadPdf = async () => {
+    if (!reportRef.current || downloading) return;
+    setDownloading(true);
+    let offscreen: HTMLDivElement | null = null;
+    try {
+      const html2canvas = (await import("html2canvas")).default;
+      const { jsPDF } = await import("jspdf");
+
+      const reelW = 1080;
+      const reelH = 1920;
+
+      const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+
+      offscreen = document.createElement("div");
+      offscreen.style.cssText = `position:fixed;left:-9999px;top:0;width:${reelW}px;height:${reelH}px;background:#fff;font-family:Inter,system-ui,sans-serif;padding:0;overflow:hidden;`;
+      document.body.appendChild(offscreen);
+
+      const cleanQ = userQuestion ? esc(userQuestion.replace(/\[Attached:.*?\]/g, "").trim()) : "";
+
+      offscreen.innerHTML = `
+        <div style="display:flex;flex-direction:column;height:${reelH}px;padding:60px 56px;">
+          <div style="display:flex;align-items:center;gap:14px;margin-bottom:40px;padding-bottom:24px;border-bottom:2px solid #1a1a2e;">
+            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#1a1a2e" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 2C9.5 2 7.5 4 7.5 6.5c0 .5-.4 1-1 1C4.5 7.5 3 9.5 3 11.5c0 1.5.8 2.8 2 3.5 0 0-.5 1.5-.5 2.5C4.5 20 6.5 22 9 22c1.5 0 2.5-.5 3-1.5.5 1 1.5 1.5 3 1.5 2.5 0 4.5-2 4.5-4.5 0-1-.5-2.5-.5-2.5 1.2-.7 2-2 2-3.5 0-2-1.5-4-3.5-4-.6 0-1-.5-1-1C16.5 4 14.5 2 12 2z"/>
+              <path d="M12 2v20"/><path d="M7.5 7.5C9 8.5 10 10 10.5 12"/><path d="M16.5 7.5C15 8.5 14 10 13.5 12"/>
+            </svg>
+            <div>
+              <div style="font-size:28px;font-weight:700;color:#1a1a2e;letter-spacing:-0.02em;line-height:1;">Profundr</div>
+              <div style="font-size:13px;color:#999;font-weight:400;margin-top:2px;">Capital Intelligence Report</div>
+            </div>
+          </div>
+
+          ${cleanQ ? `
+          <div style="margin-bottom:28px;padding:20px 24px;background:#f7f7f7;border-radius:12px;border-left:4px solid #1a1a2e;">
+            <div style="font-size:11px;color:#999;text-transform:uppercase;letter-spacing:0.1em;font-weight:600;margin-bottom:8px;">Question</div>
+            <div style="font-size:18px;color:#1a1a2e;font-weight:500;line-height:1.5;">${cleanQ}</div>
+          </div>
+          ` : ""}
+
+          <div id="pdf-report-content" style="flex:1;font-size:16px;color:#333;line-height:1.7;overflow:hidden;"></div>
+
+          <div style="margin-top:auto;padding-top:32px;border-top:2px solid #1a1a2e;display:flex;align-items:center;justify-content:space-between;">
+            <div style="display:flex;align-items:center;gap:12px;">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#1a1a2e" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 2C9.5 2 7.5 4 7.5 6.5c0 .5-.4 1-1 1C4.5 7.5 3 9.5 3 11.5c0 1.5.8 2.8 2 3.5 0 0-.5 1.5-.5 2.5C4.5 20 6.5 22 9 22c1.5 0 2.5-.5 3-1.5.5 1 1.5 1.5 3 1.5 2.5 0 4.5-2 4.5-4.5 0-1-.5-2.5-.5-2.5 1.2-.7 2-2 2-3.5 0-2-1.5-4-3.5-4-.6 0-1-.5-1-1C16.5 4 14.5 2 12 2z"/>
+                <path d="M12 2v20"/><path d="M7.5 7.5C9 8.5 10 10 10.5 12"/><path d="M16.5 7.5C15 8.5 14 10 13.5 12"/>
+              </svg>
+              <div>
+                <div style="font-size:16px;font-weight:700;color:#1a1a2e;">Profundr</div>
+                <div style="font-size:11px;color:#aaa;">Capital Operating System</div>
+              </div>
+            </div>
+            <div style="font-size:11px;color:#bbb;text-align:right;">profundr.com</div>
+          </div>
+        </div>
+      `;
+
+      const contentEl = offscreen.querySelector("#pdf-report-content") as HTMLElement;
+      if (contentEl) {
+        const md = esc(filterMarkdown(content));
+        const htmlContent = md
+          .replace(/^### (.+)$/gm, '<h3 style="font-size:17px;font-weight:600;color:#333;margin:16px 0 6px;">$1</h3>')
+          .replace(/^## (.+)$/gm, '<h2 style="font-size:19px;font-weight:700;color:#1a1a2e;text-transform:uppercase;letter-spacing:0.06em;margin:20px 0 8px;">$1</h2>')
+          .replace(/^# (.+)$/gm, '<h1 style="font-size:24px;font-weight:700;color:#1a1a2e;margin:0 0 4px;">$1</h1>')
+          .replace(/\*\*(.+?)\*\*/g, '<strong style="font-weight:600;color:#1a1a2e;">$1</strong>')
+          .replace(/\*(.+?)\*/g, '<em style="font-style:italic;color:#555;">$1</em>')
+          .replace(/^\d+\.\s+(.+)$/gm, '<div style="display:flex;gap:8px;margin:4px 0 4px 8px;"><span style="color:#999;font-weight:600;min-width:16px;">•</span><span>$1</span></div>')
+          .replace(/^[-•]\s+(.+)$/gm, '<div style="display:flex;gap:8px;margin:4px 0 4px 8px;"><span style="color:#999;">•</span><span>$1</span></div>')
+          .replace(/\n\n/g, '<div style="height:12px;"></div>')
+          .replace(/\n/g, '<br/>');
+        contentEl.innerHTML = htmlContent;
+      }
+
+      const canvas = await html2canvas(offscreen, {
+        width: reelW,
+        height: reelH,
+        scale: 2,
+        backgroundColor: "#ffffff",
+        useCORS: true,
+      });
+
+      const imgData = canvas.toDataURL("image/png");
+      const pdfW = reelW * 0.264583;
+      const pdfH = reelH * 0.264583;
+      const pdf = new jsPDF({ orientation: "portrait", unit: "mm", format: [pdfW, pdfH] });
+      pdf.addImage(imgData, "PNG", 0, 0, pdfW, pdfH);
+      pdf.save(`profundr-report-${msgId}.pdf`);
+    } catch (err) {
+      console.error("PDF generation failed:", err);
+    } finally {
+      if (offscreen && offscreen.parentNode) document.body.removeChild(offscreen);
+      setDownloading(false);
+    }
+  };
+
+  const markdown = filterMarkdown(content);
+
+  return (
+    <div ref={reportRef} data-testid={`branded-response-${msgId}`}>
+      <div className="flex items-center gap-2 mb-2 pb-1.5 border-b border-[#1a1a2e]/10">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1a1a2e" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="shrink-0">
+          <path d="M12 2C9.5 2 7.5 4 7.5 6.5c0 .5-.4 1-1 1C4.5 7.5 3 9.5 3 11.5c0 1.5.8 2.8 2 3.5 0 0-.5 1.5-.5 2.5C4.5 20 6.5 22 9 22c1.5 0 2.5-.5 3-1.5.5 1 1.5 1.5 3 1.5 2.5 0 4.5-2 4.5-4.5 0-1-.5-2.5-.5-2.5 1.2-.7 2-2 2-3.5 0-2-1.5-4-3.5-4-.6 0-1-.5-1-1C16.5 4 14.5 2 12 2z" />
+          <path d="M12 2v20" /><path d="M7.5 7.5C9 8.5 10 10 10.5 12" /><path d="M16.5 7.5C15 8.5 14 10 13.5 12" />
+        </svg>
+        <span className="text-[11px] font-bold text-[#1a1a2e] tracking-[-0.01em]">Profundr</span>
+        <span className="text-[9px] text-[#bbb] ml-auto">Capital Intelligence</span>
+      </div>
+
+      <div className="profundr-report">
+        <ReactMarkdown components={mdComponents}>{markdown}</ReactMarkdown>
+      </div>
+
+      <div className="flex items-center justify-between mt-2 pt-1.5 border-t border-[#1a1a2e]/10">
+        <div className="flex items-center gap-1.5">
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#ccc" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="shrink-0">
+            <path d="M12 2C9.5 2 7.5 4 7.5 6.5c0 .5-.4 1-1 1C4.5 7.5 3 9.5 3 11.5c0 1.5.8 2.8 2 3.5 0 0-.5 1.5-.5 2.5C4.5 20 6.5 22 9 22c1.5 0 2.5-.5 3-1.5.5 1 1.5 1.5 3 1.5 2.5 0 4.5-2 4.5-4.5 0-1-.5-2.5-.5-2.5 1.2-.7 2-2 2-3.5 0-2-1.5-4-3.5-4-.6 0-1-.5-1-1C16.5 4 14.5 2 12 2z" />
+            <path d="M12 2v20" /><path d="M7.5 7.5C9 8.5 10 10 10.5 12" /><path d="M16.5 7.5C15 8.5 14 10 13.5 12" />
+          </svg>
+          <span className="text-[8px] text-[#ccc]">profundr.com</span>
+        </div>
+        <button
+          onClick={handleDownloadPdf}
+          disabled={downloading}
+          className="flex items-center gap-1 px-2 py-1 rounded-md text-[9px] font-medium text-[#1a1a2e] hover:bg-[#f5f5f5] transition-colors disabled:opacity-40"
+          data-testid={`button-download-report-${msgId}`}
+        >
+          {downloading ? (
+            <span className="text-[8px] text-[#999]">Generating...</span>
+          ) : (
+            <>
+              <svg width="10" height="10" viewBox="0 0 12 12" fill="none"><path d="M6 2v6M6 8L4 6M6 8l2-2" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" /><path d="M2 9v1h8V9" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" /></svg>
+              <span>PDF</span>
+            </>
+          )}
+        </button>
+      </div>
     </div>
   );
 }
@@ -2731,10 +2873,11 @@ export default function LandingPage() {
           ) : (
             <div className="w-full max-w-[720px] mx-auto px-4 pt-4 pb-2" data-testid="chat-messages">
               <div className="space-y-6">
-                {displayMessages.map((msg) => {
+                {displayMessages.map((msg, msgIdx) => {
                   const msgData = msg.role === "assistant" ? parseSingleMessageData(msg.content) : null;
                   const showDashboard = msgData && hasAnalysisData(msgData);
                   const disputes = msg.role === "assistant" ? parseDisputeItems(msg.content) : [];
+                  const prevUserMsg = msg.role === "assistant" ? displayMessages.slice(0, msgIdx).reverse().find(m => m.role === "user") : null;
 
                   return (
                     <div key={msg.id}>
@@ -2779,7 +2922,7 @@ export default function LandingPage() {
                               </>
                             );
                           })() : (
-                            <FormatResponse content={msg.content} />
+                            <BrandedResponse content={msg.content} userQuestion={prevUserMsg?.content} msgId={msg.id} />
                           )}
                         </div>
                         {msg.role === "user" && (
