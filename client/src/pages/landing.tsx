@@ -1986,7 +1986,7 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
         </div>
         </>)}
 
-        {panelTab === "command" && (<>
+        {panelTab === "documents" && (<>
         <div className="mb-4">
           <div className="flex items-center gap-2 mb-2">
             <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 3h8M2 6h6M2 9h4" stroke="#333" strokeWidth="1.2" strokeLinecap="round" /></svg>
@@ -2184,6 +2184,34 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
           )}
         </div>
 
+        {aisReport?.suppressors && aisReport.suppressors.length > 0 && (
+          <div className="mb-4">
+            <div className="flex items-center gap-2 mb-2">
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 1v2M6 9v2M1 6h2M9 6h2M2.5 2.5l1.4 1.4M8.1 8.1l1.4 1.4M9.5 2.5l-1.4 1.4M3.9 8.1l-1.4 1.4" stroke="#c0392b" strokeWidth="1" strokeLinecap="round" /></svg>
+              <span className="text-[10px] font-semibold text-[#555] uppercase tracking-wider">Denial Risk Drivers</span>
+            </div>
+            <div className="rounded-lg bg-[#fafafa] border border-[#eee] p-2.5 space-y-1.5">
+              {aisReport.suppressors.slice(0, 4).map((s, i) => {
+                const institutional = s
+                  .replace(/high utilization/i, "Revolver Utilization Above Institutional Tolerance")
+                  .replace(/limited tradelines?/i, "Thin Primary Trade Line Depth")
+                  .replace(/(?:heavy|excess)\s*(?:reliance on\s*)?AU\s*accounts?/i, "Excess Authorized User Weighting")
+                  .replace(/too many inquiries/i, "Inquiry Velocity Above Safe Threshold")
+                  .replace(/thin (?:credit )?file/i, "Insufficient Account Depth")
+                  .replace(/short credit (?:history|age)/i, "Insufficient File Seasoning");
+                return (
+                  <div key={i} className="flex items-start gap-2">
+                    <span className="text-[6px] text-red-400/70 mt-[3px]">●</span>
+                    <p className="text-[9px] text-[#555] leading-[1.4]">{institutional}</p>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+        </>)}
+
+        {panelTab === "command" && (<>
         {hasAis && pf && (
           <div className="mb-4">
             <div className="flex items-center gap-2 mb-2">
@@ -2224,29 +2252,6 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
                 </div>
               )}
             </div>
-
-            {aisReport?.suppressors && aisReport.suppressors.length > 0 && (
-              <div className="mt-2.5">
-                <p className="text-[8px] text-[#aaa] uppercase tracking-wider font-semibold mb-1.5">Denial Risk Drivers</p>
-                <div className="rounded-lg bg-[#fafafa] border border-[#eee] p-2.5 space-y-1.5">
-                  {aisReport.suppressors.slice(0, 4).map((s, i) => {
-                    const institutional = s
-                      .replace(/high utilization/i, "Revolver Utilization Above Institutional Tolerance")
-                      .replace(/limited tradelines?/i, "Thin Primary Trade Line Depth")
-                      .replace(/(?:heavy|excess)\s*(?:reliance on\s*)?AU\s*accounts?/i, "Excess Authorized User Weighting")
-                      .replace(/too many inquiries/i, "Inquiry Velocity Above Safe Threshold")
-                      .replace(/thin (?:credit )?file/i, "Insufficient Account Depth")
-                      .replace(/short credit (?:history|age)/i, "Insufficient File Seasoning");
-                    return (
-                      <div key={i} className="flex items-start gap-2">
-                        <span className="text-[6px] text-red-400/70 mt-[3px]">●</span>
-                        <p className="text-[9px] text-[#555] leading-[1.4]">{institutional}</p>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
           </div>
         )}
 
