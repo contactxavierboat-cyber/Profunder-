@@ -1163,10 +1163,143 @@ function TeamSection({ user, onOpenTeamChat, activeTeamChatId }: { user: any; on
   );
 }
 
+interface PerfectCriteria {
+  label: string;
+  ideal: string;
+  actual: string | null;
+  met: boolean;
+}
+
+function PerfectProfileTab({ aisReport }: { aisReport: MissionData | null }) {
+  if (!aisReport || !hasAnalysisData(aisReport)) {
+    return (
+      <div className="flex flex-col items-center justify-center py-12 px-4 text-center">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#ccc" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M12 2C9.5 2 7.5 4 7.5 6.5c0 .5-.4 1-1 1C4.5 7.5 3 9.5 3 11.5c0 1.5.8 2.8 2 3.5 0 0-.5 1.5-.5 2.5C4.5 20 6.5 22 9 22c1.5 0 2.5-.5 3-1.5.5 1 1.5 1.5 3 1.5 2.5 0 4.5-2 4.5-4.5 0-1-.5-2.5-.5-2.5 1.2-.7 2-2 2-3.5 0-2-1.5-4-3.5-4-.6 0-1-.5-1-1C16.5 4 14.5 2 12 2z" />
+        </svg>
+        <p className="text-[11px] text-[#999] mt-3 leading-[1.5]">Upload a credit report to see how your profile measures against the ideal.</p>
+      </div>
+    );
+  }
+
+  const fi = aisReport.financialIdentity;
+  const pf = aisReport.projectedFunding;
+  const suppressorText = (aisReport.suppressors || []).join(" ").toLowerCase();
+  const hurtingText = (aisReport.hurting || []).join(" ").toLowerCase();
+  const allNegatives = suppressorText + " " + hurtingText;
+
+  const getPillarScore = (keyword: string): number | null => {
+    const match = aisReport.pillarScores?.find(p => p.label.toLowerCase().includes(keyword.toLowerCase()));
+    return match ? match.value : null;
+  };
+
+  const overallCriteria: PerfectCriteria[] = [
+    { label: "Approval Index Score", ideal: "90+", actual: aisReport.approvalIndex !== null ? `${aisReport.approvalIndex}` : null, met: (aisReport.approvalIndex ?? 0) >= 90 },
+    { label: "Band", ideal: "Exceptional", actual: aisReport.band, met: aisReport.band?.toLowerCase() === "exceptional" },
+    { label: "Phase", ideal: "Funding Phase", actual: aisReport.phase, met: aisReport.phase?.toLowerCase().includes("fund") || false },
+  ];
+
+  const pillarThresholds: { key: string; threshold: number }[] = [
+    { key: "payment", threshold: 90 },
+    { key: "utilization", threshold: 90 },
+    { key: "stability", threshold: 85 },
+    { key: "depth", threshold: 85 },
+    { key: "timing", threshold: 90 },
+    { key: "lender", threshold: 90 },
+  ];
+  const pillarCriteria: PerfectCriteria[] = pillarThresholds.map(({ key, threshold }) => {
+    const score = getPillarScore(key);
+    const label = aisReport.pillarScores?.find(p => p.label.toLowerCase().includes(key))?.label || key;
+    return { label, ideal: `${threshold}+`, actual: score !== null ? `${score}` : null, met: (score ?? 0) >= threshold };
+  });
+
+  const identityCriteria: PerfectCriteria[] = [
+    { label: "Profile Type", ideal: "Premium / Seasoned", actual: fi?.profileType || null, met: /premium|seasoned/i.test(fi?.profileType || "") },
+    { label: "Credit Age", ideal: "10+ years", actual: fi?.creditAge || null, met: (() => { const m = fi?.creditAge?.match(/(\d+)/); return m ? parseInt(m[1]) >= 10 : false; })() },
+    { label: "Bureau Footprint", ideal: "Strong", actual: fi?.bureauFootprint || null, met: /strong|full|all.*three|3.*bureau/i.test(fi?.bureauFootprint || "") },
+    { label: "Lender Perception", ideal: "Low-risk", actual: fi?.lenderPerception || null, met: /low.?risk|favorable|strong|excellent|premium/i.test(fi?.lenderPerception || "") },
+    { label: "Identity Strength", ideal: "85+", actual: fi?.identityStrength !== null && fi?.identityStrength !== undefined ? `${fi.identityStrength}` : null, met: (fi?.identityStrength ?? 0) >= 85 },
+  ];
+
+  const cleanFileCriteria: PerfectCriteria[] = [
+    { label: "No Collections", ideal: "Zero", actual: /collection/i.test(allNegatives) ? "Found" : "Clear", met: !/collection/i.test(allNegatives) },
+    { label: "No Charge-Offs", ideal: "Zero", actual: /charge.?off/i.test(allNegatives) ? "Found" : "Clear", met: !/charge.?off/i.test(allNegatives) },
+    { label: "No Public Records", ideal: "Zero", actual: /public.?record|bankrupt|judgment|lien/i.test(allNegatives) ? "Found" : "Clear", met: !/public.?record|bankrupt|judgment|lien/i.test(allNegatives) },
+    { label: "No Late Payments", ideal: "Zero", actual: /late|delinquen|past.?due/i.test(allNegatives) ? "Found" : "Clear", met: !/late|delinquen|past.?due/i.test(allNegatives) },
+    { label: "Low Inquiries", ideal: "Under 2", actual: /inquir|hard.?pull/i.test(allNegatives) ? "Elevated" : "Low", met: !/inquir|hard.?pull/i.test(allNegatives) },
+    { label: "No AU Dependency", ideal: "None", actual: /authorized.?user|AU\b/i.test(allNegatives) ? "Detected" : "Clear", met: !/authorized.?user|AU\b/i.test(allNegatives) },
+  ];
+
+  const fundingCriteria: PerfectCriteria[] = [
+    { label: "Readiness Level", ideal: "Qualification Ready", actual: pf?.readinessLevel || null, met: /ready|strong|qualified/i.test(pf?.readinessLevel || "") },
+    { label: "Denial Risk Drivers", ideal: "None", actual: (aisReport.suppressors?.length || 0) === 0 ? "None" : `${aisReport.suppressors?.length} active`, met: (aisReport.suppressors?.length || 0) === 0 },
+    { label: "Key Blockers", ideal: "None", actual: (pf?.keyBlockers?.length || 0) === 0 ? "None" : `${pf?.keyBlockers?.length} active`, met: (pf?.keyBlockers?.length || 0) === 0 },
+  ];
+
+  const allSections = [
+    { title: "Overall Score", items: overallCriteria },
+    { title: "Pillar Scores", items: pillarCriteria },
+    { title: "Financial Identity", items: identityCriteria },
+    { title: "Clean File", items: cleanFileCriteria },
+    { title: "Funding Readiness", items: fundingCriteria },
+  ];
+
+  const totalItems = allSections.reduce((sum, s) => sum + s.items.length, 0);
+  const metItems = allSections.reduce((sum, s) => sum + s.items.filter(i => i.met).length, 0);
+  const pct = Math.round((metItems / totalItems) * 100);
+
+  return (
+    <div className="space-y-4" data-testid="perfect-profile-tab">
+      <div className="rounded-xl bg-gradient-to-br from-[#1a1a2e] to-[#2a2a40] p-4">
+        <p className="text-[9px] text-white/50 uppercase tracking-wider font-semibold mb-2">The Perfect Profile</p>
+        <div className="flex items-center gap-3">
+          <div className="relative w-[44px] h-[44px]">
+            <svg viewBox="0 0 36 36" className="w-full h-full -rotate-90">
+              <circle cx="18" cy="18" r="15.5" fill="none" stroke="rgba(255,255,255,0.1)" strokeWidth="3" />
+              <circle cx="18" cy="18" r="15.5" fill="none" stroke={pct >= 80 ? "#4ade80" : pct >= 50 ? "#fbbf24" : "#f87171"} strokeWidth="3" strokeDasharray={`${pct * 0.974} 100`} strokeLinecap="round" />
+            </svg>
+            <span className="absolute inset-0 flex items-center justify-center text-[11px] font-bold text-white">{pct}%</span>
+          </div>
+          <div>
+            <p className="text-[14px] font-bold text-white">{metItems} <span className="text-[11px] font-normal text-white/60">of {totalItems}</span></p>
+            <p className="text-[9px] text-white/40">criteria met</p>
+          </div>
+        </div>
+      </div>
+
+      {allSections.map((section, si) => (
+        <div key={si}>
+          <p className="text-[8px] text-[#aaa] uppercase tracking-wider font-semibold mb-1.5">{section.title}</p>
+          <div className="rounded-lg border border-[#eee] bg-[#fafafa] overflow-hidden">
+            {section.items.map((item, ii) => (
+              <div key={ii} className={`flex items-center gap-2.5 px-3 py-2 ${ii > 0 ? "border-t border-[#f0f0f0]" : ""}`} data-testid={`perfect-criteria-${si}-${ii}`}>
+                <div className={`w-[16px] h-[16px] rounded-full flex items-center justify-center shrink-0 ${item.met ? "bg-[#1a1a2e]" : "border-[1.5px] border-[#ddd] bg-white"}`}>
+                  {item.met && (
+                    <svg width="9" height="9" viewBox="0 0 10 10" fill="none"><path d="M2 5l2.5 2.5L8 3" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                  )}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-[10px] text-[#333] font-medium leading-tight">{item.label}</p>
+                  <div className="flex items-center gap-1.5 mt-0.5">
+                    <span className="text-[8px] text-[#aaa]">Target: {item.ideal}</span>
+                    <span className="text-[8px] text-[#aaa]">·</span>
+                    <span className={`text-[8px] font-medium ${item.met ? "text-[#1a1a2e]" : "text-[#c0392b]"}`}>{item.actual || "—"}</span>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, activeTeamChatId, aisReport, onOpenAis }: { docs: SavedDoc[]; onClose: () => void; onDelete: (id: string) => void; onSave: (doc: SavedDoc) => void; user: any; onOpenTeamChat?: (member: TeamMember) => void; activeTeamChatId?: number | null; aisReport: MissionData | null; onOpenAis: () => void }) {
   const docInputRef = useRef<HTMLInputElement>(null);
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
   const [expandedBureau, setExpandedBureau] = useState<string | null>(null);
+  const [panelTab, setPanelTab] = useState<"command" | "perfect">("command");
 
   const handleUploadDoc = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -1349,7 +1482,29 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
         </button>
       </div>
 
+      <div className="flex items-center gap-1 px-4 py-2 border-b border-[#eee]">
+        <button
+          onClick={() => setPanelTab("command")}
+          className={`px-3 py-1.5 rounded-md text-[10px] font-semibold transition-all ${panelTab === "command" ? "bg-[#1a1a2e] text-white" : "text-[#999] hover:text-[#555] hover:bg-[#f0f0f0]"}`}
+          data-testid="tab-command"
+        >
+          Command
+        </button>
+        <button
+          onClick={() => setPanelTab("perfect")}
+          className={`px-3 py-1.5 rounded-md text-[10px] font-semibold transition-all ${panelTab === "perfect" ? "bg-[#1a1a2e] text-white" : "text-[#999] hover:text-[#555] hover:bg-[#f0f0f0]"}`}
+          data-testid="tab-perfect-profile"
+        >
+          Perfect Profile
+        </button>
+      </div>
+
       <div className="flex-1 overflow-y-auto px-4 py-3">
+
+        {panelTab === "perfect" ? (
+          <PerfectProfileTab aisReport={aisReport} />
+        ) : (
+        <>
 
         <div className="mb-4">
           {hasAis ? (
@@ -1810,6 +1965,8 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
 
         <div className="w-full h-px bg-[#eee] my-3"></div>
         <TeamSection user={user} onOpenTeamChat={onOpenTeamChat} activeTeamChatId={activeTeamChatId} />
+        </>
+        )}
       </div>
 
       <div className="px-4 py-3 border-t border-[#eee]">
