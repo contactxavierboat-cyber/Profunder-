@@ -2129,6 +2129,19 @@ FINAL REMINDER: You MUST list EVERY negative item found in the document above as
       teamContext: z.object({
         senderName: z.string(),
         partnerName: z.string(),
+      }).nullable().optional(),
+      userProfile: z.object({
+        fullName: z.string().optional(),
+        address: z.string().optional(),
+        ssn4: z.string().optional(),
+        dob: z.string().optional(),
+      }).nullable().optional(),
+      documentContext: z.object({
+        hasCreditReport: z.boolean().optional(),
+        hasId: z.boolean().optional(),
+        hasBankStatement: z.boolean().optional(),
+        creditReportNames: z.array(z.string()).optional(),
+        bankStatementNames: z.array(z.string()).optional(),
       }).nullable().optional()
     }).safeParse(req.body);
 
@@ -2137,7 +2150,7 @@ FINAL REMINDER: You MUST list EVERY negative item found in the document above as
       return res.status(400).json({ error: "Invalid message data" });
     }
 
-    const { content, history = [], fileContent, attachment, fileType, teamContext } = body.data;
+    const { content, history = [], fileContent, attachment, fileType, teamContext, userProfile: userProf, documentContext: docCtx } = body.data;
 
     let extractedText = "";
     let extractionMethod = "";
@@ -2296,7 +2309,50 @@ COMMUNICATION STYLE:
         .trim() || m.content,
     }));
 
-    const systemPrompt = FUNDABILITY_ENGINE_PROMPT + teamContextPrompt + fileContext;
+    let userProfileContext = "";
+    if (userProf) {
+      const parts: string[] = [];
+      if (userProf.fullName) parts.push(`Full Name: ${userProf.fullName}`);
+      if (userProf.address) parts.push(`Address: ${userProf.address}`);
+      if (userProf.dob) parts.push(`Date of Birth: ${userProf.dob}`);
+      if (userProf.ssn4) parts.push(`SSN (last 4): ****${userProf.ssn4}`);
+      if (parts.length > 0) {
+        userProfileContext = `\n\n--- USER IDENTITY PROFILE ---
+The following identity information has been provided by the user from their Document Vault. USE this data in every report, analysis, and generated document:
+${parts.join("\n")}
+
+IMPORTANT DIRECTIVES:
+1. Always address the user by their name (${userProf.fullName || "the user"}) in reports and analyses.
+2. When generating dispute letters, reports, or any official documents, include a signature block at the bottom with the user's full name, address, date of birth, and last 4 of SSN as provided.
+3. Reference the user's personal data when discussing their credit profile — make the analysis feel personalized, not generic.
+4. The signature block format for generated documents should be:
+   Respectfully submitted,
+   ${userProf.fullName || "[User Name]"}
+   ${userProf.address || "[Address]"}
+   DOB: ${userProf.dob || "[DOB]"}
+   SSN: XXX-XX-${userProf.ssn4 || "XXXX"}
+   Date: [Current Date]
+--- END USER IDENTITY PROFILE ---`;
+      }
+    }
+
+    let documentVaultContext = "";
+    if (docCtx) {
+      const vaultParts: string[] = [];
+      if (docCtx.hasCreditReport) vaultParts.push(`Credit Reports on file: ${docCtx.creditReportNames?.join(", ") || "Yes"}`);
+      if (docCtx.hasId) vaultParts.push("Government ID: Uploaded");
+      if (docCtx.hasBankStatement) vaultParts.push(`Bank Statements on file: ${docCtx.bankStatementNames?.join(", ") || "Yes"}`);
+      if (vaultParts.length > 0) {
+        documentVaultContext = `\n\n--- DOCUMENT VAULT STATUS ---
+The user has the following documents in their Document Vault:
+${vaultParts.join("\n")}
+
+When the user asks questions, reference relevant data from ALL uploaded documents. If they have bank statements AND credit reports, cross-reference financial data for a more comprehensive analysis. Pull from every available data source to provide the most thorough response possible.
+--- END DOCUMENT VAULT STATUS ---`;
+      }
+    }
+
+    const systemPrompt = FUNDABILITY_ENGINE_PROMPT + teamContextPrompt + fileContext + userProfileContext + documentVaultContext;
 
     if (extractedText) {
       console.log(`[Guest Chat] Document provided: ${extractedText.length} chars via ${extractionMethod}`);

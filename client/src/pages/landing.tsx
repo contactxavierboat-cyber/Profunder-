@@ -1149,10 +1149,31 @@ function DisputeDownloadButton({ disputes, onSave }: { disputes: DisputeItem[]; 
 interface SavedDoc {
   id: string;
   name: string;
-  type: "dispute_letter" | "credit_report" | "other";
+  type: "dispute_letter" | "credit_report" | "id_document" | "bank_statement" | "other";
   savedAt: number;
   fileDataUrl?: string;
   disputes?: DisputeItem[];
+  extractedSummary?: string;
+}
+
+interface UserProfile {
+  fullName?: string;
+  address?: string;
+  ssn4?: string;
+  dob?: string;
+  phone?: string;
+  email?: string;
+}
+
+function loadUserProfile(): UserProfile {
+  try {
+    const raw = localStorage.getItem("profundr_user_profile");
+    return raw ? JSON.parse(raw) : {};
+  } catch { return {}; }
+}
+
+function saveUserProfile(profile: UserProfile) {
+  try { localStorage.setItem("profundr_user_profile", JSON.stringify(profile)); } catch {}
 }
 
 function loadSavedDocs(): SavedDoc[] {
@@ -1657,10 +1678,25 @@ function PerfectProfileTab({ aisReport }: { aisReport: MissionData | null }) {
   );
 }
 
-function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, activeTeamChatId, aisReport, onOpenAis }: { docs: SavedDoc[]; onClose: () => void; onDelete: (id: string) => void; onSave: (doc: SavedDoc) => void; user: any; onOpenTeamChat?: (member: TeamMember) => void; activeTeamChatId?: number | null; aisReport: MissionData | null; onOpenAis: () => void }) {
+function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, activeTeamChatId, aisReport, onOpenAis, userProfile, onUpdateProfile }: { docs: SavedDoc[]; onClose: () => void; onDelete: (id: string) => void; onSave: (doc: SavedDoc) => void; user: any; onOpenTeamChat?: (member: TeamMember) => void; activeTeamChatId?: number | null; aisReport: MissionData | null; onOpenAis: () => void; userProfile: UserProfile; onUpdateProfile: (p: UserProfile) => void }) {
   const docInputRef = useRef<HTMLInputElement>(null);
+  const idInputRef = useRef<HTMLInputElement>(null);
+  const bankInputRef = useRef<HTMLInputElement>(null);
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
   const [expandedBureau, setExpandedBureau] = useState<string | null>(null);
+  const [uploadTarget, setUploadTarget] = useState<"credit_report" | "id_document" | "bank_statement" | null>(null);
+
+  const classifyDocType = (name: string, target?: string | null): SavedDoc["type"] => {
+    if (target === "id_document") return "id_document";
+    if (target === "bank_statement") return "bank_statement";
+    if (target === "credit_report") return "credit_report";
+    const n = name.toLowerCase();
+    if (/dispute/i.test(n)) return "dispute_letter";
+    if (/credit|report|experian|equifax|transunion/i.test(n)) return "credit_report";
+    if (/\bid\b|license|passport|identification/i.test(n)) return "id_document";
+    if (/bank|statement|checking|savings/i.test(n)) return "bank_statement";
+    return "other";
+  };
 
   const handleUploadDoc = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -1670,14 +1706,17 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
       const doc: SavedDoc = {
         id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
         name: file.name,
-        type: file.name.toLowerCase().includes("dispute") ? "dispute_letter" : file.name.toLowerCase().includes("credit") ? "credit_report" : "other",
+        type: classifyDocType(file.name, uploadTarget),
         savedAt: Date.now(),
         fileDataUrl: reader.result as string,
       };
       onSave(doc);
+      setUploadTarget(null);
     };
     reader.readAsDataURL(file);
     if (docInputRef.current) docInputRef.current.value = "";
+    if (idInputRef.current) idInputRef.current.value = "";
+    if (bankInputRef.current) bankInputRef.current.value = "";
   };
 
   const handleDownload = async (doc: SavedDoc) => {
@@ -1721,6 +1760,8 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
 
   const disputeLetters = docs.filter(d => d.type === "dispute_letter");
   const creditReports = docs.filter(d => d.type === "credit_report");
+  const idDocs = docs.filter(d => d.type === "id_document");
+  const bankDocs = docs.filter(d => d.type === "bank_statement");
   const otherDocs = docs.filter(d => d.type === "other");
 
   const formatDate = (ts: number) => {
@@ -1766,6 +1807,8 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
     return pf.readinessLevel;
   };
 
+  const [panelTab, setPanelTab] = useState<"command" | "documents">("command");
+
   return (
     <div className="h-full flex flex-col bg-white border-r border-[#eee]" data-testid="docs-panel">
       <div className="flex items-center justify-between px-4 py-3 border-b border-[#eee]">
@@ -1782,8 +1825,22 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
         </button>
       </div>
 
+      <div className="flex border-b border-[#eee]">
+        {(["command", "documents"] as const).map(tab => (
+          <button
+            key={tab}
+            onClick={() => setPanelTab(tab)}
+            className={`flex-1 py-2 text-[10px] font-semibold uppercase tracking-wider transition-colors ${panelTab === tab ? "text-[#1a1a2e] border-b-2 border-[#1a1a2e]" : "text-[#aaa] hover:text-[#666]"}`}
+            data-testid={`tab-${tab}`}
+          >
+            {tab === "command" ? "Command" : "Documents"}
+          </button>
+        ))}
+      </div>
+
       <div className="flex-1 overflow-y-auto px-4 py-3">
 
+        {panelTab === "command" && (<>
         <div className="mb-3">
           {hasAis ? (
             <button
@@ -1841,7 +1898,95 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
         </div>
 
         <PerfectProfileTab aisReport={aisReport} />
+        </>)}
 
+        {panelTab === "documents" && (<>
+        <div className="mb-4">
+          <div className="flex items-center gap-2 mb-2">
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M3 1h6l2 3v6a1 1 0 01-1 1H2a1 1 0 01-1-1V4l2-3z" stroke="#333" strokeWidth="1" fill="none"/><path d="M4.5 6h3M4.5 8h2" stroke="#333" strokeWidth="0.8" strokeLinecap="round"/></svg>
+            <span className="text-[10px] font-semibold text-[#555] uppercase tracking-wider">Document Vault</span>
+            <span className="text-[9px] text-[#aaa] ml-auto" style={{ fontVariantNumeric: "tabular-nums" }}>{creditReports.length + idDocs.length + bankDocs.length}</span>
+          </div>
+
+          <input ref={idInputRef} type="file" accept=".pdf,.jpg,.jpeg,.png" className="hidden" onChange={handleUploadDoc} data-testid="input-id-upload" />
+          <input ref={bankInputRef} type="file" accept=".pdf,.csv,.txt" className="hidden" onChange={handleUploadDoc} data-testid="input-bank-upload" />
+
+          <div className="space-y-1.5">
+            {[
+              { label: "Credit Report", icon: <svg width="10" height="10" viewBox="0 0 12 12" fill="none"><rect x="2" y="1" width="8" height="10" rx="1" stroke="currentColor" strokeWidth="1" fill="none"/><path d="M4 4h4M4 6h4M4 8h2" stroke="currentColor" strokeWidth="0.7" strokeLinecap="round"/></svg>, docs: creditReports, type: "credit_report" as const, onUpload: () => { setUploadTarget("credit_report"); docInputRef.current?.click(); } },
+              { label: "Government ID", icon: <svg width="10" height="10" viewBox="0 0 12 12" fill="none"><rect x="1" y="3" width="10" height="7" rx="1" stroke="currentColor" strokeWidth="1" fill="none"/><circle cx="4" cy="6.5" r="1.2" stroke="currentColor" strokeWidth="0.7" fill="none"/><path d="M6.5 5.5h3M6.5 7.5h2" stroke="currentColor" strokeWidth="0.7" strokeLinecap="round"/></svg>, docs: idDocs, type: "id_document" as const, onUpload: () => { setUploadTarget("id_document"); idInputRef.current?.click(); } },
+              { label: "Bank Statement", icon: <svg width="10" height="10" viewBox="0 0 12 12" fill="none"><path d="M2 3l4-2 4 2v1H2V3z" stroke="currentColor" strokeWidth="0.8" fill="none"/><path d="M3 5v4M5 5v4M7 5v4M9 5v4" stroke="currentColor" strokeWidth="0.7"/><path d="M1.5 10h9" stroke="currentColor" strokeWidth="0.8" strokeLinecap="round"/></svg>, docs: bankDocs, type: "bank_statement" as const, onUpload: () => { setUploadTarget("bank_statement"); bankInputRef.current?.click(); } },
+            ].map(slot => {
+              const hasDocs = slot.docs.length > 0;
+              return (
+                <div key={slot.type} className={`rounded-lg border p-2.5 transition-all ${hasDocs ? "bg-white border-[#e5e5e5]" : "bg-[#fcfcfc] border-dashed border-[#ddd]"}`} data-testid={`vault-slot-${slot.type}`}>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-1.5">
+                      <span className={hasDocs ? "text-[#1a1a2e]" : "text-[#bbb]"}>{slot.icon}</span>
+                      <span className={`text-[9px] font-semibold ${hasDocs ? "text-[#333]" : "text-[#aaa]"}`}>{slot.label}</span>
+                      {hasDocs && <span className="text-[7px] text-white bg-[#2d6a4f] rounded px-1 py-[1px] font-bold">{slot.docs.length}</span>}
+                    </div>
+                    <button
+                      onClick={slot.onUpload}
+                      className={`flex items-center gap-0.5 text-[8px] font-medium px-1.5 py-0.5 rounded transition-colors ${hasDocs ? "text-[#1a1a2e] hover:bg-[#f0f0f0]" : "text-[#999] hover:text-[#666]"}`}
+                      data-testid={`button-upload-${slot.type}`}
+                    >
+                      <svg width="8" height="8" viewBox="0 0 8 8" fill="none"><path d="M4 6V2M4 2L2.5 3.5M4 2l1.5 1.5" stroke="currentColor" strokeWidth="0.8" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                      {hasDocs ? "Replace" : "Upload"}
+                    </button>
+                  </div>
+                  {hasDocs && (
+                    <div className="mt-1.5 space-y-1">
+                      {slot.docs.map(doc => (
+                        <div key={doc.id} className="flex items-center gap-1.5 group">
+                          <p className="text-[8px] text-[#666] truncate flex-1">{doc.name}</p>
+                          <span className="text-[7px] text-[#bbb]">{formatDate(doc.savedAt)}</span>
+                          <button onClick={() => onDelete(doc.id)} className="opacity-0 group-hover:opacity-100 text-[#ccc] hover:text-red-400 transition-all" data-testid={`button-delete-vault-${doc.id}`}>
+                            <svg width="8" height="8" viewBox="0 0 8 8" fill="none"><path d="M2 2l4 4M6 2l-4 4" stroke="currentColor" strokeWidth="1" strokeLinecap="round"/></svg>
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+
+          <div className="mt-2.5 rounded-lg border border-[#eee] bg-[#fafafa] p-2.5">
+            <div className="flex items-center gap-1.5 mb-2">
+              <svg width="10" height="10" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="4" r="2.5" stroke="#555" strokeWidth="0.9" fill="none"/><path d="M2 10.5c0-2.2 1.8-4 4-4s4 1.8 4 4" stroke="#555" strokeWidth="0.9" strokeLinecap="round"/></svg>
+              <span className="text-[9px] font-semibold text-[#555]">Report Signature</span>
+            </div>
+            <div className="grid grid-cols-2 gap-x-2 gap-y-1.5">
+              {[
+                { key: "fullName" as const, label: "Full Name", placeholder: "As shown on ID" },
+                { key: "dob" as const, label: "Date of Birth", placeholder: "MM/DD/YYYY" },
+                { key: "address" as const, label: "Address", placeholder: "Street, City, State ZIP" },
+                { key: "ssn4" as const, label: "SSN (last 4)", placeholder: "••••" },
+              ].map(f => (
+                <div key={f.key} className={f.key === "address" ? "col-span-2" : ""}>
+                  <label className="text-[7px] text-[#aaa] uppercase tracking-wider font-semibold block mb-0.5">{f.label}</label>
+                  <input
+                    type={f.key === "ssn4" ? "password" : "text"}
+                    maxLength={f.key === "ssn4" ? 4 : f.key === "dob" ? 10 : 120}
+                    value={userProfile[f.key] || ""}
+                    onChange={e => {
+                      const updated = { ...userProfile, [f.key]: e.target.value };
+                      onUpdateProfile(updated);
+                    }}
+                    placeholder={f.placeholder}
+                    className="w-full text-[9px] text-[#333] bg-white border border-[#e5e5e5] rounded px-2 py-1 outline-none focus:border-[#1a1a2e] transition-colors placeholder:text-[#ccc]"
+                    data-testid={`input-profile-${f.key}`}
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+        </>)}
+
+        {panelTab === "command" && (<>
         <div className="mb-4">
           <div className="flex items-center gap-2 mb-2">
             <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 3h8M2 6h6M2 9h4" stroke="#333" strokeWidth="1.2" strokeLinecap="round" /></svg>
@@ -2199,6 +2344,11 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
           </div>
         )}
 
+        <div className="w-full h-px bg-[#eee] my-3"></div>
+        <TeamSection user={user} onOpenTeamChat={onOpenTeamChat} activeTeamChatId={activeTeamChatId} />
+        </>)}
+
+        {panelTab === "documents" && (<>
         {otherDocs.length > 0 && (
           <div className="mb-4">
             <div className="flex items-center gap-2 mb-2">
@@ -2223,13 +2373,12 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
             </div>
           </div>
         )}
-
-        <div className="w-full h-px bg-[#eee] my-3"></div>
-        <TeamSection user={user} onOpenTeamChat={onOpenTeamChat} activeTeamChatId={activeTeamChatId} />
+        </>)}
       </div>
 
+      <input ref={docInputRef} type="file" className="hidden" onChange={handleUploadDoc} data-testid="input-doc-upload" />
+      {panelTab === "documents" && (
       <div className="px-4 py-3 border-t border-[#eee]">
-        <input ref={docInputRef} type="file" className="hidden" onChange={handleUploadDoc} data-testid="input-doc-upload" />
         <button
           onClick={() => docInputRef.current?.click()}
           className="w-full flex items-center justify-center gap-2 py-2.5 text-[11px] font-semibold text-white bg-[#1a1a2e] rounded-lg hover:bg-[#2a2a40] transition-colors"
@@ -2242,6 +2391,7 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
           Recalculate Capital Readiness Index
         </p>
       </div>
+      )}
     </div>
   );
 }
@@ -2262,6 +2412,8 @@ export default function LandingPage() {
   const [autoSendFile, setAutoSendFile] = useState(false);
   const [docsOpen, setDocsOpen] = useState(false);
   const [savedDocs, setSavedDocs] = useState<SavedDoc[]>(loadSavedDocs);
+  const [userProfile, setUserProfile] = useState<UserProfile>(loadUserProfile);
+  const handleUpdateProfile = useCallback((p: UserProfile) => { setUserProfile(p); saveUserProfile(p); }, []);
   const [activeTeamChat, setActiveTeamChat] = useState<TeamMember | null>(null);
   const [teamChatMessages, setTeamChatMessages] = useState<GuestMessage[]>([]);
   const [mentionDropdown, setMentionDropdown] = useState<{ show: boolean; query: string; startIdx: number }>({ show: false, query: "", startIdx: 0 });
@@ -2497,6 +2649,26 @@ export default function LandingPage() {
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
+  const buildDocContext = () => {
+    const cr = savedDocs.filter(d => d.type === "credit_report");
+    const id = savedDocs.filter(d => d.type === "id_document");
+    const bs = savedDocs.filter(d => d.type === "bank_statement");
+    if (cr.length === 0 && id.length === 0 && bs.length === 0) return undefined;
+    return {
+      hasCreditReport: cr.length > 0,
+      hasId: id.length > 0,
+      hasBankStatement: bs.length > 0,
+      creditReportNames: cr.map(d => d.name),
+      bankStatementNames: bs.map(d => d.name),
+    };
+  };
+
+  const buildProfilePayload = () => {
+    const p = userProfile;
+    if (!p.fullName && !p.address && !p.dob && !p.ssn4) return undefined;
+    return { fullName: p.fullName, address: p.address, dob: p.dob, ssn4: p.ssn4 };
+  };
+
   const doSend = async (text: string, file?: { name: string; content: string; isPdf?: boolean } | null) => {
     if (file && (!file.content || file.content.length < 10)) {
       file = null;
@@ -2550,6 +2722,8 @@ export default function LandingPage() {
             senderName: user.displayName || user.email,
             partnerName: activeTeamChat.displayName,
           },
+          userProfile: buildProfilePayload(),
+          documentContext: buildDocContext(),
         };
         if (file) {
           payload.fileContent = file.content;
@@ -2632,7 +2806,12 @@ export default function LandingPage() {
         role: (h.role === "user" || h.role === "assistant") ? h.role : "user" as const,
         content: h.content,
       }));
-      const payload: Record<string, unknown> = { content: text, history: cleanHistory };
+      const payload: Record<string, unknown> = {
+        content: text,
+        history: cleanHistory,
+        userProfile: buildProfilePayload(),
+        documentContext: buildDocContext(),
+      };
       if (file) {
         payload.fileContent = file.content;
         payload.attachment = "credit_report";
@@ -2814,7 +2993,7 @@ export default function LandingPage() {
         <>
           <div className="sm:hidden fixed inset-0 bg-black/30 z-40" onClick={() => setDocsOpen(false)} />
           <div className="fixed sm:relative z-50 sm:z-auto w-[340px] h-full shrink-0 transition-all" data-testid="docs-sidebar">
-            <DocsPanel docs={savedDocs} onClose={() => setDocsOpen(false)} onDelete={handleDeleteDoc} onSave={handleSaveDoc} user={user} onOpenTeamChat={handleOpenTeamChat} activeTeamChatId={activeTeamChat?.id} aisReport={aisReport} onOpenAis={() => setShowAisOverlay(true)} />
+            <DocsPanel docs={savedDocs} onClose={() => setDocsOpen(false)} onDelete={handleDeleteDoc} onSave={handleSaveDoc} user={user} onOpenTeamChat={handleOpenTeamChat} activeTeamChatId={activeTeamChat?.id} aisReport={aisReport} onOpenAis={() => setShowAisOverlay(true)} userProfile={userProfile} onUpdateProfile={handleUpdateProfile} />
           </div>
         </>
       )}
