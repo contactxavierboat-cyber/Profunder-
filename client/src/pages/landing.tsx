@@ -63,6 +63,16 @@ interface ProjectedFundingData {
   keyBlockers: string[];
 }
 
+interface TradeLine {
+  creditor: string;
+  type: string;
+  ownership: string;
+  limit: string;
+  balance: string;
+  age: string;
+  paymentStatus: string;
+}
+
 interface MissionData {
   approvalIndex: number | null;
   band: string | null;
@@ -75,6 +85,7 @@ interface MissionData {
   bestNextMove: string | null;
   financialIdentity: FinancialIdentityData | null;
   projectedFunding: ProjectedFundingData | null;
+  openTradelines: TradeLine[];
 }
 
 interface DisputeItem {
@@ -276,11 +287,30 @@ function parseSingleMessageData(content: string): MissionData {
     }
   }
 
-  return { approvalIndex, band, phase, bureauSource, pillarScores, suppressors, helping, hurting, bestNextMove, financialIdentity, projectedFunding };
+  const openTradelines: TradeLine[] = [];
+  const tradelineLines = cleanText.split("\n").filter(l => /^\s*(?:TRADELINE|Tradeline)[\s:|-]/i.test(l.trim()));
+  for (const line of tradelineLines) {
+    const cleaned = line.replace(/^\s*(?:TRADELINE|Tradeline)[\s:|-]+/i, "").trim();
+    const parts = cleaned.split("|").map(p => p.trim()).filter(p => p.length > 0);
+    if (parts.length >= 5) {
+      const creditor = parts[0] || "Unknown";
+      const type = parts[1] || "Other";
+      const ownership = parts[2] || "Primary";
+      const limit = parts.length >= 7 ? parts[3] : (parts[3] || "N/A");
+      const balance = parts.length >= 7 ? parts[4] : (parts.length >= 6 ? parts[3] : "N/A");
+      const age = parts.length >= 7 ? parts[5] : (parts.length >= 6 ? parts[4] : parts[3]);
+      const paymentStatus = parts.length >= 7 ? parts[6] : (parts.length >= 6 ? parts[5] : parts[4]);
+      if (!/example|e\.g\.|chase sapphire.*\$12|capital one quicksilver.*\$8|toyota financial.*\$28/i.test(creditor + limit)) {
+        openTradelines.push({ creditor, type, ownership, limit, balance, age, paymentStatus });
+      }
+    }
+  }
+
+  return { approvalIndex, band, phase, bureauSource, pillarScores, suppressors, helping, hurting, bestNextMove, financialIdentity, projectedFunding, openTradelines };
 }
 
 function hasAnalysisData(data: MissionData): boolean {
-  return data.approvalIndex !== null || data.band !== null || data.phase !== null || data.pillarScores.length > 0 || data.suppressors.length > 0 || data.helping.length > 0 || data.hurting.length > 0 || data.bestNextMove !== null || data.financialIdentity !== null || data.projectedFunding !== null;
+  return data.approvalIndex !== null || data.band !== null || data.phase !== null || data.pillarScores.length > 0 || data.suppressors.length > 0 || data.helping.length > 0 || data.hurting.length > 0 || data.bestNextMove !== null || data.financialIdentity !== null || data.projectedFunding !== null || data.openTradelines.length > 0;
 }
 
 function getBandColor(band: string | null): string {
@@ -1184,79 +1214,69 @@ function PerfectProfileTab({ aisReport }: { aisReport: MissionData | null }) {
   const fi = aisReport.financialIdentity;
   const pf = aisReport.projectedFunding;
   const allNeg = [...(aisReport.suppressors || []), ...(aisReport.hurting || [])].join(" ").toLowerCase();
-  const allPos = (aisReport.helping || []).join(" ").toLowerCase();
-  const allText = [allPos, allNeg, fi?.bureauFootprint || "", fi?.exposureLevel || "", fi?.profileType || "", pf?.currentExposure || "", pf?.highestLimit || ""].join(" ").toLowerCase();
   const getPillar = (k: string) => aisReport.pillarScores?.find(p => p.label.toLowerCase().includes(k))?.value ?? null;
 
   const hasCollections = /\bcollections?\b/i.test(allNeg);
   const hasChargeOffs = /charge.?offs?/i.test(allNeg);
   const hasInquiries = /\binquir|\bhard.?pull/i.test(allNeg);
-  const hasAU = /authorized.?user/i.test(allNeg);
-  const utilScore = getPillar("utilization");
-  const depthScore = getPillar("depth");
   const paymentScore = getPillar("payment");
-  const stabilityScore = getPillar("stability");
-  const lenderScore = getPillar("lender");
   const lateRegex = /\blate\s+payments?|\bdelinquen|\bpast.?due|\b30\s*days?\s*late|\b60\s*days?\s*late|\b90\s*days?\s*late/i;
   const hasLates = paymentScore !== null ? (paymentScore < 70 && lateRegex.test(allNeg)) : lateRegex.test(allNeg);
-  const creditAgeYears = (() => { const m = fi?.creditAge?.match(/(\d+)/); return m ? parseInt(m[1]) : 0; })();
-  const revolverKeywords = /revolv|credit\s*card|bankcard|visa|mastercard|amex|discover|capital\s*one|chase|citi|tradeline|bankcard/i.test(allText);
-  const depthImpliesRevolvers = depthScore !== null && depthScore > 0;
-  const utilImpliesRevolvers = utilScore !== null && utilScore > 0;
-  const hasRevolvers = revolverKeywords || depthImpliesRevolvers || utilImpliesRevolvers;
-  const installmentKeywords = /installment|auto\s*(loan)?|mortgage|student|personal\s*loan|navient|sallie|nelnet|fedloan/i.test(allText);
-  const hasPillarData = aisReport.pillarScores?.length >= 3;
-  const hasInstallment = installmentKeywords || (hasPillarData && stabilityScore !== null && stabilityScore > 0);
 
-  const utilLabel = utilScore !== null ? (utilScore >= 80 ? "Low utilization" : utilScore >= 50 ? "Moderate" : "High") : null;
-  const paymentLabel = paymentScore !== null ? (paymentScore >= 85 ? "Strong" : paymentScore >= 60 ? "Mixed" : "Needs work") : null;
-  const statusLabel = hasLates ? "Late payments found" : "Current";
+  const tradelines = aisReport.openTradelines || [];
+  const revolving = tradelines.filter(t => /revolv|loc|heloc/i.test(t.type));
+  const installments = tradelines.filter(t => /installment|mortgage|auto|student|personal/i.test(t.type) || (!(/revolv|loc|heloc/i.test(t.type)) && /loan|mort/i.test(t.type)));
+  const otherAccounts = tradelines.filter(t => !revolving.includes(t) && !installments.includes(t));
 
-  const revolverSlots: AccountSlot[] = [
-    {
-      name: "Bank Revolver 1",
-      filled: hasRevolvers,
-      fields: [
-        { label: "Limit", ideal: "$10,000–$15,000", actual: hasRevolvers ? (pf?.highestLimit || pf?.currentExposure || "Detected") : null, met: hasRevolvers },
-        { label: "Balance", ideal: "$0 – 5% of limit", actual: utilLabel, met: (utilScore ?? 0) >= 80 },
-        { label: "Age", ideal: "5+ years", actual: creditAgeYears > 0 ? `${creditAgeYears}yr avg` : null, met: creditAgeYears >= 5 },
-        { label: "Status", ideal: "Open · Current", actual: hasRevolvers ? statusLabel : null, met: !hasLates },
-      ],
-    },
-    {
-      name: "Bank Revolver 2",
-      filled: hasRevolvers && (depthScore ?? 0) >= 50,
-      fields: [
-        { label: "Limit", ideal: "$10,000–$20,000", actual: (depthScore ?? 0) >= 50 ? "Detected" : null, met: (depthScore ?? 0) >= 50 },
-        { label: "Balance", ideal: "$0 – 5% of limit", actual: utilLabel, met: (utilScore ?? 0) >= 80 },
-        { label: "Age", ideal: "3+ years", actual: creditAgeYears > 0 ? `${creditAgeYears}yr avg` : null, met: creditAgeYears >= 3 },
-        { label: "Status", ideal: "Open · Current", actual: (depthScore ?? 0) >= 50 ? statusLabel : null, met: !hasLates },
-      ],
-    },
-    {
-      name: "Bank Revolver 3",
-      filled: hasRevolvers && (depthScore ?? 0) >= 70,
-      fields: [
-        { label: "Limit", ideal: "$15,000–$25,000", actual: (depthScore ?? 0) >= 70 ? "Detected" : null, met: (depthScore ?? 0) >= 70 },
-        { label: "Balance", ideal: "$0 – 3% of limit", actual: utilLabel, met: (utilScore ?? 0) >= 85 },
-        { label: "Age", ideal: "5+ years", actual: creditAgeYears > 0 ? `${creditAgeYears}yr avg` : null, met: creditAgeYears >= 5 },
-        { label: "Status", ideal: "Open · Current", actual: (depthScore ?? 0) >= 70 ? statusLabel : null, met: !hasLates },
-      ],
-    },
-  ];
+  const parseAge = (age: string): number => {
+    const yrMatch = age.match(/(\d+)\s*yr/i);
+    return yrMatch ? parseInt(yrMatch[1]) : 0;
+  };
 
-  const installmentSlots: AccountSlot[] = [
-    {
-      name: "Installment Loan",
-      filled: hasInstallment,
+  const isCurrent = (status: string) => /current|pays?\s*as\s*agreed|open/i.test(status) && !/late|delinq|collection|charge/i.test(status);
+
+  const buildTradelineSlot = (tl: TradeLine): AccountSlot => {
+    const isAU = /\bau\b/i.test(tl.ownership);
+    const ageYears = parseAge(tl.age);
+    const current = isCurrent(tl.paymentStatus);
+    const isRevolving = /revolv|loc|heloc/i.test(tl.type);
+    return {
+      name: isAU ? `${tl.creditor} (AU)` : tl.creditor,
+      filled: true,
       fields: [
-        { label: "Type", ideal: "Auto / Personal / Mortgage", actual: hasInstallment ? (fi?.exposureLevel || "Detected") : null, met: hasInstallment },
-        { label: "Payment History", ideal: "100% on-time", actual: paymentLabel, met: (paymentScore ?? 0) >= 85 },
-        { label: "Age", ideal: "2+ years", actual: creditAgeYears > 0 ? `${creditAgeYears}yr avg` : null, met: creditAgeYears >= 2 },
-        { label: "Status", ideal: "Open or Paid · Current", actual: hasInstallment ? statusLabel : null, met: !hasLates },
+        ...(isRevolving ? [
+          { label: "Limit", ideal: "$10,000+", actual: tl.limit, met: (() => { const n = parseInt(tl.limit.replace(/[^0-9]/g, "")); return !isNaN(n) && n >= 10000; })() },
+          { label: "Balance", ideal: "< 5% of limit", actual: tl.balance, met: (() => { const b = parseInt(tl.balance.replace(/[^0-9]/g, "")); const l = parseInt(tl.limit.replace(/[^0-9]/g, "")); return !isNaN(b) && !isNaN(l) && l > 0 ? (b / l) <= 0.05 : b === 0; })() },
+        ] : [
+          { label: "Amount", ideal: "—", actual: tl.limit, met: true },
+          { label: "Balance", ideal: "$0", actual: tl.balance, met: (() => { const b = parseInt(tl.balance.replace(/[^0-9]/g, "")); return !isNaN(b) && b === 0; })() },
+        ]),
+        { label: "Age", ideal: isRevolving ? "5+ years" : "2+ years", actual: tl.age, met: isRevolving ? ageYears >= 5 : ageYears >= 2 },
+        { label: "Status", ideal: "Current", actual: tl.paymentStatus, met: current },
+        ...(isAU ? [{ label: "Ownership", ideal: "Primary", actual: "Authorized User", met: false }] : []),
       ],
-    },
-  ];
+    };
+  };
+
+  const revolverSlots: AccountSlot[] = revolving.length > 0
+    ? revolving.map(buildTradelineSlot)
+    : [{ name: "Bank Revolver", filled: false, fields: [
+        { label: "Limit", ideal: "$10,000+", actual: null, met: false },
+        { label: "Balance", ideal: "< 5% of limit", actual: null, met: false },
+        { label: "Age", ideal: "5+ years", actual: null, met: false },
+        { label: "Status", ideal: "Current", actual: null, met: false },
+      ] }];
+
+  const installmentSlots: AccountSlot[] = installments.length > 0
+    ? installments.map(buildTradelineSlot)
+    : [{ name: "Installment Loan", filled: false, fields: [
+        { label: "Amount", ideal: "—", actual: null, met: false },
+        { label: "Balance", ideal: "$0", actual: null, met: false },
+        { label: "Age", ideal: "2+ years", actual: null, met: false },
+        { label: "Status", ideal: "Current", actual: null, met: false },
+      ] }];
+
+  const otherSlots: AccountSlot[] = otherAccounts.map(buildTradelineSlot);
 
   const profileSlots: AccountSlot[] = [
     {
@@ -1273,6 +1293,9 @@ function PerfectProfileTab({ aisReport }: { aisReport: MissionData | null }) {
     },
   ];
 
+  const auFromTradelines = tradelines.filter(t => /\bau\b/i.test(t.ownership));
+  const hasAU = auFromTradelines.length > 0 || /authorized.?user/i.test(allNeg);
+  const auCount = auFromTradelines.length;
   const cleanFileSlots: AccountSlot[] = [
     {
       name: "File Hygiene",
@@ -1282,7 +1305,7 @@ function PerfectProfileTab({ aisReport }: { aisReport: MissionData | null }) {
         { label: "Charge-Offs", ideal: "0 accounts", actual: hasChargeOffs ? "Found on file" : "Clear", met: !hasChargeOffs },
         { label: "Late Payments", ideal: "0 in 24 months", actual: hasLates ? "Found on file" : "Clear", met: !hasLates },
         { label: "Hard Inquiries", ideal: "0–1 in 12 months", actual: hasInquiries ? "Elevated" : "Low", met: !hasInquiries },
-        { label: "AU Dependency", ideal: "None", actual: hasAU ? "Detected" : "Clear", met: !hasAU },
+        { label: "AU Dependency", ideal: "None", actual: hasAU ? (auCount > 0 ? `${auCount} AU account${auCount > 1 ? "s" : ""}` : "Detected") : "Clear", met: !hasAU },
         { label: "Public Records", ideal: "None", actual: /public.?record|bankrupt|judgment|lien/i.test(allNeg) ? "Found" : "Clear", met: !/public.?record|bankrupt|judgment|lien/i.test(allNeg) },
       ],
     },
@@ -1304,6 +1327,7 @@ function PerfectProfileTab({ aisReport }: { aisReport: MissionData | null }) {
   const allSlots = [
     { title: "Revolving Accounts", slots: revolverSlots },
     { title: "Installment Accounts", slots: installmentSlots },
+    ...(otherSlots.length > 0 ? [{ title: "Other Accounts", slots: otherSlots }] : []),
     { title: "Score & Identity", slots: profileSlots },
     { title: "File Hygiene", slots: cleanFileSlots },
     { title: "Capital Readiness", slots: fundingSlots },

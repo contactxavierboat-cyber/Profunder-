@@ -1073,6 +1073,22 @@ Readiness Level (per-bureau): Not Ready = active derogatories on this bureau OR 
 
 Timeline: Utilization fix = 1-2 months. Removing derogatories on this bureau = 3-6 months per round. Seasoning new accounts = 6-12 months. Inquiry aging (to free slots) = 6-12 months.
 
+Open Tradelines:
+List EVERY open account and every authorized user account on the report. Do NOT include closed accounts. For each, output one line in this exact format:
+TRADELINE: [Creditor Name] | [Type: Revolving/Installment/Mortgage/HELOC/LOC/Other] | [Ownership: Primary/AU] | [Limit or Original Amount, e.g. $5,000] | [Current Balance, e.g. $1,200] | [Account Age, e.g. 3yr 2mo] | [Payment Status: Current/30-day late/60-day late/90-day late/Collection/Charge-off]
+
+Example:
+TRADELINE: Chase Sapphire | Revolving | Primary | $12,000 | $800 | 4yr 6mo | Current
+TRADELINE: Capital One Quicksilver | Revolving | AU | $8,500 | $0 | 7yr 1mo | Current
+TRADELINE: Toyota Financial | Installment | Primary | $28,000 | $14,200 | 2yr 3mo | Current
+
+Rules:
+- Include EVERY open account — do not skip any
+- Closed accounts must be excluded entirely
+- If limit/balance is not clearly stated, use best estimate from the report data
+- Authorized User accounts MUST be marked as "AU" in the Ownership field
+- If account age cannot be determined precisely, estimate from date opened
+
 Top Approval Suppressors:
 1. [suppressor]
 2. [suppressor]
