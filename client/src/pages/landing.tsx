@@ -1096,16 +1096,30 @@ function MissionDashboard({ data, userName, compact }: { data: MissionData; user
   );
 }
 
-function DisputeDownloadButton({ disputes, onSave }: { disputes: DisputeItem[]; onSave?: (disputes: DisputeItem[]) => void }) {
+function DisputeDownloadButton({ disputes, onSave, userProfile, savedDocs }: { disputes: DisputeItem[]; onSave?: (disputes: DisputeItem[]) => void; userProfile?: UserProfile; savedDocs?: SavedDoc[] }) {
   const [downloading, setDownloading] = useState(false);
 
   const handleDownload = async () => {
     setDownloading(true);
     try {
+      const attachmentPages: { type: string; dataUrl: string; name: string }[] = [];
+      if (savedDocs) {
+        for (const doc of savedDocs) {
+          if ((doc.type === "id_document" || doc.type === "proof_of_residency" || doc.type === "bank_statement") && doc.fileDataUrl) {
+            attachmentPages.push({ type: doc.type, dataUrl: doc.fileDataUrl, name: doc.name });
+          }
+        }
+      }
+      const payload: any = { disputes, attachmentPages };
+      if (userProfile?.fullName) payload.userName = userProfile.fullName;
+      if (userProfile?.address) payload.userAddress = userProfile.address;
+      if (userProfile?.ssn4) payload.ssnLast4 = userProfile.ssn4;
+      if (userProfile?.dob) payload.dob = userProfile.dob;
+
       const res = await fetch("/api/dispute-letters", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ disputes })
+        body: JSON.stringify(payload)
       });
       if (!res.ok) throw new Error("Failed to generate");
       const data = await res.json();
@@ -1149,7 +1163,7 @@ function DisputeDownloadButton({ disputes, onSave }: { disputes: DisputeItem[]; 
 interface SavedDoc {
   id: string;
   name: string;
-  type: "dispute_letter" | "credit_report" | "id_document" | "bank_statement" | "other";
+  type: "dispute_letter" | "credit_report" | "id_document" | "bank_statement" | "proof_of_residency" | "other";
   savedAt: number;
   fileDataUrl?: string;
   disputes?: DisputeItem[];
@@ -1700,17 +1714,20 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
   const bankInputRef = useRef<HTMLInputElement>(null);
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
   const [expandedBureau, setExpandedBureau] = useState<string | null>(null);
-  const [uploadTarget, setUploadTarget] = useState<"credit_report" | "id_document" | "bank_statement" | null>(null);
+  const [uploadTarget, setUploadTarget] = useState<"credit_report" | "id_document" | "bank_statement" | "proof_of_residency" | null>(null);
+  const residencyInputRef = useRef<HTMLInputElement>(null);
 
   const classifyDocType = (name: string, target?: string | null): SavedDoc["type"] => {
     if (target === "id_document") return "id_document";
     if (target === "bank_statement") return "bank_statement";
+    if (target === "proof_of_residency") return "proof_of_residency";
     if (target === "credit_report") return "credit_report";
     const n = name.toLowerCase();
     if (/dispute/i.test(n)) return "dispute_letter";
     if (/credit|report|experian|equifax|transunion/i.test(n)) return "credit_report";
     if (/\bid\b|license|passport|identification/i.test(n)) return "id_document";
     if (/bank|statement|checking|savings/i.test(n)) return "bank_statement";
+    if (/residen|utility|bill|lease|mortgage\s*statement/i.test(n)) return "proof_of_residency";
     return "other";
   };
 
@@ -1733,16 +1750,28 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
     if (docInputRef.current) docInputRef.current.value = "";
     if (idInputRef.current) idInputRef.current.value = "";
     if (bankInputRef.current) bankInputRef.current.value = "";
+    if (residencyInputRef.current) residencyInputRef.current.value = "";
   };
 
   const handleDownload = async (doc: SavedDoc) => {
     setDownloadingId(doc.id);
     try {
       if (doc.disputes && doc.disputes.length > 0) {
+        const attachmentPages: { type: string; dataUrl: string; name: string }[] = [];
+        for (const d of docs) {
+          if ((d.type === "id_document" || d.type === "proof_of_residency" || d.type === "bank_statement") && d.fileDataUrl) {
+            attachmentPages.push({ type: d.type, dataUrl: d.fileDataUrl, name: d.name });
+          }
+        }
+        const payload: any = { disputes: doc.disputes, attachmentPages };
+        if (userProfile.fullName) payload.userName = userProfile.fullName;
+        if (userProfile.address) payload.userAddress = userProfile.address;
+        if (userProfile.ssn4) payload.ssnLast4 = userProfile.ssn4;
+        if (userProfile.dob) payload.dob = userProfile.dob;
         const res = await fetch("/api/dispute-letters", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ disputes: doc.disputes })
+          body: JSON.stringify(payload)
         });
         if (!res.ok) throw new Error("Failed to generate");
         const data = await res.json();
@@ -1778,7 +1807,9 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
   const creditReports = docs.filter(d => d.type === "credit_report");
   const idDocs = docs.filter(d => d.type === "id_document");
   const bankDocs = docs.filter(d => d.type === "bank_statement");
+  const residencyDocs = docs.filter(d => d.type === "proof_of_residency");
   const otherDocs = docs.filter(d => d.type === "other");
+  const [profileSaved, setProfileSaved] = useState(false);
 
   const formatDate = (ts: number) => {
     const d = new Date(ts);
@@ -2061,17 +2092,19 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
           <div className="flex items-center gap-2 mb-2">
             <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M3 1h6l2 3v6a1 1 0 01-1 1H2a1 1 0 01-1-1V4l2-3z" stroke="#333" strokeWidth="1" fill="none"/><path d="M4.5 6h3M4.5 8h2" stroke="#333" strokeWidth="0.8" strokeLinecap="round"/></svg>
             <span className="text-[10px] font-semibold text-[#555] uppercase tracking-wider">Document Vault</span>
-            <span className="text-[9px] text-[#aaa] ml-auto" style={{ fontVariantNumeric: "tabular-nums" }}>{creditReports.length + idDocs.length + bankDocs.length}</span>
+            <span className="text-[9px] text-[#aaa] ml-auto" style={{ fontVariantNumeric: "tabular-nums" }}>{creditReports.length + idDocs.length + bankDocs.length + residencyDocs.length}</span>
           </div>
 
-          <input ref={idInputRef} type="file" accept=".pdf,.jpg,.jpeg,.png" className="hidden" onChange={handleUploadDoc} data-testid="input-id-upload" />
+          <input ref={idInputRef} type="file" accept=".jpg,.jpeg,.png" className="hidden" onChange={handleUploadDoc} data-testid="input-id-upload" />
           <input ref={bankInputRef} type="file" accept=".pdf,.csv,.txt" className="hidden" onChange={handleUploadDoc} data-testid="input-bank-upload" />
+          <input ref={residencyInputRef} type="file" accept=".jpg,.jpeg,.png" className="hidden" onChange={handleUploadDoc} data-testid="input-residency-upload" />
 
           <div className="space-y-1.5">
             {[
               { label: "Credit Report", icon: <svg width="10" height="10" viewBox="0 0 12 12" fill="none"><rect x="2" y="1" width="8" height="10" rx="1" stroke="currentColor" strokeWidth="1" fill="none"/><path d="M4 4h4M4 6h4M4 8h2" stroke="currentColor" strokeWidth="0.7" strokeLinecap="round"/></svg>, docs: creditReports, type: "credit_report" as const, onUpload: () => { setUploadTarget("credit_report"); docInputRef.current?.click(); } },
               { label: "Government ID", icon: <svg width="10" height="10" viewBox="0 0 12 12" fill="none"><rect x="1" y="3" width="10" height="7" rx="1" stroke="currentColor" strokeWidth="1" fill="none"/><circle cx="4" cy="6.5" r="1.2" stroke="currentColor" strokeWidth="0.7" fill="none"/><path d="M6.5 5.5h3M6.5 7.5h2" stroke="currentColor" strokeWidth="0.7" strokeLinecap="round"/></svg>, docs: idDocs, type: "id_document" as const, onUpload: () => { setUploadTarget("id_document"); idInputRef.current?.click(); } },
               { label: "Bank Statement", icon: <svg width="10" height="10" viewBox="0 0 12 12" fill="none"><path d="M2 3l4-2 4 2v1H2V3z" stroke="currentColor" strokeWidth="0.8" fill="none"/><path d="M3 5v4M5 5v4M7 5v4M9 5v4" stroke="currentColor" strokeWidth="0.7"/><path d="M1.5 10h9" stroke="currentColor" strokeWidth="0.8" strokeLinecap="round"/></svg>, docs: bankDocs, type: "bank_statement" as const, onUpload: () => { setUploadTarget("bank_statement"); bankInputRef.current?.click(); } },
+              { label: "Proof of Residency", icon: <svg width="10" height="10" viewBox="0 0 12 12" fill="none"><path d="M6 1L1 5.5V11h3.5V8h3v3H11V5.5L6 1z" stroke="currentColor" strokeWidth="0.9" fill="none" strokeLinejoin="round"/></svg>, docs: residencyDocs, type: "proof_of_residency" as const, onUpload: () => { setUploadTarget("proof_of_residency"); residencyInputRef.current?.click(); } },
             ].map(slot => {
               const hasDocs = slot.docs.length > 0;
               return (
@@ -2113,6 +2146,7 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
             <div className="flex items-center gap-1.5 mb-2">
               <svg width="10" height="10" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="4" r="2.5" stroke="#555" strokeWidth="0.9" fill="none"/><path d="M2 10.5c0-2.2 1.8-4 4-4s4 1.8 4 4" stroke="#555" strokeWidth="0.9" strokeLinecap="round"/></svg>
               <span className="text-[9px] font-semibold text-[#555]">Report Signature</span>
+              {profileSaved && <span className="text-[7px] text-[#2d6a4f] font-medium ml-auto">Saved</span>}
             </div>
             <div className="grid grid-cols-2 gap-x-2 gap-y-1.5">
               {[
@@ -2128,6 +2162,7 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
                     maxLength={f.key === "ssn4" ? 4 : f.key === "dob" ? 10 : 120}
                     value={userProfile[f.key] || ""}
                     onChange={e => {
+                      setProfileSaved(false);
                       const updated = { ...userProfile, [f.key]: e.target.value };
                       onUpdateProfile(updated);
                     }}
@@ -2138,6 +2173,20 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
                 </div>
               ))}
             </div>
+            <button
+              onClick={() => {
+                onUpdateProfile(userProfile);
+                setProfileSaved(true);
+              }}
+              disabled={!userProfile.fullName && !userProfile.address}
+              className="mt-2 w-full py-1.5 rounded bg-[#1a1a2e] text-white text-[8px] font-semibold uppercase tracking-wider hover:bg-[#2a2a40] transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+              data-testid="button-save-signature"
+            >
+              {profileSaved ? "Saved — Applied to All Letters" : "Save & Apply to All Letters"}
+            </button>
+            {profileSaved && (
+              <p className="text-[7px] text-[#2d6a4f] mt-1 text-center">Contact info will appear on all dispute letter headers</p>
+            )}
           </div>
         </div>
         </>)}
@@ -2773,11 +2822,13 @@ export default function LandingPage() {
     const cr = savedDocs.filter(d => d.type === "credit_report");
     const id = savedDocs.filter(d => d.type === "id_document");
     const bs = savedDocs.filter(d => d.type === "bank_statement");
-    if (cr.length === 0 && id.length === 0 && bs.length === 0) return undefined;
+    const pr = savedDocs.filter(d => d.type === "proof_of_residency");
+    if (cr.length === 0 && id.length === 0 && bs.length === 0 && pr.length === 0) return undefined;
     return {
       hasCreditReport: cr.length > 0,
       hasId: id.length > 0,
       hasBankStatement: bs.length > 0,
+      hasProofOfResidency: pr.length > 0,
       creditReportNames: cr.map(d => d.name),
       bankStatementNames: bs.map(d => d.name),
     };
@@ -3352,7 +3403,7 @@ export default function LandingPage() {
                               ))}
                             </div>
                             <div className="flex items-center gap-2 flex-wrap">
-                              <DisputeDownloadButton disputes={disputes} onSave={handleSaveDisputeLetters} />
+                              <DisputeDownloadButton disputes={disputes} onSave={handleSaveDisputeLetters} userProfile={userProfile} savedDocs={savedDocs} />
                             </div>
                           </div>
                         </div>
