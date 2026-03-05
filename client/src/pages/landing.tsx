@@ -1168,6 +1168,7 @@ interface SavedDoc {
   fileDataUrl?: string;
   disputes?: DisputeItem[];
   extractedSummary?: string;
+  extractedText?: string;
 }
 
 interface UserProfile {
@@ -2824,6 +2825,10 @@ export default function LandingPage() {
     const bs = savedDocs.filter(d => d.type === "bank_statement");
     const pr = savedDocs.filter(d => d.type === "proof_of_residency");
     if (cr.length === 0 && id.length === 0 && bs.length === 0 && pr.length === 0) return undefined;
+    const creditReportTexts: string[] = [];
+    for (const doc of cr) {
+      if (doc.extractedText) creditReportTexts.push(doc.extractedText);
+    }
     return {
       hasCreditReport: cr.length > 0,
       hasId: id.length > 0,
@@ -2831,6 +2836,7 @@ export default function LandingPage() {
       hasProofOfResidency: pr.length > 0,
       creditReportNames: cr.map(d => d.name),
       bankStatementNames: bs.map(d => d.name),
+      creditReportTexts: creditReportTexts.length > 0 ? creditReportTexts : undefined,
     };
   };
 
@@ -2917,6 +2923,20 @@ export default function LandingPage() {
 
         if (!res.ok) throw new Error("Failed");
         const data = await res.json();
+
+        if (data.extractedText && file) {
+          setSavedDocs(prev => {
+            const crDocs = prev.filter(d => d.type === "credit_report");
+            const match = crDocs.find(d => d.name === file!.name) || crDocs[crDocs.length - 1];
+            if (match && !match.extractedText) {
+              const updated = prev.map(d => d === match ? { ...d, extractedText: data.extractedText } : d);
+              try { localStorage.setItem("profundr_saved_docs", JSON.stringify(updated)); } catch {}
+              return updated;
+            }
+            return prev;
+          });
+        }
+
         const aiMsg: GuestMessage = { id: nextId + 1, role: "assistant", content: data.content };
         setTeamChatMessages((prev) => [...prev, aiMsg]);
         setNextId((n) => n + 1);
@@ -3006,6 +3026,31 @@ export default function LandingPage() {
       if (!res.ok) throw new Error("Failed to get response");
       const data = await res.json();
       let responseContent = data.content;
+
+      if (data.extractedText && file) {
+        setSavedDocs(prev => {
+          const crDocs = prev.filter(d => d.type === "credit_report");
+          const match = crDocs.find(d => d.name === file.name) || crDocs[crDocs.length - 1];
+          if (match && !match.extractedText) {
+            const updated = prev.map(d => d === match ? { ...d, extractedText: data.extractedText } : d);
+            try { localStorage.setItem("profundr_saved_docs", JSON.stringify(updated)); } catch {}
+            return updated;
+          }
+          if (!match) {
+            const newDoc: SavedDoc = {
+              id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+              name: file.name,
+              type: "credit_report",
+              savedAt: Date.now(),
+              extractedText: data.extractedText,
+            };
+            const updated = [newDoc, ...prev];
+            try { localStorage.setItem("profundr_saved_docs", JSON.stringify(updated)); } catch {}
+            return updated;
+          }
+          return prev;
+        });
+      }
 
       if (!user) {
         const newCount = previewCount + 1;

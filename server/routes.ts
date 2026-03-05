@@ -2140,8 +2140,10 @@ FINAL REMINDER: You MUST list EVERY negative item found in the document above as
         hasCreditReport: z.boolean().optional(),
         hasId: z.boolean().optional(),
         hasBankStatement: z.boolean().optional(),
+        hasProofOfResidency: z.boolean().optional(),
         creditReportNames: z.array(z.string()).optional(),
         bankStatementNames: z.array(z.string()).optional(),
+        creditReportTexts: z.array(z.string().max(200_000)).max(5).optional(),
       }).nullable().optional()
     }).safeParse(req.body);
 
@@ -2342,6 +2344,7 @@ IMPORTANT DIRECTIVES:
       if (docCtx.hasCreditReport) vaultParts.push(`Credit Reports on file: ${docCtx.creditReportNames?.join(", ") || "Yes"}`);
       if (docCtx.hasId) vaultParts.push("Government ID: Uploaded");
       if (docCtx.hasBankStatement) vaultParts.push(`Bank Statements on file: ${docCtx.bankStatementNames?.join(", ") || "Yes"}`);
+      if (docCtx.hasProofOfResidency) vaultParts.push("Proof of Residency: Uploaded");
       if (vaultParts.length > 0) {
         documentVaultContext = `\n\n--- DOCUMENT VAULT STATUS ---
 The user has the following documents in their Document Vault:
@@ -2349,6 +2352,18 @@ ${vaultParts.join("\n")}
 
 When the user asks questions, reference relevant data from ALL uploaded documents. If they have bank statements AND credit reports, cross-reference financial data for a more comprehensive analysis. Pull from every available data source to provide the most thorough response possible.
 --- END DOCUMENT VAULT STATUS ---`;
+      }
+
+      if (docCtx.creditReportTexts && docCtx.creditReportTexts.length > 0 && !(fileContent && attachment === "credit_report")) {
+        const combinedReportText = docCtx.creditReportTexts.map((t, i) =>
+          docCtx.creditReportTexts!.length > 1 ? `--- CREDIT REPORT ${i + 1} ---\n${t}` : t
+        ).join("\n\n");
+        const truncated = combinedReportText.slice(0, EXTRACTION_MAX_CHARS);
+        documentVaultContext += `\n\n--- CREDIT REPORT DATA FROM DOCUMENT VAULT ---
+CRITICAL INSTRUCTION — CREDIT REPORT DATA IS AVAILABLE BELOW. This is the user's previously uploaded and extracted credit report text. You MUST use this data to answer any questions about their credit, generate disputes, calculate scores, analyze tradelines, or perform any credit-related task. Do NOT say you don't have the report. Do NOT ask the user to re-upload. The data is RIGHT HERE:
+
+${truncated}
+--- END CREDIT REPORT DATA ---`;
       }
     }
 
@@ -2375,7 +2390,11 @@ When the user asks questions, reference relevant data from ALL uploaded document
       });
 
       const aiContent = response.choices[0]?.message?.content || "I'm sorry, I couldn't generate a response right now.";
-      res.json({ content: aiContent });
+      const responsePayload: Record<string, unknown> = { content: aiContent };
+      if (extractedText && extractedText.length > 50) {
+        responsePayload.extractedText = extractedText;
+      }
+      res.json(responsePayload);
     } catch (error: any) {
       console.error("Guest chat OpenAI Error:", error);
       res.status(500).json({ error: "Error generating AI response. Please try again." });
