@@ -2287,12 +2287,32 @@ COMMUNICATION STYLE:
     }
 
     const hasAttachmentInHistory = history.some((m: { content: string }) => m.content.includes("[Attached:"));
+    const hasVaultReportData = docCtx?.creditReportTexts && docCtx.creditReportTexts.length > 0;
+    const historyHasPriorAnalysis = history.some((m: { role: string; content: string }) =>
+      m.role === "assistant" && (m.content.includes("AIS") || m.content.includes("Approval Index") || m.content.includes("DISPUTE"))
+    );
     if (!fileContext && (content.includes("[Attached:") || hasAttachmentInHistory)) {
-      console.warn(`[Guest Chat] Attachment referenced but no fileContext generated. attachment=${attachment}, fileContent length=${fileContent?.length || 0}, hasAttachmentInHistory=${hasAttachmentInHistory}`);
-      if (attachment || fileContent) {
-        fileContext = `\n\nThe user uploaded a document but automated text extraction failed. DO NOT say you cannot read files or access attachments. Instead, say something like: "The file didn't extract properly on my end. Can you try uploading it again? If it keeps happening, the PDF might be image-based — in that case, share the key details here and I'll run the full analysis." Be helpful and reassuring.`;
+      if (hasVaultReportData || historyHasPriorAnalysis) {
+        console.log(`[Guest Chat] Attachment referenced in history but vault data or prior analysis available — skipping file-missing message`);
       } else {
-        fileContext = `\n\nThe user's message or history references an attached file but no file data was received. DO NOT say you cannot read files or access attachments. Instead, say: "It looks like the file didn't come through. Try uploading it again — click the upload button and select the file. I'll analyze it as soon as it arrives."`;
+        console.warn(`[Guest Chat] Attachment referenced but no fileContext generated. attachment=${attachment}, fileContent length=${fileContent?.length || 0}, hasAttachmentInHistory=${hasAttachmentInHistory}`);
+        if (attachment || fileContent) {
+          fileContext = `\n\nThe user uploaded a document but automated text extraction failed. DO NOT say you cannot read files or access attachments. Instead, say something like: "The file didn't extract properly on my end. Can you try uploading it again? If it keeps happening, the PDF might be image-based — in that case, share the key details here and I'll run the full analysis." Be helpful and reassuring.`;
+        } else {
+          fileContext = `\n\nThe user's message or history references an attached file but no file data was received. DO NOT say you cannot read files or access attachments. Instead, say: "It looks like the file didn't come through. Try uploading it again — click the upload button and select the file. I'll analyze it as soon as it arrives."`;
+        }
+      }
+    }
+
+    if (!fileContext && !hasVaultReportData && historyHasPriorAnalysis) {
+      const priorAnalysis = history
+        .filter((m: { role: string; content: string }) => m.role === "assistant" && (m.content.includes("AIS") || m.content.includes("DISPUTE") || m.content.includes("Approval Index")))
+        .map((m: { content: string }) => m.content)
+        .join("\n\n");
+      if (priorAnalysis.length > 100) {
+        fileContext = `\n\n--- PRIOR CREDIT ANALYSIS FROM THIS SESSION ---
+CRITICAL INSTRUCTION: You previously analyzed this user's credit report in this conversation. Your prior analysis is included in the chat history above. You MUST reference your own prior analysis to answer follow-up questions, generate dispute letters, or perform any credit-related task. Do NOT say you don't have the data — you analyzed it yourself earlier in this conversation. Use the tradelines, accounts, scores, and negative items from your previous response.
+--- END PRIOR ANALYSIS REFERENCE ---`;
       }
     }
 
@@ -2340,6 +2360,7 @@ IMPORTANT DIRECTIVES:
 
     let documentVaultContext = "";
     if (docCtx) {
+      console.log(`[Guest Chat] Document vault context: hasCR=${docCtx.hasCreditReport}, hasId=${docCtx.hasId}, hasBS=${docCtx.hasBankStatement}, hasPR=${docCtx.hasProofOfResidency}, creditReportTexts=${docCtx.creditReportTexts?.length || 0} (${docCtx.creditReportTexts?.reduce((a, t) => a + t.length, 0) || 0} chars)`);
       const vaultParts: string[] = [];
       if (docCtx.hasCreditReport) vaultParts.push(`Credit Reports on file: ${docCtx.creditReportNames?.join(", ") || "Yes"}`);
       if (docCtx.hasId) vaultParts.push("Government ID: Uploaded");
@@ -2360,7 +2381,9 @@ When the user asks questions, reference relevant data from ALL uploaded document
         ).join("\n\n");
         const truncated = combinedReportText.slice(0, EXTRACTION_MAX_CHARS);
         documentVaultContext += `\n\n--- CREDIT REPORT DATA FROM DOCUMENT VAULT ---
-CRITICAL INSTRUCTION — CREDIT REPORT DATA IS AVAILABLE BELOW. This is the user's previously uploaded and extracted credit report text. You MUST use this data to answer any questions about their credit, generate disputes, calculate scores, analyze tradelines, or perform any credit-related task. Do NOT say you don't have the report. Do NOT ask the user to re-upload. The data is RIGHT HERE:
+CRITICAL INSTRUCTION — CREDIT REPORT DATA IS AVAILABLE BELOW. This is the user's previously uploaded and extracted credit report text. You MUST use this data to answer any questions about their credit, generate disputes, calculate scores, analyze tradelines, or perform any credit-related task. Do NOT say you don't have the report. Do NOT ask the user to re-upload. The data is RIGHT HERE.
+
+When the user asks to generate dispute letters, you MUST scan this report data for ALL negative items (late payments, collections, charge-offs, derogatory marks, incorrect balances, unauthorized inquiries) and generate a separate DISPUTE entry for EACH one found. Use the actual creditor names, account numbers, dates, and amounts from the report below. Reference specific data from the report — do NOT use generic placeholders.
 
 ${truncated}
 --- END CREDIT REPORT DATA ---`;
@@ -2376,6 +2399,10 @@ ${truncated}
     let userMessage = teamContext ? `[${teamContext.senderName}]: ${content}` : content;
     if (extractedText) {
       userMessage += "\n\n(Document has been extracted and provided in the system context above. Analyze it now.)";
+    } else if (hasVaultReportData) {
+      userMessage += "\n\n(The user's credit report data is available in the CREDIT REPORT DATA FROM DOCUMENT VAULT section above. Use it to fulfill this request.)";
+    } else if (historyHasPriorAnalysis) {
+      userMessage += "\n\n(Your prior credit report analysis is in the conversation history above. Reference it to fulfill this request.)";
     }
 
     try {
