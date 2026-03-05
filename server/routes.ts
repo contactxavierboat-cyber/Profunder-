@@ -1421,7 +1421,13 @@ INQUIRY HANDLING (CRITICAL):
 - If no opened tradeline detected: label as "Standalone Inquiry (no new account detected)"
 - Default inquiry status: "Unrecognized — user confirmation required"
 - Only label "Not authorized" AFTER user attestation.
-- Inquiries are dispute-eligible when: user attests non-authorization, OR permissible purpose cannot be validated, OR identity mismatch indicators exist.
+- Inquiries are dispute-eligible when ANY of these conditions apply:
+  1. User attests non-authorization
+  2. Permissible purpose cannot be validated
+  3. Identity mismatch indicators exist
+  4. No corresponding tradeline was opened (standalone inquiry)
+  5. INQUIRY VELOCITY / CLUSTERING: When multiple inquiries from the same creditor or industry appear within a short window (e.g., 2+ from same company, or 3+ inquiries within 14-30 days), these are disputable on the basis of "impermissible purpose" or "unauthorized — no consumer-initiated application on file." Flag each clustered inquiry individually as a negative item with disputeBasis "Impermissible Purpose" or "Not Authorized" and note the velocity pattern in the issue description (e.g., "3 inquiries within 14 days — potential unauthorized batch pull" or "Duplicate inquiry from same creditor within 30 days").
+- ALL hard inquiries should be included as negativeItems in the REPAIR_DATA block — even if the user has not yet attested. Set attestationRequired: true so they can confirm authorization status in the UI. Inquiries with velocity patterns should have standaloneInquiry: true.
 - For each inquiry in negativeItems, set: furnisherName = the ACTUAL company name from the report (e.g., "CAPITAL ONE", "SYNCHRONY BANK"), dates.inquiryDate = the ACTUAL date from the report (e.g., "01/15/2025"), NOT placeholder text.
 
 IMPORTANT: The REPAIR_DATA block must contain EVERY negative item found — not just the top ones. Include late payments, collections, charge-offs, inquiries, personal info errors, duplicates, and any other adverse entries. This data populates the Repair Center UI where users manage their disputes.
