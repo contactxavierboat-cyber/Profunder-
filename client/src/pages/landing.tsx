@@ -1641,6 +1641,38 @@ function PerfectProfileTab({ aisReport }: { aisReport: MissionData | null }) {
         </div>
       </div>
 
+      <div className="rounded-lg border border-[#e8e8e8] bg-[#fafafa] p-3">
+        <p className="text-[9px] font-semibold text-[#333] mb-1.5">What is the Perfect Profile?</p>
+        <p className="text-[8px] text-[#666] leading-[1.6] mb-2">The Perfect Profile is the minimum fundable credit structure lenders evaluate before extending capital. Meeting these benchmarks signals institutional readiness — your file is positioned for approval, not just inquiry.</p>
+
+        <p className="text-[8px] font-semibold text-[#555] uppercase tracking-wider mb-1.5">Fundable Benchmarks</p>
+        <div className="space-y-1">
+          {[
+            { marker: "2 Primary Revolving Accounts", note: "Credit cards or lines of credit in your name" },
+            { marker: "1 Primary Installment Account", note: "Auto loan, personal loan, or credit builder" },
+            { marker: "$7,000+ Limit Per Revolver", note: "Demonstrates lender confidence in your capacity" },
+            { marker: "< 5% Aggregate Utilization", note: "Low balances relative to total available credit" },
+            { marker: "2+ Years Average Account Age", note: "Shows stability and responsible management history" },
+            { marker: "All Accounts Current", note: "No late payments, collections, or charge-offs" },
+            { marker: "Primary Ownership", note: "Accounts must be in your name — AU accounts don't count toward slots" },
+          ].map((b, i) => (
+            <div key={i} className="flex items-start gap-2">
+              <div className="w-[10px] h-[10px] rounded-[2px] bg-[#1a1a2e] flex items-center justify-center flex-shrink-0 mt-[1px]">
+                <svg width="6" height="6" viewBox="0 0 10 10" fill="none"><path d="M2 5l2.5 2.5L8 3" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
+              </div>
+              <div className="min-w-0">
+                <p className="text-[8px] text-[#333] font-semibold leading-tight">{b.marker}</p>
+                <p className="text-[7px] text-[#999] leading-[1.4]">{b.note}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div className="mt-2.5 pt-2 border-t border-[#e0e0e0]">
+          <p className="text-[7px] text-[#888] leading-[1.6]">Your accounts below are cross-referenced against these benchmarks. Green checks indicate criteria met. Unfilled slots show what's still needed to reach a fundable profile.</p>
+        </div>
+      </div>
+
       <div>
         <p className="text-[8px] uppercase tracking-[0.15em] text-[#999] font-semibold mb-1.5 px-0.5">Revolving Accounts</p>
         <div className="space-y-1.5">
