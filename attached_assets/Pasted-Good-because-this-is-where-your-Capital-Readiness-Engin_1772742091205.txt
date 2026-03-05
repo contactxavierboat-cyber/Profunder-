@@ -1,0 +1,238 @@
+Good — because this is where your Capital Readiness Engine becomes a true underwriting simulator, not just analytics.
+
+Banks don’t randomly assign limits. Most issuers run a capacity model that determines your exposure ceiling before deciding the limit of each card.
+
+I’ll show you the simplified structure used across most banks.
+
+⸻
+
+Core Concept: Total Exposure Capacity
+
+Banks first estimate the maximum unsecured credit exposure they are comfortable giving you.
+
+Then they allocate limits from that pool.
+
+Think of it like this:
+
+Total Exposure Capacity → split across cards.
+
+Example:
+
+Estimated capacity = $60,000
+
+Bank may approve:
+
+• $12k card
+• $10k card
+• $15k card
+• $8k card
+• $15k card
+
+Total ≈ $60k
+
+Your engine is already modeling this well.
+
+⸻
+
+Simplified Exposure Formula
+
+A rough underwriting structure looks like:
+
+Exposure Capacity ≈
+Income × Risk Multiplier × Profile Strength
+
+Where:
+
+Income = verified or estimated income
+Risk multiplier = lender policy
+Profile strength = credit structure
+
+⸻
+
+Example
+
+Income: $90,000
+
+Risk multiplier: 0.5–0.8
+
+Capacity:
+
+$45k – $72k total exposure
+
+Then underwriting adjusts for profile.
+
+⸻
+
+The Real Factors Used
+
+These are the five metrics almost every issuer uses.
+
+Your engine should model these.
+
+⸻
+
+1. Revolver Utilization
+
+Ideal: 1–9%
+
+10–29% = acceptable
+
+30%+ = suppressor
+
+80%+ = severe risk signal
+
+Your example:
+
+87% utilization → severe suppressor.
+
+This can reduce limits 50–80%.
+
+⸻
+
+2. Average Limit Strength
+
+Banks care about what other lenders already trust you with.
+
+Example:
+
+3 cards
+
+$300
+$700
+$1000
+
+Average limit = $666
+
+Bank thinks:
+
+“Other lenders don’t trust this file.”
+
+Now compare:
+
+$8k
+$10k
+$12k
+
+Average limit = $10k
+
+Now approval probability skyrockets.
+
+⸻
+
+3. Tradeline Depth
+
+Most issuers want:
+
+5–8 active accounts
+
+Fewer than 4 → thin file.
+
+Your UI already references this.
+
+⸻
+
+4. Account Age Stability
+
+Average age:
+
+< 1 year → high risk
+2–4 years → stable
+5+ years → strong
+
+⸻
+
+5. Inquiry Velocity
+
+This we already covered.
+
+Too many inquiries signals active credit seeking.
+
+⸻
+
+How Banks Decide Individual Card Limits
+
+Once capacity is determined, the limit often follows this structure:
+
+Typical bank rule:
+
+New card limit ≈ 60–120% of your highest existing card
+
+Example:
+
+Highest card = $8k
+
+New approval likely:
+
+$5k – $10k
+
+Rarely higher unless income is very strong.
+
+⸻
+
+Why This Matters for Your Engine
+
+Your Funding Strategy Matrix can model this.
+
+Example output:
+
+Maximum Modeled Exposure: $60,000
+
+Limit Matching Potential:
+
+Card 1: $10k–$12k
+Card 2: $8k–$10k
+Card 3: $8k–$10k
+Card 4: $12k–$15k
+Card 5: $10k–$12k
+
+That makes your system look like real underwriting intelligence.
+
+⸻
+
+One More Metric That Would Make Your Platform Elite
+
+Add:
+
+Limit Matching Potential
+
+Example UI:
+
+Highest Existing Limit: $10,000
+
+Projected Approval Range:
+
+$8k – $12k
+
+If profile optimized:
+
+$12k – $18k
+
+This is how banks think.
+
+⸻
+
+Final Insight
+
+Your engine is already doing something powerful:
+
+You’re modeling fundability before application.
+
+That is exactly what most founders fail to understand.
+
+They apply blindly.
+
+Your platform tells them:
+
+• When to apply
+• How much they can get
+• What to fix first
+
+That’s a capital intelligence system.
+
+⸻
+
+If you want, I can also show you something very useful:
+
+The 7 hidden underwriting triggers that instantly cause bank denials, even with a high credit score.
+
+Most people never see them coming.

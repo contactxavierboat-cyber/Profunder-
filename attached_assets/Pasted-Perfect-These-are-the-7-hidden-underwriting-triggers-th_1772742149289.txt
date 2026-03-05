@@ -1,0 +1,187 @@
+Perfect. These are the 7 hidden underwriting triggers that cause denials even when someone has a high credit score. This is exactly the type of intelligence your Capital Readiness Engine should detect.
+
+Most people think score = approval.
+Banks actually evaluate risk signals.
+
+⸻
+
+1. Inquiry Velocity (Credit Seeking Behavior)
+
+Too many recent inquiries signals financial stress or credit stacking.
+
+Typical lender tolerance:
+
+• 0–2 inquiries / 90 days → safe
+• 3–5 inquiries / 90 days → caution
+• 6+ inquiries / 90 days → high denial probability
+
+Example your engine could show:
+
+Velocity Risk: High
+7 inquiries in last 60 days
+
+⸻
+
+2. Revolver Utilization Spikes
+
+Even one card near max can trigger denial.
+
+Example:
+
+Card 1: $10k limit
+Balance: $8,700
+
+Utilization = 87%
+
+Even if overall utilization looks fine, banks see card-level risk.
+
+Your engine should flag:
+
+Revolver Concentration Risk
+
+⸻
+
+3. Thin Primary File
+
+Authorized user accounts can inflate score but not trust.
+
+Banks prefer:
+
+• 5–8 primary accounts
+
+Risk trigger:
+
+• 3 or fewer primary tradelines
+
+Your UI already references this — which is good.
+
+⸻
+
+4. Low Limit Profile
+
+Banks look at existing lender confidence.
+
+Example:
+
+Credit score: 740
+Cards:
+
+• $500
+• $800
+• $1200
+
+Even with good score, lenders think:
+
+Other banks don’t trust this borrower with real limits.
+
+Approval likelihood drops.
+
+⸻
+
+5. New Account Clustering
+
+Too many new accounts recently signals risk.
+
+Typical lender tolerance:
+
+• 0–1 new accounts in 6 months
+
+Risk trigger:
+
+• 3+ new accounts in 6 months
+
+Your engine could show:
+
+Account Age Stability: Weak
+
+⸻
+
+6. Profile Asymmetry
+
+Banks like balanced credit structures.
+
+Ideal structure:
+
+• Revolvers (credit cards)
+• Installment (loan)
+
+If someone only has credit cards:
+
+Underwriting models reduce approval probability.
+
+Your UI already mentions:
+
+1 primary installment account
+
+Which is correct.
+
+⸻
+
+7. Synthetic Profile Signals
+
+Rare but serious.
+
+Example triggers:
+
+• Many authorized user accounts
+• Rapid tradeline additions
+• Large limits suddenly appearing
+
+This can trigger fraud or synthetic identity checks.
+
+Your engine could flag:
+
+Profile Integrity Risk
+
+⸻
+
+How Your Engine Could Display This
+
+Add a module:
+
+Underwriting Risk Signals
+
+Inquiry Velocity → High
+Revolver Concentration → Elevated
+Tradeline Depth → Thin
+Profile Balance → Acceptable
+
+Overall Risk Status: Moderate
+
+⸻
+
+Why This Matters
+
+Most credit tools show:
+
+Score
+Utilization
+Accounts
+
+Banks actually model risk triggers.
+
+By detecting these 7 signals, your system becomes much closer to a real underwriting model.
+
+⸻
+
+One Feature That Would Make Your Platform Wildly Powerful
+
+Add a Denial Simulation.
+
+Example:
+
+If you applied today:
+
+Probability of approval: 42%
+
+Primary denial drivers:
+
+• Inquiry velocity
+• Revolver utilization
+• Thin tradeline depth
+
+⸻
+
+If you want, I can also show you something extremely useful:
+
+The 5 banks with the most predictable approval algorithms (which makes them perfect for funding strategy engines).
