@@ -1113,6 +1113,42 @@ Top Approval Suppressors:
 2. [suppressor]
 3. [suppressor]
 
+STRATEGY_DATA_START
+{
+  "steps": [
+    {"step": 1, "action": "[Most impactful action to take first]", "impact": "[Expected improvement, e.g. 'Approval odds +15%']", "timeframe": "[e.g. 'Immediate' or '30 days' or '90 days']"},
+    {"step": 2, "action": "[Second action]", "impact": "[Expected improvement]", "timeframe": "[timeframe]"},
+    {"step": 3, "action": "[Third action]", "impact": "[Expected improvement]", "timeframe": "[timeframe]"}
+  ],
+  "currentOdds": [current approval probability 0-100 based on profile],
+  "projectedOdds": [projected approval probability after all steps completed],
+  "currentFunding": "[current estimated approval range, e.g. '$7,200 – $14,400']",
+  "projectedFunding": "[projected funding after optimization, e.g. '$14,400 – $28,800']",
+  "timeline": [
+    {"months": 0, "label": "Today", "approvalOdds": [current odds], "change": "[current state summary]"},
+    {"months": 3, "label": "3 Months", "approvalOdds": [projected at 3mo], "change": "[what changes by then]"},
+    {"months": 6, "label": "6 Months", "approvalOdds": [projected at 6mo], "change": "[what changes by then]"},
+    {"months": 12, "label": "12 Months", "approvalOdds": [projected at 12mo], "change": "[what changes by then]"}
+  ],
+  "fundingMatches": [
+    {"lender": "[Bank name]", "likelihood": "[High|Medium|Low]", "reason": "[Why this lender fits the profile]"},
+    {"lender": "[Bank name]", "likelihood": "[likelihood]", "reason": "[reason]"},
+    {"lender": "[Bank name]", "likelihood": "[likelihood]", "reason": "[reason]"}
+  ]
+}
+STRATEGY_DATA_END
+
+STRATEGY DATA RULES:
+- Output STRATEGY_DATA block on EVERY credit report analysis — this is mandatory
+- steps: 3-5 ordered actions the user should take, most impactful first
+- currentOdds: calculate from AIS score, utilization, inquiries, derogatories — estimate real approval probability
+- projectedOdds: what odds become after all steps are completed
+- currentFunding / projectedFunding: realistic dollar ranges based on highest limit and match rates
+- timeline: 4 milestones showing projected improvement over time. Months 0 = today's state. Each milestone shows what metric improves and new approval odds
+- fundingMatches: 3-5 real lenders that match the user's current or near-future profile. Use actual bank names (Chase, Capital One, Discover, American Express, Bank of America, Wells Fargo, Citi, US Bank, etc.). Base matching on: minimum credit score thresholds, inquiry tolerance, account age preferences, utilization requirements. Likelihood = High if profile meets most criteria, Medium if close, Low if stretch
+- All numbers must be realistic — do not inflate. Base on actual data from the report
+- NEVER use placeholder brackets like [amount] — use actual computed values
+
 Then write your verdict — 2-3 sentences max. Sound like a real operator protecting the file. State whether they are fundable or not, the current phase, and the key structural reasons. No numbers, no scores, no data regurgitation in this text. Do not label it "Verdict:".
 
 Then output dispute items — THIS IS CRITICAL AND NON-NEGOTIABLE. You MUST scan EVERY SINGLE LINE of the uploaded document from top to bottom. Do NOT stop early. Do NOT summarize. Do NOT group multiple accounts into one entry. Each account with any negative mark gets its own separate dispute entry.
@@ -3175,6 +3211,235 @@ CRITICAL: The following data was previously extracted from the user's credit rep
     } catch (error: any) {
       console.error("PDF generation error:", error);
       res.status(500).json({ error: "Failed to generate dispute letters" });
+    }
+  });
+
+  app.post("/api/generate-document", async (req, res) => {
+    try {
+      const body = z.object({
+        documentType: z.enum(["cfpb_complaint", "goodwill_letter", "identity_theft_affidavit", "bureau_escalation"]),
+        creditor: z.string().optional(),
+        bureau: z.string().optional(),
+        accountNumber: z.string().optional(),
+        issue: z.string().optional(),
+        userInfo: z.object({
+          fullName: z.string().optional(),
+          address: z.string().optional(),
+          dob: z.string().optional(),
+          ssn4: z.string().optional(),
+        }).optional(),
+      }).parse(req.body);
+
+      const { documentType, creditor, bureau, accountNumber, issue, userInfo } = body;
+      const today = new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
+      const userName = userInfo?.fullName || "Consumer";
+      const userAddr = userInfo?.address || "";
+      const userDob = userInfo?.dob || "";
+      const userSsn4 = userInfo?.ssn4 || "";
+
+      const PDFDocument = (await import("pdfkit")).default;
+      const doc = new PDFDocument({ size: "LETTER", margins: { top: 72, bottom: 72, left: 72, right: 72 } });
+      const chunks: Buffer[] = [];
+      doc.on("data", (c: Buffer) => chunks.push(c));
+      const pdfReady = new Promise<Buffer>((resolve) => doc.on("end", () => resolve(Buffer.concat(chunks))));
+
+      doc.rect(0, 0, doc.page.width, doc.page.height).fill("#fafafa");
+      doc.font("Helvetica-Bold").fontSize(10).fillColor("#1a1a2e")
+        .text("PROFUNDR", 72, 40, { align: "left" });
+      doc.font("Helvetica").fontSize(7).fillColor("#999999")
+        .text("Capital Intelligence System", 72, 52);
+      doc.moveDown(3);
+
+      if (userName) {
+        doc.font("Helvetica").fontSize(9).fillColor("#333333").text(userName);
+        if (userAddr) doc.text(userAddr);
+        if (userDob) doc.text(`Date of Birth: ${userDob}`);
+        if (userSsn4) doc.text(`SSN (Last 4): ***-**-${userSsn4}`);
+        doc.moveDown(0.5);
+        doc.text(`Date: ${today}`);
+        doc.moveDown(1);
+      }
+
+      if (documentType === "cfpb_complaint") {
+        doc.font("Helvetica-Bold").fontSize(14).fillColor("#1a1a2e")
+          .text("CFPB Complaint", { align: "center" });
+        doc.moveDown(0.3);
+        doc.font("Helvetica").fontSize(8).fillColor("#888888")
+          .text("Consumer Financial Protection Bureau Filing", { align: "center" });
+        doc.moveDown(1.5);
+
+        const targetBureau = bureau || "Consumer Reporting Agency";
+        const targetCreditor = creditor || "Furnisher";
+
+        doc.font("Helvetica-Bold").fontSize(10).fillColor("#333333").text("To:");
+        doc.font("Helvetica").fontSize(9).fillColor("#444444")
+          .text("Consumer Financial Protection Bureau")
+          .text("P.O. Box 4503")
+          .text("Iowa City, Iowa 52244");
+        doc.moveDown(1);
+
+        doc.font("Helvetica-Bold").fontSize(10).fillColor("#333333").text("RE: Formal Complaint Against " + targetBureau);
+        if (creditor) doc.text("Regarding Account with: " + targetCreditor);
+        if (accountNumber) doc.text("Account Number: " + accountNumber);
+        doc.moveDown(1);
+
+        doc.font("Helvetica").fontSize(9).fillColor("#333333").text(
+          `I am filing this complaint because ${targetBureau} has failed to comply with the Fair Credit Reporting Act (FCRA) in its handling of my consumer file.`, { lineGap: 3 }
+        );
+        doc.moveDown(0.5);
+        doc.text(`Specifically, ${issue || "inaccurate information continues to be reported on my consumer file despite previous disputes and requests for investigation."}`, { lineGap: 3 });
+        doc.moveDown(0.5);
+        doc.text("Under Section 611(a) of the FCRA (15 U.S.C. § 1681i), consumer reporting agencies must conduct a reasonable reinvestigation of disputed information within 30 days. I have previously disputed this information, and the agency has either failed to investigate, failed to correct the information, or failed to provide adequate documentation of its investigation procedures.", { lineGap: 3 });
+        doc.moveDown(0.5);
+        doc.text("Under Section 607(b) of the FCRA (15 U.S.C. § 1681e(b)), consumer reporting agencies must follow reasonable procedures to assure maximum possible accuracy of consumer information. The continued reporting of disputed or unverified information violates this requirement.", { lineGap: 3 });
+        doc.moveDown(0.5);
+        doc.text("I request that the CFPB investigate this matter and take appropriate enforcement action. I also request that the consumer reporting agency:", { lineGap: 3 });
+        doc.moveDown(0.3);
+        doc.text("1. Immediately delete or correct the disputed information");
+        doc.text("2. Provide me with the method of verification used in any prior investigation");
+        doc.text("3. Send me an updated copy of my consumer report reflecting the correction");
+        doc.moveDown(1);
+        doc.text("I certify that the information provided in this complaint is true and accurate to the best of my knowledge.");
+        doc.moveDown(1.5);
+        doc.text("Respectfully,");
+        doc.moveDown(0.5);
+        doc.text(userName);
+
+      } else if (documentType === "goodwill_letter") {
+        doc.font("Helvetica-Bold").fontSize(14).fillColor("#1a1a2e")
+          .text("Goodwill Adjustment Request", { align: "center" });
+        doc.moveDown(0.3);
+        doc.font("Helvetica").fontSize(8).fillColor("#888888")
+          .text("Request for Removal of Negative Mark", { align: "center" });
+        doc.moveDown(1.5);
+
+        const targetCreditor = creditor || "Creditor";
+        doc.font("Helvetica-Bold").fontSize(10).fillColor("#333333").text("To: " + targetCreditor);
+        if (accountNumber) doc.text("Account Number: " + accountNumber);
+        doc.moveDown(1);
+
+        doc.font("Helvetica").fontSize(9).fillColor("#333333").text(
+          `Dear ${targetCreditor} Customer Relations Department,`, { lineGap: 3 }
+        );
+        doc.moveDown(0.5);
+        doc.text(`I am writing to respectfully request a goodwill adjustment to my credit reporting for the account referenced above.`, { lineGap: 3 });
+        doc.moveDown(0.5);
+        if (issue) {
+          doc.text(`The negative mark in question is: ${issue}`, { lineGap: 3 });
+          doc.moveDown(0.5);
+        }
+        doc.text("I understand that this negative mark is technically accurate, and I take full responsibility for the oversight. However, I would like to explain the circumstances and ask for your consideration.", { lineGap: 3 });
+        doc.moveDown(0.5);
+        doc.text("I have been a loyal customer and have otherwise maintained a positive payment history. The late payment was due to circumstances beyond my normal control, and I have since taken steps to ensure this does not happen again, including setting up automatic payments.", { lineGap: 3 });
+        doc.moveDown(0.5);
+        doc.text("This negative mark is significantly impacting my ability to obtain favorable credit terms for important life goals. I would be extremely grateful if you would consider removing this mark as a goodwill gesture, given my overall positive relationship with your company.", { lineGap: 3 });
+        doc.moveDown(0.5);
+        doc.text("I understand that you are under no obligation to make this adjustment, and I appreciate any consideration you can give to my request.", { lineGap: 3 });
+        doc.moveDown(1.5);
+        doc.text("Sincerely,");
+        doc.moveDown(0.5);
+        doc.text(userName);
+
+      } else if (documentType === "identity_theft_affidavit") {
+        doc.font("Helvetica-Bold").fontSize(14).fillColor("#1a1a2e")
+          .text("Identity Theft Affidavit", { align: "center" });
+        doc.moveDown(0.3);
+        doc.font("Helvetica").fontSize(8).fillColor("#888888")
+          .text("FTC Identity Theft Report — 15 U.S.C. § 1681c-2", { align: "center" });
+        doc.moveDown(1.5);
+
+        doc.font("Helvetica").fontSize(9).fillColor("#333333").text(
+          `I, ${userName}, declare under penalty of perjury that the following statements are true and correct:`, { lineGap: 3 }
+        );
+        doc.moveDown(0.5);
+        doc.text("1. I am a victim of identity theft.");
+        doc.moveDown(0.3);
+        doc.text(`2. The following account(s) and/or information appearing on my consumer report were opened or modified fraudulently without my knowledge or authorization:`);
+        doc.moveDown(0.3);
+        if (creditor) doc.text(`   Creditor: ${creditor}`);
+        if (accountNumber) doc.text(`   Account Number: ${accountNumber}`);
+        if (issue) doc.text(`   Fraudulent Activity: ${issue}`);
+        if (bureau) doc.text(`   Reporting Bureau: ${bureau}`);
+        doc.moveDown(0.5);
+        doc.text("3. I did not authorize, participate in, or benefit from any transaction associated with the fraudulent account(s) listed above.");
+        doc.moveDown(0.3);
+        doc.text("4. Under Section 605B of the FCRA (15 U.S.C. § 1681c-2), I request that any consumer reporting agency that receives this affidavit block the reporting of any information identified as resulting from identity theft within 4 business days.");
+        doc.moveDown(0.3);
+        doc.text("5. Under Section 623(a)(6) of the FCRA (15 U.S.C. § 1681s-2(a)(6)), furnishers of information are prohibited from reporting information that has been identified as resulting from identity theft.");
+        doc.moveDown(0.5);
+        doc.text("I am submitting this affidavit along with a copy of my government-issued identification and proof of address as required.");
+        doc.moveDown(1);
+        doc.text("Agencies notified:");
+        doc.text("• Federal Trade Commission (FTC) — IdentityTheft.gov");
+        doc.text("• Consumer Financial Protection Bureau (CFPB)");
+        if (bureau) doc.text(`• ${bureau}`);
+        doc.moveDown(1.5);
+        doc.font("Helvetica-Bold").fontSize(9).text("Signature: ________________________");
+        doc.moveDown(0.3);
+        doc.font("Helvetica").fontSize(9).text(`Printed Name: ${userName}`);
+        doc.text(`Date: ${today}`);
+
+      } else if (documentType === "bureau_escalation") {
+        doc.font("Helvetica-Bold").fontSize(14).fillColor("#1a1a2e")
+          .text("Bureau Escalation Letter", { align: "center" });
+        doc.moveDown(0.3);
+        doc.font("Helvetica").fontSize(8).fillColor("#888888")
+          .text("Post-Investigation Escalation — FCRA §§ 611, 616, 617", { align: "center" });
+        doc.moveDown(1.5);
+
+        const targetBureau = bureau || "Consumer Reporting Agency";
+        const bureauAddresses: Record<string, string> = {
+          "Experian": "Experian\nP.O. Box 4500\nAllen, TX 75013",
+          "Equifax": "Equifax Information Services LLC\nP.O. Box 740256\nAtlanta, GA 30374",
+          "TransUnion": "TransUnion LLC\nConsumer Dispute Center\nP.O. Box 2000\nChester, PA 19016"
+        };
+        const addr = bureauAddresses[targetBureau] || targetBureau;
+
+        doc.font("Helvetica-Bold").fontSize(10).fillColor("#333333").text("To:");
+        doc.font("Helvetica").fontSize(9).fillColor("#444444").text(addr);
+        doc.moveDown(1);
+
+        doc.font("Helvetica-Bold").fontSize(10).fillColor("#333333")
+          .text("RE: Escalation — Failure to Conduct Reasonable Reinvestigation");
+        if (creditor) doc.text("Regarding: " + creditor);
+        if (accountNumber) doc.text("Account: " + accountNumber);
+        doc.moveDown(1);
+
+        doc.font("Helvetica").fontSize(9).fillColor("#333333").text(
+          `Dear ${targetBureau} Compliance Department,`, { lineGap: 3 }
+        );
+        doc.moveDown(0.5);
+        doc.text("I have previously submitted dispute(s) regarding the above-referenced account. Your agency responded by verifying the information as accurate without providing adequate evidence that a reasonable reinvestigation was conducted.", { lineGap: 3 });
+        doc.moveDown(0.5);
+        doc.text("Under Section 611(a)(1)(A) of the FCRA, you are required to conduct a reasonable reinvestigation to determine whether disputed information is inaccurate. A reasonable reinvestigation requires more than a cursory review or automated e-OSCAR verification.", { lineGap: 3 });
+        doc.moveDown(0.5);
+        doc.text("I hereby demand:", { lineGap: 3 });
+        doc.text("1. A detailed description of the reinvestigation procedures used, including the name and contact information of any person contacted");
+        doc.text("2. All documentation and records relied upon in your verification");
+        doc.text("3. The method of verification as required under Section 611(a)(6)(B)(iii)");
+        doc.text("4. If verification cannot be provided, immediate deletion of the disputed item(s)");
+        doc.moveDown(0.5);
+        if (issue) {
+          doc.text(`The specific issue: ${issue}`, { lineGap: 3 });
+          doc.moveDown(0.5);
+        }
+        doc.text("Please be advised that under Sections 616 and 617 of the FCRA (15 U.S.C. §§ 1681n, 1681o), consumer reporting agencies may be held liable for willful or negligent noncompliance, including actual damages, statutory damages up to $1,000, punitive damages, and attorney's fees.", { lineGap: 3 });
+        doc.moveDown(0.5);
+        doc.text("This letter serves as formal notice that failure to comply with the FCRA may result in legal action. I expect a substantive response within 15 business days.", { lineGap: 3 });
+        doc.moveDown(1.5);
+        doc.text("Respectfully,");
+        doc.moveDown(0.5);
+        doc.text(userName);
+      }
+
+      doc.end();
+      const pdfBuffer = await pdfReady;
+      const token = Date.now().toString(36) + Math.random().toString(36).slice(2, 10);
+      pendingPdfs.set(token, { buffer: pdfBuffer, created: Date.now() });
+      res.json({ downloadUrl: `/api/dispute-letters/${token}` });
+    } catch (error: any) {
+      console.error("Document generation error:", error);
+      res.status(500).json({ error: "Failed to generate document" });
     }
   });
 

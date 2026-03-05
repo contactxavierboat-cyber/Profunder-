@@ -75,6 +75,36 @@ interface TradeLine {
   paymentStatus: string;
 }
 
+interface StrategyStep {
+  step: number;
+  action: string;
+  impact: string;
+  timeframe: string;
+}
+
+interface TimelineMilestone {
+  months: number;
+  label: string;
+  approvalOdds: number;
+  change: string;
+}
+
+interface FundingMatch {
+  lender: string;
+  likelihood: string;
+  reason: string;
+}
+
+interface StrategyData {
+  steps: StrategyStep[];
+  currentOdds: number;
+  projectedOdds: number;
+  currentFunding: string;
+  projectedFunding: string;
+  timeline: TimelineMilestone[];
+  fundingMatches: FundingMatch[];
+}
+
 interface MissionData {
   approvalIndex: number | null;
   band: string | null;
@@ -88,6 +118,7 @@ interface MissionData {
   financialIdentity: FinancialIdentityData | null;
   projectedFunding: ProjectedFundingData | null;
   openTradelines: TradeLine[];
+  strategyData: StrategyData | null;
 }
 
 interface DisputeItem {
@@ -319,7 +350,40 @@ function parseSingleMessageData(content: string): MissionData {
     }
   }
 
-  return { approvalIndex, band, phase, bureauSource, pillarScores, suppressors, helping, hurting, bestNextMove, financialIdentity, projectedFunding, openTradelines };
+  let strategyData: StrategyData | null = null;
+  const strategyBlockMatch = content.match(/STRATEGY_DATA_START\s*([\s\S]*?)\s*STRATEGY_DATA_END/);
+  if (strategyBlockMatch) {
+    try {
+      const parsed = JSON.parse(strategyBlockMatch[1].trim());
+      if (parsed && (parsed.steps || parsed.timeline || parsed.fundingMatches)) {
+        strategyData = {
+          steps: (parsed.steps || []).map((s: any, i: number) => ({
+            step: s.step || i + 1,
+            action: s.action || "",
+            impact: s.impact || "",
+            timeframe: s.timeframe || "",
+          })),
+          currentOdds: parsed.currentOdds || 0,
+          projectedOdds: parsed.projectedOdds || 0,
+          currentFunding: parsed.currentFunding || "",
+          projectedFunding: parsed.projectedFunding || "",
+          timeline: (parsed.timeline || []).map((m: any) => ({
+            months: m.months || 0,
+            label: m.label || "",
+            approvalOdds: m.approvalOdds || 0,
+            change: m.change || "",
+          })),
+          fundingMatches: (parsed.fundingMatches || []).map((f: any) => ({
+            lender: f.lender || "",
+            likelihood: f.likelihood || "",
+            reason: f.reason || "",
+          })),
+        };
+      }
+    } catch {}
+  }
+
+  return { approvalIndex, band, phase, bureauSource, pillarScores, suppressors, helping, hurting, bestNextMove, financialIdentity, projectedFunding, openTradelines, strategyData };
 }
 
 function hasAnalysisData(data: MissionData): boolean {
@@ -374,7 +438,8 @@ function filterMarkdown(content: string): string {
   const cleaned = content
     .replace(/^---+$/gm, "")
     .replace(/^={3,}.*$/gm, "")
-    .replace(/REPAIR_DATA_START[\s\S]*?REPAIR_DATA_END/g, "");
+    .replace(/REPAIR_DATA_START[\s\S]*?REPAIR_DATA_END/g, "")
+    .replace(/STRATEGY_DATA_START[\s\S]*?STRATEGY_DATA_END/g, "");
   const lines = cleaned.split("\n");
   const filteredLines = lines.filter(l => {
     const t = l.trim();
@@ -1308,7 +1373,7 @@ function saveRepairData(data: RepairData) {
 }
 
 function filterRepairDataFromContent(content: string): string {
-  return content.replace(/REPAIR_DATA_START[\s\S]*?REPAIR_DATA_END/g, "").trim();
+  return content.replace(/REPAIR_DATA_START[\s\S]*?REPAIR_DATA_END/g, "").replace(/STRATEGY_DATA_START[\s\S]*?STRATEGY_DATA_END/g, "").trim();
 }
 
 function loadUserProfile(): UserProfile {
@@ -1591,6 +1656,141 @@ function TeamSection({ user, onOpenTeamChat, activeTeamChatId }: { user: any; on
         >
           <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M5 1v8M1 5h8" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" /></svg>
           Add Team Member
+        </button>
+      )}
+    </div>
+  );
+}
+
+function CapitalSimulator({ aisReport }: { aisReport: MissionData }) {
+  const tradelines = aisReport.openTradelines || [];
+  const revCards = tradelines.filter(t => /revolv|credit\s*card|loc\b|heloc/i.test(t.type) && /primary/i.test(t.ownership));
+  const instCards = tradelines.filter(t => /install|auto|student|mortgage|personal\s*loan/i.test(t.type) && /primary/i.test(t.ownership));
+  const limits = revCards.map(t => parseInt(t.limit.replace(/[^0-9]/g, ""))).filter(n => !isNaN(n) && n > 0);
+  const balances = revCards.map(t => parseInt(t.balance.replace(/[^0-9]/g, ""))).filter(n => !isNaN(n));
+  const totalLimit = limits.reduce((a, b) => a + b, 0);
+  const totalBal = balances.reduce((a, b) => a + b, 0);
+  const baseUtil = totalLimit > 0 ? Math.round((totalBal / totalLimit) * 100) : 30;
+  const slotsAvail = aisReport.projectedFunding?.inquirySlots ? parseInt(aisReport.projectedFunding.inquirySlots.replace(/[^0-9]/g, "") || "0") : 2;
+  const baseInq = Math.max(0, 5 - slotsAvail);
+  const baseRev = revCards.length;
+  const baseAge = (() => { const ages = tradelines.map(t => { const m = t.age.match(/(\d+)\s*yr/i); return m ? parseInt(m[1]) : 0; }); return ages.length > 0 ? Math.round(ages.reduce((a, b) => a + b, 0) / ages.length) : 2; })();
+  const highestLim = limits.length > 0 ? Math.max(...limits) : 5000;
+
+  const [simUtil, setSimUtil] = useState(baseUtil);
+  const [simInqRemove, setSimInqRemove] = useState(0);
+  const [simAddTradelines, setSimAddTradelines] = useState(0);
+  const [simAgeBoost, setSimAgeBoost] = useState(0);
+
+  const calcOdds = (util: number, inqRem: number, addTl: number, ageBst: number) => {
+    let odds = aisReport.strategyData?.currentOdds || (aisReport.approvalIndex || 50) * 0.7;
+    const utilDelta = baseUtil - util;
+    if (utilDelta > 0) odds += utilDelta * 0.5;
+    odds += inqRem * 4;
+    odds += addTl * 3;
+    odds += ageBst * 2;
+    return Math.min(95, Math.max(5, Math.round(odds)));
+  };
+
+  const calcFunding = (util: number, inqRem: number, addTl: number, ageBst: number) => {
+    let mult = 1.0;
+    const utilDelta = baseUtil - util;
+    if (utilDelta > 0) mult += utilDelta * 0.01;
+    mult += inqRem * 0.05;
+    mult += addTl * 0.08;
+    mult += ageBst * 0.03;
+    const low = Math.round(highestLim * 0.6 * mult);
+    const high = Math.round(highestLim * 1.2 * mult);
+    return `$${low.toLocaleString()} – $${high.toLocaleString()}`;
+  };
+
+  const currentOdds = calcOdds(baseUtil, 0, 0, 0);
+  const newOdds = calcOdds(simUtil, simInqRemove, simAddTradelines, simAgeBoost);
+  const currentFunding = calcFunding(baseUtil, 0, 0, 0);
+  const newFunding = calcFunding(simUtil, simInqRemove, simAddTradelines, simAgeBoost);
+  const hasChanges = simUtil !== baseUtil || simInqRemove > 0 || simAddTradelines > 0 || simAgeBoost > 0;
+
+  return (
+    <div className="rounded-lg border border-[#e8e8e8] bg-white p-3" data-testid="capital-simulator">
+      <div className="flex items-center gap-2 mb-2.5">
+        <div className="w-5 h-5 rounded-md bg-[#1a1a2e] flex items-center justify-center shrink-0">
+          <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2 8V5M5 8V3M8 8V1" stroke="white" strokeWidth="1.2" strokeLinecap="round"/></svg>
+        </div>
+        <p className="text-[9px] text-[#333] font-bold uppercase tracking-[0.08em]">Capital Simulator</p>
+      </div>
+      <p className="text-[8px] text-[#999] mb-3">Adjust the sliders to see how changes affect your approval chances</p>
+
+      <div className="space-y-3 mb-3">
+        <div>
+          <div className="flex items-center justify-between mb-1">
+            <span className="text-[8px] text-[#555] font-medium">Lower utilization to</span>
+            <span className="text-[9px] font-bold text-[#333]" style={{ fontVariantNumeric: "tabular-nums" }}>{simUtil}%</span>
+          </div>
+          <input type="range" min="1" max={Math.max(baseUtil, 50)} value={simUtil} onChange={(e) => setSimUtil(parseInt(e.target.value))} className="w-full h-1.5 rounded-full appearance-none cursor-pointer" style={{ background: `linear-gradient(to right, #2d6a4f ${((simUtil - 1) / (Math.max(baseUtil, 50) - 1)) * 100}%, #eee ${((simUtil - 1) / (Math.max(baseUtil, 50) - 1)) * 100}%)` }} data-testid="slider-utilization" />
+          <div className="flex justify-between text-[6px] text-[#bbb] mt-0.5">
+            <span>1%</span>
+            <span>Current: {baseUtil}%</span>
+          </div>
+        </div>
+
+        <div>
+          <div className="flex items-center justify-between mb-1">
+            <span className="text-[8px] text-[#555] font-medium">Remove inquiries</span>
+            <span className="text-[9px] font-bold text-[#333]" style={{ fontVariantNumeric: "tabular-nums" }}>{simInqRemove}</span>
+          </div>
+          <input type="range" min="0" max={Math.max(baseInq, 6)} value={simInqRemove} onChange={(e) => setSimInqRemove(parseInt(e.target.value))} className="w-full h-1.5 rounded-full appearance-none cursor-pointer" style={{ background: `linear-gradient(to right, #2d6a4f ${(simInqRemove / Math.max(baseInq, 6)) * 100}%, #eee ${(simInqRemove / Math.max(baseInq, 6)) * 100}%)` }} data-testid="slider-inquiries" />
+          <div className="flex justify-between text-[6px] text-[#bbb] mt-0.5">
+            <span>0</span>
+            <span>Current: {baseInq} inquiries</span>
+          </div>
+        </div>
+
+        <div>
+          <div className="flex items-center justify-between mb-1">
+            <span className="text-[8px] text-[#555] font-medium">Add new credit accounts</span>
+            <span className="text-[9px] font-bold text-[#333]" style={{ fontVariantNumeric: "tabular-nums" }}>+{simAddTradelines}</span>
+          </div>
+          <input type="range" min="0" max="5" value={simAddTradelines} onChange={(e) => setSimAddTradelines(parseInt(e.target.value))} className="w-full h-1.5 rounded-full appearance-none cursor-pointer" style={{ background: `linear-gradient(to right, #2d6a4f ${(simAddTradelines / 5) * 100}%, #eee ${(simAddTradelines / 5) * 100}%)` }} data-testid="slider-tradelines" />
+          <div className="flex justify-between text-[6px] text-[#bbb] mt-0.5">
+            <span>0</span>
+            <span>Current: {baseRev} revolving + {instCards.length} installment</span>
+          </div>
+        </div>
+
+        <div>
+          <div className="flex items-center justify-between mb-1">
+            <span className="text-[8px] text-[#555] font-medium">Add months of age</span>
+            <span className="text-[9px] font-bold text-[#333]" style={{ fontVariantNumeric: "tabular-nums" }}>+{simAgeBoost * 6} months</span>
+          </div>
+          <input type="range" min="0" max="4" value={simAgeBoost} onChange={(e) => setSimAgeBoost(parseInt(e.target.value))} className="w-full h-1.5 rounded-full appearance-none cursor-pointer" style={{ background: `linear-gradient(to right, #2d6a4f ${(simAgeBoost / 4) * 100}%, #eee ${(simAgeBoost / 4) * 100}%)` }} data-testid="slider-age" />
+          <div className="flex justify-between text-[6px] text-[#bbb] mt-0.5">
+            <span>0</span>
+            <span>Current avg: {baseAge} years</span>
+          </div>
+        </div>
+      </div>
+
+      <div className={`rounded-md border p-2.5 transition-all ${hasChanges ? "bg-gradient-to-r from-[#f0f2f8] to-[#e8f5e9] border-[#c8e6c9]" : "bg-[#fafafa] border-[#eee]"}`}>
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <p className="text-[7px] text-[#999] font-medium mb-0.5">Approval Odds</p>
+            <div className="flex items-center gap-1.5">
+              <span className="text-[14px] font-bold" style={{ color: hasChanges && newOdds > currentOdds ? "#2d6a4f" : "#333", fontVariantNumeric: "tabular-nums" }}>{hasChanges ? newOdds : currentOdds}%</span>
+              {hasChanges && newOdds !== currentOdds && (
+                <span className="text-[8px] font-semibold text-[#2d6a4f]">+{newOdds - currentOdds}%</span>
+              )}
+            </div>
+          </div>
+          <div>
+            <p className="text-[7px] text-[#999] font-medium mb-0.5">Estimated Funding</p>
+            <p className="text-[10px] font-bold" style={{ color: hasChanges ? "#2d6a4f" : "#333", fontVariantNumeric: "tabular-nums" }}>{hasChanges ? newFunding : currentFunding}</p>
+          </div>
+        </div>
+      </div>
+
+      {hasChanges && (
+        <button onClick={() => { setSimUtil(baseUtil); setSimInqRemove(0); setSimAddTradelines(0); setSimAgeBoost(0); }} className="mt-2 text-[7px] text-[#999] hover:text-[#555] transition-colors" data-testid="button-reset-simulator">
+          Reset to current profile
         </button>
       )}
     </div>
@@ -2284,6 +2484,128 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
           })()}
         </div>
 
+        {aisReport?.strategyData && aisReport.strategyData.steps.length > 0 && (
+          <div className="rounded-lg border border-[#e8e8e8] bg-white p-3" data-testid="capital-strategy">
+            <div className="flex items-center gap-2 mb-2.5">
+              <div className="w-5 h-5 rounded-md bg-[#1a1a2e] flex items-center justify-center shrink-0">
+                <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M1 9l3-3 2 2 3-5" stroke="white" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+              </div>
+              <p className="text-[9px] text-[#333] font-bold uppercase tracking-[0.08em]">Your Action Plan</p>
+            </div>
+            <p className="text-[8px] text-[#999] mb-2.5">Follow these steps in order to improve your approval chances</p>
+            <div className="space-y-2 mb-3">
+              {aisReport.strategyData.steps.map((step) => (
+                <div key={step.step} className="rounded-md bg-[#f8f9fb] border border-[#e8e8ee] p-2.5">
+                  <div className="flex items-start gap-2">
+                    <div className="w-5 h-5 rounded-full bg-[#1a1a2e] flex items-center justify-center shrink-0 mt-0.5">
+                      <span className="text-[9px] font-bold text-white">{step.step}</span>
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-[9px] text-[#333] font-semibold mb-0.5">{step.action}</p>
+                      <div className="flex items-center gap-2">
+                        <span className="text-[7px] text-[#2d6a4f] font-semibold">{step.impact}</span>
+                        <span className="text-[7px] text-[#bbb]">·</span>
+                        <span className="text-[7px] text-[#999]">{step.timeframe}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+            {(aisReport.strategyData.currentOdds > 0 || aisReport.strategyData.projectedOdds > 0) && (
+              <div className="rounded-md bg-gradient-to-r from-[#f0f2f8] to-[#e8f5e9] border border-[#ddd] p-2.5">
+                <p className="text-[7px] text-[#999] font-semibold uppercase tracking-wider mb-1.5">Expected Results</p>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <p className="text-[7px] text-[#aaa] mb-0.5">Approval Odds</p>
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-[12px] font-bold text-[#c0392b]">{aisReport.strategyData.currentOdds}%</span>
+                      <svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4h8M6 1l3 3-3 3" stroke="#2d6a4f" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                      <span className="text-[12px] font-bold text-[#2d6a4f]">{aisReport.strategyData.projectedOdds}%</span>
+                    </div>
+                  </div>
+                  <div>
+                    <p className="text-[7px] text-[#aaa] mb-0.5">Estimated Limits</p>
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-[9px] font-bold text-[#c0392b]">{aisReport.strategyData.currentFunding}</span>
+                      <svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4h8M6 1l3 3-3 3" stroke="#2d6a4f" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                      <span className="text-[9px] font-bold text-[#2d6a4f]">{aisReport.strategyData.projectedFunding}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {aisReport?.strategyData && aisReport.strategyData.timeline.length > 0 && (
+          <div className="rounded-lg border border-[#e8e8e8] bg-white p-3" data-testid="funding-timeline">
+            <div className="flex items-center gap-2 mb-2.5">
+              <div className="w-5 h-5 rounded-md bg-[#1a1a2e] flex items-center justify-center shrink-0">
+                <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><circle cx="5" cy="5" r="4" stroke="white" strokeWidth="1" fill="none"/><path d="M5 3v2.5l1.5 1" stroke="white" strokeWidth="1" strokeLinecap="round"/></svg>
+              </div>
+              <p className="text-[9px] text-[#333] font-bold uppercase tracking-[0.08em]">Funding Timeline</p>
+            </div>
+            <p className="text-[8px] text-[#999] mb-3">Projected profile improvement over time</p>
+            <div className="relative pl-4">
+              <div className="absolute left-[7px] top-1 bottom-1 w-[2px] bg-gradient-to-b from-[#c0392b] via-[#c9a227] to-[#2d6a4f] rounded-full" />
+              <div className="space-y-3">
+                {aisReport.strategyData.timeline.map((m, i) => {
+                  const isLast = i === aisReport.strategyData!.timeline.length - 1;
+                  const dotColor = m.approvalOdds >= 70 ? "#2d6a4f" : m.approvalOdds >= 45 ? "#c9a227" : "#c0392b";
+                  return (
+                    <div key={i} className="relative">
+                      <div className="absolute -left-4 top-1 w-[10px] h-[10px] rounded-full border-2 bg-white" style={{ borderColor: dotColor }} />
+                      <div className={`rounded-md ${isLast ? "bg-[#e8f5e9] border-[#c8e6c9]" : "bg-[#fafafa] border-[#eee]"} border p-2`}>
+                        <div className="flex items-center justify-between mb-0.5">
+                          <span className="text-[8px] font-bold text-[#333]">{m.label}</span>
+                          <span className="text-[10px] font-bold" style={{ color: dotColor }}>{m.approvalOdds}%</span>
+                        </div>
+                        <p className="text-[7px] text-[#888] leading-[1.4]">{m.change}</p>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {hasAis && aisReport && (
+          <CapitalSimulator aisReport={aisReport} />
+        )}
+
+        {aisReport?.strategyData && aisReport.strategyData.fundingMatches.length > 0 && (
+          <div className="rounded-lg border border-[#e8e8e8] bg-white p-3" data-testid="funding-matches">
+            <div className="flex items-center gap-2 mb-2.5">
+              <div className="w-5 h-5 rounded-md bg-[#1a1a2e] flex items-center justify-center shrink-0">
+                <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><rect x="1" y="2" width="8" height="6" rx="1" stroke="white" strokeWidth="1" fill="none"/><path d="M1 4h8" stroke="white" strokeWidth="0.8"/></svg>
+              </div>
+              <p className="text-[9px] text-[#333] font-bold uppercase tracking-[0.08em]">Lender Matches</p>
+            </div>
+            <p className="text-[8px] text-[#999] mb-2.5">Lenders that match your profile based on their approval criteria</p>
+            <div className="space-y-1.5">
+              {aisReport.strategyData.fundingMatches.map((match, i) => {
+                const likelihoodColor = match.likelihood.toLowerCase() === "high" ? "#2d6a4f" : match.likelihood.toLowerCase() === "medium" ? "#c9a227" : "#c0392b";
+                return (
+                  <div key={i} className="rounded-md bg-[#fafafa] border border-[#eee] p-2 flex items-center gap-2.5">
+                    <div className="w-7 h-7 rounded-md bg-[#1a1a2e] flex items-center justify-center shrink-0">
+                      <span className="text-[9px] font-bold text-white">{match.lender.charAt(0)}</span>
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center justify-between mb-0.5">
+                        <span className="text-[9px] text-[#333] font-semibold">{match.lender}</span>
+                        <span className="text-[7px] font-bold px-1.5 py-[1px] rounded-full" style={{ color: likelihoodColor, backgroundColor: likelihoodColor + "15" }}>{match.likelihood}</span>
+                      </div>
+                      <p className="text-[7px] text-[#888] leading-[1.3]">{match.reason}</p>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
         <PerfectProfileTab aisReport={aisReport} />
 
         </>)}
@@ -2468,6 +2790,62 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
               </button>
             )}
           </>)}
+        </div>
+
+        <div className="mb-4">
+          <div className="flex items-center gap-2 mb-2">
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><rect x="1" y="2" width="10" height="8" rx="1" stroke="#333" strokeWidth="1" fill="none"/><path d="M3 5h6M3 7h4" stroke="#333" strokeWidth="0.7" strokeLinecap="round"/></svg>
+            <span className="text-[10px] font-semibold text-[#555] uppercase tracking-wider">Document Generator</span>
+          </div>
+          <p className="text-[8px] text-[#aaa] mb-2">Generate legal documents for your credit repair strategy</p>
+          <div className="grid grid-cols-2 gap-1.5">
+            {[
+              { type: "cfpb_complaint" as const, label: "CFPB Complaint", desc: "File with Consumer Financial Protection Bureau" },
+              { type: "goodwill_letter" as const, label: "Goodwill Letter", desc: "Request removal of negative mark" },
+              { type: "identity_theft_affidavit" as const, label: "ID Theft Affidavit", desc: "Report fraudulent accounts" },
+              { type: "bureau_escalation" as const, label: "Bureau Escalation", desc: "Escalate after failed dispute" },
+            ].map(docType => {
+              const firstNeg = repairData?.negativeItems?.[0];
+              return (
+                <button
+                  key={docType.type}
+                  onClick={async () => {
+                    try {
+                      const resp = await fetch("/api/generate-document", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                          documentType: docType.type,
+                          creditor: firstNeg?.furnisher || undefined,
+                          bureau: firstNeg?.bureau || undefined,
+                          accountNumber: firstNeg?.accountNumber || undefined,
+                          issue: firstNeg?.issue || undefined,
+                          userInfo: {
+                            fullName: userProfile.fullName,
+                            address: userProfile.address,
+                            dob: userProfile.dob,
+                            ssn4: userProfile.ssn4,
+                          },
+                        }),
+                      });
+                      const data = await resp.json();
+                      if (data.downloadUrl) {
+                        const link = document.createElement("a");
+                        link.href = data.downloadUrl;
+                        link.download = `profundr-${docType.type.replace(/_/g, "-")}.pdf`;
+                        link.click();
+                      }
+                    } catch {}
+                  }}
+                  className="rounded-lg border border-dashed border-[#ddd] bg-[#fcfcfc] hover:bg-white hover:border-[#ccc] transition-all p-2.5 text-left"
+                  data-testid={`button-generate-${docType.type}`}
+                >
+                  <p className="text-[9px] font-semibold text-[#333] mb-0.5">{docType.label}</p>
+                  <p className="text-[7px] text-[#999] leading-[1.3]">{docType.desc}</p>
+                </button>
+              );
+            })}
+          </div>
         </div>
 
         <div className="mb-4">
