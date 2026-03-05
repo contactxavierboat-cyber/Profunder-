@@ -1348,6 +1348,85 @@ FORMATTING RULES — CRITICAL:
 
 `;
 
+const CRDOS_PROMPT = `
+--- CAPITAL REPAIR & DISPUTE OPERATING SYSTEM (CRDOS) ---
+
+You also function as the Capital Repair & Dispute Operating System. When processing credit report data, you MUST additionally output a REPAIR_DATA block containing structured JSON.
+
+MISSION: Convert uploaded documents + credit report data into a complete, lender-grade repair workflow:
+1) Extract and normalize all identity, address, and account data.
+2) Cross-analyze all documents vs the credit report to detect discrepancies.
+3) Identify every negative/adverse item including inquiries with no opened account.
+4) Present dispute-eligible items with defensible dispute bases.
+5) Generate dispute letters using normalized data from all vault documents.
+
+NON-NEGOTIABLE GUARDRAILS:
+- Never state "fraud" as fact. Use: "Unrecognized" / "Potentially unauthorized (user attestation required)" / "Not authorized per user attestation".
+- Always require user attestation for claims of non-authorization.
+- Never fabricate documents. Only reference what exists in the vault.
+- If evidence missing, use verification/permissible purpose/method of verification dispute paths.
+- Only dispute on defensible bases: inaccurate, incomplete, unverifiable, mixed-file, duplicate, impermissible purpose, or not authorized per attestation.
+
+STRUCTURED OUTPUT — REPAIR_DATA BLOCK:
+After your normal analysis response (AIS, pillars, disputes, etc.), you MUST output a structured JSON block wrapped in REPAIR_DATA tags when analyzing a credit report. This block powers the Repair Center UI.
+
+Format:
+REPAIR_DATA_START
+{
+  "truthProfile": {
+    "fullName": "string",
+    "nameVariants": ["string"],
+    "dob": "string",
+    "currentAddress": "string",
+    "previousAddresses": ["string"],
+    "ssnLast4": "string",
+    "phones": ["string"],
+    "emails": ["string"],
+    "sourcesUsed": {"fieldName": ["document_type"]}
+  },
+  "discrepancies": [
+    {
+      "field": "string (name/dob/address/employer/phone)",
+      "creditReportValue": "string",
+      "documentValue": "string or null",
+      "severity": "Low|Med|High",
+      "disputeBasis": "inaccurate|mixed_file|incomplete",
+      "recommendedAction": "string"
+    }
+  ],
+  "negativeItems": [
+    {
+      "itemId": "string (unique)",
+      "bureau": "string",
+      "category": "Personal Info|Account|Inquiry|Duplicate|Public Record",
+      "furnisherName": "string",
+      "accountPartial": "string or null",
+      "dates": {"opened": "string|null", "reported": "string|null", "delinquency": "string|null", "inquiryDate": "string|null"},
+      "issue": "string (description of the negative item)",
+      "disputeBasis": "Inaccurate|Unverifiable|Impermissible Purpose|Not Authorized|Duplicate|Mixed File|Re-aging",
+      "evidenceAvailable": ["string (document types that support this)"],
+      "evidenceMissing": ["string (what would strengthen it)"],
+      "letterType": "Standard dispute|Permissible purpose demand|Method of verification|Personal info correction",
+      "attestationRequired": true/false,
+      "status": "New",
+      "standaloneInquiry": true/false
+    }
+  ]
+}
+REPAIR_DATA_END
+
+INQUIRY HANDLING (CRITICAL):
+- Detect ALL hard inquiries on each bureau report.
+- Determine whether each inquiry has a corresponding new tradeline opened within 30-90 days.
+- If no opened tradeline detected: label as "Standalone Inquiry (no new account detected)"
+- Default inquiry status: "Unrecognized — user confirmation required"
+- Only label "Not authorized" AFTER user attestation.
+- Inquiries are dispute-eligible when: user attests non-authorization, OR permissible purpose cannot be validated, OR identity mismatch indicators exist.
+
+IMPORTANT: The REPAIR_DATA block must contain EVERY negative item found — not just the top ones. Include late payments, collections, charge-offs, inquiries, personal info errors, duplicates, and any other adverse entries. This data populates the Repair Center UI where users manage their disputes.
+
+--- END CRDOS ---`;
+
 const MENTOR_PROFILES: Record<string, { name: string; keywords: string[]; systemPrompt: string; tagline: string; specialty: string }> = {
   nova_sage: {
     name: "NovaSage247",
@@ -2390,7 +2469,7 @@ ${truncated}
       }
     }
 
-    const systemPrompt = FUNDABILITY_ENGINE_PROMPT + teamContextPrompt + fileContext + userProfileContext + documentVaultContext;
+    const systemPrompt = FUNDABILITY_ENGINE_PROMPT + CRDOS_PROMPT + teamContextPrompt + fileContext + userProfileContext + documentVaultContext;
 
     if (extractedText) {
       console.log(`[Guest Chat] Document provided: ${extractedText.length} chars via ${extractionMethod}`);
@@ -2658,13 +2737,70 @@ ${truncated}
         }
       };
 
-      let letterIndex = 0;
+      drawPageBackground(doc);
+      drawWatermark(doc);
+      drawPdfLetterhead(doc);
+
+      doc.moveDown(2);
+      doc.font("Helvetica-Bold").fontSize(18).fillColor("#1a1a2e")
+        .text("Bureau Dispute Package", { align: "center" });
+      doc.moveDown(0.5);
+      doc.font("Helvetica").fontSize(10).fillColor("#666666")
+        .text(today, { align: "center" });
+      doc.moveDown(2);
+
+      doc.font("Helvetica").fontSize(10).fillColor("#333333");
+      const coverLines = [
+        ["Prepared For", userName],
+        ["Address", userAddress.replace(/\n/g, ", ")],
+        ["SSN", `XXX-XX-${ssnLast4}`],
+        ["DOB", dob],
+      ];
+      for (const [label, value] of coverLines) {
+        doc.font("Helvetica-Bold").text(`${label}: `, { continued: true }).font("Helvetica").text(value);
+        doc.moveDown(0.3);
+      }
+      doc.moveDown(1);
+
+      const totalItems = disputes.length;
+      const bureauSet = [...new Set(disputes.map(d => d.bureau || "All"))];
+      const catSet = [...new Set(Object.keys(grouped))];
+      doc.font("Helvetica-Bold").fontSize(11).fillColor("#1a1a2e").text("Package Summary");
+      doc.moveDown(0.3);
+      doc.font("Helvetica").fontSize(10).fillColor("#333333");
+      doc.text(`Total Items Disputed: ${totalItems}`);
+      doc.text(`Bureaus: ${bureauSet.join(", ")}`);
+      doc.text(`Categories: ${catSet.map(c => (categoryLabels[c] || categoryLabels["other"]).subject.split(" — ")[0]).join(", ")}`);
+      doc.text(`Evidence Documents: ${attachmentPages.length > 0 ? attachmentPages.map(a => a.name).join(", ") : "None attached"}`);
+      doc.moveDown(2);
+
       const categoryOrder = ["inquiry", "collection", "chargeoff", "late_payment", "student_loan", "other"];
+      doc.font("Helvetica-Bold").fontSize(11).fillColor("#1a1a2e").text("Table of Contents");
+      doc.moveDown(0.3);
+      doc.font("Helvetica").fontSize(9).fillColor("#555555");
+      let tocIndex = 1;
+      doc.text(`1. Cover Page`);
+      for (const cat of categoryOrder) {
+        if (!grouped[cat]) continue;
+        for (const [bureau] of Object.entries(grouped[cat])) {
+          tocIndex++;
+          const catLabel = (categoryLabels[cat] || categoryLabels["other"]).subject.split(" — ")[0];
+          doc.text(`${tocIndex}. ${catLabel} — ${bureau}`);
+        }
+      }
+      if (attachmentPages.length > 0) {
+        tocIndex++;
+        doc.text(`${tocIndex}. Evidence Appendix`);
+      }
+      tocIndex++;
+      doc.text(`${tocIndex}. Dispute Ledger`);
+
+      let letterIndex = 0;
 
       for (const cat of categoryOrder) {
         if (!grouped[cat]) continue;
         for (const [bureau, items] of Object.entries(grouped[cat])) {
-          if (letterIndex > 0) { skipNextPageEvent = true; doc.addPage(); }
+          skipNextPageEvent = true; doc.addPage();
           letterIndex++;
 
           const isInquiry = cat === "inquiry";
@@ -2896,6 +3032,48 @@ ${truncated}
             }
           }
         }
+      }
+
+      skipNextPageEvent = true;
+      doc.addPage();
+      drawPageBackground(doc);
+      drawWatermark(doc);
+      drawPdfLetterhead(doc);
+
+      doc.moveDown(1);
+      doc.font("Helvetica-Bold").fontSize(14).fillColor("#1a1a2e")
+        .text("Dispute Ledger", { align: "center" });
+      doc.moveDown(0.3);
+      doc.font("Helvetica").fontSize(8).fillColor("#888888")
+        .text(`Generated: ${today} | Items: ${disputes.length}`, { align: "center" });
+      doc.moveDown(1);
+
+      const ledgerColX = [65, 200, 320, 430];
+      const ledgerY = doc.y;
+      doc.font("Helvetica-Bold").fontSize(8).fillColor("#1a1a2e");
+      doc.text("Creditor/Requestor", ledgerColX[0], ledgerY);
+      doc.text("Issue", ledgerColX[1], ledgerY);
+      doc.text("Bureau", ledgerColX[2], ledgerY);
+      doc.text("Basis", ledgerColX[3], ledgerY);
+      doc.moveDown(0.5);
+      doc.moveTo(65, doc.y).lineTo(545, doc.y).strokeColor("#dddddd").lineWidth(0.5).stroke();
+      doc.moveDown(0.3);
+
+      doc.font("Helvetica").fontSize(7.5).fillColor("#444444");
+      for (const d of disputes) {
+        const rowY = doc.y;
+        if (rowY > doc.page.height - 80) {
+          skipNextPageEvent = true;
+          doc.addPage();
+          drawPageBackground(doc);
+          drawWatermark(doc);
+        }
+        doc.text(d.creditor.slice(0, 30), ledgerColX[0], doc.y, { width: 130 });
+        const currentY = doc.y - 10;
+        doc.text(d.issue.slice(0, 35), ledgerColX[1], currentY, { width: 115 });
+        doc.text(d.bureau, ledgerColX[2], currentY, { width: 105 });
+        doc.text(classifyDispute(d), ledgerColX[3], currentY, { width: 100 });
+        doc.moveDown(0.3);
       }
 
       doc.end();

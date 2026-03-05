@@ -373,7 +373,8 @@ function normalizeCase(text: string): string {
 function filterMarkdown(content: string): string {
   const cleaned = content
     .replace(/^---+$/gm, "")
-    .replace(/^={3,}.*$/gm, "");
+    .replace(/^={3,}.*$/gm, "")
+    .replace(/REPAIR_DATA_START[\s\S]*?REPAIR_DATA_END/g, "");
   const lines = cleaned.split("\n");
   const filteredLines = lines.filter(l => {
     const t = l.trim();
@@ -1180,6 +1181,92 @@ interface UserProfile {
   email?: string;
 }
 
+interface TruthProfile {
+  fullName: string;
+  nameVariants: string[];
+  dob: string;
+  currentAddress: string;
+  previousAddresses: string[];
+  ssnLast4: string;
+  phones: string[];
+  emails: string[];
+  sourcesUsed: Record<string, string[]>;
+}
+
+interface DiscrepancyItem {
+  field: string;
+  creditReportValue: string;
+  documentValue: string | null;
+  severity: "Low" | "Med" | "High";
+  disputeBasis: string;
+  recommendedAction: string;
+}
+
+interface NegativeItemEntry {
+  itemId: string;
+  bureau: string;
+  category: "Personal Info" | "Account" | "Inquiry" | "Duplicate" | "Public Record";
+  furnisherName: string;
+  accountPartial: string | null;
+  dates: { opened?: string | null; reported?: string | null; delinquency?: string | null; inquiryDate?: string | null };
+  issue: string;
+  disputeBasis: string;
+  evidenceAvailable: string[];
+  evidenceMissing: string[];
+  letterType: string;
+  attestationRequired: boolean;
+  status: "New" | "Attested" | "Packaged" | "Sent" | "Resolved";
+  standaloneInquiry: boolean;
+  userAttestation?: "recognized" | "not_authorized" | null;
+}
+
+interface RepairData {
+  truthProfile: TruthProfile | null;
+  discrepancies: DiscrepancyItem[];
+  negativeItems: NegativeItemEntry[];
+  parsedAt: number;
+}
+
+function parseRepairData(content: string): RepairData | null {
+  const startTag = "REPAIR_DATA_START";
+  const endTag = "REPAIR_DATA_END";
+  const startIdx = content.indexOf(startTag);
+  const endIdx = content.indexOf(endTag);
+  if (startIdx === -1 || endIdx === -1 || endIdx <= startIdx) return null;
+  const jsonStr = content.substring(startIdx + startTag.length, endIdx).trim();
+  try {
+    const parsed = JSON.parse(jsonStr);
+    return {
+      truthProfile: parsed.truthProfile || null,
+      discrepancies: Array.isArray(parsed.discrepancies) ? parsed.discrepancies : [],
+      negativeItems: Array.isArray(parsed.negativeItems) ? parsed.negativeItems.map((item: any) => ({
+        ...item,
+        status: item.status || "New",
+        userAttestation: null,
+      })) : [],
+      parsedAt: Date.now(),
+    };
+  } catch (e) {
+    console.warn("Failed to parse REPAIR_DATA:", e);
+    return null;
+  }
+}
+
+function loadRepairData(): RepairData | null {
+  try {
+    const raw = localStorage.getItem("profundr_repair_data");
+    return raw ? JSON.parse(raw) : null;
+  } catch { return null; }
+}
+
+function saveRepairData(data: RepairData) {
+  try { localStorage.setItem("profundr_repair_data", JSON.stringify(data)); } catch {}
+}
+
+function filterRepairDataFromContent(content: string): string {
+  return content.replace(/REPAIR_DATA_START[\s\S]*?REPAIR_DATA_END/g, "").trim();
+}
+
 function loadUserProfile(): UserProfile {
   try {
     const raw = localStorage.getItem("profundr_user_profile");
@@ -1709,7 +1796,7 @@ function PerfectProfileTab({ aisReport }: { aisReport: MissionData | null }) {
   );
 }
 
-function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, activeTeamChatId, aisReport, onOpenAis, userProfile, onUpdateProfile }: { docs: SavedDoc[]; onClose: () => void; onDelete: (id: string) => void; onSave: (doc: SavedDoc) => void; user: any; onOpenTeamChat?: (member: TeamMember) => void; activeTeamChatId?: number | null; aisReport: MissionData | null; onOpenAis: () => void; userProfile: UserProfile; onUpdateProfile: (p: UserProfile) => void }) {
+function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, activeTeamChatId, aisReport, onOpenAis, userProfile, onUpdateProfile, repairData, onUpdateRepairData, onSendChat }: { docs: SavedDoc[]; onClose: () => void; onDelete: (id: string) => void; onSave: (doc: SavedDoc) => void; user: any; onOpenTeamChat?: (member: TeamMember) => void; activeTeamChatId?: number | null; aisReport: MissionData | null; onOpenAis: () => void; userProfile: UserProfile; onUpdateProfile: (p: UserProfile) => void; repairData: RepairData | null; onUpdateRepairData: (data: RepairData) => void; onSendChat: (msg: string) => void }) {
   const docInputRef = useRef<HTMLInputElement>(null);
   const idInputRef = useRef<HTMLInputElement>(null);
   const bankInputRef = useRef<HTMLInputElement>(null);
@@ -1856,6 +1943,7 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
   };
 
   const [panelTab, setPanelTab] = useState<"command" | "documents">("command");
+  const [repairFilter, setRepairFilter] = useState<{ bureau: string; category: string }>({ bureau: "All", category: "All" });
 
   return (
     <div className="h-full flex flex-col bg-white border-r border-[#eee]" data-testid="docs-panel">
@@ -2089,10 +2177,185 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
         </>)}
 
         {panelTab === "documents" && (<>
+
+        {(() => {
+          const readyCount = [creditReports.length > 0, idDocs.length > 0, bankDocs.length > 0, residencyDocs.length > 0, !!(userProfile.fullName && userProfile.address)].filter(Boolean).length;
+          return (
+            <div className="mb-3 px-2.5 py-2 rounded-md bg-[#f8f9fb] border border-[#e8e8ee] flex items-center gap-2" data-testid="evidence-readiness">
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 1l5 3v4l-5 3-5-3V4l5-3z" stroke={readyCount >= 3 ? "#2d6a4f" : "#e07a5f"} strokeWidth="1" fill="none"/></svg>
+              <span className="text-[10px] text-[#555] flex-1">Evidence Readiness</span>
+              <div className="flex gap-0.5">
+                {[0,1,2,3,4].map(i => (
+                  <div key={i} className={`w-3 h-1.5 rounded-full ${i < readyCount ? "bg-[#2d6a4f]" : "bg-[#ddd]"}`} />
+                ))}
+              </div>
+              <span className="text-[9px] font-semibold text-[#888]" style={{ fontVariantNumeric: "tabular-nums" }}>{readyCount}/5</span>
+            </div>
+          );
+        })()}
+
+        {repairData && repairData.truthProfile && (
+          <div className="mb-4">
+            <div className="flex items-center gap-2 mb-2">
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="4" r="2.5" stroke="#333" strokeWidth="1" fill="none"/><path d="M2 10.5c0-2.2 1.8-4 4-4s4 1.8 4 4" stroke="#333" strokeWidth="1" strokeLinecap="round" fill="none"/></svg>
+              <span className="text-[10px] font-semibold text-[#555] uppercase tracking-wider">Truth Profile</span>
+            </div>
+            <div className="space-y-0.5 px-2.5 py-2 rounded-md bg-[#fafafa] border border-[#eee]">
+              <div className="text-[10px] text-[#333] font-medium">{repairData.truthProfile.fullName}</div>
+              {repairData.truthProfile.currentAddress && <div className="text-[9px] text-[#888]">{repairData.truthProfile.currentAddress}</div>}
+              {repairData.truthProfile.dob && <div className="text-[9px] text-[#888]">DOB: {repairData.truthProfile.dob}</div>}
+              {repairData.truthProfile.ssnLast4 && <div className="text-[9px] text-[#888]">SSN: ***-**-{repairData.truthProfile.ssnLast4}</div>}
+              {repairData.truthProfile.nameVariants.length > 1 && (
+                <div className="text-[9px] text-[#b0860f] mt-1">Name variants detected: {repairData.truthProfile.nameVariants.join(", ")}</div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {repairData && repairData.discrepancies.length > 0 && (
+          <div className="mb-4">
+            <div className="flex items-center gap-2 mb-2">
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 1l5 9H1l5-9z" stroke="#e07a5f" strokeWidth="1" fill="none"/><path d="M6 5v2M6 8.5v.5" stroke="#e07a5f" strokeWidth="1" strokeLinecap="round"/></svg>
+              <span className="text-[10px] font-semibold text-[#555] uppercase tracking-wider">Discrepancies</span>
+              <span className="text-[9px] text-[#e07a5f] ml-auto font-semibold">{repairData.discrepancies.length}</span>
+            </div>
+            <div className="space-y-1">
+              {repairData.discrepancies.map((d, i) => (
+                <div key={i} className="px-2.5 py-1.5 rounded-md bg-[#fef3f0] border border-[#f0d0c0]" data-testid={`discrepancy-${i}`}>
+                  <div className="flex items-center gap-1.5">
+                    <span className={`text-[7px] font-bold uppercase px-1 py-0.5 rounded ${d.severity === "High" ? "bg-[#e07a5f] text-white" : d.severity === "Med" ? "bg-[#f0ad4e] text-white" : "bg-[#ddd] text-[#555]"}`}>{d.severity}</span>
+                    <span className="text-[10px] font-medium text-[#333] capitalize">{d.field}</span>
+                  </div>
+                  <div className="mt-0.5 text-[9px] text-[#888]">Report: {d.creditReportValue}</div>
+                  {d.documentValue && <div className="text-[9px] text-[#2d6a4f]">Docs: {d.documentValue}</div>}
+                  <div className="text-[8px] text-[#aaa] mt-0.5">Basis: {d.disputeBasis}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        <div className="mb-4">
+          <div className="flex items-center gap-2 mb-2">
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><rect x="1" y="2" width="10" height="8" rx="1" stroke="#333" strokeWidth="1" fill="none"/><path d="M1 5h10" stroke="#333" strokeWidth="0.8"/><path d="M4 5v5M7 5v5" stroke="#333" strokeWidth="0.5"/></svg>
+            <span className="text-[10px] font-semibold text-[#555] uppercase tracking-wider">Dispute-Eligible Items</span>
+            {repairData && <span className="text-[9px] text-[#1a1a2e] ml-auto font-semibold">{repairData.negativeItems.length}</span>}
+          </div>
+
+          {!repairData || repairData.negativeItems.length === 0 ? (
+            <div className="px-3 py-4 rounded-md bg-[#fafafa] border border-[#eee] text-center">
+              <div className="text-[10px] text-[#888]">No dispute-eligible items detected yet.</div>
+              <div className="text-[9px] text-[#aaa] mt-1">Upload a credit report and run analysis to populate.</div>
+            </div>
+          ) : (<>
+            <div className="flex gap-1 mb-2">
+              <select value={repairFilter.bureau} onChange={e => setRepairFilter(f => ({ ...f, bureau: e.target.value }))} className="text-[9px] px-1.5 py-1 rounded border border-[#ddd] bg-white text-[#555]" data-testid="filter-bureau">
+                <option value="All">All Bureaus</option>
+                {[...new Set(repairData.negativeItems.map(n => n.bureau))].map(b => <option key={b} value={b}>{b}</option>)}
+              </select>
+              <select value={repairFilter.category} onChange={e => setRepairFilter(f => ({ ...f, category: e.target.value }))} className="text-[9px] px-1.5 py-1 rounded border border-[#ddd] bg-white text-[#555]" data-testid="filter-category">
+                <option value="All">All Categories</option>
+                {[...new Set(repairData.negativeItems.map(n => n.category))].map(c => <option key={c} value={c}>{c}</option>)}
+              </select>
+            </div>
+            <div className="space-y-1.5 max-h-[400px] overflow-y-auto">
+              {repairData.negativeItems
+                .filter(n => (repairFilter.bureau === "All" || n.bureau === repairFilter.bureau) && (repairFilter.category === "All" || n.category === repairFilter.category))
+                .map((item, i) => (
+                <div key={item.itemId || i} className="px-2.5 py-2 rounded-md bg-white border border-[#e8e8e8] hover:border-[#ccc] transition-colors" data-testid={`repair-item-${item.itemId}`}>
+                  <div className="flex items-start gap-1.5">
+                    <span className={`text-[7px] font-bold uppercase px-1 py-0.5 rounded mt-0.5 shrink-0 ${item.category === "Inquiry" ? "bg-[#6366f1] text-white" : item.category === "Account" ? "bg-[#e07a5f] text-white" : item.category === "Personal Info" ? "bg-[#f0ad4e] text-white" : "bg-[#888] text-white"}`}>
+                      {item.category === "Personal Info" ? "PI" : item.category === "Public Record" ? "PR" : item.category.slice(0, 3).toUpperCase()}
+                    </span>
+                    <div className="flex-1 min-w-0">
+                      <div className="text-[10px] font-medium text-[#333] truncate">{item.furnisherName}</div>
+                      <div className="text-[9px] text-[#888] truncate">{item.issue}</div>
+                      <div className="flex items-center gap-1.5 mt-1 flex-wrap">
+                        <span className="text-[8px] text-[#aaa]">{item.bureau}</span>
+                        {item.accountPartial && <span className="text-[8px] text-[#aaa]">...{item.accountPartial}</span>}
+                        <span className={`text-[7px] font-semibold uppercase px-1 py-0.5 rounded ${item.status === "New" ? "bg-[#eef] text-[#6366f1]" : item.status === "Attested" ? "bg-[#e8f5e9] text-[#2d6a4f]" : item.status === "Packaged" ? "bg-[#fff3e0] text-[#e65100]" : "bg-[#f5f5f5] text-[#888]"}`}>
+                          {item.userAttestation === "not_authorized" ? "Not Auth'd" : item.userAttestation === "recognized" ? "Recognized" : item.status}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex gap-1 mt-1.5">
+                    {item.attestationRequired && !item.userAttestation && (
+                      <>
+                        <button
+                          onClick={() => {
+                            if (!repairData) return;
+                            const updated = { ...repairData, negativeItems: repairData.negativeItems.map(n => n.itemId === item.itemId ? { ...n, userAttestation: "not_authorized" as const, status: "Attested" as const } : n) };
+                            onUpdateRepairData(updated);
+                          }}
+                          className="text-[8px] px-2 py-1 rounded bg-[#e07a5f] text-white font-semibold hover:bg-[#d06a4f] transition-colors"
+                          data-testid={`button-not-authorized-${item.itemId}`}
+                        >
+                          Not Authorized
+                        </button>
+                        <button
+                          onClick={() => {
+                            if (!repairData) return;
+                            const updated = { ...repairData, negativeItems: repairData.negativeItems.map(n => n.itemId === item.itemId ? { ...n, userAttestation: "recognized" as const, status: "Attested" as const } : n) };
+                            onUpdateRepairData(updated);
+                          }}
+                          className="text-[8px] px-2 py-1 rounded bg-[#eee] text-[#555] font-semibold hover:bg-[#ddd] transition-colors"
+                          data-testid={`button-recognized-${item.itemId}`}
+                        >
+                          I Recognize This
+                        </button>
+                      </>
+                    )}
+                    {(!item.attestationRequired || item.userAttestation) && item.userAttestation !== "recognized" && (
+                      <button
+                        onClick={() => {
+                          const disputeText = `Generate a dispute letter for this item: ${item.furnisherName} — ${item.issue} (${item.bureau}, basis: ${item.disputeBasis}${item.userAttestation === "not_authorized" ? ", user attests NOT AUTHORIZED" : ""})`;
+                          onSendChat(disputeText);
+                        }}
+                        className="text-[8px] px-2 py-1 rounded bg-[#1a1a2e] text-white font-semibold hover:bg-[#2a2a4e] transition-colors"
+                        data-testid={`button-generate-dispute-${item.itemId}`}
+                      >
+                        Generate Bureau Challenge
+                      </button>
+                    )}
+                  </div>
+                  <div className="flex gap-1 mt-1">
+                    {item.evidenceAvailable.length > 0 && (
+                      <span className="text-[7px] text-[#2d6a4f]">{item.evidenceAvailable.length} evidence</span>
+                    )}
+                    {item.evidenceMissing.length > 0 && (
+                      <span className="text-[7px] text-[#e07a5f]">{item.evidenceMissing.length} missing</span>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {repairData.negativeItems.filter(n => n.userAttestation !== "recognized").length > 0 && (
+              <button
+                onClick={() => {
+                  const eligible = repairData.negativeItems.filter(n => n.userAttestation !== "recognized");
+                  const needsAttestation = eligible.filter(n => n.attestationRequired && !n.userAttestation);
+                  if (needsAttestation.length > 0) {
+                    alert(`${needsAttestation.length} items need your attestation first. Mark inquiries as "Not Authorized" or "I Recognize This" before generating.`);
+                    return;
+                  }
+                  const summary = eligible.map(n => `- ${n.furnisherName}: ${n.issue} (${n.bureau})`).join("\n");
+                  onSendChat(`Generate dispute letters for ALL of the following items:\n${summary}`);
+                }}
+                className="mt-3 w-full py-2 rounded-md bg-[#1a1a2e] text-white text-[10px] font-semibold hover:bg-[#2a2a4e] transition-colors"
+                data-testid="button-generate-all-disputes"
+              >
+                Generate All Bureau Challenges ({repairData.negativeItems.filter(n => n.userAttestation !== "recognized").length})
+              </button>
+            )}
+          </>)}
+        </div>
+
         <div className="mb-4">
           <div className="flex items-center gap-2 mb-2">
             <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M3 1h6l2 3v6a1 1 0 01-1 1H2a1 1 0 01-1-1V4l2-3z" stroke="#333" strokeWidth="1" fill="none"/><path d="M4.5 6h3M4.5 8h2" stroke="#333" strokeWidth="0.8" strokeLinecap="round"/></svg>
-            <span className="text-[10px] font-semibold text-[#555] uppercase tracking-wider">Document Vault</span>
+            <span className="text-[10px] font-semibold text-[#555] uppercase tracking-wider">Evidence Vault</span>
             <span className="text-[9px] text-[#aaa] ml-auto" style={{ fontVariantNumeric: "tabular-nums" }}>{creditReports.length + idDocs.length + bankDocs.length + residencyDocs.length}</span>
           </div>
 
@@ -2602,6 +2865,7 @@ export default function LandingPage() {
       return saved ? JSON.parse(saved) : null;
     } catch { return null; }
   });
+  const [repairData, setRepairData] = useState<RepairData | null>(loadRepairData);
   const [showAisOverlay, setShowAisOverlay] = useState(false);
   const teamConvoLoaded = useRef(false);
   const teamChatLoaded = useRef(false);
@@ -3052,6 +3316,20 @@ export default function LandingPage() {
         });
       }
 
+      const parsedRepair = parseRepairData(responseContent);
+      if (parsedRepair) {
+        const merged = repairData ? {
+          ...parsedRepair,
+          negativeItems: parsedRepair.negativeItems.map(ni => {
+            const existing = repairData.negativeItems.find(e => e.itemId === ni.itemId);
+            return existing?.userAttestation ? { ...ni, userAttestation: existing.userAttestation, status: existing.status } : ni;
+          }),
+        } : parsedRepair;
+        setRepairData(merged);
+        saveRepairData(merged);
+      }
+      responseContent = filterRepairDataFromContent(responseContent);
+
       if (!user) {
         const newCount = previewCount + 1;
         setPreviewCount(newCount);
@@ -3209,7 +3487,7 @@ export default function LandingPage() {
         <>
           <div className="sm:hidden fixed inset-0 bg-black/30 z-40" onClick={() => setDocsOpen(false)} />
           <div className="fixed sm:relative z-50 sm:z-auto w-[340px] h-full shrink-0 transition-all" data-testid="docs-sidebar">
-            <DocsPanel docs={savedDocs} onClose={() => setDocsOpen(false)} onDelete={handleDeleteDoc} onSave={handleSaveDoc} user={user} onOpenTeamChat={handleOpenTeamChat} activeTeamChatId={activeTeamChat?.id} aisReport={aisReport} onOpenAis={() => setShowAisOverlay(true)} userProfile={userProfile} onUpdateProfile={handleUpdateProfile} />
+            <DocsPanel docs={savedDocs} onClose={() => setDocsOpen(false)} onDelete={handleDeleteDoc} onSave={handleSaveDoc} user={user} onOpenTeamChat={handleOpenTeamChat} activeTeamChatId={activeTeamChat?.id} aisReport={aisReport} onOpenAis={() => setShowAisOverlay(true)} userProfile={userProfile} onUpdateProfile={handleUpdateProfile} repairData={repairData} onUpdateRepairData={(data) => { setRepairData(data); saveRepairData(data); }} onSendChat={(msg) => { setDocsOpen(false); setTimeout(() => handleSend(msg), 100); }} />
           </div>
         </>
       )}
