@@ -1495,15 +1495,15 @@ function PerfectProfileTab({ aisReport }: { aisReport: MissionData | null }) {
     const isAU = /\bau\b|authorized/i.test(tl.ownership);
 
     const markers: AccountCard["markers"] = isRevolving ? [
-      { label: "Limit", ideal: "$7,000+", actual: tl.limit, met: !isNaN(limitNum) && limitNum >= 7000 },
-      { label: "Balance", ideal: "< 5% of limit", actual: utilizationForCard !== null ? `${utilizationForCard}%` : tl.balance, met: utilizationForCard !== null ? utilizationForCard <= 5 : false },
-      { label: "Age", ideal: "2+ years", actual: tl.age, met: ageYears >= 2 },
+      { label: "Limit", ideal: "$5,000+", actual: tl.limit, met: !isNaN(limitNum) && limitNum >= 5000 },
+      { label: "Balance", ideal: "< 10% of limit", actual: utilizationForCard !== null ? `${utilizationForCard}%` : tl.balance, met: utilizationForCard !== null ? utilizationForCard <= 9 : false },
+      { label: "Age", ideal: "3+ years", actual: tl.age, met: ageYears >= 3 },
       { label: "Status", ideal: "Current", actual: isClosed_ ? "Closed" : tl.paymentStatus, met: isClosed_ ? !/late|delinq|collection|charge/i.test(tl.paymentStatus) : isCurrent(tl.paymentStatus) },
       { label: "Ownership", ideal: "Primary", actual: isAU ? "Authorized User" : isPrimary ? "Primary" : tl.ownership, met: isPrimary },
     ] : [
       { label: "Amount", ideal: "$5,000+", actual: tl.limit, met: !isNaN(limitNum) && limitNum >= 5000 },
       { label: "Balance", ideal: "$0", actual: tl.balance, met: !isNaN(balNum) && balNum === 0 },
-      { label: "Age", ideal: "2+ years", actual: tl.age, met: ageYears >= 2 },
+      { label: "Age", ideal: "3+ years", actual: tl.age, met: ageYears >= 3 },
       { label: "Status", ideal: "Current", actual: isClosed_ ? "Closed" : tl.paymentStatus, met: isClosed_ ? !/late|delinq|collection|charge/i.test(tl.paymentStatus) : isCurrent(tl.paymentStatus) },
       { label: "Ownership", ideal: "Primary", actual: isAU ? "Authorized User" : isPrimary ? "Primary" : tl.ownership, met: isPrimary },
     ];
@@ -1526,7 +1526,7 @@ function PerfectProfileTab({ aisReport }: { aisReport: MissionData | null }) {
   const nonPrimaryInstCards = allCards.filter(c => c.category === "installment" && !isPrimaryOwnership(c.ownership) && !isAUOwnership(c.ownership));
   const otherCards = allCards.filter(c => c.category === "other" && !isAUOwnership(c.ownership));
 
-  const idealRevSlots = 2;
+  const idealRevSlots = 4;
   const idealInstSlots = 1;
   const filledPrimaryRevSlots = primaryRevCards.length;
   const filledPrimaryInstSlots = primaryInstCards.length;
@@ -1541,16 +1541,16 @@ function PerfectProfileTab({ aisReport }: { aisReport: MissionData | null }) {
   const accentColor = pct >= 80 ? "#2d6a4f" : pct >= 50 ? "#c9a227" : "#c0392b";
 
   const emptyRevSlotRows = [
-    { label: "Limit", ideal: "$7,000+" },
-    { label: "Balance", ideal: "< 5% of limit" },
-    { label: "Age", ideal: "2+ years" },
+    { label: "Limit", ideal: "$5,000+" },
+    { label: "Balance", ideal: "< 10% of limit" },
+    { label: "Age", ideal: "3+ years" },
     { label: "Status", ideal: "Current" },
     { label: "Ownership", ideal: "Primary" },
   ];
   const emptyInstSlotRows = [
     { label: "Amount", ideal: "$5,000+" },
     { label: "Balance", ideal: "$0" },
-    { label: "Age", ideal: "2+ years" },
+    { label: "Age", ideal: "3+ years" },
     { label: "Status", ideal: "Current" },
     { label: "Ownership", ideal: "Primary" },
   ];
@@ -1643,19 +1643,20 @@ function PerfectProfileTab({ aisReport }: { aisReport: MissionData | null }) {
 
       <div className="rounded-lg border border-[#e8e8e8] bg-[#fafafa] p-2.5">
         <p className="text-[9px] font-semibold text-[#333] mb-1">Institutional Credit Profile</p>
-        <p className="text-[8px] text-[#666] leading-[1.5] mb-2">The minimum fundable credit structure lenders evaluate before extending capital. Meeting these benchmarks signals institutional readiness — your file is positioned for approval, not just inquiry.</p>
+        <p className="text-[8px] text-[#666] leading-[1.5] mb-2">The minimum fundable credit structure lenders evaluate before extending first-round capital. These benchmarks mirror actual bank underwriting models — meeting them positions your file for $30K–$70K+ in approvals.</p>
 
         <p className="text-[8px] font-semibold text-[#555] uppercase tracking-wider mb-1">Fundable Benchmarks</p>
         <div className="space-y-0.5">
           {[
-            { marker: "2 Primary Revolving Accounts", note: "Credit cards or lines of credit in your name" },
-            { marker: "1 Primary Installment Account", note: "Auto loan, personal loan, or credit builder" },
-            { marker: "$7,000+ Limit Per Revolver", note: "Demonstrates lender confidence in your capacity" },
-            { marker: "< 5% Aggregate Utilization", note: "Low balances relative to total available credit" },
-            { marker: "2+ Years Average Account Age", note: "Shows stability and responsible management history" },
-            { marker: "All Accounts Current", note: "No late payments, collections, or charge-offs" },
-            { marker: "Primary Ownership", note: "Accounts must be in your name — AU accounts don't count toward slots" },
-            { marker: "0–2 Recent Inquiries (12 Months)", note: "Maintains approval probability across major lenders" },
+            { marker: "3–5 Primary Revolving Accounts", note: "Credit cards or lines of credit in your name" },
+            { marker: "1–2 Primary Installment Accounts", note: "Auto loan, personal loan, or credit builder" },
+            { marker: "$5,000–$15,000 Limit Per Revolver", note: "Highest card $10K+ enables limit matching for new approvals" },
+            { marker: "$25,000+ Total Revolving Limits", note: "Signals lender confidence — other banks trust this borrower" },
+            { marker: "1–9% Aggregate Utilization", note: "No individual card above 30% — signals financial control" },
+            { marker: "3+ Years Average Account Age", note: "Oldest account 5+ years ideal — new profiles trigger risk algorithms" },
+            { marker: "100% On-Time Payment History", note: "No collections, charge-offs, or recent late payments" },
+            { marker: "Primary Ownership", note: "Accounts must be in your name — heavy AU reliance is a red flag" },
+            { marker: "0–2 Inquiries in 6 Months", note: "0–3 in 12 months — excessive inquiries signal credit seeking behavior" },
           ].map((b, i) => (
             <div key={i} className="flex items-start gap-1.5">
               <div className="w-[10px] h-[10px] rounded-[2px] bg-[#1a1a2e] flex items-center justify-center flex-shrink-0 mt-[1px]">
@@ -2025,8 +2026,8 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
             { label: "Inquiry Velocity", status: velocityLevel, level: inqCount >= 6 ? "risk" : inqCount >= 3 ? "caution" : "safe", detail: inqCount > 0 ? `${inqCount} inquiries detected` : "No recent inquiries" },
             { label: "Revolver Concentration", status: maxCardUtil >= 80 ? "Severe" : maxCardUtil >= 30 ? "Elevated" : "Normal", level: maxCardUtil >= 80 ? "risk" : maxCardUtil >= 30 ? "caution" : "safe", detail: maxCardUtil > 0 ? `Peak card utilization: ${maxCardUtil}%` : "No revolving balances" },
             { label: "Tradeline Depth", status: primaryAll.length >= 5 ? "Established" : primaryAll.length >= 3 ? "Developing" : "Thin", level: primaryAll.length >= 5 ? "safe" : primaryAll.length >= 3 ? "caution" : "risk", detail: `${primaryAll.length} primary tradeline${primaryAll.length !== 1 ? "s" : ""}` },
-            { label: "Limit Strength", status: avgLimit >= 7000 ? "Strong" : avgLimit >= 3000 ? "Moderate" : "Weak", level: avgLimit >= 7000 ? "safe" : avgLimit >= 3000 ? "caution" : "risk", detail: avgLimit > 0 ? `Avg limit: $${avgLimit.toLocaleString()}` : "No revolving limits" },
-            { label: "Account Age Stability", status: avgAge >= 5 ? "Strong" : avgAge >= 2 ? "Stable" : "Weak", level: avgAge >= 5 ? "safe" : avgAge >= 2 ? "caution" : "risk", detail: `${avgAge} year${avgAge !== 1 ? "s" : ""} average age` },
+            { label: "Limit Strength", status: avgLimit >= 5000 ? "Strong" : avgLimit >= 3000 ? "Moderate" : "Weak", level: avgLimit >= 5000 ? "safe" : avgLimit >= 3000 ? "caution" : "risk", detail: avgLimit > 0 ? `Avg limit: $${avgLimit.toLocaleString()}` : "No revolving limits" },
+            { label: "Account Age Stability", status: avgAge >= 5 ? "Strong" : avgAge >= 3 ? "Stable" : "Weak", level: avgAge >= 5 ? "safe" : avgAge >= 3 ? "caution" : "risk", detail: `${avgAge} year${avgAge !== 1 ? "s" : ""} average age` },
             { label: "New Account Clustering", status: newAccounts >= 3 ? "Risk" : newAccounts >= 2 ? "Caution" : "Clear", level: newAccounts >= 3 ? "risk" : newAccounts >= 2 ? "caution" : "safe", detail: `${newAccounts} account${newAccounts !== 1 ? "s" : ""} under 1 year` },
             { label: "Profile Symmetry", status: hasInstallment && primaryRev.length >= 1 ? "Balanced" : "Asymmetric", level: hasInstallment && primaryRev.length >= 1 ? "safe" : "caution", detail: !hasInstallment ? "Missing installment account" : primaryRev.length < 1 ? "Missing revolving accounts" : "Revolver + installment mix present" },
           ];
@@ -2040,8 +2041,8 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
           if (inqCount >= 6) approvalProb -= 25; else if (inqCount >= 3) approvalProb -= 12;
           if (maxCardUtil >= 80) approvalProb -= 20; else if (maxCardUtil >= 30) approvalProb -= 10;
           if (primaryAll.length < 3) approvalProb -= 15; else if (primaryAll.length < 5) approvalProb -= 5;
-          if (avgLimit < 3000) approvalProb -= 15; else if (avgLimit < 7000) approvalProb -= 5;
-          if (avgAge < 1) approvalProb -= 12; else if (avgAge < 2) approvalProb -= 5;
+          if (avgLimit < 3000) approvalProb -= 15; else if (avgLimit < 5000) approvalProb -= 5;
+          if (avgAge < 1) approvalProb -= 12; else if (avgAge < 3) approvalProb -= 5;
           if (newAccounts >= 3) approvalProb -= 10; else if (newAccounts >= 2) approvalProb -= 5;
           if (!hasInstallment || primaryRev.length < 1) approvalProb -= 5;
           if (aggUtil >= 30) approvalProb -= 10; else if (aggUtil > 5) approvalProb -= 3;
@@ -2202,9 +2203,9 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
                 <div className="space-y-1.5">
                   {[
                     { label: "Credit Velocity", value: `${inqCount} inquiries`, sublabel: velocityLevel, color: velocityColor, note: "Rate of recent credit activity" },
-                    { label: "Profile Symmetry", value: primaryRev.length > 0 && hasInstallment ? "Balanced" : "Asymmetric", sublabel: `${primaryRev.length}R / ${primaryInst.length}I`, color: primaryRev.length > 0 && hasInstallment ? "#2d6a4f" : "#c9a227", note: "Revolver vs. installment balance" },
-                    { label: "Limit Strength Index", value: avgLimit > 0 ? `$${avgLimit.toLocaleString()}` : "N/A", sublabel: avgLimit >= 7000 ? "Strong" : avgLimit >= 3000 ? "Moderate" : "Weak", color: avgLimit >= 7000 ? "#2d6a4f" : avgLimit >= 3000 ? "#c9a227" : "#c0392b", note: "Average limit per card" },
-                    { label: "Utilization Stability", value: `${aggUtil}%`, sublabel: aggUtil <= 5 ? "Optimal" : aggUtil <= 29 ? "Acceptable" : "Suppressive", color: aggUtil <= 5 ? "#2d6a4f" : aggUtil <= 29 ? "#c9a227" : "#c0392b", note: "Aggregate revolving utilization" },
+                    { label: "Profile Symmetry", value: primaryRev.length >= 3 && hasInstallment ? "Balanced" : "Asymmetric", sublabel: `${primaryRev.length}R / ${primaryInst.length}I`, color: primaryRev.length >= 3 && hasInstallment ? "#2d6a4f" : "#c9a227", note: "Revolver vs. installment balance" },
+                    { label: "Limit Strength Index", value: avgLimit > 0 ? `$${avgLimit.toLocaleString()}` : "N/A", sublabel: avgLimit >= 5000 ? "Strong" : avgLimit >= 3000 ? "Moderate" : "Weak", color: avgLimit >= 5000 ? "#2d6a4f" : avgLimit >= 3000 ? "#c9a227" : "#c0392b", note: "Average limit per card" },
+                    { label: "Utilization Stability", value: `${aggUtil}%`, sublabel: aggUtil <= 9 ? "Optimal" : aggUtil <= 29 ? "Acceptable" : "Suppressive", color: aggUtil <= 9 ? "#2d6a4f" : aggUtil <= 29 ? "#c9a227" : "#c0392b", note: "Aggregate revolving utilization" },
                   ].map((m, mi) => (
                     <div key={mi} className="flex items-center justify-between px-2 py-1.5 rounded-md bg-[#fafafa]">
                       <div>
@@ -2557,21 +2558,26 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
               const primaryInst = tradelines.filter(tl => isInst(tl.type) && isPrimary(tl.ownership));
               const auCount = tradelines.filter(tl => isAU(tl.ownership)).length;
 
-              const totalLimit = primaryRev.reduce((s, tl) => s + (parseInt(tl.limit.replace(/[^0-9]/g, "")) || 0), 0);
+              const revLimits = primaryRev.map(tl => parseInt(tl.limit.replace(/[^0-9]/g, "")) || 0);
+              const totalLimit = revLimits.reduce((s, l) => s + l, 0);
               const totalBal = primaryRev.reduce((s, tl) => s + (parseInt(tl.balance.replace(/[^0-9]/g, "")) || 0), 0);
               const avgUtil = totalLimit > 0 ? Math.round((totalBal / totalLimit) * 100) : 0;
               const avgAge = tradelines.length > 0 ? Math.round(tradelines.reduce((s, tl) => s + parseAge(tl.age), 0) / tradelines.length) : 0;
-              const highLimitCount = primaryRev.filter(tl => (parseInt(tl.limit.replace(/[^0-9]/g, "")) || 0) >= 7000).length;
-              const inquiryCount = aisReport.projectedFunding?.inquirySlots ? parseInt(String(aisReport.projectedFunding.inquirySlots).replace(/[^0-9]/g, "")) || 0 : 0;
+              const highestRevLimit = revLimits.length > 0 ? Math.max(...revLimits) : 0;
+              const qualifyingLimitCount = primaryRev.filter(tl => (parseInt(tl.limit.replace(/[^0-9]/g, "")) || 0) >= 5000).length;
 
               type GoalItem = { label: string; goal: string; current: string; met: boolean; priority: number; nextMove: string };
+              const revTarget = 4;
+              const revNeeded = Math.max(0, revTarget - primaryRev.length);
               const goals: GoalItem[] = [
-                { label: "Primary Revolvers", goal: "2 accounts", current: `${primaryRev.length} account${primaryRev.length !== 1 ? "s" : ""}`, met: primaryRev.length >= 2, priority: primaryRev.length >= 2 ? 0 : 2 - primaryRev.length, nextMove: primaryRev.length >= 2 ? "Maintain current positions" : `Open ${2 - primaryRev.length} more primary revolving account${2 - primaryRev.length > 1 ? "s" : ""}, stagger 60–90 days apart` },
-                { label: "Primary Installment", goal: "1 account", current: `${primaryInst.length} account${primaryInst.length !== 1 ? "s" : ""}`, met: primaryInst.length >= 1, priority: primaryInst.length >= 1 ? 0 : 1, nextMove: primaryInst.length >= 1 ? "Maintain current position" : "Add 1 primary installment account (auto, personal loan, or credit builder)" },
-                { label: "Revolver Limits", goal: "$7,000+ each", current: `${highLimitCount} of ${primaryRev.length} at goal`, met: highLimitCount >= primaryRev.length && primaryRev.length > 0, priority: primaryRev.length > 0 ? primaryRev.length - highLimitCount : 3, nextMove: highLimitCount >= primaryRev.length && primaryRev.length > 0 ? "All limits meet threshold" : "Request CLI increases on sub-$7K cards or allow organic growth" },
-                { label: "Utilization", goal: "< 5% aggregate", current: `${avgUtil}%`, met: avgUtil <= 5, priority: avgUtil <= 5 ? 0 : avgUtil > 30 ? 4 : 2, nextMove: avgUtil <= 5 ? "Maintain low utilization" : avgUtil > 30 ? "Pay down revolving balances to under 5% of total limits" : "Reduce balances slightly to reach < 5% target" },
-                { label: "Average Age", goal: "2+ years", current: `${avgAge} year${avgAge !== 1 ? "s" : ""}`, met: avgAge >= 2, priority: avgAge >= 2 ? 0 : 1, nextMove: avgAge >= 2 ? "File seasoning meets target" : "Hold existing accounts open — avoid new applications to preserve average age" },
-                { label: "AU Dependency", goal: "Minimal", current: auCount > 0 ? `${auCount} AU account${auCount > 1 ? "s" : ""}` : "None", met: auCount <= 1, priority: auCount <= 1 ? 0 : auCount >= 3 ? 3 : 1, nextMove: auCount <= 1 ? "AU weighting acceptable" : "Shift utilization to primary accounts — reduce AU reliance over time" },
+                { label: "Primary Revolvers", goal: "3–5 accounts", current: `${primaryRev.length} account${primaryRev.length !== 1 ? "s" : ""}`, met: primaryRev.length >= 3, priority: primaryRev.length >= 3 ? 0 : revNeeded, nextMove: primaryRev.length >= 3 ? "Maintain current positions" : `Open ${revNeeded} more primary revolving account${revNeeded > 1 ? "s" : ""}, stagger 60–90 days apart` },
+                { label: "Primary Installment", goal: "1–2 accounts", current: `${primaryInst.length} account${primaryInst.length !== 1 ? "s" : ""}`, met: primaryInst.length >= 1, priority: primaryInst.length >= 1 ? 0 : 2, nextMove: primaryInst.length >= 1 ? "Maintain current position" : "Add 1 primary installment account (auto, personal loan, or credit builder)" },
+                { label: "Revolver Limits", goal: "$5K–$15K each", current: `${qualifyingLimitCount} of ${primaryRev.length} at $5K+`, met: qualifyingLimitCount >= primaryRev.length && primaryRev.length > 0, priority: primaryRev.length > 0 ? primaryRev.length - qualifyingLimitCount : 3, nextMove: qualifyingLimitCount >= primaryRev.length && primaryRev.length > 0 ? "All limits meet threshold" : "Request CLI increases on sub-$5K cards or allow organic growth" },
+                { label: "Highest Limit", goal: "$10,000+", current: highestRevLimit > 0 ? `$${highestRevLimit.toLocaleString()}` : "N/A", met: highestRevLimit >= 10000, priority: highestRevLimit >= 10000 ? 0 : 3, nextMove: highestRevLimit >= 10000 ? "Highest limit enables strong limit matching" : "Focus CLI requests on your highest-limit card — $10K+ unlocks limit matching" },
+                { label: "Total Rev. Limits", goal: "$25,000+", current: `$${totalLimit.toLocaleString()}`, met: totalLimit >= 25000, priority: totalLimit >= 25000 ? 0 : 3, nextMove: totalLimit >= 25000 ? "Total limit strength signals lender confidence" : "Grow revolving limits through CLI requests and new approvals" },
+                { label: "Utilization", goal: "1–9% aggregate", current: `${avgUtil}%`, met: avgUtil >= 1 && avgUtil <= 9, priority: avgUtil <= 9 ? 0 : avgUtil > 30 ? 4 : 2, nextMove: avgUtil <= 9 ? "Utilization in ideal range" : avgUtil > 30 ? "Pay down revolving balances — no card above 30%" : "Reduce balances to reach 1–9% aggregate target" },
+                { label: "Average Age", goal: "3+ years", current: `${avgAge} year${avgAge !== 1 ? "s" : ""}`, met: avgAge >= 3, priority: avgAge >= 3 ? 0 : 2, nextMove: avgAge >= 3 ? "File seasoning meets institutional target" : "Hold existing accounts open — avoid new applications to preserve average age" },
+                { label: "AU Dependency", goal: "Minimal", current: auCount > 0 ? `${auCount} AU account${auCount > 1 ? "s" : ""}` : "None", met: auCount <= 1, priority: auCount <= 1 ? 0 : auCount >= 3 ? 3 : 1, nextMove: auCount <= 1 ? "AU weighting acceptable" : "Heavy AU reliance is a red flag — shift to primary accounts" },
               ];
 
               const sortedGoals = [...goals].sort((a, b) => b.priority - a.priority);

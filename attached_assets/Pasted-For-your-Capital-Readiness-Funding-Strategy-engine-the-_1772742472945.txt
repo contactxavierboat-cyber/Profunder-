@@ -1,0 +1,168 @@
+For your Capital Readiness / Funding Strategy engine, the “perfect” profile for first-round funding is not the same as a perfect credit score. Lenders care about structure, stability, and capacity. A profile can be 760+ but still be unfundable if the structure is weak.
+
+Below is what most lenders consider “fundable” for a first approval stack.”
+
+⸻
+
+Ideal First-Round Fundable Profile
+
+1. Revolving Credit Structure
+	•	3–5 primary credit cards
+	•	Each card $5,000 – $15,000 limit
+	•	Highest limit $10k+
+
+Why:
+Banks use limit matching. If your highest card is $10k, new approvals often fall between $6k–$12k.
+
+⸻
+
+2. Revolver Utilization
+	•	1–9% utilization ideal
+	•	Under 30% acceptable
+	•	No individual card above 30%
+
+Example ideal:
+
+Card	Limit	Balance
+Amex	$12k	$200
+Chase	$9k	$150
+Citi	$7k	$100
+
+Total utilization ≈ 2–3%
+
+This signals low risk and financial control.
+
+⸻
+
+3. Account Age
+
+Average age of accounts:
+	•	3+ years ideal
+	•	Oldest account 5+ years
+
+New profiles trigger risk algorithms.
+
+⸻
+
+4. Tradeline Depth
+
+Ideal structure:
+	•	3–5 revolving accounts
+	•	1–2 installment loans
+
+Installment examples:
+	•	auto loan
+	•	student loan
+	•	personal loan
+
+Why: lenders like profile balance.
+
+⸻
+
+5. Inquiry Velocity
+
+This is one of the most important funding metrics.
+
+Ideal:
+	•	0–2 inquiries in last 6 months
+	•	0–3 inquiries in 12 months
+
+Too many inquiries = credit seeking behavior.
+
+⸻
+
+6. Payment History
+
+Must be:
+	•	100% on-time
+	•	No collections
+	•	No charge-offs
+	•	No recent late payments
+
+Even one recent 30-day late can destroy approvals.
+
+⸻
+
+7. Credit Limit Strength
+
+Total revolving limits ideally:
+
+$25k – $60k+
+
+Example ideal first-round profile:
+
+Card	Limit
+Amex	$12k
+Chase	$10k
+Citi	$8k
+Discover	$6k
+
+Total = $36k limits
+
+This tells lenders:
+
+Other banks trust this borrower.
+
+⸻
+
+8. No Red Flags
+
+Avoid:
+	•	heavy authorized user reliance
+	•	maxed out cards
+	•	recent account openings
+	•	excessive inquiries
+	•	thin files
+
+⸻
+
+What This Profile Usually Qualifies For
+
+If someone has the structure above, a first funding round typically produces:
+
+Bank	Typical Limit
+American Express	$10k–$20k
+Chase	$8k–$15k
+Citi	$7k–$12k
+Capital One	$5k–$10k
+
+Total funding potential:
+
+$30k – $70k first round
+
+Without damaging the profile.
+
+⸻
+
+How Your Engine Could Display This
+
+You could create a reference panel:
+
+Institutional Credit Profile
+
+Minimum benchmarks:
+
+✔ 3–5 revolving accounts
+✔ $10k+ highest limit
+✔ utilization under 10%
+✔ 0–2 recent inquiries
+✔ 3+ year account age
+✔ 1 installment account
+
+Status:
+
+Profile readiness: 72%
+
+⸻
+
+The Real Secret Most People Miss
+
+Banks don’t fund based on score.
+
+They fund based on confidence signals from other lenders.
+
+That’s why limit strength and utilization stability matter so much.
+
+⸻
+
+If you want, I can also show you the exact profile that usually produces $100k+ in approvals in a single funding round (it’s surprisingly structured).
