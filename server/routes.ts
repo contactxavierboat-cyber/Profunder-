@@ -2274,6 +2274,11 @@ FINAL REMINDER: You MUST list EVERY negative item found in the document above as
         creditReportNames: z.array(z.string()).optional(),
         bankStatementNames: z.array(z.string()).optional(),
         creditReportTexts: z.array(z.string().max(200_000)).max(5).optional(),
+        repairData: z.object({
+          truthProfile: z.any().optional(),
+          discrepancies: z.array(z.any()).optional(),
+          negativeItems: z.array(z.any()).optional(),
+        }).nullable().optional(),
       }).nullable().optional()
     }).safeParse(req.body);
 
@@ -2520,6 +2525,35 @@ ABSOLUTE RULE: NEVER use bracket placeholders like "[Insert Creditor Name]", "[I
 ${truncated}
 --- END CREDIT REPORT DATA ---`;
       }
+
+      if (docCtx.repairData) {
+        const rd = docCtx.repairData;
+        let repairContext = `\n\n--- REPAIR CENTER DATA (PREVIOUSLY EXTRACTED) ---
+CRITICAL: The following data was previously extracted from the user's credit report by CRDOS analysis. When the user asks to generate dispute letters, you MUST use these EXACT creditor names, dates, account numbers, and details. Do NOT use placeholder text.
+
+`;
+        if (rd.truthProfile) {
+          repairContext += `TRUTH PROFILE:\n${JSON.stringify(rd.truthProfile, null, 2)}\n\n`;
+        }
+        if (rd.negativeItems && rd.negativeItems.length > 0) {
+          repairContext += `NEGATIVE ITEMS (${rd.negativeItems.length} total):\n`;
+          for (const item of rd.negativeItems) {
+            const dates = item.dates ? Object.entries(item.dates).filter(([,v]: [string, any]) => v).map(([k,v]: [string, any]) => `${k}=${v}`).join(", ") : "none";
+            repairContext += `- ${item.furnisherName || "Unknown"} | Acct: ${item.accountPartial || "N/A"} | Issue: ${item.issue || "N/A"} | Bureau: ${item.bureau || "N/A"} | Basis: ${item.disputeBasis || "N/A"} | Dates: ${dates} | Category: ${item.category || "N/A"} | Attestation: ${item.userAttestation || "pending"}\n`;
+          }
+          repairContext += `\n`;
+        }
+        if (rd.discrepancies && rd.discrepancies.length > 0) {
+          repairContext += `DISCREPANCIES:\n`;
+          for (const d of rd.discrepancies) {
+            repairContext += `- ${d.field}: Report says "${d.creditReportValue}" vs Document says "${d.documentValue}" (${d.severity} severity)\n`;
+          }
+          repairContext += `\n`;
+        }
+        repairContext += `When generating dispute letters, use the creditor names and dates EXACTLY as listed above. For example, if an item says "CAPITAL ONE" with inquiryDate="01/15/2025", write "Capital One" and "January 15, 2025" in the letter — NOT "[Insert Creditor Name]" or "[Insert Date]".
+--- END REPAIR CENTER DATA ---`;
+        documentVaultContext += repairContext;
+      }
     }
 
     const systemPrompt = FUNDABILITY_ENGINE_PROMPT + CRDOS_PROMPT + teamContextPrompt + fileContext + userProfileContext + documentVaultContext;
@@ -2532,7 +2566,9 @@ ${truncated}
     if (extractedText) {
       userMessage += "\n\n(Document has been extracted and provided in the system context above. Analyze it now.)";
     } else if (hasVaultReportData) {
-      userMessage += "\n\n(The user's credit report data is available in the CREDIT REPORT DATA FROM DOCUMENT VAULT section above. Use it to fulfill this request.)";
+      userMessage += "\n\n(The user's credit report data is available in the CREDIT REPORT DATA FROM DOCUMENT VAULT section above. Use it to fulfill this request. The REPAIR CENTER DATA section also contains pre-extracted negative items with exact creditor names, dates, and account details — use those directly.)";
+    } else if (docCtx?.repairData?.negativeItems?.length) {
+      userMessage += "\n\n(The user's REPAIR CENTER DATA is available above with pre-extracted negative items, creditor names, dates, and account details. Use this data to fulfill this request — do NOT use placeholder text.)";
     } else if (historyHasPriorAnalysis) {
       userMessage += "\n\n(Your prior credit report analysis is in the conversation history above. Reference it to fulfill this request.)";
     }

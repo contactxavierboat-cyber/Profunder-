@@ -3094,12 +3094,12 @@ export default function LandingPage() {
     const id = savedDocs.filter(d => d.type === "id_document");
     const bs = savedDocs.filter(d => d.type === "bank_statement");
     const pr = savedDocs.filter(d => d.type === "proof_of_residency");
-    if (cr.length === 0 && id.length === 0 && bs.length === 0 && pr.length === 0) return undefined;
+    if (cr.length === 0 && id.length === 0 && bs.length === 0 && pr.length === 0 && !repairData) return undefined;
     const creditReportTexts: string[] = [];
     for (const doc of cr) {
       if (doc.extractedText) creditReportTexts.push(doc.extractedText);
     }
-    return {
+    const ctx: Record<string, unknown> = {
       hasCreditReport: cr.length > 0,
       hasId: id.length > 0,
       hasBankStatement: bs.length > 0,
@@ -3108,6 +3108,10 @@ export default function LandingPage() {
       bankStatementNames: bs.map(d => d.name),
       creditReportTexts: creditReportTexts.length > 0 ? creditReportTexts : undefined,
     };
+    if (repairData) {
+      ctx.repairData = repairData;
+    }
+    return ctx;
   };
 
   const buildProfilePayload = () => {
