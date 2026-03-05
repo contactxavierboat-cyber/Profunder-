@@ -1346,6 +1346,29 @@ FORMATTING RULES — CRITICAL:
 - Be aggressive in identifying disputable items but honest about the factual basis.
 - After dispute lines, add one brief line: "After downloading your dispute letters, save them to your Docs folder (folder icon, top left) to keep your dispute rounds organized and track progress."
 
+====================================================
+ABSOLUTE ZERO-PLACEHOLDER POLICY — ENFORCED ON ALL OUTPUT:
+====================================================
+
+You have been given the user's ACTUAL credit report data. You MUST extract and use REAL values.
+
+BANNED PATTERNS — if you catch yourself writing ANY of these, STOP and replace with actual data from the report:
+- "[Insert Creditor Name]" or "[Insert Creditor Name #1]" → use the ACTUAL creditor name (e.g., "CAPITAL ONE", "SYNCHRONY BANK")
+- "[Insert Date of Inquiry]" or "[Insert Date]" → use the ACTUAL date (e.g., "01/15/2025", "March 2024")
+- "[Insert Account Number]" → use the ACTUAL account number or partial (e.g., "****4521")
+- "[Insert Address for Bureau]" or "[Insert Address]" → use the actual bureau address
+- "[Your Name]" or "[YOUR NAME]" → use the user's name from their profile if provided
+- "[Your Address]" or "[YOUR ADDRESS]" → use the user's address from their profile if provided
+- ANY text wrapped in square brackets that says "Insert" → FORBIDDEN
+
+When generating dispute letters in chat:
+1. Read the credit report data in your context
+2. Extract the SPECIFIC creditor names, dates, account numbers, and amounts
+3. Write the letter with those REAL values filled in
+4. If a specific piece of data truly cannot be found in the report, OMIT that detail — do NOT insert a bracket placeholder
+
+This applies to: DISPUTE lines, full letter bodies, inquiry lists, creditor references, dates, amounts — EVERYTHING.
+
 `;
 
 const CRDOS_PROMPT = `
@@ -2037,6 +2060,20 @@ export async function registerRoutes(
     res.json(msgs);
   });
 
+  function stripBracketPlaceholders(text: string): string {
+    return text
+      .replace(/\[Insert\s+[^\]]*\]/gi, "")
+      .replace(/\[YOUR\s+NAME(?:\/ADDRESS)?\]/gi, "")
+      .replace(/\[YOUR\s+ADDRESS\]/gi, "")
+      .replace(/\[LAST4?\s*SSN\]/gi, "")
+      .replace(/\[DOB\]/gi, "")
+      .replace(/\[Creditor\s*Name\s*(?:#?\d*)?\]/gi, "")
+      .replace(/\[Date\s*(?:of\s*)?(?:Inquiry)?\s*(?:#?\d*)?\]/gi, "")
+      .replace(/\[Account\s*Number\s*(?:#?\d*)?\]/gi, "")
+      .replace(/\n{3,}/g, "\n\n")
+      .trim();
+  }
+
   app.post("/api/chat", requireAuth, async (req, res) => {
     const userId = req.session.userId!;
     const result = chatSchema.safeParse(req.body);
@@ -2195,7 +2232,8 @@ FINAL REMINDER: You MUST list EVERY negative item found in the document above as
         max_tokens: 4096,
       });
 
-      const aiContent = response.choices[0]?.message?.content || "I'm sorry, I couldn't generate a response right now.";
+      const rawAiContent = response.choices[0]?.message?.content || "I'm sorry, I couldn't generate a response right now.";
+      const aiContent = stripBracketPlaceholders(rawAiContent);
 
       const aiMessage = await storage.createMessage({ userId, role: "assistant", content: aiContent, attachment: null, mentor: detectedMentor });
 
@@ -2510,7 +2548,8 @@ ${truncated}
         max_tokens: 4096,
       });
 
-      const aiContent = response.choices[0]?.message?.content || "I'm sorry, I couldn't generate a response right now.";
+      const rawAiContent = response.choices[0]?.message?.content || "I'm sorry, I couldn't generate a response right now.";
+      const aiContent = stripBracketPlaceholders(rawAiContent);
       const responsePayload: Record<string, unknown> = { content: aiContent };
       if (extractedText && extractedText.length > 50) {
         responsePayload.extractedText = extractedText;
@@ -7953,7 +7992,7 @@ Include: sender placeholder [YOUR NAME/ADDRESS], date, bureau address, account d
         max_tokens: 1500,
       });
 
-      const letterContent = aiResponse.choices[0]?.message?.content || "";
+      const letterContent = stripBracketPlaceholders(aiResponse.choices[0]?.message?.content || "");
 
       const dispute = await storage.createDisputeCase({
         userId: req.session.userId,
