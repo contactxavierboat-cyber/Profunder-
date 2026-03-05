@@ -656,32 +656,69 @@ function BrandedResponse({ content, userQuestion, msgId }: { content: string; us
 
 function getApprovalSubtitle(index: number | null, band: string | null): string {
   if (index === null) return "";
-  if (index >= 90) return "Optimized and approval-ready";
-  if (index >= 80) return "Strong profile with minor gaps";
-  if (index >= 70) return "Approval-ready, but not optimized";
-  if (index >= 55) return "Workable profile with visible pressure";
-  if (index >= 40) return "Significant blockers remain";
-  return "Profile requires remediation first";
+  if (index >= 90) return "Your profile is optimized for institutional funding";
+  if (index >= 80) return "Your profile is strong. A few tweaks can maximize approval odds";
+  if (index >= 70) return "Almost ready for institutional funding. A few adjustments can help";
+  if (index >= 55) return "Getting closer. Some key improvements will boost your chances";
+  if (index >= 40) return "Your profile needs work before applying for funding";
+  return "Focus on fixing negatives first — then build toward funding";
 }
 
 function getBandSubtitle(band: string | null): string {
   if (!band) return "";
   const b = band.toLowerCase();
-  if (b === "exceptional") return "Premium approval readiness across products";
-  if (b === "strong") return "Can support most approval categories";
-  if (b === "viable") return "Can support selective approvals";
-  if (b === "borderline") return "May qualify with conditions or compensating factors";
-  if (b === "weak") return "Limited to secured or starter products";
-  return "Requires credit remediation before applying";
+  if (b === "exceptional") return "Lenders see your profile as premium. You qualify for top products";
+  if (b === "strong") return "You can get approved for most credit products";
+  if (b === "viable") return "You can qualify for select products with the right lender";
+  if (b === "borderline") return "Some lenders may approve you with conditions";
+  if (b === "weak") return "Start with secured cards or starter products to build up";
+  return "Fix credit issues first, then work toward approvals";
 }
 
 function getPhaseSubtitle(phase: string | null): string {
   if (!phase) return "";
   const p = phase.toLowerCase();
-  if (p.includes("funding")) return "Profile is ready — apply with precision";
-  if (p.includes("build")) return "Structure is forming — keep building";
-  if (p.includes("wait")) return "Not a no — just poor timing right now";
-  return "Address negatives before anything else";
+  if (p.includes("funding")) return "You're ready — apply strategically for best results";
+  if (p.includes("build")) return "Your foundation is forming — keep adding positive credit";
+  if (p.includes("wait")) return "Timing is off right now — pause and let your profile stabilize";
+  return "Clean up negatives before applying for anything new";
+}
+
+function getPillarTip(label: string, value: number): string | null {
+  const l = label.toLowerCase();
+  if (value >= 85) return null;
+  if (l.includes("payment")) return value < 60 ? "Late payments are the biggest factor. Focus on keeping all accounts current" : "Keep paying on time every month to strengthen this";
+  if (l.includes("utilization") || l.includes("usage")) return value < 60 ? "Your balances are too high relative to limits. Pay down to under 9% for best results" : "Try to keep balances between 1-9% of your credit limit";
+  if (l.includes("age") || l.includes("history")) return "Account age improves with time. Avoid closing your oldest accounts";
+  if (l.includes("mix") || l.includes("depth")) return "Lenders want to see a mix of credit types (revolving + installment)";
+  if (l.includes("inquiry") || l.includes("velocity")) return "Too many recent applications hurt you. Avoid new credit checks for 90 days";
+  if (l.includes("derog") || l.includes("negative")) return "Negative marks are pulling your score down. Dispute inaccurate items";
+  return null;
+}
+
+function getSignalExplanation(label: string): string {
+  const l = label.toLowerCase();
+  if (l.includes("inquiry") || l.includes("velocity")) return "Lenders see many recent credit checks as a sign you may be seeking too much credit";
+  if (l.includes("revolver") || l.includes("concentration")) return "Having too much balance on one card signals risk. Spread balances across accounts";
+  if (l.includes("tradeline") || l.includes("depth")) return "Lenders prefer borrowers with a track record across multiple accounts";
+  if (l.includes("limit") || l.includes("strength")) return "Higher credit limits show lenders trust you with more credit";
+  if (l.includes("age") || l.includes("stability")) return "Longer credit history shows stability and experience managing credit";
+  if (l.includes("clustering") || l.includes("new")) return "Opening several accounts at once can look risky to lenders";
+  if (l.includes("symmetry") || l.includes("balance")) return "A mix of revolving and installment credit shows you can handle different types";
+  return "";
+}
+
+function getSignalFix(label: string, level: "safe" | "caution" | "risk"): string | null {
+  if (level === "safe") return null;
+  const l = label.toLowerCase();
+  if (l.includes("inquiry") || l.includes("velocity")) return "Avoid new applications for 90 days";
+  if (l.includes("revolver") || l.includes("concentration")) return "Pay down highest-balance card first";
+  if (l.includes("tradeline") || l.includes("depth")) return "Add 1 more credit account";
+  if (l.includes("limit") || l.includes("strength")) return "Request credit limit increases";
+  if (l.includes("age") || l.includes("stability")) return "Keep oldest accounts open";
+  if (l.includes("clustering") || l.includes("new")) return "Wait before opening new accounts";
+  if (l.includes("symmetry") || l.includes("balance")) return "Add 1 installment account";
+  return null;
 }
 
 function getProfileTypeColor(type: string | null): string {
@@ -698,11 +735,11 @@ function getProfileTypeColor(type: string | null): string {
 function getProfileTypeSubtitle(type: string | null): string {
   if (!type) return "";
   const t = type.toLowerCase();
-  if (t.includes("premium")) return "Deep history, strong limits, clean record";
-  if (t.includes("seasoned")) return "Mature file with meaningful tradeline depth";
-  if (t.includes("established")) return "Solid foundation — room to optimize";
-  if (t.includes("starter")) return "Building blocks are in place — keep adding";
-  if (t.includes("thin")) return "Lenders can barely see you — build visibility first";
+  if (t.includes("premium")) return "Extensive credit history with high limits and clean record";
+  if (t.includes("seasoned")) return "Well-developed profile with years of credit experience";
+  if (t.includes("established")) return "Solid foundation in place — optimize for top approvals";
+  if (t.includes("starter")) return "Growing profile — keep adding positive accounts";
+  if (t.includes("thin")) return "Limited credit history — focus on building more accounts";
   return "";
 }
 
@@ -724,13 +761,13 @@ function FinancialIdentityCard({ data }: { data: FinancialIdentityData }) {
             <circle cx="12" cy="7" r="4" />
           </svg>
         </div>
-        <p className="text-[10px] text-[#999] tracking-[0.01em] font-medium">Financial Identity</p>
+        <p className="text-[10px] text-[#999] tracking-[0.01em] font-medium">Your Financial Profile</p>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         {data.profileType && (
           <div data-testid="fi-profile-type">
-            <p className="text-[9px] text-[#bbb] font-medium mb-0.5">Profile Type</p>
+            <p className="text-[9px] text-[#bbb] font-medium mb-0.5">Profile Classification</p>
             <p className="text-[15px] font-bold tracking-[-0.02em]" style={{ color: ptColor }}>{data.profileType}</p>
             <p className="text-[9px] text-[#999] mt-0.5">{getProfileTypeSubtitle(data.profileType)}</p>
           </div>
@@ -738,7 +775,7 @@ function FinancialIdentityCard({ data }: { data: FinancialIdentityData }) {
 
         {data.identityStrength !== null && (
           <div data-testid="fi-identity-strength">
-            <p className="text-[9px] text-[#bbb] font-medium mb-0.5">Identity Strength</p>
+            <p className="text-[9px] text-[#bbb] font-medium mb-0.5">How Strong Your Profile Looks</p>
             <div className="flex items-baseline gap-1">
               <span className="text-[22px] font-bold leading-none" style={{ color: getIdentityStrengthColor(data.identityStrength) }}>{data.identityStrength}</span>
               <span className="text-[11px] text-[#ccc]">/100</span>
@@ -746,26 +783,27 @@ function FinancialIdentityCard({ data }: { data: FinancialIdentityData }) {
             <div className="mt-1.5 w-full h-1.5 bg-[#f0f0f0] rounded-full overflow-hidden">
               <div className="h-full rounded-full transition-all duration-1000 ease-out" style={{ width: `${data.identityStrength}%`, backgroundColor: getIdentityStrengthColor(data.identityStrength) }} />
             </div>
+            <p className="text-[8px] text-[#aaa] mt-1">{data.identityStrength >= 80 ? "Lenders view this profile favorably" : data.identityStrength >= 60 ? "Solid foundation with room to grow" : "Needs improvement before applying"}</p>
           </div>
         )}
 
         {data.creditAge && (
           <div data-testid="fi-credit-age">
-            <p className="text-[9px] text-[#bbb] font-medium mb-0.5">Credit Age</p>
+            <p className="text-[9px] text-[#bbb] font-medium mb-0.5">How Long You've Had Credit</p>
             <p className="text-[12px] text-[#333] font-medium leading-snug">{data.creditAge}</p>
           </div>
         )}
 
         {data.exposureLevel && (
           <div data-testid="fi-exposure-level">
-            <p className="text-[9px] text-[#bbb] font-medium mb-0.5">Exposure Level</p>
+            <p className="text-[9px] text-[#bbb] font-medium mb-0.5">Total Debt Exposure</p>
             <p className="text-[12px] text-[#333] font-medium leading-snug">{data.exposureLevel}</p>
           </div>
         )}
 
         {data.bureauFootprint && (
           <div data-testid="fi-bureau-footprint">
-            <p className="text-[9px] text-[#bbb] font-medium mb-0.5">Bureau Footprint</p>
+            <p className="text-[9px] text-[#bbb] font-medium mb-0.5">Bureau Presence</p>
             <p className="text-[12px] text-[#333] font-medium leading-snug">{data.bureauFootprint}</p>
           </div>
         )}
@@ -773,7 +811,7 @@ function FinancialIdentityCard({ data }: { data: FinancialIdentityData }) {
 
       {data.lenderPerception && (
         <div className="mt-3 pt-3 border-t border-[#f0f0f0]" data-testid="fi-lender-perception">
-          <p className="text-[9px] text-[#bbb] font-medium mb-1">Lender Perception</p>
+          <p className="text-[9px] text-[#bbb] font-medium mb-1">How Lenders View You</p>
           <p className="text-[12px] text-[#444] leading-[1.6] italic">{data.lenderPerception}</p>
         </div>
       )}
@@ -804,7 +842,7 @@ function ProjectedFundingCard({ data, phase, compact }: { data: ProjectedFunding
         onClick={() => setExpanded(!expanded)}
       >
         <div className="flex items-center justify-between mb-2">
-          <p className="text-[10px] text-[#999] tracking-[0.01em] font-medium">Projected Funding</p>
+          <p className="text-[10px] text-[#999] tracking-[0.01em] font-medium">Estimated Funding Range</p>
           {data.bureau && (
             <span className="text-[8px] font-bold uppercase tracking-widest px-1.5 py-0.5 rounded-full bg-[#f0f0f0] text-[#666]" data-testid="text-funding-bureau">{data.bureau}</span>
           )}
@@ -850,7 +888,7 @@ function ProjectedFundingCard({ data, phase, compact }: { data: ProjectedFunding
               <div className="min-w-0" data-testid="pf-best-case">
                 <p className="text-[9px] text-[#bbb] font-medium mb-0.5">Best-Case {bureauLabel}</p>
                 <p className="text-[18px] font-bold tracking-[-0.02em] text-[#1a1a1a] leading-tight truncate">{data.bestCasePerBureau}</p>
-                <p className="text-[9px] text-[#aaa] mt-1">5 approvals at full limit match</p>
+                <p className="text-[9px] text-[#aaa] mt-1">This is the maximum lenders may approve based on your profile</p>
               </div>
             )}
 
@@ -858,7 +896,7 @@ function ProjectedFundingCard({ data, phase, compact }: { data: ProjectedFunding
               <div className="min-w-0" data-testid="pf-projected-amount">
                 <p className="text-[9px] text-[#bbb] font-medium mb-0.5">{bureauLabel} Projection</p>
                 <p className="text-[14px] font-bold tracking-[-0.02em] text-[#333] truncate">{data.perBureauProjection}</p>
-                <p className="text-[9px] text-[#aaa] mt-1">3-5 approvals at 60-80% match rate</p>
+                <p className="text-[9px] text-[#aaa] mt-1">Average starting limits lenders may approve</p>
               </div>
             )}
 
@@ -961,8 +999,7 @@ function MissionDashboard({ data, userName, compact }: { data: MissionData; user
           <div className={`rounded-xl bg-gradient-to-br from-[#1a1a1a] to-[#2a2a2a] p-5 shadow-lg ${compact ? 'col-span-2' : 'col-span-1 sm:col-span-3'}`} data-testid="card-approval-index">
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2">
-                <span className="text-[11px] font-bold tracking-[0.15em] text-white/50 uppercase">AIS</span>
-                <span className="text-[9px] text-white/30 tracking-wide">Approval Index Score</span>
+                <span className="text-[11px] font-bold tracking-[0.15em] text-white/50 uppercase">Capital Readiness</span>
               </div>
               {data.bureauSource && (
                 <span className="text-[9px] font-bold uppercase tracking-widest px-2 py-1 rounded-full bg-white/10 text-white/60" data-testid="text-ais-bureau">{data.bureauSource}</span>
@@ -972,38 +1009,35 @@ function MissionDashboard({ data, userName, compact }: { data: MissionData; user
               <span className="text-[56px] font-bold leading-none tracking-tighter text-white" data-testid="text-approval-score">
                 {data.approvalIndex}
               </span>
-              <span className="text-[18px] text-white/30 font-light">/100</span>
+              <span className="text-[18px] text-white/30 font-light">/ 100</span>
             </div>
-            <p className="text-[11px] text-white/50 mt-2 leading-snug">{getApprovalSubtitle(data.approvalIndex, data.band)}</p>
+            <p className="text-[12px] text-white/60 mt-2 leading-snug font-medium">{getApprovalSubtitle(data.approvalIndex, data.band)}</p>
             <div className="mt-3 w-full h-2 bg-white/10 rounded-full overflow-hidden">
               <div className="h-full rounded-full transition-all duration-1000 ease-out" style={{ width: `${data.approvalIndex}%`, backgroundColor: bandColor }} />
             </div>
+            {data.approvalIndex < 88 && (
+              <p className="text-[10px] text-white/40 mt-2">Next target: <span className="text-white/70 font-semibold">{data.approvalIndex < 70 ? "70+" : data.approvalIndex < 78 ? "78+" : data.approvalIndex < 82 ? "82+" : "88+"}</span></p>
+            )}
           </div>
         )}
 
         {data.band && (
           <div className="rounded-xl bg-white border border-[#e8e8e8] p-4 shadow-sm" data-testid="card-band">
-            <p className="text-[10px] text-[#999] tracking-[0.01em] font-medium mb-2">Approval Strength</p>
+            <p className="text-[10px] text-[#999] tracking-[0.01em] font-medium mb-1">Your Approval Tier</p>
             <p className="text-[20px] font-bold tracking-[-0.02em]" style={{ color: bandColor }} data-testid="text-band">
               {data.band}
             </p>
-            <div className="flex items-center gap-1.5 mt-1">
-              <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: bandColor }} />
-              <p className="text-[10px] text-[#777]">{getBandSubtitle(data.band)}</p>
-            </div>
+            <p className="text-[10px] text-[#666] mt-1.5 leading-[1.5]">{getBandSubtitle(data.band)}</p>
           </div>
         )}
 
         {data.phase && (
           <div className="rounded-xl bg-white border border-[#e8e8e8] p-4 shadow-sm" data-testid="card-phase">
-            <p className="text-[10px] text-[#999] tracking-[0.01em] font-medium mb-2">Current Phase</p>
+            <p className="text-[10px] text-[#999] tracking-[0.01em] font-medium mb-1">Where You Are Now</p>
             <p className="text-[18px] font-bold tracking-[-0.02em]" style={{ color: phaseColor }} data-testid="text-phase">
               {data.phase}
             </p>
-            <div className="flex items-center gap-1.5 mt-1">
-              <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: phaseColor }} />
-              <p className="text-[10px] text-[#777]">{getPhaseSubtitle(data.phase)}</p>
-            </div>
+            <p className="text-[10px] text-[#666] mt-1.5 leading-[1.5]">{getPhaseSubtitle(data.phase)}</p>
           </div>
         )}
 
@@ -1014,11 +1048,12 @@ function MissionDashboard({ data, userName, compact }: { data: MissionData; user
 
       {data.pillarScores.length > 0 && (
         <div className="rounded-xl bg-white border border-[#e8e8e8] p-4 shadow-sm" data-testid="card-pillar-scores">
-          <p className="text-[10px] text-[#999] tracking-[0.01em] font-medium mb-0.5">Pillar Scores</p>
-          <p className="text-[9px] text-[#bbb] mb-3">How your profile performs across core underwriting signals</p>
+          <p className="text-[10px] text-[#999] tracking-[0.01em] font-medium mb-0.5">Profile Scores</p>
+          <p className="text-[9px] text-[#bbb] mb-3">Each area impacts how lenders evaluate your application</p>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-x-4 gap-y-3">
             {data.pillarScores.map((pillar) => {
               const color = getPillarColor(pillar.value);
+              const tip = getPillarTip(pillar.label, pillar.value);
               return (
                 <div key={pillar.label} data-testid={`pillar-${pillar.label.toLowerCase().replace(/\s+/g, "-")}`}>
                   <div className="flex items-center justify-between mb-1">
@@ -1028,6 +1063,7 @@ function MissionDashboard({ data, userName, compact }: { data: MissionData; user
                   <div className="w-full h-1.5 bg-[#f0f0f0] rounded-full overflow-hidden">
                     <div className="h-full rounded-full transition-all duration-1000 ease-out" style={{ width: `${pillar.value}%`, backgroundColor: color }} />
                   </div>
+                  {tip && <p className="text-[8px] text-[#999] mt-1 leading-[1.4]">{tip}</p>}
                 </div>
               );
             })}
@@ -1039,9 +1075,22 @@ function MissionDashboard({ data, userName, compact }: { data: MissionData; user
         <FinancialIdentityCard data={data.financialIdentity} />
       )}
 
+      {data.bestNextMove && (
+        <div className="rounded-xl bg-gradient-to-r from-[#f8f9fb] to-[#f0f2f8] border border-[#e0e4ee] p-4 shadow-sm" data-testid="card-best-next-move">
+          <div className="flex items-center gap-2 mb-2">
+            <div className="w-5 h-5 rounded-md bg-[#1a1a2e] flex items-center justify-center shrink-0">
+              <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M5 1v8M1 5l4 4 4-4" stroke="white" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+            </div>
+            <p className="text-[10px] text-[#1a1a2e] tracking-[0.01em] font-bold uppercase">Next Best Action</p>
+          </div>
+          <p className="text-[12px] text-[#333] leading-[1.6] font-medium">{data.bestNextMove}</p>
+        </div>
+      )}
+
       {data.suppressors.length > 0 && (
         <div className="rounded-xl bg-white border border-[#e8e8e8] p-4 shadow-sm" data-testid="card-suppressors">
-          <p className="text-[10px] text-[#999] tracking-[0.01em] font-medium mb-2.5">Top Approval Suppressors</p>
+          <p className="text-[10px] text-[#999] tracking-[0.01em] font-medium mb-1">Issues Affecting Your Approval</p>
+          <p className="text-[9px] text-[#bbb] mb-2.5">Fix these to increase your chances</p>
           <div className="space-y-2">
             {data.suppressors.map((s, i) => (
               <div key={i} className="flex items-start gap-2.5">
@@ -1055,21 +1104,15 @@ function MissionDashboard({ data, userName, compact }: { data: MissionData; user
         </div>
       )}
 
-      {data.bestNextMove && (
-        <div className="rounded-xl bg-white border border-[#e8e8e8] p-4 shadow-sm" data-testid="card-best-next-move">
-          <p className="text-[10px] text-[#999] tracking-[0.01em] font-medium mb-2">Best Next Move</p>
-          <p className="text-[12px] text-[#333] leading-[1.6] font-medium">{data.bestNextMove}</p>
-        </div>
-      )}
-
       {data.helping.length > 0 && (
         <div className="rounded-xl bg-white border border-[#e8e8e8] p-4 shadow-sm" data-testid="card-helping">
-          <p className="text-[10px] text-[#999] tracking-[0.01em] font-medium mb-2">What's Helping</p>
+          <p className="text-[10px] text-[#999] tracking-[0.01em] font-medium mb-1">Positive Signals</p>
+          <p className="text-[9px] text-[#bbb] mb-2">These areas are helping your profile</p>
           <div className="space-y-1.5">
             {data.helping.map((h, i) => (
               <div key={i} className="flex items-start gap-2">
-                <div className="w-4 h-4 rounded-md bg-[#f0f0f0] flex items-center justify-center shrink-0 mt-0.5">
-                  <span className="text-[9px] text-[#333333] font-bold">✓</span>
+                <div className="w-4 h-4 rounded-md bg-[#e8f5e9] flex items-center justify-center shrink-0 mt-0.5">
+                  <span className="text-[9px] text-[#2d6a4f] font-bold">✓</span>
                 </div>
                 <p className="text-[11px] text-[#555] leading-[1.5]">{h}</p>
               </div>
@@ -1080,12 +1123,13 @@ function MissionDashboard({ data, userName, compact }: { data: MissionData; user
 
       {data.hurting.length > 0 && (
         <div className="rounded-xl bg-white border border-[#e8e8e8] p-4 shadow-sm" data-testid="card-hurting">
-          <p className="text-[10px] text-[#999] tracking-[0.01em] font-medium mb-2">What's Hurting</p>
+          <p className="text-[10px] text-[#999] tracking-[0.01em] font-medium mb-1">Risk Signals</p>
+          <p className="text-[9px] text-[#bbb] mb-2">These patterns are things lenders watch closely</p>
           <div className="space-y-1.5">
             {data.hurting.map((h, i) => (
               <div key={i} className="flex items-start gap-2">
-                <div className="w-4 h-4 rounded-md bg-[#f0f0f0] flex items-center justify-center shrink-0 mt-0.5">
-                  <span className="text-[9px] text-[#777777] font-bold">−</span>
+                <div className="w-4 h-4 rounded-md bg-[#fce4ec] flex items-center justify-center shrink-0 mt-0.5">
+                  <span className="text-[9px] text-[#c0392b] font-bold">!</span>
                 </div>
                 <p className="text-[11px] text-[#555] leading-[1.5]">{h}</p>
               </div>
@@ -1746,9 +1790,9 @@ function PerfectProfileTab({ aisReport }: { aisReport: MissionData | null }) {
       </div>
 
       <div className="rounded-md bg-[#f8f8f8] border border-[#eee] px-2 py-1.5">
-        <p className="text-[7px] font-semibold text-[#555] uppercase tracking-[0.1em] mb-1">Institutional Benchmarks</p>
+        <p className="text-[7px] font-semibold text-[#555] uppercase tracking-[0.1em] mb-1">What Lenders Want to See</p>
         <div className="grid grid-cols-3 gap-x-2 gap-y-[2px]">
-          {["3–5 Revolvers", "$5K–$15K Limits", "$25K+ Total", "1–9% Utilization", "3+ Yr Age", "100% On-Time", "Primary Only", "0–2 Inq / 6mo", "1–2 Installments"].map((b, i) => (
+          {["3–5 Credit Cards", "$5K–$15K Limits", "$25K+ Total Credit", "1–9% Balance Usage", "3+ Year History", "100% On-Time Payments", "Primary Accounts", "0–2 Recent Inquiries", "1–2 Loan Accounts"].map((b, i) => (
             <div key={i} className="flex items-center gap-1">
               <div className="w-[6px] h-[6px] rounded-[1px] bg-[#1a1a2e] flex items-center justify-center flex-shrink-0">
                 <svg width="4" height="4" viewBox="0 0 10 10" fill="none"><path d="M2 5l2.5 2.5L8 3" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
@@ -1760,7 +1804,7 @@ function PerfectProfileTab({ aisReport }: { aisReport: MissionData | null }) {
       </div>
 
       <div>
-        <p className="text-[8px] uppercase tracking-[0.12em] text-[#999] font-semibold mb-1 px-0.5">Revolving Accounts</p>
+        <p className="text-[8px] uppercase tracking-[0.12em] text-[#999] font-semibold mb-1 px-0.5">Your Credit Cards</p>
         <div className="space-y-1">
           {primaryRevCards.map((card, i) => renderCard(card, i))}
           {emptyRevCount > 0 && Array.from({ length: emptyRevCount }).map((_, i) => renderEmptySlot("Revolving Card", filledPrimaryRevSlots + i, emptyRevSlotRows))}
@@ -1769,7 +1813,7 @@ function PerfectProfileTab({ aisReport }: { aisReport: MissionData | null }) {
 
       {auCards.length > 0 && (
         <div>
-          <p className="text-[8px] uppercase tracking-[0.12em] text-[#999] font-semibold mb-1 px-0.5">Authorized User Accounts <span className="normal-case tracking-normal font-normal text-[7px] text-[#bbb]">(not counted toward slots)</span></p>
+          <p className="text-[8px] uppercase tracking-[0.12em] text-[#999] font-semibold mb-1 px-0.5">Authorized User Cards <span className="normal-case tracking-normal font-normal text-[7px] text-[#bbb]">(added to someone else's account — doesn't count toward your slots)</span></p>
           <div className="space-y-1">
             {auCards.map((card, i) => renderCard(card, primaryRevCards.length + i))}
           </div>
@@ -1777,7 +1821,7 @@ function PerfectProfileTab({ aisReport }: { aisReport: MissionData | null }) {
       )}
 
       <div>
-        <p className="text-[8px] uppercase tracking-[0.12em] text-[#999] font-semibold mb-1 px-0.5">Installment Accounts</p>
+        <p className="text-[8px] uppercase tracking-[0.12em] text-[#999] font-semibold mb-1 px-0.5">Your Loans</p>
         <div className="space-y-1">
           {primaryInstCards.map((card, i) => renderCard(card, primaryRevCards.length + auCards.length + i))}
           {emptyInstCount > 0 && Array.from({ length: emptyInstCount }).map((_, i) => renderEmptySlot("Installment Loan", filledPrimaryInstSlots + i, emptyInstSlotRows))}
@@ -1985,7 +2029,7 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
               data-testid="button-open-ais"
             >
               <div className="flex items-center justify-between mb-1">
-                <p className="text-[7px] font-semibold text-white/40 uppercase tracking-[0.12em]">Capital Readiness</p>
+                <p className="text-[7px] font-semibold text-white/40 uppercase tracking-[0.12em]">Capital Readiness Index</p>
                 <svg width="8" height="8" viewBox="0 0 10 10" fill="none" className="text-white/25 group-hover:text-white/50 transition-colors"><path d="M3 1l4 4-4 4" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" /></svg>
               </div>
               <div className="flex items-center gap-3">
@@ -2089,84 +2133,152 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
             const mn = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
             return (<>
-              <div className="rounded-lg border border-[#e8e8e8] bg-white p-2" data-testid="denial-simulation">
-                <div className="flex items-center gap-2.5 mb-1.5">
-                  <div className="relative w-[36px] h-[36px] flex-shrink-0">
+              <div className="rounded-lg border border-[#e8e8e8] bg-white p-2.5" data-testid="denial-simulation">
+                <div className="flex items-center gap-2.5 mb-2">
+                  <div className="relative w-[40px] h-[40px] flex-shrink-0">
                     <svg viewBox="0 0 36 36" className="w-full h-full -rotate-90">
                       <circle cx="18" cy="18" r="15.5" fill="none" stroke="#f0f0f0" strokeWidth="2.5" />
                       <circle cx="18" cy="18" r="15.5" fill="none" stroke={probColor} strokeWidth="2.5" strokeDasharray={`${approvalProb * 0.974} 100`} strokeLinecap="round" />
                     </svg>
                     <div className="absolute inset-0 flex items-center justify-center">
-                      <span className="text-[10px] font-bold leading-none" style={{ color: probColor, fontVariantNumeric: "tabular-nums" }}>{approvalProb}%</span>
+                      <span className="text-[11px] font-bold leading-none" style={{ color: probColor, fontVariantNumeric: "tabular-nums" }}>{approvalProb}%</span>
                     </div>
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p className="text-[7px] text-[#aaa] uppercase tracking-[0.1em] font-semibold">If You Applied Today</p>
-                    <p className="text-[10px] font-bold text-[#333]">Approval: <span style={{ color: probColor }}>{approvalProb}%</span></p>
-                    <p className="text-[7px] text-[#999]">{mn[windowStart.getMonth()]}–{mn[windowEnd.getMonth()]} {windowEnd.getFullYear()} · {inqCount > 2 ? "Velocity stabilizing" : "Window open"}</p>
+                    <p className="text-[8px] text-[#555] font-semibold mb-0.5">If You Applied Today</p>
+                    <p className="text-[10px] text-[#777] leading-[1.4]">
+                      {approvalProb >= 70
+                        ? "You have a good chance of getting approved"
+                        : approvalProb >= 45
+                          ? `Lenders would likely approve about ${Math.round(approvalProb / 10)} out of 10 applications`
+                          : "Most applications would likely be declined right now"}
+                    </p>
                   </div>
                 </div>
-                {denialDrivers.length > 0 && (
-                  <div className="flex flex-wrap gap-1">
-                    {denialDrivers.slice(0, 4).map((d, di) => (
-                      <span key={di} className={`inline-flex items-center gap-1 text-[7px] font-medium px-1.5 py-0.5 rounded ${d.level === "risk" ? "bg-[#c0392b]/8 text-[#c0392b]" : "bg-[#c9a227]/8 text-[#c9a227]"}`}>
-                        <span className={`w-[4px] h-[4px] rounded-full ${d.level === "risk" ? "bg-[#c0392b]" : "bg-[#c9a227]"}`} />
-                        {d.label}
-                      </span>
-                    ))}
-                  </div>
-                )}
                 {highestLimit > 0 && (
-                  <div className="mt-1.5 pt-1.5 border-t border-[#f0f0f0] grid grid-cols-2 gap-2">
-                    <div>
-                      <p className="text-[6px] text-[#aaa] uppercase tracking-wider">Limit Match</p>
-                      <p className="text-[8px] text-[#333] font-bold" style={{ fontVariantNumeric: "tabular-nums" }}>${Math.round(highestLimit * 0.6).toLocaleString()}–${Math.round(highestLimit * 1.2).toLocaleString()}</p>
+                  <div className="grid grid-cols-2 gap-2 mb-2">
+                    <div className="rounded-md bg-[#fafafa] border border-[#eee] px-2 py-1.5">
+                      <p className="text-[7px] text-[#999] font-medium mb-0.5">Typical Approval Range</p>
+                      <p className="text-[10px] text-[#333] font-bold" style={{ fontVariantNumeric: "tabular-nums" }}>${Math.round(highestLimit * 0.6).toLocaleString()} – ${Math.round(highestLimit * 1.2).toLocaleString()}</p>
                     </div>
-                    <div>
-                      <p className="text-[6px] text-[#aaa] uppercase tracking-wider">If Optimized</p>
-                      <p className="text-[8px] text-[#2d6a4f] font-bold" style={{ fontVariantNumeric: "tabular-nums" }}>${Math.round(highestLimit * 1.2).toLocaleString()}–${Math.round(highestLimit * 1.8).toLocaleString()}</p>
+                    <div className="rounded-md bg-[#fafafa] border border-[#eee] px-2 py-1.5">
+                      <p className="text-[7px] text-[#999] font-medium mb-0.5">If Profile Improves</p>
+                      <p className="text-[10px] text-[#2d6a4f] font-bold" style={{ fontVariantNumeric: "tabular-nums" }}>${Math.round(highestLimit * 1.2).toLocaleString()} – ${Math.round(highestLimit * 1.8).toLocaleString()}</p>
                     </div>
                   </div>
                 )}
+                {denialDrivers.length > 0 && (
+                  <div>
+                    <p className="text-[7px] text-[#999] font-semibold mb-1">Main issues affecting approval:</p>
+                    <div className="space-y-1">
+                      {denialDrivers.slice(0, 4).map((d, di) => (
+                        <div key={di} className="flex items-start gap-1.5">
+                          <div className={`w-[5px] h-[5px] rounded-full mt-[3px] shrink-0 ${d.level === "risk" ? "bg-[#c0392b]" : "bg-[#c9a227]"}`} />
+                          <div className="min-w-0 flex-1">
+                            <span className={`text-[8px] font-semibold ${d.level === "risk" ? "text-[#c0392b]" : "text-[#c9a227]"}`}>{d.label}</span>
+                            <p className="text-[7px] text-[#999] leading-[1.3]">{getSignalExplanation(d.label)}</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                <div className="mt-2 pt-1.5 border-t border-[#f0f0f0]">
+                  <p className="text-[7px] text-[#999]">Best window: <span className="font-semibold text-[#555]">{mn[windowStart.getMonth()]}–{mn[windowEnd.getMonth()]} {windowEnd.getFullYear()}</span></p>
+                </div>
               </div>
 
-              <div className="rounded-lg border border-[#e8e8e8] bg-white p-2" data-testid="underwriting-risk-signals">
-                <div className="flex items-center justify-between mb-1.5">
-                  <p className="text-[7px] uppercase tracking-[0.1em] text-[#555] font-semibold">Risk Signals</p>
-                  <span className="text-[7px] font-bold px-1.5 py-[2px] rounded" style={{ color: overallColor, backgroundColor: overallColor + "10" }}>{riskCount >= 2 ? "High" : riskCount >= 1 || cautionCount >= 3 ? "Moderate" : cautionCount >= 1 ? "Low" : "Clear"}</span>
+              <div className="rounded-lg border border-[#e8e8e8] bg-white p-2.5" data-testid="underwriting-risk-signals">
+                <div className="flex items-center justify-between mb-2">
+                  <p className="text-[8px] text-[#555] font-semibold">Risk Signals</p>
+                  <span className="text-[7px] font-bold px-1.5 py-[2px] rounded" style={{ color: overallColor, backgroundColor: overallColor + "10" }}>{riskCount >= 2 ? "High Risk" : riskCount >= 1 || cautionCount >= 3 ? "Moderate" : cautionCount >= 1 ? "Low" : "Clear"}</span>
                 </div>
-                <div className="grid grid-cols-2 gap-x-2 gap-y-[3px]">
-                  {signals.map((s, si) => (
-                    <div key={si} className="flex items-center justify-between">
-                      <div className="flex items-center gap-1">
-                        <div className={`w-[5px] h-[5px] rounded-full ${s.level === "risk" ? "bg-[#c0392b]" : s.level === "caution" ? "bg-[#c9a227]" : "bg-[#2d6a4f]"}`} />
-                        <span className="text-[7px] text-[#555]">{s.label}</span>
+                <p className="text-[7px] text-[#aaa] mb-2">These are patterns lenders watch closely when reviewing applications</p>
+                {(() => {
+                  const riskSignals = signals.filter(s => s.level === "risk");
+                  const cautionSignals = signals.filter(s => s.level === "caution");
+                  const safeSignals = signals.filter(s => s.level === "safe");
+                  return (<>
+                    {riskSignals.length > 0 && (
+                      <div className="mb-2">
+                        <p className="text-[7px] text-[#c0392b] font-bold uppercase tracking-wider mb-1">High Risk</p>
+                        <div className="space-y-1.5">
+                          {riskSignals.map((s, si) => {
+                            const fix = getSignalFix(s.label, s.level);
+                            return (
+                              <div key={si} className="rounded-md bg-[#c0392b]/4 border border-[#c0392b]/10 px-2 py-1.5">
+                                <div className="flex items-center justify-between mb-0.5">
+                                  <span className="text-[8px] text-[#333] font-semibold">{s.label}</span>
+                                  <span className="text-[7px] font-bold text-[#c0392b]">{s.status}</span>
+                                </div>
+                                <p className="text-[7px] text-[#888] leading-[1.3]">{getSignalExplanation(s.label)}</p>
+                                {fix && (
+                                  <div className="mt-1 flex items-center gap-1">
+                                    <span className="text-[7px] text-[#c0392b] font-semibold">Fix:</span>
+                                    <span className="text-[7px] text-[#666]">{fix}</span>
+                                  </div>
+                                )}
+                              </div>
+                            );
+                          })}
+                        </div>
                       </div>
-                      <span className={`text-[7px] font-bold ${s.level === "risk" ? "text-[#c0392b]" : s.level === "caution" ? "text-[#c9a227]" : "text-[#2d6a4f]"}`}>{s.status}</span>
+                    )}
+                    {cautionSignals.length > 0 && (
+                      <div className="mb-2">
+                        <p className="text-[7px] text-[#c9a227] font-bold uppercase tracking-wider mb-1">Moderate Risk</p>
+                        <div className="space-y-1">
+                          {cautionSignals.map((s, si) => {
+                            const fix = getSignalFix(s.label, s.level);
+                            return (
+                              <div key={si} className="flex items-center justify-between px-2 py-1 rounded-md bg-[#c9a227]/4 border border-[#c9a227]/10">
+                                <div className="min-w-0 flex-1">
+                                  <span className="text-[7px] text-[#333] font-semibold">{s.label}</span>
+                                  {fix && <span className="text-[7px] text-[#888] ml-1">· {fix}</span>}
+                                </div>
+                                <span className="text-[7px] font-bold text-[#c9a227]">{s.status}</span>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
+                    {safeSignals.length > 0 && (
+                      <div>
+                        <p className="text-[7px] text-[#2d6a4f] font-bold uppercase tracking-wider mb-1">Positive Signals</p>
+                        <div className="space-y-0.5">
+                          {safeSignals.map((s, si) => (
+                            <div key={si} className="flex items-center justify-between px-2 py-1">
+                              <span className="text-[7px] text-[#555]">{s.label}</span>
+                              <span className="text-[7px] font-bold text-[#2d6a4f]">{s.status}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </>);
+                })()}
+              </div>
+
+              <div className="rounded-lg border border-[#e8e8e8] bg-white p-2.5" data-testid="lender-metrics">
+                <p className="text-[8px] text-[#555] font-semibold mb-2">Profile Metrics</p>
+                <div className="space-y-2">
+                  {[
+                    { label: "Recent Inquiries", value: `${inqCount}`, detail: inqCount >= 6 ? "Too many recent credit checks. Avoid new applications for 90 days" : inqCount >= 3 ? "Several recent credit checks. Try to avoid new applications" : "Your inquiry count is healthy", color: velocityColor, optimal: "0-2 in the last 6 months" },
+                    { label: "Credit Mix", value: `${primaryRev.length} Revolving / ${primaryInst.length} Installment`, detail: primaryRev.length >= 3 && hasInstallment ? "Good mix of credit types" : !hasInstallment ? "Add 1 installment account to improve your mix" : "Add more revolving accounts", color: primaryRev.length >= 3 && hasInstallment ? "#2d6a4f" : "#c9a227", optimal: "3-5 revolving + 1-2 installment" },
+                    { label: "Average Credit Limit", value: avgLimit > 0 ? `$${avgLimit.toLocaleString()}` : "—", detail: avgLimit >= 5000 ? "This is considered strong and helps with approvals" : avgLimit >= 3000 ? "Moderate. Request limit increases to strengthen your profile" : "Low limits reduce your approval chances. Request increases", color: avgLimit >= 5000 ? "#2d6a4f" : avgLimit >= 3000 ? "#c9a227" : "#c0392b", optimal: "$5,000-$15,000" },
+                    { label: "Utilization", value: `${aggUtil}%`, detail: aggUtil <= 9 ? "This is in the optimal range" : aggUtil <= 29 ? "Acceptable, but ideal range is 1-9%" : "Too high. Pay down balances to under 9% for best results", color: aggUtil <= 9 ? "#2d6a4f" : aggUtil <= 29 ? "#c9a227" : "#c0392b", optimal: "1% - 9%" },
+                  ].map((m, mi) => (
+                    <div key={mi} className="rounded-md bg-[#fafafa] border border-[#eee] px-2.5 py-2">
+                      <div className="flex items-center justify-between mb-0.5">
+                        <p className="text-[7px] text-[#999] font-medium">{m.label}</p>
+                        <p className="text-[7px] text-[#bbb]">Optimal: {m.optimal}</p>
+                      </div>
+                      <p className="text-[11px] font-bold mb-0.5" style={{ color: m.color, fontVariantNumeric: "tabular-nums" }}>{m.value}</p>
+                      <p className="text-[7px] text-[#888] leading-[1.3]">{m.detail}</p>
                     </div>
                   ))}
                 </div>
-                {inqCount > 2 && (
-                  <div className="mt-1.5 pt-1 border-t border-[#f0f0f0] flex items-center justify-between">
-                    <span className="text-[6px] text-[#999] uppercase tracking-wider">Velocity</span>
-                    <span className="text-[7px] font-bold" style={{ color: velocityColor }}>{inqCount} inq · {inqCount > 2 ? "Suppression Active" : "Clear"}</span>
-                  </div>
-                )}
-              </div>
-
-              <div className="grid grid-cols-2 gap-1.5" data-testid="lender-metrics">
-                {[
-                  { label: "Velocity", value: `${inqCount}`, sub: inqCount >= 6 ? "High" : inqCount >= 3 ? "Elevated" : "Clear", color: velocityColor },
-                  { label: "Symmetry", value: `${primaryRev.length}R/${primaryInst.length}I`, sub: primaryRev.length >= 3 && hasInstallment ? "Balanced" : "Asymm.", color: primaryRev.length >= 3 && hasInstallment ? "#2d6a4f" : "#c9a227" },
-                  { label: "Avg Limit", value: avgLimit > 0 ? `$${(avgLimit / 1000).toFixed(0)}K` : "—", sub: avgLimit >= 5000 ? "Strong" : avgLimit >= 3000 ? "Mod." : "Weak", color: avgLimit >= 5000 ? "#2d6a4f" : avgLimit >= 3000 ? "#c9a227" : "#c0392b" },
-                  { label: "Utilization", value: `${aggUtil}%`, sub: aggUtil <= 9 ? "Optimal" : aggUtil <= 29 ? "OK" : "High", color: aggUtil <= 9 ? "#2d6a4f" : aggUtil <= 29 ? "#c9a227" : "#c0392b" },
-                ].map((m, mi) => (
-                  <div key={mi} className="rounded-md bg-[#fafafa] border border-[#eee] px-2 py-1.5 text-center">
-                    <p className="text-[6px] text-[#aaa] uppercase tracking-wider">{m.label}</p>
-                    <p className="text-[10px] font-bold" style={{ color: m.color, fontVariantNumeric: "tabular-nums" }}>{m.value}</p>
-                    <p className="text-[6px] font-semibold" style={{ color: m.color }}>{m.sub}</p>
-                  </div>
-                ))}
               </div>
             </>);
           })()}
