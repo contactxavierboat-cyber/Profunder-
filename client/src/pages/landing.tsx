@@ -1621,10 +1621,10 @@ function PerfectProfileTab({ aisReport }: { aisReport: MissionData | null }) {
   const emptyInstCount = Math.max(0, idealInstSlots - filledPrimaryInstSlots);
 
   return (
-    <div className="space-y-3" data-testid="perfect-profile-tab">
-      <div className="rounded-xl bg-gradient-to-br from-[#1a1a2e] to-[#252540] p-3">
-        <div className="flex items-center gap-2.5">
-          <div className="relative w-[40px] h-[40px] flex-shrink-0">
+    <div className="space-y-2.5" data-testid="perfect-profile-tab">
+      <div className="rounded-xl bg-gradient-to-br from-[#1a1a2e] to-[#252540] p-2.5">
+        <div className="flex items-center gap-2">
+          <div className="relative w-[38px] h-[38px] flex-shrink-0">
             <svg viewBox="0 0 36 36" className="w-full h-full -rotate-90">
               <circle cx="18" cy="18" r="15.5" fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="2.5" />
               <circle cx="18" cy="18" r="15.5" fill="none" stroke={accentColor} strokeWidth="2.5" strokeDasharray={`${pct * 0.974} 100`} strokeLinecap="round" />
@@ -1634,19 +1634,19 @@ function PerfectProfileTab({ aisReport }: { aisReport: MissionData | null }) {
             </div>
           </div>
           <div className="min-w-0">
-            <p className="text-[7px] uppercase tracking-[0.12em] text-white/35 font-semibold mb-0.5">Profile Match</p>
-            <p className="text-[12px] font-bold text-white leading-tight"><span style={{ fontVariantNumeric: "tabular-nums" }}>{filledSlots}</span> <span className="text-[10px] font-normal text-white/40">/ {totalSlots} slots</span></p>
-            <p className="text-[9px] text-white/30 mt-0.5" style={{ fontVariantNumeric: "tabular-nums" }}>{metCriteria} of {totalCriteria} criteria met</p>
+            <p className="text-[7px] uppercase tracking-[0.12em] text-white/35 font-semibold mb-0.5">Fundability Benchmarks</p>
+            <p className="text-[12px] font-bold text-white leading-tight" style={{ fontVariantNumeric: "tabular-nums" }}>{metCriteria} <span className="text-[10px] font-normal text-white/40">/ {totalCriteria} met</span></p>
+            <p className="text-[9px] text-white/30 mt-0.5" style={{ fontVariantNumeric: "tabular-nums" }}>{filledSlots} of {totalSlots} account slots filled</p>
           </div>
         </div>
       </div>
 
-      <div className="rounded-lg border border-[#e8e8e8] bg-[#fafafa] p-3">
-        <p className="text-[9px] font-semibold text-[#333] mb-1.5">What is the Perfect Profile?</p>
-        <p className="text-[8px] text-[#666] leading-[1.6] mb-2">The Perfect Profile is the minimum fundable credit structure lenders evaluate before extending capital. Meeting these benchmarks signals institutional readiness — your file is positioned for approval, not just inquiry.</p>
+      <div className="rounded-lg border border-[#e8e8e8] bg-[#fafafa] p-2.5">
+        <p className="text-[9px] font-semibold text-[#333] mb-1">Institutional Credit Profile</p>
+        <p className="text-[8px] text-[#666] leading-[1.5] mb-2">The minimum fundable credit structure lenders evaluate before extending capital. Meeting these benchmarks signals institutional readiness — your file is positioned for approval, not just inquiry.</p>
 
-        <p className="text-[8px] font-semibold text-[#555] uppercase tracking-wider mb-1.5">Fundable Benchmarks</p>
-        <div className="space-y-1">
+        <p className="text-[8px] font-semibold text-[#555] uppercase tracking-wider mb-1">Fundable Benchmarks</p>
+        <div className="space-y-0.5">
           {[
             { marker: "2 Primary Revolving Accounts", note: "Credit cards or lines of credit in your name" },
             { marker: "1 Primary Installment Account", note: "Auto loan, personal loan, or credit builder" },
@@ -1655,27 +1655,28 @@ function PerfectProfileTab({ aisReport }: { aisReport: MissionData | null }) {
             { marker: "2+ Years Average Account Age", note: "Shows stability and responsible management history" },
             { marker: "All Accounts Current", note: "No late payments, collections, or charge-offs" },
             { marker: "Primary Ownership", note: "Accounts must be in your name — AU accounts don't count toward slots" },
+            { marker: "0–2 Recent Inquiries (12 Months)", note: "Maintains approval probability across major lenders" },
           ].map((b, i) => (
-            <div key={i} className="flex items-start gap-2">
+            <div key={i} className="flex items-start gap-1.5">
               <div className="w-[10px] h-[10px] rounded-[2px] bg-[#1a1a2e] flex items-center justify-center flex-shrink-0 mt-[1px]">
                 <svg width="6" height="6" viewBox="0 0 10 10" fill="none"><path d="M2 5l2.5 2.5L8 3" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
               </div>
               <div className="min-w-0">
                 <p className="text-[8px] text-[#333] font-semibold leading-tight">{b.marker}</p>
-                <p className="text-[7px] text-[#999] leading-[1.4]">{b.note}</p>
+                <p className="text-[7px] text-[#999] leading-[1.3]">{b.note}</p>
               </div>
             </div>
           ))}
         </div>
 
-        <div className="mt-2.5 pt-2 border-t border-[#e0e0e0]">
-          <p className="text-[7px] text-[#888] leading-[1.6]">Your accounts below are cross-referenced against these benchmarks. Green checks indicate criteria met. Unfilled slots show what's still needed to reach a fundable profile.</p>
+        <div className="mt-2 pt-1.5 border-t border-[#e0e0e0]">
+          <p className="text-[7px] text-[#888] leading-[1.5]">Your accounts below are cross-referenced against these benchmarks. Green checks indicate criteria met. Unfilled slots show what's still needed to reach a fundable profile.</p>
         </div>
       </div>
 
       <div>
-        <p className="text-[8px] uppercase tracking-[0.15em] text-[#999] font-semibold mb-1.5 px-0.5">Revolving Accounts</p>
-        <div className="space-y-1.5">
+        <p className="text-[8px] uppercase tracking-[0.12em] text-[#999] font-semibold mb-1 px-0.5">Revolving Accounts</p>
+        <div className="space-y-1">
           {primaryRevCards.map((card, i) => renderCard(card, i))}
           {emptyRevCount > 0 && Array.from({ length: emptyRevCount }).map((_, i) => renderEmptySlot("Revolving Card", filledPrimaryRevSlots + i, emptyRevSlotRows))}
         </div>
@@ -1683,16 +1684,16 @@ function PerfectProfileTab({ aisReport }: { aisReport: MissionData | null }) {
 
       {auCards.length > 0 && (
         <div>
-          <p className="text-[8px] uppercase tracking-[0.15em] text-[#999] font-semibold mb-1.5 px-0.5">Authorized User Accounts <span className="normal-case tracking-normal font-normal text-[7px] text-[#bbb]">(not counted toward slots)</span></p>
-          <div className="space-y-1.5">
+          <p className="text-[8px] uppercase tracking-[0.12em] text-[#999] font-semibold mb-1 px-0.5">Authorized User Accounts <span className="normal-case tracking-normal font-normal text-[7px] text-[#bbb]">(not counted toward slots)</span></p>
+          <div className="space-y-1">
             {auCards.map((card, i) => renderCard(card, primaryRevCards.length + i))}
           </div>
         </div>
       )}
 
       <div>
-        <p className="text-[8px] uppercase tracking-[0.15em] text-[#999] font-semibold mb-1.5 px-0.5">Installment Accounts</p>
-        <div className="space-y-1.5">
+        <p className="text-[8px] uppercase tracking-[0.12em] text-[#999] font-semibold mb-1 px-0.5">Installment Accounts</p>
+        <div className="space-y-1">
           {primaryInstCards.map((card, i) => renderCard(card, primaryRevCards.length + auCards.length + i))}
           {emptyInstCount > 0 && Array.from({ length: emptyInstCount }).map((_, i) => renderEmptySlot("Installment Loan", filledPrimaryInstSlots + i, emptyInstSlotRows))}
         </div>
@@ -1700,8 +1701,8 @@ function PerfectProfileTab({ aisReport }: { aisReport: MissionData | null }) {
 
       {(otherCards.length > 0 || nonPrimaryInstCards.length > 0) && (
         <div>
-          <p className="text-[8px] uppercase tracking-[0.15em] text-[#999] font-semibold mb-1.5 px-0.5">Other Accounts</p>
-          <div className="space-y-1.5">
+          <p className="text-[8px] uppercase tracking-[0.12em] text-[#999] font-semibold mb-1 px-0.5">Other Accounts</p>
+          <div className="space-y-1">
             {[...nonPrimaryInstCards, ...otherCards].map((card, i) => renderCard(card, primaryRevCards.length + auCards.length + primaryInstCards.length + i))}
           </div>
         </div>
@@ -1893,28 +1894,68 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
               <p className="text-[9px] text-white/70 font-medium mb-0.5" data-testid="text-ais-status">{getStatusLabel()}</p>
               <p className="text-[8px] text-white/40">{getPhaseAction()}</p>
 
-              <div className="mt-2 pt-2 border-t border-white/10 grid grid-cols-2 gap-x-3 gap-y-1">
+              <div className="mt-2 pt-2 border-t border-white/10 space-y-1.5">
                 {suppressorCount > 0 && (
-                  <p className="text-[8px] text-white/50">
-                    Suppressors: <span className="text-white/80 font-medium">{suppressorCount}</span>
-                  </p>
+                  <div>
+                    <p className="text-[8px] text-white/50">
+                      Active Approval Suppressors: <span className="text-white/80 font-medium">{suppressorCount}</span>
+                    </p>
+                    <div className="mt-1 space-y-0.5">
+                      {aisReport?.suppressors?.slice(0, 3).map((s, si) => (
+                        <p key={si} className="text-[7px] text-white/35 pl-2">· {s}</p>
+                      ))}
+                    </div>
+                  </div>
                 )}
-                {pf?.readinessLevel && (
-                  <p className="text-[8px] text-white/50">
-                    Tier: <span className="text-white/80 font-medium">{getReadinessTier()}</span>
-                  </p>
-                )}
-                {pf?.inquirySlots && (
-                  <p className="text-[8px] text-white/50">
-                    Inquiries: <span className="text-white/80 font-medium">{pf.inquirySlots}</span>
-                  </p>
-                )}
+                <div className="grid grid-cols-2 gap-x-3 gap-y-1">
+                  {pf?.readinessLevel && (
+                    <p className="text-[8px] text-white/50">
+                      Tier: <span className="text-white/80 font-medium">{getReadinessTier()}</span>
+                    </p>
+                  )}
+                  {pf?.inquirySlots && (
+                    <div>
+                      <p className="text-[8px] text-white/50">
+                        Inquiry Capacity: <span className="text-white/80 font-medium">{(() => {
+                          const raw = String(pf.inquirySlots);
+                          const totalMatch = raw.match(/(\d+)\s*(?:total|hard)/i);
+                          const totalInq = totalMatch ? parseInt(totalMatch[1]) : 0;
+                          const available = Math.max(0, 2 - totalInq);
+                          return `${available} Available`;
+                        })()}</span>
+                      </p>
+                      <p className="text-[7px] text-white/30 mt-0.5">{pf.inquirySlots}</p>
+                    </div>
+                  )}
+                </div>
               </div>
 
               {aisScore && aisScore < 88 && (
-                <p className="mt-2 text-[8px] text-white/50">
-                  Next: <span className="text-white/70 font-medium">{aisScore < 78 ? "Tier 1 (78)" : aisScore < 82 ? "Prime (82)" : "Premium (88)"}</span>
-                </p>
+                <div className="mt-2 space-y-1">
+                  <p className="text-[8px] text-white/50">
+                    Next: <span className="text-white/70 font-medium">{aisScore < 78 ? "Tier 1 (78)" : aisScore < 82 ? "Prime (82)" : "Premium (88)"}</span>
+                  </p>
+                  {(() => {
+                    const raw = pf?.inquirySlots ? String(pf.inquirySlots) : "";
+                    const recentMatch = raw.match(/(\d+)\s*(?:inquir|within|last\s*30)/i);
+                    const recentInq = recentMatch ? parseInt(recentMatch[1]) : 0;
+                    const totalMatch = raw.match(/(\d+)\s*(?:total|hard)/i);
+                    const totalInq = totalMatch ? parseInt(totalMatch[1]) : 0;
+                    const now = new Date();
+                    const cooldownMonths = totalInq > 4 ? 6 : totalInq > 2 ? 3 : 1;
+                    const windowStart = new Date(now.getFullYear(), now.getMonth() + cooldownMonths, 1);
+                    const windowEnd = new Date(windowStart.getFullYear(), windowStart.getMonth() + 2, 1);
+                    const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+                    const windowLabel = `${monthNames[windowStart.getMonth()]}–${monthNames[windowEnd.getMonth()]} ${windowEnd.getFullYear()}`;
+                    return (
+                      <div className="rounded-md bg-white/5 px-2 py-1.5">
+                        <p className="text-[7px] text-white/35 uppercase tracking-wider font-semibold">Next Approval Window</p>
+                        <p className="text-[10px] text-white/80 font-bold mt-0.5">{windowLabel}</p>
+                        <p className="text-[7px] text-white/30 mt-0.5">{recentInq > 0 ? "Triggered when inquiry velocity stabilizes" : "Inquiry velocity stable — window open"}</p>
+                      </div>
+                    );
+                  })()}
+                </div>
               )}
 
               <div className="mt-2 flex items-center gap-1.5 text-[9px] text-white/60 group-hover:text-white/90 font-medium transition-colors">

@@ -1,0 +1,160 @@
+This is a strong screen, but there are two logical issues and one opportunity that will make the system feel much smarter.
+
+I’ll break it down.
+
+⸻
+
+1. Inquiry Logic Is Currently Confusing
+
+Your card says:
+
+Inquiries: 0
+(6 hard inquiries in last 2 years — too high for funding movement)
+
+That’s contradictory.
+
+If someone sees 0 inquiries, they assume they’re clear.
+
+Better phrasing
+
+Inquiry Capacity: 0 Available
+6 hard inquiries within 24 months
+Recent velocity suppressing funding eligibility
+
+This communicates:
+
+• You have inquiries
+• They affect funding
+• You cannot apply right now
+
+That’s much clearer.
+
+⸻
+
+2. “Suppressors: 3” Needs Context
+
+Right now it just says:
+
+Suppressors: 3
+
+But suppressors should feel diagnostic, not mysterious.
+
+Better:
+
+Active Approval Suppressors: 3
+
+Tap to view:
+
+• Inquiry velocity
+• Revolver utilization
+• Thin tradeline depth
+
+This makes the system feel analytical.
+
+⸻
+
+3. Profile Match Section Is a Huge Opportunity
+
+Right now:
+
+0% | 0 / 3 slots
+
+That’s confusing.
+
+The user doesn’t know what a slot is.
+
+Make it understandable
+
+Instead:
+
+Institutional Profile Match
+
+0 / 15 lender benchmarks satisfied
+
+Or
+
+Fundability Benchmarks Met
+
+3 / 15
+
+Now users understand immediately.
+
+⸻
+
+4. The “Perfect Profile” Section Is Actually Excellent
+
+Your benchmarks are very strong:
+
+• 2 primary revolving accounts
+• 1 installment account
+• $7k+ limit per revolver
+• <5% utilization
+• 2+ year account age
+• all accounts current
+
+That is exactly how lenders think.
+
+One improvement:
+
+Change title.
+
+Instead of:
+
+What is the Perfect Profile
+
+Use:
+
+Institutional Credit Profile
+
+It sounds far more serious.
+
+⸻
+
+5. Add One More Powerful Benchmark
+
+Add this under utilization:
+
+0–2 Recent Inquiries (12 months)
+Maintains approval probability across major lenders
+
+This ties your readiness score to real underwriting behavior.
+
+⸻
+
+6. One Feature That Would Make This System Insane
+
+Under the readiness card add:
+
+Next Approval Window
+
+Example:
+
+Next optimal application window:
+April–June 2026
+
+Triggered when inquiry velocity stabilizes.
+
+This turns your system into a funding timing engine.
+
+⸻
+
+Final Verdict
+
+Your product already feels like:
+
+a lender-side underwriting simulator
+
+not a credit repair tool.
+
+If you add:
+
+• clearer inquiry capacity logic
+• suppressor explanations
+• benchmark scoring
+• application timing windows
+
+you’ll have something that looks far beyond most fintech dashboards.
+
+⸻
+
+If you want, I can also show you the one missing metric every funding algorithm uses that would make your readiness engine significantly more accurate.
