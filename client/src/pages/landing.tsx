@@ -1621,57 +1621,39 @@ function PerfectProfileTab({ aisReport }: { aisReport: MissionData | null }) {
   const emptyInstCount = Math.max(0, idealInstSlots - filledPrimaryInstSlots);
 
   return (
-    <div className="space-y-2.5" data-testid="perfect-profile-tab">
-      <div className="rounded-xl bg-gradient-to-br from-[#1a1a2e] to-[#252540] p-2.5">
+    <div className="space-y-2 mt-2" data-testid="perfect-profile-tab">
+      <div className="rounded-xl bg-gradient-to-br from-[#1a1a2e] to-[#252540] p-2">
         <div className="flex items-center gap-2">
-          <div className="relative w-[38px] h-[38px] flex-shrink-0">
+          <div className="relative w-[32px] h-[32px] flex-shrink-0">
             <svg viewBox="0 0 36 36" className="w-full h-full -rotate-90">
-              <circle cx="18" cy="18" r="15.5" fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="2.5" />
-              <circle cx="18" cy="18" r="15.5" fill="none" stroke={accentColor} strokeWidth="2.5" strokeDasharray={`${pct * 0.974} 100`} strokeLinecap="round" />
+              <circle cx="18" cy="18" r="15.5" fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="3" />
+              <circle cx="18" cy="18" r="15.5" fill="none" stroke={accentColor} strokeWidth="3" strokeDasharray={`${pct * 0.974} 100`} strokeLinecap="round" />
             </svg>
             <div className="absolute inset-0 flex items-center justify-center">
-              <span className="text-[12px] font-bold text-white leading-none" style={{ fontVariantNumeric: "tabular-nums" }}>{pct}%</span>
+              <span className="text-[10px] font-bold text-white leading-none" style={{ fontVariantNumeric: "tabular-nums" }}>{pct}%</span>
             </div>
           </div>
-          <div className="min-w-0">
-            <p className="text-[7px] uppercase tracking-[0.12em] text-white/35 font-semibold mb-0.5">Fundability Benchmarks</p>
-            <p className="text-[12px] font-bold text-white leading-tight" style={{ fontVariantNumeric: "tabular-nums" }}>{metCriteria} <span className="text-[10px] font-normal text-white/40">/ {totalCriteria} met</span></p>
-            <p className="text-[9px] text-white/30 mt-0.5" style={{ fontVariantNumeric: "tabular-nums" }}>{filledSlots} of {totalSlots} account slots filled</p>
+          <div className="min-w-0 flex-1">
+            <p className="text-[7px] uppercase tracking-[0.1em] text-white/35 font-semibold">Fundability Benchmarks</p>
+            <div className="flex items-baseline gap-2">
+              <p className="text-[11px] font-bold text-white leading-tight" style={{ fontVariantNumeric: "tabular-nums" }}>{metCriteria} <span className="text-[9px] font-normal text-white/40">/ {totalCriteria}</span></p>
+              <p className="text-[7px] text-white/25" style={{ fontVariantNumeric: "tabular-nums" }}>{filledSlots}/{totalSlots} slots</p>
+            </div>
           </div>
         </div>
       </div>
 
-      <div className="rounded-lg border border-[#e8e8e8] bg-[#fafafa] p-2.5">
-        <p className="text-[9px] font-semibold text-[#333] mb-1">Institutional Credit Profile</p>
-        <p className="text-[8px] text-[#666] leading-[1.5] mb-2">The minimum fundable credit structure lenders evaluate before extending first-round capital. These benchmarks mirror actual bank underwriting models — meeting them positions your file for $30K–$70K+ in approvals.</p>
-
-        <p className="text-[8px] font-semibold text-[#555] uppercase tracking-wider mb-1">Fundable Benchmarks</p>
-        <div className="space-y-0.5">
-          {[
-            { marker: "3–5 Primary Revolving Accounts", note: "Credit cards or lines of credit in your name" },
-            { marker: "1–2 Primary Installment Accounts", note: "Auto loan, personal loan, or credit builder" },
-            { marker: "$5,000–$15,000 Limit Per Revolver", note: "Highest card $10K+ enables limit matching for new approvals" },
-            { marker: "$25,000+ Total Revolving Limits", note: "Signals lender confidence — other banks trust this borrower" },
-            { marker: "1–9% Aggregate Utilization", note: "No individual card above 30% — signals financial control" },
-            { marker: "3+ Years Average Account Age", note: "Oldest account 5+ years ideal — new profiles trigger risk algorithms" },
-            { marker: "100% On-Time Payment History", note: "No collections, charge-offs, or recent late payments" },
-            { marker: "Primary Ownership", note: "Accounts must be in your name — heavy AU reliance is a red flag" },
-            { marker: "0–2 Inquiries in 6 Months", note: "0–3 in 12 months — excessive inquiries signal credit seeking behavior" },
-          ].map((b, i) => (
-            <div key={i} className="flex items-start gap-1.5">
-              <div className="w-[10px] h-[10px] rounded-[2px] bg-[#1a1a2e] flex items-center justify-center flex-shrink-0 mt-[1px]">
-                <svg width="6" height="6" viewBox="0 0 10 10" fill="none"><path d="M2 5l2.5 2.5L8 3" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
+      <div className="rounded-md bg-[#f8f8f8] border border-[#eee] px-2 py-1.5">
+        <p className="text-[7px] font-semibold text-[#555] uppercase tracking-[0.1em] mb-1">Institutional Benchmarks</p>
+        <div className="grid grid-cols-3 gap-x-2 gap-y-[2px]">
+          {["3–5 Revolvers", "$5K–$15K Limits", "$25K+ Total", "1–9% Utilization", "3+ Yr Age", "100% On-Time", "Primary Only", "0–2 Inq / 6mo", "1–2 Installments"].map((b, i) => (
+            <div key={i} className="flex items-center gap-1">
+              <div className="w-[6px] h-[6px] rounded-[1px] bg-[#1a1a2e] flex items-center justify-center flex-shrink-0">
+                <svg width="4" height="4" viewBox="0 0 10 10" fill="none"><path d="M2 5l2.5 2.5L8 3" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
               </div>
-              <div className="min-w-0">
-                <p className="text-[8px] text-[#333] font-semibold leading-tight">{b.marker}</p>
-                <p className="text-[7px] text-[#999] leading-[1.3]">{b.note}</p>
-              </div>
+              <span className="text-[6.5px] text-[#666] leading-tight">{b}</span>
             </div>
           ))}
-        </div>
-
-        <div className="mt-2 pt-1.5 border-t border-[#e0e0e0]">
-          <p className="text-[7px] text-[#888] leading-[1.5]">Your accounts below are cross-referenced against these benchmarks. Green checks indicate criteria met. Unfilled slots show what's still needed to reach a fundable profile.</p>
         </div>
       </div>
 
@@ -1875,354 +1857,202 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
       <div className="flex-1 overflow-y-auto px-4 py-3">
 
         {panelTab === "command" && (<>
-        <div className="mb-3">
+        <div className="space-y-2">
           {hasAis ? (
             <button
               onClick={onOpenAis}
-              className="w-full text-left rounded-xl bg-gradient-to-br from-[#1a1a2e] to-[#2a2a40] p-3 hover:from-[#22223a] hover:to-[#333350] transition-all group"
+              className="w-full text-left rounded-xl bg-gradient-to-br from-[#1a1a2e] to-[#2a2a40] p-2.5 hover:from-[#22223a] hover:to-[#333350] transition-all group"
               data-testid="button-open-ais"
             >
-              <div className="flex items-center justify-between mb-1.5">
-                <p className="text-[8px] font-medium text-white/50 uppercase tracking-widest">Capital Readiness</p>
-                <svg width="10" height="10" viewBox="0 0 10 10" fill="none" className="text-white/30 group-hover:text-white/60 transition-colors shrink-0">
-                  <path d="M3 1l4 4-4 4" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
+              <div className="flex items-center justify-between mb-1">
+                <p className="text-[7px] font-semibold text-white/40 uppercase tracking-[0.12em]">Capital Readiness</p>
+                <svg width="8" height="8" viewBox="0 0 10 10" fill="none" className="text-white/25 group-hover:text-white/50 transition-colors"><path d="M3 1l4 4-4 4" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" /></svg>
               </div>
-              <div className="flex items-baseline gap-1.5 mb-1">
-                <span className="text-[24px] font-bold text-white leading-none" data-testid="text-ais-score">{aisScore}</span>
-                <span className="text-[11px] font-medium text-white/40">/ 100</span>
+              <div className="flex items-center gap-3">
+                <div className="flex items-baseline gap-1">
+                  <span className="text-[22px] font-bold text-white leading-none" data-testid="text-ais-score" style={{ fontVariantNumeric: "tabular-nums" }}>{aisScore}</span>
+                  <span className="text-[10px] font-medium text-white/30">/ 100</span>
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="text-[8px] text-white/60 font-medium truncate" data-testid="text-ais-status">{getStatusLabel()}</p>
+                  <p className="text-[7px] text-white/30 truncate">{getPhaseAction()}</p>
+                </div>
               </div>
-              <p className="text-[9px] text-white/70 font-medium mb-0.5" data-testid="text-ais-status">{getStatusLabel()}</p>
-              <p className="text-[8px] text-white/40">{getPhaseAction()}</p>
+              {(suppressorCount > 0 || pf?.readinessLevel) && (
+                <div className="mt-1.5 pt-1.5 border-t border-white/8 flex items-center gap-3 flex-wrap">
+                  {pf?.readinessLevel && <span className="text-[7px] text-white/40">Tier: <span className="text-white/70 font-medium">{getReadinessTier()}</span></span>}
+                  {suppressorCount > 0 && <span className="text-[7px] text-white/40">Suppressors: <span className="text-white/70 font-medium">{suppressorCount}</span></span>}
+                  {aisScore && aisScore < 88 && <span className="text-[7px] text-white/40">Next: <span className="text-white/70 font-medium">{aisScore < 78 ? "78" : aisScore < 82 ? "82" : "88"}</span></span>}
+                </div>
+              )}
+            </button>
+          ) : (
+            <div className="rounded-xl border border-dashed border-[#ddd] p-2.5 text-center">
+              <p className="text-[8px] text-[#999] leading-[1.5]">Upload a credit report to activate your Capital Readiness Index</p>
+            </div>
+          )}
 
-              <div className="mt-2 pt-2 border-t border-white/10 space-y-1.5">
-                {suppressorCount > 0 && (
-                  <div>
-                    <p className="text-[8px] text-white/50">
-                      Active Approval Suppressors: <span className="text-white/80 font-medium">{suppressorCount}</span>
-                    </p>
-                    <div className="mt-1 space-y-0.5">
-                      {aisReport?.suppressors?.slice(0, 3).map((s, si) => (
-                        <p key={si} className="text-[7px] text-white/35 pl-2">· {s}</p>
-                      ))}
+          {hasAis && aisReport && (() => {
+            const tradelines = aisReport.openTradelines || [];
+            const isPrimary = (o: string) => /primary/i.test(o);
+            const isAU = (o: string) => /\bau\b|authorized/i.test(o);
+            const isRev = (t: string) => /revolv|credit\s*card|loc\b|heloc/i.test(t);
+            const isInst = (t: string) => /install|auto|student|mortgage|personal\s*loan/i.test(t);
+
+            const primaryRev = tradelines.filter(tl => isRev(tl.type) && isPrimary(tl.ownership));
+            const primaryInst = tradelines.filter(tl => isInst(tl.type) && isPrimary(tl.ownership));
+            const primaryAll = tradelines.filter(tl => isPrimary(tl.ownership));
+
+            const inqRaw = aisReport.projectedFunding?.inquirySlots ? String(aisReport.projectedFunding.inquirySlots) : "";
+            const inqMatch = inqRaw.match(/(\d+)\s*(?:hard|inquir|total)/i);
+            let inqCount = inqMatch ? parseInt(inqMatch[1]) : 0;
+            if (inqCount === 0) {
+              const suppInq = (aisReport.suppressors || []).find(s => /inquir|velocity/i.test(s));
+              if (suppInq) { const sm = suppInq.match(/(\d+)\s*(?:inquir|hard)/i); inqCount = sm ? parseInt(sm[1]) : 3; }
+            }
+
+            const limits = primaryRev.map(tl => parseInt(tl.limit.replace(/[^0-9]/g, "")) || 0);
+            const balances = primaryRev.map(tl => parseInt(tl.balance.replace(/[^0-9]/g, "")) || 0);
+            const totalLimit = limits.reduce((s, l) => s + l, 0);
+            const totalBal = balances.reduce((s, b) => s + b, 0);
+            const aggUtil = totalLimit > 0 ? Math.round((totalBal / totalLimit) * 100) : 0;
+            const avgLimit = limits.length > 0 ? Math.round(limits.reduce((s, l) => s + l, 0) / limits.length) : 0;
+            const highestLimit = limits.length > 0 ? Math.max(...limits) : 0;
+            const maxCardUtil = limits.length > 0 ? Math.max(...limits.map((l, i) => l > 0 ? Math.round((balances[i] / l) * 100) : 0)) : 0;
+            const parseAgeYears = (age: string): number | null => {
+              const yrM = age.match(/(\d+)\s*yr/i);
+              if (yrM) return parseInt(yrM[1]);
+              const moM = age.match(/(\d+)\s*mo/i);
+              if (moM) return Math.round(parseInt(moM[1]) / 12 * 10) / 10;
+              return null;
+            };
+            const parsedAges = tradelines.map(tl => parseAgeYears(tl.age)).filter((a): a is number => a !== null);
+            const avgAge = parsedAges.length > 0 ? Math.round(parsedAges.reduce((s, a) => s + a, 0) / parsedAges.length) : 0;
+            const newAccounts = parsedAges.filter(a => a < 1).length;
+            const hasInstallment = primaryInst.length > 0;
+
+            const velocityColor = inqCount >= 6 ? "#c0392b" : inqCount >= 3 ? "#c9a227" : "#2d6a4f";
+
+            type RiskSignal = { label: string; status: string; level: "safe" | "caution" | "risk" };
+            const signals: RiskSignal[] = [
+              { label: "Inquiry Velocity", status: inqCount >= 6 ? "High" : inqCount >= 3 ? "Elevated" : "Clear", level: inqCount >= 6 ? "risk" : inqCount >= 3 ? "caution" : "safe" },
+              { label: "Revolver Concentration", status: maxCardUtil >= 80 ? "Severe" : maxCardUtil >= 30 ? "Elevated" : "Normal", level: maxCardUtil >= 80 ? "risk" : maxCardUtil >= 30 ? "caution" : "safe" },
+              { label: "Tradeline Depth", status: primaryAll.length >= 5 ? "Established" : primaryAll.length >= 3 ? "Developing" : "Thin", level: primaryAll.length >= 5 ? "safe" : primaryAll.length >= 3 ? "caution" : "risk" },
+              { label: "Limit Strength", status: avgLimit >= 5000 ? "Strong" : avgLimit >= 3000 ? "Moderate" : "Weak", level: avgLimit >= 5000 ? "safe" : avgLimit >= 3000 ? "caution" : "risk" },
+              { label: "Age Stability", status: avgAge >= 5 ? "Strong" : avgAge >= 3 ? "Stable" : "Weak", level: avgAge >= 5 ? "safe" : avgAge >= 3 ? "caution" : "risk" },
+              { label: "New Clustering", status: newAccounts >= 3 ? "Risk" : newAccounts >= 2 ? "Caution" : "Clear", level: newAccounts >= 3 ? "risk" : newAccounts >= 2 ? "caution" : "safe" },
+              { label: "Profile Symmetry", status: hasInstallment && primaryRev.length >= 1 ? "Balanced" : "Asymmetric", level: hasInstallment && primaryRev.length >= 1 ? "safe" : "caution" },
+            ];
+
+            const riskCount = signals.filter(s => s.level === "risk").length;
+            const cautionCount = signals.filter(s => s.level === "caution").length;
+            const overallColor = riskCount >= 2 ? "#c0392b" : riskCount >= 1 || cautionCount >= 3 ? "#c9a227" : "#2d6a4f";
+
+            let approvalProb = 85;
+            if (inqCount >= 6) approvalProb -= 25; else if (inqCount >= 3) approvalProb -= 12;
+            if (maxCardUtil >= 80) approvalProb -= 20; else if (maxCardUtil >= 30) approvalProb -= 10;
+            if (primaryAll.length < 3) approvalProb -= 15; else if (primaryAll.length < 5) approvalProb -= 5;
+            if (avgLimit < 3000) approvalProb -= 15; else if (avgLimit < 5000) approvalProb -= 5;
+            if (avgAge < 1) approvalProb -= 12; else if (avgAge < 3) approvalProb -= 5;
+            if (newAccounts >= 3) approvalProb -= 10; else if (newAccounts >= 2) approvalProb -= 5;
+            if (!hasInstallment || primaryRev.length < 1) approvalProb -= 5;
+            if (aggUtil >= 30) approvalProb -= 10; else if (aggUtil > 9) approvalProb -= 3;
+            approvalProb = Math.max(5, Math.min(95, approvalProb));
+            const probColor = approvalProb >= 70 ? "#2d6a4f" : approvalProb >= 45 ? "#c9a227" : "#c0392b";
+
+            const denialDrivers = signals.filter(s => s.level !== "safe").sort((a, b) => a.level === "risk" ? -1 : b.level === "risk" ? 1 : 0);
+
+            const now = new Date();
+            const cooldownMonths = inqCount > 4 ? 4 : inqCount > 2 ? 2 : 1;
+            const windowStart = new Date(now.getFullYear(), now.getMonth() + cooldownMonths, 1);
+            const windowEnd = new Date(windowStart.getFullYear(), windowStart.getMonth() + 2, 1);
+            const mn = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+            return (<>
+              <div className="rounded-lg border border-[#e8e8e8] bg-white p-2" data-testid="denial-simulation">
+                <div className="flex items-center gap-2.5 mb-1.5">
+                  <div className="relative w-[36px] h-[36px] flex-shrink-0">
+                    <svg viewBox="0 0 36 36" className="w-full h-full -rotate-90">
+                      <circle cx="18" cy="18" r="15.5" fill="none" stroke="#f0f0f0" strokeWidth="2.5" />
+                      <circle cx="18" cy="18" r="15.5" fill="none" stroke={probColor} strokeWidth="2.5" strokeDasharray={`${approvalProb * 0.974} 100`} strokeLinecap="round" />
+                    </svg>
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <span className="text-[10px] font-bold leading-none" style={{ color: probColor, fontVariantNumeric: "tabular-nums" }}>{approvalProb}%</span>
+                    </div>
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-[7px] text-[#aaa] uppercase tracking-[0.1em] font-semibold">If You Applied Today</p>
+                    <p className="text-[10px] font-bold text-[#333]">Approval: <span style={{ color: probColor }}>{approvalProb}%</span></p>
+                    <p className="text-[7px] text-[#999]">{mn[windowStart.getMonth()]}–{mn[windowEnd.getMonth()]} {windowEnd.getFullYear()} · {inqCount > 2 ? "Velocity stabilizing" : "Window open"}</p>
+                  </div>
+                </div>
+                {denialDrivers.length > 0 && (
+                  <div className="flex flex-wrap gap-1">
+                    {denialDrivers.slice(0, 4).map((d, di) => (
+                      <span key={di} className={`inline-flex items-center gap-1 text-[7px] font-medium px-1.5 py-0.5 rounded ${d.level === "risk" ? "bg-[#c0392b]/8 text-[#c0392b]" : "bg-[#c9a227]/8 text-[#c9a227]"}`}>
+                        <span className={`w-[4px] h-[4px] rounded-full ${d.level === "risk" ? "bg-[#c0392b]" : "bg-[#c9a227]"}`} />
+                        {d.label}
+                      </span>
+                    ))}
+                  </div>
+                )}
+                {highestLimit > 0 && (
+                  <div className="mt-1.5 pt-1.5 border-t border-[#f0f0f0] grid grid-cols-2 gap-2">
+                    <div>
+                      <p className="text-[6px] text-[#aaa] uppercase tracking-wider">Limit Match</p>
+                      <p className="text-[8px] text-[#333] font-bold" style={{ fontVariantNumeric: "tabular-nums" }}>${Math.round(highestLimit * 0.6).toLocaleString()}–${Math.round(highestLimit * 1.2).toLocaleString()}</p>
+                    </div>
+                    <div>
+                      <p className="text-[6px] text-[#aaa] uppercase tracking-wider">If Optimized</p>
+                      <p className="text-[8px] text-[#2d6a4f] font-bold" style={{ fontVariantNumeric: "tabular-nums" }}>${Math.round(highestLimit * 1.2).toLocaleString()}–${Math.round(highestLimit * 1.8).toLocaleString()}</p>
                     </div>
                   </div>
                 )}
-                <div className="grid grid-cols-2 gap-x-3 gap-y-1">
-                  {pf?.readinessLevel && (
-                    <p className="text-[8px] text-white/50">
-                      Tier: <span className="text-white/80 font-medium">{getReadinessTier()}</span>
-                    </p>
-                  )}
-                  {pf?.inquirySlots && (
-                    <div>
-                      <p className="text-[8px] text-white/50">
-                        Inquiry Capacity: <span className="text-white/80 font-medium">{(() => {
-                          const raw = String(pf.inquirySlots);
-                          const totalMatch = raw.match(/(\d+)\s*(?:total|hard)/i);
-                          const totalInq = totalMatch ? parseInt(totalMatch[1]) : 0;
-                          const available = Math.max(0, 2 - totalInq);
-                          return `${available} Available`;
-                        })()}</span>
-                      </p>
-                      <p className="text-[7px] text-white/30 mt-0.5">{pf.inquirySlots}</p>
-                    </div>
-                  )}
-                </div>
               </div>
 
-              {aisScore && aisScore < 88 && (
-                <div className="mt-2 space-y-1">
-                  <p className="text-[8px] text-white/50">
-                    Next: <span className="text-white/70 font-medium">{aisScore < 78 ? "Tier 1 (78)" : aisScore < 82 ? "Prime (82)" : "Premium (88)"}</span>
-                  </p>
-                  {(() => {
-                    const raw = pf?.inquirySlots ? String(pf.inquirySlots) : "";
-                    const recentMatch = raw.match(/(\d+)\s*(?:inquir|within|last\s*30)/i);
-                    const recentInq = recentMatch ? parseInt(recentMatch[1]) : 0;
-                    const totalMatch = raw.match(/(\d+)\s*(?:total|hard)/i);
-                    const totalInq = totalMatch ? parseInt(totalMatch[1]) : 0;
-                    const now = new Date();
-                    const cooldownMonths = totalInq > 4 ? 6 : totalInq > 2 ? 3 : 1;
-                    const windowStart = new Date(now.getFullYear(), now.getMonth() + cooldownMonths, 1);
-                    const windowEnd = new Date(windowStart.getFullYear(), windowStart.getMonth() + 2, 1);
-                    const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-                    const windowLabel = `${monthNames[windowStart.getMonth()]}–${monthNames[windowEnd.getMonth()]} ${windowEnd.getFullYear()}`;
-                    return (
-                      <div className="rounded-md bg-white/5 px-2 py-1.5">
-                        <p className="text-[7px] text-white/35 uppercase tracking-wider font-semibold">Next Approval Window</p>
-                        <p className="text-[10px] text-white/80 font-bold mt-0.5">{windowLabel}</p>
-                        <p className="text-[7px] text-white/30 mt-0.5">{recentInq > 0 ? "Triggered when inquiry velocity stabilizes" : "Inquiry velocity stable — window open"}</p>
+              <div className="rounded-lg border border-[#e8e8e8] bg-white p-2" data-testid="underwriting-risk-signals">
+                <div className="flex items-center justify-between mb-1.5">
+                  <p className="text-[7px] uppercase tracking-[0.1em] text-[#555] font-semibold">Risk Signals</p>
+                  <span className="text-[7px] font-bold px-1.5 py-[2px] rounded" style={{ color: overallColor, backgroundColor: overallColor + "10" }}>{riskCount >= 2 ? "High" : riskCount >= 1 || cautionCount >= 3 ? "Moderate" : cautionCount >= 1 ? "Low" : "Clear"}</span>
+                </div>
+                <div className="grid grid-cols-2 gap-x-2 gap-y-[3px]">
+                  {signals.map((s, si) => (
+                    <div key={si} className="flex items-center justify-between">
+                      <div className="flex items-center gap-1">
+                        <div className={`w-[5px] h-[5px] rounded-full ${s.level === "risk" ? "bg-[#c0392b]" : s.level === "caution" ? "bg-[#c9a227]" : "bg-[#2d6a4f]"}`} />
+                        <span className="text-[7px] text-[#555]">{s.label}</span>
                       </div>
-                    );
-                  })()}
+                      <span className={`text-[7px] font-bold ${s.level === "risk" ? "text-[#c0392b]" : s.level === "caution" ? "text-[#c9a227]" : "text-[#2d6a4f]"}`}>{s.status}</span>
+                    </div>
+                  ))}
                 </div>
-              )}
-
-              <div className="mt-2 flex items-center gap-1.5 text-[9px] text-white/60 group-hover:text-white/90 font-medium transition-colors">
-                <span>View Full Analysis</span>
-                <svg width="8" height="8" viewBox="0 0 8 8" fill="none"><path d="M2 4h4M4 2l2 2-2 2" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                {inqCount > 2 && (
+                  <div className="mt-1.5 pt-1 border-t border-[#f0f0f0] flex items-center justify-between">
+                    <span className="text-[6px] text-[#999] uppercase tracking-wider">Velocity</span>
+                    <span className="text-[7px] font-bold" style={{ color: velocityColor }}>{inqCount} inq · {inqCount > 2 ? "Suppression Active" : "Clear"}</span>
+                  </div>
+                )}
               </div>
-            </button>
-          ) : (
-            <div className="rounded-xl border border-dashed border-[#ddd] p-3 text-center">
-              <p className="text-[9px] text-[#999] leading-[1.5]">Upload a credit report to activate your Capital Readiness Index</p>
-            </div>
-          )}
+
+              <div className="grid grid-cols-2 gap-1.5" data-testid="lender-metrics">
+                {[
+                  { label: "Velocity", value: `${inqCount}`, sub: inqCount >= 6 ? "High" : inqCount >= 3 ? "Elevated" : "Clear", color: velocityColor },
+                  { label: "Symmetry", value: `${primaryRev.length}R/${primaryInst.length}I`, sub: primaryRev.length >= 3 && hasInstallment ? "Balanced" : "Asymm.", color: primaryRev.length >= 3 && hasInstallment ? "#2d6a4f" : "#c9a227" },
+                  { label: "Avg Limit", value: avgLimit > 0 ? `$${(avgLimit / 1000).toFixed(0)}K` : "—", sub: avgLimit >= 5000 ? "Strong" : avgLimit >= 3000 ? "Mod." : "Weak", color: avgLimit >= 5000 ? "#2d6a4f" : avgLimit >= 3000 ? "#c9a227" : "#c0392b" },
+                  { label: "Utilization", value: `${aggUtil}%`, sub: aggUtil <= 9 ? "Optimal" : aggUtil <= 29 ? "OK" : "High", color: aggUtil <= 9 ? "#2d6a4f" : aggUtil <= 29 ? "#c9a227" : "#c0392b" },
+                ].map((m, mi) => (
+                  <div key={mi} className="rounded-md bg-[#fafafa] border border-[#eee] px-2 py-1.5 text-center">
+                    <p className="text-[6px] text-[#aaa] uppercase tracking-wider">{m.label}</p>
+                    <p className="text-[10px] font-bold" style={{ color: m.color, fontVariantNumeric: "tabular-nums" }}>{m.value}</p>
+                    <p className="text-[6px] font-semibold" style={{ color: m.color }}>{m.sub}</p>
+                  </div>
+                ))}
+              </div>
+            </>);
+          })()}
         </div>
 
         <PerfectProfileTab aisReport={aisReport} />
-
-        {hasAis && aisReport && (() => {
-          const tradelines = aisReport.openTradelines || [];
-          const isPrimary = (o: string) => /primary/i.test(o);
-          const isAU = (o: string) => /\bau\b|authorized/i.test(o);
-          const isRev = (t: string) => /revolv|credit\s*card|loc\b|heloc/i.test(t);
-          const isInst = (t: string) => /install|auto|student|mortgage|personal\s*loan/i.test(t);
-          const parseAge = (a: string): number => { const m = a.match(/(\d+)\s*yr/i); return m ? parseInt(m[1]) : 0; };
-
-          const primaryRev = tradelines.filter(tl => isRev(tl.type) && isPrimary(tl.ownership));
-          const primaryInst = tradelines.filter(tl => isInst(tl.type) && isPrimary(tl.ownership));
-          const primaryAll = tradelines.filter(tl => isPrimary(tl.ownership));
-          const auCount = tradelines.filter(tl => isAU(tl.ownership)).length;
-
-          const inqRaw = aisReport.projectedFunding?.inquirySlots ? String(aisReport.projectedFunding.inquirySlots) : "";
-          const inqMatch = inqRaw.match(/(\d+)\s*(?:hard|inquir|total)/i);
-          let inqCount = inqMatch ? parseInt(inqMatch[1]) : 0;
-          if (inqCount === 0) {
-            const suppInq = (aisReport.suppressors || []).find(s => /inquir|velocity/i.test(s));
-            if (suppInq) {
-              const suppMatch = suppInq.match(/(\d+)\s*(?:inquir|hard)/i);
-              inqCount = suppMatch ? parseInt(suppMatch[1]) : 3;
-            }
-          }
-
-          const limits = primaryRev.map(tl => parseInt(tl.limit.replace(/[^0-9]/g, "")) || 0);
-          const balances = primaryRev.map(tl => parseInt(tl.balance.replace(/[^0-9]/g, "")) || 0);
-          const totalLimit = limits.reduce((s, l) => s + l, 0);
-          const totalBal = balances.reduce((s, b) => s + b, 0);
-          const aggUtil = totalLimit > 0 ? Math.round((totalBal / totalLimit) * 100) : 0;
-          const avgLimit = limits.length > 0 ? Math.round(limits.reduce((s, l) => s + l, 0) / limits.length) : 0;
-          const highestLimit = limits.length > 0 ? Math.max(...limits) : 0;
-          const maxCardUtil = limits.length > 0 ? Math.max(...limits.map((l, i) => l > 0 ? Math.round((balances[i] / l) * 100) : 0)) : 0;
-          const parseAgeYears = (age: string): number | null => {
-            const yrM = age.match(/(\d+)\s*yr/i);
-            if (yrM) return parseInt(yrM[1]);
-            const moM = age.match(/(\d+)\s*mo/i);
-            if (moM) return Math.round(parseInt(moM[1]) / 12 * 10) / 10;
-            return null;
-          };
-          const parsedAges = tradelines.map(tl => parseAgeYears(tl.age)).filter((a): a is number => a !== null);
-          const avgAge = parsedAges.length > 0 ? Math.round(parsedAges.reduce((s, a) => s + a, 0) / parsedAges.length) : 0;
-          const newAccounts = parsedAges.filter(a => a < 1).length;
-          const hasInstallment = primaryInst.length > 0;
-
-          const velocityLevel = inqCount >= 6 ? "High" : inqCount >= 3 ? "Elevated" : inqCount >= 1 ? "Low" : "Clear";
-          const velocityColor = inqCount >= 6 ? "#c0392b" : inqCount >= 3 ? "#c9a227" : "#2d6a4f";
-          const stabilizationDays = inqCount >= 6 ? 90 : inqCount >= 3 ? 60 : 0;
-
-          type RiskSignal = { label: string; status: string; level: "safe" | "caution" | "risk"; detail: string };
-          const signals: RiskSignal[] = [
-            { label: "Inquiry Velocity", status: velocityLevel, level: inqCount >= 6 ? "risk" : inqCount >= 3 ? "caution" : "safe", detail: inqCount > 0 ? `${inqCount} inquiries detected` : "No recent inquiries" },
-            { label: "Revolver Concentration", status: maxCardUtil >= 80 ? "Severe" : maxCardUtil >= 30 ? "Elevated" : "Normal", level: maxCardUtil >= 80 ? "risk" : maxCardUtil >= 30 ? "caution" : "safe", detail: maxCardUtil > 0 ? `Peak card utilization: ${maxCardUtil}%` : "No revolving balances" },
-            { label: "Tradeline Depth", status: primaryAll.length >= 5 ? "Established" : primaryAll.length >= 3 ? "Developing" : "Thin", level: primaryAll.length >= 5 ? "safe" : primaryAll.length >= 3 ? "caution" : "risk", detail: `${primaryAll.length} primary tradeline${primaryAll.length !== 1 ? "s" : ""}` },
-            { label: "Limit Strength", status: avgLimit >= 5000 ? "Strong" : avgLimit >= 3000 ? "Moderate" : "Weak", level: avgLimit >= 5000 ? "safe" : avgLimit >= 3000 ? "caution" : "risk", detail: avgLimit > 0 ? `Avg limit: $${avgLimit.toLocaleString()}` : "No revolving limits" },
-            { label: "Account Age Stability", status: avgAge >= 5 ? "Strong" : avgAge >= 3 ? "Stable" : "Weak", level: avgAge >= 5 ? "safe" : avgAge >= 3 ? "caution" : "risk", detail: `${avgAge} year${avgAge !== 1 ? "s" : ""} average age` },
-            { label: "New Account Clustering", status: newAccounts >= 3 ? "Risk" : newAccounts >= 2 ? "Caution" : "Clear", level: newAccounts >= 3 ? "risk" : newAccounts >= 2 ? "caution" : "safe", detail: `${newAccounts} account${newAccounts !== 1 ? "s" : ""} under 1 year` },
-            { label: "Profile Symmetry", status: hasInstallment && primaryRev.length >= 1 ? "Balanced" : "Asymmetric", level: hasInstallment && primaryRev.length >= 1 ? "safe" : "caution", detail: !hasInstallment ? "Missing installment account" : primaryRev.length < 1 ? "Missing revolving accounts" : "Revolver + installment mix present" },
-          ];
-
-          const riskCount = signals.filter(s => s.level === "risk").length;
-          const cautionCount = signals.filter(s => s.level === "caution").length;
-          const overallStatus = riskCount >= 2 ? "High" : riskCount >= 1 || cautionCount >= 3 ? "Moderate" : cautionCount >= 1 ? "Low" : "Clear";
-          const overallColor = riskCount >= 2 ? "#c0392b" : riskCount >= 1 || cautionCount >= 3 ? "#c9a227" : "#2d6a4f";
-
-          let approvalProb = 85;
-          if (inqCount >= 6) approvalProb -= 25; else if (inqCount >= 3) approvalProb -= 12;
-          if (maxCardUtil >= 80) approvalProb -= 20; else if (maxCardUtil >= 30) approvalProb -= 10;
-          if (primaryAll.length < 3) approvalProb -= 15; else if (primaryAll.length < 5) approvalProb -= 5;
-          if (avgLimit < 3000) approvalProb -= 15; else if (avgLimit < 5000) approvalProb -= 5;
-          if (avgAge < 1) approvalProb -= 12; else if (avgAge < 3) approvalProb -= 5;
-          if (newAccounts >= 3) approvalProb -= 10; else if (newAccounts >= 2) approvalProb -= 5;
-          if (!hasInstallment || primaryRev.length < 1) approvalProb -= 5;
-          if (aggUtil >= 30) approvalProb -= 10; else if (aggUtil > 5) approvalProb -= 3;
-          approvalProb = Math.max(5, Math.min(95, approvalProb));
-          const probColor = approvalProb >= 70 ? "#2d6a4f" : approvalProb >= 45 ? "#c9a227" : "#c0392b";
-
-          const denialDrivers = signals.filter(s => s.level === "risk" || s.level === "caution").sort((a, b) => a.level === "risk" ? -1 : b.level === "risk" ? 1 : 0);
-
-          const now = new Date();
-          const cooldownMonths = inqCount > 4 ? 4 : inqCount > 2 ? 2 : 1;
-          const windowStart = new Date(now.getFullYear(), now.getMonth() + cooldownMonths, 1);
-          const windowEnd = new Date(windowStart.getFullYear(), windowStart.getMonth() + 2, 1);
-          const mn = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-
-          const limitMatchLow = Math.round(highestLimit * 0.6);
-          const limitMatchHigh = Math.round(highestLimit * 1.2);
-          const optimizedLow = Math.round(highestLimit * 1.2);
-          const optimizedHigh = Math.round(highestLimit * 1.8);
-
-          return (
-            <div className="space-y-2.5 mt-2.5" data-testid="underwriting-intelligence">
-              <div className="rounded-xl bg-gradient-to-br from-[#1a1a2e] to-[#252540] p-2.5" data-testid="velocity-risk-monitor">
-                <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center gap-1.5">
-                    <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M1 9l3-4 2 2 4-6" stroke={velocityColor} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /><circle cx="10" cy="1" r="1" fill={velocityColor} /></svg>
-                    <p className="text-[8px] uppercase tracking-[0.12em] text-white/40 font-semibold">Velocity Risk Monitor</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2 mb-1.5">
-                  <span className="text-[11px] font-bold text-white">Inquiry Velocity:</span>
-                  <span className="text-[11px] font-bold" style={{ color: velocityColor }}>{velocityLevel}</span>
-                </div>
-                {inqCount > 0 && (
-                  <p className="text-[8px] text-white/50 mb-1">{inqCount} inquiries detected within recent window</p>
-                )}
-                <div className="grid grid-cols-2 gap-1 mb-2">
-                  <div className="rounded-md bg-white/5 px-2 py-1">
-                    <p className="text-[6px] text-white/30 uppercase tracking-wider">Institutional Tolerance</p>
-                    <p className="text-[8px] text-white/70 font-medium">≤ 2 / 90 days</p>
-                  </div>
-                  <div className="rounded-md bg-white/5 px-2 py-1">
-                    <p className="text-[6px] text-white/30 uppercase tracking-wider">Status</p>
-                    <p className="text-[8px] font-medium" style={{ color: velocityColor }}>{inqCount > 2 ? "Velocity Suppression Active" : "Within Tolerance"}</p>
-                  </div>
-                </div>
-                {stabilizationDays > 0 && (
-                  <p className="text-[7px] text-white/35">Recommended stabilization window: {stabilizationDays} days</p>
-                )}
-                <div className="mt-1.5 pt-1.5 border-t border-white/10 text-[7px] text-white/25 space-y-0.5">
-                  <p className="font-medium text-white/35 uppercase tracking-wider text-[6px]">Velocity Thresholds</p>
-                  <div className="grid grid-cols-4 gap-1">
-                    {[
-                      { window: "30d", safe: "0–1", risk: "3+" },
-                      { window: "90d", safe: "0–2", risk: "4+" },
-                      { window: "12mo", safe: "0–5", risk: "8+" },
-                      { window: "24mo", safe: "0–10", risk: "15+" },
-                    ].map((t, i) => (
-                      <div key={i} className="text-center">
-                        <p className="text-[6px] text-white/25">{t.window}</p>
-                        <p className="text-[7px] text-[#2d6a4f]">{t.safe}</p>
-                        <p className="text-[7px] text-[#c0392b]">{t.risk}</p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-
-              <div className="rounded-lg border border-[#e8e8e8] bg-white p-2.5" data-testid="underwriting-risk-signals">
-                <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center gap-1.5">
-                    <svg width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M6 1L11 10H1L6 1z" stroke="#555" strokeWidth="1" fill="none" /><path d="M6 5v2" stroke="#555" strokeWidth="1.2" strokeLinecap="round" /><circle cx="6" cy="8.5" r="0.5" fill="#555" /></svg>
-                    <p className="text-[8px] uppercase tracking-[0.12em] text-[#555] font-semibold">Underwriting Risk Signals</p>
-                  </div>
-                  <span className="text-[8px] font-bold px-1.5 py-0.5 rounded-md" style={{ color: overallColor, backgroundColor: overallColor + "12" }}>{overallStatus}</span>
-                </div>
-                <div className="space-y-1">
-                  {signals.map((s, si) => (
-                    <div key={si} className="flex items-center justify-between px-1.5 py-1 rounded-md bg-[#fafafa]">
-                      <div className="flex items-center gap-1.5">
-                        <div className={`w-[6px] h-[6px] rounded-full ${s.level === "risk" ? "bg-[#c0392b]" : s.level === "caution" ? "bg-[#c9a227]" : "bg-[#2d6a4f]"}`} />
-                        <span className="text-[8px] text-[#333] font-medium">{s.label}</span>
-                      </div>
-                      <div className="text-right">
-                        <span className={`text-[8px] font-bold ${s.level === "risk" ? "text-[#c0392b]" : s.level === "caution" ? "text-[#c9a227]" : "text-[#2d6a4f]"}`}>{s.status}</span>
-                        <p className="text-[6px] text-[#aaa]">{s.detail}</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <div className="rounded-lg border border-[#e8e8e8] bg-white p-2.5" data-testid="denial-simulation">
-                <div className="flex items-center gap-1.5 mb-2">
-                  <svg width="11" height="11" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="5" stroke="#555" strokeWidth="1" fill="none" /><path d="M6 3v3.5l2.5 1.5" stroke="#555" strokeWidth="1" strokeLinecap="round" /></svg>
-                  <p className="text-[8px] uppercase tracking-[0.12em] text-[#555] font-semibold">Denial Simulation</p>
-                </div>
-
-                <div className="flex items-center gap-3 mb-2">
-                  <div className="relative w-[44px] h-[44px] flex-shrink-0">
-                    <svg viewBox="0 0 36 36" className="w-full h-full -rotate-90">
-                      <circle cx="18" cy="18" r="15.5" fill="none" stroke="#f0f0f0" strokeWidth="3" />
-                      <circle cx="18" cy="18" r="15.5" fill="none" stroke={probColor} strokeWidth="3" strokeDasharray={`${approvalProb * 0.974} 100`} strokeLinecap="round" />
-                    </svg>
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <span className="text-[11px] font-bold leading-none" style={{ color: probColor, fontVariantNumeric: "tabular-nums" }}>{approvalProb}%</span>
-                    </div>
-                  </div>
-                  <div>
-                    <p className="text-[8px] text-[#aaa] uppercase tracking-wider font-semibold">If You Applied Today</p>
-                    <p className="text-[10px] font-bold text-[#333]">Approval Probability: <span style={{ color: probColor }}>{approvalProb}%</span></p>
-                  </div>
-                </div>
-
-                {denialDrivers.length > 0 && (
-                  <div className="mb-2">
-                    <p className="text-[7px] text-[#aaa] uppercase tracking-wider font-semibold mb-1">Primary Denial Drivers</p>
-                    <div className="space-y-0.5">
-                      {denialDrivers.slice(0, 4).map((d, di) => (
-                        <div key={di} className="flex items-center gap-1.5 px-1.5 py-0.5 rounded bg-[#fafafa]">
-                          <div className={`w-[5px] h-[5px] rounded-full ${d.level === "risk" ? "bg-[#c0392b]" : "bg-[#c9a227]"}`} />
-                          <span className="text-[8px] text-[#555] font-medium">{d.label}</span>
-                          <span className="text-[7px] text-[#aaa] ml-auto">{d.detail}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                <div className="rounded-md bg-[#f8faf8] border border-[#e0ece0] p-2">
-                  <p className="text-[7px] text-[#2d6a4f] uppercase tracking-wider font-semibold mb-0.5">Next Approval Window</p>
-                  <p className="text-[10px] font-bold text-[#333]">{mn[windowStart.getMonth()]}–{mn[windowEnd.getMonth()]} {windowEnd.getFullYear()}</p>
-                  <p className="text-[7px] text-[#888] mt-0.5">{inqCount > 2 ? "Triggered when inquiry velocity stabilizes" : "Inquiry velocity stable — window open"}</p>
-                </div>
-
-                {highestLimit > 0 && (
-                  <div className="mt-2 rounded-md bg-[#f5f5ff] border border-[#e0e0f0] p-2">
-                    <p className="text-[7px] text-[#555] uppercase tracking-wider font-semibold mb-0.5">Limit Matching Potential</p>
-                    <div className="grid grid-cols-2 gap-2 mt-1">
-                      <div>
-                        <p className="text-[6px] text-[#aaa] uppercase tracking-wider">Current Range</p>
-                        <p className="text-[9px] text-[#333] font-bold" style={{ fontVariantNumeric: "tabular-nums" }}>${limitMatchLow.toLocaleString()}–${limitMatchHigh.toLocaleString()}</p>
-                      </div>
-                      <div>
-                        <p className="text-[6px] text-[#aaa] uppercase tracking-wider">If Optimized</p>
-                        <p className="text-[9px] text-[#2d6a4f] font-bold" style={{ fontVariantNumeric: "tabular-nums" }}>${optimizedLow.toLocaleString()}–${optimizedHigh.toLocaleString()}</p>
-                      </div>
-                    </div>
-                    <p className="text-[7px] text-[#999] mt-1">Based on highest existing limit: ${highestLimit.toLocaleString()}</p>
-                  </div>
-                )}
-              </div>
-
-              <div className="rounded-lg border border-[#e8e8e8] bg-white p-2.5" data-testid="lender-metrics">
-                <div className="flex items-center gap-1.5 mb-2">
-                  <svg width="11" height="11" viewBox="0 0 12 12" fill="none"><rect x="1" y="5" width="2" height="6" rx="0.5" fill="#555" /><rect x="5" y="3" width="2" height="8" rx="0.5" fill="#555" /><rect x="9" y="1" width="2" height="10" rx="0.5" fill="#555" /></svg>
-                  <p className="text-[8px] uppercase tracking-[0.12em] text-[#555] font-semibold">Elite Lender Metrics</p>
-                </div>
-                <div className="space-y-1.5">
-                  {[
-                    { label: "Credit Velocity", value: `${inqCount} inquiries`, sublabel: velocityLevel, color: velocityColor, note: "Rate of recent credit activity" },
-                    { label: "Profile Symmetry", value: primaryRev.length >= 3 && hasInstallment ? "Balanced" : "Asymmetric", sublabel: `${primaryRev.length}R / ${primaryInst.length}I`, color: primaryRev.length >= 3 && hasInstallment ? "#2d6a4f" : "#c9a227", note: "Revolver vs. installment balance" },
-                    { label: "Limit Strength Index", value: avgLimit > 0 ? `$${avgLimit.toLocaleString()}` : "N/A", sublabel: avgLimit >= 5000 ? "Strong" : avgLimit >= 3000 ? "Moderate" : "Weak", color: avgLimit >= 5000 ? "#2d6a4f" : avgLimit >= 3000 ? "#c9a227" : "#c0392b", note: "Average limit per card" },
-                    { label: "Utilization Stability", value: `${aggUtil}%`, sublabel: aggUtil <= 9 ? "Optimal" : aggUtil <= 29 ? "Acceptable" : "Suppressive", color: aggUtil <= 9 ? "#2d6a4f" : aggUtil <= 29 ? "#c9a227" : "#c0392b", note: "Aggregate revolving utilization" },
-                  ].map((m, mi) => (
-                    <div key={mi} className="flex items-center justify-between px-2 py-1.5 rounded-md bg-[#fafafa]">
-                      <div>
-                        <p className="text-[8px] text-[#333] font-semibold">{m.label}</p>
-                        <p className="text-[6px] text-[#aaa]">{m.note}</p>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-[9px] font-bold" style={{ color: m.color, fontVariantNumeric: "tabular-nums" }}>{m.value}</p>
-                        <p className="text-[7px] font-medium" style={{ color: m.color }}>{m.sublabel}</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          );
-        })()}
 
         </>)}
 
@@ -2540,12 +2370,7 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
         {panelTab === "command" && (<>
         <div className="w-full h-px bg-[#eee] my-3"></div>
         {hasAis && aisReport && (
-          <div className="mb-4" data-testid="next-moves-section">
-            <div className="flex items-center gap-2 mb-2">
-              <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 2h8v8H2z" stroke="#333" strokeWidth="1" fill="none" rx="1" /><path d="M4 5l1.5 1.5L8 4" stroke="#333" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" /></svg>
-              <span className="text-[10px] font-semibold text-[#555] uppercase tracking-wider">Next Moves</span>
-            </div>
-
+          <div className="mb-3" data-testid="next-moves-section">
             {(() => {
               const tradelines = aisReport.openTradelines || [];
               const parseAge = (age: string): number => { const m = age.match(/(\d+)\s*yr/i); return m ? parseInt(m[1]) : 0; };
@@ -2566,65 +2391,59 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
               const highestRevLimit = revLimits.length > 0 ? Math.max(...revLimits) : 0;
               const qualifyingLimitCount = primaryRev.filter(tl => (parseInt(tl.limit.replace(/[^0-9]/g, "")) || 0) >= 5000).length;
 
-              type GoalItem = { label: string; goal: string; current: string; met: boolean; priority: number; nextMove: string };
-              const revTarget = 4;
-              const revNeeded = Math.max(0, revTarget - primaryRev.length);
-              const goals: GoalItem[] = [
-                { label: "Primary Revolvers", goal: "3–5 accounts", current: `${primaryRev.length} account${primaryRev.length !== 1 ? "s" : ""}`, met: primaryRev.length >= 3, priority: primaryRev.length >= 3 ? 0 : revNeeded, nextMove: primaryRev.length >= 3 ? "Maintain current positions" : `Open ${revNeeded} more primary revolving account${revNeeded > 1 ? "s" : ""}, stagger 60–90 days apart` },
-                { label: "Primary Installment", goal: "1–2 accounts", current: `${primaryInst.length} account${primaryInst.length !== 1 ? "s" : ""}`, met: primaryInst.length >= 1, priority: primaryInst.length >= 1 ? 0 : 2, nextMove: primaryInst.length >= 1 ? "Maintain current position" : "Add 1 primary installment account (auto, personal loan, or credit builder)" },
-                { label: "Revolver Limits", goal: "$5K–$15K each", current: `${qualifyingLimitCount} of ${primaryRev.length} at $5K+`, met: qualifyingLimitCount >= primaryRev.length && primaryRev.length > 0, priority: primaryRev.length > 0 ? primaryRev.length - qualifyingLimitCount : 3, nextMove: qualifyingLimitCount >= primaryRev.length && primaryRev.length > 0 ? "All limits meet threshold" : "Request CLI increases on sub-$5K cards or allow organic growth" },
-                { label: "Highest Limit", goal: "$10,000+", current: highestRevLimit > 0 ? `$${highestRevLimit.toLocaleString()}` : "N/A", met: highestRevLimit >= 10000, priority: highestRevLimit >= 10000 ? 0 : 3, nextMove: highestRevLimit >= 10000 ? "Highest limit enables strong limit matching" : "Focus CLI requests on your highest-limit card — $10K+ unlocks limit matching" },
-                { label: "Total Rev. Limits", goal: "$25,000+", current: `$${totalLimit.toLocaleString()}`, met: totalLimit >= 25000, priority: totalLimit >= 25000 ? 0 : 3, nextMove: totalLimit >= 25000 ? "Total limit strength signals lender confidence" : "Grow revolving limits through CLI requests and new approvals" },
-                { label: "Utilization", goal: "1–9% aggregate", current: `${avgUtil}%`, met: avgUtil >= 1 && avgUtil <= 9, priority: avgUtil <= 9 ? 0 : avgUtil > 30 ? 4 : 2, nextMove: avgUtil <= 9 ? "Utilization in ideal range" : avgUtil > 30 ? "Pay down revolving balances — no card above 30%" : "Reduce balances to reach 1–9% aggregate target" },
-                { label: "Average Age", goal: "3+ years", current: `${avgAge} year${avgAge !== 1 ? "s" : ""}`, met: avgAge >= 3, priority: avgAge >= 3 ? 0 : 2, nextMove: avgAge >= 3 ? "File seasoning meets institutional target" : "Hold existing accounts open — avoid new applications to preserve average age" },
-                { label: "AU Dependency", goal: "Minimal", current: auCount > 0 ? `${auCount} AU account${auCount > 1 ? "s" : ""}` : "None", met: auCount <= 1, priority: auCount <= 1 ? 0 : auCount >= 3 ? 3 : 1, nextMove: auCount <= 1 ? "AU weighting acceptable" : "Heavy AU reliance is a red flag — shift to primary accounts" },
+              type GoalRow = { label: string; current: string; target: string; met: boolean; priority: number; tip: string };
+              const revNeeded = Math.max(0, 4 - primaryRev.length);
+              const goals: GoalRow[] = [
+                { label: "Revolvers", current: `${primaryRev.length}`, target: "3–5", met: primaryRev.length >= 3, priority: primaryRev.length >= 3 ? 0 : revNeeded, tip: primaryRev.length >= 3 ? "" : `Open ${revNeeded}, stagger 60–90d` },
+                { label: "Installment", current: `${primaryInst.length}`, target: "1–2", met: primaryInst.length >= 1, priority: primaryInst.length >= 1 ? 0 : 2, tip: primaryInst.length >= 1 ? "" : "Add credit builder or personal loan" },
+                { label: "Per-Card Limit", current: revLimits.length > 0 ? `${qualifyingLimitCount}/${primaryRev.length}` : "—", target: "$5K+", met: qualifyingLimitCount >= primaryRev.length && primaryRev.length > 0, priority: primaryRev.length > 0 ? primaryRev.length - qualifyingLimitCount : 3, tip: qualifyingLimitCount >= primaryRev.length && primaryRev.length > 0 ? "" : "Request CLI on sub-$5K cards" },
+                { label: "Highest Card", current: highestRevLimit > 0 ? `$${(highestRevLimit/1000).toFixed(0)}K` : "—", target: "$10K+", met: highestRevLimit >= 10000, priority: highestRevLimit >= 10000 ? 0 : 3, tip: highestRevLimit >= 10000 ? "" : "CLI your top card — unlocks limit matching" },
+                { label: "Total Limits", current: `$${(totalLimit/1000).toFixed(0)}K`, target: "$25K+", met: totalLimit >= 25000, priority: totalLimit >= 25000 ? 0 : 3, tip: totalLimit >= 25000 ? "" : "Grow via CLI + new approvals" },
+                { label: "Utilization", current: `${avgUtil}%`, target: "1–9%", met: avgUtil >= 1 && avgUtil <= 9, priority: avgUtil <= 9 ? 0 : avgUtil > 30 ? 4 : 2, tip: avgUtil <= 9 ? "" : avgUtil > 30 ? "Pay down — no card above 30%" : "Reduce to 1–9% aggregate" },
+                { label: "Avg Age", current: `${avgAge}yr`, target: "3+yr", met: avgAge >= 3, priority: avgAge >= 3 ? 0 : 2, tip: avgAge >= 3 ? "" : "Hold accounts open, avoid new apps" },
+                { label: "AU Reliance", current: auCount > 0 ? `${auCount}` : "0", target: "≤1", met: auCount <= 1, priority: auCount <= 1 ? 0 : auCount >= 3 ? 3 : 1, tip: auCount <= 1 ? "" : "Shift to primary accounts" },
               ];
 
               const sortedGoals = [...goals].sort((a, b) => b.priority - a.priority);
               const metCount = goals.filter(g => g.met).length;
-              const totalGoals = goals.length;
 
               return (
-                <div className="space-y-2">
-                  <div className="rounded-xl bg-gradient-to-br from-[#1a1a2e] to-[#252540] p-2.5">
+                <div>
+                  <div className="rounded-xl bg-gradient-to-br from-[#1a1a2e] to-[#252540] p-2 mb-1.5">
                     <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-[7px] uppercase tracking-[0.12em] text-white/35 font-semibold">Goal Sheet</p>
-                        <p className="text-[11px] font-bold text-white mt-0.5" style={{ fontVariantNumeric: "tabular-nums" }}>{metCount} <span className="text-[9px] font-normal text-white/40">/ {totalGoals} met</span></p>
+                      <div className="flex items-center gap-2">
+                        <svg width="10" height="10" viewBox="0 0 12 12" fill="none"><path d="M2 2h8v8H2z" stroke="white" strokeWidth="1" fill="none" rx="1" opacity="0.5" /><path d="M4 5l1.5 1.5L8 4" stroke="white" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" opacity="0.5" /></svg>
+                        <p className="text-[7px] uppercase tracking-[0.1em] text-white/40 font-semibold">Next Moves</p>
                       </div>
-                      <div className="flex gap-0.5">
-                        {goals.map((g, gi) => (
-                          <div key={gi} className={`w-[6px] h-[18px] rounded-sm ${g.met ? "bg-[#2d6a4f]" : "bg-white/10"}`} />
-                        ))}
+                      <div className="flex items-center gap-1.5">
+                        <p className="text-[10px] font-bold text-white" style={{ fontVariantNumeric: "tabular-nums" }}>{metCount}<span className="text-[8px] font-normal text-white/35">/{goals.length}</span></p>
+                        <div className="flex gap-[2px]">
+                          {goals.map((g, gi) => (
+                            <div key={gi} className={`w-[4px] h-[12px] rounded-[1px] ${g.met ? "bg-[#2d6a4f]" : "bg-white/10"}`} />
+                          ))}
+                        </div>
                       </div>
                     </div>
                   </div>
 
-                  {sortedGoals.map((g, gi) => (
-                    <div key={gi} className={`rounded-lg border p-2.5 ${g.met ? "bg-white border-[#e5e5e5]" : "bg-[#fffbf5] border-[#f0e0c0]"}`} data-testid={`goal-item-${gi}`}>
-                      <div className="flex items-center gap-1.5 mb-1">
-                        <div className={`w-[10px] h-[10px] rounded-[2px] flex items-center justify-center flex-shrink-0 ${g.met ? "bg-[#2d6a4f]" : "border border-[#ddd] bg-white"}`}>
-                          {g.met && <svg width="6" height="6" viewBox="0 0 10 10" fill="none"><path d="M2 5l2.5 2.5L8 3" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>}
-                        </div>
-                        <span className="text-[9px] font-semibold text-[#333]">{g.label}</span>
-                        {!g.met && <span className="text-[7px] text-[#c9a227] font-semibold ml-auto uppercase tracking-wider">Action Needed</span>}
-                      </div>
-                      <div className="grid grid-cols-2 gap-x-2 pl-[18px] mb-1">
-                        <div>
-                          <p className="text-[7px] text-[#aaa] uppercase tracking-wider">Goal</p>
-                          <p className="text-[8px] text-[#555] font-medium">{g.goal}</p>
-                        </div>
-                        <div>
-                          <p className="text-[7px] text-[#aaa] uppercase tracking-wider">Current</p>
-                          <p className={`text-[8px] font-medium ${g.met ? "text-[#2d6a4f]" : "text-[#c0392b]"}`}>{g.current}</p>
-                        </div>
-                      </div>
-                      <div className="pl-[18px] pt-1 border-t border-[#f0f0f0]">
-                        <p className="text-[7px] text-[#aaa] uppercase tracking-wider mb-0.5">Next Move</p>
-                        <p className="text-[8px] text-[#555] leading-[1.5]">{g.nextMove}</p>
-                      </div>
+                  <div className="rounded-lg border border-[#e8e8e8] bg-white overflow-hidden">
+                    <div className="grid grid-cols-[auto_1fr_auto_auto] gap-x-2 px-1.5 py-[3px] bg-[#f8f8f8] border-b border-[#eee]">
+                      <span className="text-[6px] text-[#aaa] uppercase tracking-wider w-3"></span>
+                      <span className="text-[6px] text-[#aaa] uppercase tracking-wider">Metric</span>
+                      <span className="text-[6px] text-[#aaa] uppercase tracking-wider text-right">Now</span>
+                      <span className="text-[6px] text-[#aaa] uppercase tracking-wider text-right">Target</span>
                     </div>
-                  ))}
+                    {sortedGoals.map((g, gi) => (
+                      <div key={gi} className={`grid grid-cols-[auto_1fr_auto_auto] gap-x-2 items-center px-1.5 py-[4px] ${gi < sortedGoals.length - 1 ? "border-b border-[#f5f5f5]" : ""} ${!g.met ? "bg-[#fffdf8]" : ""}`} data-testid={`goal-item-${gi}`}>
+                        <div className={`w-[7px] h-[7px] rounded-[2px] flex items-center justify-center flex-shrink-0 ${g.met ? "bg-[#2d6a4f]" : "border border-[#ddd]"}`}>
+                          {g.met && <svg width="5" height="5" viewBox="0 0 10 10" fill="none"><path d="M2 5l2.5 2.5L8 3" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" /></svg>}
+                        </div>
+                        <span className={`text-[7px] font-medium ${g.met ? "text-[#888]" : "text-[#333]"}`}>{g.label}{g.tip ? <span className="text-[6px] text-[#bbb] font-normal ml-1 hidden sm:inline">{g.tip}</span> : null}</span>
+                        <span className={`text-[7px] font-bold text-right ${g.met ? "text-[#2d6a4f]" : "text-[#333]"}`} style={{ fontVariantNumeric: "tabular-nums" }}>{g.current}</span>
+                        <span className="text-[7px] text-[#999] text-right" style={{ fontVariantNumeric: "tabular-nums" }}>{g.target}</span>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               );
             })()}
@@ -2632,13 +2451,15 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
         )}
 
         {!hasAis && (
-          <div className="mb-4">
-            <div className="flex items-center gap-2 mb-2">
-              <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 2h8v8H2z" stroke="#333" strokeWidth="1" fill="none" rx="1" /><path d="M4 5l1.5 1.5L8 4" stroke="#333" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" /></svg>
-              <span className="text-[10px] font-semibold text-[#555] uppercase tracking-wider">Next Moves</span>
+          <div className="mb-3">
+            <div className="rounded-xl bg-gradient-to-br from-[#1a1a2e] to-[#252540] p-2 mb-1.5">
+              <div className="flex items-center gap-2">
+                <svg width="10" height="10" viewBox="0 0 12 12" fill="none"><path d="M2 2h8v8H2z" stroke="white" strokeWidth="1" fill="none" rx="1" opacity="0.5" /><path d="M4 5l1.5 1.5L8 4" stroke="white" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" opacity="0.5" /></svg>
+                <p className="text-[7px] uppercase tracking-[0.1em] text-white/40 font-semibold">Next Moves</p>
+              </div>
             </div>
-            <div className="rounded-lg border border-dashed border-[#ddd] p-3 text-center">
-              <p className="text-[9px] text-[#999] leading-[1.5]">Upload a credit report to generate your goal sheet and next moves</p>
+            <div className="rounded-lg border border-dashed border-[#ddd] p-2.5 text-center">
+              <p className="text-[8px] text-[#999]">Upload a credit report to generate your goal sheet</p>
             </div>
           </div>
         )}
