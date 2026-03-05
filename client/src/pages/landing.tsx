@@ -2309,7 +2309,9 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
                     {(!item.attestationRequired || item.userAttestation) && item.userAttestation !== "recognized" && (
                       <button
                         onClick={() => {
-                          const disputeText = `Generate a dispute letter for this item: ${item.furnisherName} — ${item.issue} (${item.bureau}, basis: ${item.disputeBasis}${item.userAttestation === "not_authorized" ? ", user attests NOT AUTHORIZED" : ""})`;
+                          const dateInfo = item.dates ? Object.entries(item.dates).filter(([,v]) => v).map(([k,v]) => `${k}: ${v}`).join(", ") : "";
+                          const acctInfo = item.accountPartial ? `, account: ${item.accountPartial}` : "";
+                          const disputeText = `Generate a dispute letter for this item: ${item.furnisherName} — ${item.issue} (${item.bureau}, basis: ${item.disputeBasis}${acctInfo}${dateInfo ? `, ${dateInfo}` : ""}${item.userAttestation === "not_authorized" ? ", user attests NOT AUTHORIZED" : ""}). Use the ACTUAL creditor name, dates, and account details provided — do NOT use placeholder text like [Insert Creditor Name]. Reference my credit report data directly.`;
                           onSendChat(disputeText);
                         }}
                         className="text-[8px] px-2 py-1 rounded bg-[#1a1a2e] text-white font-semibold hover:bg-[#2a2a4e] transition-colors"
@@ -2340,8 +2342,12 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
                     alert(`${needsAttestation.length} items need your attestation first. Mark inquiries as "Not Authorized" or "I Recognize This" before generating.`);
                     return;
                   }
-                  const summary = eligible.map(n => `- ${n.furnisherName}: ${n.issue} (${n.bureau})`).join("\n");
-                  onSendChat(`Generate dispute letters for ALL of the following items:\n${summary}`);
+                  const summary = eligible.map(n => {
+                    const dateInfo = n.dates ? Object.entries(n.dates).filter(([,v]) => v).map(([k,v]) => `${k}: ${v}`).join(", ") : "";
+                    const acctInfo = n.accountPartial ? ` (acct: ${n.accountPartial})` : "";
+                    return `- ${n.furnisherName}${acctInfo}: ${n.issue} (${n.bureau}, basis: ${n.disputeBasis}${dateInfo ? `, ${dateInfo}` : ""}${n.userAttestation === "not_authorized" ? ", NOT AUTHORIZED per user" : ""})`;
+                  }).join("\n");
+                  onSendChat(`Generate dispute letters for ALL of the following items. Use the ACTUAL creditor names, dates, and account details listed below — do NOT use placeholder text like [Insert Creditor Name] or [Insert Date]. Reference my credit report data directly.\n\n${summary}`);
                 }}
                 className="mt-3 w-full py-2 rounded-md bg-[#1a1a2e] text-white text-[10px] font-semibold hover:bg-[#2a2a4e] transition-colors"
                 data-testid="button-generate-all-disputes"

@@ -1416,14 +1416,21 @@ REPAIR_DATA_START
 REPAIR_DATA_END
 
 INQUIRY HANDLING (CRITICAL):
-- Detect ALL hard inquiries on each bureau report.
+- Detect ALL hard inquiries on each bureau report. Extract the EXACT creditor/company name and the EXACT date of each inquiry as shown on the report.
 - Determine whether each inquiry has a corresponding new tradeline opened within 30-90 days.
 - If no opened tradeline detected: label as "Standalone Inquiry (no new account detected)"
 - Default inquiry status: "Unrecognized — user confirmation required"
 - Only label "Not authorized" AFTER user attestation.
 - Inquiries are dispute-eligible when: user attests non-authorization, OR permissible purpose cannot be validated, OR identity mismatch indicators exist.
+- For each inquiry in negativeItems, set: furnisherName = the ACTUAL company name from the report (e.g., "CAPITAL ONE", "SYNCHRONY BANK"), dates.inquiryDate = the ACTUAL date from the report (e.g., "01/15/2025"), NOT placeholder text.
 
 IMPORTANT: The REPAIR_DATA block must contain EVERY negative item found — not just the top ones. Include late payments, collections, charge-offs, inquiries, personal info errors, duplicates, and any other adverse entries. This data populates the Repair Center UI where users manage their disputes.
+
+ABSOLUTE RULE — NO PLACEHOLDERS IN REPAIR_DATA OR DISPUTE LETTERS:
+- Every furnisherName MUST be the ACTUAL creditor/company name extracted from the credit report (e.g., "CAPITAL ONE", "MIDLAND CREDIT MGMT", "LVNV FUNDING"). NEVER use "[Insert Creditor Name]" or similar placeholder text.
+- Every date field MUST contain the ACTUAL date from the report. NEVER use "[Insert Date]" or similar placeholder text.
+- Every accountPartial MUST be the actual partial account number from the report if available. NEVER use "[Insert Account Number]".
+- When generating dispute letters, use the REAL extracted data. If a specific detail cannot be found in the report, omit it rather than inserting a placeholder bracket.
 
 --- END CRDOS ---`;
 
@@ -2463,6 +2470,8 @@ When the user asks questions, reference relevant data from ALL uploaded document
 CRITICAL INSTRUCTION — CREDIT REPORT DATA IS AVAILABLE BELOW. This is the user's previously uploaded and extracted credit report text. You MUST use this data to answer any questions about their credit, generate disputes, calculate scores, analyze tradelines, or perform any credit-related task. Do NOT say you don't have the report. Do NOT ask the user to re-upload. The data is RIGHT HERE.
 
 When the user asks to generate dispute letters, you MUST scan this report data for ALL negative items (late payments, collections, charge-offs, derogatory marks, incorrect balances, unauthorized inquiries) and generate a separate DISPUTE entry for EACH one found. Use the actual creditor names, account numbers, dates, and amounts from the report below. Reference specific data from the report — do NOT use generic placeholders.
+
+ABSOLUTE RULE: NEVER use bracket placeholders like "[Insert Creditor Name]", "[Insert Date of Inquiry]", "[Insert Account Number]", or ANY "[Insert ...]" text in dispute letters. Every creditor name, date, account number, and amount MUST come from the actual credit report data below. If a specific detail cannot be found, omit that detail entirely rather than inserting a placeholder. The credit report text is provided — extract real data from it.
 
 ${truncated}
 --- END CREDIT REPORT DATA ---`;
@@ -7381,6 +7390,7 @@ CRITICAL RULES:
 - Auto-fill the user's name and address on every letter
 - Include bureau fraud department addresses on every letter
 - Include online mailing service recommendations
+- NEVER use bracket placeholders like "[Insert Creditor Name]", "[Insert Date of Inquiry]", "[Insert Account Number]", or ANY "[Insert ...]" text. Extract the ACTUAL creditor names, dates, account numbers, and amounts from the credit report text below. If a specific detail cannot be found, omit that detail entirely — do NOT insert placeholder brackets.
 
 You must use plain language. No hype. No guaranteed removals.
 Your tone must feel like a private capital analyst reviewing a file.
