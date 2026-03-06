@@ -444,7 +444,9 @@ function filterMarkdown(content: string): string {
     .replace(/^---+$/gm, "")
     .replace(/^={3,}.*$/gm, "")
     .replace(/REPAIR_DATA_START[\s\S]*?REPAIR_DATA_END/g, "")
-    .replace(/STRATEGY_DATA_START[\s\S]*?STRATEGY_DATA_END/g, "");
+    .replace(/STRATEGY_DATA_START[\s\S]*?STRATEGY_DATA_END/g, "")
+    .replace(/^\s*DISPUTE:\s*.+$/gm, "")
+    .replace(/\[GENERATE_DISPUTE_PACKAGE\]/g, "");
   const lines = cleaned.split("\n");
   const filteredLines = lines.filter(l => {
     const t = l.trim();
@@ -2815,7 +2817,7 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
                                       : item.disputeRound === 2
                                       ? "Generate a ROUND 2 inquiry dispute letter: This is a follow-up. The inquiry was reported as verified. Demand method of verification under FCRA §611(a)(6)(B)(iii). Request name/address/phone of the party contacted. Again request documentation of permissible purpose under §604."
                                       : "Generate a ROUND 3 inquiry dispute letter: This is a final escalation. The bureau failed to provide documentation of permissible purpose. Mention intent to file complaints with CFPB, FTC, and state AG. Reserve rights under §616/§617. Professional but firm.";
-                                    const disputeText = `${roundInstr}\n\nInquiry: ${item.furnisherName} (${item.bureau}${dateInfo ? `, ${dateInfo}` : ""}${item.userAttestation === "not_authorized" ? ", user attests NOT AUTHORIZED" : ""}). Use the ACTUAL creditor name and dates — do NOT use placeholder text.`;
+                                    const disputeText = `${roundInstr}\n\nInquiry: ${item.furnisherName} (${item.bureau}${dateInfo ? `, ${dateInfo}` : ""}${item.userAttestation === "not_authorized" ? ", user attests NOT AUTHORIZED" : ""}). Use the ACTUAL creditor name and dates — do NOT use placeholder text.\n\nIMPORTANT: After the letter, output a DISPUTE: line in this exact format for EACH disputed item:\nDISPUTE: CreditorName | AccountNumber | Issue Description | Bureau | Reason/Basis\nThen output [GENERATE_DISPUTE_PACKAGE] at the very end.`;
                                     onSendChat(disputeText);
                                   }}
                                   className="text-[8px] px-2 py-1 rounded bg-[#6366f1] text-white font-semibold hover:bg-[#5254cc] transition-colors"
@@ -2868,6 +2870,7 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
                             });
                             prompt += "\n";
                           }
+                          prompt += "IMPORTANT: After the letters, output a DISPUTE: line for EACH disputed item in this exact format:\nDISPUTE: CreditorName | AccountNumber | Issue Description | Bureau | Reason/Basis\nThen output [GENERATE_DISPUTE_PACKAGE] at the very end.";
                           onSendChat(prompt);
                         }}
                         className="mt-2 w-full py-1.5 rounded-md bg-[#6366f1] text-white text-[10px] font-semibold hover:bg-[#5254cc] transition-colors"
@@ -2939,7 +2942,7 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
                                 onClick={() => {
                                   const dateInfo = item.dates ? Object.entries(item.dates).filter(([,v]) => v).map(([k,v]) => `${k}: ${v}`).join(", ") : "";
                                   const acctInfo = item.accountPartial ? `, account: ${item.accountPartial}` : "";
-                                  const disputeText = `Generate a dispute letter for this item: ${item.furnisherName} — ${item.issue} (${item.bureau}, basis: ${item.disputeBasis}${acctInfo}${dateInfo ? `, ${dateInfo}` : ""}${item.userAttestation === "not_authorized" ? ", user attests NOT AUTHORIZED" : ""}). Use the ACTUAL creditor name, dates, and account details provided — do NOT use placeholder text like [Insert Creditor Name]. Reference my credit report data directly.`;
+                                  const disputeText = `Generate a dispute letter for this item: ${item.furnisherName} — ${item.issue} (${item.bureau}, basis: ${item.disputeBasis}${acctInfo}${dateInfo ? `, ${dateInfo}` : ""}${item.userAttestation === "not_authorized" ? ", user attests NOT AUTHORIZED" : ""}). Use the ACTUAL creditor name, dates, and account details provided — do NOT use placeholder text like [Insert Creditor Name]. Reference my credit report data directly.\n\nIMPORTANT: After the letter, output a DISPUTE: line in this exact format:\nDISPUTE: CreditorName | AccountNumber | Issue Description | Bureau | Reason/Basis\nThen output [GENERATE_DISPUTE_PACKAGE] at the very end.`;
                                   onSendChat(disputeText);
                                 }}
                                 className="text-[8px] px-2 py-1 rounded bg-[#1a1a2e] text-white font-semibold hover:bg-[#2a2a4e] transition-colors"
@@ -3000,6 +3003,7 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
                           prompt += `- ${n.furnisherName}${acctInfo}: ${n.issue} (${n.bureau}, basis: ${n.disputeBasis}${dateInfo ? `, ${dateInfo}` : ""}${n.userAttestation === "not_authorized" ? ", NOT AUTHORIZED per user" : ""})\n`;
                         });
                       }
+                      prompt += "\nIMPORTANT: After the letters, output a DISPUTE: line for EACH disputed item in this exact format:\nDISPUTE: CreditorName | AccountNumber | Issue Description | Bureau | Reason/Basis\nThen output [GENERATE_DISPUTE_PACKAGE] at the very end.";
                       onSendChat(prompt);
                     }}
                     className="mt-3 w-full py-2 rounded-md bg-[#1a1a2e] text-white text-[10px] font-semibold hover:bg-[#2a2a4e] transition-colors"
