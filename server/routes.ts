@@ -1498,20 +1498,29 @@ REPAIR_DATA_START
 }
 REPAIR_DATA_END
 
-INQUIRY HANDLING (CRITICAL):
-- Detect ALL hard inquiries on each bureau report. Extract the EXACT creditor/company name and the EXACT date of each inquiry as shown on the report.
-- Determine whether each inquiry has a corresponding new tradeline opened within 30-90 days.
-- If no opened tradeline detected: label as "Standalone Inquiry (no new account detected)"
+INQUIRY HANDLING (CRITICAL — MUST FOLLOW):
+- You MUST detect and extract EVERY hard inquiry listed on each bureau report. This is non-negotiable. Every single hard inquiry must appear as a negativeItem in the REPAIR_DATA block.
+- Extract the EXACT creditor/company name and the EXACT date of each inquiry as shown on the report.
+- For EACH hard inquiry, cross-reference the tradeline section: does a new account from that same creditor appear as opened within 30-90 days of the inquiry date?
+- If NO corresponding opened tradeline is found: this is a "Standalone Inquiry" — it MUST be included as a negativeItem with:
+  - category: "Inquiry"
+  - standaloneInquiry: true
+  - issue: "Hard inquiry with no corresponding account opened — no permissible purpose established"
+  - disputeBasis: "Impermissible Purpose"
+  - attestationRequired: true
+  - letterType: "Permissible purpose demand"
+- If a corresponding tradeline IS found: STILL include it as a negativeItem with attestationRequired: true so the user can confirm whether they authorized it.
 - Default inquiry status: "Unrecognized — user confirmation required"
 - Only label "Not authorized" AFTER user attestation.
 - Inquiries are dispute-eligible when ANY of these conditions apply:
   1. User attests non-authorization
-  2. Permissible purpose cannot be validated
-  3. Identity mismatch indicators exist
-  4. No corresponding tradeline was opened (standalone inquiry)
+  2. No corresponding tradeline was opened (standalone inquiry — THIS IS THE MOST COMMON CASE)
+  3. Permissible purpose cannot be validated
+  4. Identity mismatch indicators exist
   5. INQUIRY VELOCITY / CLUSTERING: When multiple inquiries from the same creditor or industry appear within a short window (e.g., 2+ from same company, or 3+ inquiries within 14-30 days), these are disputable on the basis of "impermissible purpose" or "unauthorized — no consumer-initiated application on file." Flag each clustered inquiry individually as a negative item with disputeBasis "Impermissible Purpose" or "Not Authorized" and note the velocity pattern in the issue description (e.g., "3 inquiries within 14 days — potential unauthorized batch pull" or "Duplicate inquiry from same creditor within 30 days").
-- ALL hard inquiries should be included as negativeItems in the REPAIR_DATA block — even if the user has not yet attested. Set attestationRequired: true so they can confirm authorization status in the UI. Inquiries with velocity patterns should have standaloneInquiry: true.
+- EVERY hard inquiry MUST be included in the negativeItems array. Do NOT skip inquiries. Do NOT omit inquiries because they seem normal. The user needs to see ALL of them to decide which to dispute.
 - For each inquiry in negativeItems, set: furnisherName = the ACTUAL company name from the report (e.g., "CAPITAL ONE", "SYNCHRONY BANK"), dates.inquiryDate = the ACTUAL date from the report (e.g., "01/15/2025"), NOT placeholder text.
+- If the credit report lists an "Inquiries" or "Hard Inquiries" section, extract EVERY entry from it. If inquiries are mentioned inline within the report text, extract those too.
 
 IMPORTANT: The REPAIR_DATA block must contain EVERY negative item found — not just the top ones. Include late payments, collections, charge-offs, inquiries, personal info errors, duplicates, and any other adverse entries. This data populates the Repair Center UI where users manage their disputes.
 
