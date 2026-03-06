@@ -1492,7 +1492,8 @@ REPAIR_DATA_START
       "letterType": "Standard dispute|Permissible purpose demand|Method of verification|Personal info correction",
       "attestationRequired": true/false,
       "status": "New",
-      "standaloneInquiry": true/false
+      "standaloneInquiry": true/false,
+      "disputeRound": 1
     }
   ]
 }
@@ -1509,7 +1510,8 @@ INQUIRY HANDLING (CRITICAL — MUST FOLLOW):
   - disputeBasis: "Impermissible Purpose"
   - attestationRequired: true
   - letterType: "Permissible purpose demand"
-- If a corresponding tradeline IS found: STILL include it as a negativeItem with attestationRequired: true so the user can confirm whether they authorized it.
+  - disputeRound: 1
+- If a corresponding tradeline IS found: STILL include it as a negativeItem with attestationRequired: true so the user can confirm whether they authorized it. Set disputeRound: 1.
 - Default inquiry status: "Unrecognized — user confirmation required"
 - Only label "Not authorized" AFTER user attestation.
 - Inquiries are dispute-eligible when ANY of these conditions apply:
@@ -1521,6 +1523,32 @@ INQUIRY HANDLING (CRITICAL — MUST FOLLOW):
 - EVERY hard inquiry MUST be included in the negativeItems array. Do NOT skip inquiries. Do NOT omit inquiries because they seem normal. The user needs to see ALL of them to decide which to dispute.
 - For each inquiry in negativeItems, set: furnisherName = the ACTUAL company name from the report (e.g., "CAPITAL ONE", "SYNCHRONY BANK"), dates.inquiryDate = the ACTUAL date from the report (e.g., "01/15/2025"), NOT placeholder text.
 - If the credit report lists an "Inquiries" or "Hard Inquiries" section, extract EVERY entry from it. If inquiries are mentioned inline within the report text, extract those too.
+- ALL inquiries must include disputeRound: 1 (initial round). The UI manages round progression.
+
+INQUIRY DISPUTE PHILOSOPHY (3-ROUND PROCEDURAL WORKFLOW):
+The system uses a tactical, procedural, high-deletion inquiry-dispute workflow. Do NOT generate weak generic inquiry disputes that only say "I did not authorize this inquiry" or "remove this because it is unauthorized." Instead, the default framing is:
+- The user does not recognize the inquiry or does not recall authorizing it
+- The bureau must provide documentation showing permissible purpose
+- The bureau must provide documentation showing the transaction initiated by the consumer
+- If such documentation cannot be produced, the inquiry must be deleted
+
+Priority flags for inquiries:
+- No resulting account appears (highest priority)
+- Multiple inquiries occurred on the same day (cluster)
+- The lender appears unfamiliar to the user
+- The inquiry is outside the user's expected lending/funding pattern
+- The inquiry is recent and still impacts approval odds
+
+Safe framing rules (unless user explicitly confirms identity theft/fraud):
+- Use: "I do not recognize" / "I do not recall authorizing" / "Please provide documentation"
+- Avoid: "This is fraud" / "I never authorized this and can prove it" / "This was illegal"
+
+The 3 rounds are:
+ROUND 1 — Verification / Permissible Purpose Request: Force bureau to provide documentation of permissible purpose under FCRA §604. Calm, procedural, no threats.
+ROUND 2 — Method of Verification Request: Challenge vague "verified" responses. Demand method of verification under FCRA §611(a)(6)(B)(iii).
+ROUND 3 — Escalation / Liability Notice: Escalate after failure. Mention CFPB, FTC, state AG. Reserve rights under §616/§617.
+
+When generating inquiry dispute letters in chat, use the disputeRound from the item to determine which template to use.
 
 IMPORTANT: The REPAIR_DATA block must contain EVERY negative item found — not just the top ones. Include late payments, collections, charge-offs, inquiries, personal info errors, duplicates, and any other adverse entries. This data populates the Repair Center UI where users manage their disputes.
 
@@ -2909,7 +2937,9 @@ CRITICAL: The following data was previously extracted from the user's credit rep
         accountNumber: z.string().max(100),
         issue: z.string().max(500),
         bureau: z.string().max(50),
-        reason: z.string().max(1000)
+        reason: z.string().max(1000),
+        disputeRound: z.number().min(1).max(3).optional(),
+        category: z.string().max(50).optional()
       })).min(1).max(20),
       userName: z.string().max(100).optional(),
       userAddress: z.string().max(300).optional(),
@@ -2954,6 +2984,11 @@ CRITICAL: The following data was previously extracted from the user's credit rep
 
       type DisputeItem = typeof disputes[number];
       const classifyDispute = (d: DisputeItem): string => {
+        if (d.category) {
+          const cat = d.category.toLowerCase();
+          if (cat === "inquiry") return "inquiry";
+          if (cat === "account") return "other";
+        }
         const text = `${d.issue} ${d.reason} ${d.creditor}`.toLowerCase();
         if (/inquir|hard\s*pull|credit\s*pull|unauthorized.*pull|permissible\s*purpose|1681b/i.test(text)) return "inquiry";
         if (/collection|collect|sold.*debt|debt.*buyer|assigned.*collection/i.test(text)) return "collection";
@@ -2972,11 +3007,23 @@ CRITICAL: The following data was previously extracted from the user's credit rep
         grouped[cat][bureau].push(d);
       }
 
-      const categoryLabels: Record<string, { subject: string; intro: string }> = {
-        inquiry: {
-          subject: "Removal of Unauthorized Hard Inquiries — Request for Proof of Permissible Purpose",
-          intro: "I am writing to dispute unauthorized hard inquiries appearing on my credit report. I did not authorize these credit pulls, nor did I provide written consent for my credit file to be accessed. I am requesting immediate removal of the following inquiries pursuant to my rights under the Fair Credit Reporting Act (FCRA)."
+      const inquiryRoundLabels: Record<number, { subject: string; intro: string }> = {
+        1: {
+          subject: "Request for Documentation of Permissible Purpose — Hard Inquiry Dispute",
+          intro: "After reviewing my consumer report, I identified the following hard inquiries that I do not recognize or do not recall authorizing. Under FCRA §604, a consumer report may only be accessed for a permissible purpose. I am requesting documentation demonstrating the permissible purpose that authorized each inquiry listed below."
         },
+        2: {
+          subject: "Request for Method of Verification — Hard Inquiry Dispute (Follow-Up)",
+          intro: "This letter serves as a follow-up to my prior dispute regarding the hard inquiries listed below. The inquiries were reported as verified or remain on my consumer report. Under FCRA §611(a)(6)(B)(iii), I am requesting the method of verification used in your investigation, including the name, address, and telephone number of the party contacted in verifying each inquiry."
+        },
+        3: {
+          subject: "Failure to Provide Permissible Purpose Documentation — Escalation Notice",
+          intro: "This letter serves as a final notice regarding the hard inquiries listed below. Despite prior disputes, you have failed to provide documentation demonstrating the permissible purpose for the continued reporting of these inquiries. Continuing to report them without adequate verification may violate FCRA §604 and §611."
+        }
+      };
+
+      const categoryLabels: Record<string, { subject: string; intro: string }> = {
+        inquiry: inquiryRoundLabels[1],
         collection: {
           subject: "Dispute of Collection Accounts — Request for Validation and Investigation",
           intro: "I am writing to dispute the following collection account(s) appearing on my credit report pursuant to my rights under the Fair Credit Reporting Act (FCRA), 15 U.S.C. § 1681. I am requesting that each item be investigated, validated, and corrected or removed."
@@ -3067,7 +3114,8 @@ CRITICAL: The following data was previously extracted from the user's credit rep
 
           const isInquiry = cat === "inquiry";
           const bureauAddr = bureauAddresses[bureau] || bureauAddresses["All"];
-          const catInfo = categoryLabels[cat] || categoryLabels["other"];
+          const inquiryRound = isInquiry ? (items[0]?.disputeRound || 1) : 1;
+          const catInfo = isInquiry ? (inquiryRoundLabels[inquiryRound] || inquiryRoundLabels[1]) : (categoryLabels[cat] || categoryLabels["other"]);
 
           drawPageBackground(doc);
           drawPdfLetterhead(doc);
@@ -3099,8 +3147,14 @@ CRITICAL: The following data was previously extracted from the user's credit rep
           doc.text(catInfo.intro, j).moveDown(0.8);
 
           if (isInquiry) {
-            doc.font("Helvetica-Bold").fontSize(10)
-              .text(`Unauthorized Inquiries (${items.length} item${items.length > 1 ? "s" : ""}):`, { underline: true, align: "center" })
+            const round = items[0]?.disputeRound || 1;
+            const roundLabel = inquiryRoundLabels[round] || inquiryRoundLabels[1];
+
+            doc.font("Helvetica-Bold").fontSize(9).fillColor("#6366f1")
+              .text(`ROUND ${round} OF 3`, { align: "center" })
+              .moveDown(0.3);
+            doc.font("Helvetica-Bold").fontSize(10).fillColor("#333333")
+              .text(`Disputed Inquiries (${items.length} item${items.length > 1 ? "s" : ""}):`, { underline: true, align: "center" })
               .moveDown(0.4);
             doc.font("Helvetica").fontSize(10).fillColor("#333333");
             for (let idx = 0; idx < items.length; idx++) {
@@ -3115,43 +3169,74 @@ CRITICAL: The following data was previously extracted from the user's credit rep
             }
             doc.moveDown(0.6);
 
-            doc.font("Helvetica-Bold").text("Legal Basis — FCRA §604 [15 USC §1681b]:", { underline: true, align: "center" }).moveDown(0.4);
-            doc.font("Helvetica").text(
-              "Under FCRA §604(a), a consumer reporting agency may furnish a consumer report only under the following circumstances and no other:",
-              j
-            ).moveDown(0.3);
-            doc.text("• §604(a)(2): In accordance with the written instructions of the consumer", j);
-            doc.text("• §604(a)(3)(A): In connection with a credit transaction involving the consumer — extension, review, or collection", j);
-            doc.text("• §604(a)(3)(F): Legitimate business need in connection with a business transaction initiated by the consumer", j);
-            doc.moveDown(0.3);
-            doc.text(
-              "Per §604(f): \"A person shall not use or obtain a consumer report for any purpose unless the consumer report is obtained for a purpose for which the consumer report is authorized to be furnished under this section and the purpose is certified in accordance with section 607.\"",
-              j
-            ).moveDown(0.3);
-            doc.text(
-              "I did not initiate transactions with the inquiring creditors listed above, nor did I provide written instructions or consent for my credit file to be accessed. These inquiries therefore lack a permissible purpose under §604 and must be removed.",
-              j
-            ).moveDown(0.6);
+            if (round === 1) {
+              doc.font("Helvetica-Bold").text("Legal Basis — FCRA §604 [15 USC §1681b]:", { underline: true, align: "center" }).moveDown(0.4);
+              doc.font("Helvetica").text(
+                "Under FCRA §604(a), a consumer reporting agency may furnish a consumer report only under the following circumstances and no other:",
+                j
+              ).moveDown(0.3);
+              doc.text("• §604(a)(2): In accordance with the written instructions of the consumer", j);
+              doc.text("• §604(a)(3)(A): In connection with a credit transaction involving the consumer — extension, review, or collection", j);
+              doc.text("• §604(a)(3)(F): Legitimate business need in connection with a business transaction initiated by the consumer", j);
+              doc.moveDown(0.3);
+              doc.font("Helvetica-Bold").text("Request:", { underline: true }).moveDown(0.3);
+              doc.font("Helvetica");
+              doc.text("Please provide the following documentation for each inquiry listed above:", j).moveDown(0.2);
+              doc.text("1. Documentation showing the permissible purpose that authorized access to my consumer report under §604.", j);
+              doc.text("2. Documentation of the transaction initiated by me that created the permissible purpose, including any application or written authorization.", j);
+              doc.text("3. The date and nature of the transaction that justified accessing my report.", j);
+              doc.moveDown(0.4);
+              doc.text(
+                "If these inquiries cannot be verified through documentation demonstrating permissible purpose, they must be deleted pursuant to FCRA §611(a)(5)(A). Items that cannot be verified must be promptly deleted or modified.",
+                j
+              ).moveDown(0.4);
+              doc.text(
+                "I am requesting written notification of the results of your investigation per §611(a)(6), including the procedure used to determine accuracy and completeness.",
+                j
+              ).moveDown(1);
 
-            doc.font("Helvetica-Bold").text("Required Action — FCRA §611 [15 USC §1681i]:", { underline: true, align: "center" }).moveDown(0.4);
-            doc.font("Helvetica").text(
-              "Under §611(a)(1)(A), you are required to conduct a reasonable reinvestigation within 30 days. I am requesting:",
-              j
-            ).moveDown(0.2);
-            doc.text("1. Proof of the permissible purpose under §604(a) for each inquiry listed above, including any written authorization bearing my signature per §604(a)(2).", j);
-            doc.text("2. If no permissible purpose or written authorization can be provided, immediate removal of each inquiry per §611(a)(5)(A) — items that cannot be verified must be promptly deleted.", j);
-            doc.text("3. Written notification of the results of your investigation per §611(a)(6), including the procedure used to determine accuracy.", j);
-            doc.moveDown(0.4);
+            } else if (round === 2) {
+              doc.font("Helvetica-Bold").text("Method of Verification Request — FCRA §611(a)(6)(B)(iii):", { underline: true, align: "center" }).moveDown(0.4);
+              doc.font("Helvetica").text(
+                "This letter serves as a request for the method of verification used in your investigation of the inquiries listed above. Under FCRA §611(a)(6)(B)(iii), upon request, you must provide:",
+                j
+              ).moveDown(0.3);
+              doc.text("1. The name, address, and telephone number of the party contacted in verifying each inquiry.", j);
+              doc.text("2. The specific method used to verify permissible purpose.", j);
+              doc.text("3. Documentation demonstrating the permissible purpose that authorized these inquiries under FCRA §604.", j);
+              doc.moveDown(0.4);
+              doc.text(
+                "A response of \"verified\" without providing the above information does not satisfy your obligations under §611(a)(6)(B)(iii). If the inquiries cannot be verified through documentation of permissible purpose, they must be deleted pursuant to §611(a)(5)(A).",
+                j
+              ).moveDown(0.4);
+              doc.text(
+                "I am requesting written notification of your reinvestigation results, including the method of verification, per §611(a)(6).",
+                j
+              ).moveDown(1);
 
-            doc.text(
-              "Per §616 [15 USC §1681n], any willful failure to comply with FCRA requirements subjects you to liability of $100 to $1,000 per violation, plus punitive damages and attorney's fees. Per §617 [15 USC §1681o], negligent noncompliance subjects you to actual damages and attorney's fees. Per §618 [15 USC §1681p], I have 2 years from discovery of the violation to bring action. I reserve all rights under the FCRA.",
-              j
-            ).moveDown(0.5);
-
-            doc.text(
-              "I also intend to send separate letters directly to each inquiring creditor demanding proof of permissible purpose under §604. Per §623(a)(1)(A) [15 USC §1681s-2], the furnisher may not report information it knows or has reasonable cause to believe is inaccurate.",
-              j
-            ).moveDown(1);
+            } else {
+              doc.font("Helvetica-Bold").text("Escalation Notice — Failure to Provide Adequate Verification:", { underline: true, align: "center" }).moveDown(0.4);
+              doc.font("Helvetica").text(
+                "Despite prior disputes, you have failed to provide documentation demonstrating the permissible purpose for the continued reporting of the inquiries listed above. Continuing to report these inquiries without adequate verification may violate FCRA §604 and §611.",
+                j
+              ).moveDown(0.4);
+              doc.text(
+                "If these inquiries are not removed within 30 days, I intend to escalate this matter through formal complaints to:",
+                j
+              ).moveDown(0.2);
+              doc.text("• Consumer Financial Protection Bureau (CFPB)", j);
+              doc.text("• Federal Trade Commission (FTC)", j);
+              doc.text("• The appropriate State Attorney General", j);
+              doc.moveDown(0.4);
+              doc.text(
+                "I reserve all rights under FCRA §616 [15 USC §1681n] (willful noncompliance — liability of $100 to $1,000 per violation, plus punitive damages and attorney's fees) and §617 [15 USC §1681o] (negligent noncompliance — actual damages and attorney's fees). Per §618, I have 2 years from discovery to bring action.",
+                j
+              ).moveDown(0.4);
+              doc.text(
+                "This is a final notice before formal escalation. I expect prompt resolution.",
+                j
+              ).moveDown(1);
+            }
 
           } else {
             doc.font("Helvetica-Bold").fontSize(10)
@@ -3315,13 +3400,14 @@ CRITICAL: The following data was previously extracted from the user's credit rep
         .text(`Generated: ${today} | Items: ${disputes.length}`, { align: "center" });
       doc.moveDown(1);
 
-      const ledgerColX = [65, 200, 320, 430];
+      const ledgerColX = [65, 180, 290, 380, 470];
       const ledgerY = doc.y;
       doc.font("Helvetica-Bold").fontSize(8).fillColor("#1a1a2e");
       doc.text("Creditor/Requestor", ledgerColX[0], ledgerY);
       doc.text("Issue", ledgerColX[1], ledgerY);
       doc.text("Bureau", ledgerColX[2], ledgerY);
       doc.text("Basis", ledgerColX[3], ledgerY);
+      doc.text("Round", ledgerColX[4], ledgerY);
       doc.moveDown(0.5);
       doc.moveTo(65, doc.y).lineTo(545, doc.y).strokeColor("#dddddd").lineWidth(0.5).stroke();
       doc.moveDown(0.3);
@@ -3335,11 +3421,13 @@ CRITICAL: The following data was previously extracted from the user's credit rep
           drawPageBackground(doc);
           drawWatermark(doc);
         }
-        doc.text(d.creditor.slice(0, 30), ledgerColX[0], doc.y, { width: 130 });
+        doc.text(d.creditor.slice(0, 25), ledgerColX[0], doc.y, { width: 110 });
         const currentY = doc.y - 10;
-        doc.text(d.issue.slice(0, 35), ledgerColX[1], currentY, { width: 115 });
-        doc.text(d.bureau, ledgerColX[2], currentY, { width: 105 });
-        doc.text(classifyDispute(d), ledgerColX[3], currentY, { width: 100 });
+        doc.text(d.issue.slice(0, 30), ledgerColX[1], currentY, { width: 105 });
+        doc.text(d.bureau, ledgerColX[2], currentY, { width: 85 });
+        doc.text(classifyDispute(d), ledgerColX[3], currentY, { width: 85 });
+        const isInqCat = classifyDispute(d) === "inquiry";
+        doc.text(isInqCat ? `R${d.disputeRound || 1}` : "—", ledgerColX[4], currentY, { width: 50 });
         doc.moveDown(0.3);
       }
 

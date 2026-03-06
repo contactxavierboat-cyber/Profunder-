@@ -1,0 +1,249 @@
+Update the Profundr Repair Center and dispute-generation system to use a tactical, procedural, high-deletion inquiry-dispute workflow instead of generic legal-language templates.
+
+CORE OBJECTIVE
+The system should generate inquiry disputes designed to maximize deletion probability by forcing procedural verification under the FCRA, not by relying on broad consumer claims alone. The AI should attack verification, permissible purpose, and method of verification in a structured 3-round workflow.
+
+PRIMARY RULE
+Do not generate weak, generic inquiry disputes that only say:
+- “I did not authorize this inquiry”
+- “remove this because it is unauthorized”
+- “I never gave consent”
+unless the user explicitly states identity theft or true non-recognition and chooses that angle.
+
+Instead, the system should default to a stronger and safer framing:
+- the user does not recognize the inquiry or does not recall authorizing it
+- the bureau must provide documentation showing permissible purpose
+- the bureau must provide documentation showing the transaction initiated by the consumer
+- if such documentation cannot be produced, the inquiry must be deleted
+
+SYSTEM BEHAVIOR
+When the platform detects hard inquiries with no resulting open account, suspicious inquiry patterns, or inquiries selected by the user for challenge, the Repair Center should automatically classify them as potential inquiry disputes and prepare a 3-round procedural dispute workflow.
+
+The AI should:
+- identify inquiry tradelines from uploaded reports
+- detect inquiry date, creditor/requestor name, bureau, and whether a resulting account exists
+- flag inquiries as higher-priority when:
+  - no resulting account appears
+  - multiple inquiries occurred on the same day
+  - the lender appears unfamiliar to the user
+  - the inquiry is outside the user’s expected lending/funding pattern
+  - the inquiry is recent and still impacts approval odds
+- create a dispute queue for the user
+- allow letter generation by bureau and by inquiry cluster
+
+REPORT INTELLIGENCE INTEGRATION
+Any report uploaded through the Command Center or Repair Center must be accessible to the AI and used directly for inquiry detection, dispute drafting, planning, and chat responses. Once uploaded, the report remains the active intelligence source until replaced by a new upload.
+
+The system must pull directly from uploaded data to:
+- identify all hard inquiries
+- determine whether those inquiries appear tied to resulting accounts
+- group inquiries by bureau
+- group same-day inquiries when useful
+- surface them inside the Repair Center as disputable
+- reference them in chat when the user asks questions
+
+INQUIRY-DISPUTE PHILOSOPHY
+For inquiry disputes, the system should prioritize procedural attack language over emotional, aggressive, or conclusory language.
+
+The AI must understand:
+- bureaus often mark inquiries “verified” without truly verifying permissible purpose
+- the strongest leverage comes from requiring documentation of the permissible purpose under FCRA §604
+- the second strongest leverage comes from demanding the method of verification under FCRA §611(a)(6)(B)(iii)
+- legal liability language should generally be reserved for later rounds, not overused in Round 1
+- inquiry disputes should focus on verification failure, not just accusation
+
+ROUND STRUCTURE
+
+ROUND 1: VERIFICATION / PERMISSIBLE PURPOSE REQUEST
+Goal:
+Force the bureau to provide documentation showing the inquiry was accessed for a permissible purpose.
+
+Round 1 letters should:
+- state that the user reviewed their consumer report and identified inquiries they do not recognize or do not recall authorizing
+- cite FCRA §604 as the legal basis for permissible purpose
+- request documentation showing the permissible purpose for each inquiry
+- request documentation showing the transaction initiated by the user that created permissible purpose
+- request any written application or authorization, where applicable
+- request the date and nature of the transaction that justified accessing the report
+- state that if the inquiry cannot be verified through documentation demonstrating permissible purpose, it must be deleted pursuant to FCRA §611(a)(5)(A)
+- remain calm, concise, and procedural
+- avoid excessive threats, hostility, or over-argument
+
+ROUND 1 SHOULD NOT:
+- automatically accuse the bureau or furnisher of fraud
+- overuse damages language
+- claim identity theft unless supported by user input
+- state definitive facts that the user may not be able to prove
+- rely only on “I did not authorize this” language
+
+ROUND 2: METHOD OF VERIFICATION REQUEST
+Goal:
+Challenge vague “verified” responses and force the bureau to disclose how verification occurred.
+
+Round 2 letters should:
+- reference the prior dispute
+- state that the inquiry was reported as verified or remains on file
+- demand the method of verification under FCRA §611(a)(6)(B)(iii)
+- request the name, address, and telephone number of the party contacted in verifying each inquiry
+- again request documentation demonstrating the permissible purpose under §604
+- state that if the inquiry cannot be verified through documentation of permissible purpose, it must be deleted
+- keep pressure procedural and compliance-based
+
+ROUND 3: ESCALATION / LIABILITY NOTICE
+Goal:
+Escalate only after failure to provide adequate verification.
+
+Round 3 letters should:
+- state that the bureau failed to provide documentation demonstrating permissible purpose
+- state that continuing to report the inquiry without adequate verification may violate FCRA §604 and §611
+- mention intent to escalate through formal complaints if the issue is not corrected
+- mention agencies such as:
+  - Consumer Financial Protection Bureau
+  - Federal Trade Commission
+  - relevant state attorney general
+- reserve rights under FCRA §616 and §617
+- remain professional and controlled, not reckless or inflammatory
+
+LETTER GENERATION RULES
+For each inquiry dispute letter, the AI should automatically insert:
+- user full name
+- mailing address
+- date
+- bureau name and bureau mailing address
+- subject line tailored to inquiry disputes
+- clearly itemized inquiry list with:
+  - creditor/requestor name
+  - inquiry date
+  - bureau
+- the appropriate round-specific body language
+- signature block
+- compliance-focused closing
+
+The AI should never generate one-size-fits-all inquiry letters. It should tailor the letter based on:
+- dispute round
+- bureau
+- inquiry list selected
+- whether the user states they recognize the lender
+- whether the user states they applied but want proof of permissible purpose
+- whether identity theft is being claimed
+- whether prior responses exist
+
+SAFE FRAMING RULES
+Unless the user explicitly confirms identity theft, fraud, or complete non-recognition, the default wording should be:
+- “I do not recognize”
+- “I do not recall authorizing”
+- “Please provide documentation”
+- “Please provide the permissible purpose”
+- “Please provide the transaction initiated by me that authorized access”
+
+Avoid defaulting to:
+- “This is fraud”
+- “I never authorized this and can prove it”
+- “This was illegal”
+unless the facts clearly support those statements.
+
+DISPUTE PACKAGE GENERATION
+The Repair Center should automatically compile a professional inquiry dispute package PDF that includes:
+- cover page
+- dispute letter
+- identity document
+- proof of residency
+- supporting document appendix if relevant
+- dispute ledger listing the disputed inquiries
+
+The dispute ledger should show:
+- creditor/requestor
+- inquiry date
+- bureau
+- dispute basis
+- dispute round
+- package generation date
+
+The package should look professional, organized, and compliance-oriented.
+
+DOCUMENT INTEGRATION
+If the user has uploaded:
+- government-issued ID
+- proof of residency
+- bank statement
+- supporting notes
+the system should attach them appropriately to the package.
+
+However, the AI should understand:
+- identity documents help verify the user
+- they do not themselves prove the inquiry dispute
+- inquiry disputes are usually won on procedural verification failure, not documentary evidence
+The generated language should reflect that understanding.
+
+CHAT + DISPUTE ENGINE INTEGRATION
+When users ask in chat:
+- “why is this inquiry disputable”
+- “generate dispute”
+- “make round 2”
+- “what should I send next”
+the AI should pull from the stored report and prior dispute data and respond consistently.
+
+The chat assistant should be able to:
+- explain why an inquiry is potentially disputable
+- explain the logic behind permissible purpose
+- explain the difference between authorization and verification
+- generate the appropriate next-round letter
+- summarize prior dispute attempts
+- export the generated chat or dispute results to PDF if requested
+
+AI REASONING LOGIC FOR INQUIRIES
+Teach the AI the following decision logic:
+
+1. If an inquiry appears and no resulting account is shown, mark it as a candidate for dispute review.
+2. If multiple inquiries occurred on the same day, highlight them as a cluster.
+3. If the user says they do not recognize the inquiry, use recognition-based language.
+4. If the user says they applied somewhere but do not believe the inquiry is justified, use permissible-purpose proof language instead of outright unauthorized language.
+5. If the bureau already responded “verified,” move to method-of-verification language.
+6. If the bureau fails again, move to escalation language.
+7. If the user alleges identity theft, allow a stronger fraud framing and adapted workflow.
+
+INTERNAL CONTENT RULES FOR THE AI
+The AI should know and apply these principles:
+- Inquiry disputes are strongest when they force proof of permissible purpose
+- Generic “unauthorized inquiry” letters are weaker than targeted verification requests
+- Round 1 should be calm and focused
+- Round 2 should force disclosure of verification method
+- Round 3 should escalate to complaints and liability reservation
+- The bureau’s inability or unwillingness to produce documentary support is the leverage point
+- The system should help the user appear organized, informed, and procedurally serious
+
+SAMPLE ROUND TEMPLATES
+
+ROUND 1 TEMPLATE
+Use a version similar to:
+
+“After reviewing my consumer report, I identified the following hard inquiries that I do not recognize or do not recall authorizing. Under FCRA §604, a consumer report may only be accessed for a permissible purpose. Please provide documentation showing the permissible purpose that authorized each inquiry, including the transaction initiated by me, any application or written authorization, and the date and nature of the transaction that justified access. If these inquiries cannot be verified through documentation demonstrating a permissible purpose, they must be deleted pursuant to FCRA §611(a)(5)(A).”
+
+ROUND 2 TEMPLATE
+Use a version similar to:
+
+“This letter serves as a request for the method of verification used in your investigation. Under FCRA §611(a)(6)(B)(iii), please provide the name, address, and telephone number of the party contacted in verifying each inquiry. Additionally, please provide documentation demonstrating the permissible purpose that authorized these inquiries under FCRA §604. If the inquiries cannot be verified through documentation demonstrating permissible purpose, they must be deleted.”
+
+ROUND 3 TEMPLATE
+Use a version similar to:
+
+“You have failed to provide documentation demonstrating the permissible purpose for the continued reporting of these inquiries. Continuing to report them without adequate verification may violate FCRA §604 and §611. If these inquiries are not removed, I intend to escalate this matter through formal complaints to the CFPB, FTC, and the appropriate state attorney general, and I reserve all rights under FCRA §616 and §617.”
+
+PRODUCT UX REQUIREMENTS
+Inside the Repair Center:
+- show inquiries in a dedicated section
+- allow users to select inquiries individually or as a group
+- show dispute round status
+- show recommended next step
+- allow one-click generation of Round 1, Round 2, or Round 3 package
+- allow PDF export
+- retain prior dispute history for each inquiry
+
+Inside the Command Center:
+- display detected inquiry clusters
+- show whether an inquiry appears tied to an account or not
+- show a “Potentially Disputable” tag
+- make those results accessible to chat and Repair Center automatically
+
+FINAL GOAL
+The end result should be a smarter inquiry dispute engine that behaves like a tactical compliance assistant, not a generic template generator. It should produce cleaner, safer, more effective inquiry disputes that maximize deletion odds while keeping the user’s claims measured, credible, and strategically framed.

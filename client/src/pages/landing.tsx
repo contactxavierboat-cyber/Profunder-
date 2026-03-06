@@ -130,6 +130,8 @@ interface DisputeItem {
   issue: string;
   bureau: string;
   reason: string;
+  disputeRound?: number;
+  category?: string;
 }
 
 function parseDisputeItems(content: string): DisputeItem[] {
@@ -1352,6 +1354,7 @@ interface NegativeItemEntry {
   status: "New" | "Attested" | "Packaged" | "Sent" | "Resolved";
   standaloneInquiry: boolean;
   userAttestation?: "recognized" | "not_authorized" | null;
+  disputeRound: number;
 }
 
 interface RepairData {
@@ -1377,6 +1380,7 @@ function parseRepairData(content: string): RepairData | null {
         ...item,
         status: item.status || "New",
         userAttestation: null,
+        disputeRound: item.disputeRound || 1,
       })) : [],
       parsedAt: Date.now(),
     };
@@ -2728,103 +2732,284 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
                 {[...new Set(repairData.negativeItems.map(n => n.category))].map(c => <option key={c} value={c}>{c}</option>)}
               </select>
             </div>
-            <div className="space-y-1.5 max-h-[400px] overflow-y-auto">
-              {repairData.negativeItems
-                .filter(n => (repairFilter.bureau === "All" || n.bureau === repairFilter.bureau) && (repairFilter.category === "All" || n.category === repairFilter.category))
-                .map((item, i) => (
-                <div key={item.itemId || i} className="px-2.5 py-2 rounded-md bg-white border border-[#e8e8e8] hover:border-[#ccc] transition-colors" data-testid={`repair-item-${item.itemId}`}>
-                  <div className="flex items-start gap-1.5">
-                    <span className={`text-[7px] font-bold uppercase px-1 py-0.5 rounded mt-0.5 shrink-0 ${item.category === "Inquiry" ? "bg-[#6366f1] text-white" : item.category === "Account" ? "bg-[#e07a5f] text-white" : item.category === "Personal Info" ? "bg-[#f0ad4e] text-white" : "bg-[#888] text-white"}`}>
-                      {item.category === "Personal Info" ? "PI" : item.category === "Public Record" ? "PR" : item.category.slice(0, 3).toUpperCase()}
-                    </span>
-                    <div className="flex-1 min-w-0">
-                      <div className="text-[10px] font-medium text-[#333] truncate">{item.furnisherName}</div>
-                      <div className="text-[9px] text-[#888] truncate">{item.issue}</div>
-                      <div className="flex items-center gap-1.5 mt-1 flex-wrap">
-                        <span className="text-[8px] text-[#aaa]">{item.bureau}</span>
-                        {item.accountPartial && <span className="text-[8px] text-[#aaa]">...{item.accountPartial}</span>}
-                        <span className={`text-[7px] font-semibold uppercase px-1 py-0.5 rounded ${item.status === "New" ? "bg-[#eef] text-[#6366f1]" : item.status === "Attested" ? "bg-[#e8f5e9] text-[#2d6a4f]" : item.status === "Packaged" ? "bg-[#fff3e0] text-[#e65100]" : "bg-[#f5f5f5] text-[#888]"}`}>
-                          {item.userAttestation === "not_authorized" ? "Not Auth'd" : item.userAttestation === "recognized" ? "Recognized" : item.status}
-                        </span>
-                      </div>
+
+            {(() => {
+              const inquiryItems = repairData.negativeItems.filter(n => n.category === "Inquiry" && (repairFilter.bureau === "All" || n.bureau === repairFilter.bureau) && (repairFilter.category === "All" || repairFilter.category === "Inquiry"));
+              const nonInquiryItems = repairData.negativeItems.filter(n => n.category !== "Inquiry" && (repairFilter.bureau === "All" || n.bureau === repairFilter.bureau) && (repairFilter.category === "All" || n.category === repairFilter.category));
+              const roundLabels: Record<number, { label: string; desc: string }> = {
+                1: { label: "R1: Verification", desc: "Request documentation of permissible purpose" },
+                2: { label: "R2: Method of Verification", desc: "Demand how verification was conducted" },
+                3: { label: "R3: Escalation", desc: "Final notice — CFPB/FTC/AG escalation" }
+              };
+
+              return (<>
+                {inquiryItems.length > 0 && (repairFilter.category === "All" || repairFilter.category === "Inquiry") && (
+                  <div className="mb-3">
+                    <div className="flex items-center gap-1.5 mb-1.5">
+                      <svg width="10" height="10" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="5.5" stroke="#6366f1" strokeWidth="1.2"/><path d="M8 5v3.5M8 10.5v.5" stroke="#6366f1" strokeWidth="1.2" strokeLinecap="round"/></svg>
+                      <span className="text-[9px] font-semibold text-[#6366f1] uppercase tracking-wider">Inquiry Disputes</span>
+                      <span className="text-[8px] text-[#6366f1] ml-auto font-semibold">{inquiryItems.length}</span>
                     </div>
-                  </div>
-                  <div className="flex gap-1 mt-1.5">
-                    {item.attestationRequired && !item.userAttestation && (
-                      <>
-                        <button
-                          onClick={() => {
-                            if (!repairData) return;
-                            const updated = { ...repairData, negativeItems: repairData.negativeItems.map(n => n.itemId === item.itemId ? { ...n, userAttestation: "not_authorized" as const, status: "Attested" as const } : n) };
-                            onUpdateRepairData(updated);
-                          }}
-                          className="text-[8px] px-2 py-1 rounded bg-[#e07a5f] text-white font-semibold hover:bg-[#d06a4f] transition-colors"
-                          data-testid={`button-not-authorized-${item.itemId}`}
-                        >
-                          Not Authorized
-                        </button>
-                        <button
-                          onClick={() => {
-                            if (!repairData) return;
-                            const updated = { ...repairData, negativeItems: repairData.negativeItems.map(n => n.itemId === item.itemId ? { ...n, userAttestation: "recognized" as const, status: "Attested" as const } : n) };
-                            onUpdateRepairData(updated);
-                          }}
-                          className="text-[8px] px-2 py-1 rounded bg-[#eee] text-[#555] font-semibold hover:bg-[#ddd] transition-colors"
-                          data-testid={`button-recognized-${item.itemId}`}
-                        >
-                          I Recognize This
-                        </button>
-                      </>
-                    )}
-                    {(!item.attestationRequired || item.userAttestation) && item.userAttestation !== "recognized" && (
+                    <div className="space-y-1.5 max-h-[280px] overflow-y-auto">
+                      {inquiryItems.map((item, i) => {
+                        const rl = roundLabels[item.disputeRound] || roundLabels[1];
+                        const sameDayCount = inquiryItems.filter(n => n.dates?.inquiryDate === item.dates?.inquiryDate && n.dates?.inquiryDate).length;
+                        const isCluster = sameDayCount > 1;
+                        return (
+                          <div key={item.itemId || i} className="px-2.5 py-2 rounded-md bg-white border border-[#e0e0f0] hover:border-[#6366f1]/40 transition-colors" data-testid={`repair-item-${item.itemId}`}>
+                            <div className="flex items-start gap-1.5">
+                              <span className="text-[7px] font-bold uppercase px-1 py-0.5 rounded mt-0.5 shrink-0 bg-[#6366f1] text-white">INQ</span>
+                              <div className="flex-1 min-w-0">
+                                <div className="text-[10px] font-medium text-[#333] truncate">{item.furnisherName}</div>
+                                <div className="text-[9px] text-[#888] truncate">{item.issue}</div>
+                                <div className="flex items-center gap-1 mt-1 flex-wrap">
+                                  <span className="text-[8px] text-[#aaa]">{item.bureau}</span>
+                                  {item.dates?.inquiryDate && <span className="text-[8px] text-[#aaa]">{item.dates.inquiryDate}</span>}
+                                  {item.standaloneInquiry && <span className="text-[7px] font-semibold px-1 py-0.5 rounded bg-[#fee2e2] text-[#dc2626]">No Account</span>}
+                                  {isCluster && <span className="text-[7px] font-semibold px-1 py-0.5 rounded bg-[#fef3c7] text-[#d97706]">Cluster</span>}
+                                  <span className={`text-[7px] font-semibold uppercase px-1 py-0.5 rounded ${item.userAttestation === "not_authorized" ? "bg-[#e07a5f] text-white" : item.userAttestation === "recognized" ? "bg-[#e8f5e9] text-[#2d6a4f]" : "bg-[#eef] text-[#6366f1]"}`}>
+                                    {item.userAttestation === "not_authorized" ? "Not Auth'd" : item.userAttestation === "recognized" ? "Recognized" : item.status}
+                                  </span>
+                                </div>
+                                <div className="flex items-center gap-1 mt-1">
+                                  <span className={`text-[7px] font-bold px-1.5 py-0.5 rounded ${item.disputeRound === 1 ? "bg-[#6366f1]/10 text-[#6366f1]" : item.disputeRound === 2 ? "bg-[#f59e0b]/10 text-[#d97706]" : "bg-[#ef4444]/10 text-[#dc2626]"}`}>
+                                    {rl.label}
+                                  </span>
+                                  <span className="text-[7px] text-[#999] italic truncate">{rl.desc}</span>
+                                </div>
+                              </div>
+                            </div>
+                            <div className="flex gap-1 mt-1.5 flex-wrap">
+                              {item.attestationRequired && !item.userAttestation && (
+                                <>
+                                  <button
+                                    onClick={() => {
+                                      if (!repairData) return;
+                                      const updated = { ...repairData, negativeItems: repairData.negativeItems.map(n => n.itemId === item.itemId ? { ...n, userAttestation: "not_authorized" as const, status: "Attested" as const } : n) };
+                                      onUpdateRepairData(updated);
+                                    }}
+                                    className="text-[8px] px-2 py-1 rounded bg-[#e07a5f] text-white font-semibold hover:bg-[#d06a4f] transition-colors"
+                                    data-testid={`button-not-authorized-${item.itemId}`}
+                                  >
+                                    Not Authorized
+                                  </button>
+                                  <button
+                                    onClick={() => {
+                                      if (!repairData) return;
+                                      const updated = { ...repairData, negativeItems: repairData.negativeItems.map(n => n.itemId === item.itemId ? { ...n, userAttestation: "recognized" as const, status: "Attested" as const } : n) };
+                                      onUpdateRepairData(updated);
+                                    }}
+                                    className="text-[8px] px-2 py-1 rounded bg-[#eee] text-[#555] font-semibold hover:bg-[#ddd] transition-colors"
+                                    data-testid={`button-recognized-${item.itemId}`}
+                                  >
+                                    I Recognize This
+                                  </button>
+                                </>
+                              )}
+                              {(!item.attestationRequired || item.userAttestation) && item.userAttestation !== "recognized" && (
+                                <button
+                                  onClick={() => {
+                                    const dateInfo = item.dates?.inquiryDate ? `inquiry date: ${item.dates.inquiryDate}` : "";
+                                    const roundInstr = item.disputeRound === 1
+                                      ? "Generate a ROUND 1 inquiry dispute letter: Request documentation of permissible purpose under FCRA §604. Do NOT accuse fraud. Use 'I do not recognize / do not recall authorizing' framing. Request the transaction initiated by the consumer, any application or authorization, and the date/nature of the transaction."
+                                      : item.disputeRound === 2
+                                      ? "Generate a ROUND 2 inquiry dispute letter: This is a follow-up. The inquiry was reported as verified. Demand method of verification under FCRA §611(a)(6)(B)(iii). Request name/address/phone of the party contacted. Again request documentation of permissible purpose under §604."
+                                      : "Generate a ROUND 3 inquiry dispute letter: This is a final escalation. The bureau failed to provide documentation of permissible purpose. Mention intent to file complaints with CFPB, FTC, and state AG. Reserve rights under §616/§617. Professional but firm.";
+                                    const disputeText = `${roundInstr}\n\nInquiry: ${item.furnisherName} (${item.bureau}${dateInfo ? `, ${dateInfo}` : ""}${item.userAttestation === "not_authorized" ? ", user attests NOT AUTHORIZED" : ""}). Use the ACTUAL creditor name and dates — do NOT use placeholder text.`;
+                                    onSendChat(disputeText);
+                                  }}
+                                  className="text-[8px] px-2 py-1 rounded bg-[#6366f1] text-white font-semibold hover:bg-[#5254cc] transition-colors"
+                                  data-testid={`button-generate-dispute-${item.itemId}`}
+                                >
+                                  Generate Round {item.disputeRound} Letter
+                                </button>
+                              )}
+                              {(!item.attestationRequired || item.userAttestation) && item.userAttestation !== "recognized" && item.disputeRound < 3 && (
+                                <button
+                                  onClick={() => {
+                                    if (!repairData) return;
+                                    const nextRound = Math.min(item.disputeRound + 1, 3);
+                                    const updated = { ...repairData, negativeItems: repairData.negativeItems.map(n => n.itemId === item.itemId ? { ...n, disputeRound: nextRound } : n) };
+                                    onUpdateRepairData(updated);
+                                  }}
+                                  className="text-[8px] px-2 py-1 rounded bg-[#f5f5f5] text-[#666] font-semibold hover:bg-[#eee] transition-colors"
+                                  data-testid={`button-advance-round-${item.itemId}`}
+                                >
+                                  Advance to R{Math.min(item.disputeRound + 1, 3)}
+                                </button>
+                              )}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                    {inquiryItems.filter(n => n.userAttestation !== "recognized").length > 0 && (
                       <button
                         onClick={() => {
-                          const dateInfo = item.dates ? Object.entries(item.dates).filter(([,v]) => v).map(([k,v]) => `${k}: ${v}`).join(", ") : "";
-                          const acctInfo = item.accountPartial ? `, account: ${item.accountPartial}` : "";
-                          const disputeText = `Generate a dispute letter for this item: ${item.furnisherName} — ${item.issue} (${item.bureau}, basis: ${item.disputeBasis}${acctInfo}${dateInfo ? `, ${dateInfo}` : ""}${item.userAttestation === "not_authorized" ? ", user attests NOT AUTHORIZED" : ""}). Use the ACTUAL creditor name, dates, and account details provided — do NOT use placeholder text like [Insert Creditor Name]. Reference my credit report data directly.`;
-                          onSendChat(disputeText);
+                          const eligible = inquiryItems.filter(n => n.userAttestation !== "recognized");
+                          const needsAttestation = eligible.filter(n => n.attestationRequired && !n.userAttestation);
+                          if (needsAttestation.length > 0) {
+                            alert(`${needsAttestation.length} inquiries need your attestation first. Mark them as "Not Authorized" or "I Recognize This" before generating.`);
+                            return;
+                          }
+                          const byRound: Record<number, typeof eligible> = {};
+                          eligible.forEach(n => { const r = n.disputeRound || 1; if (!byRound[r]) byRound[r] = []; byRound[r].push(n); });
+                          const roundInstructions: Record<number, string> = {
+                            1: "ROUND 1: Request documentation of permissible purpose under FCRA §604. Use 'I do not recognize / do not recall authorizing' framing. Do NOT accuse fraud.",
+                            2: "ROUND 2: Follow-up. Demand method of verification under FCRA §611(a)(6)(B)(iii). Request name/address/phone of verifying party. Again request permissible purpose documentation.",
+                            3: "ROUND 3: Final escalation. Bureau failed to provide documentation. Mention CFPB, FTC, state AG complaints. Reserve rights under §616/§617."
+                          };
+                          let prompt = "Generate inquiry dispute letters for the following items, grouped by dispute round. Use the ACTUAL creditor names and dates — do NOT use placeholder text.\n\n";
+                          for (const [round, items] of Object.entries(byRound).sort((a, b) => Number(a[0]) - Number(b[0]))) {
+                            prompt += `--- ${roundInstructions[Number(round)] || roundInstructions[1]} ---\n`;
+                            items.forEach(n => {
+                              const dateInfo = n.dates?.inquiryDate ? `, inquiry date: ${n.dates.inquiryDate}` : "";
+                              prompt += `- ${n.furnisherName} (${n.bureau}${dateInfo}${n.userAttestation === "not_authorized" ? ", NOT AUTHORIZED per user" : ""})\n`;
+                            });
+                            prompt += "\n";
+                          }
+                          onSendChat(prompt);
                         }}
-                        className="text-[8px] px-2 py-1 rounded bg-[#1a1a2e] text-white font-semibold hover:bg-[#2a2a4e] transition-colors"
-                        data-testid={`button-generate-dispute-${item.itemId}`}
+                        className="mt-2 w-full py-1.5 rounded-md bg-[#6366f1] text-white text-[10px] font-semibold hover:bg-[#5254cc] transition-colors"
+                        data-testid="button-generate-all-inquiry-disputes"
                       >
-                        Generate Bureau Challenge
+                        Generate All Inquiry Disputes ({inquiryItems.filter(n => n.userAttestation !== "recognized").length})
                       </button>
                     )}
                   </div>
-                  <div className="flex gap-1 mt-1">
-                    {item.evidenceAvailable.length > 0 && (
-                      <span className="text-[7px] text-[#2d6a4f]">{item.evidenceAvailable.length} evidence</span>
-                    )}
-                    {item.evidenceMissing.length > 0 && (
-                      <span className="text-[7px] text-[#e07a5f]">{item.evidenceMissing.length} missing</span>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
+                )}
 
-            {repairData.negativeItems.filter(n => n.userAttestation !== "recognized").length > 0 && (
-              <button
-                onClick={() => {
-                  const eligible = repairData.negativeItems.filter(n => n.userAttestation !== "recognized");
-                  const needsAttestation = eligible.filter(n => n.attestationRequired && !n.userAttestation);
-                  if (needsAttestation.length > 0) {
-                    alert(`${needsAttestation.length} items need your attestation first. Mark inquiries as "Not Authorized" or "I Recognize This" before generating.`);
-                    return;
-                  }
-                  const summary = eligible.map(n => {
-                    const dateInfo = n.dates ? Object.entries(n.dates).filter(([,v]) => v).map(([k,v]) => `${k}: ${v}`).join(", ") : "";
-                    const acctInfo = n.accountPartial ? ` (acct: ${n.accountPartial})` : "";
-                    return `- ${n.furnisherName}${acctInfo}: ${n.issue} (${n.bureau}, basis: ${n.disputeBasis}${dateInfo ? `, ${dateInfo}` : ""}${n.userAttestation === "not_authorized" ? ", NOT AUTHORIZED per user" : ""})`;
-                  }).join("\n");
-                  onSendChat(`Generate dispute letters for ALL of the following items. Use the ACTUAL creditor names, dates, and account details listed below — do NOT use placeholder text like [Insert Creditor Name] or [Insert Date]. Reference my credit report data directly.\n\n${summary}`);
-                }}
-                className="mt-3 w-full py-2 rounded-md bg-[#1a1a2e] text-white text-[10px] font-semibold hover:bg-[#2a2a4e] transition-colors"
-                data-testid="button-generate-all-disputes"
-              >
-                Generate All Bureau Challenges ({repairData.negativeItems.filter(n => n.userAttestation !== "recognized").length})
-              </button>
-            )}
+                {nonInquiryItems.length > 0 && (repairFilter.category === "All" || repairFilter.category !== "Inquiry") && (
+                  <div className="mb-2">
+                    {(repairFilter.category === "All" && inquiryItems.length > 0) && (
+                      <div className="flex items-center gap-1.5 mb-1.5 mt-1">
+                        <svg width="10" height="10" viewBox="0 0 12 12" fill="none"><rect x="1" y="2" width="10" height="8" rx="1" stroke="#333" strokeWidth="1" fill="none"/><path d="M3 5h6M3 7h4" stroke="#333" strokeWidth="0.7" strokeLinecap="round"/></svg>
+                        <span className="text-[9px] font-semibold text-[#555] uppercase tracking-wider">Other Dispute Items</span>
+                        <span className="text-[8px] text-[#555] ml-auto font-semibold">{nonInquiryItems.length}</span>
+                      </div>
+                    )}
+                    <div className="space-y-1.5 max-h-[280px] overflow-y-auto">
+                      {nonInquiryItems.map((item, i) => (
+                        <div key={item.itemId || i} className="px-2.5 py-2 rounded-md bg-white border border-[#e8e8e8] hover:border-[#ccc] transition-colors" data-testid={`repair-item-${item.itemId}`}>
+                          <div className="flex items-start gap-1.5">
+                            <span className={`text-[7px] font-bold uppercase px-1 py-0.5 rounded mt-0.5 shrink-0 ${item.category === "Account" ? "bg-[#e07a5f] text-white" : item.category === "Personal Info" ? "bg-[#f0ad4e] text-white" : "bg-[#888] text-white"}`}>
+                              {item.category === "Personal Info" ? "PI" : item.category === "Public Record" ? "PR" : item.category.slice(0, 3).toUpperCase()}
+                            </span>
+                            <div className="flex-1 min-w-0">
+                              <div className="text-[10px] font-medium text-[#333] truncate">{item.furnisherName}</div>
+                              <div className="text-[9px] text-[#888] truncate">{item.issue}</div>
+                              <div className="flex items-center gap-1.5 mt-1 flex-wrap">
+                                <span className="text-[8px] text-[#aaa]">{item.bureau}</span>
+                                {item.accountPartial && <span className="text-[8px] text-[#aaa]">...{item.accountPartial}</span>}
+                                <span className={`text-[7px] font-semibold uppercase px-1 py-0.5 rounded ${item.status === "New" ? "bg-[#eef] text-[#6366f1]" : item.status === "Attested" ? "bg-[#e8f5e9] text-[#2d6a4f]" : item.status === "Packaged" ? "bg-[#fff3e0] text-[#e65100]" : "bg-[#f5f5f5] text-[#888]"}`}>
+                                  {item.userAttestation === "not_authorized" ? "Not Auth'd" : item.userAttestation === "recognized" ? "Recognized" : item.status}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="flex gap-1 mt-1.5">
+                            {item.attestationRequired && !item.userAttestation && (
+                              <>
+                                <button
+                                  onClick={() => {
+                                    if (!repairData) return;
+                                    const updated = { ...repairData, negativeItems: repairData.negativeItems.map(n => n.itemId === item.itemId ? { ...n, userAttestation: "not_authorized" as const, status: "Attested" as const } : n) };
+                                    onUpdateRepairData(updated);
+                                  }}
+                                  className="text-[8px] px-2 py-1 rounded bg-[#e07a5f] text-white font-semibold hover:bg-[#d06a4f] transition-colors"
+                                  data-testid={`button-not-authorized-${item.itemId}`}
+                                >
+                                  Not Authorized
+                                </button>
+                                <button
+                                  onClick={() => {
+                                    if (!repairData) return;
+                                    const updated = { ...repairData, negativeItems: repairData.negativeItems.map(n => n.itemId === item.itemId ? { ...n, userAttestation: "recognized" as const, status: "Attested" as const } : n) };
+                                    onUpdateRepairData(updated);
+                                  }}
+                                  className="text-[8px] px-2 py-1 rounded bg-[#eee] text-[#555] font-semibold hover:bg-[#ddd] transition-colors"
+                                  data-testid={`button-recognized-${item.itemId}`}
+                                >
+                                  I Recognize This
+                                </button>
+                              </>
+                            )}
+                            {(!item.attestationRequired || item.userAttestation) && item.userAttestation !== "recognized" && (
+                              <button
+                                onClick={() => {
+                                  const dateInfo = item.dates ? Object.entries(item.dates).filter(([,v]) => v).map(([k,v]) => `${k}: ${v}`).join(", ") : "";
+                                  const acctInfo = item.accountPartial ? `, account: ${item.accountPartial}` : "";
+                                  const disputeText = `Generate a dispute letter for this item: ${item.furnisherName} — ${item.issue} (${item.bureau}, basis: ${item.disputeBasis}${acctInfo}${dateInfo ? `, ${dateInfo}` : ""}${item.userAttestation === "not_authorized" ? ", user attests NOT AUTHORIZED" : ""}). Use the ACTUAL creditor name, dates, and account details provided — do NOT use placeholder text like [Insert Creditor Name]. Reference my credit report data directly.`;
+                                  onSendChat(disputeText);
+                                }}
+                                className="text-[8px] px-2 py-1 rounded bg-[#1a1a2e] text-white font-semibold hover:bg-[#2a2a4e] transition-colors"
+                                data-testid={`button-generate-dispute-${item.itemId}`}
+                              >
+                                Generate Bureau Challenge
+                              </button>
+                            )}
+                          </div>
+                          <div className="flex gap-1 mt-1">
+                            {item.evidenceAvailable.length > 0 && (
+                              <span className="text-[7px] text-[#2d6a4f]">{item.evidenceAvailable.length} evidence</span>
+                            )}
+                            {item.evidenceMissing.length > 0 && (
+                              <span className="text-[7px] text-[#e07a5f]">{item.evidenceMissing.length} missing</span>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {repairData.negativeItems.filter(n => n.userAttestation !== "recognized").length > 0 && (
+                  <button
+                    onClick={() => {
+                      const eligible = repairData.negativeItems.filter(n => n.userAttestation !== "recognized");
+                      const needsAttestation = eligible.filter(n => n.attestationRequired && !n.userAttestation);
+                      if (needsAttestation.length > 0) {
+                        alert(`${needsAttestation.length} items need your attestation first. Mark inquiries as "Not Authorized" or "I Recognize This" before generating.`);
+                        return;
+                      }
+                      const inquiries = eligible.filter(n => n.category === "Inquiry");
+                      const others = eligible.filter(n => n.category !== "Inquiry");
+                      let prompt = "Generate dispute letters for ALL of the following items. Use the ACTUAL creditor names, dates, and account details — do NOT use placeholder text.\n\n";
+                      if (inquiries.length > 0) {
+                        const byRound: Record<number, typeof inquiries> = {};
+                        inquiries.forEach(n => { const r = n.disputeRound || 1; if (!byRound[r]) byRound[r] = []; byRound[r].push(n); });
+                        const roundInstructions: Record<number, string> = {
+                          1: "ROUND 1: Request documentation of permissible purpose under FCRA §604. Use 'I do not recognize / do not recall authorizing' framing.",
+                          2: "ROUND 2: Follow-up. Demand method of verification under FCRA §611(a)(6)(B)(iii).",
+                          3: "ROUND 3: Final escalation. Mention CFPB, FTC, state AG complaints. Reserve rights under §616/§617."
+                        };
+                        for (const [round, items] of Object.entries(byRound).sort((a, b) => Number(a[0]) - Number(b[0]))) {
+                          prompt += `--- INQUIRY DISPUTES: ${roundInstructions[Number(round)] || roundInstructions[1]} ---\n`;
+                          items.forEach(n => {
+                            const dateInfo = n.dates?.inquiryDate ? `, inquiry date: ${n.dates.inquiryDate}` : "";
+                            prompt += `- ${n.furnisherName} (${n.bureau}${dateInfo}${n.userAttestation === "not_authorized" ? ", NOT AUTHORIZED per user" : ""})\n`;
+                          });
+                          prompt += "\n";
+                        }
+                      }
+                      if (others.length > 0) {
+                        prompt += "--- OTHER DISPUTE ITEMS ---\n";
+                        others.forEach(n => {
+                          const dateInfo = n.dates ? Object.entries(n.dates).filter(([,v]) => v).map(([k,v]) => `${k}: ${v}`).join(", ") : "";
+                          const acctInfo = n.accountPartial ? ` (acct: ${n.accountPartial})` : "";
+                          prompt += `- ${n.furnisherName}${acctInfo}: ${n.issue} (${n.bureau}, basis: ${n.disputeBasis}${dateInfo ? `, ${dateInfo}` : ""}${n.userAttestation === "not_authorized" ? ", NOT AUTHORIZED per user" : ""})\n`;
+                        });
+                      }
+                      onSendChat(prompt);
+                    }}
+                    className="mt-3 w-full py-2 rounded-md bg-[#1a1a2e] text-white text-[10px] font-semibold hover:bg-[#2a2a4e] transition-colors"
+                    data-testid="button-generate-all-disputes"
+                  >
+                    Generate All Bureau Challenges ({repairData.negativeItems.filter(n => n.userAttestation !== "recognized").length})
+                  </button>
+                )}
+              </>);
+            })()}
           </>)}
         </div>
 
@@ -3881,6 +4066,8 @@ export default function LandingPage() {
           issue: item.issue || "Inaccurate reporting",
           bureau: item.bureau || "All",
           reason: item.disputeBasis || "Information is inaccurate per FCRA §611",
+          disputeRound: item.disputeRound || 1,
+          category: item.category || "Account",
         }));
         const attachmentPages: { type: string; dataUrl: string; name: string }[] = [];
         for (const d of savedDocs) {
