@@ -1820,20 +1820,10 @@ function CapitalSimulator({ aisReport }: { aisReport: MissionData }) {
   );
 }
 
-function PerfectProfileTab({ aisReport, onUpload }: { aisReport: MissionData | null; onUpload?: () => void }) {
+function PerfectProfileTab({ aisReport }: { aisReport: MissionData | null }) {
   const [expandedSection, setExpandedSection] = useState<string | null>("revolving");
   if (!aisReport || !hasAnalysisData(aisReport)) {
-    return (
-      <div className="flex flex-col items-center justify-center py-10 px-4 text-center">
-        <button onClick={onUpload} className="rounded-lg border border-dashed border-[#ccc] px-6 py-3 hover:border-[#999] hover:bg-[#fafafa] transition-all cursor-pointer" data-testid="button-upload-profile">
-          <svg width="14" height="14" viewBox="0 0 18 18" fill="none" className="mx-auto mb-1 text-[#aaa]">
-            <path d="M9 3V12M9 3L5.5 6.5M9 3L12.5 6.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-            <path d="M3 12V14C3 14.5523 3.44772 15 4 15H14C14.5523 15 15 14.5523 15 14V12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
-          <p className="text-[9px] text-[#999] leading-[1.6]">Upload Report</p>
-        </button>
-      </div>
-    );
+    return null;
   }
 
   const tradelines = aisReport.openTradelines || [];
@@ -2271,6 +2261,20 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
       <div className="flex-1 overflow-y-auto px-4 py-3">
 
         {panelTab === "command" && (<>
+
+        {!hasAis && (
+          <div className="mb-4">
+            <button onClick={triggerCommandUpload} className="w-full rounded-xl bg-gradient-to-br from-[#1a1a2e] to-[#2a2a40] p-5 text-center hover:from-[#22223a] hover:to-[#333350] transition-all cursor-pointer group" data-testid="button-upload-command">
+              <svg width="22" height="22" viewBox="0 0 18 18" fill="none" className="mx-auto mb-2 text-white/40 group-hover:text-white/60 transition-colors">
+                <path d="M9 3V12M9 3L5.5 6.5M9 3L12.5 6.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                <path d="M3 12V14C3 14.5523 3.44772 15 4 15H14C14.5523 15 15 14.5523 15 14V12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+              <p className="text-[11px] font-semibold text-white/70 group-hover:text-white/90 transition-colors">Upload Report</p>
+              <p className="text-[8px] text-white/30 mt-1 leading-[1.5]">Activates AIS, Repair Center, dispute detection, and full analysis</p>
+            </button>
+          </div>
+        )}
+
         <div className="space-y-2.5">
           {hasAis ? (
             <button
@@ -2300,15 +2304,7 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
                 </div>
               )}
             </button>
-          ) : (
-            <button onClick={triggerCommandUpload} className="w-full rounded-xl border border-dashed border-[#ccc] p-3 text-center hover:border-[#999] hover:bg-[#fafafa] transition-all cursor-pointer" data-testid="button-upload-ais">
-              <svg width="14" height="14" viewBox="0 0 18 18" fill="none" className="mx-auto mb-1 text-[#aaa]">
-                <path d="M9 3V12M9 3L5.5 6.5M9 3L12.5 6.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                <path d="M3 12V14C3 14.5523 3.44772 15 4 15H14C14.5523 15 15 14.5523 15 14V12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-              <p className="text-[9px] text-[#999] leading-[1.5]">Upload Report</p>
-            </button>
-          )}
+          ) : null}
 
           {hasAis && aisReport && (() => {
             const tradelines = aisReport.openTradelines || [];
@@ -2658,7 +2654,7 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
             </div>
           )}
 
-          <PerfectProfileTab aisReport={aisReport} onUpload={triggerCommandUpload} />
+          <PerfectProfileTab aisReport={aisReport} />
 
         </div>
         </>)}
@@ -2715,10 +2711,10 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
           </div>
 
           {!repairData || repairData.negativeItems.length === 0 ? (
-            <button onClick={triggerCommandUpload} className="w-full px-2.5 py-2.5 rounded-md bg-[#fafafa] border border-dashed border-[#ddd] text-center hover:border-[#999] hover:bg-[#f0f0f0] transition-all cursor-pointer" data-testid="button-upload-repair">
+            <div className="w-full px-2.5 py-2.5 rounded-md bg-[#fafafa] border border-[#eee] text-center">
               <div className="text-[9px] text-[#888]">No dispute-eligible items detected yet.</div>
-              <div className="text-[8px] text-[#aaa] mt-0.5">Upload Report to scan for disputable items</div>
-            </button>
+              <div className="text-[8px] text-[#aaa] mt-0.5">Upload a report in the Command tab to scan for disputable items</div>
+            </div>
           ) : (<>
             <div className="flex gap-1 mb-2">
               <select value={repairFilter.bureau} onChange={e => setRepairFilter(f => ({ ...f, bureau: e.target.value }))} className="text-[9px] px-1.5 py-1 rounded border border-[#ddd] bg-white text-[#555]" data-testid="filter-bureau">
@@ -3293,19 +3289,7 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
           </div>
         )}
 
-        {!hasAis && (
-          <div className="mb-3">
-            <div className="rounded-xl bg-gradient-to-br from-[#1a1a2e] to-[#252540] p-2 mb-1.5">
-              <div className="flex items-center gap-2">
-                <svg width="10" height="10" viewBox="0 0 12 12" fill="none"><path d="M2 2h8v8H2z" stroke="white" strokeWidth="1" fill="none" rx="1" opacity="0.5" /><path d="M4 5l1.5 1.5L8 4" stroke="white" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" opacity="0.5" /></svg>
-                <p className="text-[7px] uppercase tracking-[0.1em] text-white/40 font-semibold">Next Moves</p>
-              </div>
-            </div>
-            <button onClick={triggerCommandUpload} className="w-full rounded-lg border border-dashed border-[#ccc] p-2.5 text-center hover:border-[#999] hover:bg-[#fafafa] transition-all cursor-pointer" data-testid="button-upload-goals">
-              <p className="text-[8px] text-[#999]">Upload Report</p>
-            </button>
-          </div>
-        )}
+        {!hasAis && null}
 
         <div className="w-full h-px bg-[#eee] my-3"></div>
         <TeamSection user={user} onOpenTeamChat={onOpenTeamChat} activeTeamChatId={activeTeamChatId} />
