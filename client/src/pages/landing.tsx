@@ -2334,57 +2334,56 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
 
             return (<>
               <div className="rounded-xl border border-[#e8e8e8] bg-white p-3" data-testid="denial-simulation">
-                <div className="flex items-center gap-3 mb-2.5">
-                  <div className="relative w-[44px] h-[44px] flex-shrink-0">
+                <div className="flex items-center gap-2.5 mb-2">
+                  <div className="relative w-[36px] h-[36px] flex-shrink-0">
                     <svg viewBox="0 0 36 36" className="w-full h-full -rotate-90">
                       <circle cx="18" cy="18" r="15.5" fill="none" stroke="#f0f0f0" strokeWidth="2.5" />
                       <circle cx="18" cy="18" r="15.5" fill="none" stroke={probColor} strokeWidth="2.5" strokeDasharray={`${approvalProb * 0.974} 100`} strokeLinecap="round" />
                     </svg>
                     <div className="absolute inset-0 flex items-center justify-center">
-                      <span className="text-[11px] font-bold leading-none" style={{ color: probColor, fontVariantNumeric: "tabular-nums" }}>{approvalProb}%</span>
+                      <span className="text-[10px] font-bold leading-none" style={{ color: probColor, fontVariantNumeric: "tabular-nums" }}>{approvalProb}%</span>
                     </div>
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p className="text-[9px] text-[#333] font-semibold mb-0.5">If You Applied Today</p>
-                    <p className="text-[8px] text-[#777] leading-[1.4]">
+                    <p className="text-[9px] text-[#333] font-semibold leading-tight">If You Applied Today</p>
+                    <p className="text-[7px] text-[#888] leading-[1.3] mt-0.5">
                       {approvalProb >= 70
-                        ? "You have a good chance of getting approved"
+                        ? "Good chance of approval"
                         : approvalProb >= 45
-                          ? `Lenders would likely approve about ${Math.round(approvalProb / 10)} out of 10 applications`
-                          : "Most applications would likely be declined right now"}
+                          ? `~${Math.round(approvalProb / 10)} in 10 apps approved`
+                          : "Most apps would be declined"}
                     </p>
                   </div>
                 </div>
                 {highestLimit > 0 && (
-                  <div className="grid grid-cols-2 gap-2 mb-2.5">
-                    <div className="rounded-lg bg-[#fafafa] border border-[#eee] px-2.5 py-2">
-                      <p className="text-[7px] text-[#999] font-medium mb-0.5">Typical Approval Range</p>
-                      <p className="text-[10px] text-[#333] font-bold" style={{ fontVariantNumeric: "tabular-nums" }}>${Math.round(highestLimit * 0.6).toLocaleString()} – ${Math.round(highestLimit * 1.2).toLocaleString()}</p>
+                  <div className="grid grid-cols-2 gap-1.5 mb-2">
+                    <div className="rounded-md bg-[#fafafa] border border-[#eee] px-2 py-1.5">
+                      <p className="text-[6px] text-[#aaa] font-medium uppercase tracking-wider">Typical Range</p>
+                      <p className="text-[9px] text-[#333] font-bold mt-0.5" style={{ fontVariantNumeric: "tabular-nums" }}>${Math.round(highestLimit * 0.6).toLocaleString()} – ${Math.round(highestLimit * 1.2).toLocaleString()}</p>
                     </div>
-                    <div className="rounded-lg bg-[#fafafa] border border-[#eee] px-2.5 py-2">
-                      <p className="text-[7px] text-[#999] font-medium mb-0.5">If Profile Improves</p>
-                      <p className="text-[10px] text-[#2d6a4f] font-bold" style={{ fontVariantNumeric: "tabular-nums" }}>${Math.round(highestLimit * 1.2).toLocaleString()} – ${Math.round(highestLimit * 1.8).toLocaleString()}</p>
+                    <div className="rounded-md bg-[#fafafa] border border-[#eee] px-2 py-1.5">
+                      <p className="text-[6px] text-[#aaa] font-medium uppercase tracking-wider">If Improved</p>
+                      <p className="text-[9px] text-[#2d6a4f] font-bold mt-0.5" style={{ fontVariantNumeric: "tabular-nums" }}>${Math.round(highestLimit * 1.2).toLocaleString()} – ${Math.round(highestLimit * 1.8).toLocaleString()}</p>
                     </div>
                   </div>
                 )}
                 {denialDrivers.length > 0 && (
-                  <div>
-                    <p className="text-[8px] text-[#aaa] font-semibold mb-1.5">Main issues affecting approval</p>
-                    <div className="space-y-1.5">
-                      {denialDrivers.slice(0, 4).map((d, di) => (
-                        <div key={di} className="flex items-start gap-2">
-                          <div className={`w-[5px] h-[5px] rounded-full mt-[4px] shrink-0 ${d.level === "risk" ? "bg-[#c0392b]" : "bg-[#c9a227]"}`} />
-                          <div className="min-w-0 flex-1">
-                            <span className={`text-[8px] font-semibold ${d.level === "risk" ? "text-[#c0392b]" : "text-[#c9a227]"}`}>{d.label}</span>
-                            <p className="text-[7px] text-[#999] leading-[1.4]">{getSignalExplanation(d.label)}</p>
-                          </div>
-                        </div>
-                      ))}
+                  <div className="rounded-md bg-[#fafafa] border border-[#eee] overflow-hidden">
+                    <div className="px-2 py-1 border-b border-[#eee] bg-[#f5f5f5]">
+                      <p className="text-[6px] text-[#aaa] font-semibold uppercase tracking-wider">Issues Affecting Approval</p>
                     </div>
+                    {denialDrivers.slice(0, 4).map((d, di) => (
+                      <div key={di} className={`flex items-center gap-2 px-2 py-1.5 ${di < Math.min(denialDrivers.length, 4) - 1 ? "border-b border-[#f0f0f0]" : ""}`}>
+                        <div className={`w-[4px] h-[4px] rounded-full shrink-0 ${d.level === "risk" ? "bg-[#c0392b]" : "bg-[#c9a227]"}`} />
+                        <span className={`text-[8px] font-semibold flex-1 ${d.level === "risk" ? "text-[#c0392b]" : "text-[#c9a227]"}`}>{d.label}</span>
+                        <span className="text-[7px] text-[#bbb]">{d.status}</span>
+                      </div>
+                    ))}
                   </div>
                 )}
-                <div className="mt-2.5 pt-2 border-t border-[#f0f0f0]">
-                  <p className="text-[8px] text-[#aaa]">Best window: <span className="font-semibold text-[#333]">{mn[windowStart.getMonth()]}–{mn[windowEnd.getMonth()]} {windowEnd.getFullYear()}</span></p>
+                <div className="mt-2 pt-1.5 border-t border-[#f0f0f0] flex items-center justify-between">
+                  <p className="text-[7px] text-[#aaa]">Best window</p>
+                  <p className="text-[8px] font-semibold text-[#333]" style={{ fontVariantNumeric: "tabular-nums" }}>{mn[windowStart.getMonth()]}–{mn[windowEnd.getMonth()]} {windowEnd.getFullYear()}</p>
                 </div>
               </div>
 
@@ -2460,23 +2459,22 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
                 })()}
               </div>
 
-              <div className="rounded-xl border border-[#e8e8e8] bg-white p-3" data-testid="lender-metrics">
-                <p className="text-[9px] text-[#333] font-semibold mb-1.5">Profile Metrics</p>
-                <p className="text-[8px] text-[#aaa] mb-2.5">Key metrics lenders evaluate during underwriting</p>
-                <div className="space-y-2">
+              <div className="rounded-xl border border-[#e8e8e8] bg-white overflow-hidden" data-testid="lender-metrics">
+                <div className="px-3 py-2 border-b border-[#eee]">
+                  <p className="text-[9px] text-[#333] font-semibold">Profile Metrics</p>
+                </div>
+                <div className="divide-y divide-[#f0f0f0]">
                   {[
-                    { label: "Recent Inquiries", value: `${inqCount}`, detail: inqCount >= 6 ? "Too many recent credit checks. Avoid new applications for 90 days" : inqCount >= 3 ? "Several recent credit checks. Try to avoid new applications" : "Your inquiry count is healthy", color: velocityColor, optimal: "0-2 in 6 months" },
-                    { label: "Credit Mix", value: `${primaryRev.length} Revolving / ${primaryInst.length} Installment`, detail: primaryRev.length >= 3 && hasInstallment ? "Good mix of credit types" : !hasInstallment ? "Add 1 installment account to improve your mix" : "Add more revolving accounts", color: primaryRev.length >= 3 && hasInstallment ? "#2d6a4f" : "#c9a227", optimal: "3-5 rev + 1-2 inst" },
-                    { label: "Average Credit Limit", value: avgLimit > 0 ? `$${avgLimit.toLocaleString()}` : "—", detail: avgLimit >= 5000 ? "This is considered strong and helps with approvals" : avgLimit >= 3000 ? "Moderate. Request limit increases to strengthen your profile" : "Low limits reduce your approval chances. Request increases", color: avgLimit >= 5000 ? "#2d6a4f" : avgLimit >= 3000 ? "#c9a227" : "#c0392b", optimal: "$5,000-$15,000" },
-                    { label: "Utilization", value: `${aggUtil}%`, detail: aggUtil <= 9 ? "This is in the optimal range" : aggUtil <= 29 ? "Acceptable, but ideal range is 1-9%" : "Too high. Pay down balances to under 9% for best results", color: aggUtil <= 9 ? "#2d6a4f" : aggUtil <= 29 ? "#c9a227" : "#c0392b", optimal: "1-9%" },
+                    { label: "Inquiries", value: `${inqCount}`, color: velocityColor, optimal: "0–2", tip: inqCount >= 6 ? "Too many — wait 90 days" : inqCount >= 3 ? "Avoid new applications" : "" },
+                    { label: "Credit Mix", value: `${primaryRev.length}R / ${primaryInst.length}I`, color: primaryRev.length >= 3 && hasInstallment ? "#2d6a4f" : "#c9a227", optimal: "3-5R + 1-2I", tip: !hasInstallment ? "Add installment loan" : primaryRev.length < 3 ? "Add revolving accounts" : "" },
+                    { label: "Avg Limit", value: avgLimit > 0 ? `$${avgLimit.toLocaleString()}` : "—", color: avgLimit >= 5000 ? "#2d6a4f" : avgLimit >= 3000 ? "#c9a227" : "#c0392b", optimal: "$5K–$15K", tip: avgLimit < 5000 ? "Request limit increases" : "" },
+                    { label: "Utilization", value: `${aggUtil}%`, color: aggUtil <= 9 ? "#2d6a4f" : aggUtil <= 29 ? "#c9a227" : "#c0392b", optimal: "1–9%", tip: aggUtil > 9 ? "Pay down balances" : "" },
                   ].map((m, mi) => (
-                    <div key={mi} className="rounded-lg bg-[#fafafa] border border-[#eee] px-2.5 py-2">
-                      <div className="flex items-center justify-between mb-1">
-                        <p className="text-[8px] text-[#555] font-medium">{m.label}</p>
-                        <p className="text-[7px] text-[#bbb]">Optimal: {m.optimal}</p>
-                      </div>
-                      <p className="text-[11px] font-bold mb-0.5" style={{ color: m.color, fontVariantNumeric: "tabular-nums" }}>{m.value}</p>
-                      <p className="text-[7px] text-[#888] leading-[1.4]">{m.detail}</p>
+                    <div key={mi} className="flex items-center gap-2 px-3 py-2">
+                      <div className="w-[4px] h-[4px] rounded-full shrink-0" style={{ backgroundColor: m.color }} />
+                      <span className="text-[8px] text-[#555] font-medium flex-1">{m.label}</span>
+                      <span className="text-[9px] font-bold text-right min-w-[40px]" style={{ color: m.color, fontVariantNumeric: "tabular-nums" }}>{m.value}</span>
+                      <span className="text-[7px] text-[#bbb] text-right min-w-[45px]" style={{ fontVariantNumeric: "tabular-nums" }}>{m.optimal}</span>
                     </div>
                   ))}
                 </div>
@@ -3237,19 +3235,19 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
                   </div>
 
                   <div className="rounded-lg border border-[#e8e8e8] bg-white overflow-hidden">
-                    <div className="grid grid-cols-[auto_1fr_auto_auto] gap-x-2 px-1.5 py-[3px] bg-[#f8f8f8] border-b border-[#eee]">
+                    <div className="grid grid-cols-[auto_1fr_auto_auto] gap-x-2.5 px-2 py-[4px] bg-[#f8f8f8] border-b border-[#eee]">
                       <span className="text-[6px] text-[#aaa] uppercase tracking-wider w-3"></span>
                       <span className="text-[6px] text-[#aaa] uppercase tracking-wider">Metric</span>
                       <span className="text-[6px] text-[#aaa] uppercase tracking-wider text-right">Now</span>
                       <span className="text-[6px] text-[#aaa] uppercase tracking-wider text-right">Target</span>
                     </div>
                     {sortedGoals.map((g, gi) => (
-                      <div key={gi} className={`grid grid-cols-[auto_1fr_auto_auto] gap-x-2 items-center px-1.5 py-[4px] ${gi < sortedGoals.length - 1 ? "border-b border-[#f5f5f5]" : ""} ${!g.met ? "bg-[#fffdf8]" : ""}`} data-testid={`goal-item-${gi}`}>
-                        <div className={`w-[7px] h-[7px] rounded-[2px] flex items-center justify-center flex-shrink-0 ${g.met ? "bg-[#2d6a4f]" : "border border-[#ddd]"}`}>
+                      <div key={gi} className={`grid grid-cols-[auto_1fr_auto_auto] gap-x-2.5 items-center px-2 py-[5px] ${gi < sortedGoals.length - 1 ? "border-b border-[#f5f5f5]" : ""} ${!g.met ? "bg-[#fffdf8]" : ""}`} data-testid={`goal-item-${gi}`}>
+                        <div className={`w-[8px] h-[8px] rounded-[2px] flex items-center justify-center flex-shrink-0 ${g.met ? "bg-[#2d6a4f]" : "border border-[#ddd]"}`}>
                           {g.met && <svg width="5" height="5" viewBox="0 0 10 10" fill="none"><path d="M2 5l2.5 2.5L8 3" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" /></svg>}
                         </div>
-                        <span className={`text-[7px] font-medium ${g.met ? "text-[#888]" : "text-[#333]"}`}>{g.label}{g.tip ? <span className="text-[6px] text-[#bbb] font-normal ml-1 hidden sm:inline">{g.tip}</span> : null}</span>
-                        <span className={`text-[7px] font-bold text-right ${g.met ? "text-[#2d6a4f]" : "text-[#333]"}`} style={{ fontVariantNumeric: "tabular-nums" }}>{g.current}</span>
+                        <span className={`text-[8px] font-medium ${g.met ? "text-[#888]" : "text-[#333]"}`}>{g.label}</span>
+                        <span className={`text-[8px] font-bold text-right ${g.met ? "text-[#2d6a4f]" : "text-[#333]"}`} style={{ fontVariantNumeric: "tabular-nums" }}>{g.current}</span>
                         <span className="text-[7px] text-[#999] text-right" style={{ fontVariantNumeric: "tabular-nums" }}>{g.target}</span>
                       </div>
                     ))}
