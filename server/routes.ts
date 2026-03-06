@@ -3218,8 +3218,12 @@ CRITICAL: The following data was previously extracted from the user's credit rep
       }
 
       if (attachmentPages.length > 0) {
-        const attachOrder = ["id_document", "proof_of_residency", "bank_statement"];
-        const sorted = [...attachmentPages].sort((a, b) => attachOrder.indexOf(a.type) - attachOrder.indexOf(b.type));
+        const attachOrder = ["credit_report", "id_document", "proof_of_residency", "bank_statement"];
+        const sorted = [...attachmentPages].sort((a, b) => {
+          const aIdx = attachOrder.indexOf(a.type);
+          const bIdx = attachOrder.indexOf(b.type);
+          return (aIdx === -1 ? 99 : aIdx) - (bIdx === -1 ? 99 : bIdx);
+        });
         for (const att of sorted) {
           skipNextPageEvent = true;
           doc.addPage();
@@ -3227,6 +3231,7 @@ CRITICAL: The following data was previously extracted from the user's credit rep
           drawWatermark(doc);
 
           const typeLabels: Record<string, string> = {
+            credit_report: "Bureau Report",
             id_document: "Government-Issued Identification",
             proof_of_residency: "Proof of Residency",
             bank_statement: "Bank Statement"

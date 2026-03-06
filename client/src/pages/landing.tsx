@@ -37,6 +37,8 @@ interface GuestMessage {
   senderName?: string;
   senderPhoto?: string | null;
   senderId?: number;
+  disputePackageUrl?: string;
+  disputeCount?: number;
 }
 
 interface PillarScore {
@@ -1238,7 +1240,7 @@ function DisputeDownloadButton({ disputes, onSave, userProfile, savedDocs }: { d
       const attachmentPages: { type: string; dataUrl: string; name: string }[] = [];
       if (savedDocs) {
         for (const doc of savedDocs) {
-          if ((doc.type === "id_document" || doc.type === "proof_of_residency" || doc.type === "bank_statement") && doc.fileDataUrl) {
+          if ((doc.type === "id_document" || doc.type === "proof_of_residency" || doc.type === "bank_statement" || doc.type === "credit_report") && doc.fileDataUrl) {
             attachmentPages.push({ type: doc.type, dataUrl: doc.fileDataUrl, name: doc.name });
           }
         }
@@ -1263,7 +1265,7 @@ function DisputeDownloadButton({ disputes, onSave, userProfile, savedDocs }: { d
         const url = URL.createObjectURL(blob);
         const a = document.createElement("a");
         a.href = url;
-        a.download = "profundr-dispute-letters.pdf";
+        a.download = "profundr-dispute-package.pdf";
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
@@ -1288,7 +1290,7 @@ function DisputeDownloadButton({ disputes, onSave, userProfile, savedDocs }: { d
         <path d="M8 2v8M8 10L5 7M8 10l3-3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
         <path d="M3 12v1.5a.5.5 0 00.5.5h9a.5.5 0 00.5-.5V12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
       </svg>
-      {downloading ? "Generating..." : `Download ${disputes.length} Dispute Letter${disputes.length > 1 ? "s" : ""} (PDF)`}
+      {downloading ? "Generating Package..." : `Download Dispute Package (PDF)`}
     </button>
   );
 }
@@ -2131,7 +2133,7 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
       if (doc.disputes && doc.disputes.length > 0) {
         const attachmentPages: { type: string; dataUrl: string; name: string }[] = [];
         for (const d of docs) {
-          if ((d.type === "id_document" || d.type === "proof_of_residency" || d.type === "bank_statement") && d.fileDataUrl) {
+          if ((d.type === "id_document" || d.type === "proof_of_residency" || d.type === "bank_statement" || d.type === "credit_report") && d.fileDataUrl) {
             attachmentPages.push({ type: d.type, dataUrl: d.fileDataUrl, name: d.name });
           }
         }
@@ -3873,7 +3875,7 @@ export default function LandingPage() {
       setNextId((n) => n + 1);
 
       if (hasDisputePackageTrigger && repairData && repairData.negativeItems.length > 0) {
-        const disputes = repairData.negativeItems.map(item => ({
+        const autoDisputes = repairData.negativeItems.map(item => ({
           creditor: item.furnisherName || "Unknown",
           accountNumber: item.accountPartial || "N/A",
           issue: item.issue || "Inaccurate reporting",
@@ -3882,12 +3884,12 @@ export default function LandingPage() {
         }));
         const attachmentPages: { type: string; dataUrl: string; name: string }[] = [];
         for (const d of savedDocs) {
-          if ((d.type === "id_document" || d.type === "proof_of_residency" || d.type === "bank_statement") && d.fileDataUrl) {
+          if ((d.type === "id_document" || d.type === "proof_of_residency" || d.type === "bank_statement" || d.type === "credit_report") && d.fileDataUrl) {
             attachmentPages.push({ type: d.type, dataUrl: d.fileDataUrl, name: d.name });
           }
         }
         try {
-          const payload: any = { disputes, attachmentPages };
+          const payload: any = { disputes: autoDisputes, attachmentPages };
           if (userProfile.fullName) payload.userName = userProfile.fullName;
           if (userProfile.address) payload.userAddress = userProfile.address;
           if (userProfile.ssn4) payload.ssnLast4 = userProfile.ssn4;
@@ -3899,12 +3901,8 @@ export default function LandingPage() {
               const dlRes = await fetch(pdfData.downloadUrl);
               if (dlRes.ok) {
                 const blob = await dlRes.blob();
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement("a");
-                a.href = url;
-                a.download = "profundr-dispute-package.pdf";
-                a.click();
-                URL.revokeObjectURL(url);
+                const blobUrl = URL.createObjectURL(blob);
+                setGuestMessages(prev => prev.map(m => m.id === aiMsg.id ? { ...m, disputePackageUrl: blobUrl, disputeCount: autoDisputes.length } : m));
               }
             }
           }
@@ -4529,6 +4527,31 @@ export default function LandingPage() {
                             <div className="flex items-center gap-2 flex-wrap">
                               <DisputeDownloadButton disputes={disputes} onSave={handleSaveDisputeLetters} userProfile={userProfile} savedDocs={savedDocs} />
                             </div>
+                          </div>
+                        </div>
+                      )}
+                      {msg.disputePackageUrl && (
+                        <div className="ml-10 mt-3">
+                          <div className="rounded-xl bg-white border border-[#e8e8e8] p-4 shadow-sm" data-testid="card-dispute-package">
+                            <div className="flex items-center gap-2 mb-2">
+                              <div className="w-5 h-5 rounded bg-green-50 flex items-center justify-center">
+                                <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M4 8l3 3 5-5" stroke="#22c55e" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                              </div>
+                              <p className="text-[11px] font-medium text-[#333]">Dispute Package Ready</p>
+                            </div>
+                            <p className="text-[9px] text-[#888] mb-3">{msg.disputeCount || 0} dispute letter{(msg.disputeCount || 0) !== 1 ? "s" : ""} with all vault documents included</p>
+                            <a
+                              href={msg.disputePackageUrl}
+                              download="profundr-dispute-package.pdf"
+                              className="inline-flex items-center gap-2 px-4 py-2 bg-[#1a1a2e] text-white rounded-lg text-[12px] font-medium hover:bg-[#2a2a40] transition-colors"
+                              data-testid="button-download-dispute-package"
+                            >
+                              <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+                                <path d="M8 2v8M8 10L5 7M8 10l3-3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                                <path d="M3 12v1.5a.5.5 0 00.5.5h9a.5.5 0 00.5-.5V12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                              </svg>
+                              Download Dispute Package (PDF)
+                            </a>
                           </div>
                         </div>
                       )}
