@@ -541,95 +541,88 @@ function BrandedResponse({ content, userQuestion, msgId }: { content: string; us
   const reportRef = useRef<HTMLDivElement>(null);
   const [downloading, setDownloading] = useState(false);
 
-  const handleDownloadPdf = async () => {
+  const handleDownloadImage = async () => {
     if (!reportRef.current || downloading) return;
     setDownloading(true);
     let offscreen: HTMLDivElement | null = null;
     try {
       const html2canvas = (await import("html2canvas")).default;
-      const { jsPDF } = await import("jspdf");
 
-      const reelW = 1080;
-      const reelH = 1920;
+      const pageW = 816;
+      const padX = 60;
+      const padY = 52;
 
       const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 
+      const now = new Date();
+      const dateStr = now.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
+
       offscreen = document.createElement("div");
-      offscreen.style.cssText = `position:fixed;left:-9999px;top:0;width:${reelW}px;height:${reelH}px;background:#fff;font-family:Inter,system-ui,sans-serif;padding:0;overflow:hidden;`;
+      offscreen.style.cssText = `position:fixed;left:-9999px;top:0;width:${pageW}px;background:#fff;font-family:Inter,system-ui,sans-serif;padding:0;`;
       document.body.appendChild(offscreen);
 
       const cleanQ = userQuestion ? esc(userQuestion.replace(/\[Attached:.*?\]/g, "").trim()) : "";
 
+      let bodyHtml = "";
+
+      const md = esc(filterMarkdown(content));
+      bodyHtml = md
+        .replace(/^### (.+)$/gm, '<h3 style="font-size:15px;font-weight:600;color:#333;margin:14px 0 5px;">$1</h3>')
+        .replace(/^## (.+)$/gm, '<h2 style="font-size:17px;font-weight:700;color:#1a1a2e;text-transform:uppercase;letter-spacing:0.06em;margin:18px 0 6px;">$1</h2>')
+        .replace(/^# (.+)$/gm, '<h1 style="font-size:20px;font-weight:700;color:#1a1a2e;margin:0 0 4px;">$1</h1>')
+        .replace(/\*\*(.+?)\*\*/g, '<strong style="font-weight:600;color:#1a1a2e;">$1</strong>')
+        .replace(/\*(.+?)\*/g, '<em style="font-style:italic;color:#555;">$1</em>')
+        .replace(/^\d+\.\s+(.+)$/gm, '<div style="display:flex;gap:8px;margin:3px 0 3px 8px;"><span style="color:#999;font-weight:600;min-width:14px;">•</span><span>$1</span></div>')
+        .replace(/^[-•]\s+(.+)$/gm, '<div style="display:flex;gap:8px;margin:3px 0 3px 8px;"><span style="color:#999;">•</span><span>$1</span></div>')
+        .replace(/\n\n/g, '<div style="height:10px;"></div>')
+        .replace(/\n/g, '<br/>');
+
       offscreen.innerHTML = `
-        <div style="display:flex;flex-direction:column;height:${reelH}px;padding:60px 56px;">
-          <div style="display:flex;align-items:center;gap:14px;margin-bottom:40px;padding-bottom:24px;border-bottom:2px solid #1a1a2e;">
-            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#1a1a2e" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M12 2C9.5 2 7.5 4 7.5 6.5c0 .5-.4 1-1 1C4.5 7.5 3 9.5 3 11.5c0 1.5.8 2.8 2 3.5 0 0-.5 1.5-.5 2.5C4.5 20 6.5 22 9 22c1.5 0 2.5-.5 3-1.5.5 1 1.5 1.5 3 1.5 2.5 0 4.5-2 4.5-4.5 0-1-.5-2.5-.5-2.5 1.2-.7 2-2 2-3.5 0-2-1.5-4-3.5-4-.6 0-1-.5-1-1C16.5 4 14.5 2 12 2z"/>
-              <path d="M12 2v20"/><path d="M7.5 7.5C9 8.5 10 10 10.5 12"/><path d="M16.5 7.5C15 8.5 14 10 13.5 12"/>
-            </svg>
+        <div style="padding:${padY}px ${padX}px 40px;">
+          <div style="display:flex;align-items:flex-end;justify-content:space-between;padding-bottom:16px;margin-bottom:24px;border-bottom:2px solid #1a1a2e;">
             <div>
-              <div style="font-size:28px;font-weight:700;color:#1a1a2e;letter-spacing:-0.02em;line-height:1;">Profundr</div>
-              <div style="font-size:13px;color:#999;font-weight:400;margin-top:2px;">Capital Intelligence Report</div>
+              <div style="font-size:20px;font-weight:700;color:#1a1a2e;letter-spacing:-0.02em;">PROFUNDR</div>
+              <div style="font-size:9px;color:#999;letter-spacing:0.1em;text-transform:uppercase;margin-top:3px;">Capital Intelligence Report</div>
+            </div>
+            <div style="text-align:right;">
+              <div style="font-size:9px;color:#aaa;">${dateStr}</div>
             </div>
           </div>
 
           ${cleanQ ? `
-          <div style="margin-bottom:28px;padding:20px 24px;background:#f7f7f7;border-radius:12px;border-left:4px solid #1a1a2e;">
-            <div style="font-size:11px;color:#999;text-transform:uppercase;letter-spacing:0.1em;font-weight:600;margin-bottom:8px;">Question</div>
-            <div style="font-size:18px;color:#1a1a2e;font-weight:500;line-height:1.5;">${cleanQ}</div>
+          <div style="margin-bottom:20px;padding:14px 18px;background:#f7f7f7;border-radius:8px;border-left:3px solid #1a1a2e;">
+            <div style="font-size:9px;color:#999;text-transform:uppercase;letter-spacing:0.1em;font-weight:600;margin-bottom:5px;">Question</div>
+            <div style="font-size:14px;color:#1a1a2e;font-weight:500;line-height:1.5;">${cleanQ}</div>
           </div>
           ` : ""}
 
-          <div id="pdf-report-content" style="flex:1;font-size:16px;color:#333;line-height:1.7;overflow:hidden;"></div>
+          <div style="font-size:13px;color:#333;line-height:1.75;">${bodyHtml}</div>
 
-          <div style="margin-top:auto;padding-top:32px;border-top:2px solid #1a1a2e;display:flex;align-items:center;justify-content:space-between;">
-            <div style="display:flex;align-items:center;gap:12px;">
-              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#1a1a2e" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M12 2C9.5 2 7.5 4 7.5 6.5c0 .5-.4 1-1 1C4.5 7.5 3 9.5 3 11.5c0 1.5.8 2.8 2 3.5 0 0-.5 1.5-.5 2.5C4.5 20 6.5 22 9 22c1.5 0 2.5-.5 3-1.5.5 1 1.5 1.5 3 1.5 2.5 0 4.5-2 4.5-4.5 0-1-.5-2.5-.5-2.5 1.2-.7 2-2 2-3.5 0-2-1.5-4-3.5-4-.6 0-1-.5-1-1C16.5 4 14.5 2 12 2z"/>
-                <path d="M12 2v20"/><path d="M7.5 7.5C9 8.5 10 10 10.5 12"/><path d="M16.5 7.5C15 8.5 14 10 13.5 12"/>
-              </svg>
-              <div>
-                <div style="font-size:16px;font-weight:700;color:#1a1a2e;">Profundr</div>
-                <div style="font-size:11px;color:#aaa;">Capital Operating System</div>
-              </div>
-            </div>
-            <div style="font-size:11px;color:#bbb;text-align:right;">profundr.com</div>
+          <div style="border-top:1px solid #e0e0e0;margin-top:28px;padding-top:14px;display:flex;align-items:center;justify-content:space-between;">
+            <div style="font-size:8px;color:#bbb;letter-spacing:0.06em;text-transform:uppercase;">Profundr &middot; Confidential</div>
+            <div style="font-size:8px;color:#bbb;">profundr.com &middot; ${dateStr}</div>
           </div>
         </div>
       `;
 
-      const contentEl = offscreen.querySelector("#pdf-report-content") as HTMLElement;
-      if (contentEl) {
-        const md = esc(filterMarkdown(content));
-        const htmlContent = md
-          .replace(/^### (.+)$/gm, '<h3 style="font-size:17px;font-weight:600;color:#333;margin:16px 0 6px;">$1</h3>')
-          .replace(/^## (.+)$/gm, '<h2 style="font-size:19px;font-weight:700;color:#1a1a2e;text-transform:uppercase;letter-spacing:0.06em;margin:20px 0 8px;">$1</h2>')
-          .replace(/^# (.+)$/gm, '<h1 style="font-size:24px;font-weight:700;color:#1a1a2e;margin:0 0 4px;">$1</h1>')
-          .replace(/\*\*(.+?)\*\*/g, '<strong style="font-weight:600;color:#1a1a2e;">$1</strong>')
-          .replace(/\*(.+?)\*/g, '<em style="font-style:italic;color:#555;">$1</em>')
-          .replace(/^\d+\.\s+(.+)$/gm, '<div style="display:flex;gap:8px;margin:4px 0 4px 8px;"><span style="color:#999;font-weight:600;min-width:16px;">•</span><span>$1</span></div>')
-          .replace(/^[-•]\s+(.+)$/gm, '<div style="display:flex;gap:8px;margin:4px 0 4px 8px;"><span style="color:#999;">•</span><span>$1</span></div>')
-          .replace(/\n\n/g, '<div style="height:12px;"></div>')
-          .replace(/\n/g, '<br/>');
-        contentEl.innerHTML = htmlContent;
-      }
-
       const canvas = await html2canvas(offscreen, {
-        width: reelW,
-        height: reelH,
         scale: 2,
         backgroundColor: "#ffffff",
         useCORS: true,
+        logging: false,
       });
 
-      const imgData = canvas.toDataURL("image/png");
-      const pdfW = reelW * 0.264583;
-      const pdfH = reelH * 0.264583;
-      const pdf = new jsPDF({ orientation: "portrait", unit: "mm", format: [pdfW, pdfH] });
-      pdf.addImage(imgData, "PNG", 0, 0, pdfW, pdfH);
-      pdf.save(`profundr-report-${msgId}.pdf`);
+      canvas.toBlob((blob) => {
+        if (!blob) return;
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `profundr-report-${msgId}.jpg`;
+        a.click();
+        URL.revokeObjectURL(url);
+      }, "image/jpeg", 0.95);
     } catch (err) {
-      console.error("PDF generation failed:", err);
+      console.error("Image generation failed:", err);
     } finally {
       if (offscreen && offscreen.parentNode) document.body.removeChild(offscreen);
       setDownloading(false);
@@ -701,7 +694,7 @@ function BrandedResponse({ content, userQuestion, msgId }: { content: string; us
           <span className="text-[7px] text-[#ccc]">profundr.com</span>
         </div>
         <button
-          onClick={handleDownloadPdf}
+          onClick={handleDownloadImage}
           disabled={downloading}
           className="flex items-center gap-1 px-2 py-0.5 rounded-md text-[9px] font-medium text-[#1a1a2e] hover:bg-[#f5f5f5] transition-colors disabled:opacity-40"
           data-testid={`button-download-report-${msgId}`}
@@ -711,7 +704,7 @@ function BrandedResponse({ content, userQuestion, msgId }: { content: string; us
           ) : (
             <>
               <svg width="9" height="9" viewBox="0 0 12 12" fill="none"><path d="M6 2v6M6 8L4 6M6 8l2-2" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" /><path d="M2 9v1h8V9" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" /></svg>
-              <span>PDF</span>
+              <span>Save Image</span>
             </>
           )}
         </button>
@@ -1019,22 +1012,51 @@ function MissionDashboard({ data, userName, compact }: { data: MissionData; user
   const bandColor = getBandColor(data.band);
   const phaseColor = getPhaseColor(data.phase);
   const [downloadingReport, setDownloadingReport] = useState(false);
+  const dashboardRef = useRef<HTMLDivElement>(null);
 
   const handleDownloadReport = async () => {
+    if (!dashboardRef.current || downloadingReport) return;
     setDownloadingReport(true);
     try {
-      const res = await fetch("/api/analysis-report", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...data, userName }),
-      });
-      if (!res.ok) throw new Error("Server error");
-      const result = await res.json();
-      if (!result.downloadUrl) throw new Error("No download URL");
-      const a = document.createElement("a");
-      a.href = result.downloadUrl;
-      a.download = "profundr-analysis-report.pdf";
-      a.click();
+      const html2canvas = (await import("html2canvas")).default;
+      const now = new Date();
+      const dateStr = now.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
+
+      const wrapper = document.createElement("div");
+      wrapper.style.cssText = "position:fixed;left:-9999px;top:0;width:816px;background:#fff;font-family:Inter,system-ui,sans-serif;padding:52px 60px 40px;";
+
+      const header = document.createElement("div");
+      header.innerHTML = `<div style="display:flex;align-items:flex-end;justify-content:space-between;padding-bottom:16px;margin-bottom:24px;border-bottom:2px solid #1a1a2e;">
+        <div><div style="font-size:20px;font-weight:700;color:#1a1a2e;letter-spacing:-0.02em;">PROFUNDR</div>
+        <div style="font-size:9px;color:#999;letter-spacing:0.1em;text-transform:uppercase;margin-top:3px;">Credit Analysis Report</div></div>
+        <div style="text-align:right;"><div style="font-size:10px;color:#555;font-weight:500;">${userName || "User"}</div>
+        <div style="font-size:9px;color:#aaa;">${dateStr}</div></div></div>`;
+      wrapper.appendChild(header);
+
+      const clone = dashboardRef.current.cloneNode(true) as HTMLElement;
+      clone.style.cssText = "width:100%;";
+      wrapper.appendChild(clone);
+
+      const footer = document.createElement("div");
+      footer.innerHTML = `<div style="border-top:1px solid #e0e0e0;margin-top:28px;padding-top:14px;display:flex;align-items:center;justify-content:space-between;">
+        <div style="font-size:8px;color:#bbb;letter-spacing:0.06em;text-transform:uppercase;">Profundr &middot; Confidential</div>
+        <div style="font-size:8px;color:#bbb;">profundr.com &middot; ${dateStr}</div></div>`;
+      wrapper.appendChild(footer);
+
+      document.body.appendChild(wrapper);
+
+      const canvas = await html2canvas(wrapper, { scale: 2, backgroundColor: "#ffffff", useCORS: true, logging: false });
+      document.body.removeChild(wrapper);
+
+      canvas.toBlob((blob) => {
+        if (!blob) return;
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `profundr-analysis-${now.toISOString().slice(0, 10)}.jpg`;
+        a.click();
+        URL.revokeObjectURL(url);
+      }, "image/jpeg", 0.95);
     } catch (e) {
       console.error("Failed to download analysis report:", e);
       alert("Failed to generate report. Please try again.");
@@ -1044,7 +1066,7 @@ function MissionDashboard({ data, userName, compact }: { data: MissionData; user
   };
 
   return (
-    <div className={`w-full ${compact ? 'mt-0' : 'mt-4'} space-y-2.5`} data-testid="mission-dashboard-inline">
+    <div ref={dashboardRef} className={`w-full ${compact ? 'mt-0' : 'mt-4'} space-y-2.5`} data-testid="mission-dashboard-inline">
       <div className="flex items-center justify-end mb-1">
         <button
           onClick={handleDownloadReport}
@@ -1057,7 +1079,7 @@ function MissionDashboard({ data, userName, compact }: { data: MissionData; user
           ) : (
             <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v12m0 0l-4-4m4 4l4-4M4 18h16" /></svg>
           )}
-          {downloadingReport ? "Generating..." : "Download Report"}
+          {downloadingReport ? "Generating..." : "Save Image"}
         </button>
       </div>
       <div className={`grid ${compact ? 'grid-cols-2' : 'grid-cols-1 sm:grid-cols-3'} gap-2`}>
