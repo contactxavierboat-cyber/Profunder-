@@ -1388,7 +1388,11 @@ function saveRepairData(data: RepairData) {
 }
 
 function filterRepairDataFromContent(content: string): string {
-  return content.replace(/REPAIR_DATA_START[\s\S]*?REPAIR_DATA_END/g, "").replace(/STRATEGY_DATA_START[\s\S]*?STRATEGY_DATA_END/g, "").trim();
+  let filtered = content.replace(/REPAIR_DATA_START[\s\S]*?REPAIR_DATA_END/g, "");
+  if (filtered.includes("REPAIR_DATA_START")) {
+    filtered = filtered.replace(/REPAIR_DATA_START[\s\S]*/g, "");
+  }
+  return filtered.replace(/STRATEGY_DATA_START[\s\S]*?STRATEGY_DATA_END/g, "").trim();
 }
 
 function loadUserProfile(): UserProfile {
@@ -4035,7 +4039,11 @@ export default function LandingPage() {
         });
       }
 
+      const hasRepairStart = responseContent.includes("REPAIR_DATA_START");
+      const hasRepairEnd = responseContent.includes("REPAIR_DATA_END");
+      console.log(`[doSend] responseLen=${responseContent.length}, hasRepairStart=${hasRepairStart}, hasRepairEnd=${hasRepairEnd}`);
       const parsedRepair = parseRepairData(responseContent);
+      console.log(`[doSend] parsedRepair=${parsedRepair ? `found ${parsedRepair.negativeItems.length} items` : "null"}`);
       if (parsedRepair) {
         const merged = repairData ? {
           ...parsedRepair,

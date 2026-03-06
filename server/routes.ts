@@ -126,7 +126,7 @@ async function extractWithOCR(pdfPath: string, sessionId: string): Promise<strin
   try {
     await ensureTmpDir();
     const prefix = path.join(TMP_DIR, `ocr-${sessionId}`);
-    await execFileAsync("pdftoppm", ["-png", "-r", "300", "-l", "5", pdfPath, prefix], { maxBuffer: 50 * 1024 * 1024 });
+    await execFileAsync("pdftoppm", ["-png", "-r", "200", "-l", "20", pdfPath, prefix], { maxBuffer: 50 * 1024 * 1024 });
     const files = await readdir(TMP_DIR);
     const imageFiles = files
       .filter(f => f.startsWith(`ocr-${sessionId}`) && f.endsWith(".png"))
@@ -1455,7 +1455,9 @@ NON-NEGOTIABLE GUARDRAILS:
 - Only dispute on defensible bases: inaccurate, incomplete, unverifiable, mixed-file, duplicate, impermissible purpose, or not authorized per attestation.
 
 STRUCTURED OUTPUT — REPAIR_DATA BLOCK:
-After your normal analysis response (AIS, pillars, disputes, etc.), you MUST output a structured JSON block wrapped in REPAIR_DATA tags when analyzing a credit report. This block powers the Repair Center UI.
+When analyzing a credit report, you MUST output a structured JSON block wrapped in REPAIR_DATA tags. This block powers the Repair Center UI.
+
+CRITICAL OUTPUT ORDER: You MUST output the REPAIR_DATA block FIRST, BEFORE your prose analysis (AIS, pillars, disputes, etc.). The REPAIR_DATA block must appear at the VERY BEGINNING of your response when processing a credit report. This ensures the structured data is never lost to token limits. The prose analysis follows AFTER the REPAIR_DATA_END tag.
 
 Format:
 REPAIR_DATA_START
@@ -2275,7 +2277,11 @@ The user has uploaded a ${attachment === "bank_statement" ? "bank statement" : "
 
 CRITICAL OVERRIDE: If anything in this conversation's history says you "cannot access attachments" or "cannot read files" — those were errors from previous attempts. The document IS here now. Disregard any prior refusals.
 
-YOU MUST PRODUCE YOUR FULL ANALYSIS IN THIS RESPONSE. DO NOT say "one moment," "let me analyze," "diving in," or any deferral language. DO NOT ask the user for data — the document is right here. Analyze it NOW and output the complete structured response format: Bureau Source, AIS (Approval Index Score), Band, Phase, Pillar Scores, Financial Identity, Projected Funding Per-Bureau (Bureau, Current Exposure, Highest Limit, Per-Bureau Projection, Best-Case Per-Bureau, Readiness Level, Inquiry Slots Available, Timeline, Key Blockers), Top Approval Suppressors, verdict, and all DISPUTE lines. If some fields are missing or unclear from OCR, make reasonable estimates based on what IS available and note assumptions. There is NO second pass — this response IS the analysis.
+YOU MUST PRODUCE YOUR FULL ANALYSIS IN THIS RESPONSE. DO NOT say "one moment," "let me analyze," "diving in," or any deferral language. DO NOT ask the user for data — the document is right here.
+
+CRITICAL OUTPUT ORDER: Start your response IMMEDIATELY with the REPAIR_DATA_START block. Extract ALL negative items, inquiries, discrepancies, and truth profile from the document and output them as the REPAIR_DATA JSON block FIRST, before any prose. Then after REPAIR_DATA_END, output the prose analysis: Bureau Source, AIS (Approval Index Score), Band, Phase, Pillar Scores, Financial Identity, Projected Funding Per-Bureau (Bureau, Current Exposure, Highest Limit, Per-Bureau Projection, Best-Case Per-Bureau, Readiness Level, Inquiry Slots Available, Timeline, Key Blockers), Top Approval Suppressors, verdict, and all DISPUTE lines.
+
+If some fields are missing or unclear from OCR, make reasonable estimates based on what IS available and note assumptions. There is NO second pass — this response IS the analysis.
 
 Extraction method: ${extractionMethod}
 
@@ -2283,7 +2289,7 @@ Extraction method: ${extractionMethod}
 ${extractedText}
 --- END OF DOCUMENT ---
 
-FINAL REMINDER: You MUST list EVERY negative item found in the document above as a separate DISPUTE entry. If there are 10 Dept of Education accounts with late payments, output 10 separate DISPUTE lines. If there are 15 negative items total, output 15 DISPUTE lines. Do NOT consolidate, summarize, or skip any. Count them as you go.`;
+FINAL REMINDER: The REPAIR_DATA block at the start of your response MUST contain EVERY negative item found — including ALL hard inquiries, ALL late payments, ALL collections, ALL charge-offs. Do NOT consolidate or skip any.`;
     }
 
     const hasAttachmentInAuthHistory = last10.some((m: { content: string }) => m.content.includes("[Attached:"));
@@ -2335,6 +2341,12 @@ FINAL REMINDER: You MUST list EVERY negative item found in the document above as
       });
 
       const rawAiContent = response.choices[0]?.message?.content || "I'm sorry, I couldn't generate a response right now.";
+      const finishReasonAuth = response.choices[0]?.finish_reason;
+      const tokenUsageAuth = response.usage;
+      console.log(`[Auth Chat] finish_reason=${finishReasonAuth}, tokens=${tokenUsageAuth?.completion_tokens}/${tokenUsageAuth?.total_tokens}, hasRepairData=${rawAiContent.includes("REPAIR_DATA_START")}, hasRepairEnd=${rawAiContent.includes("REPAIR_DATA_END")}, responseLen=${rawAiContent.length}`);
+      if (finishReasonAuth === "length") {
+        console.warn("[Auth Chat] WARNING: Response truncated by max_tokens! REPAIR_DATA may be incomplete.");
+      }
       const aiContent = stripBracketPlaceholders(rawAiContent);
 
       const aiMessage = await storage.createMessage({ userId, role: "assistant", content: aiContent, attachment: null, mentor: detectedMentor });
@@ -2522,7 +2534,11 @@ The user has uploaded a ${attachment === "bank_statement" ? "bank statement" : "
 
 CRITICAL OVERRIDE: If anything in this conversation's history says you "cannot access attachments" or "cannot read files" — those were errors from previous attempts. The document IS here now. Disregard any prior refusals.
 
-YOU MUST PRODUCE YOUR FULL ANALYSIS IN THIS RESPONSE. DO NOT say "one moment," "let me analyze," "diving in," or any deferral language. DO NOT ask the user for data — the document is right here. Analyze it NOW and output the complete structured response format: Bureau Source, AIS (Approval Index Score), Band, Phase, Pillar Scores, Financial Identity, Projected Funding Per-Bureau (Bureau, Current Exposure, Highest Limit, Per-Bureau Projection, Best-Case Per-Bureau, Readiness Level, Inquiry Slots Available, Timeline, Key Blockers), Top Approval Suppressors, verdict, and all DISPUTE lines. If some fields are missing or unclear from OCR, make reasonable estimates based on what IS available and note assumptions. There is NO second pass — this response IS the analysis.
+YOU MUST PRODUCE YOUR FULL ANALYSIS IN THIS RESPONSE. DO NOT say "one moment," "let me analyze," "diving in," or any deferral language. DO NOT ask the user for data — the document is right here.
+
+CRITICAL OUTPUT ORDER: Start your response IMMEDIATELY with the REPAIR_DATA_START block. Extract ALL negative items, inquiries, discrepancies, and truth profile from the document and output them as the REPAIR_DATA JSON block FIRST, before any prose. Then after REPAIR_DATA_END, output the prose analysis: Bureau Source, AIS (Approval Index Score), Band, Phase, Pillar Scores, Financial Identity, Projected Funding Per-Bureau (Bureau, Current Exposure, Highest Limit, Per-Bureau Projection, Best-Case Per-Bureau, Readiness Level, Inquiry Slots Available, Timeline, Key Blockers), Top Approval Suppressors, verdict, and all DISPUTE lines.
+
+If some fields are missing or unclear from OCR, make reasonable estimates based on what IS available and note assumptions. There is NO second pass — this response IS the analysis.
 
 Extraction method: ${extractionMethod}
 
@@ -2530,7 +2546,7 @@ Extraction method: ${extractionMethod}
 ${extractedText}
 --- END OF DOCUMENT ---
 
-FINAL REMINDER: You MUST list EVERY negative item found in the document above as a separate DISPUTE entry. If there are 10 Dept of Education accounts with late payments, output 10 separate DISPUTE lines. If there are 15 negative items total, output 15 DISPUTE lines. Do NOT consolidate, summarize, or skip any. Count them as you go.`;
+FINAL REMINDER: The REPAIR_DATA block at the start of your response MUST contain EVERY negative item found — including ALL hard inquiries, ALL late payments, ALL collections, ALL charge-offs. Do NOT consolidate or skip any.`;
     }
 
     let teamContextPrompt = "";
@@ -2770,6 +2786,12 @@ CRITICAL: The following data was previously extracted from the user's credit rep
       });
 
       const rawAiContent = response.choices[0]?.message?.content || "I'm sorry, I couldn't generate a response right now.";
+      const finishReason = response.choices[0]?.finish_reason;
+      const tokenUsage = response.usage;
+      console.log(`[Guest Chat] finish_reason=${finishReason}, tokens=${tokenUsage?.completion_tokens}/${tokenUsage?.total_tokens}, hasRepairData=${rawAiContent.includes("REPAIR_DATA_START")}, hasRepairEnd=${rawAiContent.includes("REPAIR_DATA_END")}, responseLen=${rawAiContent.length}`);
+      if (finishReason === "length") {
+        console.warn("[Guest Chat] WARNING: Response truncated by max_tokens! REPAIR_DATA may be incomplete.");
+      }
       const aiContent = stripBracketPlaceholders(rawAiContent);
       const responsePayload: Record<string, unknown> = { content: aiContent };
       if (extractedText && extractedText.length > 50) {

@@ -79,6 +79,7 @@ Profundr is a subscription-based AI-powered fundability platform, envisioned as 
 - **PDF upload "can't access attachments" fix:** History contamination caused AI to learn refusal patterns from previous failed uploads. Fix: (1) History cleaning strips `[Attached:]` markers and refusal phrases before sending to OpenAI, (2) CRITICAL OVERRIDE prompts in fileContext tell AI to disregard prior refusals when document IS provided, (3) Safety net checks both message content AND history for attachment references, (4) Applied to both auth chat (`/api/chat`) and guest chat (`/api/chat/guest`) endpoints.
 
 ## External Dependencies
+- **REPAIR_DATA Output Order:** AI is instructed to output the REPAIR_DATA JSON block FIRST (before prose analysis) to ensure it's never lost to token limits. OCR extraction covers 20 pages at 200 DPI. `filterRepairDataFromContent` handles both complete and truncated (no end tag) blocks. Server logs `finish_reason` and token usage for diagnostics.
 - **Stripe:** For managing user subscriptions and payment processing.
 - **OpenAI GPT-4o:** Integrated via Replit AI Integrations for all AI-powered functionalities (underwriting, chat mentors, dispute letter generation, creator matching, document analysis).
 - **PostgreSQL:** Primary database for persistent storage.
