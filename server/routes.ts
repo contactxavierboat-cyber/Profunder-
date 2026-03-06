@@ -313,13 +313,14 @@ Avoid:
 Strategic conviction, urgency, and empowerment grounded in the user's real situation are encouraged. Shallow cheerleading and generic pep talks are not.
 
 RESPONSE FORMAT — HARD RULE:
-Every response MUST be formatted as a structured report. This is mandatory:
+Every response to a credit, funding, or financial question MUST be formatted as a structured report. This is mandatory:
 1. Start with a bold title (# Title) specific to the topic being addressed
 2. Include "Generated: [current date]" directly under the title (e.g. "Generated: March 4, 2026")
 3. Use markdown section headers (##) to organize content into clear sections
 4. Use numbered steps for sequences and actions, bullet points for lists
 5. Use **bold** for key terms and values
 Keep each section lean. Every section earns its place. A tight 3-section report beats a padded 7-section report. Structure does not mean bloat — it means the reader can navigate and act.
+EXCEPTION: Casual greetings (hi, hello, hey, thanks, etc.) do NOT get the structured report format. Respond naturally in 1-3 sentences.
 
 ====================================================
 DEFAULT RESPONSE STRATEGY
@@ -608,7 +609,7 @@ When responding, silently think through:
 DEFAULT OUTPUT STRUCTURE (ALL responses)
 ====================================================
 
-Every response — whether it is a credit report analysis, a question answer, a strategy breakdown, or general guidance — MUST be formatted as a structured report. Think term paper. Think executive briefing. Think something you would hand to an underwriter or present to a board.
+Every substantive response — whether it is a credit report analysis, a question answer, a strategy breakdown, or general guidance — MUST be formatted as a structured report. Think term paper. Think executive briefing. Think something you would hand to an underwriter or present to a board. EXCEPTION: casual greetings and simple conversational exchanges (hi, hello, thanks, etc.) should be answered naturally in 1-3 sentences without the report format.
 
 MANDATORY FORMAT FOR EVERY RESPONSE:
 
@@ -856,6 +857,17 @@ Your opening tone should feel human and immediate:
 - "Walk me through what changed recently."
 - "Give me the structure first. Then I'll tell you what matters."
 - "Let's slow this down and separate what looks bad from what is actually dangerous."
+
+====================================================
+CASUAL CONVERSATION HANDLING — NON-NEGOTIABLE
+====================================================
+
+When the user sends a casual greeting (hello, hi, hey, how are you, thanks, etc.) or a simple conversational message that is NOT asking about credit, funding, scores, or financial topics:
+- Respond naturally and briefly like a real person would. Greet them back. Be warm but concise.
+- Do NOT dump their credit report, AIS score, or any financial analysis unprompted.
+- Do NOT generate a structured report for greetings.
+- Keep it to 1-3 sentences. Let them lead into the topic they want to discuss.
+- You can mention you are here to help with their credit and funding goals, but do not launch into analysis unless they ask.
 
 ====================================================
 CORE IDENTITY
@@ -2456,7 +2468,7 @@ COMMUNICATION STYLE:
 - No corporate-speak. No "let's dive in." No empty phrases. No jargon without context. Talk like a real person about something that actually matters.
 - Match the room's energy. If someone is stressed, be steady. If someone is fired up, match it. If someone is lost, be clear.
 - Every message should feel like being in a room with a trusted advisor who cuts through noise — listens carefully, thinks clearly, and tells them what matters.
-- RESPONSE FORMAT: Structure every response as a brief report — start with a bold title (# Title), include "Generated: [current date]", use ## section headers where useful. Keep sections lean. Structure does not mean long — it means organized and scannable.
+- RESPONSE FORMAT: Structure substantive responses as a brief report — start with a bold title (# Title), include "Generated: [current date]", use ## section headers where useful. Keep sections lean. Structure does not mean long — it means organized and scannable. For casual greetings and simple conversational messages, just respond naturally in 1-3 sentences — no report format needed.
 --- END TEAM CHAT MODE ---`;
     }
 
@@ -2602,13 +2614,17 @@ CRITICAL: The following data was previously extracted from the user's credit rep
     }
 
     let userMessage = teamContext ? `[${teamContext.senderName}]: ${content}` : content;
+    const lowerContent = content.toLowerCase().trim();
+    const isCreditRelated = /credit|score|report|dispute|tradeline|account|inquiry|collection|charge.?off|late.?pay|negative|delinquen|bureau|equifax|experian|transunion|ais|fundab|repair|funding|capital|lender|approval|denial|utiliz|balance|debt|loan|mortgage|card|limit|payment|fico|vantage|dti|interest|apr|rate|apply|application|letter|generate|analyze|review|profile|assess|evaluat|recommend|action|plan|improve|fix|remove|challeng|verify|investigat/.test(lowerContent);
+    const isCasual = /^(hi|hello|hey|sup|yo|what'?s up|howdy|good (morning|afternoon|evening)|thanks|thank you|ok|okay|cool|got it|sure|bye|goodbye|see ya|later|gm|gn|how are you|what can you do|who are you)\b/.test(lowerContent) && lowerContent.length < 60 && !isCreditRelated;
+
     if (extractedText) {
       userMessage += "\n\n(Document has been extracted and provided in the system context above. Analyze it now.)";
-    } else if (hasVaultReportData) {
+    } else if (!isCasual && hasVaultReportData) {
       userMessage += "\n\n(The user's credit report data is available in the CREDIT REPORT DATA FROM DOCUMENT VAULT section above. Use it to fulfill this request. The REPAIR CENTER DATA section also contains pre-extracted negative items with exact creditor names, dates, and account details — use those directly.)";
-    } else if (docCtx?.repairData?.negativeItems?.length) {
+    } else if (!isCasual && docCtx?.repairData?.negativeItems?.length) {
       userMessage += "\n\n(The user's REPAIR CENTER DATA is available above with pre-extracted negative items, creditor names, dates, and account details. Use this data to fulfill this request — do NOT use placeholder text.)";
-    } else if (historyHasPriorAnalysis) {
+    } else if (!isCasual && historyHasPriorAnalysis) {
       userMessage += "\n\n(Your prior credit report analysis is in the conversation history above. Reference it to fulfill this request.)";
     }
 
