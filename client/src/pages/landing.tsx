@@ -710,7 +710,7 @@ function BrandedResponse({ content, userQuestion, msgId }: { content: string; us
           ) : (
             <>
               <svg width="9" height="9" viewBox="0 0 12 12" fill="none"><path d="M6 2v6M6 8L4 6M6 8l2-2" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" /><path d="M2 9v1h8V9" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" /></svg>
-              <span>Save Image</span>
+              <span>Save Report</span>
             </>
           )}
         </button>
@@ -4059,45 +4059,59 @@ export default function LandingPage() {
       const hasDisputePackageTrigger = responseContent.includes("[GENERATE_DISPUTE_PACKAGE]");
       responseContent = responseContent.replace(/\[GENERATE_DISPUTE_PACKAGE\]/g, "").trim();
 
+      const isDisputeGenRequest = /generate.*(?:dispute|round\s*[123]|bureau\s*challenge)|(?:dispute|round\s*[123]).*letter|build\s*dispute|create\s*(?:my\s*)?dispute|ROUND\s*[123].*inquiry\s*dispute/i.test(text);
+      const shouldAutoGeneratePdf = hasDisputePackageTrigger || isDisputeGenRequest;
+
       const aiMsg: GuestMessage = { id: nextId + 1, role: "assistant", content: responseContent };
       setGuestMessages((prev) => [...prev, aiMsg]);
       setNextId((n) => n + 1);
 
-      if (hasDisputePackageTrigger && repairData && repairData.negativeItems.length > 0) {
-        const autoDisputes = repairData.negativeItems.map(item => ({
-          creditor: item.furnisherName || "Unknown",
-          accountNumber: item.accountPartial || "N/A",
-          issue: item.issue || "Inaccurate reporting",
-          bureau: item.bureau || "All",
-          reason: item.disputeBasis || "Information is inaccurate per FCRA §611",
-          disputeRound: item.disputeRound || 1,
-          category: item.category || "Account",
-        }));
-        const attachmentPages: { type: string; dataUrl: string; name: string }[] = [];
-        for (const d of savedDocs) {
-          if ((d.type === "id_document" || d.type === "proof_of_residency" || d.type === "bank_statement" || d.type === "credit_report") && d.fileDataUrl) {
-            attachmentPages.push({ type: d.type, dataUrl: d.fileDataUrl, name: d.name });
+      if (shouldAutoGeneratePdf) {
+        let autoDisputes: { creditor: string; accountNumber: string; issue: string; bureau: string; reason: string; disputeRound?: number; category?: string }[] = [];
+        if (repairData && repairData.negativeItems.length > 0) {
+          autoDisputes = repairData.negativeItems.filter(item => item.userAttestation !== "recognized").map(item => ({
+            creditor: item.furnisherName || "Unknown",
+            accountNumber: item.accountPartial || "N/A",
+            issue: item.issue || "Inaccurate reporting",
+            bureau: item.bureau || "All",
+            reason: item.disputeBasis || "Information is inaccurate per FCRA §611",
+            disputeRound: item.disputeRound || 1,
+            category: item.category || "Account",
+          }));
+        }
+        if (autoDisputes.length === 0) {
+          const inlineDisputes = parseDisputeItems(responseContent);
+          if (inlineDisputes.length > 0) {
+            autoDisputes = inlineDisputes;
           }
         }
-        try {
-          const payload: any = { disputes: autoDisputes, attachmentPages };
-          if (userProfile.fullName) payload.userName = userProfile.fullName;
-          if (userProfile.address) payload.userAddress = userProfile.address;
-          if (userProfile.ssn4) payload.ssnLast4 = userProfile.ssn4;
-          if (userProfile.dob) payload.dob = userProfile.dob;
-          const pdfRes = await fetch("/api/dispute-letters", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
-          if (pdfRes.ok) {
-            const pdfData = await pdfRes.json();
-            if (pdfData.downloadUrl) {
-              const dlRes = await fetch(pdfData.downloadUrl);
-              if (dlRes.ok) {
-                const blob = await dlRes.blob();
-                const blobUrl = URL.createObjectURL(blob);
-                setGuestMessages(prev => prev.map(m => m.id === aiMsg.id ? { ...m, disputePackageUrl: blobUrl, disputeCount: autoDisputes.length } : m));
-              }
+        if (autoDisputes.length > 0) {
+          const attachmentPages: { type: string; dataUrl: string; name: string }[] = [];
+          for (const d of savedDocs) {
+            if ((d.type === "id_document" || d.type === "proof_of_residency" || d.type === "bank_statement" || d.type === "credit_report") && d.fileDataUrl) {
+              attachmentPages.push({ type: d.type, dataUrl: d.fileDataUrl, name: d.name });
             }
           }
-        } catch (err) { console.error("Auto dispute package generation failed:", err); }
+          try {
+            const payload: any = { disputes: autoDisputes, attachmentPages };
+            if (userProfile.fullName) payload.userName = userProfile.fullName;
+            if (userProfile.address) payload.userAddress = userProfile.address;
+            if (userProfile.ssn4) payload.ssnLast4 = userProfile.ssn4;
+            if (userProfile.dob) payload.dob = userProfile.dob;
+            const pdfRes = await fetch("/api/dispute-letters", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
+            if (pdfRes.ok) {
+              const pdfData = await pdfRes.json();
+              if (pdfData.downloadUrl) {
+                const dlRes = await fetch(pdfData.downloadUrl);
+                if (dlRes.ok) {
+                  const blob = await dlRes.blob();
+                  const blobUrl = URL.createObjectURL(blob);
+                  setGuestMessages(prev => prev.map(m => m.id === aiMsg.id ? { ...m, disputePackageUrl: blobUrl, disputeCount: autoDisputes.length } : m));
+                }
+              }
+            }
+          } catch (err) { console.error("Auto dispute package generation failed:", err); }
+        }
       }
 
       const parsedAis = parseSingleMessageData(responseContent);
