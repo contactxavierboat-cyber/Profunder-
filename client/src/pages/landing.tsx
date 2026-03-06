@@ -4070,7 +4070,7 @@ export default function LandingPage() {
                   }} data-testid="input-profile-photo" />
                 </label>
                 <button
-                  onClick={() => { logout(); window.location.href = '/'; }}
+                  onClick={async () => { await logout(); window.location.href = '/'; }}
                   className="rounded-full px-4 py-1.5 text-[12px] font-medium bg-[#1a1a2e] text-white hover:bg-[#2a2a40] transition-colors"
                   data-testid="button-signout"
                 >

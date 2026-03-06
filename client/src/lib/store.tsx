@@ -177,11 +177,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   });
 
   const logout = async () => {
-    await fetch("/api/logout", { method: "POST" });
+    try { await fetch("/api/logout", { method: "POST" }); } catch {}
     setIsLoggedIn(false);
     localStorage.removeItem("studio_logged_in");
     queryClient.clear();
-    setLocation('/');
   };
 
   const resetUsage = async (id: number) => {

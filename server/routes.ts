@@ -1863,7 +1863,8 @@ export async function registerRoutes(
   });
 
   app.post("/api/logout", (req, res) => {
-    req.session.destroy(() => {
+    req.session.destroy((err) => {
+      res.clearCookie("connect.sid");
       res.json({ ok: true });
     });
   });
