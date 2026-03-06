@@ -2331,7 +2331,7 @@ FINAL REMINDER: You MUST list EVERY negative item found in the document above as
       const response = await openai.chat.completions.create({
         model: "gpt-4o",
         messages: messages as any,
-        max_tokens: 4096,
+        max_tokens: 16000,
       });
 
       const rawAiContent = response.choices[0]?.message?.content || "I'm sorry, I couldn't generate a response right now.";
@@ -2758,6 +2758,7 @@ CRITICAL: The following data was previously extracted from the user's credit rep
     }
 
     try {
+      const hasCreditReport = !!(req.body.fileContent || req.body.documentContext?.creditReportTexts?.length);
       const response = await openai.chat.completions.create({
         model: "gpt-4o",
         messages: [
@@ -2765,7 +2766,7 @@ CRITICAL: The following data was previously extracted from the user's credit rep
           ...cleanedHistory,
           { role: "user", content: userMessage }
         ],
-        max_tokens: 4096,
+        max_tokens: hasCreditReport ? 16000 : 4096,
       });
 
       const rawAiContent = response.choices[0]?.message?.content || "I'm sorry, I couldn't generate a response right now.";

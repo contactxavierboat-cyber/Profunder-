@@ -1314,26 +1314,66 @@ function parseRepairData(content: string): RepairData | null {
   const startTag = "REPAIR_DATA_START";
   const endTag = "REPAIR_DATA_END";
   const startIdx = content.indexOf(startTag);
+  if (startIdx === -1) return null;
   const endIdx = content.indexOf(endTag);
-  if (startIdx === -1 || endIdx === -1 || endIdx <= startIdx) return null;
-  const jsonStr = content.substring(startIdx + startTag.length, endIdx).trim();
-  try {
-    const parsed = JSON.parse(jsonStr);
-    return {
-      truthProfile: parsed.truthProfile || null,
-      discrepancies: Array.isArray(parsed.discrepancies) ? parsed.discrepancies : [],
-      negativeItems: Array.isArray(parsed.negativeItems) ? parsed.negativeItems.map((item: any) => ({
-        ...item,
-        status: item.status || "New",
-        userAttestation: null,
-        disputeRound: item.disputeRound || 1,
-      })) : [],
-      parsedAt: Date.now(),
-    };
-  } catch (e) {
-    console.warn("Failed to parse REPAIR_DATA:", e);
+  let jsonStr: string;
+  if (endIdx !== -1 && endIdx > startIdx) {
+    jsonStr = content.substring(startIdx + startTag.length, endIdx).trim();
+  } else {
+    jsonStr = content.substring(startIdx + startTag.length).trim();
+  }
+  const tryParse = (s: string): any => {
+    try { return JSON.parse(s); } catch { return null; }
+  };
+  let parsed = tryParse(jsonStr);
+  if (!parsed) {
+    let fixed = jsonStr;
+    const openBraces = (fixed.match(/\{/g) || []).length;
+    const closeBraces = (fixed.match(/\}/g) || []).length;
+    const openBrackets = (fixed.match(/\[/g) || []).length;
+    const closeBrackets = (fixed.match(/\]/g) || []).length;
+    for (let i = 0; i < openBrackets - closeBrackets; i++) fixed += "]";
+    for (let i = 0; i < openBraces - closeBraces; i++) fixed += "}";
+    fixed = fixed.replace(/,\s*([\]}])/g, "$1");
+    fixed = fixed.replace(/,\s*$/gm, "");
+    parsed = tryParse(fixed);
+    if (!parsed) {
+      const lastComplete = fixed.lastIndexOf("},");
+      if (lastComplete > 0) {
+        const trimmed = fixed.substring(0, lastComplete + 1);
+        let rFixed = trimmed;
+        const ob2 = (rFixed.match(/\[/g) || []).length;
+        const cb2 = (rFixed.match(/\]/g) || []).length;
+        const ob3 = (rFixed.match(/\{/g) || []).length;
+        const cb3 = (rFixed.match(/\}/g) || []).length;
+        for (let i = 0; i < ob2 - cb2; i++) rFixed += "]";
+        for (let i = 0; i < ob3 - cb3; i++) rFixed += "}";
+        parsed = tryParse(rFixed);
+      }
+    }
+    if (parsed) console.log("REPAIR_DATA recovered from truncated JSON");
+  }
+  if (!parsed) {
+    console.warn("Failed to parse REPAIR_DATA — JSON could not be recovered");
     return null;
   }
+  return {
+    truthProfile: parsed.truthProfile || null,
+    discrepancies: Array.isArray(parsed.discrepancies) ? parsed.discrepancies : [],
+    negativeItems: Array.isArray(parsed.negativeItems) ? parsed.negativeItems.map((item: any) => ({
+      ...item,
+      itemId: item.itemId || `auto-${(item.furnisherName || "").replace(/\s+/g, "").slice(0, 10)}-${(item.bureau || "").slice(0, 3)}-${(item.dates?.inquiryDate || item.dates?.opened || "").replace(/\//g, "")}`,
+      status: item.status || "New",
+      userAttestation: null,
+      disputeRound: item.disputeRound || 1,
+      category: item.category || "Account",
+      standaloneInquiry: item.standaloneInquiry || false,
+      attestationRequired: item.attestationRequired !== false,
+      evidenceAvailable: Array.isArray(item.evidenceAvailable) ? item.evidenceAvailable : [],
+      evidenceMissing: Array.isArray(item.evidenceMissing) ? item.evidenceMissing : [],
+    })).filter((item: any) => item.furnisherName) : [],
+    parsedAt: Date.now(),
+  };
 }
 
 function loadRepairData(): RepairData | null {
