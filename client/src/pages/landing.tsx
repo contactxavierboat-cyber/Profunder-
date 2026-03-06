@@ -2634,21 +2634,6 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
 
         {panelTab === "documents" && (<>
 
-        {(() => {
-          const readyCount = [creditReports.length > 0, idDocs.length > 0, bankDocs.length > 0, residencyDocs.length > 0, !!(userProfile.fullName && userProfile.address)].filter(Boolean).length;
-          return (
-            <div className="mb-2 px-2 py-1.5 rounded-md bg-[#f8f9fb] border border-[#e8e8ee] flex items-center gap-2" data-testid="evidence-readiness">
-              <svg width="10" height="10" viewBox="0 0 12 12" fill="none"><path d="M6 1l5 3v4l-5 3-5-3V4l5-3z" stroke={readyCount >= 3 ? "#2d6a4f" : "#e07a5f"} strokeWidth="1" fill="none"/></svg>
-              <span className="text-[9px] text-[#555] flex-1 font-medium">Evidence Readiness</span>
-              <div className="flex gap-[3px]">
-                {[0,1,2,3,4].map(i => (
-                  <div key={i} className={`w-2.5 h-[5px] rounded-full ${i < readyCount ? "bg-[#2d6a4f]" : "bg-[#ddd]"}`} />
-                ))}
-              </div>
-              <span className="text-[8px] font-semibold text-[#888]" style={{ fontVariantNumeric: "tabular-nums" }}>{readyCount}/5</span>
-            </div>
-          );
-        })()}
 
         {repairData && repairData.truthProfile && (
           <div className="mb-4">
