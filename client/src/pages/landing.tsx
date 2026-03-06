@@ -4278,7 +4278,7 @@ export default function LandingPage() {
         <>
           <div className="sm:hidden fixed inset-0 bg-black/30 z-40" onClick={() => setDocsOpen(false)} />
           <div className="fixed sm:relative z-50 sm:z-auto w-[340px] h-full shrink-0 transition-all" data-testid="docs-sidebar">
-            <DocsPanel docs={savedDocs} onClose={() => setDocsOpen(false)} onDelete={handleDeleteDoc} onSave={handleSaveDoc} user={user} onOpenTeamChat={handleOpenTeamChat} activeTeamChatId={activeTeamChat?.id} aisReport={user ? aisReport : null} onOpenAis={() => setShowAisOverlay(true)} userProfile={userProfile} onUpdateProfile={handleUpdateProfile} repairData={user ? repairData : null} onUpdateRepairData={(data) => { setRepairData(data); saveRepairData(data); }} onSendChat={(msg) => { setDocsOpen(false); setTimeout(() => handleSend(msg), 100); }} />
+            <DocsPanel docs={savedDocs} onClose={() => setDocsOpen(false)} onDelete={handleDeleteDoc} onSave={handleSaveDoc} user={user} onOpenTeamChat={handleOpenTeamChat} activeTeamChatId={activeTeamChat?.id} aisReport={aisReport} onOpenAis={() => setShowAisOverlay(true)} userProfile={userProfile} onUpdateProfile={handleUpdateProfile} repairData={repairData} onUpdateRepairData={(data) => { setRepairData(data); saveRepairData(data); }} onSendChat={(msg) => { if (!msg.startsWith("__VAULT_REPORT_UPLOAD__")) setDocsOpen(false); setTimeout(() => handleSend(msg), 100); }} />
           </div>
         </>
       )}
@@ -4398,7 +4398,7 @@ export default function LandingPage() {
             </div>
           )}
 
-          {showAisOverlay && user && aisReport && hasAnalysisData(aisReport) ? (
+          {showAisOverlay && aisReport && hasAnalysisData(aisReport) ? (
             <div className="w-full max-w-[720px] mx-auto px-4 pt-4 pb-2">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
