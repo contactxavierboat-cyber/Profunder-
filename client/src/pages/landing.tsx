@@ -2637,15 +2637,15 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
         {(() => {
           const readyCount = [creditReports.length > 0, idDocs.length > 0, bankDocs.length > 0, residencyDocs.length > 0, !!(userProfile.fullName && userProfile.address)].filter(Boolean).length;
           return (
-            <div className="mb-3 px-2.5 py-2 rounded-md bg-[#f8f9fb] border border-[#e8e8ee] flex items-center gap-2" data-testid="evidence-readiness">
-              <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 1l5 3v4l-5 3-5-3V4l5-3z" stroke={readyCount >= 3 ? "#2d6a4f" : "#e07a5f"} strokeWidth="1" fill="none"/></svg>
-              <span className="text-[10px] text-[#555] flex-1">Evidence Readiness</span>
-              <div className="flex gap-0.5">
+            <div className="mb-2 px-2 py-1.5 rounded-md bg-[#f8f9fb] border border-[#e8e8ee] flex items-center gap-2" data-testid="evidence-readiness">
+              <svg width="10" height="10" viewBox="0 0 12 12" fill="none"><path d="M6 1l5 3v4l-5 3-5-3V4l5-3z" stroke={readyCount >= 3 ? "#2d6a4f" : "#e07a5f"} strokeWidth="1" fill="none"/></svg>
+              <span className="text-[9px] text-[#555] flex-1 font-medium">Evidence Readiness</span>
+              <div className="flex gap-[3px]">
                 {[0,1,2,3,4].map(i => (
-                  <div key={i} className={`w-3 h-1.5 rounded-full ${i < readyCount ? "bg-[#2d6a4f]" : "bg-[#ddd]"}`} />
+                  <div key={i} className={`w-2.5 h-[5px] rounded-full ${i < readyCount ? "bg-[#2d6a4f]" : "bg-[#ddd]"}`} />
                 ))}
               </div>
-              <span className="text-[9px] font-semibold text-[#888]" style={{ fontVariantNumeric: "tabular-nums" }}>{readyCount}/5</span>
+              <span className="text-[8px] font-semibold text-[#888]" style={{ fontVariantNumeric: "tabular-nums" }}>{readyCount}/5</span>
             </div>
           );
         })()}
@@ -2691,17 +2691,17 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
           </div>
         )}
 
-        <div className="mb-4">
-          <div className="flex items-center gap-2 mb-2">
-            <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><rect x="1" y="2" width="10" height="8" rx="1" stroke="#333" strokeWidth="1" fill="none"/><path d="M1 5h10" stroke="#333" strokeWidth="0.8"/><path d="M4 5v5M7 5v5" stroke="#333" strokeWidth="0.5"/></svg>
-            <span className="text-[10px] font-semibold text-[#555] uppercase tracking-wider">Dispute-Eligible Items</span>
-            {repairData && <span className="text-[9px] text-[#1a1a2e] ml-auto font-semibold">{repairData.negativeItems.length}</span>}
+        <div className="mb-3">
+          <div className="flex items-center gap-1.5 mb-1.5">
+            <svg width="10" height="10" viewBox="0 0 12 12" fill="none"><rect x="1" y="2" width="10" height="8" rx="1" stroke="#333" strokeWidth="1" fill="none"/><path d="M1 5h10" stroke="#333" strokeWidth="0.8"/><path d="M4 5v5M7 5v5" stroke="#333" strokeWidth="0.5"/></svg>
+            <span className="text-[9px] font-semibold text-[#555] uppercase tracking-wider">Dispute-Eligible Items</span>
+            {repairData && <span className="text-[8px] text-[#1a1a2e] ml-auto font-semibold">{repairData.negativeItems.length}</span>}
           </div>
 
           {!repairData || repairData.negativeItems.length === 0 ? (
-            <div className="px-3 py-4 rounded-md bg-[#fafafa] border border-[#eee] text-center">
-              <div className="text-[10px] text-[#888]">No dispute-eligible items detected yet.</div>
-              <div className="text-[9px] text-[#aaa] mt-1">Upload a credit report and run analysis to populate.</div>
+            <div className="px-2.5 py-2.5 rounded-md bg-[#fafafa] border border-[#eee] text-center">
+              <div className="text-[9px] text-[#888]">No dispute-eligible items detected yet.</div>
+              <div className="text-[8px] text-[#aaa] mt-0.5">Upload a credit report and run analysis to populate.</div>
             </div>
           ) : (<>
             <div className="flex gap-1 mb-2">
@@ -2814,15 +2814,14 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
           </>)}
         </div>
 
-        <div className="mb-4">
-          <div className="flex items-center gap-2 mb-2">
-            <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><rect x="1" y="2" width="10" height="8" rx="1" stroke="#333" strokeWidth="1" fill="none"/><path d="M3 5h6M3 7h4" stroke="#333" strokeWidth="0.7" strokeLinecap="round"/></svg>
-            <span className="text-[10px] font-semibold text-[#555] uppercase tracking-wider">Document Generator</span>
+        <div className="mb-3">
+          <div className="flex items-center gap-1.5 mb-1.5">
+            <svg width="10" height="10" viewBox="0 0 12 12" fill="none"><rect x="1" y="2" width="10" height="8" rx="1" stroke="#333" strokeWidth="1" fill="none"/><path d="M3 5h6M3 7h4" stroke="#333" strokeWidth="0.7" strokeLinecap="round"/></svg>
+            <span className="text-[9px] font-semibold text-[#555] uppercase tracking-wider">Document Generator</span>
           </div>
-          <p className="text-[8px] text-[#aaa] mb-2">Generate legal documents for your credit repair strategy</p>
-          <div className="grid grid-cols-2 gap-1.5">
+          <div className="grid grid-cols-2 gap-1">
             {[
-              { type: "cfpb_complaint" as const, label: "CFPB Complaint", desc: "File with Consumer Financial Protection Bureau" },
+              { type: "cfpb_complaint" as const, label: "CFPB Complaint", desc: "Consumer Financial Protection Bureau" },
               { type: "goodwill_letter" as const, label: "Goodwill Letter", desc: "Request removal of negative mark" },
               { type: "identity_theft_affidavit" as const, label: "ID Theft Affidavit", desc: "Report fraudulent accounts" },
               { type: "bureau_escalation" as const, label: "Bureau Escalation", desc: "Escalate after failed dispute" },
@@ -2859,61 +2858,61 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
                       }
                     } catch {}
                   }}
-                  className="rounded-lg border border-dashed border-[#ddd] bg-[#fcfcfc] hover:bg-white hover:border-[#ccc] transition-all p-2.5 text-left"
+                  className="rounded-md border border-dashed border-[#ddd] bg-[#fcfcfc] hover:bg-white hover:border-[#ccc] transition-all px-2 py-1.5 text-left"
                   data-testid={`button-generate-${docType.type}`}
                 >
-                  <p className="text-[9px] font-semibold text-[#333] mb-0.5">{docType.label}</p>
-                  <p className="text-[7px] text-[#999] leading-[1.3]">{docType.desc}</p>
+                  <p className="text-[8px] font-semibold text-[#333]">{docType.label}</p>
+                  <p className="text-[7px] text-[#aaa] leading-[1.2]">{docType.desc}</p>
                 </button>
               );
             })}
           </div>
         </div>
 
-        <div className="mb-4">
-          <div className="flex items-center gap-2 mb-2">
-            <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M3 1h6l2 3v6a1 1 0 01-1 1H2a1 1 0 01-1-1V4l2-3z" stroke="#333" strokeWidth="1" fill="none"/><path d="M4.5 6h3M4.5 8h2" stroke="#333" strokeWidth="0.8" strokeLinecap="round"/></svg>
-            <span className="text-[10px] font-semibold text-[#555] uppercase tracking-wider">Evidence Vault</span>
-            <span className="text-[9px] text-[#aaa] ml-auto" style={{ fontVariantNumeric: "tabular-nums" }}>{creditReports.length + idDocs.length + bankDocs.length + residencyDocs.length}</span>
+        <div className="mb-3">
+          <div className="flex items-center gap-1.5 mb-1.5">
+            <svg width="10" height="10" viewBox="0 0 12 12" fill="none"><path d="M3 1h6l2 3v6a1 1 0 01-1 1H2a1 1 0 01-1-1V4l2-3z" stroke="#333" strokeWidth="1" fill="none"/><path d="M4.5 6h3M4.5 8h2" stroke="#333" strokeWidth="0.8" strokeLinecap="round"/></svg>
+            <span className="text-[9px] font-semibold text-[#555] uppercase tracking-wider">Evidence Vault</span>
+            <span className="text-[8px] text-[#aaa] ml-auto" style={{ fontVariantNumeric: "tabular-nums" }}>{creditReports.length + idDocs.length + bankDocs.length + residencyDocs.length}</span>
           </div>
 
           <input ref={idInputRef} type="file" accept=".jpg,.jpeg,.png" className="hidden" onChange={handleUploadDoc} data-testid="input-id-upload" />
           <input ref={bankInputRef} type="file" accept=".pdf,.csv,.txt" className="hidden" onChange={handleUploadDoc} data-testid="input-bank-upload" />
           <input ref={residencyInputRef} type="file" accept=".jpg,.jpeg,.png" className="hidden" onChange={handleUploadDoc} data-testid="input-residency-upload" />
 
-          <div className="space-y-1.5">
+          <div className="rounded-lg border border-[#e8e8e8] bg-white overflow-hidden divide-y divide-[#f0f0f0]">
             {[
-              { label: "Credit Report", icon: <svg width="10" height="10" viewBox="0 0 12 12" fill="none"><rect x="2" y="1" width="8" height="10" rx="1" stroke="currentColor" strokeWidth="1" fill="none"/><path d="M4 4h4M4 6h4M4 8h2" stroke="currentColor" strokeWidth="0.7" strokeLinecap="round"/></svg>, docs: creditReports, type: "credit_report" as const, onUpload: () => { setUploadTarget("credit_report"); docInputRef.current?.click(); } },
-              { label: "Government ID", icon: <svg width="10" height="10" viewBox="0 0 12 12" fill="none"><rect x="1" y="3" width="10" height="7" rx="1" stroke="currentColor" strokeWidth="1" fill="none"/><circle cx="4" cy="6.5" r="1.2" stroke="currentColor" strokeWidth="0.7" fill="none"/><path d="M6.5 5.5h3M6.5 7.5h2" stroke="currentColor" strokeWidth="0.7" strokeLinecap="round"/></svg>, docs: idDocs, type: "id_document" as const, onUpload: () => { setUploadTarget("id_document"); idInputRef.current?.click(); } },
-              { label: "Bank Statement", icon: <svg width="10" height="10" viewBox="0 0 12 12" fill="none"><path d="M2 3l4-2 4 2v1H2V3z" stroke="currentColor" strokeWidth="0.8" fill="none"/><path d="M3 5v4M5 5v4M7 5v4M9 5v4" stroke="currentColor" strokeWidth="0.7"/><path d="M1.5 10h9" stroke="currentColor" strokeWidth="0.8" strokeLinecap="round"/></svg>, docs: bankDocs, type: "bank_statement" as const, onUpload: () => { setUploadTarget("bank_statement"); bankInputRef.current?.click(); } },
-              { label: "Proof of Residency", icon: <svg width="10" height="10" viewBox="0 0 12 12" fill="none"><path d="M6 1L1 5.5V11h3.5V8h3v3H11V5.5L6 1z" stroke="currentColor" strokeWidth="0.9" fill="none" strokeLinejoin="round"/></svg>, docs: residencyDocs, type: "proof_of_residency" as const, onUpload: () => { setUploadTarget("proof_of_residency"); residencyInputRef.current?.click(); } },
+              { label: "Credit Report", icon: <svg width="9" height="9" viewBox="0 0 12 12" fill="none"><rect x="2" y="1" width="8" height="10" rx="1" stroke="currentColor" strokeWidth="1" fill="none"/><path d="M4 4h4M4 6h4M4 8h2" stroke="currentColor" strokeWidth="0.7" strokeLinecap="round"/></svg>, docs: creditReports, type: "credit_report" as const, onUpload: () => { setUploadTarget("credit_report"); docInputRef.current?.click(); } },
+              { label: "Government ID", icon: <svg width="9" height="9" viewBox="0 0 12 12" fill="none"><rect x="1" y="3" width="10" height="7" rx="1" stroke="currentColor" strokeWidth="1" fill="none"/><circle cx="4" cy="6.5" r="1.2" stroke="currentColor" strokeWidth="0.7" fill="none"/><path d="M6.5 5.5h3M6.5 7.5h2" stroke="currentColor" strokeWidth="0.7" strokeLinecap="round"/></svg>, docs: idDocs, type: "id_document" as const, onUpload: () => { setUploadTarget("id_document"); idInputRef.current?.click(); } },
+              { label: "Bank Statement", icon: <svg width="9" height="9" viewBox="0 0 12 12" fill="none"><path d="M2 3l4-2 4 2v1H2V3z" stroke="currentColor" strokeWidth="0.8" fill="none"/><path d="M3 5v4M5 5v4M7 5v4M9 5v4" stroke="currentColor" strokeWidth="0.7"/><path d="M1.5 10h9" stroke="currentColor" strokeWidth="0.8" strokeLinecap="round"/></svg>, docs: bankDocs, type: "bank_statement" as const, onUpload: () => { setUploadTarget("bank_statement"); bankInputRef.current?.click(); } },
+              { label: "Proof of Residency", icon: <svg width="9" height="9" viewBox="0 0 12 12" fill="none"><path d="M6 1L1 5.5V11h3.5V8h3v3H11V5.5L6 1z" stroke="currentColor" strokeWidth="0.9" fill="none" strokeLinejoin="round"/></svg>, docs: residencyDocs, type: "proof_of_residency" as const, onUpload: () => { setUploadTarget("proof_of_residency"); residencyInputRef.current?.click(); } },
             ].map(slot => {
               const hasDocs = slot.docs.length > 0;
               return (
-                <div key={slot.type} className={`rounded-lg border p-2.5 transition-all ${hasDocs ? "bg-white border-[#e5e5e5]" : "bg-[#fcfcfc] border-dashed border-[#ddd]"}`} data-testid={`vault-slot-${slot.type}`}>
+                <div key={slot.type} className="px-2.5 py-2" data-testid={`vault-slot-${slot.type}`}>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-1.5">
                       <span className={hasDocs ? "text-[#1a1a2e]" : "text-[#bbb]"}>{slot.icon}</span>
-                      <span className={`text-[9px] font-semibold ${hasDocs ? "text-[#333]" : "text-[#aaa]"}`}>{slot.label}</span>
-                      {hasDocs && <span className="text-[7px] text-white bg-[#2d6a4f] rounded px-1 py-[1px] font-bold">{slot.docs.length}</span>}
+                      <span className={`text-[8px] font-semibold ${hasDocs ? "text-[#333]" : "text-[#aaa]"}`}>{slot.label}</span>
+                      {hasDocs && <span className="text-[6px] text-white bg-[#2d6a4f] rounded px-1 py-[1px] font-bold">{slot.docs.length}</span>}
                     </div>
                     <button
                       onClick={slot.onUpload}
-                      className={`flex items-center gap-0.5 text-[8px] font-medium px-1.5 py-0.5 rounded transition-colors ${hasDocs ? "text-[#1a1a2e] hover:bg-[#f0f0f0]" : "text-[#999] hover:text-[#666]"}`}
+                      className={`flex items-center gap-0.5 text-[7px] font-medium px-1 py-0.5 rounded transition-colors ${hasDocs ? "text-[#1a1a2e] hover:bg-[#f0f0f0]" : "text-[#999] hover:text-[#666]"}`}
                       data-testid={`button-upload-${slot.type}`}
                     >
-                      <svg width="8" height="8" viewBox="0 0 8 8" fill="none"><path d="M4 6V2M4 2L2.5 3.5M4 2l1.5 1.5" stroke="currentColor" strokeWidth="0.8" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                      <svg width="7" height="7" viewBox="0 0 8 8" fill="none"><path d="M4 6V2M4 2L2.5 3.5M4 2l1.5 1.5" stroke="currentColor" strokeWidth="0.8" strokeLinecap="round" strokeLinejoin="round"/></svg>
                       {hasDocs ? "Replace" : "Upload"}
                     </button>
                   </div>
                   {hasDocs && (
-                    <div className="mt-1.5 space-y-1">
+                    <div className="mt-1 space-y-0.5 pl-[18px]">
                       {slot.docs.map(doc => (
                         <div key={doc.id} className="flex items-center gap-1.5 group">
-                          <p className="text-[8px] text-[#666] truncate flex-1">{doc.name}</p>
-                          <span className="text-[7px] text-[#bbb]">{formatDate(doc.savedAt)}</span>
+                          <p className="text-[7px] text-[#666] truncate flex-1">{doc.name}</p>
+                          <span className="text-[7px] text-[#ccc]" style={{ fontVariantNumeric: "tabular-nums" }}>{formatDate(doc.savedAt)}</span>
                           <button onClick={() => onDelete(doc.id)} className="opacity-0 group-hover:opacity-100 text-[#ccc] hover:text-red-400 transition-all" data-testid={`button-delete-vault-${doc.id}`}>
-                            <svg width="8" height="8" viewBox="0 0 8 8" fill="none"><path d="M2 2l4 4M6 2l-4 4" stroke="currentColor" strokeWidth="1" strokeLinecap="round"/></svg>
+                            <svg width="7" height="7" viewBox="0 0 8 8" fill="none"><path d="M2 2l4 4M6 2l-4 4" stroke="currentColor" strokeWidth="1" strokeLinecap="round"/></svg>
                           </button>
                         </div>
                       ))}
@@ -2924,13 +2923,13 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
             })}
           </div>
 
-          <div className="mt-2.5 rounded-lg border border-[#eee] bg-[#fafafa] p-2.5">
-            <div className="flex items-center gap-1.5 mb-2">
-              <svg width="10" height="10" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="4" r="2.5" stroke="#555" strokeWidth="0.9" fill="none"/><path d="M2 10.5c0-2.2 1.8-4 4-4s4 1.8 4 4" stroke="#555" strokeWidth="0.9" strokeLinecap="round"/></svg>
-              <span className="text-[9px] font-semibold text-[#555]">Report Signature</span>
-              {profileSaved && <span className="text-[7px] text-[#2d6a4f] font-medium ml-auto">Saved</span>}
+          <div className="mt-2 rounded-lg border border-[#eee] bg-[#fafafa] px-2.5 py-2">
+            <div className="flex items-center gap-1.5 mb-1.5">
+              <svg width="9" height="9" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="4" r="2.5" stroke="#555" strokeWidth="0.9" fill="none"/><path d="M2 10.5c0-2.2 1.8-4 4-4s4 1.8 4 4" stroke="#555" strokeWidth="0.9" strokeLinecap="round"/></svg>
+              <span className="text-[8px] font-semibold text-[#555]">Report Signature</span>
+              {profileSaved && <span className="text-[6px] text-[#2d6a4f] font-medium ml-auto">Saved</span>}
             </div>
-            <div className="grid grid-cols-2 gap-x-2 gap-y-1.5">
+            <div className="grid grid-cols-2 gap-x-1.5 gap-y-1">
               {[
                 { key: "fullName" as const, label: "Full Name", placeholder: "As shown on ID" },
                 { key: "dob" as const, label: "Date of Birth", placeholder: "MM/DD/YYYY" },
@@ -2938,7 +2937,7 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
                 { key: "ssn4" as const, label: "SSN (last 4)", placeholder: "••••" },
               ].map(f => (
                 <div key={f.key} className={f.key === "address" ? "col-span-2" : ""}>
-                  <label className="text-[7px] text-[#aaa] uppercase tracking-wider font-semibold block mb-0.5">{f.label}</label>
+                  <label className="text-[6px] text-[#aaa] uppercase tracking-wider font-semibold block mb-[2px]">{f.label}</label>
                   <input
                     type={f.key === "ssn4" ? "password" : "text"}
                     maxLength={f.key === "ssn4" ? 4 : f.key === "dob" ? 10 : 120}
@@ -2949,7 +2948,7 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
                       onUpdateProfile(updated);
                     }}
                     placeholder={f.placeholder}
-                    className="w-full text-[9px] text-[#333] bg-white border border-[#e5e5e5] rounded px-2 py-1 outline-none focus:border-[#1a1a2e] transition-colors placeholder:text-[#ccc]"
+                    className="w-full text-[8px] text-[#333] bg-white border border-[#e5e5e5] rounded px-1.5 py-[5px] outline-none focus:border-[#1a1a2e] transition-colors placeholder:text-[#ccc]"
                     data-testid={`input-profile-${f.key}`}
                   />
                 </div>
@@ -2961,14 +2960,11 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
                 setProfileSaved(true);
               }}
               disabled={!userProfile.fullName && !userProfile.address}
-              className="mt-2 w-full py-1.5 rounded bg-[#1a1a2e] text-white text-[8px] font-semibold uppercase tracking-wider hover:bg-[#2a2a40] transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+              className="mt-1.5 w-full py-1 rounded bg-[#1a1a2e] text-white text-[7px] font-semibold uppercase tracking-wider hover:bg-[#2a2a40] transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
               data-testid="button-save-signature"
             >
-              {profileSaved ? "Saved — Applied to All Letters" : "Save & Apply to All Letters"}
+              {profileSaved ? "Saved" : "Save & Apply"}
             </button>
-            {profileSaved && (
-              <p className="text-[7px] text-[#2d6a4f] mt-1 text-center">Contact info will appear on all dispute letter headers</p>
-            )}
           </div>
         </div>
         </>)}
