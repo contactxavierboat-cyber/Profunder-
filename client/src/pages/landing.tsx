@@ -2236,7 +2236,7 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
             className={`flex-1 py-2 text-[10px] font-semibold uppercase tracking-wider transition-colors ${panelTab === tab ? "text-[#1a1a2e] border-b-2 border-[#1a1a2e]" : "text-[#aaa] hover:text-[#666]"}`}
             data-testid={`tab-${tab}`}
           >
-            {tab === "command" ? "Command" : "Documents"}
+            {tab === "command" ? "Command" : "Repair Center"}
           </button>
         ))}
       </div>
