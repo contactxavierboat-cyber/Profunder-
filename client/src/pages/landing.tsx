@@ -2089,17 +2089,36 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
   const handleUploadDoc = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    const docType = classifyDocType(file.name, uploadTarget);
     const reader = new FileReader();
     reader.onload = () => {
       const doc: SavedDoc = {
         id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
         name: file.name,
-        type: classifyDocType(file.name, uploadTarget),
+        type: docType,
         savedAt: Date.now(),
         fileDataUrl: reader.result as string,
       };
       onSave(doc);
       setUploadTarget(null);
+
+      if (docType === "credit_report") {
+        const isPdf = file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf");
+        if (isPdf) {
+          const dataUrl = reader.result as string;
+          const base64 = dataUrl.split(",")[1] || dataUrl;
+          onSendChat(`__VAULT_REPORT_UPLOAD__${file.name}__BASE64__${base64}`);
+        } else {
+          const textReader = new FileReader();
+          textReader.onload = () => {
+            const text = textReader.result as string;
+            if (text && text.length > 10) {
+              onSendChat(`__VAULT_REPORT_UPLOAD__${file.name}__TEXT__${text}`);
+            }
+          };
+          textReader.readAsText(file);
+        }
+      }
     };
     reader.readAsDataURL(file);
     if (docInputRef.current) docInputRef.current.value = "";
@@ -3937,6 +3956,22 @@ export default function LandingPage() {
       return;
     }
 
+    if (text.startsWith("__VAULT_REPORT_UPLOAD__")) {
+      const parts = text.split("__");
+      const fileName = parts[2] || "report.pdf";
+      const dataType = parts[3];
+      const content = parts.slice(4).join("__");
+      setAisReport(null);
+      try { localStorage.removeItem("profundr_ais_report"); } catch {}
+      setRepairData(null);
+      try { localStorage.removeItem("profundr_repair_data"); } catch {}
+      const vaultFile = dataType === "BASE64"
+        ? { name: fileName, content: `data:application/pdf;base64,${content}`, isPdf: true }
+        : { name: fileName, content };
+      doSend("Analyze my report and generate my AIS.", vaultFile);
+      return;
+    }
+
     const file = attachedFile;
     const msg = text || "Analyze my report and generate my AIS.";
     setInput("");
@@ -4596,7 +4631,7 @@ export default function LandingPage() {
             <div className="flex justify-center mb-2 animate-in fade-in slide-in-from-bottom-1 duration-300" data-testid="popup-input-hint">
               <div className="relative bg-[#1a1a2e] text-white rounded-xl px-4 py-3 shadow-lg" style={{ maxWidth: "300px" }}>
                 <p className="text-[12px] leading-[1.5] font-medium text-center">
-                  Ask credit repair or funding questions, or upload your report for a full analysis.
+                  Ask repair or funding questions, or upload your report for a full analysis.
                 </p>
                 <button
                   onClick={() => {
