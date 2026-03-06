@@ -1711,8 +1711,8 @@ function CapitalSimulator({ aisReport }: { aisReport: MissionData }) {
   const hasChanges = simUtil !== baseUtil || simInqRemove > 0 || simAddTradelines > 0 || simAgeBoost > 0;
 
   return (
-    <div className="rounded-lg border border-[#e8e8e8] bg-white p-3" data-testid="capital-simulator">
-      <div className="flex items-center gap-2 mb-2.5">
+    <div className="rounded-xl border border-[#e8e8e8] bg-white p-3" data-testid="capital-simulator">
+      <div className="flex items-center gap-2 mb-1.5">
         <div className="w-5 h-5 rounded-md bg-[#1a1a2e] flex items-center justify-center shrink-0">
           <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2 8V5M5 8V3M8 8V1" stroke="white" strokeWidth="1.2" strokeLinecap="round"/></svg>
         </div>
@@ -1770,7 +1770,7 @@ function CapitalSimulator({ aisReport }: { aisReport: MissionData }) {
         </div>
       </div>
 
-      <div className={`rounded-md border p-2.5 transition-all ${hasChanges ? "bg-gradient-to-r from-[#f0f2f8] to-[#e8f5e9] border-[#c8e6c9]" : "bg-[#fafafa] border-[#eee]"}`}>
+      <div className={`rounded-lg border p-2.5 transition-all ${hasChanges ? "bg-gradient-to-r from-[#f0f2f8] to-[#e8f5e9] border-[#c8e6c9]" : "bg-[#fafafa] border-[#eee]"}`}>
         <div className="grid grid-cols-2 gap-3">
           <div>
             <p className="text-[7px] text-[#999] font-medium mb-0.5">Approval Odds</p>
@@ -2221,15 +2221,15 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
       <div className="flex-1 overflow-y-auto px-4 py-3">
 
         {panelTab === "command" && (<>
-        <div className="space-y-2">
+        <div className="space-y-2.5">
           {hasAis ? (
             <button
               onClick={onOpenAis}
-              className="w-full text-left rounded-xl bg-gradient-to-br from-[#1a1a2e] to-[#2a2a40] p-2.5 hover:from-[#22223a] hover:to-[#333350] transition-all group"
+              className="w-full text-left rounded-xl bg-gradient-to-br from-[#1a1a2e] to-[#2a2a40] p-3 hover:from-[#22223a] hover:to-[#333350] transition-all group"
               data-testid="button-open-ais"
             >
-              <div className="flex items-center justify-between mb-1">
-                <p className="text-[7px] font-semibold text-white/40 uppercase tracking-[0.12em]">Capital Readiness Index</p>
+              <div className="flex items-center justify-between mb-1.5">
+                <p className="text-[8px] font-semibold text-white/40 uppercase tracking-[0.1em]">Capital Readiness Index</p>
                 <svg width="8" height="8" viewBox="0 0 10 10" fill="none" className="text-white/25 group-hover:text-white/50 transition-colors"><path d="M3 1l4 4-4 4" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" /></svg>
               </div>
               <div className="flex items-center gap-3">
@@ -2238,12 +2238,12 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
                   <span className="text-[10px] font-medium text-white/30">/ 100</span>
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p className="text-[8px] text-white/60 font-medium truncate" data-testid="text-ais-status">{getStatusLabel()}</p>
+                  <p className="text-[9px] text-white/60 font-medium truncate" data-testid="text-ais-status">{getStatusLabel()}</p>
                   <p className="text-[7px] text-white/30 truncate">{getPhaseAction()}</p>
                 </div>
               </div>
               {(suppressorCount > 0 || pf?.readinessLevel) && (
-                <div className="mt-1.5 pt-1.5 border-t border-white/8 flex items-center gap-3 flex-wrap">
+                <div className="mt-2 pt-2 border-t border-white/8 flex items-center gap-3 flex-wrap">
                   {pf?.readinessLevel && <span className="text-[7px] text-white/40">Tier: <span className="text-white/70 font-medium">{getReadinessTier()}</span></span>}
                   {suppressorCount > 0 && <span className="text-[7px] text-white/40">Suppressors: <span className="text-white/70 font-medium">{suppressorCount}</span></span>}
                   {aisScore && aisScore < 88 && <span className="text-[7px] text-white/40">Next: <span className="text-white/70 font-medium">{aisScore < 78 ? "78" : aisScore < 82 ? "82" : "88"}</span></span>}
@@ -2251,8 +2251,8 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
               )}
             </button>
           ) : (
-            <div className="rounded-xl border border-dashed border-[#ddd] p-2.5 text-center">
-              <p className="text-[8px] text-[#999] leading-[1.5]">Upload a credit report to activate your Capital Readiness Index</p>
+            <div className="rounded-xl border border-dashed border-[#ddd] p-3 text-center">
+              <p className="text-[9px] text-[#999] leading-[1.5]">Upload a credit report to activate your Capital Readiness Index</p>
             </div>
           )}
 
@@ -2333,9 +2333,9 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
             const mn = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
             return (<>
-              <div className="rounded-lg border border-[#e8e8e8] bg-white p-2.5" data-testid="denial-simulation">
-                <div className="flex items-center gap-2.5 mb-2">
-                  <div className="relative w-[40px] h-[40px] flex-shrink-0">
+              <div className="rounded-xl border border-[#e8e8e8] bg-white p-3" data-testid="denial-simulation">
+                <div className="flex items-center gap-3 mb-2.5">
+                  <div className="relative w-[44px] h-[44px] flex-shrink-0">
                     <svg viewBox="0 0 36 36" className="w-full h-full -rotate-90">
                       <circle cx="18" cy="18" r="15.5" fill="none" stroke="#f0f0f0" strokeWidth="2.5" />
                       <circle cx="18" cy="18" r="15.5" fill="none" stroke={probColor} strokeWidth="2.5" strokeDasharray={`${approvalProb * 0.974} 100`} strokeLinecap="round" />
@@ -2345,8 +2345,8 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
                     </div>
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p className="text-[8px] text-[#555] font-semibold mb-0.5">If You Applied Today</p>
-                    <p className="text-[10px] text-[#777] leading-[1.4]">
+                    <p className="text-[9px] text-[#333] font-semibold mb-0.5">If You Applied Today</p>
+                    <p className="text-[8px] text-[#777] leading-[1.4]">
                       {approvalProb >= 70
                         ? "You have a good chance of getting approved"
                         : approvalProb >= 45
@@ -2356,12 +2356,12 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
                   </div>
                 </div>
                 {highestLimit > 0 && (
-                  <div className="grid grid-cols-2 gap-2 mb-2">
-                    <div className="rounded-md bg-[#fafafa] border border-[#eee] px-2 py-1.5">
+                  <div className="grid grid-cols-2 gap-2 mb-2.5">
+                    <div className="rounded-lg bg-[#fafafa] border border-[#eee] px-2.5 py-2">
                       <p className="text-[7px] text-[#999] font-medium mb-0.5">Typical Approval Range</p>
                       <p className="text-[10px] text-[#333] font-bold" style={{ fontVariantNumeric: "tabular-nums" }}>${Math.round(highestLimit * 0.6).toLocaleString()} – ${Math.round(highestLimit * 1.2).toLocaleString()}</p>
                     </div>
-                    <div className="rounded-md bg-[#fafafa] border border-[#eee] px-2 py-1.5">
+                    <div className="rounded-lg bg-[#fafafa] border border-[#eee] px-2.5 py-2">
                       <p className="text-[7px] text-[#999] font-medium mb-0.5">If Profile Improves</p>
                       <p className="text-[10px] text-[#2d6a4f] font-bold" style={{ fontVariantNumeric: "tabular-nums" }}>${Math.round(highestLimit * 1.2).toLocaleString()} – ${Math.round(highestLimit * 1.8).toLocaleString()}</p>
                     </div>
@@ -2369,31 +2369,31 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
                 )}
                 {denialDrivers.length > 0 && (
                   <div>
-                    <p className="text-[7px] text-[#999] font-semibold mb-1">Main issues affecting approval:</p>
-                    <div className="space-y-1">
+                    <p className="text-[8px] text-[#aaa] font-semibold mb-1.5">Main issues affecting approval</p>
+                    <div className="space-y-1.5">
                       {denialDrivers.slice(0, 4).map((d, di) => (
-                        <div key={di} className="flex items-start gap-1.5">
-                          <div className={`w-[5px] h-[5px] rounded-full mt-[3px] shrink-0 ${d.level === "risk" ? "bg-[#c0392b]" : "bg-[#c9a227]"}`} />
+                        <div key={di} className="flex items-start gap-2">
+                          <div className={`w-[5px] h-[5px] rounded-full mt-[4px] shrink-0 ${d.level === "risk" ? "bg-[#c0392b]" : "bg-[#c9a227]"}`} />
                           <div className="min-w-0 flex-1">
                             <span className={`text-[8px] font-semibold ${d.level === "risk" ? "text-[#c0392b]" : "text-[#c9a227]"}`}>{d.label}</span>
-                            <p className="text-[7px] text-[#999] leading-[1.3]">{getSignalExplanation(d.label)}</p>
+                            <p className="text-[7px] text-[#999] leading-[1.4]">{getSignalExplanation(d.label)}</p>
                           </div>
                         </div>
                       ))}
                     </div>
                   </div>
                 )}
-                <div className="mt-2 pt-1.5 border-t border-[#f0f0f0]">
-                  <p className="text-[7px] text-[#999]">Best window: <span className="font-semibold text-[#555]">{mn[windowStart.getMonth()]}–{mn[windowEnd.getMonth()]} {windowEnd.getFullYear()}</span></p>
+                <div className="mt-2.5 pt-2 border-t border-[#f0f0f0]">
+                  <p className="text-[8px] text-[#aaa]">Best window: <span className="font-semibold text-[#333]">{mn[windowStart.getMonth()]}–{mn[windowEnd.getMonth()]} {windowEnd.getFullYear()}</span></p>
                 </div>
               </div>
 
-              <div className="rounded-lg border border-[#e8e8e8] bg-white p-2.5" data-testid="underwriting-risk-signals">
-                <div className="flex items-center justify-between mb-2">
-                  <p className="text-[8px] text-[#555] font-semibold">Risk Signals</p>
+              <div className="rounded-xl border border-[#e8e8e8] bg-white p-3" data-testid="underwriting-risk-signals">
+                <div className="flex items-center justify-between mb-1.5">
+                  <p className="text-[9px] text-[#333] font-semibold">Risk Signals</p>
                   <span className="text-[7px] font-bold px-1.5 py-[2px] rounded" style={{ color: overallColor, backgroundColor: overallColor + "10" }}>{riskCount >= 2 ? "High Risk" : riskCount >= 1 || cautionCount >= 3 ? "Moderate" : cautionCount >= 1 ? "Low" : "Clear"}</span>
                 </div>
-                <p className="text-[7px] text-[#aaa] mb-2">These are patterns lenders watch closely when reviewing applications</p>
+                <p className="text-[8px] text-[#aaa] mb-2.5">These are patterns lenders watch closely when reviewing applications</p>
                 {(() => {
                   const riskSignals = signals.filter(s => s.level === "risk");
                   const cautionSignals = signals.filter(s => s.level === "caution");
@@ -2401,19 +2401,19 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
                   return (<>
                     {riskSignals.length > 0 && (
                       <div className="mb-2">
-                        <p className="text-[7px] text-[#c0392b] font-bold uppercase tracking-wider mb-1">High Risk</p>
+                        <p className="text-[7px] text-[#c0392b] font-bold uppercase tracking-wider mb-1.5">High Risk</p>
                         <div className="space-y-1.5">
                           {riskSignals.map((s, si) => {
                             const fix = getSignalFix(s.label, s.level);
                             return (
-                              <div key={si} className="rounded-md bg-[#c0392b]/4 border border-[#c0392b]/10 px-2 py-1.5">
+                              <div key={si} className="rounded-lg bg-[#c0392b]/4 border border-[#c0392b]/10 px-2.5 py-2">
                                 <div className="flex items-center justify-between mb-0.5">
                                   <span className="text-[8px] text-[#333] font-semibold">{s.label}</span>
                                   <span className="text-[7px] font-bold text-[#c0392b]">{s.status}</span>
                                 </div>
-                                <p className="text-[7px] text-[#888] leading-[1.3]">{getSignalExplanation(s.label)}</p>
+                                <p className="text-[7px] text-[#888] leading-[1.4]">{getSignalExplanation(s.label)}</p>
                                 {fix && (
-                                  <div className="mt-1 flex items-center gap-1">
+                                  <div className="mt-1 flex items-center gap-1.5">
                                     <span className="text-[7px] text-[#c0392b] font-semibold">Fix:</span>
                                     <span className="text-[7px] text-[#666]">{fix}</span>
                                   </div>
@@ -2426,17 +2426,17 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
                     )}
                     {cautionSignals.length > 0 && (
                       <div className="mb-2">
-                        <p className="text-[7px] text-[#c9a227] font-bold uppercase tracking-wider mb-1">Moderate Risk</p>
-                        <div className="space-y-1">
+                        <p className="text-[7px] text-[#c9a227] font-bold uppercase tracking-wider mb-1.5">Moderate Risk</p>
+                        <div className="space-y-1.5">
                           {cautionSignals.map((s, si) => {
                             const fix = getSignalFix(s.label, s.level);
                             return (
-                              <div key={si} className="flex items-center justify-between px-2 py-1 rounded-md bg-[#c9a227]/4 border border-[#c9a227]/10">
+                              <div key={si} className="flex items-center justify-between px-2.5 py-1.5 rounded-lg bg-[#c9a227]/4 border border-[#c9a227]/10">
                                 <div className="min-w-0 flex-1">
-                                  <span className="text-[7px] text-[#333] font-semibold">{s.label}</span>
-                                  {fix && <span className="text-[7px] text-[#888] ml-1">· {fix}</span>}
+                                  <span className="text-[8px] text-[#333] font-semibold">{s.label}</span>
+                                  {fix && <span className="text-[7px] text-[#888] ml-1.5">· {fix}</span>}
                                 </div>
-                                <span className="text-[7px] font-bold text-[#c9a227]">{s.status}</span>
+                                <span className="text-[7px] font-bold text-[#c9a227] ml-2">{s.status}</span>
                               </div>
                             );
                           })}
@@ -2445,11 +2445,11 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
                     )}
                     {safeSignals.length > 0 && (
                       <div>
-                        <p className="text-[7px] text-[#2d6a4f] font-bold uppercase tracking-wider mb-1">Positive Signals</p>
-                        <div className="space-y-0.5">
+                        <p className="text-[7px] text-[#2d6a4f] font-bold uppercase tracking-wider mb-1.5">Positive Signals</p>
+                        <div className="space-y-1">
                           {safeSignals.map((s, si) => (
-                            <div key={si} className="flex items-center justify-between px-2 py-1">
-                              <span className="text-[7px] text-[#555]">{s.label}</span>
+                            <div key={si} className="flex items-center justify-between px-2.5 py-1.5">
+                              <span className="text-[8px] text-[#555]">{s.label}</span>
                               <span className="text-[7px] font-bold text-[#2d6a4f]">{s.status}</span>
                             </div>
                           ))}
@@ -2460,106 +2460,106 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
                 })()}
               </div>
 
-              <div className="rounded-lg border border-[#e8e8e8] bg-white p-2.5" data-testid="lender-metrics">
-                <p className="text-[8px] text-[#555] font-semibold mb-2">Profile Metrics</p>
+              <div className="rounded-xl border border-[#e8e8e8] bg-white p-3" data-testid="lender-metrics">
+                <p className="text-[9px] text-[#333] font-semibold mb-1.5">Profile Metrics</p>
+                <p className="text-[8px] text-[#aaa] mb-2.5">Key metrics lenders evaluate during underwriting</p>
                 <div className="space-y-2">
                   {[
-                    { label: "Recent Inquiries", value: `${inqCount}`, detail: inqCount >= 6 ? "Too many recent credit checks. Avoid new applications for 90 days" : inqCount >= 3 ? "Several recent credit checks. Try to avoid new applications" : "Your inquiry count is healthy", color: velocityColor, optimal: "0-2 in the last 6 months" },
-                    { label: "Credit Mix", value: `${primaryRev.length} Revolving / ${primaryInst.length} Installment`, detail: primaryRev.length >= 3 && hasInstallment ? "Good mix of credit types" : !hasInstallment ? "Add 1 installment account to improve your mix" : "Add more revolving accounts", color: primaryRev.length >= 3 && hasInstallment ? "#2d6a4f" : "#c9a227", optimal: "3-5 revolving + 1-2 installment" },
+                    { label: "Recent Inquiries", value: `${inqCount}`, detail: inqCount >= 6 ? "Too many recent credit checks. Avoid new applications for 90 days" : inqCount >= 3 ? "Several recent credit checks. Try to avoid new applications" : "Your inquiry count is healthy", color: velocityColor, optimal: "0-2 in 6 months" },
+                    { label: "Credit Mix", value: `${primaryRev.length} Revolving / ${primaryInst.length} Installment`, detail: primaryRev.length >= 3 && hasInstallment ? "Good mix of credit types" : !hasInstallment ? "Add 1 installment account to improve your mix" : "Add more revolving accounts", color: primaryRev.length >= 3 && hasInstallment ? "#2d6a4f" : "#c9a227", optimal: "3-5 rev + 1-2 inst" },
                     { label: "Average Credit Limit", value: avgLimit > 0 ? `$${avgLimit.toLocaleString()}` : "—", detail: avgLimit >= 5000 ? "This is considered strong and helps with approvals" : avgLimit >= 3000 ? "Moderate. Request limit increases to strengthen your profile" : "Low limits reduce your approval chances. Request increases", color: avgLimit >= 5000 ? "#2d6a4f" : avgLimit >= 3000 ? "#c9a227" : "#c0392b", optimal: "$5,000-$15,000" },
-                    { label: "Utilization", value: `${aggUtil}%`, detail: aggUtil <= 9 ? "This is in the optimal range" : aggUtil <= 29 ? "Acceptable, but ideal range is 1-9%" : "Too high. Pay down balances to under 9% for best results", color: aggUtil <= 9 ? "#2d6a4f" : aggUtil <= 29 ? "#c9a227" : "#c0392b", optimal: "1% - 9%" },
+                    { label: "Utilization", value: `${aggUtil}%`, detail: aggUtil <= 9 ? "This is in the optimal range" : aggUtil <= 29 ? "Acceptable, but ideal range is 1-9%" : "Too high. Pay down balances to under 9% for best results", color: aggUtil <= 9 ? "#2d6a4f" : aggUtil <= 29 ? "#c9a227" : "#c0392b", optimal: "1-9%" },
                   ].map((m, mi) => (
-                    <div key={mi} className="rounded-md bg-[#fafafa] border border-[#eee] px-2.5 py-2">
-                      <div className="flex items-center justify-between mb-0.5">
-                        <p className="text-[7px] text-[#999] font-medium">{m.label}</p>
+                    <div key={mi} className="rounded-lg bg-[#fafafa] border border-[#eee] px-2.5 py-2">
+                      <div className="flex items-center justify-between mb-1">
+                        <p className="text-[8px] text-[#555] font-medium">{m.label}</p>
                         <p className="text-[7px] text-[#bbb]">Optimal: {m.optimal}</p>
                       </div>
                       <p className="text-[11px] font-bold mb-0.5" style={{ color: m.color, fontVariantNumeric: "tabular-nums" }}>{m.value}</p>
-                      <p className="text-[7px] text-[#888] leading-[1.3]">{m.detail}</p>
+                      <p className="text-[7px] text-[#888] leading-[1.4]">{m.detail}</p>
                     </div>
                   ))}
                 </div>
               </div>
             </>);
           })()}
-        </div>
 
-        {aisReport?.strategyData && aisReport.strategyData.steps.length > 0 && (
-          <div className="rounded-lg border border-[#e8e8e8] bg-white p-3" data-testid="capital-strategy">
-            <div className="flex items-center gap-2 mb-2.5">
-              <div className="w-5 h-5 rounded-md bg-[#1a1a2e] flex items-center justify-center shrink-0">
-                <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M1 9l3-3 2 2 3-5" stroke="white" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+          {aisReport?.strategyData && aisReport.strategyData.steps.length > 0 && (
+            <div className="rounded-xl border border-[#e8e8e8] bg-white p-3" data-testid="capital-strategy">
+              <div className="flex items-center gap-2 mb-1.5">
+                <div className="w-5 h-5 rounded-md bg-[#1a1a2e] flex items-center justify-center shrink-0">
+                  <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M1 9l3-3 2 2 3-5" stroke="white" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                </div>
+                <p className="text-[9px] text-[#333] font-bold uppercase tracking-[0.08em]">Your Action Plan</p>
               </div>
-              <p className="text-[9px] text-[#333] font-bold uppercase tracking-[0.08em]">Your Action Plan</p>
-            </div>
-            <p className="text-[8px] text-[#999] mb-2.5">Follow these steps in order to improve your approval chances</p>
-            <div className="space-y-2 mb-3">
-              {aisReport.strategyData.steps.map((step) => (
-                <div key={step.step} className="rounded-md bg-[#f8f9fb] border border-[#e8e8ee] p-2.5">
-                  <div className="flex items-start gap-2">
-                    <div className="w-5 h-5 rounded-full bg-[#1a1a2e] flex items-center justify-center shrink-0 mt-0.5">
-                      <span className="text-[9px] font-bold text-white">{step.step}</span>
+              <p className="text-[8px] text-[#999] mb-2.5">Follow these steps in order to improve your approval chances</p>
+              <div className="space-y-2 mb-3">
+                {aisReport.strategyData.steps.map((step) => (
+                  <div key={step.step} className="rounded-lg bg-[#f8f9fb] border border-[#e8e8ee] p-2.5">
+                    <div className="flex items-start gap-2">
+                      <div className="w-5 h-5 rounded-full bg-[#1a1a2e] flex items-center justify-center shrink-0 mt-0.5">
+                        <span className="text-[9px] font-bold text-white" style={{ fontVariantNumeric: "tabular-nums" }}>{step.step}</span>
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-[9px] text-[#333] font-semibold mb-0.5">{step.action}</p>
+                        <div className="flex items-center gap-2">
+                          <span className="text-[7px] text-[#2d6a4f] font-semibold">{step.impact}</span>
+                          <span className="text-[7px] text-[#ddd]">|</span>
+                          <span className="text-[7px] text-[#999]">{step.timeframe}</span>
+                        </div>
+                      </div>
                     </div>
-                    <div className="min-w-0 flex-1">
-                      <p className="text-[9px] text-[#333] font-semibold mb-0.5">{step.action}</p>
-                      <div className="flex items-center gap-2">
-                        <span className="text-[7px] text-[#2d6a4f] font-semibold">{step.impact}</span>
-                        <span className="text-[7px] text-[#bbb]">·</span>
-                        <span className="text-[7px] text-[#999]">{step.timeframe}</span>
+                  </div>
+                ))}
+              </div>
+              {(aisReport.strategyData.currentOdds > 0 || aisReport.strategyData.projectedOdds > 0) && (
+                <div className="rounded-lg bg-gradient-to-r from-[#f0f2f8] to-[#e8f5e9] border border-[#ddd] p-2.5">
+                  <p className="text-[7px] text-[#999] font-semibold uppercase tracking-wider mb-1.5">Expected Results</p>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <p className="text-[7px] text-[#aaa] mb-0.5">Approval Odds</p>
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-[12px] font-bold text-[#c0392b]" style={{ fontVariantNumeric: "tabular-nums" }}>{aisReport.strategyData.currentOdds}%</span>
+                        <svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4h8M6 1l3 3-3 3" stroke="#2d6a4f" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                        <span className="text-[12px] font-bold text-[#2d6a4f]" style={{ fontVariantNumeric: "tabular-nums" }}>{aisReport.strategyData.projectedOdds}%</span>
+                      </div>
+                    </div>
+                    <div>
+                      <p className="text-[7px] text-[#aaa] mb-0.5">Estimated Limits</p>
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-[9px] font-bold text-[#c0392b]" style={{ fontVariantNumeric: "tabular-nums" }}>{aisReport.strategyData.currentFunding}</span>
+                        <svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4h8M6 1l3 3-3 3" stroke="#2d6a4f" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                        <span className="text-[9px] font-bold text-[#2d6a4f]" style={{ fontVariantNumeric: "tabular-nums" }}>{aisReport.strategyData.projectedFunding}</span>
                       </div>
                     </div>
                   </div>
                 </div>
-              ))}
+              )}
             </div>
-            {(aisReport.strategyData.currentOdds > 0 || aisReport.strategyData.projectedOdds > 0) && (
-              <div className="rounded-md bg-gradient-to-r from-[#f0f2f8] to-[#e8f5e9] border border-[#ddd] p-2.5">
-                <p className="text-[7px] text-[#999] font-semibold uppercase tracking-wider mb-1.5">Expected Results</p>
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <p className="text-[7px] text-[#aaa] mb-0.5">Approval Odds</p>
-                    <div className="flex items-center gap-1.5">
-                      <span className="text-[12px] font-bold text-[#c0392b]">{aisReport.strategyData.currentOdds}%</span>
-                      <svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4h8M6 1l3 3-3 3" stroke="#2d6a4f" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                      <span className="text-[12px] font-bold text-[#2d6a4f]">{aisReport.strategyData.projectedOdds}%</span>
-                    </div>
-                  </div>
-                  <div>
-                    <p className="text-[7px] text-[#aaa] mb-0.5">Estimated Limits</p>
-                    <div className="flex items-center gap-1.5">
-                      <span className="text-[9px] font-bold text-[#c0392b]">{aisReport.strategyData.currentFunding}</span>
-                      <svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4h8M6 1l3 3-3 3" stroke="#2d6a4f" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                      <span className="text-[9px] font-bold text-[#2d6a4f]">{aisReport.strategyData.projectedFunding}</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
-        )}
+          )}
 
-        {aisReport?.strategyData && aisReport.strategyData.timeline.length > 0 && (
-          <div className="rounded-lg border border-[#e8e8e8] bg-white p-3" data-testid="funding-timeline">
-            <div className="flex items-center gap-2 mb-2.5">
-              <div className="w-5 h-5 rounded-md bg-[#1a1a2e] flex items-center justify-center shrink-0">
-                <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><circle cx="5" cy="5" r="4" stroke="white" strokeWidth="1" fill="none"/><path d="M5 3v2.5l1.5 1" stroke="white" strokeWidth="1" strokeLinecap="round"/></svg>
+          {aisReport?.strategyData && aisReport.strategyData.timeline.length > 0 && (
+            <div className="rounded-xl border border-[#e8e8e8] bg-white p-3" data-testid="funding-timeline">
+              <div className="flex items-center gap-2 mb-1.5">
+                <div className="w-5 h-5 rounded-md bg-[#1a1a2e] flex items-center justify-center shrink-0">
+                  <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><circle cx="5" cy="5" r="4" stroke="white" strokeWidth="1" fill="none"/><path d="M5 3v2.5l1.5 1" stroke="white" strokeWidth="1" strokeLinecap="round"/></svg>
+                </div>
+                <p className="text-[9px] text-[#333] font-bold uppercase tracking-[0.08em]">Funding Timeline</p>
               </div>
-              <p className="text-[9px] text-[#333] font-bold uppercase tracking-[0.08em]">Funding Timeline</p>
-            </div>
-            <p className="text-[8px] text-[#999] mb-3">Projected profile improvement over time</p>
-            <div className="relative pl-4">
-              <div className="absolute left-[7px] top-1 bottom-1 w-[2px] bg-gradient-to-b from-[#c0392b] via-[#c9a227] to-[#2d6a4f] rounded-full" />
-              <div className="space-y-3">
-                {aisReport.strategyData.timeline.map((m, i) => {
-                  const isLast = i === aisReport.strategyData!.timeline.length - 1;
-                  const dotColor = m.approvalOdds >= 70 ? "#2d6a4f" : m.approvalOdds >= 45 ? "#c9a227" : "#c0392b";
-                  return (
-                    <div key={i} className="relative">
-                      <div className="absolute -left-4 top-1 w-[10px] h-[10px] rounded-full border-2 bg-white" style={{ borderColor: dotColor }} />
-                      <div className={`rounded-md ${isLast ? "bg-[#e8f5e9] border-[#c8e6c9]" : "bg-[#fafafa] border-[#eee]"} border p-2`}>
+              <p className="text-[8px] text-[#999] mb-3">Projected profile improvement over time</p>
+              <div className="relative pl-4">
+                <div className="absolute left-[7px] top-1 bottom-1 w-[2px] bg-gradient-to-b from-[#c0392b] via-[#c9a227] to-[#2d6a4f] rounded-full" />
+                <div className="space-y-3">
+                  {aisReport.strategyData.timeline.map((m, i) => {
+                    const isLast = i === aisReport.strategyData!.timeline.length - 1;
+                    const dotColor = m.approvalOdds >= 70 ? "#2d6a4f" : m.approvalOdds >= 45 ? "#c9a227" : "#c0392b";
+                    return (
+                      <div key={i} className="relative">
+                        <div className="absolute -left-4 top-1 w-[10px] h-[10px] rounded-full border-2 bg-white" style={{ borderColor: dotColor }} />
+                      <div className={`rounded-lg ${isLast ? "bg-[#e8f5e9] border-[#c8e6c9]" : "bg-[#fafafa] border-[#eee]"} border p-2.5`}>
                         <div className="flex items-center justify-between mb-0.5">
-                          <span className="text-[8px] font-bold text-[#333]">{m.label}</span>
-                          <span className="text-[10px] font-bold" style={{ color: dotColor }}>{m.approvalOdds}%</span>
+                          <span className="text-[9px] font-bold text-[#333]">{m.label}</span>
+                          <span className="text-[10px] font-bold" style={{ color: dotColor, fontVariantNumeric: "tabular-nums" }}>{m.approvalOdds}%</span>
                         </div>
                         <p className="text-[7px] text-[#888] leading-[1.4]">{m.change}</p>
                       </div>
@@ -2568,46 +2568,47 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
                 })}
               </div>
             </div>
-          </div>
-        )}
+            </div>
+          )}
 
-        {hasAis && aisReport && (
-          <CapitalSimulator aisReport={aisReport} />
-        )}
+          {hasAis && aisReport && (
+            <CapitalSimulator aisReport={aisReport} />
+          )}
 
-        {aisReport?.strategyData && aisReport.strategyData.fundingMatches.length > 0 && (
-          <div className="rounded-lg border border-[#e8e8e8] bg-white p-3" data-testid="funding-matches">
-            <div className="flex items-center gap-2 mb-2.5">
-              <div className="w-5 h-5 rounded-md bg-[#1a1a2e] flex items-center justify-center shrink-0">
-                <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><rect x="1" y="2" width="8" height="6" rx="1" stroke="white" strokeWidth="1" fill="none"/><path d="M1 4h8" stroke="white" strokeWidth="0.8"/></svg>
+          {aisReport?.strategyData && aisReport.strategyData.fundingMatches.length > 0 && (
+            <div className="rounded-xl border border-[#e8e8e8] bg-white p-3" data-testid="funding-matches">
+              <div className="flex items-center gap-2 mb-1.5">
+                <div className="w-5 h-5 rounded-md bg-[#1a1a2e] flex items-center justify-center shrink-0">
+                  <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><rect x="1" y="2" width="8" height="6" rx="1" stroke="white" strokeWidth="1" fill="none"/><path d="M1 4h8" stroke="white" strokeWidth="0.8"/></svg>
+                </div>
+                <p className="text-[9px] text-[#333] font-bold uppercase tracking-[0.08em]">Lender Matches</p>
               </div>
-              <p className="text-[9px] text-[#333] font-bold uppercase tracking-[0.08em]">Lender Matches</p>
-            </div>
-            <p className="text-[8px] text-[#999] mb-2.5">Lenders that match your profile based on their approval criteria</p>
-            <div className="space-y-1.5">
-              {aisReport.strategyData.fundingMatches.map((match, i) => {
-                const likelihoodColor = match.likelihood.toLowerCase() === "high" ? "#2d6a4f" : match.likelihood.toLowerCase() === "medium" ? "#c9a227" : "#c0392b";
-                return (
-                  <div key={i} className="rounded-md bg-[#fafafa] border border-[#eee] p-2 flex items-center gap-2.5">
-                    <div className="w-7 h-7 rounded-md bg-[#1a1a2e] flex items-center justify-center shrink-0">
-                      <span className="text-[9px] font-bold text-white">{match.lender.charAt(0)}</span>
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-center justify-between mb-0.5">
-                        <span className="text-[9px] text-[#333] font-semibold">{match.lender}</span>
-                        <span className="text-[7px] font-bold px-1.5 py-[1px] rounded-full" style={{ color: likelihoodColor, backgroundColor: likelihoodColor + "15" }}>{match.likelihood}</span>
+              <p className="text-[8px] text-[#999] mb-2.5">Lenders that match your profile based on their approval criteria</p>
+              <div className="space-y-1.5">
+                {aisReport.strategyData.fundingMatches.map((match, i) => {
+                  const likelihoodColor = match.likelihood.toLowerCase() === "high" ? "#2d6a4f" : match.likelihood.toLowerCase() === "medium" ? "#c9a227" : "#c0392b";
+                  return (
+                    <div key={i} className="rounded-lg bg-[#fafafa] border border-[#eee] p-2.5 flex items-center gap-2.5">
+                      <div className="w-7 h-7 rounded-lg bg-[#1a1a2e] flex items-center justify-center shrink-0">
+                        <span className="text-[9px] font-bold text-white">{match.lender.charAt(0)}</span>
                       </div>
-                      <p className="text-[7px] text-[#888] leading-[1.3]">{match.reason}</p>
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center justify-between mb-0.5">
+                          <span className="text-[9px] text-[#333] font-semibold">{match.lender}</span>
+                          <span className="text-[7px] font-bold px-1.5 py-[2px] rounded-full" style={{ color: likelihoodColor, backgroundColor: likelihoodColor + "15" }}>{match.likelihood}</span>
+                        </div>
+                        <p className="text-[7px] text-[#888] leading-[1.4]">{match.reason}</p>
+                      </div>
                     </div>
-                  </div>
-                );
-              })}
+                  );
+                })}
+              </div>
             </div>
-          </div>
-        )}
+          )}
 
-        <PerfectProfileTab aisReport={aisReport} />
+          <PerfectProfileTab aisReport={aisReport} />
 
+        </div>
         </>)}
 
         {panelTab === "documents" && (<>
