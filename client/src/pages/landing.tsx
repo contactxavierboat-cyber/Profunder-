@@ -547,90 +547,34 @@ function BrandedResponse({ content, userQuestion, msgId }: { content: string; us
   const reportRef = useRef<HTMLDivElement>(null);
   const [downloading, setDownloading] = useState(false);
 
-  const handleDownloadImage = async () => {
-    if (!reportRef.current || downloading) return;
+  const handleDownloadPdf = async () => {
+    if (downloading) return;
     setDownloading(true);
-    let offscreen: HTMLDivElement | null = null;
     try {
-      const html2canvas = (await import("html2canvas")).default;
-
-      const pageW = 816;
-      const padX = 60;
-      const padY = 52;
-
-      const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
-
-      const now = new Date();
-      const dateStr = now.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
-
-      offscreen = document.createElement("div");
-      offscreen.style.cssText = `position:fixed;left:-9999px;top:0;width:${pageW}px;background:#fff;font-family:Inter,system-ui,sans-serif;padding:0;`;
-      document.body.appendChild(offscreen);
-
-      const cleanQ = userQuestion ? esc(userQuestion.replace(/\[Attached:.*?\]/g, "").trim()) : "";
-
-      let bodyHtml = "";
-
-      const md = esc(filterMarkdown(content));
-      bodyHtml = md
-        .replace(/^### (.+)$/gm, '<h3 style="font-size:15px;font-weight:600;color:#333;margin:14px 0 5px;">$1</h3>')
-        .replace(/^## (.+)$/gm, '<h2 style="font-size:17px;font-weight:700;color:#1a1a2e;text-transform:uppercase;letter-spacing:0.06em;margin:18px 0 6px;">$1</h2>')
-        .replace(/^# (.+)$/gm, '<h1 style="font-size:20px;font-weight:700;color:#1a1a2e;margin:0 0 4px;">$1</h1>')
-        .replace(/\*\*(.+?)\*\*/g, '<strong style="font-weight:600;color:#1a1a2e;">$1</strong>')
-        .replace(/\*(.+?)\*/g, '<em style="font-style:italic;color:#555;">$1</em>')
-        .replace(/^\d+\.\s+(.+)$/gm, '<div style="display:flex;gap:8px;margin:3px 0 3px 8px;"><span style="color:#999;font-weight:600;min-width:14px;">•</span><span>$1</span></div>')
-        .replace(/^[-•]\s+(.+)$/gm, '<div style="display:flex;gap:8px;margin:3px 0 3px 8px;"><span style="color:#999;">•</span><span>$1</span></div>')
-        .replace(/\n\n/g, '<div style="height:10px;"></div>')
-        .replace(/\n/g, '<br/>');
-
-      offscreen.innerHTML = `
-        <div style="padding:${padY}px ${padX}px 40px;">
-          <div style="display:flex;align-items:flex-end;justify-content:space-between;padding-bottom:16px;margin-bottom:24px;border-bottom:2px solid #1a1a2e;">
-            <div>
-              <div style="font-size:20px;font-weight:700;color:#1a1a2e;letter-spacing:-0.02em;">PROFUNDR</div>
-              <div style="font-size:9px;color:#999;letter-spacing:0.1em;text-transform:uppercase;margin-top:3px;">Capital Intelligence Report</div>
-            </div>
-            <div style="text-align:right;">
-              <div style="font-size:9px;color:#aaa;">${dateStr}</div>
-            </div>
-          </div>
-
-          ${cleanQ ? `
-          <div style="margin-bottom:20px;padding:14px 18px;background:#f7f7f7;border-radius:8px;border-left:3px solid #1a1a2e;">
-            <div style="font-size:9px;color:#999;text-transform:uppercase;letter-spacing:0.1em;font-weight:600;margin-bottom:5px;">Question</div>
-            <div style="font-size:14px;color:#1a1a2e;font-weight:500;line-height:1.5;">${cleanQ}</div>
-          </div>
-          ` : ""}
-
-          <div style="font-size:13px;color:#333;line-height:1.75;">${bodyHtml}</div>
-
-          <div style="border-top:1px solid #e0e0e0;margin-top:28px;padding-top:14px;display:flex;align-items:center;justify-content:space-between;">
-            <div style="font-size:8px;color:#bbb;letter-spacing:0.06em;text-transform:uppercase;">Profundr &middot; Confidential</div>
-            <div style="font-size:8px;color:#bbb;">profundr.com &middot; ${dateStr}</div>
-          </div>
-        </div>
-      `;
-
-      const canvas = await html2canvas(offscreen, {
-        scale: 2,
-        backgroundColor: "#ffffff",
-        useCORS: true,
-        logging: false,
+      const cleaned = filterMarkdown(content);
+      const res = await fetch("/api/report-pdf", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ content: cleaned, question: userQuestion || undefined }),
       });
-
-      canvas.toBlob((blob) => {
-        if (!blob) return;
+      if (!res.ok) throw new Error("PDF generation failed");
+      const data = await res.json();
+      if (data.downloadUrl) {
+        const pdfRes = await fetch(data.downloadUrl);
+        if (!pdfRes.ok) throw new Error("Download failed");
+        const blob = await pdfRes.blob();
         const url = URL.createObjectURL(blob);
         const a = document.createElement("a");
         a.href = url;
-        a.download = `profundr-report-${msgId}.jpg`;
+        a.download = `profundr-report-${msgId}.pdf`;
+        document.body.appendChild(a);
         a.click();
+        document.body.removeChild(a);
         URL.revokeObjectURL(url);
-      }, "image/jpeg", 0.95);
+      }
     } catch (err) {
-      console.error("Image generation failed:", err);
+      console.error("PDF generation failed:", err);
     } finally {
-      if (offscreen && offscreen.parentNode) document.body.removeChild(offscreen);
       setDownloading(false);
     }
   };
@@ -700,17 +644,17 @@ function BrandedResponse({ content, userQuestion, msgId }: { content: string; us
           <span className="text-[7px] text-[#ccc]">profundr.com</span>
         </div>
         <button
-          onClick={handleDownloadImage}
+          onClick={handleDownloadPdf}
           disabled={downloading}
           className="flex items-center gap-1 px-2 py-0.5 rounded-md text-[9px] font-medium text-[#1a1a2e] hover:bg-[#f5f5f5] transition-colors disabled:opacity-40"
           data-testid={`button-download-report-${msgId}`}
         >
           {downloading ? (
-            <span className="text-[8px] text-[#999]">Generating...</span>
+            <span className="text-[8px] text-[#999]">Generating PDF...</span>
           ) : (
             <>
               <svg width="9" height="9" viewBox="0 0 12 12" fill="none"><path d="M6 2v6M6 8L4 6M6 8l2-2" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" /><path d="M2 9v1h8V9" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" /></svg>
-              <span>Save Report</span>
+              <span>Save PDF</span>
             </>
           )}
         </button>
@@ -2812,12 +2756,16 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
                                 <button
                                   onClick={() => {
                                     const dateInfo = item.dates?.inquiryDate ? `inquiry date: ${item.dates.inquiryDate}` : "";
+                                    const sameDayItems = inquiryItems.filter(n => n.dates?.inquiryDate === item.dates?.inquiryDate && n.dates?.inquiryDate);
+                                    const velocityInfo = sameDayItems.length > 1 ? `\nINQUIRY VELOCITY FLAG: ${sameDayItems.length} inquiries detected on the same date (${item.dates?.inquiryDate}). This cluster pattern suggests unauthorized batch pull or impermissible purpose. Include this velocity pattern in the dispute basis.` : "";
+                                    const totalInquiries = inquiryItems.length;
+                                    const velocitySummary = totalInquiries >= 3 ? `\nTotal inquiry velocity: ${totalInquiries} inquiries flagged across the report. High inquiry density strengthens the dispute basis under §604.` : "";
                                     const roundInstr = item.disputeRound === 1
                                       ? "Generate a ROUND 1 inquiry dispute letter: Request documentation of permissible purpose under FCRA §604. Do NOT accuse fraud. Use 'I do not recognize / do not recall authorizing' framing. Request the transaction initiated by the consumer, any application or authorization, and the date/nature of the transaction."
                                       : item.disputeRound === 2
                                       ? "Generate a ROUND 2 inquiry dispute letter: This is a follow-up. The inquiry was reported as verified. Demand method of verification under FCRA §611(a)(6)(B)(iii). Request name/address/phone of the party contacted. Again request documentation of permissible purpose under §604."
                                       : "Generate a ROUND 3 inquiry dispute letter: This is a final escalation. The bureau failed to provide documentation of permissible purpose. Mention intent to file complaints with CFPB, FTC, and state AG. Reserve rights under §616/§617. Professional but firm.";
-                                    const disputeText = `${roundInstr}\n\nInquiry: ${item.furnisherName} (${item.bureau}${dateInfo ? `, ${dateInfo}` : ""}${item.userAttestation === "not_authorized" ? ", user attests NOT AUTHORIZED" : ""}). Use the ACTUAL creditor name and dates — do NOT use placeholder text.\n\nIMPORTANT: After the letter, output a DISPUTE: line in this exact format for EACH disputed item:\nDISPUTE: CreditorName | AccountNumber | Issue Description | Bureau | Reason/Basis\nThen output [GENERATE_DISPUTE_PACKAGE] at the very end.`;
+                                    const disputeText = `${roundInstr}\n\nInquiry: ${item.furnisherName} (${item.bureau}${dateInfo ? `, ${dateInfo}` : ""}${item.userAttestation === "not_authorized" ? ", user attests NOT AUTHORIZED" : ""}).${velocityInfo}${velocitySummary} Use the ACTUAL creditor name and dates — do NOT use placeholder text.\n\nIMPORTANT: After the letter, output a DISPUTE: line in this exact format for EACH disputed item:\nDISPUTE: CreditorName | AccountNumber | Issue Description | Bureau | Reason/Basis\nThen output [GENERATE_DISPUTE_PACKAGE] at the very end.`;
                                     onSendChat(disputeText);
                                   }}
                                   className="text-[8px] px-2 py-1 rounded bg-[#6366f1] text-white font-semibold hover:bg-[#5254cc] transition-colors"
@@ -2861,12 +2809,20 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
                             2: "ROUND 2: Follow-up. Demand method of verification under FCRA §611(a)(6)(B)(iii). Request name/address/phone of verifying party. Again request permissible purpose documentation.",
                             3: "ROUND 3: Final escalation. Bureau failed to provide documentation. Mention CFPB, FTC, state AG complaints. Reserve rights under §616/§617."
                           };
-                          let prompt = "Generate inquiry dispute letters for the following items, grouped by dispute round. Use the ACTUAL creditor names and dates — do NOT use placeholder text.\n\n";
+                          const dateGroups: Record<string, number> = {};
+                          eligible.forEach(n => { if (n.dates?.inquiryDate) { dateGroups[n.dates.inquiryDate] = (dateGroups[n.dates.inquiryDate] || 0) + 1; } });
+                          const clusterDates = Object.entries(dateGroups).filter(([, c]) => c > 1);
+                          let prompt = `Generate inquiry dispute letters for the following items, grouped by dispute round. Use the ACTUAL creditor names and dates — do NOT use placeholder text.\n\nINQUIRY VELOCITY SUMMARY: ${eligible.length} total inquiry disputes.`;
+                          if (clusterDates.length > 0) {
+                            prompt += ` Cluster dates detected: ${clusterDates.map(([d, c]) => `${d} (${c} inquiries)`).join(", ")}. Flag these clusters as potential unauthorized batch pulls in the dispute letters.`;
+                          }
+                          prompt += "\n\n";
                           for (const [round, items] of Object.entries(byRound).sort((a, b) => Number(a[0]) - Number(b[0]))) {
                             prompt += `--- ${roundInstructions[Number(round)] || roundInstructions[1]} ---\n`;
                             items.forEach(n => {
                               const dateInfo = n.dates?.inquiryDate ? `, inquiry date: ${n.dates.inquiryDate}` : "";
-                              prompt += `- ${n.furnisherName} (${n.bureau}${dateInfo}${n.userAttestation === "not_authorized" ? ", NOT AUTHORIZED per user" : ""})\n`;
+                              const isCluster = n.dates?.inquiryDate && dateGroups[n.dates.inquiryDate] > 1;
+                              prompt += `- ${n.furnisherName} (${n.bureau}${dateInfo}${n.userAttestation === "not_authorized" ? ", NOT AUTHORIZED per user" : ""}${isCluster ? ", CLUSTER — same-day inquiry" : ""})\n`;
                             });
                             prompt += "\n";
                           }
@@ -2981,6 +2937,14 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
                       if (inquiries.length > 0) {
                         const byRound: Record<number, typeof inquiries> = {};
                         inquiries.forEach(n => { const r = n.disputeRound || 1; if (!byRound[r]) byRound[r] = []; byRound[r].push(n); });
+                        const inqDateGroups: Record<string, number> = {};
+                        inquiries.forEach(n => { if (n.dates?.inquiryDate) { inqDateGroups[n.dates.inquiryDate] = (inqDateGroups[n.dates.inquiryDate] || 0) + 1; } });
+                        const inqClusterDates = Object.entries(inqDateGroups).filter(([, c]) => c > 1);
+                        prompt += `INQUIRY VELOCITY: ${inquiries.length} inquiry disputes.`;
+                        if (inqClusterDates.length > 0) {
+                          prompt += ` Cluster dates: ${inqClusterDates.map(([d, c]) => `${d} (${c} inquiries)`).join(", ")}. Flag these clusters as potential unauthorized batch pulls.`;
+                        }
+                        prompt += "\n\n";
                         const roundInstructions: Record<number, string> = {
                           1: "ROUND 1: Request documentation of permissible purpose under FCRA §604. Use 'I do not recognize / do not recall authorizing' framing.",
                           2: "ROUND 2: Follow-up. Demand method of verification under FCRA §611(a)(6)(B)(iii).",
@@ -2990,7 +2954,8 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
                           prompt += `--- INQUIRY DISPUTES: ${roundInstructions[Number(round)] || roundInstructions[1]} ---\n`;
                           items.forEach(n => {
                             const dateInfo = n.dates?.inquiryDate ? `, inquiry date: ${n.dates.inquiryDate}` : "";
-                            prompt += `- ${n.furnisherName} (${n.bureau}${dateInfo}${n.userAttestation === "not_authorized" ? ", NOT AUTHORIZED per user" : ""})\n`;
+                            const isCluster = n.dates?.inquiryDate && inqDateGroups[n.dates.inquiryDate] > 1;
+                            prompt += `- ${n.furnisherName} (${n.bureau}${dateInfo}${n.userAttestation === "not_authorized" ? ", NOT AUTHORIZED per user" : ""}${isCluster ? ", CLUSTER — same-day inquiry" : ""})\n`;
                           });
                           prompt += "\n";
                         }
@@ -4093,7 +4058,7 @@ export default function LandingPage() {
             }
           }
           try {
-            const payload: any = { disputes: autoDisputes, attachmentPages };
+            const payload: any = { disputes: autoDisputes, attachmentPages, letterContent: filterMarkdown(responseContent) };
             if (userProfile.fullName) payload.userName = userProfile.fullName;
             if (userProfile.address) payload.userAddress = userProfile.address;
             if (userProfile.ssn4) payload.ssnLast4 = userProfile.ssn4;
