@@ -1,0 +1,227 @@
+1. Remove “Credit” Terminology
+
+Remove the word “credit” from front-facing upload and action language wherever possible.
+
+Examples:
+
+Upload Credit Report → Upload Report
+
+Credit Analysis → Analysis
+
+Credit Repair Center → Repair Center or Dispute Center
+
+The platform should feel broader, cleaner, and more modern, not narrowly tied to “credit” language on the surface.
+
+2. Centralized Report Upload Logic
+
+Reports uploaded through either the Command Center or the Repair Center must be stored as a central intelligence file for the user.
+
+Once a report is uploaded, it should:
+
+remain on file until a new report is uploaded
+
+automatically replace the old report when a new one is submitted
+
+become the main data source for analysis across the platform
+
+persist across sessions for the logged-in user
+
+This uploaded file should act as the user’s active profile dataset until replaced.
+
+3. Automatic AIS Generation
+
+After a report is uploaded, the system should automatically generate the AIS and attach it to the user profile.
+
+That AIS should:
+
+generate once the upload is complete
+
+remain saved and accessible until a new report is uploaded
+
+update automatically when a replacement report is added
+
+serve as the system’s ongoing intelligence summary for the user
+
+4. Command Center as Main Processing Hub
+
+The Command Center should serve as the primary processing center for all uploaded report data.
+
+Once a report is uploaded into the Command Center, it should initiate all major system functions, including:
+
+analysis
+
+repair detection
+
+dispute eligibility review
+
+approval trigger detection
+
+plan generation
+
+AI-assisted responses
+
+The Command Center should function as the platform’s operational brain, while other tabs pull from the same stored intelligence.
+
+5. AI Access Across Entire Platform
+
+Any report uploaded through the Command Center or Repair Center should be available for the AI to pull from throughout the platform.
+
+The AI should be able to use uploaded report data when the user:
+
+asks questions in chat
+
+requests a dispute
+
+asks for a repair strategy
+
+asks for a funding-readiness plan
+
+asks for explanations of profile weaknesses
+
+requests next steps or recommendations
+
+The uploaded report should not live in one isolated section. It should power the full mainframe.
+
+6. Automatic Trigger Detection
+
+Once a report is uploaded, the system should automatically scan it and identify all active approval blockers, negative signals, and disputable items.
+
+This includes detection of:
+
+hard inquiries not tied to open accounts
+
+collections
+
+charge-offs
+
+late payments
+
+repossessions
+
+public negative items if present
+
+inaccurate or inconsistent personal information
+
+duplicate accounts
+
+suspicious reporting discrepancies
+
+utilization-based risk triggers
+
+excessive recent inquiries
+
+other active approval triggers that may reduce eligibility
+
+The system should actively surface these items instead of waiting for the user to find them.
+
+7. Autonomous Dispute Flagging
+
+When the system detects active negative items or approval triggers, it should autonomously flag them as Disputable where applicable.
+
+That means:
+
+disputable items should automatically appear in the Repair Center
+
+flagged items should be grouped into a dispute queue
+
+the user should be able to generate dispute letters directly from those flagged items
+
+the AI should recognize those same items inside chat when the user asks for help
+
+The system should not only identify problems, but also indicate which items may be actionable for dispute.
+
+8. Repair Center as Dispute Package Builder
+
+The Repair Center should do more than show negative items. It should compile a complete dispute package every time the user is ready to take action.
+
+It should automatically combine:
+
+uploaded ID
+
+proof of residence
+
+any supporting user documents
+
+selected disputable items
+
+generated dispute letters
+
+relevant data pulled from the stored report
+
+relevant chat responses if the user answered questions through chat
+
+All of this should be compiled into one complete dispute package PDF.
+
+9. Chat-Integrated Dispute Generation
+
+The AI assistant should be able to ask the user relevant follow-up questions and use those answers inside the dispute workflow.
+
+When the user provides information through chat, the system should:
+
+save relevant responses
+
+attach them to the dispute workflow
+
+use them in letter generation where relevant
+
+include them in the final dispute package PDF when appropriate
+
+Chat should function as an active intake tool for dispute preparation, not just a conversation window.
+
+10. Downloadable PDFs
+
+The platform should support PDF generation for both dispute workflows and chat history.
+
+Dispute Package PDF
+
+Should include:
+
+dispute letters
+
+supporting documents
+
+selected items being challenged
+
+user identity/residency documents
+
+any relevant supplemental statements or notes
+
+Chat Export PDF
+
+Users should also be able to download chat conversations in PDF form, including:
+
+timestamps
+
+conversation transcript
+
+relevant references to uploaded report data where applicable
+
+11. Login-Based Privacy and Session Security
+
+Uploaded reports, AIS results, and analysis data should never be visible from the front page when the user is logged out.
+
+System behavior should be:
+
+logged out: no stored report data visible
+
+logged in: restore and display the user’s saved report intelligence automatically
+
+The data should remain securely tied to the authenticated user session.
+
+12. Complimentary Chat Limit
+
+Users should receive 5 complimentary chat sessions.
+
+After the fifth complimentary chat, the platform should prompt the user to:
+
+sign in
+
+subscribe
+
+or upgrade for continued access
+
+This should be enforced cleanly without breaking the overall experience.
+
+Condensed Developer Intent
+
+Any report uploaded through the Command Center or Repair Center becomes the permanent active intelligence file for that user until replaced. That report must automatically trigger AIS generation, power all Command Center and Repair Center functions, remain accessible to the AI across the platform, identify approval triggers and disputable items autonomously, and support PDF generation for both disputes and chat history. All sensitive report intelligence must remain hidden when logged out and restore upon login. Complimentary chat access should be limited to 5 sessions.

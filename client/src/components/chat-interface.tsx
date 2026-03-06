@@ -132,20 +132,34 @@ export function ChatInterface() {
     }
   };
 
-  const downloadSummary = () => {
-    const lastAssistantMessage = [...messages].reverse().find(m => m.role === 'assistant');
-    if (!lastAssistantMessage) {
-      toast({ title: "Nothing to download", description: "Run an analysis first." });
+  const downloadSummary = async () => {
+    if (messages.length === 0) {
+      toast({ title: "Nothing to download", description: "Start a conversation first." });
       return;
     }
-    
-    const blob = new Blob([lastAssistantMessage.content], { type: 'text/plain' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'profundr-Session.txt';
-    a.click();
-    toast({ title: "Summary Downloaded" });
+    try {
+      const transcript = messages.map(m => ({
+        role: m.role,
+        content: m.content,
+        timestamp: (m as any).createdAt || new Date().toISOString(),
+      }));
+      const res = await fetch("/api/chat/export-pdf", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ messages: transcript }),
+      });
+      if (!res.ok) throw new Error("Export failed");
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `profundr-chat-${new Date().toISOString().slice(0, 10)}.pdf`;
+      a.click();
+      URL.revokeObjectURL(url);
+      toast({ title: "Chat exported as PDF" });
+    } catch {
+      toast({ title: "Export failed", description: "Could not generate PDF." });
+    }
   };
 
   return (
@@ -337,7 +351,7 @@ export function ChatInterface() {
                 variant="ghost" 
                 className="w-8 h-8 rounded-full hover:bg-white/60 text-[#7a7a9a]"
                 onClick={() => handleSend("credit_report")}
-                title="Attach Credit Report"
+                title="Attach Report"
                 disabled={isLoading || !user?.hasCreditReport}
                 data-testid="button-attach"
               >

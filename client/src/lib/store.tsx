@@ -180,6 +180,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try { await fetch("/api/logout", { method: "POST" }); } catch {}
     setIsLoggedIn(false);
     localStorage.removeItem("studio_logged_in");
+    try { localStorage.removeItem("profundr_ais_report"); } catch {}
+    try { localStorage.removeItem("profundr_ais_calculated_at"); } catch {}
+    try { localStorage.removeItem("profundr_repair_data"); } catch {}
     queryClient.clear();
   };
 

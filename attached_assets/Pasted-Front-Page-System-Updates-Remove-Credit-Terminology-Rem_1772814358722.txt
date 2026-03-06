@@ -1,0 +1,80 @@
+Front Page & System Updates
+
+Remove “Credit” Terminology
+Remove the word “credit” from all front-page actions.
+Example:
+
+Replace “Upload Credit Report” with “Upload Report.”
+
+Single Upload → Persistent Analysis
+
+Once a user uploads a report, the system should automatically generate the AIS (Analysis Intelligence Summary).
+
+The uploaded report and its analysis should remain on file until the user uploads a new report.
+
+Uploading a new report should automatically replace the previous analysis and trigger a new AIS generation.
+
+Central Processing Location (Command Tab)
+
+All report analysis and processing should occur in the Command Tab, which acts as the system’s primary processing center.
+
+Once processed, the report data should become accessible throughout the entire platform (mainframe) including:
+
+Repair Center
+
+Funding Strategy
+
+Chat Assistant
+
+Dashboard insights
+
+Login Security
+
+Report data and analysis must not appear on the front page if the user is logged out.
+
+After login, the system should restore and display the previously stored analysis automatically.
+
+Repair Center – Automated Dispute Package Builder
+The Repair Center should automatically:
+
+Collect all uploaded identity documents such as:
+
+ID
+
+Proof of Residence
+
+Supporting documentation
+
+Combine them with:
+
+Identified negative items
+
+Generated dispute letters
+
+Relevant report data
+
+Compile everything into one complete dispute package PDF.
+
+Chat-Driven Dispute Generation
+
+When users interact with the chat assistant and answer dispute-related questions, the system should automatically integrate those responses into the dispute package.
+
+The chat assistant should be able to trigger dispute package generation on command.
+
+Downloadable Chat History
+
+Users should be able to download chat conversations in PDF format.
+
+Each export should include:
+
+Date/time
+
+Conversation transcript
+
+Relevant analysis references if applicable.
+
+Complimentary Chat Limit
+
+Users should receive 5 complimentary chat sessions.
+
+After the fifth chat interaction, the system should prompt the user to subscribe or upgrade to continue using chat features.

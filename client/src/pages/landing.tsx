@@ -1028,7 +1028,7 @@ function MissionDashboard({ data, userName, compact }: { data: MissionData; user
       const header = document.createElement("div");
       header.innerHTML = `<div style="display:flex;align-items:flex-end;justify-content:space-between;padding-bottom:16px;margin-bottom:24px;border-bottom:2px solid #1a1a2e;">
         <div><div style="font-size:20px;font-weight:700;color:#1a1a2e;letter-spacing:-0.02em;">PROFUNDR</div>
-        <div style="font-size:9px;color:#999;letter-spacing:0.1em;text-transform:uppercase;margin-top:3px;">Credit Analysis Report</div></div>
+        <div style="font-size:9px;color:#999;letter-spacing:0.1em;text-transform:uppercase;margin-top:3px;">Analysis Report</div></div>
         <div style="text-align:right;"><div style="font-size:10px;color:#555;font-weight:500;">${userName || "User"}</div>
         <div style="font-size:9px;color:#aaa;">${dateStr}</div></div></div>`;
       wrapper.appendChild(header);
@@ -1830,7 +1830,7 @@ function PerfectProfileTab({ aisReport }: { aisReport: MissionData | null }) {
             <path d="M12 5v14M5 12h14" />
           </svg>
         </div>
-        <p className="text-[9px] text-[#999] mt-2.5 leading-[1.6]">Upload a credit report to generate your profile match.</p>
+        <p className="text-[9px] text-[#999] mt-2.5 leading-[1.6]">Upload a report to generate your profile match.</p>
       </div>
     );
   }
@@ -2275,7 +2275,7 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
             </button>
           ) : (
             <div className="rounded-xl border border-dashed border-[#ddd] p-3 text-center">
-              <p className="text-[9px] text-[#999] leading-[1.5]">Upload a credit report to activate your Capital Readiness Index</p>
+              <p className="text-[9px] text-[#999] leading-[1.5]">Upload a report to activate your Capital Readiness Index</p>
             </div>
           )}
 
@@ -2686,7 +2686,7 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
           {!repairData || repairData.negativeItems.length === 0 ? (
             <div className="px-2.5 py-2.5 rounded-md bg-[#fafafa] border border-[#eee] text-center">
               <div className="text-[9px] text-[#888]">No dispute-eligible items detected yet.</div>
-              <div className="text-[8px] text-[#aaa] mt-0.5">Upload a credit report and run analysis to populate.</div>
+              <div className="text-[8px] text-[#aaa] mt-0.5">Upload a report and run analysis to populate.</div>
             </div>
           ) : (<>
             <div className="flex gap-1 mb-2">
@@ -2867,7 +2867,7 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
 
           <div className="rounded-lg border border-[#e8e8e8] bg-white overflow-hidden divide-y divide-[#f0f0f0]">
             {[
-              { label: "Credit Report", icon: <svg width="9" height="9" viewBox="0 0 12 12" fill="none"><rect x="2" y="1" width="8" height="10" rx="1" stroke="currentColor" strokeWidth="1" fill="none"/><path d="M4 4h4M4 6h4M4 8h2" stroke="currentColor" strokeWidth="0.7" strokeLinecap="round"/></svg>, docs: creditReports, type: "credit_report" as const, onUpload: () => { setUploadTarget("credit_report"); docInputRef.current?.click(); } },
+              { label: "Bureau Report", icon: <svg width="9" height="9" viewBox="0 0 12 12" fill="none"><rect x="2" y="1" width="8" height="10" rx="1" stroke="currentColor" strokeWidth="1" fill="none"/><path d="M4 4h4M4 6h4M4 8h2" stroke="currentColor" strokeWidth="0.7" strokeLinecap="round"/></svg>, docs: creditReports, type: "credit_report" as const, onUpload: () => { setUploadTarget("credit_report"); docInputRef.current?.click(); } },
               { label: "Government ID", icon: <svg width="9" height="9" viewBox="0 0 12 12" fill="none"><rect x="1" y="3" width="10" height="7" rx="1" stroke="currentColor" strokeWidth="1" fill="none"/><circle cx="4" cy="6.5" r="1.2" stroke="currentColor" strokeWidth="0.7" fill="none"/><path d="M6.5 5.5h3M6.5 7.5h2" stroke="currentColor" strokeWidth="0.7" strokeLinecap="round"/></svg>, docs: idDocs, type: "id_document" as const, onUpload: () => { setUploadTarget("id_document"); idInputRef.current?.click(); } },
               { label: "Bank Statement", icon: <svg width="9" height="9" viewBox="0 0 12 12" fill="none"><path d="M2 3l4-2 4 2v1H2V3z" stroke="currentColor" strokeWidth="0.8" fill="none"/><path d="M3 5v4M5 5v4M7 5v4M9 5v4" stroke="currentColor" strokeWidth="0.7"/><path d="M1.5 10h9" stroke="currentColor" strokeWidth="0.8" strokeLinecap="round"/></svg>, docs: bankDocs, type: "bank_statement" as const, onUpload: () => { setUploadTarget("bank_statement"); bankInputRef.current?.click(); } },
               { label: "Proof of Residency", icon: <svg width="9" height="9" viewBox="0 0 12 12" fill="none"><path d="M6 1L1 5.5V11h3.5V8h3v3H11V5.5L6 1z" stroke="currentColor" strokeWidth="0.9" fill="none" strokeLinejoin="round"/></svg>, docs: residencyDocs, type: "proof_of_residency" as const, onUpload: () => { setUploadTarget("proof_of_residency"); residencyInputRef.current?.click(); } },
@@ -3271,7 +3271,7 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
               </div>
             </div>
             <div className="rounded-lg border border-dashed border-[#ddd] p-2.5 text-center">
-              <p className="text-[8px] text-[#999]">Upload a credit report to generate your goal sheet</p>
+              <p className="text-[8px] text-[#999]">Upload a report to generate your goal sheet</p>
             </div>
           </div>
         )}
@@ -3566,11 +3566,15 @@ export default function LandingPage() {
       }
       const fileData = { name: file.name, content, isPdf };
       if (shouldAutoSend) {
-        if (!user && previewCount >= 2) {
+        if (!user && previewCount >= 5) {
           setShowInitiationGate(true);
           return;
         }
-        doSend("Analyze my credit report and generate my AIS.", fileData);
+        setAisReport(null);
+        try { localStorage.removeItem("profundr_ais_report"); } catch {}
+        setRepairData(null);
+        try { localStorage.removeItem("profundr_repair_data"); } catch {}
+        doSend("Analyze my report and generate my AIS.", fileData);
       } else {
         setAttachedFile(fileData);
       }
@@ -3837,16 +3841,59 @@ export default function LandingPage() {
         const newCount = previewCount + 1;
         setPreviewCount(newCount);
         setGuestPreviewCount(newCount);
-        if (newCount === 1) {
-          responseContent += "\n\n---\n\n*This is 1 of 2 complimentary previews. Subscribe to unlock the full system — AIS, dispute letters, funding projections, and unlimited analysis.*";
-        } else if (newCount === 2) {
-          responseContent += "\n\n---\n\n**Your final complimentary preview is complete.**\n\nSubscribe to access the full system — AIS scoring, dispute generation, funding projections, and unlimited analysis. $50/mo, cancel anytime.";
+        const remaining = 5 - newCount;
+        if (remaining > 0) {
+          responseContent += `\n\n---\n\n*${remaining} complimentary chat${remaining === 1 ? "" : "s"} remaining. Subscribe to unlock the full system — AIS, dispute letters, funding projections, and unlimited analysis.*`;
+        } else if (remaining === 0) {
+          responseContent += "\n\n---\n\n**Your complimentary chats are complete.**\n\nSubscribe to access the full system — AIS scoring, dispute generation, funding projections, and unlimited analysis. $50/mo, cancel anytime.";
         }
       }
+
+      const hasDisputePackageTrigger = responseContent.includes("[GENERATE_DISPUTE_PACKAGE]");
+      responseContent = responseContent.replace(/\[GENERATE_DISPUTE_PACKAGE\]/g, "").trim();
 
       const aiMsg: GuestMessage = { id: nextId + 1, role: "assistant", content: responseContent };
       setGuestMessages((prev) => [...prev, aiMsg]);
       setNextId((n) => n + 1);
+
+      if (hasDisputePackageTrigger && repairData && repairData.negativeItems.length > 0) {
+        const disputes = repairData.negativeItems.map(item => ({
+          creditor: item.furnisherName || "Unknown",
+          accountNumber: item.accountPartial || "N/A",
+          issue: item.issue || "Inaccurate reporting",
+          bureau: item.bureau || "All",
+          reason: item.disputeBasis || "Information is inaccurate per FCRA §611",
+        }));
+        const attachmentPages: { type: string; dataUrl: string; name: string }[] = [];
+        for (const d of savedDocs) {
+          if ((d.type === "id_document" || d.type === "proof_of_residency" || d.type === "bank_statement") && d.fileDataUrl) {
+            attachmentPages.push({ type: d.type, dataUrl: d.fileDataUrl, name: d.name });
+          }
+        }
+        try {
+          const payload: any = { disputes, attachmentPages };
+          if (userProfile.fullName) payload.userName = userProfile.fullName;
+          if (userProfile.address) payload.userAddress = userProfile.address;
+          if (userProfile.ssn4) payload.ssnLast4 = userProfile.ssn4;
+          if (userProfile.dob) payload.dob = userProfile.dob;
+          const pdfRes = await fetch("/api/dispute-letters", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
+          if (pdfRes.ok) {
+            const pdfData = await pdfRes.json();
+            if (pdfData.downloadUrl) {
+              const dlRes = await fetch(pdfData.downloadUrl);
+              if (dlRes.ok) {
+                const blob = await dlRes.blob();
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement("a");
+                a.href = url;
+                a.download = "profundr-dispute-package.pdf";
+                a.click();
+                URL.revokeObjectURL(url);
+              }
+            }
+          }
+        } catch (err) { console.error("Auto dispute package generation failed:", err); }
+      }
 
       const parsedAis = parseSingleMessageData(responseContent);
       if (hasAnalysisData(parsedAis) && parsedAis.approvalIndex !== null) {
@@ -3885,15 +3932,21 @@ export default function LandingPage() {
     if (isSending) return;
     if (!text && !attachedFile) return;
 
-    if (!user && previewCount >= 2) {
+    if (!user && previewCount >= 5) {
       setShowInitiationGate(true);
       return;
     }
 
     const file = attachedFile;
-    const msg = text || "Analyze my credit report and generate my AIS.";
+    const msg = text || "Analyze my report and generate my AIS.";
     setInput("");
     setAttachedFile(null);
+    if (file) {
+      setAisReport(null);
+      try { localStorage.removeItem("profundr_ais_report"); } catch {}
+      setRepairData(null);
+      try { localStorage.removeItem("profundr_repair_data"); } catch {}
+    }
     doSend(msg, file);
   };
 
@@ -4076,6 +4129,35 @@ export default function LandingPage() {
     }
   }, [displayMessages, hasMessages, isExporting, user]);
 
+  const downloadChatAsPdf = useCallback(async () => {
+    if (!hasMessages || isExporting) return;
+    setIsExporting(true);
+    try {
+      const transcript = displayMessages.map(m => ({
+        role: m.role === "assistant" ? "assistant" as const : "user" as const,
+        content: m.content,
+        timestamp: new Date().toISOString(),
+      }));
+      const res = await fetch("/api/chat/export-pdf", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ messages: transcript }),
+      });
+      if (!res.ok) throw new Error("Export failed");
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `profundr-chat-${new Date().toISOString().slice(0, 10)}.pdf`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error("PDF export failed:", err);
+    } finally {
+      setIsExporting(false);
+    }
+  }, [displayMessages, hasMessages, isExporting]);
+
   const mentionCandidates = useMemo(() => {
     if (!activeTeamChat) return [];
     const candidates = [
@@ -4148,7 +4230,7 @@ export default function LandingPage() {
         <>
           <div className="sm:hidden fixed inset-0 bg-black/30 z-40" onClick={() => setDocsOpen(false)} />
           <div className="fixed sm:relative z-50 sm:z-auto w-[340px] h-full shrink-0 transition-all" data-testid="docs-sidebar">
-            <DocsPanel docs={savedDocs} onClose={() => setDocsOpen(false)} onDelete={handleDeleteDoc} onSave={handleSaveDoc} user={user} onOpenTeamChat={handleOpenTeamChat} activeTeamChatId={activeTeamChat?.id} aisReport={aisReport} onOpenAis={() => setShowAisOverlay(true)} userProfile={userProfile} onUpdateProfile={handleUpdateProfile} repairData={repairData} onUpdateRepairData={(data) => { setRepairData(data); saveRepairData(data); }} onSendChat={(msg) => { setDocsOpen(false); setTimeout(() => handleSend(msg), 100); }} />
+            <DocsPanel docs={savedDocs} onClose={() => setDocsOpen(false)} onDelete={handleDeleteDoc} onSave={handleSaveDoc} user={user} onOpenTeamChat={handleOpenTeamChat} activeTeamChatId={activeTeamChat?.id} aisReport={user ? aisReport : null} onOpenAis={() => setShowAisOverlay(true)} userProfile={userProfile} onUpdateProfile={handleUpdateProfile} repairData={user ? repairData : null} onUpdateRepairData={(data) => { setRepairData(data); saveRepairData(data); }} onSendChat={(msg) => { setDocsOpen(false); setTimeout(() => handleSend(msg), 100); }} />
           </div>
         </>
       )}
@@ -4268,7 +4350,7 @@ export default function LandingPage() {
             </div>
           )}
 
-          {showAisOverlay && aisReport && hasAnalysisData(aisReport) ? (
+          {showAisOverlay && user && aisReport && hasAnalysisData(aisReport) ? (
             <div className="w-full max-w-[720px] mx-auto px-4 pt-4 pb-2">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
@@ -4298,15 +4380,27 @@ export default function LandingPage() {
                   <path d="M9 3V12M9 3L5.5 6.5M9 3L12.5 6.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
                   <path d="M3 12V14C3 14.5523 3.44772 15 4 15H14C14.5523 15 15 14.5523 15 14V12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
-                Upload credit report to get started
+                Upload report to get started
               </button>
               <p className="text-[11px] text-[#999] text-center max-w-[240px] leading-[1.6]" data-testid="text-upload-description">
-                Profundr reviews your credit report like a bank would and shows your funding potential before you apply. No hard inquiry, no lending — just secure, clear analysis.
+                Profundr reviews your report like a bank would and shows your funding potential before you apply. No hard inquiry, no lending — just secure, clear analysis.
               </p>
             </div>
           ) : (
             <div className="w-full max-w-[720px] mx-auto px-4 pt-4 pb-2" data-testid="chat-messages">
-              <div className="flex justify-end mb-2">
+              <div className="flex justify-end gap-1.5 mb-2">
+                <button
+                  onClick={downloadChatAsPdf}
+                  disabled={isExporting}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] font-medium text-[#777] border border-[#e0e0e0] hover:bg-[#f5f5f5] hover:border-[#ccc] transition-colors disabled:opacity-50 disabled:cursor-wait"
+                  title="Download conversation as PDF"
+                  data-testid="button-download-chat-pdf"
+                >
+                  <svg width="12" height="12" viewBox="0 0 16 16" fill="none">
+                    <path d="M8 2v8.5M8 10.5l-3-3M8 10.5l3-3M3 13h10" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                  {isExporting ? "Exporting..." : "Save as PDF"}
+                </button>
                 <button
                   onClick={downloadChatAsJpg}
                   disabled={isExporting}
@@ -4524,7 +4618,7 @@ export default function LandingPage() {
               <button
                 type="button" onClick={handleUploadClick}
                 className="w-9 h-9 flex items-center justify-center rounded-full text-[#888] hover:text-[#555] hover:bg-[#e5e5e5] transition-colors shrink-0"
-                title="Upload credit report" data-testid="button-attach-file"
+                title="Upload report" data-testid="button-attach-file"
               >
                 <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
                   <path d="M15.75 8.55L9.3075 14.9925C8.59083 15.7092 7.62164 16.1121 6.61125 16.1121C5.60086 16.1121 4.63167 15.7092 3.915 14.9925C3.19833 14.2758 2.79544 13.3067 2.79544 12.2963C2.79544 11.2859 3.19833 10.3167 3.915 9.6L10.3575 3.1575C10.8358 2.67917 11.4845 2.41121 12.16 2.41121C12.8355 2.41121 13.4842 2.67917 13.9625 3.1575C14.4408 3.63583 14.7088 4.28453 14.7088 4.96C14.7088 5.63547 14.4408 6.28417 13.9625 6.7625L7.5125 13.205C7.27333 13.4442 6.94898 13.5782 6.61125 13.5782C6.27352 13.5782 5.94917 13.4442 5.71 13.205C5.47083 12.9658 5.33685 12.6415 5.33685 12.3038C5.33685 11.966 5.47083 11.6417 5.71 11.4025L11.6025 5.5175" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" />
@@ -4552,7 +4646,7 @@ export default function LandingPage() {
 
           {!user && (
             <p className="text-center text-[10px] text-[#bbb] mt-1 tracking-wide" data-testid="text-preview-counter">
-              {previewCount === 0 ? "2 complimentary previews available" : previewCount === 1 ? "1 complimentary preview remaining" : "Complimentary previews exhausted"}
+              {previewCount >= 5 ? "Complimentary chats exhausted" : `${5 - previewCount} complimentary chat${5 - previewCount === 1 ? "" : "s"} remaining`}
             </p>
           )}
 
@@ -4583,7 +4677,7 @@ export default function LandingPage() {
                 Unlock Profundr
               </h2>
               <p className="text-[13px] text-[#777] leading-[1.6] max-w-[320px] mx-auto">
-                Your complimentary previews are complete. Subscribe to access full AIS scoring, dispute generation, funding projections, and unlimited analysis.
+                Your 5 complimentary chats are complete. Subscribe to access full AIS scoring, dispute generation, funding projections, and unlimited analysis.
               </p>
             </div>
 
