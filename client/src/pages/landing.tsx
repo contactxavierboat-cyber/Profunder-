@@ -3979,7 +3979,7 @@ export default function LandingPage() {
       setRepairData(null);
       try { localStorage.removeItem("profundr_repair_data"); } catch {}
       const vaultFile = dataType === "BASE64"
-        ? { name: fileName, content: `data:application/pdf;base64,${content}`, isPdf: true }
+        ? { name: fileName, content, isPdf: true }
         : { name: fileName, content };
       doSend("Analyze my report and generate my AIS.", vaultFile);
       return;
