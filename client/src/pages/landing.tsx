@@ -1820,17 +1820,18 @@ function CapitalSimulator({ aisReport }: { aisReport: MissionData }) {
   );
 }
 
-function PerfectProfileTab({ aisReport }: { aisReport: MissionData | null }) {
+function PerfectProfileTab({ aisReport, onUpload }: { aisReport: MissionData | null; onUpload?: () => void }) {
   const [expandedSection, setExpandedSection] = useState<string | null>("revolving");
   if (!aisReport || !hasAnalysisData(aisReport)) {
     return (
       <div className="flex flex-col items-center justify-center py-10 px-4 text-center">
-        <div className="w-[28px] h-[28px] rounded-md bg-[#f5f5f5] border border-[#e8e8e8] flex items-center justify-center">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#bbb" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M12 5v14M5 12h14" />
+        <button onClick={onUpload} className="rounded-lg border border-dashed border-[#ccc] px-6 py-3 hover:border-[#999] hover:bg-[#fafafa] transition-all cursor-pointer" data-testid="button-upload-profile">
+          <svg width="14" height="14" viewBox="0 0 18 18" fill="none" className="mx-auto mb-1 text-[#aaa]">
+            <path d="M9 3V12M9 3L5.5 6.5M9 3L12.5 6.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+            <path d="M3 12V14C3 14.5523 3.44772 15 4 15H14C14.5523 15 15 14.5523 15 14V12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
-        </div>
-        <p className="text-[9px] text-[#999] mt-2.5 leading-[1.6]">Upload a report to generate your profile match.</p>
+          <p className="text-[9px] text-[#999] leading-[1.6]">Upload Report</p>
+        </button>
       </div>
     );
   }
@@ -2067,10 +2068,16 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
   const docInputRef = useRef<HTMLInputElement>(null);
   const idInputRef = useRef<HTMLInputElement>(null);
   const bankInputRef = useRef<HTMLInputElement>(null);
+  const commandUploadRef = useRef<HTMLInputElement>(null);
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
   const [expandedBureau, setExpandedBureau] = useState<string | null>(null);
   const [uploadTarget, setUploadTarget] = useState<"credit_report" | "id_document" | "bank_statement" | "proof_of_residency" | null>(null);
   const residencyInputRef = useRef<HTMLInputElement>(null);
+
+  const triggerCommandUpload = () => {
+    setUploadTarget("credit_report");
+    commandUploadRef.current?.click();
+  };
 
   const classifyDocType = (name: string, target?: string | null): SavedDoc["type"] => {
     if (target === "id_document") return "id_document";
@@ -2125,6 +2132,7 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
     if (idInputRef.current) idInputRef.current.value = "";
     if (bankInputRef.current) bankInputRef.current.value = "";
     if (residencyInputRef.current) residencyInputRef.current.value = "";
+    if (commandUploadRef.current) commandUploadRef.current.value = "";
   };
 
   const handleDownload = async (doc: SavedDoc) => {
@@ -2293,9 +2301,13 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
               )}
             </button>
           ) : (
-            <div className="rounded-xl border border-dashed border-[#ddd] p-3 text-center">
-              <p className="text-[9px] text-[#999] leading-[1.5]">Upload a report to activate your Capital Readiness Index</p>
-            </div>
+            <button onClick={triggerCommandUpload} className="w-full rounded-xl border border-dashed border-[#ccc] p-3 text-center hover:border-[#999] hover:bg-[#fafafa] transition-all cursor-pointer" data-testid="button-upload-ais">
+              <svg width="14" height="14" viewBox="0 0 18 18" fill="none" className="mx-auto mb-1 text-[#aaa]">
+                <path d="M9 3V12M9 3L5.5 6.5M9 3L12.5 6.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                <path d="M3 12V14C3 14.5523 3.44772 15 4 15H14C14.5523 15 15 14.5523 15 14V12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+              <p className="text-[9px] text-[#999] leading-[1.5]">Upload Report</p>
+            </button>
           )}
 
           {hasAis && aisReport && (() => {
@@ -2646,7 +2658,7 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
             </div>
           )}
 
-          <PerfectProfileTab aisReport={aisReport} />
+          <PerfectProfileTab aisReport={aisReport} onUpload={triggerCommandUpload} />
 
         </div>
         </>)}
@@ -2703,10 +2715,10 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
           </div>
 
           {!repairData || repairData.negativeItems.length === 0 ? (
-            <div className="px-2.5 py-2.5 rounded-md bg-[#fafafa] border border-[#eee] text-center">
+            <button onClick={triggerCommandUpload} className="w-full px-2.5 py-2.5 rounded-md bg-[#fafafa] border border-dashed border-[#ddd] text-center hover:border-[#999] hover:bg-[#f0f0f0] transition-all cursor-pointer" data-testid="button-upload-repair">
               <div className="text-[9px] text-[#888]">No dispute-eligible items detected yet.</div>
-              <div className="text-[8px] text-[#aaa] mt-0.5">Upload a report and run analysis to populate.</div>
-            </div>
+              <div className="text-[8px] text-[#aaa] mt-0.5">Upload Report to scan for disputable items</div>
+            </button>
           ) : (<>
             <div className="flex gap-1 mb-2">
               <select value={repairFilter.bureau} onChange={e => setRepairFilter(f => ({ ...f, bureau: e.target.value }))} className="text-[9px] px-1.5 py-1 rounded border border-[#ddd] bg-white text-[#555]" data-testid="filter-bureau">
@@ -3289,9 +3301,9 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
                 <p className="text-[7px] uppercase tracking-[0.1em] text-white/40 font-semibold">Next Moves</p>
               </div>
             </div>
-            <div className="rounded-lg border border-dashed border-[#ddd] p-2.5 text-center">
-              <p className="text-[8px] text-[#999]">Upload a report to generate your goal sheet</p>
-            </div>
+            <button onClick={triggerCommandUpload} className="w-full rounded-lg border border-dashed border-[#ccc] p-2.5 text-center hover:border-[#999] hover:bg-[#fafafa] transition-all cursor-pointer" data-testid="button-upload-goals">
+              <p className="text-[8px] text-[#999]">Upload Report</p>
+            </button>
           </div>
         )}
 
@@ -3328,6 +3340,7 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
       </div>
 
       <input ref={docInputRef} type="file" className="hidden" onChange={handleUploadDoc} data-testid="input-doc-upload" />
+      <input ref={commandUploadRef} type="file" accept=".pdf,.txt,.csv,.html" className="hidden" onChange={handleUploadDoc} data-testid="input-command-upload" />
       {panelTab === "documents" && (
       <div className="px-4 py-3 border-t border-[#eee]">
         <button
