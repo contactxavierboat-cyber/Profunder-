@@ -3596,6 +3596,8 @@ export default function LandingPage() {
   const { user, logout } = useAuth();
   const prevUserRef = useRef<typeof user>(undefined);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const scrollAreaRef = useRef<HTMLDivElement>(null);
+  const [showScrollBtn, setShowScrollBtn] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -3766,6 +3768,26 @@ export default function LandingPage() {
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [guestMessages, teamChatMessages]);
+
+  useEffect(() => {
+    const el = scrollAreaRef.current;
+    if (!el) return;
+    const onScroll = () => {
+      const distFromBottom = el.scrollHeight - el.scrollTop - el.clientHeight;
+      setShowScrollBtn(distFromBottom > 200);
+    };
+    el.addEventListener("scroll", onScroll, { passive: true });
+    return () => el.removeEventListener("scroll", onScroll);
+  }, []);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  const resetChat = () => {
+    setGuestMessages([]);
+    setShowScrollBtn(false);
+  };
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -4491,7 +4513,7 @@ export default function LandingPage() {
       )}
 
       <div className="flex-1 flex flex-col min-w-0 h-full">
-        <div className="flex-1 overflow-y-auto" data-testid="main-scroll-area">
+        <div ref={scrollAreaRef} className="flex-1 overflow-y-auto relative" data-testid="main-scroll-area">
           <nav className="sticky top-0 z-30 bg-[#fafafa]/95 backdrop-blur-sm flex items-center justify-between px-4 sm:px-6 py-3 border-b border-[#eee]" data-testid="nav-top">
             <div className="flex items-center gap-2">
               {!docsOpen && (
@@ -4644,6 +4666,18 @@ export default function LandingPage() {
           ) : (
             <div className="w-full max-w-[720px] mx-auto px-4 pt-4 pb-2" data-testid="chat-messages">
               <div className="flex justify-end gap-1.5 mb-2">
+                <button
+                  onClick={resetChat}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] font-medium text-[#777] border border-[#e0e0e0] hover:bg-[#f5f5f5] hover:border-[#ccc] transition-colors"
+                  title="Reset chat"
+                  data-testid="button-reset-chat"
+                >
+                  <svg width="12" height="12" viewBox="0 0 16 16" fill="none">
+                    <path d="M2 2v5h5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+                    <path d="M3.05 10A6 6 0 1 0 4.18 4.18L2 7" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                  New Chat
+                </button>
                 <button
                   onClick={downloadChatAsPdf}
                   disabled={isExporting}
@@ -4805,6 +4839,21 @@ export default function LandingPage() {
             </div>
           )}
         </div>
+
+        {showScrollBtn && hasMessages && (
+          <div className="w-full flex justify-center pb-2 shrink-0">
+            <button
+              onClick={scrollToBottom}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white border border-[#ddd] shadow-sm text-[10px] font-medium text-[#666] hover:bg-[#f5f5f5] hover:border-[#ccc] transition-all"
+              data-testid="button-scroll-bottom"
+            >
+              <svg width="12" height="12" viewBox="0 0 16 16" fill="none">
+                <path d="M8 3v10M8 13l-3.5-3.5M8 13l3.5-3.5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+              Back to bottom
+            </button>
+          </div>
+        )}
 
         <div className="w-full max-w-[720px] mx-auto px-4 pb-4 shrink-0">
           {!hasMessages && !isSending && (
