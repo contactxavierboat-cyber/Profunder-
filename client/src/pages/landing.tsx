@@ -2843,15 +2843,13 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
 
               return (<>
                 {inquiryItems.length > 0 && (repairFilter.category === "All" || repairFilter.category === "Inquiry") && (
-                  <div className="mb-4">
-                    <div className="flex items-center gap-2 mb-2 pb-1.5 border-b border-[#e8e8f4]">
-                      <div className="w-5 h-5 rounded-full bg-[#6366f1]/10 flex items-center justify-center shrink-0">
-                        <svg width="11" height="11" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="5.5" stroke="#6366f1" strokeWidth="1.3"/><path d="M8 5v3.5M8 10.5v.5" stroke="#6366f1" strokeWidth="1.3" strokeLinecap="round"/></svg>
-                      </div>
-                      <span className="text-[11px] font-semibold text-[#333] tracking-wide">Inquiry Disputes</span>
-                      <span className="text-[10px] text-white bg-[#6366f1] rounded-full px-1.5 py-0.5 ml-auto font-bold min-w-[18px] text-center">{inquiryItems.length}</span>
+                  <div className="mb-3">
+                    <div className="flex items-center gap-1.5 mb-1.5 pb-1 border-b border-[#e8e8f4]">
+                      <svg width="10" height="10" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="5.5" stroke="#6366f1" strokeWidth="1.3"/><path d="M8 5v3.5M8 10.5v.5" stroke="#6366f1" strokeWidth="1.3" strokeLinecap="round"/></svg>
+                      <span className="text-[10px] font-semibold text-[#333]">Inquiry Disputes</span>
+                      <span className="text-[9px] text-white bg-[#6366f1] rounded-full w-[16px] h-[16px] flex items-center justify-center ml-auto font-bold">{inquiryItems.length}</span>
                     </div>
-                    <div className="space-y-2 max-h-[340px] overflow-y-auto pr-0.5">
+                    <div className="space-y-1 max-h-[300px] overflow-y-auto">
                       {inquiryItems.map((item, i) => {
                         const rl = roundLabels[item.disputeRound] || roundLabels[1];
                         const sameDayCount = inquiryItems.filter(n => n.dates?.inquiryDate === item.dates?.inquiryDate && n.dates?.inquiryDate).length;
@@ -2859,26 +2857,23 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
                         const statusColor = item.userAttestation === "not_authorized" ? "bg-[#dc2626] text-white" : item.userAttestation === "recognized" ? "bg-[#16a34a] text-white" : "bg-[#6366f1]/10 text-[#6366f1]";
                         const statusLabel = item.userAttestation === "not_authorized" ? "Denied" : item.userAttestation === "recognized" ? "Recognized" : "Pending";
                         return (
-                          <div key={item.itemId || i} className="rounded-lg bg-white border border-[#e4e4ed] hover:border-[#6366f1]/30 hover:shadow-sm transition-all" data-testid={`repair-item-${item.itemId}`}>
-                            <div className="px-3 py-2.5">
-                              <div className="flex items-center gap-2 mb-1.5">
-                                <span className="text-[11px] font-bold text-[#1a1a2e] tracking-wide">{item.furnisherName}</span>
-                                <span className={`text-[8px] font-bold uppercase px-1.5 py-0.5 rounded-full ml-auto ${statusColor}`}>{statusLabel}</span>
+                          <div key={item.itemId || i} className="rounded-md bg-white border border-[#e4e4ed] hover:border-[#6366f1]/30 transition-all" data-testid={`repair-item-${item.itemId}`}>
+                            <div className="px-2.5 py-2">
+                              <div className="flex items-center gap-1.5 mb-1">
+                                <span className="text-[10px] font-bold text-[#1a1a2e] truncate">{item.furnisherName}</span>
+                                <span className={`text-[7px] font-bold uppercase px-1 py-[1px] rounded-full ml-auto shrink-0 ${statusColor}`}>{statusLabel}</span>
                               </div>
-                              <div className="flex items-center gap-1.5 text-[10px] text-[#666] mb-2">
+                              <div className="flex items-center gap-1 text-[9px] text-[#888] mb-1.5 flex-wrap">
                                 <span>{item.bureau}</span>
-                                <span className="text-[#ccc]">|</span>
-                                {item.dates?.inquiryDate && <span>{item.dates.inquiryDate}</span>}
-                                {item.standaloneInquiry && <><span className="text-[#ccc]">|</span><span className="text-[#dc2626] font-medium">No Account</span></>}
-                                {isCluster && <><span className="text-[#ccc]">|</span><span className="text-[#d97706] font-medium">Cluster</span></>}
+                                {item.dates?.inquiryDate && <><span className="text-[#ddd]">|</span><span>{item.dates.inquiryDate}</span></>}
+                                {item.standaloneInquiry && <><span className="text-[#ddd]">|</span><span className="text-[#dc2626] font-medium">No Account</span></>}
+                                {isCluster && <><span className="text-[#ddd]">|</span><span className="text-[#d97706] font-medium">Cluster</span></>}
                               </div>
-                              <div className="flex items-center gap-1.5 mb-2.5">
-                                <span className={`text-[9px] font-bold px-2 py-0.5 rounded ${item.disputeRound === 1 ? "bg-[#6366f1]/8 text-[#6366f1] border border-[#6366f1]/15" : item.disputeRound === 2 ? "bg-[#f59e0b]/8 text-[#b45309] border border-[#f59e0b]/15" : "bg-[#ef4444]/8 text-[#dc2626] border border-[#ef4444]/15"}`}>
-                                  {rl.label}
-                                </span>
-                                <span className="text-[9px] text-[#999]">{rl.desc}</span>
+                              <div className="flex items-center gap-1 mb-1.5">
+                                <span className={`text-[8px] font-bold px-1.5 py-[2px] rounded ${item.disputeRound === 1 ? "bg-[#6366f1]/8 text-[#6366f1]" : item.disputeRound === 2 ? "bg-[#f59e0b]/8 text-[#b45309]" : "bg-[#ef4444]/8 text-[#dc2626]"}`}>{rl.label}</span>
+                                <span className="text-[8px] text-[#aaa] truncate">{rl.desc}</span>
                               </div>
-                              <div className="flex gap-1.5 flex-wrap">
+                              <div className="flex gap-1 flex-wrap">
                                 {item.attestationRequired && !item.userAttestation && (
                                   <>
                                     <button
@@ -2887,7 +2882,7 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
                                         const updated = { ...repairData, negativeItems: repairData.negativeItems.map(n => n.itemId === item.itemId ? { ...n, userAttestation: "not_authorized" as const, status: "Attested" as const } : n) };
                                         onUpdateRepairData(updated);
                                       }}
-                                      className="text-[10px] px-3 py-1.5 rounded-md bg-[#dc2626] text-white font-semibold hover:bg-[#b91c1c] transition-colors"
+                                      className="text-[9px] px-2 py-1 rounded bg-[#dc2626] text-white font-semibold hover:bg-[#b91c1c] transition-colors"
                                       data-testid={`button-not-authorized-${item.itemId}`}
                                     >
                                       Not Authorized
@@ -2898,7 +2893,7 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
                                         const updated = { ...repairData, negativeItems: repairData.negativeItems.map(n => n.itemId === item.itemId ? { ...n, userAttestation: "recognized" as const, status: "Attested" as const } : n) };
                                         onUpdateRepairData(updated);
                                       }}
-                                      className="text-[10px] px-3 py-1.5 rounded-md bg-[#f3f4f6] text-[#555] font-semibold hover:bg-[#e5e7eb] transition-colors border border-[#e5e7eb]"
+                                      className="text-[9px] px-2 py-1 rounded bg-[#f3f4f6] text-[#555] font-semibold hover:bg-[#e5e7eb] transition-colors border border-[#e5e7eb]"
                                       data-testid={`button-recognized-${item.itemId}`}
                                     >
                                       I Recognize This
@@ -2921,7 +2916,7 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
                                       const disputeText = `${roundInstr}\n\nInquiry: ${item.furnisherName} (${item.bureau}${dateInfo ? `, ${dateInfo}` : ""}${item.userAttestation === "not_authorized" ? ", user attests NOT AUTHORIZED" : ""}).${velocityInfo}${velocitySummary} Use the ACTUAL creditor name and dates — do NOT use placeholder text.\n\nIMPORTANT: After the letter, output a DISPUTE: line in this exact format for EACH disputed item:\nDISPUTE: CreditorName | AccountNumber | Issue Description | Bureau | Reason/Basis\nThen output [GENERATE_DISPUTE_PACKAGE] at the very end.`;
                                       onSendChat(disputeText);
                                     }}
-                                    className="text-[10px] px-3 py-1.5 rounded-md bg-[#6366f1] text-white font-semibold hover:bg-[#4f46e5] transition-colors"
+                                    className="text-[9px] px-2 py-1 rounded bg-[#6366f1] text-white font-semibold hover:bg-[#4f46e5] transition-colors"
                                     data-testid={`button-generate-dispute-${item.itemId}`}
                                   >
                                     Generate Round {item.disputeRound} Letter
@@ -2935,7 +2930,7 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
                                       const updated = { ...repairData, negativeItems: repairData.negativeItems.map(n => n.itemId === item.itemId ? { ...n, disputeRound: nextRound } : n) };
                                       onUpdateRepairData(updated);
                                     }}
-                                    className="text-[10px] px-3 py-1.5 rounded-md bg-white text-[#555] font-semibold hover:bg-[#f3f4f6] transition-colors border border-[#ddd]"
+                                    className="text-[9px] px-2 py-1 rounded bg-white text-[#555] font-semibold hover:bg-[#f3f4f6] transition-colors border border-[#ddd]"
                                     data-testid={`button-advance-round-${item.itemId}`}
                                   >
                                     Advance to R{Math.min(item.disputeRound + 1, 3)}
@@ -2983,7 +2978,7 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
                           prompt += "IMPORTANT: After the letters, output a DISPUTE: line for EACH disputed item in this exact format:\nDISPUTE: CreditorName | AccountNumber | Issue Description | Bureau | Reason/Basis\nThen output [GENERATE_DISPUTE_PACKAGE] at the very end.";
                           onSendChat(prompt);
                         }}
-                        className="mt-2.5 w-full py-2 rounded-lg bg-[#6366f1] text-white text-[11px] font-bold hover:bg-[#4f46e5] transition-colors shadow-sm"
+                        className="mt-2 w-full py-1.5 rounded-lg bg-[#6366f1] text-white text-[10px] font-bold hover:bg-[#4f46e5] transition-colors"
                         data-testid="button-generate-all-inquiry-disputes"
                       >
                         Generate All Inquiry Disputes ({inquiryItems.filter(n => n.userAttestation !== "recognized").length})
@@ -2993,37 +2988,35 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
                 )}
 
                 {nonInquiryItems.length > 0 && (repairFilter.category === "All" || repairFilter.category !== "Inquiry") && (
-                  <div className="mb-3">
+                  <div className="mb-2">
                     {(repairFilter.category === "All" && inquiryItems.length > 0) && (
-                      <div className="flex items-center gap-2 mb-2 pb-1.5 border-b border-[#e8e8e8]">
-                        <div className="w-5 h-5 rounded-full bg-[#1a1a2e]/8 flex items-center justify-center shrink-0">
-                          <svg width="11" height="11" viewBox="0 0 12 12" fill="none"><rect x="1" y="2" width="10" height="8" rx="1" stroke="#555" strokeWidth="1" fill="none"/><path d="M3 5h6M3 7h4" stroke="#555" strokeWidth="0.7" strokeLinecap="round"/></svg>
-                        </div>
-                        <span className="text-[11px] font-semibold text-[#333] tracking-wide">Account Disputes</span>
-                        <span className="text-[10px] text-white bg-[#555] rounded-full px-1.5 py-0.5 ml-auto font-bold min-w-[18px] text-center">{nonInquiryItems.length}</span>
+                      <div className="flex items-center gap-1.5 mb-1.5 pb-1 border-b border-[#e8e8e8]">
+                        <svg width="10" height="10" viewBox="0 0 12 12" fill="none"><rect x="1" y="2" width="10" height="8" rx="1" stroke="#555" strokeWidth="1" fill="none"/><path d="M3 5h6M3 7h4" stroke="#555" strokeWidth="0.7" strokeLinecap="round"/></svg>
+                        <span className="text-[10px] font-semibold text-[#333]">Account Disputes</span>
+                        <span className="text-[9px] text-white bg-[#555] rounded-full w-[16px] h-[16px] flex items-center justify-center ml-auto font-bold">{nonInquiryItems.length}</span>
                       </div>
                     )}
-                    <div className="space-y-2 max-h-[340px] overflow-y-auto pr-0.5">
+                    <div className="space-y-1 max-h-[300px] overflow-y-auto">
                       {nonInquiryItems.map((item, i) => {
                         const catColor = item.category === "Account" ? "bg-[#e07a5f]" : item.category === "Personal Info" ? "bg-[#f0ad4e]" : item.category === "Public Record" ? "bg-[#6366f1]" : "bg-[#888]";
                         const catLabel = item.category === "Personal Info" ? "PI" : item.category === "Public Record" ? "PR" : item.category.slice(0, 3).toUpperCase();
                         const statusColor = item.userAttestation === "not_authorized" ? "bg-[#dc2626] text-white" : item.userAttestation === "recognized" ? "bg-[#16a34a] text-white" : item.status === "Packaged" ? "bg-[#ea580c] text-white" : "bg-[#f3f4f6] text-[#555]";
                         const statusLabel = item.userAttestation === "not_authorized" ? "Denied" : item.userAttestation === "recognized" ? "Recognized" : item.status === "Packaged" ? "Packaged" : "New";
                         return (
-                          <div key={item.itemId || i} className="rounded-lg bg-white border border-[#e8e8e8] hover:border-[#999] hover:shadow-sm transition-all" data-testid={`repair-item-${item.itemId}`}>
-                            <div className="px-3 py-2.5">
-                              <div className="flex items-center gap-2 mb-1.5">
-                                <span className={`text-[8px] font-bold uppercase px-1.5 py-0.5 rounded text-white shrink-0 ${catColor}`}>{catLabel}</span>
-                                <span className="text-[11px] font-bold text-[#1a1a2e] truncate">{item.furnisherName}</span>
-                                <span className={`text-[8px] font-bold uppercase px-1.5 py-0.5 rounded-full ml-auto shrink-0 ${statusColor}`}>{statusLabel}</span>
+                          <div key={item.itemId || i} className="rounded-md bg-white border border-[#e8e8e8] hover:border-[#999] transition-all" data-testid={`repair-item-${item.itemId}`}>
+                            <div className="px-2.5 py-2">
+                              <div className="flex items-center gap-1.5 mb-0.5">
+                                <span className={`text-[7px] font-bold uppercase px-1 py-[1px] rounded text-white shrink-0 ${catColor}`}>{catLabel}</span>
+                                <span className="text-[10px] font-bold text-[#1a1a2e] truncate">{item.furnisherName}</span>
+                                <span className={`text-[7px] font-bold uppercase px-1 py-[1px] rounded-full ml-auto shrink-0 ${statusColor}`}>{statusLabel}</span>
                               </div>
-                              <div className="text-[10px] text-[#666] mb-1.5 line-clamp-2">{item.issue}</div>
-                              <div className="flex items-center gap-1.5 text-[10px] text-[#888] mb-2.5">
+                              <div className="text-[9px] text-[#666] mb-1 line-clamp-1">{item.issue}</div>
+                              <div className="flex items-center gap-1 text-[9px] text-[#888] mb-1.5 flex-wrap">
                                 <span>{item.bureau}</span>
-                                {item.accountPartial && <><span className="text-[#ccc]">|</span><span>...{item.accountPartial}</span></>}
-                                {item.disputeBasis && <><span className="text-[#ccc]">|</span><span className="text-[#6366f1] font-medium">{item.disputeBasis}</span></>}
+                                {item.accountPartial && <><span className="text-[#ddd]">|</span><span className="truncate max-w-[80px]">...{item.accountPartial}</span></>}
+                                {item.disputeBasis && <><span className="text-[#ddd]">|</span><span className="text-[#6366f1] font-medium truncate max-w-[100px]">{item.disputeBasis}</span></>}
                               </div>
-                              <div className="flex gap-1.5 flex-wrap">
+                              <div className="flex gap-1 flex-wrap">
                                 {item.attestationRequired && !item.userAttestation && (
                                   <>
                                     <button
@@ -3032,7 +3025,7 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
                                         const updated = { ...repairData, negativeItems: repairData.negativeItems.map(n => n.itemId === item.itemId ? { ...n, userAttestation: "not_authorized" as const, status: "Attested" as const } : n) };
                                         onUpdateRepairData(updated);
                                       }}
-                                      className="text-[10px] px-3 py-1.5 rounded-md bg-[#dc2626] text-white font-semibold hover:bg-[#b91c1c] transition-colors"
+                                      className="text-[9px] px-2 py-1 rounded bg-[#dc2626] text-white font-semibold hover:bg-[#b91c1c] transition-colors"
                                       data-testid={`button-not-authorized-${item.itemId}`}
                                     >
                                       Not Authorized
@@ -3043,7 +3036,7 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
                                         const updated = { ...repairData, negativeItems: repairData.negativeItems.map(n => n.itemId === item.itemId ? { ...n, userAttestation: "recognized" as const, status: "Attested" as const } : n) };
                                         onUpdateRepairData(updated);
                                       }}
-                                      className="text-[10px] px-3 py-1.5 rounded-md bg-[#f3f4f6] text-[#555] font-semibold hover:bg-[#e5e7eb] transition-colors border border-[#e5e7eb]"
+                                      className="text-[9px] px-2 py-1 rounded bg-[#f3f4f6] text-[#555] font-semibold hover:bg-[#e5e7eb] transition-colors border border-[#e5e7eb]"
                                       data-testid={`button-recognized-${item.itemId}`}
                                     >
                                       I Recognize This
@@ -3058,7 +3051,7 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
                                       const disputeText = `Generate a dispute letter for this item: ${item.furnisherName} — ${item.issue} (${item.bureau}, basis: ${item.disputeBasis}${acctInfo}${dateInfo ? `, ${dateInfo}` : ""}${item.userAttestation === "not_authorized" ? ", user attests NOT AUTHORIZED" : ""}). Use the ACTUAL creditor name, dates, and account details provided — do NOT use placeholder text like [Insert Creditor Name]. Reference my credit report data directly.\n\nIMPORTANT: After the letter, output a DISPUTE: line in this exact format:\nDISPUTE: CreditorName | AccountNumber | Issue Description | Bureau | Reason/Basis\nThen output [GENERATE_DISPUTE_PACKAGE] at the very end.`;
                                       onSendChat(disputeText);
                                     }}
-                                    className="text-[10px] px-3 py-1.5 rounded-md bg-[#1a1a2e] text-white font-semibold hover:bg-[#2a2a4e] transition-colors"
+                                    className="text-[9px] px-2 py-1 rounded bg-[#1a1a2e] text-white font-semibold hover:bg-[#2a2a4e] transition-colors"
                                     data-testid={`button-generate-dispute-${item.itemId}`}
                                   >
                                     Generate Bureau Challenge
@@ -3066,12 +3059,12 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
                                 )}
                               </div>
                               {(item.evidenceAvailable.length > 0 || item.evidenceMissing.length > 0) && (
-                                <div className="flex gap-2 mt-2 pt-1.5 border-t border-[#f0f0f0]">
+                                <div className="flex gap-1.5 mt-1.5 pt-1 border-t border-[#f0f0f0]">
                                   {item.evidenceAvailable.length > 0 && (
-                                    <span className="text-[9px] text-[#16a34a] font-medium">{item.evidenceAvailable.length} evidence on file</span>
+                                    <span className="text-[8px] text-[#16a34a] font-medium">{item.evidenceAvailable.length} evidence on file</span>
                                   )}
                                   {item.evidenceMissing.length > 0 && (
-                                    <span className="text-[9px] text-[#dc2626] font-medium">{item.evidenceMissing.length} evidence needed</span>
+                                    <span className="text-[8px] text-[#dc2626] font-medium">{item.evidenceMissing.length} evidence needed</span>
                                   )}
                                 </div>
                               )}
@@ -3132,7 +3125,7 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
                       prompt += "\nIMPORTANT: After the letters, output a DISPUTE: line for EACH disputed item in this exact format:\nDISPUTE: CreditorName | AccountNumber | Issue Description | Bureau | Reason/Basis\nThen output [GENERATE_DISPUTE_PACKAGE] at the very end.";
                       onSendChat(prompt);
                     }}
-                    className="mt-3 w-full py-2 rounded-md bg-[#1a1a2e] text-white text-[10px] font-semibold hover:bg-[#2a2a4e] transition-colors"
+                    className="mt-2 w-full py-1.5 rounded-md bg-[#1a1a2e] text-white text-[9px] font-semibold hover:bg-[#2a2a4e] transition-colors"
                     data-testid="button-generate-all-disputes"
                   >
                     Generate All Bureau Challenges ({repairData.negativeItems.filter(n => n.userAttestation !== "recognized").length})
