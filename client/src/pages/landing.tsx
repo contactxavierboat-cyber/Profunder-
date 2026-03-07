@@ -557,6 +557,60 @@ function FormatResponse({ content }: { content: string }) {
   );
 }
 
+function StreamingText({ fullContent, onComplete, components }: { fullContent: string; onComplete: () => void; components: any }) {
+  const [visibleText, setVisibleText] = useState("");
+  const completedRef = useRef(false);
+
+  useEffect(() => {
+    completedRef.current = false;
+    setVisibleText("");
+
+    const tokens = fullContent.split(/(\s+)/);
+    const totalTokens = tokens.length;
+    if (totalTokens === 0) { onComplete(); return; }
+
+    const baseDelay = totalTokens > 200 ? 10 : totalTokens > 100 ? 16 : 22;
+    let idx = 0;
+    let timeout: ReturnType<typeof setTimeout>;
+
+    const revealNext = () => {
+      if (idx >= totalTokens || completedRef.current) {
+        completedRef.current = true;
+        setVisibleText(fullContent);
+        onComplete();
+        return;
+      }
+      const chunk = Math.min(2 + Math.floor(Math.random() * 3), totalTokens - idx);
+      idx += chunk;
+      setVisibleText(tokens.slice(0, idx).join(""));
+
+      const word = (tokens[idx - 1] || "").trim();
+      const hasPunctuation = /[.!?—:;]$/.test(word);
+      const isThinkPhrase = /^(let|hold|wait|actually|now|here's|alright|hmm|okay|give|before)/i.test(word);
+      const hasNewline = /\n\n/.test(tokens.slice(Math.max(0, idx - 2), idx).join(""));
+
+      let delay = baseDelay + Math.random() * 12;
+      if (hasNewline) delay += 200 + Math.random() * 150;
+      else if (isThinkPhrase) delay += 120 + Math.random() * 100;
+      else if (hasPunctuation) delay += 60 + Math.random() * 80;
+
+      timeout = setTimeout(revealNext, delay);
+    };
+
+    timeout = setTimeout(revealNext, 80);
+    return () => { completedRef.current = true; clearTimeout(timeout); };
+  }, [fullContent]);
+
+  return (
+    <>
+      <ReactMarkdown components={components}>{filterMarkdown(visibleText)}</ReactMarkdown>
+      {visibleText.length < fullContent.length && (
+        <span className="inline-block w-[3px] h-[14px] bg-[#6366f1] rounded-sm ml-0.5 animate-pulse align-text-bottom" />
+      )}
+    </>
+  );
+}
+
 function BrandedResponse({ content, userQuestion, msgId }: { content: string; userQuestion?: string; msgId: number }) {
   const reportRef = useRef<HTMLDivElement>(null);
   const [downloading, setDownloading] = useState(false);
@@ -3576,6 +3630,7 @@ export default function LandingPage() {
   const [input, setInput] = useState("");
   const [isSending, setIsSending] = useState(false);
   const [guestMessages, setGuestMessages] = useState<GuestMessage[]>([]);
+  const [streamingMsgId, setStreamingMsgId] = useState<number | null>(null);
   const [nextId, setNextId] = useState(1);
   const [attachedFile, setAttachedFile] = useState<{ name: string; content: string; isPdf?: boolean } | null>(null);
   const [autoSendFile, setAutoSendFile] = useState(false);
@@ -3798,9 +3853,18 @@ export default function LandingPage() {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
+  useEffect(() => {
+    if (streamingMsgId === null) return;
+    const interval = setInterval(() => {
+      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    }, 400);
+    return () => clearInterval(interval);
+  }, [streamingMsgId]);
+
   const resetChat = () => {
     setGuestMessages([]);
     setShowScrollBtn(false);
+    setStreamingMsgId(null);
   };
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -4118,9 +4182,14 @@ export default function LandingPage() {
       const isDisputeGenRequest = /generate.*(?:dispute|round\s*[123]|bureau\s*challenge)|(?:dispute|round\s*[123]).*letter|build\s*dispute|create\s*(?:my\s*)?dispute|ROUND\s*[123].*inquiry\s*dispute/i.test(text);
       const shouldAutoGeneratePdf = hasDisputePackageTrigger || isDisputeGenRequest;
 
-      const aiMsg: GuestMessage = { id: nextId + 1, role: "assistant", content: responseContent };
+      const aiMsgId = nextId + 1;
+      const aiMsg: GuestMessage = { id: aiMsgId, role: "assistant", content: responseContent };
       setGuestMessages((prev) => [...prev, aiMsg]);
       setNextId((n) => n + 1);
+      const isStructured = /(?:STRATEGY_DATA_START|TRADELINE:|DISPUTE:.*\|.*\||Pillar\s*Scores:|Payment\s*Integrity:\s*\d|Utilization\s*Control:\s*\d|AIS.*(?:Approval\s*Index|Score).*:\s*\d)/i.test(responseContent);
+      if (!isStructured) {
+        setStreamingMsgId(aiMsgId);
+      }
 
       if (shouldAutoGeneratePdf) {
         let autoDisputes: { creditor: string; accountNumber: string; issue: string; bureau: string; reason: string; disputeRound?: number; category?: string }[] = [];
@@ -4758,11 +4827,34 @@ export default function LandingPage() {
                             );
                           })() : (() => {
                             const isStructuredReport = /(?:STRATEGY_DATA_START|TRADELINE:|DISPUTE:.*\|.*\||Pillar\s*Scores:|Payment\s*Integrity:\s*\d|Utilization\s*Control:\s*\d|AIS.*(?:Approval\s*Index|Score).*:\s*\d)/i.test(msg.content);
+                            const isCurrentlyStreaming = streamingMsgId === msg.id;
                             return isStructuredReport ? (
                               <BrandedResponse content={msg.content} userQuestion={prevUserMsg?.content} msgId={msg.id} />
                             ) : (
-                              <div className="text-[14px] text-[#1a1a1a] leading-[1.7] overflow-hidden">
-                                <ReactMarkdown components={chatMdComponents}>{filterMarkdown(msg.content)}</ReactMarkdown>
+                              <div className="overflow-hidden">
+                                <div className="rounded-xl bg-gradient-to-br from-[#1a1a2e] to-[#252540] px-3.5 py-2 mb-2">
+                                  <div className="flex items-center gap-2">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 opacity-60">
+                                      <path d="M12 2C9.5 2 7.5 4 7.5 6.5c0 .5-.4 1-1 1C4.5 7.5 3 9.5 3 11.5c0 1.5.8 2.8 2 3.5 0 0-.5 1.5-.5 2.5C4.5 20 6.5 22 9 22c1.5 0 2.5-.5 3-1.5.5 1 1.5 1.5 3 1.5 2.5 0 4.5-2 4.5-4.5 0-1-.5-2.5-.5-2.5 1.2-.7 2-2 2-3.5 0-2-1.5-4-3.5-4-.6 0-1-.5-1-1C16.5 4 14.5 2 12 2z" />
+                                      <path d="M12 2v20" /><path d="M7.5 7.5C9 8.5 10 10 10.5 12" /><path d="M16.5 7.5C15 8.5 14 10 13.5 12" />
+                                    </svg>
+                                    <div className="min-w-0 flex-1">
+                                      <p className="text-[11px] font-bold text-white leading-tight">Profundr</p>
+                                      <p className="text-[8px] text-white/35 mt-0.5">Capital Intelligence</p>
+                                    </div>
+                                  </div>
+                                </div>
+                                <div className="text-[14px] text-[#1a1a1a] leading-[1.7]">
+                                  {isCurrentlyStreaming ? (
+                                    <StreamingText
+                                      fullContent={msg.content}
+                                      onComplete={() => setStreamingMsgId(null)}
+                                      components={chatMdComponents}
+                                    />
+                                  ) : (
+                                    <ReactMarkdown components={chatMdComponents}>{filterMarkdown(msg.content)}</ReactMarkdown>
+                                  )}
+                                </div>
                               </div>
                             );
                           })()}
