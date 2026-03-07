@@ -611,6 +611,69 @@ function StreamingText({ fullContent, onComplete, components }: { fullContent: s
   );
 }
 
+function ChatPdfButton({ content, msgId, userQuestion }: { content: string; msgId: number; userQuestion?: string }) {
+  const [downloading, setDownloading] = useState(false);
+
+  const handleDownload = async () => {
+    if (downloading) return;
+    setDownloading(true);
+    try {
+      const cleaned = filterMarkdown(content);
+      const res = await fetch("/api/report-pdf", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ content: cleaned, question: userQuestion || undefined }),
+      });
+      if (!res.ok) throw new Error("PDF generation failed");
+      const data = await res.json();
+      if (data.downloadUrl) {
+        const pdfRes = await fetch(data.downloadUrl);
+        if (!pdfRes.ok) throw new Error("Download failed");
+        const blob = await pdfRes.blob();
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `profundr-response-${msgId}.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      }
+    } catch (err) {
+      console.error("PDF download failed:", err);
+    } finally {
+      setDownloading(false);
+    }
+  };
+
+  return (
+    <div className="flex items-center justify-between mt-2 px-1">
+      <div className="flex items-center gap-1.5">
+        <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#ccc" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="shrink-0">
+          <path d="M12 2C9.5 2 7.5 4 7.5 6.5c0 .5-.4 1-1 1C4.5 7.5 3 9.5 3 11.5c0 1.5.8 2.8 2 3.5 0 0-.5 1.5-.5 2.5C4.5 20 6.5 22 9 22c1.5 0 2.5-.5 3-1.5.5 1 1.5 1.5 3 1.5 2.5 0 4.5-2 4.5-4.5 0-1-.5-2.5-.5-2.5 1.2-.7 2-2 2-3.5 0-2-1.5-4-3.5-4-.6 0-1-.5-1-1C16.5 4 14.5 2 12 2z" />
+          <path d="M12 2v20" /><path d="M7.5 7.5C9 8.5 10 10 10.5 12" /><path d="M16.5 7.5C15 8.5 14 10 13.5 12" />
+        </svg>
+        <span className="text-[7px] text-[#ccc]">profundr.com</span>
+      </div>
+      <button
+        onClick={handleDownload}
+        disabled={downloading}
+        className="flex items-center gap-1 px-2 py-0.5 rounded-md text-[9px] font-medium text-[#1a1a2e] hover:bg-[#f5f5f5] transition-colors disabled:opacity-40"
+        data-testid={`button-download-chat-${msgId}`}
+      >
+        {downloading ? (
+          <span className="text-[8px] text-[#999]">Generating PDF...</span>
+        ) : (
+          <>
+            <svg width="9" height="9" viewBox="0 0 12 12" fill="none"><path d="M6 2v6M6 8L4 6M6 8l2-2" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" /><path d="M2 9v1h8V9" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" /></svg>
+            <span>Save PDF</span>
+          </>
+        )}
+      </button>
+    </div>
+  );
+}
+
 function BrandedResponse({ content, userQuestion, msgId }: { content: string; userQuestion?: string; msgId: number }) {
   const reportRef = useRef<HTMLDivElement>(null);
   const [downloading, setDownloading] = useState(false);
@@ -4855,6 +4918,7 @@ export default function LandingPage() {
                                     <ReactMarkdown components={chatMdComponents}>{filterMarkdown(msg.content)}</ReactMarkdown>
                                   )}
                                 </div>
+                                {!isCurrentlyStreaming && <ChatPdfButton content={msg.content} msgId={msg.id} userQuestion={prevUserMsg?.content} />}
                               </div>
                             );
                           })()}
