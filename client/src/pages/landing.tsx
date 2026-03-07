@@ -622,7 +622,21 @@ function ChatPdfButton({ chatBubbleRef, msgId }: { chatBubbleRef: React.RefObjec
       const html2canvas = (await import("html2canvas")).default;
       const { jsPDF } = await import("jspdf");
 
-      const canvas = await html2canvas(el, { scale: 2, backgroundColor: "#ffffff", useCORS: true, logging: false });
+      const clone = el.cloneNode(true) as HTMLElement;
+      clone.style.cssText = `position:fixed;left:-9999px;top:0;width:${Math.min(el.offsetWidth, 600)}px;background:#ffffff;padding:16px;font-family:Inter,system-ui,-apple-system,sans-serif;`;
+      document.body.appendChild(clone);
+
+      const canvas = await html2canvas(clone, {
+        scale: 2,
+        backgroundColor: "#ffffff",
+        useCORS: true,
+        allowTaint: true,
+        logging: false,
+        width: clone.offsetWidth,
+        height: clone.scrollHeight,
+      });
+      document.body.removeChild(clone);
+
       const imgData = canvas.toDataURL("image/png");
       const imgW = canvas.width;
       const imgH = canvas.height;
@@ -630,8 +644,8 @@ function ChatPdfButton({ chatBubbleRef, msgId }: { chatBubbleRef: React.RefObjec
       const pdfW = 595.28;
       const margin = 24;
       const contentW = pdfW - margin * 2;
-      const scale = contentW / imgW;
-      const contentH = imgH * scale;
+      const ratio = contentW / imgW;
+      const contentH = imgH * ratio;
       const pdfH = Math.max(contentH + margin * 2 + 30, 300);
 
       const pdf = new jsPDF({ unit: "pt", format: [pdfW, pdfH] });
@@ -707,7 +721,6 @@ function ChatBubbleWithPdf({ content, msgId, isCurrentlyStreaming, onStreamCompl
   content: string; msgId: number; isCurrentlyStreaming: boolean; onStreamComplete: () => void; chatMdComponents: any; userQuestion?: string;
 }) {
   const bubbleRef = useRef<HTMLDivElement>(null);
-  const title = deriveResponseTitle(userQuestion);
 
   return (
     <div className="overflow-hidden">
@@ -719,17 +732,8 @@ function ChatBubbleWithPdf({ content, msgId, isCurrentlyStreaming, onStreamCompl
               <path d="M12 2v20" /><path d="M7.5 7.5C9 8.5 10 10 10.5 12" /><path d="M16.5 7.5C15 8.5 14 10 13.5 12" />
             </svg>
             <div className="min-w-0 flex-1">
-              {title ? (
-                <>
-                  <p className="text-[13px] font-bold text-white leading-tight truncate">{title}</p>
-                  <p className="text-[8px] text-white/35 mt-0.5">Profundr Capital Intelligence</p>
-                </>
-              ) : (
-                <>
-                  <p className="text-[11px] font-bold text-white leading-tight">Profundr</p>
-                  <p className="text-[8px] text-white/35 mt-0.5">Capital Intelligence</p>
-                </>
-              )}
+              <p className="text-[11px] font-bold text-white leading-tight">Profundr</p>
+              <p className="text-[8px] text-white/35 mt-0.5">Capital Intelligence</p>
             </div>
           </div>
         </div>
@@ -5213,8 +5217,8 @@ export default function LandingPage() {
             </p>
           )}
 
-          <p className="text-center text-[11px] text-[#aaa] mt-3 leading-[1.5]" data-testid="text-footer-legal">
-            Profundr is a capital intelligence platform, not a lender.{" "}
+          <p className="text-center text-[10px] text-[#bbb] mt-3 leading-[1.6] tracking-wide" data-testid="text-footer-legal">
+            Insights for education only — not financial advice.{" "}
             <span className="underline cursor-pointer hover:text-[#888] transition-colors">Terms</span> &middot;{" "}
             <span className="underline cursor-pointer hover:text-[#888] transition-colors">Privacy</span>
           </p>
