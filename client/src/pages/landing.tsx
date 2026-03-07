@@ -610,7 +610,7 @@ function StreamingText({ fullContent, onComplete, components }: { fullContent: s
   );
 }
 
-function ChatPdfButton({ content, msgId, question }: { content: string; msgId: number; question?: string }) {
+function ChatPdfButton({ content, msgId, question, userName }: { content: string; msgId: number; question?: string; userName?: string }) {
   const [downloading, setDownloading] = useState(false);
 
   const handleDownload = async () => {
@@ -621,7 +621,7 @@ function ChatPdfButton({ content, msgId, question }: { content: string; msgId: n
       const res = await fetch("/api/chat-pdf", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ content: cleaned, question: question || undefined }),
+        body: JSON.stringify({ content: cleaned, question: question || undefined, userName: userName || undefined }),
       });
       if (!res.ok) throw new Error("PDF generation failed");
       const { token } = await res.json();
@@ -678,8 +678,8 @@ function deriveResponseTitle(question?: string): string | null {
   return title.charAt(0).toUpperCase() + title.slice(1);
 }
 
-function ChatBubbleWithPdf({ content, msgId, isCurrentlyStreaming, onStreamComplete, chatMdComponents, userQuestion }: {
-  content: string; msgId: number; isCurrentlyStreaming: boolean; onStreamComplete: () => void; chatMdComponents: any; userQuestion?: string;
+function ChatBubbleWithPdf({ content, msgId, isCurrentlyStreaming, onStreamComplete, chatMdComponents, userQuestion, userName }: {
+  content: string; msgId: number; isCurrentlyStreaming: boolean; onStreamComplete: () => void; chatMdComponents: any; userQuestion?: string; userName?: string;
 }) {
   return (
     <div className="overflow-hidden">
@@ -703,7 +703,7 @@ function ChatBubbleWithPdf({ content, msgId, isCurrentlyStreaming, onStreamCompl
           )}
         </div>
       </div>
-      {!isCurrentlyStreaming && <ChatPdfButton content={content} msgId={msgId} question={userQuestion} />}
+      {!isCurrentlyStreaming && <ChatPdfButton content={content} msgId={msgId} question={userQuestion} userName={userName} />}
     </div>
   );
 }
@@ -4881,6 +4881,7 @@ export default function LandingPage() {
                                 onStreamComplete={() => setStreamingMsgId(null)}
                                 chatMdComponents={chatMdComponents}
                                 userQuestion={prevUserMsg?.content}
+                                userName={user?.displayName || user?.email}
                               />
                             );
                           })()}

@@ -3105,15 +3105,21 @@ CRITICAL: The following data was previously extracted from the user's credit rep
     const body = z.object({
       content: z.string().max(50000),
       question: z.string().max(2000).optional(),
+      userName: z.string().max(200).optional(),
     }).safeParse(req.body);
     if (!body.success) return res.status(400).json({ error: "Invalid data" });
-    const { content, question } = body.data;
+    const { content, question, userName } = body.data;
     const today = new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
 
     try {
       const pageW = 612;
       const pageH = 792;
-      const doc = new PDFDocument({ size: "LETTER", margins: { top: 60, bottom: 50, left: 65, right: 65 } });
+      const marginL = 55;
+      const marginR = 55;
+      const contentW = pageW - marginL - marginR;
+      const avatarSize = 24;
+      const avatarGap = 10;
+      const doc = new PDFDocument({ size: "LETTER", margins: { top: 50, bottom: 50, left: marginL, right: marginR } });
       const chunks: Buffer[] = [];
       doc.on("data", (chunk: Buffer) => chunks.push(chunk));
       const pdfReady = new Promise<Buffer>((resolve) => doc.on("end", () => resolve(Buffer.concat(chunks))));
@@ -3122,58 +3128,174 @@ CRITICAL: The following data was previously extracted from the user's credit rep
         try { doc.image(chatPdfBgPath, 0, 0, { width: pageW, height: pageH }); } catch {}
       };
 
+      const checkPage = (needed: number = 80) => {
+        if (doc.y > pageH - needed) {
+          doc.addPage();
+          drawBg();
+          doc.y = 50;
+        }
+      };
+
+      const userInitial = userName ? userName.charAt(0).toUpperCase() : "U";
+
       drawBg();
-      doc.y = 190;
+      doc.y = 50;
 
       if (question) {
         const cleanQ = question.replace(/\[Attached:.*?\]/g, "").trim();
         if (cleanQ) {
-          doc.font("Helvetica-Bold").fontSize(7).fillColor("#aaaaaa").text("QUESTION", 65, doc.y, { align: "left" });
-          doc.moveDown(0.3);
-          doc.font("Helvetica").fontSize(10).fillColor("#1a1a2e").text(cleanQ, { align: "left", lineGap: 2, width: pageW - 130 });
-          doc.moveDown(0.8);
-          doc.moveTo(65, doc.y).lineTo(pageW - 65, doc.y).strokeColor("#e5e5e5").lineWidth(0.5).stroke();
-          doc.moveDown(0.6);
+          checkPage(60);
+          const bubbleMaxW = contentW * 0.65;
+          const textPadX = 14;
+          const textPadY = 10;
+          const maxTextW = bubbleMaxW - textPadX * 2;
+          const measuredTextW = Math.min(maxTextW, doc.font("Helvetica").fontSize(10).widthOfString(cleanQ) + 4);
+          const textW = cleanQ.length > 40 ? maxTextW : measuredTextW;
+          const textH = doc.font("Helvetica").fontSize(10).heightOfString(cleanQ, { width: textW, lineGap: 3 });
+          const bubbleH = textH + textPadY * 2;
+          const bubbleW = textW + textPadX * 2;
+          const bubbleX = pageW - marginR - avatarSize - avatarGap - bubbleW;
+          const bubbleY = doc.y;
+
+          doc.save();
+          doc.roundedRect(bubbleX, bubbleY, bubbleW, bubbleH, 16).fill("#f0f0f0");
+          doc.restore();
+
+          doc.fillColor("#1a1a1a").font("Helvetica").fontSize(10).text(cleanQ, bubbleX + textPadX, bubbleY + textPadY, { width: textW, lineGap: 3 });
+
+          const avX = pageW - marginR - avatarSize;
+          const avY = bubbleY + 2;
+          doc.save();
+          doc.circle(avX + avatarSize / 2, avY + avatarSize / 2, avatarSize / 2).fill("#8B7355");
+          doc.restore();
+          doc.fillColor("#ffffff").font("Helvetica-Bold").fontSize(10).text(userInitial, avX, avY + 6, { width: avatarSize, align: "center" });
+
+          doc.y = bubbleY + bubbleH + 16;
         }
       }
 
-      const lines = content.split("\n");
-      for (const line of lines) {
-        if (doc.y > pageH - 80) {
+      checkPage(60);
+      const aiStartY = doc.y;
+      const aiIconSize = 22;
+      const aiIconX = marginL;
+      const aiIconY = aiStartY;
+
+      doc.save();
+      doc.circle(aiIconX + aiIconSize / 2, aiIconY + aiIconSize / 2, aiIconSize / 2).fill("#1a1a2e");
+      doc.restore();
+      const cx = aiIconX + aiIconSize / 2;
+      const cy = aiIconY + aiIconSize / 2;
+      doc.save();
+      doc.strokeColor("#ffffff").lineWidth(0.8);
+      doc.moveTo(cx - 4, cy - 4).lineTo(cx + 4, cy - 4).lineTo(cx + 4, cy + 4).lineTo(cx - 4, cy + 4).closePath().stroke();
+      doc.moveTo(cx, cy - 4).lineTo(cx, cy + 4).stroke();
+      doc.moveTo(cx - 4, cy).lineTo(cx + 4, cy).stroke();
+      doc.restore();
+
+      const headerX = aiIconX + aiIconSize + 8;
+      const headerW = contentW - aiIconSize - 8;
+      const headerH = 24;
+      doc.save();
+      doc.roundedRect(headerX, aiIconY, headerW, headerH, 10).fill("#1a1a2e");
+      doc.restore();
+
+      const disclaimerIconR = 5;
+      const disclaimerIconX = headerX + 10 + disclaimerIconR;
+      const disclaimerIconY = aiIconY + headerH / 2;
+      doc.save();
+      doc.strokeColor("rgba(255,255,255,0.5)").lineWidth(0.6);
+      doc.circle(disclaimerIconX, disclaimerIconY, disclaimerIconR).stroke();
+      doc.moveTo(disclaimerIconX, disclaimerIconY - 2).lineTo(disclaimerIconX, disclaimerIconY + 1).stroke();
+      doc.moveTo(disclaimerIconX, disclaimerIconY + 3).lineTo(disclaimerIconX, disclaimerIconY + 3).stroke();
+      doc.restore();
+
+      doc.fillColor("rgba(255,255,255,0.5)").font("Helvetica").fontSize(7.5)
+        .text("Insights for education only \u2014 not financial advice.", disclaimerIconX + disclaimerIconR + 6, aiIconY + headerH / 2 - 3.5, { width: headerW - 40 });
+
+      doc.y = aiIconY + headerH + 12;
+      const responseX = headerX;
+      const responseW = headerW - 5;
+
+      const drawAiHeader = () => {
+        const y = doc.y;
+        doc.save();
+        doc.circle(marginL + aiIconSize / 2, y + aiIconSize / 2, aiIconSize / 2).fill("#1a1a2e");
+        doc.restore();
+        const hcx = marginL + aiIconSize / 2;
+        const hcy = y + aiIconSize / 2;
+        doc.save();
+        doc.strokeColor("#ffffff").lineWidth(0.8);
+        doc.moveTo(hcx - 4, hcy - 4).lineTo(hcx + 4, hcy - 4).lineTo(hcx + 4, hcy + 4).lineTo(hcx - 4, hcy + 4).closePath().stroke();
+        doc.moveTo(hcx, hcy - 4).lineTo(hcx, hcy + 4).stroke();
+        doc.moveTo(hcx - 4, hcy).lineTo(hcx + 4, hcy).stroke();
+        doc.restore();
+        const hx = marginL + aiIconSize + 8;
+        const hw = contentW - aiIconSize - 8;
+        doc.save();
+        doc.roundedRect(hx, y, hw, headerH, 10).fill("#1a1a2e");
+        doc.restore();
+        const dir = 5;
+        const dix = hx + 10 + dir;
+        const diy = y + headerH / 2;
+        doc.save();
+        doc.strokeColor("rgba(255,255,255,0.5)").lineWidth(0.6);
+        doc.circle(dix, diy, dir).stroke();
+        doc.moveTo(dix, diy - 2).lineTo(dix, diy + 1).stroke();
+        doc.moveTo(dix, diy + 3).lineTo(dix, diy + 3).stroke();
+        doc.restore();
+        doc.fillColor("rgba(255,255,255,0.5)").font("Helvetica").fontSize(7.5)
+          .text("Insights for education only \u2014 not financial advice.", dix + dir + 6, y + headerH / 2 - 3.5, { width: hw - 40 });
+        doc.y = y + headerH + 12;
+      };
+
+      const checkPageWithHeader = (needed: number = 80) => {
+        if (doc.y > pageH - needed) {
           doc.addPage();
           drawBg();
-          doc.y = 60;
+          doc.y = 50;
+          drawAiHeader();
         }
+      };
+
+      const lines = content.split("\n");
+      for (const line of lines) {
+        checkPageWithHeader(40);
         const trimmed = line.trim();
         if (!trimmed) { doc.moveDown(0.4); continue; }
         const stripped = trimmed.replace(/\*\*(.*?)\*\*/g, "$1").replace(/\*(.*?)\*/g, "$1");
         if (trimmed.startsWith("# ")) {
-          doc.font("Helvetica-Bold").fontSize(15).fillColor("#1a1a2e").text(stripped.slice(2), { lineGap: 2 });
+          doc.font("Helvetica-Bold").fontSize(14).fillColor("#1a1a2e").text(stripped.slice(2), responseX, doc.y, { width: responseW, lineGap: 2 });
           doc.moveDown(0.4);
         } else if (trimmed.startsWith("## ")) {
-          doc.font("Helvetica-Bold").fontSize(12).fillColor("#1a1a2e").text(stripped.slice(3), { lineGap: 2 });
+          doc.font("Helvetica-Bold").fontSize(12).fillColor("#1a1a2e").text(stripped.slice(3), responseX, doc.y, { width: responseW, lineGap: 2 });
           doc.moveDown(0.3);
         } else if (trimmed.startsWith("### ")) {
-          doc.font("Helvetica-Bold").fontSize(11).fillColor("#333333").text(stripped.slice(4), { lineGap: 2 });
+          doc.font("Helvetica-Bold").fontSize(11).fillColor("#333333").text(stripped.slice(4), responseX, doc.y, { width: responseW, lineGap: 2 });
           doc.moveDown(0.2);
         } else if (/^[-\u2022]\s+/.test(trimmed)) {
-          doc.font("Helvetica").fontSize(10).fillColor("#333333").text(`  \u2022  ${stripped.replace(/^[-\u2022]\s+/, "")}`, { lineGap: 3, indent: 10 });
+          doc.font("Helvetica").fontSize(10).fillColor("#333333").text(`  \u2022  ${stripped.replace(/^[-\u2022]\s+/, "")}`, responseX, doc.y, { width: responseW, lineGap: 3, indent: 10 });
           doc.moveDown(0.15);
         } else if (/^\d+\.\s+/.test(trimmed)) {
-          doc.font("Helvetica").fontSize(10).fillColor("#333333").text(`  ${stripped}`, { lineGap: 3, indent: 10 });
+          doc.font("Helvetica").fontSize(10).fillColor("#333333").text(`  ${stripped}`, responseX, doc.y, { width: responseW, lineGap: 3, indent: 10 });
           doc.moveDown(0.15);
         } else if (trimmed.startsWith("---")) {
           doc.moveDown(0.3);
-          doc.moveTo(65, doc.y).lineTo(pageW - 65, doc.y).strokeColor("#e0e0e0").lineWidth(0.5).stroke();
+          doc.moveTo(responseX, doc.y).lineTo(responseX + responseW, doc.y).strokeColor("#e0e0e0").lineWidth(0.5).stroke();
           doc.moveDown(0.3);
         } else {
-          doc.font("Helvetica").fontSize(10).fillColor("#333333").text(stripped, { lineGap: 3, align: "left" });
+          doc.font("Helvetica").fontSize(10).fillColor("#333333").text(stripped, responseX, doc.y, { width: responseW, lineGap: 3, align: "left" });
           doc.moveDown(0.15);
         }
       }
 
-      doc.moveDown(1.5);
-      doc.font("Helvetica").fontSize(7).fillColor("#bbbbbb").text(`profundr.com  \u00b7  ${today}`, { align: "center" });
+      doc.moveDown(1);
+      checkPage(30);
+      const footerY = doc.y;
+      doc.font("Helvetica").fontSize(7).fillColor("#cccccc").text("profundr.com", responseX, footerY, { width: responseW / 2 });
+      doc.font("Helvetica").fontSize(7).fillColor("#1a1a2e").text(`\u2193 Save PDF`, responseX, footerY, { width: responseW, align: "right" });
+
+      doc.moveDown(2);
+      doc.font("Helvetica").fontSize(6.5).fillColor("#bbbbbb").text(`profundr.com  \u00b7  ${today}`, marginL, doc.y, { width: contentW, align: "center" });
 
       doc.end();
       const pdfBuffer = await pdfReady;
