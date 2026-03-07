@@ -732,8 +732,7 @@ function ChatBubbleWithPdf({ content, msgId, isCurrentlyStreaming, onStreamCompl
               <path d="M12 2v20" /><path d="M7.5 7.5C9 8.5 10 10 10.5 12" /><path d="M16.5 7.5C15 8.5 14 10 13.5 12" />
             </svg>
             <div className="min-w-0 flex-1">
-              <p className="text-[11px] font-bold text-white leading-tight">Profundr</p>
-              <p className="text-[8px] text-white/35 mt-0.5">Capital Intelligence</p>
+              <p className="text-[10px] text-white/50 leading-tight tracking-wide">Insights for education only — not financial advice.</p>
             </div>
           </div>
         </div>
@@ -5217,8 +5216,8 @@ export default function LandingPage() {
             </p>
           )}
 
-          <p className="text-center text-[10px] text-[#bbb] mt-3 leading-[1.6] tracking-wide" data-testid="text-footer-legal">
-            Insights for education only — not financial advice.{" "}
+          <p className="text-center text-[11px] text-[#aaa] mt-3 leading-[1.5]" data-testid="text-footer-legal">
+            Profundr is a capital intelligence platform, not a lender.{" "}
             <span className="underline cursor-pointer hover:text-[#888] transition-colors">Terms</span> &middot;{" "}
             <span className="underline cursor-pointer hover:text-[#888] transition-colors">Privacy</span>
           </p>
