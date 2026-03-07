@@ -1,6 +1,5 @@
 import { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import ReactMarkdown from "react-markdown";
-import html2canvas from "html2canvas";
 import { useAuth } from "@/lib/store";
 import { ProfundrLogo } from "@/components/profundr-logo";
 
@@ -611,36 +610,50 @@ function StreamingText({ fullContent, onComplete, components }: { fullContent: s
   );
 }
 
-function ChatPdfButton({ content, msgId, title }: { content: string; msgId: number; title?: string | null }) {
+function ChatPdfButton({ chatBubbleRef, msgId }: { chatBubbleRef: React.RefObject<HTMLDivElement | null>; msgId: number }) {
   const [downloading, setDownloading] = useState(false);
 
   const handleDownload = async () => {
     if (downloading) return;
+    const el = chatBubbleRef.current;
+    if (!el) return;
     setDownloading(true);
     try {
-      const cleaned = filterMarkdown(content);
-      const res = await fetch("/api/report-pdf", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ content: cleaned, question: title || undefined }),
-      });
-      if (!res.ok) throw new Error("PDF generation failed");
-      const data = await res.json();
-      if (data.downloadUrl) {
-        const pdfRes = await fetch(data.downloadUrl);
-        if (!pdfRes.ok) throw new Error("Download failed");
-        const blob = await pdfRes.blob();
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = `profundr-response-${msgId}.pdf`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-      }
+      const html2canvas = (await import("html2canvas")).default;
+      const { jsPDF } = await import("jspdf");
+
+      const canvas = await html2canvas(el, { scale: 2, backgroundColor: "#ffffff", useCORS: true, logging: false });
+      const imgData = canvas.toDataURL("image/png");
+      const imgW = canvas.width;
+      const imgH = canvas.height;
+
+      const pdfW = 595.28;
+      const margin = 24;
+      const contentW = pdfW - margin * 2;
+      const scale = contentW / imgW;
+      const contentH = imgH * scale;
+      const pdfH = Math.max(contentH + margin * 2 + 30, 300);
+
+      const pdf = new jsPDF({ unit: "pt", format: [pdfW, pdfH] });
+      pdf.addImage(imgData, "PNG", margin, margin, contentW, contentH);
+
+      pdf.setFontSize(6);
+      pdf.setTextColor(170, 170, 170);
+      pdf.text("profundr.com", margin, pdfH - 10);
+      const d = new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+      pdf.text(d, pdfW - margin - pdf.getTextWidth(d), pdfH - 10);
+
+      const blob = pdf.output("blob");
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `profundr-response-${msgId}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      setTimeout(() => URL.revokeObjectURL(url), 500);
     } catch (err) {
-      console.error("PDF download failed:", err);
+      console.error("PDF generation error:", err);
     } finally {
       setDownloading(false);
     }
@@ -693,11 +706,12 @@ function deriveResponseTitle(question?: string): string | null {
 function ChatBubbleWithPdf({ content, msgId, isCurrentlyStreaming, onStreamComplete, chatMdComponents, userQuestion }: {
   content: string; msgId: number; isCurrentlyStreaming: boolean; onStreamComplete: () => void; chatMdComponents: any; userQuestion?: string;
 }) {
+  const bubbleRef = useRef<HTMLDivElement>(null);
   const title = deriveResponseTitle(userQuestion);
 
   return (
     <div className="overflow-hidden">
-      <div>
+      <div ref={bubbleRef}>
         <div className="rounded-xl bg-gradient-to-br from-[#1a1a2e] to-[#252540] px-3.5 py-2 mb-2">
           <div className="flex items-center gap-2">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 opacity-60">
@@ -727,7 +741,7 @@ function ChatBubbleWithPdf({ content, msgId, isCurrentlyStreaming, onStreamCompl
           )}
         </div>
       </div>
-      {!isCurrentlyStreaming && <ChatPdfButton content={content} msgId={msgId} title={title} />}
+      {!isCurrentlyStreaming && <ChatPdfButton chatBubbleRef={bubbleRef} msgId={msgId} />}
     </div>
   );
 }
@@ -4568,6 +4582,7 @@ export default function LandingPage() {
         </div>`;
         document.body.appendChild(container);
 
+        const html2canvas = (await import("html2canvas")).default;
         const cvs = await html2canvas(container, { scale: 2, backgroundColor: "#ffffff", useCORS: true, logging: false });
         canvases.push(cvs);
         document.body.removeChild(container);
