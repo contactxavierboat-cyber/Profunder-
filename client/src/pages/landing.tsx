@@ -610,64 +610,26 @@ function StreamingText({ fullContent, onComplete, components }: { fullContent: s
   );
 }
 
-function ChatPdfButton({ chatBubbleRef, msgId }: { chatBubbleRef: React.RefObject<HTMLDivElement | null>; msgId: number }) {
+function ChatPdfButton({ content, msgId }: { content: string; msgId: number }) {
   const [downloading, setDownloading] = useState(false);
 
   const handleDownload = async () => {
     if (downloading) return;
-    const el = chatBubbleRef.current;
-    if (!el) return;
     setDownloading(true);
     try {
-      const html2canvas = (await import("html2canvas")).default;
-      const { jsPDF } = await import("jspdf");
-
-      const clone = el.cloneNode(true) as HTMLElement;
-      clone.style.cssText = `position:fixed;left:-9999px;top:0;width:${Math.min(el.offsetWidth, 600)}px;background:#ffffff;padding:16px;font-family:Inter,system-ui,-apple-system,sans-serif;`;
-      document.body.appendChild(clone);
-
-      const canvas = await html2canvas(clone, {
-        scale: 2,
-        backgroundColor: "#ffffff",
-        useCORS: true,
-        allowTaint: true,
-        logging: false,
-        width: clone.offsetWidth,
-        height: clone.scrollHeight,
+      const cleaned = filterMarkdown(content);
+      const res = await fetch("/api/report-pdf", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ content: cleaned, style: "chat" }),
       });
-      document.body.removeChild(clone);
-
-      const imgData = canvas.toDataURL("image/png");
-      const imgW = canvas.width;
-      const imgH = canvas.height;
-
-      const pdfW = 595.28;
-      const margin = 24;
-      const contentW = pdfW - margin * 2;
-      const ratio = contentW / imgW;
-      const contentH = imgH * ratio;
-      const pdfH = Math.max(contentH + margin * 2 + 30, 300);
-
-      const pdf = new jsPDF({ unit: "pt", format: [pdfW, pdfH] });
-      pdf.addImage(imgData, "PNG", margin, margin, contentW, contentH);
-
-      pdf.setFontSize(6);
-      pdf.setTextColor(170, 170, 170);
-      pdf.text("profundr.com", margin, pdfH - 10);
-      const d = new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
-      pdf.text(d, pdfW - margin - pdf.getTextWidth(d), pdfH - 10);
-
-      const blob = pdf.output("blob");
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `profundr-response-${msgId}.pdf`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      setTimeout(() => URL.revokeObjectURL(url), 500);
+      if (!res.ok) throw new Error("PDF generation failed");
+      const data = await res.json();
+      if (data.downloadUrl) {
+        window.open(data.downloadUrl, "_blank");
+      }
     } catch (err) {
-      console.error("PDF generation error:", err);
+      console.error("PDF download failed:", err);
     } finally {
       setDownloading(false);
     }
@@ -720,11 +682,9 @@ function deriveResponseTitle(question?: string): string | null {
 function ChatBubbleWithPdf({ content, msgId, isCurrentlyStreaming, onStreamComplete, chatMdComponents, userQuestion }: {
   content: string; msgId: number; isCurrentlyStreaming: boolean; onStreamComplete: () => void; chatMdComponents: any; userQuestion?: string;
 }) {
-  const bubbleRef = useRef<HTMLDivElement>(null);
-
   return (
     <div className="overflow-hidden">
-      <div ref={bubbleRef}>
+      <div>
         <div className="rounded-xl bg-gradient-to-br from-[#1a1a2e] to-[#252540] px-3.5 py-2 mb-2">
           <div className="flex items-center gap-2">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 opacity-60">
@@ -744,7 +704,7 @@ function ChatBubbleWithPdf({ content, msgId, isCurrentlyStreaming, onStreamCompl
           )}
         </div>
       </div>
-      {!isCurrentlyStreaming && <ChatPdfButton chatBubbleRef={bubbleRef} msgId={msgId} />}
+      {!isCurrentlyStreaming && <ChatPdfButton content={content} msgId={msgId} />}
     </div>
   );
 }
