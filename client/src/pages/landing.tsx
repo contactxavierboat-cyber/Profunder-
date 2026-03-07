@@ -615,13 +615,14 @@ function ChatPdfButton({ chatBubbleRef, msgId }: { chatBubbleRef: React.RefObjec
   const [downloading, setDownloading] = useState(false);
 
   const handleDownload = async () => {
-    if (downloading || !chatBubbleRef.current) return;
+    if (downloading) return;
+    const el = chatBubbleRef.current;
+    if (!el) { console.error("ChatPdfButton: no ref element"); return; }
     setDownloading(true);
     try {
       const html2canvas = (await import("html2canvas")).default;
       const { jsPDF } = await import("jspdf");
 
-      const el = chatBubbleRef.current;
       const canvas = await html2canvas(el, {
         scale: 2,
         backgroundColor: "#ffffff",
@@ -634,12 +635,12 @@ function ChatPdfButton({ chatBubbleRef, msgId }: { chatBubbleRef: React.RefObjec
       const imgH = canvas.height;
 
       const pdfW = 595.28;
-      const margin = 32;
+      const margin = 28;
       const contentW = pdfW - margin * 2;
       const ratio = contentW / imgW;
       const contentH = imgH * ratio;
 
-      const pdfH = Math.max(contentH + margin * 2 + 40, 400);
+      const pdfH = Math.max(contentH + margin * 2 + 50, 400);
       const pdf = new jsPDF({ unit: "pt", format: [pdfW, pdfH] });
 
       pdf.setFillColor(26, 26, 46);
@@ -648,11 +649,11 @@ function ChatPdfButton({ chatBubbleRef, msgId }: { chatBubbleRef: React.RefObjec
       pdf.setFontSize(10);
       pdf.setTextColor(255, 255, 255);
       pdf.text("Profundr", margin, 23);
-      pdf.setFontSize(6);
-      pdf.setTextColor(255, 255, 255, 0.5);
+      pdf.setFontSize(7);
+      pdf.setTextColor(200, 200, 210);
       pdf.text("Capital Intelligence", margin + 52, 23);
 
-      pdf.addImage(imgData, "PNG", margin, 52, contentW, contentH);
+      pdf.addImage(imgData, "PNG", margin, 48, contentW, contentH);
 
       pdf.setDrawColor(230, 230, 230);
       pdf.line(margin, pdfH - 28, pdfW - margin, pdfH - 28);
@@ -662,9 +663,18 @@ function ChatPdfButton({ chatBubbleRef, msgId }: { chatBubbleRef: React.RefObjec
       const dateStr = new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
       pdf.text(dateStr, pdfW - margin - pdf.getTextWidth(dateStr), pdfH - 14);
 
-      pdf.save(`profundr-response-${msgId}.pdf`);
+      const pdfBlob = pdf.output("blob");
+      const blobUrl = URL.createObjectURL(pdfBlob);
+      const a = document.createElement("a");
+      a.href = blobUrl;
+      a.download = `profundr-response-${msgId}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      setTimeout(() => URL.revokeObjectURL(blobUrl), 1000);
     } catch (err) {
       console.error("PDF capture failed:", err);
+      alert("PDF generation failed. Please try again.");
     } finally {
       setDownloading(false);
     }
