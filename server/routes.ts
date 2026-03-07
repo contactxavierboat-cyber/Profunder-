@@ -3157,13 +3157,23 @@ CRITICAL: The following data was previously extracted from the user's credit rep
 
       doc.end();
       const pdfBuffer = await pdfReady;
-      res.setHeader("Content-Type", "application/pdf");
-      res.setHeader("Content-Disposition", `inline; filename=profundr-chat.pdf`);
-      res.send(pdfBuffer);
+      const token = Date.now().toString(36) + Math.random().toString(36).slice(2, 10);
+      pendingPdfs.set(token, { buffer: pdfBuffer, created: Date.now() });
+      res.json({ token });
     } catch (error: any) {
       console.error("Chat PDF generation error:", error);
       res.status(500).json({ error: "Failed to generate PDF" });
     }
+  });
+
+  app.get("/api/chat-pdf/:token", (req, res) => {
+    const pdf = pendingPdfs.get(req.params.token);
+    if (!pdf) return res.status(404).send("Download expired");
+    pendingPdfs.delete(req.params.token);
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader("Content-Disposition", "attachment; filename=profundr-insight.pdf");
+    res.setHeader("Content-Length", pdf.buffer.length.toString());
+    res.send(pdf.buffer);
   });
 
   app.post("/api/report-pdf", async (req, res) => {

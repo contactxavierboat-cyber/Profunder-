@@ -624,26 +624,13 @@ function ChatPdfButton({ content, msgId }: { content: string; msgId: number }) {
         body: JSON.stringify({ content: cleaned }),
       });
       if (!res.ok) throw new Error("PDF generation failed");
-      const blob = await res.blob();
-      const blobUrl = URL.createObjectURL(blob);
-
-      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
-      if (isIOS) {
-        window.open(blobUrl);
-      } else {
-        const a = document.createElement("a");
-        a.href = blobUrl;
-        a.download = `profundr-${msgId}.pdf`;
-        a.style.display = "none";
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-      }
-      setTimeout(() => URL.revokeObjectURL(blobUrl), 5000);
+      const { token } = await res.json();
+      if (!token) throw new Error("No token");
+      window.location.href = `/api/chat-pdf/${token}`;
     } catch (err) {
       console.error("PDF download failed:", err);
     } finally {
-      setDownloading(false);
+      setTimeout(() => setDownloading(false), 2000);
     }
   };
 
