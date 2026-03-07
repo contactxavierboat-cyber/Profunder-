@@ -4679,6 +4679,7 @@ export default function LandingPage() {
             </div>
           ) : (
             <div className="w-full max-w-[720px] mx-auto px-4 pt-4 pb-2" data-testid="chat-messages">
+              {displayMessages.some(m => m.role === "assistant" && /(?:STRATEGY_DATA_START|TRADELINE:|DISPUTE:.*\|.*\||Pillar\s*Scores:|Payment\s*Integrity:\s*\d)/i.test(m.content)) && (
               <div className="flex justify-end gap-1.5 mb-2">
                 <button
                   onClick={downloadChatAsPdf}
@@ -4705,6 +4706,7 @@ export default function LandingPage() {
                   {isExporting ? "Exporting..." : "Save as Image"}
                 </button>
               </div>
+              )}
               <div className="space-y-6">
                 {displayMessages.map((msg, msgIdx) => {
                   const msgData = msg.role === "assistant" ? parseSingleMessageData(msg.content) : null;
