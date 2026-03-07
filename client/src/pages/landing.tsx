@@ -460,6 +460,20 @@ function filterMarkdown(content: string): string {
   return filteredLines.join("\n").trim();
 }
 
+const chatMdComponents = {
+  h1: ({ children }: any) => <p className="text-[15px] font-semibold text-[#1a1a2e] leading-snug mb-2 mt-1">{children}</p>,
+  h2: ({ children }: any) => <p className="text-[14px] font-semibold text-[#1a1a2e] leading-snug mb-1.5 mt-2">{children}</p>,
+  h3: ({ children }: any) => <p className="text-[14px] font-semibold text-[#1a1a2e] leading-snug mb-1 mt-1.5">{children}</p>,
+  p: ({ children }: any) => <p className="text-[14px] text-[#333] leading-[1.7] mb-2">{children}</p>,
+  strong: ({ children }: any) => <strong className="font-semibold text-[#1a1a2e]">{children}</strong>,
+  em: ({ children }: any) => <em className="italic text-[#555]">{children}</em>,
+  ul: ({ children }: any) => <ul className="list-disc list-outside pl-4 mb-2 space-y-1">{children}</ul>,
+  ol: ({ children }: any) => <ol className="list-decimal list-outside pl-4 mb-2 space-y-1">{children}</ol>,
+  li: ({ children }: any) => <li className="text-[14px] text-[#333] leading-[1.6]">{children}</li>,
+  hr: () => <hr className="border-t border-[#e8e8e8] my-2" />,
+  blockquote: ({ children }: any) => <blockquote className="border-l-2 border-[#1a1a2e] pl-3 my-2 text-[13px] text-[#555] italic">{children}</blockquote>,
+};
+
 const cardMdComponents = {
   h3: ({ children }: any) => <h3 className="text-[12px] font-semibold text-[#1a1a2e] leading-tight mb-1 mt-1.5">{children}</h3>,
   p: ({ children }: any) => <p className="text-[12px] text-[#444] leading-[1.6] mb-1">{children}</p>,
@@ -584,7 +598,7 @@ function BrandedResponse({ content, userQuestion, msgId }: { content: string; us
   const hasCards = sections.length > 0;
 
   return (
-    <div ref={reportRef} data-testid={`branded-response-${msgId}`}>
+    <div ref={reportRef} data-testid={`branded-response-${msgId}`} className="overflow-hidden">
       <div className="rounded-xl bg-gradient-to-br from-[#1a1a2e] to-[#252540] px-3.5 py-2.5 mb-2">
         <div className="flex items-center gap-2">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 opacity-60">
@@ -4667,18 +4681,6 @@ export default function LandingPage() {
             <div className="w-full max-w-[720px] mx-auto px-4 pt-4 pb-2" data-testid="chat-messages">
               <div className="flex justify-end gap-1.5 mb-2">
                 <button
-                  onClick={resetChat}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] font-medium text-[#777] border border-[#e0e0e0] hover:bg-[#f5f5f5] hover:border-[#ccc] transition-colors"
-                  title="Reset chat"
-                  data-testid="button-reset-chat"
-                >
-                  <svg width="12" height="12" viewBox="0 0 16 16" fill="none">
-                    <path d="M2 2v5h5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
-                    <path d="M3.05 10A6 6 0 1 0 4.18 4.18L2 7" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
-                  New Chat
-                </button>
-                <button
                   onClick={downloadChatAsPdf}
                   disabled={isExporting}
                   className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] font-medium text-[#777] border border-[#e0e0e0] hover:bg-[#f5f5f5] hover:border-[#ccc] transition-colors disabled:opacity-50 disabled:cursor-wait"
@@ -4732,12 +4734,12 @@ export default function LandingPage() {
                           </div>
                         </div>
                       ) : (
-                      <div className={`flex gap-3 ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
+                      <div className={`flex gap-3 min-w-0 ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
                         {msg.role === "assistant" && (
-                          <ProfundrAvatar size={28} className="mt-0.5" />
+                          <ProfundrAvatar size={28} className="mt-0.5 shrink-0" />
                         )}
                         <div
-                          className={`max-w-[85%] ${msg.role === "user" ? "bg-[#f0f0f0] rounded-[20px] rounded-br-[6px] px-4 py-2.5" : "bg-transparent"}`}
+                          className={`max-w-[85%] min-w-0 overflow-hidden ${msg.role === "user" ? "bg-[#f0f0f0] rounded-[20px] rounded-br-[6px] px-4 py-2.5" : "bg-transparent"}`}
                           data-testid={`message-${msg.role}-${msg.id}`}
                         >
                           {msg.role === "assistant" && msg.senderName && (
@@ -4753,12 +4755,12 @@ export default function LandingPage() {
                               </>
                             );
                           })() : (() => {
-                            const isStructuredReport = /(?:AIS|Approval\s*Index\s*Score|STRATEGY_DATA_START|TRADELINE:|DISPUTE:|Pillar\s*Scores|Payment\s*Integrity|Utilization\s*Control|File\s*Stability|Credit\s*Depth|Timing\s*Risk|Lender\s*Confidence|Financial\s*Identity)/i.test(msg.content) && /^##\s/m.test(msg.content);
+                            const isStructuredReport = /(?:STRATEGY_DATA_START|TRADELINE:|DISPUTE:.*\|.*\||Pillar\s*Scores:|Payment\s*Integrity:\s*\d|Utilization\s*Control:\s*\d|AIS.*(?:Approval\s*Index|Score).*:\s*\d)/i.test(msg.content);
                             return isStructuredReport ? (
                               <BrandedResponse content={msg.content} userQuestion={prevUserMsg?.content} msgId={msg.id} />
                             ) : (
-                              <div className="text-[14px] text-[#1a1a1a] leading-[1.7]">
-                                <ReactMarkdown components={cardMdComponents}>{filterMarkdown(msg.content)}</ReactMarkdown>
+                              <div className="text-[14px] text-[#1a1a1a] leading-[1.7] overflow-hidden">
+                                <ReactMarkdown components={chatMdComponents}>{filterMarkdown(msg.content)}</ReactMarkdown>
                               </div>
                             );
                           })()}
@@ -4951,6 +4953,18 @@ export default function LandingPage() {
 
           <form onSubmit={handleSubmit} className="w-full">
             <div className="flex items-center bg-[#f0f0f0] rounded-full h-[52px] pl-1.5 pr-1.5 border border-[#e5e5e5] shadow-sm focus-within:border-[#ccc] transition-colors">
+              {hasMessages && (
+                <button
+                  type="button" onClick={resetChat}
+                  className="w-9 h-9 flex items-center justify-center rounded-full text-[#888] hover:text-[#555] hover:bg-[#e5e5e5] transition-colors shrink-0"
+                  title="New Chat" data-testid="button-reset-chat"
+                >
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                    <path d="M13.5 8.5a5.5 5.5 0 1 1-1.1-3.3" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" />
+                    <path d="M14 2v4h-4" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </button>
+              )}
               <button
                 type="button" onClick={handleUploadClick}
                 className="w-9 h-9 flex items-center justify-center rounded-full text-[#888] hover:text-[#555] hover:bg-[#e5e5e5] transition-colors shrink-0"
