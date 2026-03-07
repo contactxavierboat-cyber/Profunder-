@@ -611,57 +611,184 @@ function StreamingText({ fullContent, onComplete, components }: { fullContent: s
   );
 }
 
-function ChatPdfButton({ chatBubbleRef, msgId }: { chatBubbleRef: React.RefObject<HTMLDivElement | null>; msgId: number }) {
+function loadImageAsDataUrl(src: string): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.crossOrigin = "anonymous";
+    img.onload = () => {
+      const c = document.createElement("canvas");
+      c.width = img.naturalWidth;
+      c.height = img.naturalHeight;
+      const ctx = c.getContext("2d");
+      if (!ctx) { reject(new Error("no canvas ctx")); return; }
+      ctx.drawImage(img, 0, 0);
+      resolve(c.toDataURL("image/jpeg", 0.6));
+    };
+    img.onerror = () => reject(new Error("img load failed"));
+    img.src = src;
+  });
+}
+
+function renderMarkdownToPdf(pdf: any, text: string, x: number, startY: number, maxW: number, fontSize: number, lineH: number): number {
+  let y = startY;
+  const cleaned = text.replace(/\*\*(.+?)\*\*/g, "±BOLD±$1±/BOLD±").replace(/\*(.+?)\*/g, "±IT±$1±/IT±").replace(/_(.+?)_/g, "±IT±$1±/IT±");
+  const lines = cleaned.split("\n");
+  let listNum = 0;
+
+  for (const rawLine of lines) {
+    let line = rawLine;
+    const h1 = line.match(/^#\s+(.+)$/);
+    const h2 = line.match(/^##\s+(.+)$/);
+    const h3 = line.match(/^###\s+(.+)$/);
+    const bullet = line.match(/^[-*]\s+(.+)$/);
+    const numbered = line.match(/^\d+\.\s+(.+)$/);
+    const hr = /^---+$/.test(line.trim());
+
+    if (hr) {
+      y += 4;
+      pdf.setDrawColor(200, 200, 200);
+      pdf.line(x, y, x + maxW, y);
+      y += lineH * 0.6;
+      listNum = 0;
+      continue;
+    }
+
+    if (line.trim() === "") { y += lineH * 0.4; listNum = 0; continue; }
+
+    let currentSize = fontSize;
+    let isBold = false;
+
+    if (h1) { line = h1[1]; currentSize = fontSize + 4; isBold = true; listNum = 0; }
+    else if (h2) { line = h2[1]; currentSize = fontSize + 2; isBold = true; listNum = 0; }
+    else if (h3) { line = h3[1]; currentSize = fontSize + 1; isBold = true; listNum = 0; }
+    else if (bullet) { line = "  •  " + bullet[1]; listNum = 0; }
+    else if (numbered) { listNum++; line = "  " + listNum + ".  " + numbered[1]; }
+    else { listNum = 0; }
+
+    const segments: { text: string; bold: boolean; italic: boolean }[] = [];
+    const parts = line.split(/±(BOLD|\/BOLD|IT|\/IT)±/);
+    let bold = isBold, italic = false;
+    for (const part of parts) {
+      if (part === "BOLD") { bold = true; continue; }
+      if (part === "/BOLD") { bold = isBold; continue; }
+      if (part === "IT") { italic = true; continue; }
+      if (part === "/IT") { italic = false; continue; }
+      if (part) segments.push({ text: part, bold, italic });
+    }
+
+    pdf.setFontSize(currentSize);
+    const fullText = segments.map(s => s.text).join("");
+    const wrappedLines = pdf.splitTextToSize(fullText, maxW);
+
+    for (const wl of wrappedLines) {
+      if (y > 780) {
+        pdf.addPage();
+        y = 50;
+      }
+      let cx = x;
+      let remaining = wl;
+      for (const seg of segments) {
+        if (!remaining) break;
+        let take = "";
+        if (remaining.startsWith(seg.text)) {
+          take = seg.text;
+          remaining = remaining.slice(seg.text.length);
+        } else if (seg.text.length > 0) {
+          const idx = remaining.indexOf(seg.text.charAt(0));
+          if (idx >= 0) {
+            const overlap = Math.min(seg.text.length, remaining.length - idx);
+            take = remaining.slice(idx, idx + overlap);
+            remaining = remaining.slice(idx + overlap);
+          } else continue;
+        } else continue;
+
+        const style = seg.bold && seg.italic ? "bolditalic" : seg.bold ? "bold" : seg.italic ? "italic" : "normal";
+        pdf.setFont("helvetica", style);
+        pdf.setFontSize(currentSize);
+        pdf.setTextColor(26, 26, 46);
+        pdf.text(take, cx, y);
+        cx += pdf.getTextWidth(take);
+      }
+      y += lineH;
+    }
+    if (h1 || h2 || h3) y += 2;
+  }
+  return y;
+}
+
+function ChatPdfButton({ content, msgId, title }: { content: string; msgId: number; title?: string | null }) {
   const [downloading, setDownloading] = useState(false);
 
   const handleDownload = async () => {
     if (downloading) return;
-    const el = chatBubbleRef.current;
-    if (!el) { console.error("ChatPdfButton: no ref element"); return; }
     setDownloading(true);
     try {
-      const html2canvas = (await import("html2canvas")).default;
       const { jsPDF } = await import("jspdf");
 
-      const canvas = await html2canvas(el, {
-        scale: 2,
-        backgroundColor: "#ffffff",
-        useCORS: true,
-        logging: false,
-      });
-
-      const imgData = canvas.toDataURL("image/png");
-      const imgW = canvas.width;
-      const imgH = canvas.height;
-
       const pdfW = 595.28;
-      const margin = 28;
+      const pdfH = 841.89;
+      const margin = 40;
       const contentW = pdfW - margin * 2;
-      const ratio = contentW / imgW;
-      const contentH = imgH * ratio;
+      const pdf = new jsPDF({ unit: "pt", format: "a4" });
 
-      const pdfH = Math.max(contentH + margin * 2 + 50, 400);
-      const pdf = new jsPDF({ unit: "pt", format: [pdfW, pdfH] });
+      try {
+        const bgData = await loadImageAsDataUrl("/images/pdf-bg.jpg");
+        pdf.addImage(bgData, "JPEG", 0, 0, pdfW, pdfH, undefined, "FAST");
+        pdf.setFillColor(255, 255, 255);
+        pdf.setGState(new pdf.GState({ opacity: 0.88 }));
+        pdf.roundedRect(margin - 12, 56, contentW + 24, pdfH - 100, 8, 8, "F");
+        pdf.setGState(new pdf.GState({ opacity: 1 }));
+      } catch { /* bg image optional */ }
 
       pdf.setFillColor(26, 26, 46);
-      pdf.rect(0, 0, pdfW, 36, "F");
+      pdf.roundedRect(margin - 12, 0, contentW + 24, 48, 0, 0, "F");
       pdf.setFont("helvetica", "bold");
-      pdf.setFontSize(10);
+      pdf.setFontSize(14);
       pdf.setTextColor(255, 255, 255);
-      pdf.text("Profundr", margin, 23);
-      pdf.setFontSize(7);
-      pdf.setTextColor(200, 200, 210);
-      pdf.text("Capital Intelligence", margin + 52, 23);
+      pdf.text("Profundr", margin, 30);
+      pdf.setFontSize(8);
+      pdf.setTextColor(180, 180, 200);
+      pdf.text("Capital Intelligence", margin + 68, 30);
 
-      pdf.addImage(imgData, "PNG", margin, 48, contentW, contentH);
+      let y = 72;
 
-      pdf.setDrawColor(230, 230, 230);
-      pdf.line(margin, pdfH - 28, pdfW - margin, pdfH - 28);
-      pdf.setFontSize(6);
-      pdf.setTextColor(180, 180, 180);
-      pdf.text("profundr.com", margin, pdfH - 14);
-      const dateStr = new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
-      pdf.text(dateStr, pdfW - margin - pdf.getTextWidth(dateStr), pdfH - 14);
+      if (title) {
+        pdf.setFillColor(26, 26, 46);
+        pdf.roundedRect(margin, y, contentW, 30, 6, 6, "F");
+        pdf.setFont("helvetica", "bold");
+        pdf.setFontSize(11);
+        pdf.setTextColor(255, 255, 255);
+        const titleLines = pdf.splitTextToSize(title, contentW - 20);
+        pdf.text(titleLines[0], margin + 10, y + 19);
+        y += 40;
+      }
+
+      const cleaned = filterMarkdown(content);
+      y = renderMarkdownToPdf(pdf, cleaned, margin, y, contentW, 10, 14);
+
+      const totalPages = pdf.getNumberOfPages();
+      for (let i = 1; i <= totalPages; i++) {
+        pdf.setPage(i);
+        if (i > 1) {
+          try {
+            const bgData = await loadImageAsDataUrl("/images/pdf-bg.jpg");
+            pdf.addImage(bgData, "JPEG", 0, 0, pdfW, pdfH, undefined, "FAST");
+            pdf.setFillColor(255, 255, 255);
+            pdf.setGState(new pdf.GState({ opacity: 0.88 }));
+            pdf.roundedRect(margin - 12, 12, contentW + 24, pdfH - 36, 8, 8, "F");
+            pdf.setGState(new pdf.GState({ opacity: 1 }));
+          } catch {}
+        }
+        pdf.setDrawColor(220, 220, 220);
+        pdf.line(margin, pdfH - 32, pdfW - margin, pdfH - 32);
+        pdf.setFont("helvetica", "normal");
+        pdf.setFontSize(7);
+        pdf.setTextColor(160, 160, 160);
+        pdf.text("profundr.com", margin, pdfH - 18);
+        const dateStr = new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+        pdf.text(dateStr, pdfW - margin - pdf.getTextWidth(dateStr), pdfH - 18);
+        pdf.text(`${i} / ${totalPages}`, pdfW / 2 - 8, pdfH - 18);
+      }
 
       const pdfBlob = pdf.output("blob");
       const blobUrl = URL.createObjectURL(pdfBlob);
@@ -673,8 +800,7 @@ function ChatPdfButton({ chatBubbleRef, msgId }: { chatBubbleRef: React.RefObjec
       document.body.removeChild(a);
       setTimeout(() => URL.revokeObjectURL(blobUrl), 1000);
     } catch (err) {
-      console.error("PDF capture failed:", err);
-      alert("PDF generation failed. Please try again.");
+      console.error("PDF generation failed:", err);
     } finally {
       setDownloading(false);
     }
@@ -727,12 +853,11 @@ function deriveResponseTitle(question?: string): string | null {
 function ChatBubbleWithPdf({ content, msgId, isCurrentlyStreaming, onStreamComplete, chatMdComponents, userQuestion }: {
   content: string; msgId: number; isCurrentlyStreaming: boolean; onStreamComplete: () => void; chatMdComponents: any; userQuestion?: string;
 }) {
-  const bubbleRef = useRef<HTMLDivElement>(null);
   const title = deriveResponseTitle(userQuestion);
 
   return (
     <div className="overflow-hidden">
-      <div ref={bubbleRef}>
+      <div>
         <div className="rounded-xl bg-gradient-to-br from-[#1a1a2e] to-[#252540] px-3.5 py-2 mb-2">
           <div className="flex items-center gap-2">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 opacity-60">
@@ -762,7 +887,7 @@ function ChatBubbleWithPdf({ content, msgId, isCurrentlyStreaming, onStreamCompl
           )}
         </div>
       </div>
-      {!isCurrentlyStreaming && <ChatPdfButton chatBubbleRef={bubbleRef} msgId={msgId} />}
+      {!isCurrentlyStreaming && <ChatPdfButton content={content} msgId={msgId} title={title} />}
     </div>
   );
 }
