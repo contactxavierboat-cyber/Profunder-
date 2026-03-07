@@ -4718,9 +4718,16 @@ export default function LandingPage() {
                                 {textContent && <p className="text-[14px] text-[#1a1a1a] leading-[1.6] whitespace-pre-wrap">{renderMentionText(textContent)}</p>}
                               </>
                             );
-                          })() : (
-                            <BrandedResponse content={msg.content} userQuestion={prevUserMsg?.content} msgId={msg.id} />
-                          )}
+                          })() : (() => {
+                            const isStructuredReport = /(?:AIS|Approval\s*Index\s*Score|STRATEGY_DATA_START|TRADELINE:|DISPUTE:|Pillar\s*Scores|Payment\s*Integrity|Utilization\s*Control|File\s*Stability|Credit\s*Depth|Timing\s*Risk|Lender\s*Confidence|Financial\s*Identity)/i.test(msg.content) && /^##\s/m.test(msg.content);
+                            return isStructuredReport ? (
+                              <BrandedResponse content={msg.content} userQuestion={prevUserMsg?.content} msgId={msg.id} />
+                            ) : (
+                              <div className="text-[14px] text-[#1a1a1a] leading-[1.7]">
+                                <ReactMarkdown components={cardMdComponents}>{filterMarkdown(msg.content)}</ReactMarkdown>
+                              </div>
+                            );
+                          })()}
                         </div>
                         {msg.role === "user" && (
                           <ProfileAvatar photo={msg.senderPhoto || user?.profilePhoto} name={msg.senderName || user?.displayName || user?.email} size={28} className="mt-0.5" />
