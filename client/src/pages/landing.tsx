@@ -611,36 +611,60 @@ function StreamingText({ fullContent, onComplete, components }: { fullContent: s
   );
 }
 
-function ChatPdfButton({ content, msgId, userQuestion }: { content: string; msgId: number; userQuestion?: string }) {
+function ChatPdfButton({ chatBubbleRef, msgId }: { chatBubbleRef: React.RefObject<HTMLDivElement | null>; msgId: number }) {
   const [downloading, setDownloading] = useState(false);
 
   const handleDownload = async () => {
-    if (downloading) return;
+    if (downloading || !chatBubbleRef.current) return;
     setDownloading(true);
     try {
-      const cleaned = filterMarkdown(content);
-      const res = await fetch("/api/report-pdf", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ content: cleaned, question: userQuestion || undefined }),
+      const html2canvas = (await import("html2canvas")).default;
+      const { jsPDF } = await import("jspdf");
+
+      const el = chatBubbleRef.current;
+      const canvas = await html2canvas(el, {
+        scale: 2,
+        backgroundColor: "#ffffff",
+        useCORS: true,
+        logging: false,
       });
-      if (!res.ok) throw new Error("PDF generation failed");
-      const data = await res.json();
-      if (data.downloadUrl) {
-        const pdfRes = await fetch(data.downloadUrl);
-        if (!pdfRes.ok) throw new Error("Download failed");
-        const blob = await pdfRes.blob();
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = `profundr-response-${msgId}.pdf`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-      }
+
+      const imgData = canvas.toDataURL("image/png");
+      const imgW = canvas.width;
+      const imgH = canvas.height;
+
+      const pdfW = 595.28;
+      const margin = 32;
+      const contentW = pdfW - margin * 2;
+      const ratio = contentW / imgW;
+      const contentH = imgH * ratio;
+
+      const pdfH = Math.max(contentH + margin * 2 + 40, 400);
+      const pdf = new jsPDF({ unit: "pt", format: [pdfW, pdfH] });
+
+      pdf.setFillColor(26, 26, 46);
+      pdf.rect(0, 0, pdfW, 36, "F");
+      pdf.setFont("helvetica", "bold");
+      pdf.setFontSize(10);
+      pdf.setTextColor(255, 255, 255);
+      pdf.text("Profundr", margin, 23);
+      pdf.setFontSize(6);
+      pdf.setTextColor(255, 255, 255, 0.5);
+      pdf.text("Capital Intelligence", margin + 52, 23);
+
+      pdf.addImage(imgData, "PNG", margin, 52, contentW, contentH);
+
+      pdf.setDrawColor(230, 230, 230);
+      pdf.line(margin, pdfH - 28, pdfW - margin, pdfH - 28);
+      pdf.setFontSize(6);
+      pdf.setTextColor(180, 180, 180);
+      pdf.text("profundr.com", margin, pdfH - 14);
+      const dateStr = new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+      pdf.text(dateStr, pdfW - margin - pdf.getTextWidth(dateStr), pdfH - 14);
+
+      pdf.save(`profundr-response-${msgId}.pdf`);
     } catch (err) {
-      console.error("PDF download failed:", err);
+      console.error("PDF capture failed:", err);
     } finally {
       setDownloading(false);
     }
@@ -662,7 +686,7 @@ function ChatPdfButton({ content, msgId, userQuestion }: { content: string; msgI
         data-testid={`button-download-chat-${msgId}`}
       >
         {downloading ? (
-          <span className="text-[8px] text-[#999]">Generating PDF...</span>
+          <span className="text-[8px] text-[#999]">Generating...</span>
         ) : (
           <>
             <svg width="9" height="9" viewBox="0 0 12 12" fill="none"><path d="M6 2v6M6 8L4 6M6 8l2-2" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" /><path d="M2 9v1h8V9" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" /></svg>
@@ -670,6 +694,39 @@ function ChatPdfButton({ content, msgId, userQuestion }: { content: string; msgI
           </>
         )}
       </button>
+    </div>
+  );
+}
+
+function ChatBubbleWithPdf({ content, msgId, isCurrentlyStreaming, onStreamComplete, chatMdComponents }: {
+  content: string; msgId: number; isCurrentlyStreaming: boolean; onStreamComplete: () => void; chatMdComponents: any;
+}) {
+  const bubbleRef = useRef<HTMLDivElement>(null);
+
+  return (
+    <div className="overflow-hidden">
+      <div ref={bubbleRef}>
+        <div className="rounded-xl bg-gradient-to-br from-[#1a1a2e] to-[#252540] px-3.5 py-2 mb-2">
+          <div className="flex items-center gap-2">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 opacity-60">
+              <path d="M12 2C9.5 2 7.5 4 7.5 6.5c0 .5-.4 1-1 1C4.5 7.5 3 9.5 3 11.5c0 1.5.8 2.8 2 3.5 0 0-.5 1.5-.5 2.5C4.5 20 6.5 22 9 22c1.5 0 2.5-.5 3-1.5.5 1 1.5 1.5 3 1.5 2.5 0 4.5-2 4.5-4.5 0-1-.5-2.5-.5-2.5 1.2-.7 2-2 2-3.5 0-2-1.5-4-3.5-4-.6 0-1-.5-1-1C16.5 4 14.5 2 12 2z" />
+              <path d="M12 2v20" /><path d="M7.5 7.5C9 8.5 10 10 10.5 12" /><path d="M16.5 7.5C15 8.5 14 10 13.5 12" />
+            </svg>
+            <div className="min-w-0 flex-1">
+              <p className="text-[11px] font-bold text-white leading-tight">Profundr</p>
+              <p className="text-[8px] text-white/35 mt-0.5">Capital Intelligence</p>
+            </div>
+          </div>
+        </div>
+        <div className="text-[14px] text-[#1a1a1a] leading-[1.7]">
+          {isCurrentlyStreaming ? (
+            <StreamingText fullContent={content} onComplete={onStreamComplete} components={chatMdComponents} />
+          ) : (
+            <ReactMarkdown components={chatMdComponents}>{filterMarkdown(content)}</ReactMarkdown>
+          )}
+        </div>
+      </div>
+      {!isCurrentlyStreaming && <ChatPdfButton chatBubbleRef={bubbleRef} msgId={msgId} />}
     </div>
   );
 }
@@ -4894,32 +4951,13 @@ export default function LandingPage() {
                             return isStructuredReport ? (
                               <BrandedResponse content={msg.content} userQuestion={prevUserMsg?.content} msgId={msg.id} />
                             ) : (
-                              <div className="overflow-hidden">
-                                <div className="rounded-xl bg-gradient-to-br from-[#1a1a2e] to-[#252540] px-3.5 py-2 mb-2">
-                                  <div className="flex items-center gap-2">
-                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 opacity-60">
-                                      <path d="M12 2C9.5 2 7.5 4 7.5 6.5c0 .5-.4 1-1 1C4.5 7.5 3 9.5 3 11.5c0 1.5.8 2.8 2 3.5 0 0-.5 1.5-.5 2.5C4.5 20 6.5 22 9 22c1.5 0 2.5-.5 3-1.5.5 1 1.5 1.5 3 1.5 2.5 0 4.5-2 4.5-4.5 0-1-.5-2.5-.5-2.5 1.2-.7 2-2 2-3.5 0-2-1.5-4-3.5-4-.6 0-1-.5-1-1C16.5 4 14.5 2 12 2z" />
-                                      <path d="M12 2v20" /><path d="M7.5 7.5C9 8.5 10 10 10.5 12" /><path d="M16.5 7.5C15 8.5 14 10 13.5 12" />
-                                    </svg>
-                                    <div className="min-w-0 flex-1">
-                                      <p className="text-[11px] font-bold text-white leading-tight">Profundr</p>
-                                      <p className="text-[8px] text-white/35 mt-0.5">Capital Intelligence</p>
-                                    </div>
-                                  </div>
-                                </div>
-                                <div className="text-[14px] text-[#1a1a1a] leading-[1.7]">
-                                  {isCurrentlyStreaming ? (
-                                    <StreamingText
-                                      fullContent={msg.content}
-                                      onComplete={() => setStreamingMsgId(null)}
-                                      components={chatMdComponents}
-                                    />
-                                  ) : (
-                                    <ReactMarkdown components={chatMdComponents}>{filterMarkdown(msg.content)}</ReactMarkdown>
-                                  )}
-                                </div>
-                                {!isCurrentlyStreaming && <ChatPdfButton content={msg.content} msgId={msg.id} userQuestion={prevUserMsg?.content} />}
-                              </div>
+                              <ChatBubbleWithPdf
+                                content={msg.content}
+                                msgId={msg.id}
+                                isCurrentlyStreaming={isCurrentlyStreaming}
+                                onStreamComplete={() => setStreamingMsgId(null)}
+                                chatMdComponents={chatMdComponents}
+                              />
                             );
                           })()}
                         </div>
