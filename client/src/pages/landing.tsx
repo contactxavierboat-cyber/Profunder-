@@ -618,16 +618,28 @@ function ChatPdfButton({ content, msgId }: { content: string; msgId: number }) {
     setDownloading(true);
     try {
       const cleaned = filterMarkdown(content);
-      const res = await fetch("/api/report-pdf", {
+      const res = await fetch("/api/chat-pdf", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ content: cleaned, style: "chat" }),
+        body: JSON.stringify({ content: cleaned }),
       });
       if (!res.ok) throw new Error("PDF generation failed");
-      const data = await res.json();
-      if (data.downloadUrl) {
-        window.open(data.downloadUrl, "_blank");
+      const blob = await res.blob();
+      const blobUrl = URL.createObjectURL(blob);
+
+      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+      if (isIOS) {
+        window.open(blobUrl);
+      } else {
+        const a = document.createElement("a");
+        a.href = blobUrl;
+        a.download = `profundr-${msgId}.pdf`;
+        a.style.display = "none";
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
       }
+      setTimeout(() => URL.revokeObjectURL(blobUrl), 5000);
     } catch (err) {
       console.error("PDF download failed:", err);
     } finally {
