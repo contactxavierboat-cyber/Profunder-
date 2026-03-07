@@ -467,9 +467,9 @@ const chatMdComponents = {
   p: ({ children }: any) => <p className="text-[14px] text-[#333] leading-[1.7] mb-2">{children}</p>,
   strong: ({ children }: any) => <strong className="font-semibold text-[#1a1a2e]">{children}</strong>,
   em: ({ children }: any) => <em className="italic text-[#555]">{children}</em>,
-  ul: ({ children }: any) => <ul className="list-disc list-inside mb-2 space-y-1">{children}</ul>,
-  ol: ({ children }: any) => <ol className="list-decimal list-inside mb-2 space-y-1">{children}</ol>,
-  li: ({ children }: any) => <li className="text-[14px] text-[#333] leading-[1.6]">{children}</li>,
+  ul: ({ children }: any) => <ul className="list-disc pl-5 mb-2 space-y-1">{children}</ul>,
+  ol: ({ children }: any) => <ol className="list-decimal pl-5 mb-2 space-y-1">{children}</ol>,
+  li: ({ children }: any) => <li className="text-[14px] text-[#333] leading-[1.6] pl-0.5">{children}</li>,
   hr: () => <hr className="border-t border-[#e8e8e8] my-2" />,
   blockquote: ({ children }: any) => <blockquote className="border-l-2 border-[#1a1a2e] pl-3 my-2 text-[13px] text-[#555] italic">{children}</blockquote>,
 };
@@ -708,10 +708,27 @@ function ChatPdfButton({ chatBubbleRef, msgId }: { chatBubbleRef: React.RefObjec
   );
 }
 
-function ChatBubbleWithPdf({ content, msgId, isCurrentlyStreaming, onStreamComplete, chatMdComponents }: {
-  content: string; msgId: number; isCurrentlyStreaming: boolean; onStreamComplete: () => void; chatMdComponents: any;
+function deriveResponseTitle(question?: string): string | null {
+  if (!question) return null;
+  const q = question.replace(/\[Attached:.*?\]/g, "").trim();
+  if (q.length < 8) return null;
+  const actionPatterns = [
+    { re: /(?:how|what|ways?|steps?|tips?|strategies?).*(?:improv|increas|rais|boost|fix|build|grow|get|start)/i, prefix: "" },
+    { re: /(?:what|explain|tell|describe|break.*down|walk.*through)/i, prefix: "" },
+    { re: /(?:how|can|should|do|does|is|are|will|when|where|why|which)/i, prefix: "" },
+  ];
+  const isQuestion = actionPatterns.some(p => p.re.test(q));
+  if (!isQuestion && q.length < 20) return null;
+  let title = q.replace(/[?.!]+$/, "").trim();
+  if (title.length > 60) title = title.slice(0, 57) + "...";
+  return title.charAt(0).toUpperCase() + title.slice(1);
+}
+
+function ChatBubbleWithPdf({ content, msgId, isCurrentlyStreaming, onStreamComplete, chatMdComponents, userQuestion }: {
+  content: string; msgId: number; isCurrentlyStreaming: boolean; onStreamComplete: () => void; chatMdComponents: any; userQuestion?: string;
 }) {
   const bubbleRef = useRef<HTMLDivElement>(null);
+  const title = deriveResponseTitle(userQuestion);
 
   return (
     <div className="overflow-hidden">
@@ -723,8 +740,17 @@ function ChatBubbleWithPdf({ content, msgId, isCurrentlyStreaming, onStreamCompl
               <path d="M12 2v20" /><path d="M7.5 7.5C9 8.5 10 10 10.5 12" /><path d="M16.5 7.5C15 8.5 14 10 13.5 12" />
             </svg>
             <div className="min-w-0 flex-1">
-              <p className="text-[11px] font-bold text-white leading-tight">Profundr</p>
-              <p className="text-[8px] text-white/35 mt-0.5">Capital Intelligence</p>
+              {title ? (
+                <>
+                  <p className="text-[13px] font-bold text-white leading-tight truncate">{title}</p>
+                  <p className="text-[8px] text-white/35 mt-0.5">Profundr Capital Intelligence</p>
+                </>
+              ) : (
+                <>
+                  <p className="text-[11px] font-bold text-white leading-tight">Profundr</p>
+                  <p className="text-[8px] text-white/35 mt-0.5">Capital Intelligence</p>
+                </>
+              )}
             </div>
           </div>
         </div>
@@ -4967,6 +4993,7 @@ export default function LandingPage() {
                                 isCurrentlyStreaming={isCurrentlyStreaming}
                                 onStreamComplete={() => setStreamingMsgId(null)}
                                 chatMdComponents={chatMdComponents}
+                                userQuestion={prevUserMsg?.content}
                               />
                             );
                           })()}
