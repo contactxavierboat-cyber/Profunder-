@@ -610,7 +610,7 @@ function StreamingText({ fullContent, onComplete, components }: { fullContent: s
   );
 }
 
-function ChatPdfButton({ content, msgId }: { content: string; msgId: number }) {
+function ChatPdfButton({ content, msgId, question }: { content: string; msgId: number; question?: string }) {
   const [downloading, setDownloading] = useState(false);
 
   const handleDownload = async () => {
@@ -621,7 +621,7 @@ function ChatPdfButton({ content, msgId }: { content: string; msgId: number }) {
       const res = await fetch("/api/chat-pdf", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ content: cleaned }),
+        body: JSON.stringify({ content: cleaned, question: question || undefined }),
       });
       if (!res.ok) throw new Error("PDF generation failed");
       const { token } = await res.json();
@@ -703,7 +703,7 @@ function ChatBubbleWithPdf({ content, msgId, isCurrentlyStreaming, onStreamCompl
           )}
         </div>
       </div>
-      {!isCurrentlyStreaming && <ChatPdfButton content={content} msgId={msgId} />}
+      {!isCurrentlyStreaming && <ChatPdfButton content={content} msgId={msgId} question={userQuestion} />}
     </div>
   );
 }

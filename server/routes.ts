@@ -3099,61 +3099,81 @@ CRITICAL: The following data was previously extracted from the user's credit rep
     res.send(pdf.buffer);
   });
 
+  const chatPdfBgPath = path.join(process.cwd(), "server", "assets", "pdf-bg.png");
+
   app.post("/api/chat-pdf", async (req, res) => {
-    const body = z.object({ content: z.string().max(50000) }).safeParse(req.body);
+    const body = z.object({
+      content: z.string().max(50000),
+      question: z.string().max(2000).optional(),
+    }).safeParse(req.body);
     if (!body.success) return res.status(400).json({ error: "Invalid data" });
-    const { content } = body.data;
+    const { content, question } = body.data;
     const today = new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
 
     try {
-      const doc = new PDFDocument({ size: "LETTER", margins: { top: 50, bottom: 50, left: 65, right: 65 } });
+      const pageW = 612;
+      const pageH = 792;
+      const doc = new PDFDocument({ size: "LETTER", margins: { top: 60, bottom: 50, left: 65, right: 65 } });
       const chunks: Buffer[] = [];
       doc.on("data", (chunk: Buffer) => chunks.push(chunk));
       const pdfReady = new Promise<Buffer>((resolve) => doc.on("end", () => resolve(Buffer.concat(chunks))));
 
-      const headerY = 30;
-      const barH = 36;
-      doc.save();
-      doc.roundedRect(50, headerY, doc.page.width - 100, barH, 8).fill("#1a1a2e");
-      doc.restore();
-      doc.font("Helvetica").fontSize(8).fillColor("#ffffff", 0.5).text("Insights for education only \u2014 not financial advice.", 70, headerY + 13, { width: doc.page.width - 140, align: "left" });
-      doc.y = headerY + barH + 20;
+      const drawBg = () => {
+        try { doc.image(chatPdfBgPath, 0, 0, { width: pageW, height: pageH }); } catch {}
+      };
+
+      drawBg();
+      doc.y = 190;
+
+      if (question) {
+        const cleanQ = question.replace(/\[Attached:.*?\]/g, "").trim();
+        if (cleanQ) {
+          doc.font("Helvetica-Bold").fontSize(7).fillColor("#aaaaaa").text("QUESTION", 65, doc.y, { align: "left" });
+          doc.moveDown(0.3);
+          doc.font("Helvetica").fontSize(10).fillColor("#1a1a2e").text(cleanQ, { align: "left", lineGap: 2, width: pageW - 130 });
+          doc.moveDown(0.8);
+          doc.moveTo(65, doc.y).lineTo(pageW - 65, doc.y).strokeColor("#e5e5e5").lineWidth(0.5).stroke();
+          doc.moveDown(0.6);
+        }
+      }
 
       const lines = content.split("\n");
       for (const line of lines) {
-        if (doc.y > doc.page.height - 80) { doc.addPage(); }
+        if (doc.y > pageH - 80) {
+          doc.addPage();
+          drawBg();
+          doc.y = 60;
+        }
         const trimmed = line.trim();
         if (!trimmed) { doc.moveDown(0.4); continue; }
         const stripped = trimmed.replace(/\*\*(.*?)\*\*/g, "$1").replace(/\*(.*?)\*/g, "$1");
         if (trimmed.startsWith("# ")) {
-          doc.font("Helvetica-Bold").fontSize(16).fillColor("#1a1a2e").text(stripped.slice(2), { lineGap: 2 });
+          doc.font("Helvetica-Bold").fontSize(15).fillColor("#1a1a2e").text(stripped.slice(2), { lineGap: 2 });
           doc.moveDown(0.4);
         } else if (trimmed.startsWith("## ")) {
-          doc.font("Helvetica-Bold").fontSize(13).fillColor("#1a1a2e").text(stripped.slice(3).toUpperCase(), { lineGap: 2, characterSpacing: 0.5 });
+          doc.font("Helvetica-Bold").fontSize(12).fillColor("#1a1a2e").text(stripped.slice(3), { lineGap: 2 });
           doc.moveDown(0.3);
         } else if (trimmed.startsWith("### ")) {
           doc.font("Helvetica-Bold").fontSize(11).fillColor("#333333").text(stripped.slice(4), { lineGap: 2 });
           doc.moveDown(0.2);
         } else if (/^[-\u2022]\s+/.test(trimmed)) {
-          doc.font("Helvetica").fontSize(10).fillColor("#333333").text(`  \u2022  ${stripped.replace(/^[-\u2022]\s+/, "")}`, { lineGap: 2, indent: 10 });
+          doc.font("Helvetica").fontSize(10).fillColor("#333333").text(`  \u2022  ${stripped.replace(/^[-\u2022]\s+/, "")}`, { lineGap: 3, indent: 10 });
           doc.moveDown(0.15);
         } else if (/^\d+\.\s+/.test(trimmed)) {
-          doc.font("Helvetica").fontSize(10).fillColor("#333333").text(`  ${stripped}`, { lineGap: 2, indent: 10 });
+          doc.font("Helvetica").fontSize(10).fillColor("#333333").text(`  ${stripped}`, { lineGap: 3, indent: 10 });
           doc.moveDown(0.15);
         } else if (trimmed.startsWith("---")) {
           doc.moveDown(0.3);
-          doc.moveTo(65, doc.y).lineTo(545, doc.y).strokeColor("#e0e0e0").lineWidth(0.5).stroke();
+          doc.moveTo(65, doc.y).lineTo(pageW - 65, doc.y).strokeColor("#e0e0e0").lineWidth(0.5).stroke();
           doc.moveDown(0.3);
         } else {
-          doc.font("Helvetica").fontSize(10).fillColor("#333333").text(stripped, { lineGap: 2, align: "left" });
+          doc.font("Helvetica").fontSize(10).fillColor("#333333").text(stripped, { lineGap: 3, align: "left" });
           doc.moveDown(0.15);
         }
       }
 
-      doc.moveDown(1);
-      doc.moveTo(65, doc.y).lineTo(545, doc.y).strokeColor("#e0e0e0").lineWidth(0.5).stroke();
-      doc.moveDown(0.5);
-      doc.font("Helvetica").fontSize(7).fillColor("#999999").text(`profundr.com \u00b7 ${today}`, { align: "center" });
+      doc.moveDown(1.5);
+      doc.font("Helvetica").fontSize(7).fillColor("#bbbbbb").text(`profundr.com  \u00b7  ${today}`, { align: "center" });
 
       doc.end();
       const pdfBuffer = await pdfReady;
