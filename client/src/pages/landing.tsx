@@ -2143,41 +2143,6 @@ function PerfectProfileTab({ aisReport }: { aisReport: MissionData | null }) {
 
   return (
     <div className="space-y-2 mt-2" data-testid="perfect-profile-tab">
-      <div className="rounded-xl bg-gradient-to-br from-[#1a1a2e] to-[#252540] p-2">
-        <div className="flex items-center gap-2">
-          <div className="relative w-[32px] h-[32px] flex-shrink-0">
-            <svg viewBox="0 0 36 36" className="w-full h-full -rotate-90">
-              <circle cx="18" cy="18" r="15.5" fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="3" />
-              <circle cx="18" cy="18" r="15.5" fill="none" stroke={accentColor} strokeWidth="3" strokeDasharray={`${pct * 0.974} 100`} strokeLinecap="round" />
-            </svg>
-            <div className="absolute inset-0 flex items-center justify-center">
-              <span className="text-[10px] font-bold text-white leading-none" style={{ fontVariantNumeric: "tabular-nums" }}>{pct}%</span>
-            </div>
-          </div>
-          <div className="min-w-0 flex-1">
-            <p className="text-[7px] uppercase tracking-[0.1em] text-white/35 font-semibold">Fundability Benchmarks</p>
-            <div className="flex items-baseline gap-2">
-              <p className="text-[11px] font-bold text-white leading-tight" style={{ fontVariantNumeric: "tabular-nums" }}>{metCriteria} <span className="text-[9px] font-normal text-white/40">/ {totalCriteria}</span></p>
-              <p className="text-[7px] text-white/25" style={{ fontVariantNumeric: "tabular-nums" }}>{filledSlots}/{totalSlots} slots</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="rounded-md bg-[#f8f8f8] border border-[#eee] px-2 py-1.5">
-        <p className="text-[7px] font-semibold text-[#555] uppercase tracking-[0.1em] mb-1">What Lenders Want to See</p>
-        <div className="grid grid-cols-3 gap-x-2 gap-y-[2px]">
-          {["3–5 Credit Cards", "$5K–$15K Limits", "$25K+ Total Credit", "1–9% Balance Usage", "3+ Year History", "100% On-Time Payments", "Primary Accounts", "0–2 Recent Inquiries", "1–2 Loan Accounts"].map((b, i) => (
-            <div key={i} className="flex items-center gap-1">
-              <div className="w-[6px] h-[6px] rounded-[1px] bg-[#1a1a2e] flex items-center justify-center flex-shrink-0">
-                <svg width="4" height="4" viewBox="0 0 10 10" fill="none"><path d="M2 5l2.5 2.5L8 3" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
-              </div>
-              <span className="text-[6.5px] text-[#666] leading-tight">{b}</span>
-            </div>
-          ))}
-        </div>
-      </div>
-
       <div>
         <p className="text-[8px] uppercase tracking-[0.12em] text-[#999] font-semibold mb-1 px-0.5">Your Credit Cards</p>
         <div className="space-y-1">
@@ -2670,26 +2635,6 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
                 })()}
               </div>
 
-              <div className="rounded-xl border border-[#e8e8e8] bg-white overflow-hidden" data-testid="lender-metrics">
-                <div className="px-3 py-2 border-b border-[#eee]">
-                  <p className="text-[9px] text-[#333] font-semibold">Profile Metrics</p>
-                </div>
-                <div className="divide-y divide-[#f0f0f0]">
-                  {[
-                    { label: "Inquiries", value: `${inqCount}`, color: velocityColor, optimal: "0–2", tip: inqCount >= 6 ? "Too many — wait 90 days" : inqCount >= 3 ? "Avoid new applications" : "" },
-                    { label: "Credit Mix", value: `${primaryRev.length}R / ${primaryInst.length}I`, color: primaryRev.length >= 3 && hasInstallment ? "#2d6a4f" : "#c9a227", optimal: "3-5R + 1-2I", tip: !hasInstallment ? "Add installment loan" : primaryRev.length < 3 ? "Add revolving accounts" : "" },
-                    { label: "Avg Limit", value: avgLimit > 0 ? `$${avgLimit.toLocaleString()}` : "—", color: avgLimit >= 5000 ? "#2d6a4f" : avgLimit >= 3000 ? "#c9a227" : "#c0392b", optimal: "$5K–$15K", tip: avgLimit < 5000 ? "Request limit increases" : "" },
-                    { label: "Utilization", value: `${aggUtil}%`, color: aggUtil <= 9 ? "#2d6a4f" : aggUtil <= 29 ? "#c9a227" : "#c0392b", optimal: "1–9%", tip: aggUtil > 9 ? "Pay down balances" : "" },
-                  ].map((m, mi) => (
-                    <div key={mi} className="flex items-center gap-2 px-3 py-2">
-                      <div className="w-[4px] h-[4px] rounded-full shrink-0" style={{ backgroundColor: m.color }} />
-                      <span className="text-[8px] text-[#555] font-medium flex-1">{m.label}</span>
-                      <span className="text-[9px] font-bold text-right min-w-[40px]" style={{ color: m.color, fontVariantNumeric: "tabular-nums" }}>{m.value}</span>
-                      <span className="text-[7px] text-[#bbb] text-right min-w-[45px]" style={{ fontVariantNumeric: "tabular-nums" }}>{m.optimal}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
             </>);
           })()}
 
@@ -3354,7 +3299,7 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
         </>)}
 
         {panelTab === "documents" && (<>
-        <div className="mb-4">
+        {false && <div className="mb-4">
           <div className="flex items-center gap-2 mb-2">
             <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 3h8M2 6h6M2 9h4" stroke="#333" strokeWidth="1.2" strokeLinecap="round" /></svg>
             <span className="text-[10px] font-semibold text-[#555] uppercase tracking-wider">Correction Engine</span>
@@ -3418,7 +3363,7 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
           ) : (
             <p className="text-[10px] text-[#bbb] pl-1 leading-[1.5]">Bureau correction letters generate automatically after analysis</p>
           )}
-        </div>
+        </div>}
 
         <div className="mb-4">
           <div className="flex items-center gap-2 mb-2">
@@ -3580,7 +3525,7 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
 
         {panelTab === "command" && (<>
         <div className="w-full h-px bg-[#eee] my-3"></div>
-        {hasAis && aisReport && (
+        {hasAis && aisReport && false && (
           <div className="mb-3" data-testid="next-moves-section">
             {(() => {
               const tradelines = aisReport.openTradelines || [];
