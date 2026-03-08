@@ -3355,8 +3355,8 @@ Never give advice that ignores the current date or economic climate. Your intell
       let skipNextPageEvent = false;
       doc.on("pageAdded", () => {
         if (skipNextPageEvent) { skipNextPageEvent = false; return; }
-        drawPageBackground(doc);
-        drawWatermark(doc);
+        drawCleanHeader(doc);
+        drawCleanFooter(doc, today);
       });
 
       const pdfReady = new Promise<Buffer>((resolve) => {
@@ -3427,11 +3427,10 @@ Never give advice that ignores the current date or economic climate. Your intell
         }
       };
 
-      drawPageBackground(doc);
-      drawWatermark(doc);
-      drawPdfLetterhead(doc);
+      drawCleanHeader(doc);
+      drawCleanFooter(doc, today);
 
-      doc.moveDown(2);
+      doc.moveDown(1);
       doc.font("Helvetica-Bold").fontSize(18).fillColor("#1a1a2e")
         .text("Bureau Dispute Package", { align: "center" });
       doc.moveDown(0.5);
@@ -3491,10 +3490,9 @@ Never give advice that ignores the current date or economic climate. Your intell
 
       if (letterContent) {
         skipNextPageEvent = true; doc.addPage();
-        drawPageBackground(doc);
-        drawPdfLetterhead(doc);
-        drawWatermark(doc);
-        doc.moveDown(1.5);
+        drawCleanHeader(doc);
+        drawCleanFooter(doc, today);
+        doc.moveDown(0.5);
         doc.font("Helvetica-Bold").fontSize(14).fillColor("#1a1a2e").text("Dispute Letter Content", { align: "center" });
         doc.moveDown(0.3);
         doc.font("Helvetica").fontSize(8).fillColor("#888888").text("AI-generated dispute letter for your records", { align: "center" });
@@ -3504,8 +3502,8 @@ Never give advice that ignores the current date or economic climate. Your intell
         for (const line of lcLines) {
           if (doc.y > doc.page.height - 80) {
             skipNextPageEvent = true; doc.addPage();
-            drawPageBackground(doc);
-            drawWatermark(doc);
+            drawCleanHeader(doc);
+            drawCleanFooter(doc, today);
           }
           const trimmed = line.trim();
           if (!trimmed) { doc.moveDown(0.3); continue; }
@@ -3544,9 +3542,8 @@ Never give advice that ignores the current date or economic climate. Your intell
           const inquiryRound = isInquiry ? (items[0]?.disputeRound || 1) : 1;
           const catInfo = isInquiry ? (inquiryRoundLabels[inquiryRound] || inquiryRoundLabels[1]) : (categoryLabels[cat] || categoryLabels["other"]);
 
-          drawPageBackground(doc);
-          drawPdfLetterhead(doc);
-          drawWatermark(doc);
+          drawCleanHeader(doc);
+          drawCleanFooter(doc, today);
 
           const j: PDFKit.Mixins.TextOptions = { align: "justify", lineGap: 2 };
           const c: PDFKit.Mixins.TextOptions = { align: "center" };
@@ -3739,8 +3736,8 @@ Never give advice that ignores the current date or economic climate. Your intell
         for (const att of sorted) {
           skipNextPageEvent = true;
           doc.addPage();
-          drawPageBackground(doc);
-          drawWatermark(doc);
+          drawCleanHeader(doc);
+          drawCleanFooter(doc, today);
 
           const typeLabels: Record<string, string> = {
             credit_report: "Bureau Report",
@@ -3815,11 +3812,10 @@ Never give advice that ignores the current date or economic climate. Your intell
 
       skipNextPageEvent = true;
       doc.addPage();
-      drawPageBackground(doc);
-      drawWatermark(doc);
-      drawPdfLetterhead(doc);
+      drawCleanHeader(doc);
+      drawCleanFooter(doc, today);
 
-      doc.moveDown(1);
+      doc.moveDown(0.5);
       doc.font("Helvetica-Bold").fontSize(14).fillColor("#1a1a2e")
         .text("Dispute Ledger", { align: "center" });
       doc.moveDown(0.3);
@@ -3845,8 +3841,8 @@ Never give advice that ignores the current date or economic climate. Your intell
         if (rowY > doc.page.height - 80) {
           skipNextPageEvent = true;
           doc.addPage();
-          drawPageBackground(doc);
-          drawWatermark(doc);
+          drawCleanHeader(doc);
+          drawCleanFooter(doc, today);
         }
         doc.text(d.creditor.slice(0, 25), ledgerColX[0], doc.y, { width: 110 });
         const currentY = doc.y - 10;
