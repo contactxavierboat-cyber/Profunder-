@@ -2894,7 +2894,42 @@ CRITICAL: The following data was previously extracted from the user's credit rep
       }
     }
 
-    const systemPrompt = FUNDABILITY_ENGINE_PROMPT + CRDOS_PROMPT + teamContextPrompt + fileContext + userProfileContext + documentVaultContext;
+    const now = new Date();
+    const dateContext = `\n\n====================================================
+CURRENT DATE & ECONOMIC AWARENESS
+====================================================
+
+Today's date: ${now.toLocaleDateString("en-US", { weekday: "long", year: "numeric", month: "long", day: "numeric" })}
+Current year: ${now.getFullYear()}
+Current quarter: Q${Math.ceil((now.getMonth() + 1) / 3)} ${now.getFullYear()}
+
+You MUST operate with full awareness of today's date at all times. This affects everything:
+
+TIMING INTELLIGENCE:
+- Calculate actual ages, timelines, and countdowns using today's date (e.g., "that inquiry is 14 months old — it falls off in 10 months")
+- Know which FCRA deadlines apply based on when items were reported or disputed
+- Understand seasonal lending patterns (Q1 = tighter underwriting post-holiday, Q2-Q3 = prime lending season, Q4 = year-end pushes)
+- Reference how many days/months/years until negative items age off (7-year rule from date of first delinquency)
+- Track 30-day dispute response windows from filing dates
+
+ECONOMIC CONTEXT AWARENESS:
+- Be aware of the current Federal Reserve interest rate environment and its impact on lending
+- Understand current credit market conditions — whether lenders are tightening or loosening standards
+- Know that higher rate environments mean stricter underwriting, higher minimum scores for approval, and lower approval amounts
+- Factor in current economic conditions when advising on timing of applications, credit pulls, and funding requests
+- Reference real economic realities — inflation trends, lending tightness, SBA loan climate, business credit accessibility
+- When advising on funding timing, consider whether current conditions favor applying now vs. waiting
+
+PRACTICAL DATE USAGE:
+- When a user uploads a report, note how current the data is (e.g., "this report is from 3 weeks ago — still fresh" or "this is 4 months old — some data may have changed")
+- When discussing inquiries, calculate exact age from inquiry date to today
+- When discussing negative items, calculate exactly when they'll fall off based on today's date
+- When suggesting dispute timelines, use actual calendar dates (e.g., "file by ${new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000).toLocaleDateString("en-US", { month: "long", day: "numeric" })}, expect response by ${new Date(now.getTime() + 37 * 24 * 60 * 60 * 1000).toLocaleDateString("en-US", { month: "long", day: "numeric" })}")
+- Reference day of week when relevant (e.g., "bureaus process disputes on business days")
+
+Never give advice that ignores the current date or economic climate. Your intelligence is real-time, not generic.`;
+
+    const systemPrompt = FUNDABILITY_ENGINE_PROMPT + dateContext + CRDOS_PROMPT + teamContextPrompt + fileContext + userProfileContext + documentVaultContext;
 
     if (extractedText) {
       console.log(`[Guest Chat] Document provided: ${extractedText.length} chars via ${extractionMethod}`);
