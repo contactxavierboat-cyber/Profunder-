@@ -3932,7 +3932,7 @@ export default function LandingPage() {
         try { localStorage.removeItem("profundr_ais_report"); } catch {}
         setRepairData(null);
         try { localStorage.removeItem("profundr_repair_data"); } catch {}
-        doSend("Analyze my report and generate my AIS.", fileData);
+        doSend("Analyze my report and generate my AIS.", fileData, true);
       } else {
         setAttachedFile(fileData);
       }
@@ -3975,7 +3975,7 @@ export default function LandingPage() {
     return { fullName: p.fullName, address: p.address, dob: p.dob, ssn4: p.ssn4 };
   };
 
-  const doSend = async (text: string, file?: { name: string; content: string; isPdf?: boolean } | null) => {
+  const doSend = async (text: string, file?: { name: string; content: string; isPdf?: boolean } | null, isFreshUpload?: boolean) => {
     if (file && (!file.content || file.content.length < 10)) {
       file = null;
     }
@@ -4187,7 +4187,7 @@ export default function LandingPage() {
       const parsedRepair = parseRepairData(responseContent);
       console.log(`[doSend] parsedRepair=${parsedRepair ? `found ${parsedRepair.negativeItems.length} items` : "null"}`);
       if (parsedRepair) {
-        const merged = repairData ? {
+        const merged = (!isFreshUpload && repairData) ? {
           ...parsedRepair,
           negativeItems: parsedRepair.negativeItems.map(ni => {
             const existing = repairData.negativeItems.find(e => e.itemId === ni.itemId);
@@ -4328,7 +4328,7 @@ export default function LandingPage() {
       const vaultFile = dataType === "BASE64"
         ? { name: fileName, content, isPdf: true }
         : { name: fileName, content };
-      doSend("Analyze my report and generate my AIS.", vaultFile);
+      doSend("Analyze my report and generate my AIS.", vaultFile, true);
       return;
     }
 
@@ -4342,7 +4342,7 @@ export default function LandingPage() {
       setRepairData(null);
       try { localStorage.removeItem("profundr_repair_data"); } catch {}
     }
-    doSend(msg, file);
+    doSend(msg, file, !!file);
   };
 
   const handleSubmit = (e: React.FormEvent) => { e.preventDefault(); if (mentionDropdown.show) return; handleSend(); };
@@ -4367,164 +4367,6 @@ export default function LandingPage() {
   const hasMessages = displayMessages.length > 0;
 
   const [isExporting, setIsExporting] = useState(false);
-  const downloadChatAsJpg = useCallback(async () => {
-    if (!hasMessages || isExporting) return;
-    setIsExporting(true);
-    try {
-      const now = new Date();
-      const dateStr = now.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
-      const timeStr = now.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" });
-      const userName = user?.displayName || user?.email || "User";
-
-      const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
-
-      const cleanContent = (text: string) => {
-        return text
-          .replace(/```[\s\S]*?```/g, "")
-          .replace(/\[REPAIR_DATA\][\s\S]*?\[\/REPAIR_DATA\]/g, "")
-          .replace(/\[STRATEGY_DATA\][\s\S]*?\[\/STRATEGY_DATA\]/g, "")
-          .replace(/\[AIS_REPORT\][\s\S]*?\[\/AIS_REPORT\]/g, "")
-          .replace(/\[USER_PROFILE\][\s\S]*?\[\/USER_PROFILE\]/g, "")
-          .replace(/\[DOC_\d+\][\s\S]*?\[\/DOC_\d+\]/g, "")
-          .replace(/\[Attached: .+?\]/g, "")
-          .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1")
-          .replace(/^\|.*\|$/gm, "")
-          .replace(/^[-|: ]+$/gm, "")
-          .replace(/^#{1,6}\s+/gm, "")
-          .replace(/(\*\*|__)(.*?)\1/g, "$2")
-          .replace(/(\*|_)(.*?)\1/g, "$2")
-          .replace(/~~(.*?)~~/g, "$1")
-          .replace(/`([^`]+)`/g, "$1")
-          .replace(/\n{3,}/g, "\n\n")
-          .trim();
-      };
-
-      const cleaned: { label: string; color: string; text: string }[] = [];
-      displayMessages.forEach((msg) => {
-        const clean = cleanContent(msg.content);
-        if (!clean) return;
-        const isUser = msg.role === "user";
-        cleaned.push({
-          label: isUser ? userName : (msg.role === "team" ? (msg.senderName || "Team") : "Profundr"),
-          color: isUser ? "#1a1a2e" : msg.role === "team" ? "#6366f1" : "#2d6a4f",
-          text: clean,
-        });
-      });
-
-      const PAGE_W = 816;
-      const PAGE_H = 1056;
-      const PAD_X = 60;
-      const PAD_TOP = 52;
-      const PAD_BOT = 48;
-      const HEADER_H = 72;
-      const FOOTER_H = 36;
-
-      const headerHtml = (pg: number, total: number) => `
-        <div style="height:${HEADER_H}px;border-bottom:2px solid #1a1a2e;padding:0 0 14px;margin-bottom:24px;display:flex;align-items:flex-end;justify-content:space-between;">
-          <div>
-            <div style="font-size:20px;font-weight:700;color:#1a1a2e;letter-spacing:-0.02em;font-family:Inter,system-ui,sans-serif;">PROFUNDR</div>
-            <div style="font-size:9px;color:#999;letter-spacing:0.1em;text-transform:uppercase;margin-top:3px;font-family:Inter,system-ui,sans-serif;">Capital Intelligence Report</div>
-          </div>
-          <div style="text-align:right;">
-            <div style="font-size:10px;color:#555;font-weight:500;font-family:Inter,system-ui,sans-serif;">${esc(userName)}</div>
-            <div style="font-size:9px;color:#aaa;font-family:Inter,system-ui,sans-serif;">${dateStr} &middot; ${timeStr}</div>
-          </div>
-        </div>`;
-
-      const footerHtml = (pg: number, total: number) => `
-        <div style="height:${FOOTER_H}px;border-top:1px solid #e0e0e0;display:flex;align-items:center;justify-content:space-between;margin-top:auto;padding-top:12px;">
-          <div style="font-size:8px;color:#bbb;letter-spacing:0.06em;text-transform:uppercase;font-family:Inter,system-ui,sans-serif;">Profundr &middot; Confidential</div>
-          <div style="font-size:8px;color:#bbb;font-family:Inter,system-ui,sans-serif;">Page ${pg} of ${total} &middot; ${dateStr}</div>
-        </div>`;
-
-      const bodyAvail = PAGE_H - PAD_TOP - PAD_BOT - HEADER_H - FOOTER_H - 24;
-
-      const measure = document.createElement("div");
-      measure.style.cssText = `position:fixed;left:-9999px;top:0;width:${PAGE_W - PAD_X * 2}px;font-family:Inter,system-ui,sans-serif;visibility:hidden;`;
-      document.body.appendChild(measure);
-
-      const pages: string[][] = [[]];
-      let usedH = 0;
-
-      for (const entry of cleaned) {
-        const tmp = document.createElement("div");
-        tmp.style.cssText = "margin-bottom:20px;";
-        tmp.innerHTML = `
-          <div style="display:flex;align-items:center;gap:7px;margin-bottom:5px;">
-            <div style="width:5px;height:5px;border-radius:50%;background:${entry.color};flex-shrink:0;"></div>
-            <div style="font-size:10px;font-weight:600;color:${entry.color};text-transform:uppercase;letter-spacing:0.04em;">${esc(entry.label)}</div>
-          </div>
-          <div style="font-size:12.5px;color:#333;line-height:1.8;padding-left:12px;white-space:pre-wrap;word-break:break-word;">${esc(entry.text)}</div>`;
-        measure.appendChild(tmp);
-        const h = tmp.offsetHeight;
-        measure.removeChild(tmp);
-
-        if (usedH + h > bodyAvail && pages[pages.length - 1].length > 0) {
-          pages.push([]);
-          usedH = 0;
-        }
-        pages[pages.length - 1].push(tmp.outerHTML);
-        usedH += h;
-      }
-
-      document.body.removeChild(measure);
-
-      const totalPages = pages.length;
-      const canvases: HTMLCanvasElement[] = [];
-
-      for (let pi = 0; pi < totalPages; pi++) {
-        const container = document.createElement("div");
-        container.style.cssText = `position:fixed;left:-9999px;top:0;width:${PAGE_W}px;height:${PAGE_H}px;background:#fff;font-family:Inter,system-ui,sans-serif;`;
-        container.innerHTML = `<div style="padding:${PAD_TOP}px ${PAD_X}px ${PAD_BOT}px;height:100%;display:flex;flex-direction:column;">
-          ${headerHtml(pi + 1, totalPages)}
-          <div style="flex:1;overflow:hidden;">${pages[pi].join("")}</div>
-          ${footerHtml(pi + 1, totalPages)}
-        </div>`;
-        document.body.appendChild(container);
-
-        const html2canvas = (await import("html2canvas")).default;
-        const cvs = await html2canvas(container, { scale: 2, backgroundColor: "#ffffff", useCORS: true, logging: false });
-        canvases.push(cvs);
-        document.body.removeChild(container);
-      }
-
-      if (canvases.length === 1) {
-        canvases[0].toBlob((blob) => {
-          if (!blob) return;
-          const url = URL.createObjectURL(blob);
-          const a = document.createElement("a");
-          a.href = url;
-          a.download = `Profundr-Report-${now.toISOString().slice(0, 10)}.jpg`;
-          a.click();
-          URL.revokeObjectURL(url);
-        }, "image/jpeg", 0.95);
-      } else {
-        const merged = document.createElement("canvas");
-        merged.width = canvases[0].width;
-        merged.height = canvases.reduce((s, c) => s + c.height, 0);
-        const ctx = merged.getContext("2d")!;
-        let y = 0;
-        for (const c of canvases) {
-          ctx.drawImage(c, 0, y);
-          y += c.height;
-        }
-        merged.toBlob((blob) => {
-          if (!blob) return;
-          const url = URL.createObjectURL(blob);
-          const a = document.createElement("a");
-          a.href = url;
-          a.download = `Profundr-Report-${now.toISOString().slice(0, 10)}.jpg`;
-          a.click();
-          URL.revokeObjectURL(url);
-        }, "image/jpeg", 0.92);
-      }
-    } catch (err) {
-      console.error("Export failed:", err);
-    } finally {
-      setIsExporting(false);
-    }
-  }, [displayMessages, hasMessages, isExporting, user]);
-
   const downloadChatAsPdf = useCallback(async () => {
     if (!hasMessages || isExporting) return;
     setIsExporting(true);
@@ -4797,18 +4639,6 @@ export default function LandingPage() {
                     <path d="M8 2v8.5M8 10.5l-3-3M8 10.5l3-3M3 13h10" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
                   {isExporting ? "Exporting..." : "Save as PDF"}
-                </button>
-                <button
-                  onClick={downloadChatAsJpg}
-                  disabled={isExporting}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] font-medium text-[#777] border border-[#e0e0e0] hover:bg-[#f5f5f5] hover:border-[#ccc] transition-colors disabled:opacity-50 disabled:cursor-wait"
-                  title="Download conversation as image"
-                  data-testid="button-download-chat"
-                >
-                  <svg width="12" height="12" viewBox="0 0 16 16" fill="none">
-                    <path d="M8 2v8.5M8 10.5l-3-3M8 10.5l3-3M3 13h10" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
-                  {isExporting ? "Exporting..." : "Save as Image"}
                 </button>
               </div>
               )}
