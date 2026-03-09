@@ -4473,8 +4473,8 @@ export default function LandingPage() {
         </>
       )}
 
-      <div className="flex-1 flex flex-col min-w-0 h-full">
-        <div ref={scrollAreaRef} className="flex-1 overflow-y-auto relative" data-testid="main-scroll-area">
+      <div className="flex-1 flex flex-col min-w-0 min-h-0 h-full">
+        <div ref={scrollAreaRef} className="flex-1 min-h-0 overflow-y-auto relative" data-testid="main-scroll-area">
           <nav className="sticky top-0 z-30 bg-[#fafafa]/95 backdrop-blur-sm flex items-center justify-between px-4 sm:px-6 py-3 border-b border-[#eee]" data-testid="nav-top">
             <div className="flex items-center gap-2">
               {!docsOpen && (
