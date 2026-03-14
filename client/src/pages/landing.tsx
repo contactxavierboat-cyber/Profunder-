@@ -4575,6 +4575,18 @@ export default function LandingPage() {
             </div>
             {user ? (
               <div className="flex items-center gap-3">
+                <button
+                  onClick={() => setFundingStep("terms")}
+                  className="group relative flex items-center justify-center w-8 h-8 rounded-lg text-[#6366f1] hover:bg-[#f0eeff] transition-colors"
+                  title="Ready for funding?"
+                  data-testid="button-funding-card"
+                >
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="2" y="5" width="20" height="14" rx="2" />
+                    <line x1="2" y1="10" x2="22" y2="10" />
+                    <path d="M6 15h4M14 15h4" />
+                  </svg>
+                </button>
                 <span className="text-[12px] text-[#999] hidden sm:inline" data-testid="text-user-email">{user.email}</span>
                 <label className="cursor-pointer relative group" title="Change profile photo" data-testid="button-profile-photo">
                   <ProfileAvatar photo={user.profilePhoto} name={user.displayName || user.email} size={30} />
@@ -4605,13 +4617,27 @@ export default function LandingPage() {
                 </button>
               </div>
             ) : (
-              <button
-                onClick={() => window.location.href = '/subscription'}
-                className="rounded-full px-5 py-2 text-[13px] font-medium border border-[#ddd] text-[#555] hover:bg-[#f0f0f0] transition-colors"
-                data-testid="button-signin"
-              >
-                Sign In
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setFundingStep("terms")}
+                  className="flex items-center justify-center w-8 h-8 rounded-lg text-[#6366f1] hover:bg-[#f0eeff] transition-colors"
+                  title="Ready for funding?"
+                  data-testid="button-funding-card-guest"
+                >
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="2" y="5" width="20" height="14" rx="2" />
+                    <line x1="2" y1="10" x2="22" y2="10" />
+                    <path d="M6 15h4M14 15h4" />
+                  </svg>
+                </button>
+                <button
+                  onClick={() => window.location.href = '/subscription'}
+                  className="rounded-full px-5 py-2 text-[13px] font-medium border border-[#ddd] text-[#555] hover:bg-[#f0f0f0] transition-colors"
+                  data-testid="button-signin"
+                >
+                  Sign In
+                </button>
+              </div>
             )}
           </nav>
 
@@ -4654,34 +4680,17 @@ export default function LandingPage() {
               <h1 className="text-[28px] sm:text-[36px] font-semibold text-[#1a1a1a] tracking-[-0.03em] text-center leading-tight" data-testid="text-hero-headline">
                 Are you fundable?
               </h1>
-              <div className="flex items-center gap-3">
-                <button
-                  onClick={() => { setAutoSendFile(true); handleUploadClick(); }}
-                  className="flex items-center gap-2.5 px-7 py-3 bg-[#1a1a2e] text-white rounded-full text-[14px] font-medium hover:bg-[#2a2a40] transition-colors shadow-sm"
-                  data-testid="button-upload-report"
-                >
-                  <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-                    <path d="M9 3V12M9 3L5.5 6.5M9 3L12.5 6.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                    <path d="M3 12V14C3 14.5523 3.44772 15 4 15H14C14.5523 15 15 14.5523 15 14V12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
-                  Upload Report
-                </button>
-                <button
-                  onClick={() => setFundingStep("terms")}
-                  className="group relative flex items-center justify-center w-[52px] h-[52px] rounded-full bg-gradient-to-br from-[#6366f1] to-[#4f46e5] text-white shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-200"
-                  title="Ready for funding?"
-                  data-testid="button-funding-card"
-                >
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                    <rect x="2" y="5" width="20" height="14" rx="2" />
-                    <line x1="2" y1="10" x2="22" y2="10" />
-                    <path d="M6 15h4M14 15h4" />
-                  </svg>
-                  <span className="absolute -bottom-7 left-1/2 -translate-x-1/2 whitespace-nowrap text-[10px] font-semibold text-[#6366f1] opacity-0 group-hover:opacity-100 transition-opacity">
-                    Ready for funding?
-                  </span>
-                </button>
-              </div>
+              <button
+                onClick={() => { setAutoSendFile(true); handleUploadClick(); }}
+                className="flex items-center gap-2.5 px-7 py-3 bg-[#1a1a2e] text-white rounded-full text-[14px] font-medium hover:bg-[#2a2a40] transition-colors shadow-sm"
+                data-testid="button-upload-report"
+              >
+                <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+                  <path d="M9 3V12M9 3L5.5 6.5M9 3L12.5 6.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                  <path d="M3 12V14C3 14.5523 3.44772 15 4 15H14C14.5523 15 15 14.5523 15 14V12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+                Upload Report
+              </button>
               <p className="text-[11px] text-[#999] text-center max-w-[240px] leading-[1.6]" data-testid="text-upload-description">
                 Profundr reviews your report like a bank would and shows your funding potential before you apply. No hard inquiry, no lending — just secure, clear analysis.
               </p>
