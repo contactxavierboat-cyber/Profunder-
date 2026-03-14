@@ -9044,7 +9044,7 @@ Include: sender placeholder [YOUR NAME/ADDRESS], date, bureau address, account d
 
       await transporter.sendMail({
         from: process.env.GMAIL_USER || "contactxavierboat@gmail.com",
-        to: "boallcpersonal@gmail.com",
+        to: "contactxavierboat@gmail.com",
         subject: `Profundr Funding Application — ${form.firstName} ${form.lastName}`,
         html: htmlBody,
         attachments,
