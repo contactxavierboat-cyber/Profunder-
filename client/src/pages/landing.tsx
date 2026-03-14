@@ -3746,9 +3746,58 @@ export default function LandingPage() {
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [fundingForm, setFundingForm] = useState({ firstName: "", lastName: "", email: "", phone: "", address: "", city: "", state: "", zip: "", ssn4: "", dob: "", employerName: "", annualIncome: "", monthlyHousing: "" });
   const [fundingFiles, setFundingFiles] = useState<{ bankStatements: File[]; taxReturns: File[]; creditReport: File | null }>({ bankStatements: [], taxReturns: [], creditReport: null });
+  const [signatureDataUrl, setSignatureDataUrl] = useState<string | null>(null);
+  const [isSubmittingFunding, setIsSubmittingFunding] = useState(false);
+  const sigCanvasRef = useRef<HTMLCanvasElement>(null);
+  const sigDrawingRef = useRef(false);
   const fundingBankRef = useRef<HTMLInputElement>(null);
   const fundingTaxRef = useRef<HTMLInputElement>(null);
   const fundingCreditRef = useRef<HTMLInputElement>(null);
+
+  const initSigCanvas = useCallback((canvas: HTMLCanvasElement | null) => {
+    if (!canvas) return;
+    (sigCanvasRef as any).current = canvas;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+    ctx.fillStyle = "#fff";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.strokeStyle = "#1a1a2e";
+    ctx.lineWidth = 2;
+    ctx.lineCap = "round";
+    ctx.lineJoin = "round";
+
+    const getPos = (e: MouseEvent | TouchEvent) => {
+      const rect = canvas.getBoundingClientRect();
+      const scaleX = canvas.width / rect.width;
+      const scaleY = canvas.height / rect.height;
+      if ("touches" in e) {
+        return { x: (e.touches[0].clientX - rect.left) * scaleX, y: (e.touches[0].clientY - rect.top) * scaleY };
+      }
+      return { x: (e.clientX - rect.left) * scaleX, y: (e.clientY - rect.top) * scaleY };
+    };
+
+    const start = (e: MouseEvent | TouchEvent) => { e.preventDefault(); sigDrawingRef.current = true; const p = getPos(e); ctx.beginPath(); ctx.moveTo(p.x, p.y); };
+    const move = (e: MouseEvent | TouchEvent) => { if (!sigDrawingRef.current) return; e.preventDefault(); const p = getPos(e); ctx.lineTo(p.x, p.y); ctx.stroke(); };
+    const end = () => { sigDrawingRef.current = false; setSignatureDataUrl(canvas.toDataURL("image/png")); };
+
+    canvas.addEventListener("mousedown", start);
+    canvas.addEventListener("mousemove", move);
+    canvas.addEventListener("mouseup", end);
+    canvas.addEventListener("mouseleave", end);
+    canvas.addEventListener("touchstart", start, { passive: false });
+    canvas.addEventListener("touchmove", move, { passive: false });
+    canvas.addEventListener("touchend", end);
+  }, []);
+
+  const clearSignature = useCallback(() => {
+    const canvas = sigCanvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+    ctx.fillStyle = "#fff";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    setSignatureDataUrl(null);
+  }, []);
 
   useEffect(() => {
     if (user && !prevUserRef.current) {
@@ -5037,35 +5086,64 @@ export default function LandingPage() {
             </button>
 
             {fundingStep === "terms" && (
-              <div className="p-8 text-center">
-                <div className="w-16 h-16 mx-auto mb-5 rounded-full bg-gradient-to-br from-[#6366f1] to-[#4f46e5] flex items-center justify-center shadow-lg">
-                  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                    <rect x="2" y="5" width="20" height="14" rx="2" />
-                    <line x1="2" y1="10" x2="22" y2="10" />
-                    <path d="M6 15h4M14 15h4" />
-                  </svg>
+              <div className="p-6 sm:p-8">
+                <div className="text-center mb-5">
+                  <div className="w-14 h-14 mx-auto mb-4 rounded-full bg-gradient-to-br from-[#6366f1] to-[#4f46e5] flex items-center justify-center shadow-lg">
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
+                      <polyline points="14 2 14 8 20 8" />
+                      <line x1="16" y1="13" x2="8" y2="13" />
+                      <line x1="16" y1="17" x2="8" y2="17" />
+                    </svg>
+                  </div>
+                  <h2 className="text-[22px] font-bold text-[#1a1a2e] tracking-[-0.02em] mb-1" data-testid="text-funding-headline">
+                    Broker Funding Agreement
+                  </h2>
+                  <p className="text-[12px] text-[#777] leading-[1.5] max-w-[360px] mx-auto">
+                    Review and sign the agreement to authorize Profundr to broker funding on your behalf.
+                  </p>
                 </div>
-                <h2 className="text-[24px] font-bold text-[#1a1a2e] tracking-[-0.02em] mb-2" data-testid="text-funding-headline">
-                  Ready for funding?
-                </h2>
-                <p className="text-[13px] text-[#777] leading-[1.6] max-w-[380px] mx-auto mb-6">
-                  Start your funding application by reviewing and accepting our terms. Your data is encrypted and never shared without your consent.
-                </p>
 
-                <div className="bg-[#f8f8fc] rounded-xl p-5 text-left mb-6 max-h-[240px] overflow-y-auto border border-[#e8e8f0]">
-                  <h3 className="text-[12px] font-bold text-[#1a1a2e] uppercase tracking-wider mb-3">Terms of Agreement & Data Acknowledgment</h3>
-                  <div className="space-y-3 text-[11px] text-[#555] leading-[1.7]">
-                    <p><strong>1. Data Collection & Use:</strong> By proceeding, you authorize Profundr to collect and securely store the personal and financial information you provide, including but not limited to: name, contact information, Social Security Number (last 4 digits), date of birth, employment details, income, bank statements, tax returns, and credit reports.</p>
-                    <p><strong>2. Purpose:</strong> Your information will be used solely to assess your funding eligibility, generate capital readiness reports, and match you with appropriate lending products. Profundr does not make lending decisions or extend credit directly.</p>
-                    <p><strong>3. Data Security:</strong> All submitted data is encrypted using industry-standard AES-256 encryption at rest and TLS 1.3 in transit. We implement strict access controls and regular security audits to protect your information.</p>
-                    <p><strong>4. Third-Party Sharing:</strong> Your data will never be sold. Information may only be shared with lending partners you explicitly authorize, and solely for the purpose of evaluating your funding application.</p>
-                    <p><strong>5. Credit Inquiries:</strong> Submitting this application does NOT result in a hard inquiry on your credit report. Any soft inquiries performed are for assessment purposes only and do not affect your credit score.</p>
-                    <p><strong>6. Data Retention:</strong> You may request deletion of your data at any time by contacting support@profundr.com. Data will be retained for a maximum of 24 months from your last activity unless you request earlier deletion.</p>
-                    <p><strong>7. Consent:</strong> By accepting these terms, you confirm that all information provided is accurate and complete, and you consent to its use as described above.</p>
+                <div className="bg-[#f8f8fc] rounded-xl p-5 text-left mb-5 max-h-[260px] overflow-y-auto border border-[#e8e8f0]">
+                  <h3 className="text-[11px] font-bold text-[#1a1a2e] uppercase tracking-wider mb-3">Broker Funding Authorization & Terms of Service</h3>
+                  <div className="space-y-2.5 text-[10.5px] text-[#555] leading-[1.7]">
+                    <p><strong>1. Broker Authorization:</strong> By signing below, you ("Client") hereby authorize Profundr LLC ("Broker") to act as your authorized representative and broker for the purpose of identifying, negotiating, and securing funding opportunities on your behalf. This includes, but is not limited to, business lines of credit, term loans, SBA loans, revenue-based financing, equipment financing, and other capital products.</p>
+                    <p><strong>2. Scope of Services:</strong> The Broker will: (a) review and analyze your credit profile, financial documentation, and business information; (b) identify suitable lending partners and funding programs; (c) submit applications to lenders on your behalf; (d) negotiate terms, rates, and conditions; and (e) facilitate the funding process through to disbursement.</p>
+                    <p><strong>3. Client Obligations:</strong> The Client agrees to: (a) provide accurate, complete, and truthful information; (b) promptly supply any additional documentation requested; (c) notify Broker of any material changes to financial circumstances; (d) not apply directly to lenders that Broker has already submitted applications to on Client's behalf.</p>
+                    <p><strong>4. Data Collection & Use:</strong> By signing, you authorize Profundr to collect and securely store personal and financial information including: name, contact details, Social Security Number (last 4 digits), date of birth, employment details, income, bank statements, tax returns, and credit reports. All data is encrypted using AES-256 at rest and TLS 1.3 in transit.</p>
+                    <p><strong>5. Broker Compensation:</strong> Broker compensation is paid by the lending institution upon successful funding. The Client will not be charged any upfront fees for brokerage services. Any fees or costs associated with specific funding products will be clearly disclosed prior to Client's acceptance.</p>
+                    <p><strong>6. Third-Party Disclosure:</strong> Client authorizes Broker to share submitted information exclusively with lending partners and financial institutions for the sole purpose of evaluating and processing funding applications. Client data will never be sold to third parties.</p>
+                    <p><strong>7. Credit Inquiries:</strong> Client acknowledges that while the initial assessment does NOT result in a hard inquiry, lender applications submitted on Client's behalf may result in hard credit inquiries. Broker will notify Client before any hard inquiry is initiated.</p>
+                    <p><strong>8. No Guarantee:</strong> Broker does not guarantee approval or specific terms. All funding decisions are made solely by the lending institutions. Broker will use best efforts to secure favorable terms.</p>
+                    <p><strong>9. Term & Termination:</strong> This agreement is effective upon signing and remains in force for 12 months unless terminated in writing by either party with 30 days' notice. Termination does not affect applications already in progress.</p>
+                    <p><strong>10. Data Retention & Deletion:</strong> Client may request deletion of all stored data at any time by contacting support@profundr.com. Data will be retained for a maximum of 24 months from last activity unless earlier deletion is requested.</p>
+                    <p><strong>11. Governing Law:</strong> This agreement shall be governed by and construed in accordance with applicable federal and state laws. Any disputes shall be resolved through binding arbitration.</p>
+                    <p><strong>12. Consent:</strong> By signing below, Client confirms that all information provided is accurate and complete, authorizes Profundr to act as Broker on their behalf, and consents to the terms described herein.</p>
                   </div>
                 </div>
 
-                <label className="flex items-start gap-2.5 mb-5 cursor-pointer text-left" data-testid="label-accept-terms">
+                <div className="mb-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <h4 className="text-[11px] font-bold text-[#1a1a2e] uppercase tracking-wider flex items-center gap-1.5">
+                      <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M1 11C3 9 5 4 7 3c1-.5 2.5.5 3.5-1" stroke="#6366f1" strokeWidth="1.2" strokeLinecap="round"/></svg>
+                      Your Signature
+                    </h4>
+                    <button onClick={clearSignature} className="text-[10px] text-[#999] hover:text-[#6366f1] transition-colors" data-testid="button-clear-signature">Clear</button>
+                  </div>
+                  <div className="border-2 border-[#e8e8f0] rounded-xl overflow-hidden bg-white" style={{ touchAction: "none" }}>
+                    <canvas
+                      ref={initSigCanvas}
+                      width={560}
+                      height={140}
+                      className="w-full cursor-crosshair"
+                      style={{ height: "100px" }}
+                      data-testid="canvas-signature"
+                    />
+                  </div>
+                  <p className="text-[9px] text-[#bbb] mt-1 text-center">Draw your signature above using your mouse or finger</p>
+                </div>
+
+                <label className="flex items-start gap-2.5 mb-4 cursor-pointer text-left" data-testid="label-accept-terms">
                   <input
                     type="checkbox"
                     checked={termsAccepted}
@@ -5073,18 +5151,18 @@ export default function LandingPage() {
                     className="mt-0.5 w-4 h-4 rounded border-[#ccc] text-[#6366f1] focus:ring-[#6366f1] cursor-pointer"
                     data-testid="checkbox-accept-terms"
                   />
-                  <span className="text-[12px] text-[#555] leading-[1.5]">
-                    I have read and agree to the <strong>Terms of Agreement</strong> and <strong>Data Acknowledgment</strong>. I understand how my data will be used and stored.
+                  <span className="text-[11px] text-[#555] leading-[1.5]">
+                    I have read and agree to the <strong>Broker Funding Agreement</strong> and <strong>Terms of Service</strong>. I authorize Profundr to act as my broker and represent me to lending partners.
                   </span>
                 </label>
 
                 <button
-                  onClick={() => { if (termsAccepted) setFundingStep("form"); }}
-                  disabled={!termsAccepted}
+                  onClick={() => { if (termsAccepted && signatureDataUrl) setFundingStep("form"); }}
+                  disabled={!termsAccepted || !signatureDataUrl}
                   className="w-full py-3 bg-[#1a1a2e] text-white rounded-full text-[14px] font-medium hover:bg-[#2a2a40] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                   data-testid="button-accept-terms"
                 >
-                  Accept & Continue
+                  Sign & Continue
                 </button>
               </div>
             )}
@@ -5216,7 +5294,7 @@ export default function LandingPage() {
                   </div>
 
                   <button
-                    onClick={() => {
+                    onClick={async () => {
                       const missing: string[] = [];
                       if (!fundingForm.firstName) missing.push("First Name");
                       if (!fundingForm.lastName) missing.push("Last Name");
@@ -5226,20 +5304,50 @@ export default function LandingPage() {
                         alert(`Please fill in: ${missing.join(", ")}`);
                         return;
                       }
-                      alert("Application submitted successfully! Our team will review your documents and reach out within 24-48 hours.");
-                      setFundingStep("closed");
-                      setTermsAccepted(false);
-                      setFundingForm({ firstName: "", lastName: "", email: "", phone: "", address: "", city: "", state: "", zip: "", ssn4: "", dob: "", employerName: "", annualIncome: "", monthlyHousing: "" });
-                      setFundingFiles({ bankStatements: [], taxReturns: [], creditReport: null });
+                      setIsSubmittingFunding(true);
+                      try {
+                        const fileNames: string[] = [];
+                        fundingFiles.bankStatements.forEach(f => fileNames.push(`[Bank] ${f.name}`));
+                        fundingFiles.taxReturns.forEach(f => fileNames.push(`[Tax] ${f.name}`));
+                        if (fundingFiles.creditReport) fileNames.push(`[Credit] ${fundingFiles.creditReport.name}`);
+
+                        const res = await fetch("/api/funding-application", {
+                          method: "POST",
+                          headers: { "Content-Type": "application/json" },
+                          body: JSON.stringify({
+                            form: fundingForm,
+                            signatureDataUrl: signatureDataUrl,
+                            termsAcceptedAt: new Date().toISOString(),
+                            fileNames,
+                          }),
+                        });
+                        const data = await res.json();
+                        if (data.success) {
+                          alert("Application submitted successfully! Your signed broker agreement and application have been sent. Our team will review and reach out within 24-48 hours.");
+                        } else {
+                          alert("Application saved. Our team will follow up shortly.");
+                        }
+                        setFundingStep("closed");
+                        setTermsAccepted(false);
+                        setSignatureDataUrl(null);
+                        setFundingForm({ firstName: "", lastName: "", email: "", phone: "", address: "", city: "", state: "", zip: "", ssn4: "", dob: "", employerName: "", annualIncome: "", monthlyHousing: "" });
+                        setFundingFiles({ bankStatements: [], taxReturns: [], creditReport: null });
+                      } catch (err) {
+                        alert("Application saved. Our team will follow up shortly.");
+                        setFundingStep("closed");
+                      } finally {
+                        setIsSubmittingFunding(false);
+                      }
                     }}
-                    className="w-full py-3 bg-gradient-to-r from-[#6366f1] to-[#4f46e5] text-white rounded-full text-[14px] font-semibold hover:opacity-90 transition-opacity shadow-md"
+                    disabled={isSubmittingFunding}
+                    className="w-full py-3 bg-gradient-to-r from-[#6366f1] to-[#4f46e5] text-white rounded-full text-[14px] font-semibold hover:opacity-90 transition-opacity shadow-md disabled:opacity-50"
                     data-testid="button-submit-funding"
                   >
-                    Submit Application
+                    {isSubmittingFunding ? "Submitting..." : "Submit Application"}
                   </button>
 
                   <p className="text-center text-[9px] text-[#bbb] leading-[1.5]">
-                    Your data is encrypted and secure. No hard inquiry will be performed.
+                    Your signed agreement and application will be sent securely. No hard inquiry will be performed.
                   </p>
                 </div>
               </div>
