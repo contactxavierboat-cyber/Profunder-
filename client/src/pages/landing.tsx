@@ -3742,6 +3742,13 @@ export default function LandingPage() {
   const [showScrollBtn, setShowScrollBtn] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [fundingStep, setFundingStep] = useState<"closed" | "terms" | "form">("closed");
+  const [termsAccepted, setTermsAccepted] = useState(false);
+  const [fundingForm, setFundingForm] = useState({ firstName: "", lastName: "", email: "", phone: "", address: "", city: "", state: "", zip: "", ssn4: "", dob: "", employerName: "", annualIncome: "", monthlyHousing: "" });
+  const [fundingFiles, setFundingFiles] = useState<{ bankStatements: File[]; taxReturns: File[]; creditReport: File | null }>({ bankStatements: [], taxReturns: [], creditReport: null });
+  const fundingBankRef = useRef<HTMLInputElement>(null);
+  const fundingTaxRef = useRef<HTMLInputElement>(null);
+  const fundingCreditRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (user && !prevUserRef.current) {
@@ -4647,17 +4654,34 @@ export default function LandingPage() {
               <h1 className="text-[28px] sm:text-[36px] font-semibold text-[#1a1a1a] tracking-[-0.03em] text-center leading-tight" data-testid="text-hero-headline">
                 Are you fundable?
               </h1>
-              <button
-                onClick={() => { setAutoSendFile(true); handleUploadClick(); }}
-                className="flex items-center gap-2.5 px-7 py-3 bg-[#1a1a2e] text-white rounded-full text-[14px] font-medium hover:bg-[#2a2a40] transition-colors shadow-sm"
-                data-testid="button-upload-report"
-              >
-                <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-                  <path d="M9 3V12M9 3L5.5 6.5M9 3L12.5 6.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                  <path d="M3 12V14C3 14.5523 3.44772 15 4 15H14C14.5523 15 15 14.5523 15 14V12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-                Upload Report
-              </button>
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={() => { setAutoSendFile(true); handleUploadClick(); }}
+                  className="flex items-center gap-2.5 px-7 py-3 bg-[#1a1a2e] text-white rounded-full text-[14px] font-medium hover:bg-[#2a2a40] transition-colors shadow-sm"
+                  data-testid="button-upload-report"
+                >
+                  <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+                    <path d="M9 3V12M9 3L5.5 6.5M9 3L12.5 6.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                    <path d="M3 12V14C3 14.5523 3.44772 15 4 15H14C14.5523 15 15 14.5523 15 14V12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                  Upload Report
+                </button>
+                <button
+                  onClick={() => setFundingStep("terms")}
+                  className="group relative flex items-center justify-center w-[52px] h-[52px] rounded-full bg-gradient-to-br from-[#6366f1] to-[#4f46e5] text-white shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-200"
+                  title="Ready for funding?"
+                  data-testid="button-funding-card"
+                >
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="2" y="5" width="20" height="14" rx="2" />
+                    <line x1="2" y1="10" x2="22" y2="10" />
+                    <path d="M6 15h4M14 15h4" />
+                  </svg>
+                  <span className="absolute -bottom-7 left-1/2 -translate-x-1/2 whitespace-nowrap text-[10px] font-semibold text-[#6366f1] opacity-0 group-hover:opacity-100 transition-opacity">
+                    Ready for funding?
+                  </span>
+                </button>
+              </div>
               <p className="text-[11px] text-[#999] text-center max-w-[240px] leading-[1.6]" data-testid="text-upload-description">
                 Profundr reviews your report like a bank would and shows your funding potential before you apply. No hard inquiry, no lending — just secure, clear analysis.
               </p>
@@ -4989,6 +5013,231 @@ export default function LandingPage() {
           </p>
         </div>
       </div>
+
+      {fundingStep !== "closed" && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm" data-testid="modal-funding-flow">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-[520px] w-[92%] max-h-[90dvh] overflow-y-auto relative">
+            <button
+              onClick={() => { setFundingStep("closed"); setTermsAccepted(false); }}
+              className="absolute top-4 right-4 z-10 text-[#ccc] hover:text-[#666] transition-colors"
+              data-testid="button-close-funding"
+            >
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                <path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+              </svg>
+            </button>
+
+            {fundingStep === "terms" && (
+              <div className="p-8 text-center">
+                <div className="w-16 h-16 mx-auto mb-5 rounded-full bg-gradient-to-br from-[#6366f1] to-[#4f46e5] flex items-center justify-center shadow-lg">
+                  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="2" y="5" width="20" height="14" rx="2" />
+                    <line x1="2" y1="10" x2="22" y2="10" />
+                    <path d="M6 15h4M14 15h4" />
+                  </svg>
+                </div>
+                <h2 className="text-[24px] font-bold text-[#1a1a2e] tracking-[-0.02em] mb-2" data-testid="text-funding-headline">
+                  Ready for funding?
+                </h2>
+                <p className="text-[13px] text-[#777] leading-[1.6] max-w-[380px] mx-auto mb-6">
+                  Start your funding application by reviewing and accepting our terms. Your data is encrypted and never shared without your consent.
+                </p>
+
+                <div className="bg-[#f8f8fc] rounded-xl p-5 text-left mb-6 max-h-[240px] overflow-y-auto border border-[#e8e8f0]">
+                  <h3 className="text-[12px] font-bold text-[#1a1a2e] uppercase tracking-wider mb-3">Terms of Agreement & Data Acknowledgment</h3>
+                  <div className="space-y-3 text-[11px] text-[#555] leading-[1.7]">
+                    <p><strong>1. Data Collection & Use:</strong> By proceeding, you authorize Profundr to collect and securely store the personal and financial information you provide, including but not limited to: name, contact information, Social Security Number (last 4 digits), date of birth, employment details, income, bank statements, tax returns, and credit reports.</p>
+                    <p><strong>2. Purpose:</strong> Your information will be used solely to assess your funding eligibility, generate capital readiness reports, and match you with appropriate lending products. Profundr does not make lending decisions or extend credit directly.</p>
+                    <p><strong>3. Data Security:</strong> All submitted data is encrypted using industry-standard AES-256 encryption at rest and TLS 1.3 in transit. We implement strict access controls and regular security audits to protect your information.</p>
+                    <p><strong>4. Third-Party Sharing:</strong> Your data will never be sold. Information may only be shared with lending partners you explicitly authorize, and solely for the purpose of evaluating your funding application.</p>
+                    <p><strong>5. Credit Inquiries:</strong> Submitting this application does NOT result in a hard inquiry on your credit report. Any soft inquiries performed are for assessment purposes only and do not affect your credit score.</p>
+                    <p><strong>6. Data Retention:</strong> You may request deletion of your data at any time by contacting support@profundr.com. Data will be retained for a maximum of 24 months from your last activity unless you request earlier deletion.</p>
+                    <p><strong>7. Consent:</strong> By accepting these terms, you confirm that all information provided is accurate and complete, and you consent to its use as described above.</p>
+                  </div>
+                </div>
+
+                <label className="flex items-start gap-2.5 mb-5 cursor-pointer text-left" data-testid="label-accept-terms">
+                  <input
+                    type="checkbox"
+                    checked={termsAccepted}
+                    onChange={(e) => setTermsAccepted(e.target.checked)}
+                    className="mt-0.5 w-4 h-4 rounded border-[#ccc] text-[#6366f1] focus:ring-[#6366f1] cursor-pointer"
+                    data-testid="checkbox-accept-terms"
+                  />
+                  <span className="text-[12px] text-[#555] leading-[1.5]">
+                    I have read and agree to the <strong>Terms of Agreement</strong> and <strong>Data Acknowledgment</strong>. I understand how my data will be used and stored.
+                  </span>
+                </label>
+
+                <button
+                  onClick={() => { if (termsAccepted) setFundingStep("form"); }}
+                  disabled={!termsAccepted}
+                  className="w-full py-3 bg-[#1a1a2e] text-white rounded-full text-[14px] font-medium hover:bg-[#2a2a40] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                  data-testid="button-accept-terms"
+                >
+                  Accept & Continue
+                </button>
+              </div>
+            )}
+
+            {fundingStep === "form" && (
+              <div className="p-6 sm:p-8">
+                <div className="flex items-center gap-2 mb-1">
+                  <button onClick={() => setFundingStep("terms")} className="text-[#999] hover:text-[#555] transition-colors" data-testid="button-funding-back">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M10 4L6 8l4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                  </button>
+                  <h2 className="text-[20px] font-bold text-[#1a1a2e] tracking-[-0.02em]" data-testid="text-form-headline">Funding Application</h2>
+                </div>
+                <p className="text-[11px] text-[#999] mb-5 ml-6">Complete your profile and upload documents</p>
+
+                <div className="space-y-4">
+                  <div>
+                    <h3 className="text-[11px] font-bold text-[#1a1a2e] uppercase tracking-wider mb-2.5 flex items-center gap-1.5">
+                      <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="4" r="2.5" stroke="#6366f1" strokeWidth="1.2"/><path d="M1.5 11c0-2.5 2-4 4.5-4s4.5 1.5 4.5 4" stroke="#6366f1" strokeWidth="1.2" strokeLinecap="round"/></svg>
+                      Personal Information
+                    </h3>
+                    <div className="grid grid-cols-2 gap-2.5">
+                      <input value={fundingForm.firstName} onChange={e => setFundingForm(f => ({ ...f, firstName: e.target.value }))} placeholder="First Name" className="col-span-1 px-3 py-2.5 rounded-lg border border-[#ddd] text-[12px] focus:outline-none focus:border-[#6366f1] focus:ring-1 focus:ring-[#6366f1]/20 transition-colors" data-testid="input-funding-firstname" />
+                      <input value={fundingForm.lastName} onChange={e => setFundingForm(f => ({ ...f, lastName: e.target.value }))} placeholder="Last Name" className="col-span-1 px-3 py-2.5 rounded-lg border border-[#ddd] text-[12px] focus:outline-none focus:border-[#6366f1] focus:ring-1 focus:ring-[#6366f1]/20 transition-colors" data-testid="input-funding-lastname" />
+                      <input value={fundingForm.email} onChange={e => setFundingForm(f => ({ ...f, email: e.target.value }))} placeholder="Email Address" type="email" className="col-span-2 px-3 py-2.5 rounded-lg border border-[#ddd] text-[12px] focus:outline-none focus:border-[#6366f1] focus:ring-1 focus:ring-[#6366f1]/20 transition-colors" data-testid="input-funding-email" />
+                      <input value={fundingForm.phone} onChange={e => setFundingForm(f => ({ ...f, phone: e.target.value }))} placeholder="Phone Number" type="tel" className="col-span-1 px-3 py-2.5 rounded-lg border border-[#ddd] text-[12px] focus:outline-none focus:border-[#6366f1] focus:ring-1 focus:ring-[#6366f1]/20 transition-colors" data-testid="input-funding-phone" />
+                      <input value={fundingForm.dob} onChange={e => setFundingForm(f => ({ ...f, dob: e.target.value }))} placeholder="Date of Birth" type="date" className="col-span-1 px-3 py-2.5 rounded-lg border border-[#ddd] text-[12px] focus:outline-none focus:border-[#6366f1] focus:ring-1 focus:ring-[#6366f1]/20 transition-colors" data-testid="input-funding-dob" />
+                      <input value={fundingForm.ssn4} onChange={e => setFundingForm(f => ({ ...f, ssn4: e.target.value.replace(/\D/g, "").slice(0, 4) }))} placeholder="Last 4 SSN" maxLength={4} className="col-span-1 px-3 py-2.5 rounded-lg border border-[#ddd] text-[12px] focus:outline-none focus:border-[#6366f1] focus:ring-1 focus:ring-[#6366f1]/20 transition-colors" data-testid="input-funding-ssn4" />
+                    </div>
+                  </div>
+
+                  <div>
+                    <h3 className="text-[11px] font-bold text-[#1a1a2e] uppercase tracking-wider mb-2.5 flex items-center gap-1.5">
+                      <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M1.5 10.5V3.5l5-2 5 2v7l-5-2-5 2z" stroke="#6366f1" strokeWidth="1.2" strokeLinejoin="round"/></svg>
+                      Address
+                    </h3>
+                    <div className="grid grid-cols-6 gap-2.5">
+                      <input value={fundingForm.address} onChange={e => setFundingForm(f => ({ ...f, address: e.target.value }))} placeholder="Street Address" className="col-span-6 px-3 py-2.5 rounded-lg border border-[#ddd] text-[12px] focus:outline-none focus:border-[#6366f1] focus:ring-1 focus:ring-[#6366f1]/20 transition-colors" data-testid="input-funding-address" />
+                      <input value={fundingForm.city} onChange={e => setFundingForm(f => ({ ...f, city: e.target.value }))} placeholder="City" className="col-span-3 px-3 py-2.5 rounded-lg border border-[#ddd] text-[12px] focus:outline-none focus:border-[#6366f1] focus:ring-1 focus:ring-[#6366f1]/20 transition-colors" data-testid="input-funding-city" />
+                      <input value={fundingForm.state} onChange={e => setFundingForm(f => ({ ...f, state: e.target.value }))} placeholder="State" className="col-span-1 px-3 py-2.5 rounded-lg border border-[#ddd] text-[12px] focus:outline-none focus:border-[#6366f1] focus:ring-1 focus:ring-[#6366f1]/20 transition-colors" data-testid="input-funding-state" />
+                      <input value={fundingForm.zip} onChange={e => setFundingForm(f => ({ ...f, zip: e.target.value }))} placeholder="ZIP" className="col-span-2 px-3 py-2.5 rounded-lg border border-[#ddd] text-[12px] focus:outline-none focus:border-[#6366f1] focus:ring-1 focus:ring-[#6366f1]/20 transition-colors" data-testid="input-funding-zip" />
+                    </div>
+                  </div>
+
+                  <div>
+                    <h3 className="text-[11px] font-bold text-[#1a1a2e] uppercase tracking-wider mb-2.5 flex items-center gap-1.5">
+                      <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><rect x="1.5" y="3" width="9" height="6.5" rx="1" stroke="#6366f1" strokeWidth="1.2"/><path d="M1.5 5h9" stroke="#6366f1" strokeWidth="1.2"/></svg>
+                      Financial Details
+                    </h3>
+                    <div className="grid grid-cols-3 gap-2.5">
+                      <input value={fundingForm.employerName} onChange={e => setFundingForm(f => ({ ...f, employerName: e.target.value }))} placeholder="Employer Name" className="col-span-3 px-3 py-2.5 rounded-lg border border-[#ddd] text-[12px] focus:outline-none focus:border-[#6366f1] focus:ring-1 focus:ring-[#6366f1]/20 transition-colors" data-testid="input-funding-employer" />
+                      <input value={fundingForm.annualIncome} onChange={e => setFundingForm(f => ({ ...f, annualIncome: e.target.value }))} placeholder="Annual Income" type="number" className="col-span-1 px-3 py-2.5 rounded-lg border border-[#ddd] text-[12px] focus:outline-none focus:border-[#6366f1] focus:ring-1 focus:ring-[#6366f1]/20 transition-colors" data-testid="input-funding-income" />
+                      <input value={fundingForm.monthlyHousing} onChange={e => setFundingForm(f => ({ ...f, monthlyHousing: e.target.value }))} placeholder="Monthly Housing" type="number" className="col-span-1 px-3 py-2.5 rounded-lg border border-[#ddd] text-[12px] focus:outline-none focus:border-[#6366f1] focus:ring-1 focus:ring-[#6366f1]/20 transition-colors" data-testid="input-funding-housing" />
+                    </div>
+                  </div>
+
+                  <div>
+                    <h3 className="text-[11px] font-bold text-[#1a1a2e] uppercase tracking-wider mb-2.5 flex items-center gap-1.5">
+                      <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 2h8v8H2z" stroke="#6366f1" strokeWidth="1.2" strokeLinejoin="round"/><path d="M5 2v8M2 5h8" stroke="#6366f1" strokeWidth="0.8"/></svg>
+                      Document Upload Center
+                    </h3>
+                    <div className="space-y-2.5">
+                      <input ref={fundingBankRef} type="file" accept=".pdf,.jpg,.jpeg,.png" multiple className="hidden" onChange={(e) => { if (e.target.files) setFundingFiles(f => ({ ...f, bankStatements: [...f.bankStatements, ...Array.from(e.target.files!)] })); }} data-testid="input-funding-bank-files" />
+                      <div
+                        onClick={() => fundingBankRef.current?.click()}
+                        className="border-2 border-dashed border-[#d4d0f0] rounded-xl p-4 cursor-pointer hover:border-[#6366f1] hover:bg-[#f8f7ff] transition-colors text-center"
+                        data-testid="upload-zone-bank"
+                      >
+                        <div className="flex items-center justify-center gap-2 mb-1">
+                          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 11V13C2 13.5523 2.44772 14 3 14H13C13.5523 14 14 13.5523 14 13V11" stroke="#6366f1" strokeWidth="1.3" strokeLinecap="round"/><path d="M8 2V10M8 2L5 5M8 2L11 5" stroke="#6366f1" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                          <span className="text-[12px] font-semibold text-[#6366f1]">Bank Statements</span>
+                        </div>
+                        <p className="text-[10px] text-[#999]">PDF, JPG, or PNG — Last 3 months recommended</p>
+                        {fundingFiles.bankStatements.length > 0 && (
+                          <div className="mt-2 flex flex-wrap gap-1 justify-center">
+                            {fundingFiles.bankStatements.map((f, i) => (
+                              <span key={i} className="inline-flex items-center gap-1 text-[9px] bg-[#e8e6ff] text-[#6366f1] rounded-full px-2 py-0.5 font-medium">
+                                {f.name.length > 20 ? f.name.slice(0, 17) + "..." : f.name}
+                                <button onClick={(e) => { e.stopPropagation(); setFundingFiles(ff => ({ ...ff, bankStatements: ff.bankStatements.filter((_, j) => j !== i) })); }} className="hover:text-red-500">&times;</button>
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+
+                      <input ref={fundingTaxRef} type="file" accept=".pdf,.jpg,.jpeg,.png" multiple className="hidden" onChange={(e) => { if (e.target.files) setFundingFiles(f => ({ ...f, taxReturns: [...f.taxReturns, ...Array.from(e.target.files!)] })); }} data-testid="input-funding-tax-files" />
+                      <div
+                        onClick={() => fundingTaxRef.current?.click()}
+                        className="border-2 border-dashed border-[#d4d0f0] rounded-xl p-4 cursor-pointer hover:border-[#6366f1] hover:bg-[#f8f7ff] transition-colors text-center"
+                        data-testid="upload-zone-tax"
+                      >
+                        <div className="flex items-center justify-center gap-2 mb-1">
+                          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 2h5l4 4v8a1 1 0 01-1 1H4a1 1 0 01-1-1V3a1 1 0 011-1z" stroke="#6366f1" strokeWidth="1.3" strokeLinejoin="round"/><path d="M9 2v4h4" stroke="#6366f1" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                          <span className="text-[12px] font-semibold text-[#6366f1]">Tax Returns</span>
+                        </div>
+                        <p className="text-[10px] text-[#999]">PDF or image — Most recent filing</p>
+                        {fundingFiles.taxReturns.length > 0 && (
+                          <div className="mt-2 flex flex-wrap gap-1 justify-center">
+                            {fundingFiles.taxReturns.map((f, i) => (
+                              <span key={i} className="inline-flex items-center gap-1 text-[9px] bg-[#e8e6ff] text-[#6366f1] rounded-full px-2 py-0.5 font-medium">
+                                {f.name.length > 20 ? f.name.slice(0, 17) + "..." : f.name}
+                                <button onClick={(e) => { e.stopPropagation(); setFundingFiles(ff => ({ ...ff, taxReturns: ff.taxReturns.filter((_, j) => j !== i) })); }} className="hover:text-red-500">&times;</button>
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+
+                      <input ref={fundingCreditRef} type="file" accept=".pdf,.txt,.csv" className="hidden" onChange={(e) => { if (e.target.files?.[0]) setFundingFiles(f => ({ ...f, creditReport: e.target.files![0] })); }} data-testid="input-funding-credit-file" />
+                      <div
+                        onClick={() => fundingCreditRef.current?.click()}
+                        className="border-2 border-dashed border-[#d4d0f0] rounded-xl p-4 cursor-pointer hover:border-[#6366f1] hover:bg-[#f8f7ff] transition-colors text-center"
+                        data-testid="upload-zone-credit"
+                      >
+                        <div className="flex items-center justify-center gap-2 mb-1">
+                          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="2" y="3" width="12" height="10" rx="1.5" stroke="#6366f1" strokeWidth="1.3"/><path d="M2 6.5h12M5 9.5h3M9 9.5h2" stroke="#6366f1" strokeWidth="1" strokeLinecap="round"/></svg>
+                          <span className="text-[12px] font-semibold text-[#6366f1]">Credit Report</span>
+                        </div>
+                        <p className="text-[10px] text-[#999]">PDF, TXT, or CSV from any bureau</p>
+                        {fundingFiles.creditReport && (
+                          <div className="mt-2 flex justify-center">
+                            <span className="inline-flex items-center gap-1 text-[9px] bg-[#e8e6ff] text-[#6366f1] rounded-full px-2 py-0.5 font-medium">
+                              {fundingFiles.creditReport.name.length > 25 ? fundingFiles.creditReport.name.slice(0, 22) + "..." : fundingFiles.creditReport.name}
+                              <button onClick={(e) => { e.stopPropagation(); setFundingFiles(f => ({ ...f, creditReport: null })); }} className="hover:text-red-500">&times;</button>
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  <button
+                    onClick={() => {
+                      const missing: string[] = [];
+                      if (!fundingForm.firstName) missing.push("First Name");
+                      if (!fundingForm.lastName) missing.push("Last Name");
+                      if (!fundingForm.email) missing.push("Email");
+                      if (!fundingForm.phone) missing.push("Phone");
+                      if (missing.length > 0) {
+                        alert(`Please fill in: ${missing.join(", ")}`);
+                        return;
+                      }
+                      alert("Application submitted successfully! Our team will review your documents and reach out within 24-48 hours.");
+                      setFundingStep("closed");
+                      setTermsAccepted(false);
+                      setFundingForm({ firstName: "", lastName: "", email: "", phone: "", address: "", city: "", state: "", zip: "", ssn4: "", dob: "", employerName: "", annualIncome: "", monthlyHousing: "" });
+                      setFundingFiles({ bankStatements: [], taxReturns: [], creditReport: null });
+                    }}
+                    className="w-full py-3 bg-gradient-to-r from-[#6366f1] to-[#4f46e5] text-white rounded-full text-[14px] font-semibold hover:opacity-90 transition-opacity shadow-md"
+                    data-testid="button-submit-funding"
+                  >
+                    Submit Application
+                  </button>
+
+                  <p className="text-center text-[9px] text-[#bbb] leading-[1.5]">
+                    Your data is encrypted and secure. No hard inquiry will be performed.
+                  </p>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       {showInitiationGate && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm" data-testid="modal-initiation-gate">
