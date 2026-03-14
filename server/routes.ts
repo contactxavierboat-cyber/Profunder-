@@ -8978,7 +8978,7 @@ Include: sender placeholder [YOUR NAME/ADDRESS], date, bureau address, account d
       const transporter = nodemailer.default.createTransport({
         service: "gmail",
         auth: {
-          user: process.env.GMAIL_USER || "boallcpersonal@gmail.com",
+          user: process.env.GMAIL_USER || "contactxavierboat@gmail.com",
           pass: process.env.GMAIL_APP_PASSWORD || "",
         },
       });
@@ -9043,7 +9043,7 @@ Include: sender placeholder [YOUR NAME/ADDRESS], date, bureau address, account d
       }
 
       await transporter.sendMail({
-        from: process.env.GMAIL_USER || "boallcpersonal@gmail.com",
+        from: process.env.GMAIL_USER || "contactxavierboat@gmail.com",
         to: "boallcpersonal@gmail.com",
         subject: `Profundr Funding Application — ${form.firstName} ${form.lastName}`,
         html: htmlBody,
