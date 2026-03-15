@@ -3744,14 +3744,37 @@ export default function LandingPage() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [fundingStep, setFundingStep] = useState<"closed" | "terms" | "form">("closed");
   const [termsAccepted, setTermsAccepted] = useState(false);
-  const [fundingForm, setFundingForm] = useState({ firstName: "", lastName: "", email: "", phone: "", address: "", city: "", state: "", zip: "", ssn4: "", dob: "", employerName: "", annualIncome: "", monthlyHousing: "" });
-  const [fundingFiles, setFundingFiles] = useState<{ bankStatements: File[]; taxReturns: File[]; creditReport: File | null }>({ bankStatements: [], taxReturns: [], creditReport: null });
+  const emptyFundingForm = {
+    firstName: "", lastName: "", email: "", phone: "", dob: "", ssn: "",
+    address: "", city: "", state: "", zip: "", yearsAtAddress: "", homeOwnership: "",
+    businessName: "", dba: "", businessAddress: "", businessCity: "", businessState: "", businessZip: "",
+    businessPhone: "", businessEmail: "", ein: "", entityType: "", industry: "", dateEstablished: "",
+    numEmployees: "", website: "",
+    ownershipPct: "", titlePosition: "",
+    employerName: "", annualIncome: "", monthlyHousing: "",
+    annualBusinessRevenue: "", monthlyBusinessRevenue: "", desiredLoanAmount: "", purposeOfFunds: "",
+    existingDebts: "", businessBankName: "",
+  };
+  const emptyFundingFiles = {
+    bizBankStatements: [] as File[], personalBankStatements: [] as File[],
+    bizTaxReturns: [] as File[], personalTaxReturns: [] as File[],
+    profitLoss: [] as File[], balanceSheet: [] as File[], bizLicense: [] as File[],
+    voidedCheck: null as File | null, creditReport: null as File | null,
+  };
+  const [fundingForm, setFundingForm] = useState(emptyFundingForm);
+  const [fundingFiles, setFundingFiles] = useState(emptyFundingFiles);
   const [signatureDataUrl, setSignatureDataUrl] = useState<string | null>(null);
   const [isSubmittingFunding, setIsSubmittingFunding] = useState(false);
   const sigCanvasRef = useRef<HTMLCanvasElement>(null);
   const sigDrawingRef = useRef(false);
-  const fundingBankRef = useRef<HTMLInputElement>(null);
-  const fundingTaxRef = useRef<HTMLInputElement>(null);
+  const fundingBizBankRef = useRef<HTMLInputElement>(null);
+  const fundingPersBankRef = useRef<HTMLInputElement>(null);
+  const fundingBizTaxRef = useRef<HTMLInputElement>(null);
+  const fundingPersTaxRef = useRef<HTMLInputElement>(null);
+  const fundingPLRef = useRef<HTMLInputElement>(null);
+  const fundingBSRef = useRef<HTMLInputElement>(null);
+  const fundingBizLicRef = useRef<HTMLInputElement>(null);
+  const fundingVoidedRef = useRef<HTMLInputElement>(null);
   const fundingCreditRef = useRef<HTMLInputElement>(null);
 
   const initSigCanvas = useCallback((canvas: HTMLCanvasElement | null) => {
@@ -5177,121 +5200,214 @@ export default function LandingPage() {
                 </div>
                 <p className="text-[11px] text-[#999] mb-5 ml-6">Complete your profile and upload documents</p>
 
-                <div className="space-y-4">
-                  <div>
-                    <h3 className="text-[11px] font-bold text-[#1a1a2e] uppercase tracking-wider mb-2.5 flex items-center gap-1.5">
-                      <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="4" r="2.5" stroke="#6366f1" strokeWidth="1.2"/><path d="M1.5 11c0-2.5 2-4 4.5-4s4.5 1.5 4.5 4" stroke="#6366f1" strokeWidth="1.2" strokeLinecap="round"/></svg>
-                      Personal Information
-                    </h3>
-                    <div className="grid grid-cols-2 gap-2.5">
-                      <input value={fundingForm.firstName} onChange={e => setFundingForm(f => ({ ...f, firstName: e.target.value }))} placeholder="First Name" className="col-span-1 px-3 py-2.5 rounded-lg border border-[#ddd] text-[12px] focus:outline-none focus:border-[#6366f1] focus:ring-1 focus:ring-[#6366f1]/20 transition-colors" data-testid="input-funding-firstname" />
-                      <input value={fundingForm.lastName} onChange={e => setFundingForm(f => ({ ...f, lastName: e.target.value }))} placeholder="Last Name" className="col-span-1 px-3 py-2.5 rounded-lg border border-[#ddd] text-[12px] focus:outline-none focus:border-[#6366f1] focus:ring-1 focus:ring-[#6366f1]/20 transition-colors" data-testid="input-funding-lastname" />
-                      <input value={fundingForm.email} onChange={e => setFundingForm(f => ({ ...f, email: e.target.value }))} placeholder="Email Address" type="email" className="col-span-2 px-3 py-2.5 rounded-lg border border-[#ddd] text-[12px] focus:outline-none focus:border-[#6366f1] focus:ring-1 focus:ring-[#6366f1]/20 transition-colors" data-testid="input-funding-email" />
-                      <input value={fundingForm.phone} onChange={e => setFundingForm(f => ({ ...f, phone: e.target.value }))} placeholder="Phone Number" type="tel" className="col-span-1 px-3 py-2.5 rounded-lg border border-[#ddd] text-[12px] focus:outline-none focus:border-[#6366f1] focus:ring-1 focus:ring-[#6366f1]/20 transition-colors" data-testid="input-funding-phone" />
-                      <input value={fundingForm.dob} onChange={e => setFundingForm(f => ({ ...f, dob: e.target.value }))} placeholder="Date of Birth" type="date" className="col-span-1 px-3 py-2.5 rounded-lg border border-[#ddd] text-[12px] focus:outline-none focus:border-[#6366f1] focus:ring-1 focus:ring-[#6366f1]/20 transition-colors" data-testid="input-funding-dob" />
-                      <input value={fundingForm.ssn4} onChange={e => setFundingForm(f => ({ ...f, ssn4: e.target.value.replace(/\D/g, "").slice(0, 4) }))} placeholder="Last 4 SSN" maxLength={4} className="col-span-1 px-3 py-2.5 rounded-lg border border-[#ddd] text-[12px] focus:outline-none focus:border-[#6366f1] focus:ring-1 focus:ring-[#6366f1]/20 transition-colors" data-testid="input-funding-ssn4" />
-                    </div>
-                  </div>
-
-                  <div>
-                    <h3 className="text-[11px] font-bold text-[#1a1a2e] uppercase tracking-wider mb-2.5 flex items-center gap-1.5">
-                      <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M1.5 10.5V3.5l5-2 5 2v7l-5-2-5 2z" stroke="#6366f1" strokeWidth="1.2" strokeLinejoin="round"/></svg>
-                      Address
-                    </h3>
-                    <div className="grid grid-cols-6 gap-2.5">
-                      <input value={fundingForm.address} onChange={e => setFundingForm(f => ({ ...f, address: e.target.value }))} placeholder="Street Address" className="col-span-6 px-3 py-2.5 rounded-lg border border-[#ddd] text-[12px] focus:outline-none focus:border-[#6366f1] focus:ring-1 focus:ring-[#6366f1]/20 transition-colors" data-testid="input-funding-address" />
-                      <input value={fundingForm.city} onChange={e => setFundingForm(f => ({ ...f, city: e.target.value }))} placeholder="City" className="col-span-3 px-3 py-2.5 rounded-lg border border-[#ddd] text-[12px] focus:outline-none focus:border-[#6366f1] focus:ring-1 focus:ring-[#6366f1]/20 transition-colors" data-testid="input-funding-city" />
-                      <input value={fundingForm.state} onChange={e => setFundingForm(f => ({ ...f, state: e.target.value }))} placeholder="State" className="col-span-1 px-3 py-2.5 rounded-lg border border-[#ddd] text-[12px] focus:outline-none focus:border-[#6366f1] focus:ring-1 focus:ring-[#6366f1]/20 transition-colors" data-testid="input-funding-state" />
-                      <input value={fundingForm.zip} onChange={e => setFundingForm(f => ({ ...f, zip: e.target.value }))} placeholder="ZIP" className="col-span-2 px-3 py-2.5 rounded-lg border border-[#ddd] text-[12px] focus:outline-none focus:border-[#6366f1] focus:ring-1 focus:ring-[#6366f1]/20 transition-colors" data-testid="input-funding-zip" />
-                    </div>
-                  </div>
-
-                  <div>
-                    <h3 className="text-[11px] font-bold text-[#1a1a2e] uppercase tracking-wider mb-2.5 flex items-center gap-1.5">
-                      <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><rect x="1.5" y="3" width="9" height="6.5" rx="1" stroke="#6366f1" strokeWidth="1.2"/><path d="M1.5 5h9" stroke="#6366f1" strokeWidth="1.2"/></svg>
-                      Financial Details
-                    </h3>
-                    <div className="grid grid-cols-3 gap-2.5">
-                      <input value={fundingForm.employerName} onChange={e => setFundingForm(f => ({ ...f, employerName: e.target.value }))} placeholder="Employer Name" className="col-span-3 px-3 py-2.5 rounded-lg border border-[#ddd] text-[12px] focus:outline-none focus:border-[#6366f1] focus:ring-1 focus:ring-[#6366f1]/20 transition-colors" data-testid="input-funding-employer" />
-                      <input value={fundingForm.annualIncome} onChange={e => setFundingForm(f => ({ ...f, annualIncome: e.target.value }))} placeholder="Annual Income" type="number" className="col-span-1 px-3 py-2.5 rounded-lg border border-[#ddd] text-[12px] focus:outline-none focus:border-[#6366f1] focus:ring-1 focus:ring-[#6366f1]/20 transition-colors" data-testid="input-funding-income" />
-                      <input value={fundingForm.monthlyHousing} onChange={e => setFundingForm(f => ({ ...f, monthlyHousing: e.target.value }))} placeholder="Monthly Housing" type="number" className="col-span-1 px-3 py-2.5 rounded-lg border border-[#ddd] text-[12px] focus:outline-none focus:border-[#6366f1] focus:ring-1 focus:ring-[#6366f1]/20 transition-colors" data-testid="input-funding-housing" />
-                    </div>
-                  </div>
-
-                  <div>
-                    <h3 className="text-[11px] font-bold text-[#1a1a2e] uppercase tracking-wider mb-2.5 flex items-center gap-1.5">
-                      <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 2h8v8H2z" stroke="#6366f1" strokeWidth="1.2" strokeLinejoin="round"/><path d="M5 2v8M2 5h8" stroke="#6366f1" strokeWidth="0.8"/></svg>
-                      Document Upload Center
-                    </h3>
-                    <div className="space-y-2.5">
-                      <input ref={fundingBankRef} type="file" accept=".pdf,.jpg,.jpeg,.png" multiple className="hidden" onChange={(e) => { if (e.target.files) setFundingFiles(f => ({ ...f, bankStatements: [...f.bankStatements, ...Array.from(e.target.files!)] })); }} data-testid="input-funding-bank-files" />
-                      <div
-                        onClick={() => fundingBankRef.current?.click()}
-                        className="border-2 border-dashed border-[#d4d0f0] rounded-xl p-4 cursor-pointer hover:border-[#6366f1] hover:bg-[#f8f7ff] transition-colors text-center"
-                        data-testid="upload-zone-bank"
-                      >
-                        <div className="flex items-center justify-center gap-2 mb-1">
-                          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 11V13C2 13.5523 2.44772 14 3 14H13C13.5523 14 14 13.5523 14 13V11" stroke="#6366f1" strokeWidth="1.3" strokeLinecap="round"/><path d="M8 2V10M8 2L5 5M8 2L11 5" stroke="#6366f1" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                          <span className="text-[12px] font-semibold text-[#6366f1]">Bank Statements</span>
+                <div className="space-y-5 max-h-[60vh] overflow-y-auto pr-1">
+                  {(() => {
+                    const inp = "px-3 py-2.5 rounded-lg border border-[#ddd] text-[12px] focus:outline-none focus:border-[#6366f1] focus:ring-1 focus:ring-[#6366f1]/20 transition-colors";
+                    const sel = "px-3 py-2.5 rounded-lg border border-[#ddd] text-[12px] focus:outline-none focus:border-[#6366f1] focus:ring-1 focus:ring-[#6366f1]/20 transition-colors bg-white";
+                    const secH = "text-[11px] font-bold text-[#1a1a2e] uppercase tracking-wider mb-2.5 flex items-center gap-1.5";
+                    const fileZone = "border-2 border-dashed border-[#d4d0f0] rounded-xl p-3 cursor-pointer hover:border-[#6366f1] hover:bg-[#f8f7ff] transition-colors text-center";
+                    const filePill = "inline-flex items-center gap-1 text-[9px] bg-[#e8e6ff] text-[#6366f1] rounded-full px-2 py-0.5 font-medium";
+                    const renderFiles = (files: File[], key: string, setter: (fn: (prev: any) => any) => void) => files.length > 0 && (
+                      <div className="mt-2 flex flex-wrap gap-1 justify-center">
+                        {files.map((f, i) => (
+                          <span key={i} className={filePill}>
+                            {f.name.length > 18 ? f.name.slice(0, 15) + "..." : f.name}
+                            <button onClick={(e) => { e.stopPropagation(); setter((ff: any) => ({ ...ff, [key]: ff[key].filter((_: any, j: number) => j !== i) })); }} className="hover:text-red-500">&times;</button>
+                          </span>
+                        ))}
+                      </div>
+                    );
+                    const renderSingle = (file: File | null, key: string) => file && (
+                      <div className="mt-2 flex justify-center">
+                        <span className={filePill}>
+                          {file.name.length > 22 ? file.name.slice(0, 19) + "..." : file.name}
+                          <button onClick={(e) => { e.stopPropagation(); setFundingFiles(f => ({ ...f, [key]: null })); }} className="hover:text-red-500">&times;</button>
+                        </span>
+                      </div>
+                    );
+                    const ssnFormat = (v: string) => {
+                      const d = v.replace(/\D/g, "").slice(0, 9);
+                      if (d.length <= 3) return d;
+                      if (d.length <= 5) return d.slice(0, 3) + "-" + d.slice(3);
+                      return d.slice(0, 3) + "-" + d.slice(3, 5) + "-" + d.slice(5);
+                    };
+                    return (<>
+                      <div>
+                        <h3 className={secH}>
+                          <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="4" r="2.5" stroke="#6366f1" strokeWidth="1.2"/><path d="M1.5 11c0-2.5 2-4 4.5-4s4.5 1.5 4.5 4" stroke="#6366f1" strokeWidth="1.2" strokeLinecap="round"/></svg>
+                          Personal Information
+                        </h3>
+                        <div className="grid grid-cols-6 gap-2.5">
+                          <input value={fundingForm.firstName} onChange={e => setFundingForm(f => ({ ...f, firstName: e.target.value }))} placeholder="First Name *" className={`col-span-3 ${inp}`} data-testid="input-funding-firstname" />
+                          <input value={fundingForm.lastName} onChange={e => setFundingForm(f => ({ ...f, lastName: e.target.value }))} placeholder="Last Name *" className={`col-span-3 ${inp}`} data-testid="input-funding-lastname" />
+                          <input value={fundingForm.email} onChange={e => setFundingForm(f => ({ ...f, email: e.target.value }))} placeholder="Email Address *" type="email" className={`col-span-6 ${inp}`} data-testid="input-funding-email" />
+                          <input value={fundingForm.phone} onChange={e => setFundingForm(f => ({ ...f, phone: e.target.value }))} placeholder="Phone Number *" type="tel" className={`col-span-3 ${inp}`} data-testid="input-funding-phone" />
+                          <input value={fundingForm.dob} onChange={e => setFundingForm(f => ({ ...f, dob: e.target.value }))} placeholder="Date of Birth" type="date" className={`col-span-3 ${inp}`} data-testid="input-funding-dob" />
+                          <input value={fundingForm.ssn} onChange={e => setFundingForm(f => ({ ...f, ssn: ssnFormat(e.target.value) }))} placeholder="Social Security # (XXX-XX-XXXX)" maxLength={11} className={`col-span-6 ${inp}`} data-testid="input-funding-ssn" />
                         </div>
-                        <p className="text-[10px] text-[#999]">PDF, JPG, or PNG — Last 3 months recommended</p>
-                        {fundingFiles.bankStatements.length > 0 && (
-                          <div className="mt-2 flex flex-wrap gap-1 justify-center">
-                            {fundingFiles.bankStatements.map((f, i) => (
-                              <span key={i} className="inline-flex items-center gap-1 text-[9px] bg-[#e8e6ff] text-[#6366f1] rounded-full px-2 py-0.5 font-medium">
-                                {f.name.length > 20 ? f.name.slice(0, 17) + "..." : f.name}
-                                <button onClick={(e) => { e.stopPropagation(); setFundingFiles(ff => ({ ...ff, bankStatements: ff.bankStatements.filter((_, j) => j !== i) })); }} className="hover:text-red-500">&times;</button>
-                              </span>
-                            ))}
-                          </div>
-                        )}
                       </div>
 
-                      <input ref={fundingTaxRef} type="file" accept=".pdf,.jpg,.jpeg,.png" multiple className="hidden" onChange={(e) => { if (e.target.files) setFundingFiles(f => ({ ...f, taxReturns: [...f.taxReturns, ...Array.from(e.target.files!)] })); }} data-testid="input-funding-tax-files" />
-                      <div
-                        onClick={() => fundingTaxRef.current?.click()}
-                        className="border-2 border-dashed border-[#d4d0f0] rounded-xl p-4 cursor-pointer hover:border-[#6366f1] hover:bg-[#f8f7ff] transition-colors text-center"
-                        data-testid="upload-zone-tax"
-                      >
-                        <div className="flex items-center justify-center gap-2 mb-1">
-                          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 2h5l4 4v8a1 1 0 01-1 1H4a1 1 0 01-1-1V3a1 1 0 011-1z" stroke="#6366f1" strokeWidth="1.3" strokeLinejoin="round"/><path d="M9 2v4h4" stroke="#6366f1" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                          <span className="text-[12px] font-semibold text-[#6366f1]">Tax Returns</span>
+                      <div>
+                        <h3 className={secH}>
+                          <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M1.5 10.5V3.5l5-2 5 2v7l-5-2-5 2z" stroke="#6366f1" strokeWidth="1.2" strokeLinejoin="round"/></svg>
+                          Home Address
+                        </h3>
+                        <div className="grid grid-cols-6 gap-2.5">
+                          <input value={fundingForm.address} onChange={e => setFundingForm(f => ({ ...f, address: e.target.value }))} placeholder="Street Address" className={`col-span-6 ${inp}`} data-testid="input-funding-address" />
+                          <input value={fundingForm.city} onChange={e => setFundingForm(f => ({ ...f, city: e.target.value }))} placeholder="City" className={`col-span-3 ${inp}`} data-testid="input-funding-city" />
+                          <input value={fundingForm.state} onChange={e => setFundingForm(f => ({ ...f, state: e.target.value }))} placeholder="State" className={`col-span-1 ${inp}`} data-testid="input-funding-state" />
+                          <input value={fundingForm.zip} onChange={e => setFundingForm(f => ({ ...f, zip: e.target.value }))} placeholder="ZIP" className={`col-span-2 ${inp}`} data-testid="input-funding-zip" />
+                          <input value={fundingForm.yearsAtAddress} onChange={e => setFundingForm(f => ({ ...f, yearsAtAddress: e.target.value }))} placeholder="Years at Address" type="number" className={`col-span-3 ${inp}`} data-testid="input-funding-years-address" />
+                          <select value={fundingForm.homeOwnership} onChange={e => setFundingForm(f => ({ ...f, homeOwnership: e.target.value }))} className={`col-span-3 ${sel}`} data-testid="select-funding-home-ownership">
+                            <option value="">Home Ownership</option>
+                            <option value="Own">Own</option>
+                            <option value="Rent">Rent</option>
+                            <option value="Other">Other</option>
+                          </select>
                         </div>
-                        <p className="text-[10px] text-[#999]">PDF or image — Most recent filing</p>
-                        {fundingFiles.taxReturns.length > 0 && (
-                          <div className="mt-2 flex flex-wrap gap-1 justify-center">
-                            {fundingFiles.taxReturns.map((f, i) => (
-                              <span key={i} className="inline-flex items-center gap-1 text-[9px] bg-[#e8e6ff] text-[#6366f1] rounded-full px-2 py-0.5 font-medium">
-                                {f.name.length > 20 ? f.name.slice(0, 17) + "..." : f.name}
-                                <button onClick={(e) => { e.stopPropagation(); setFundingFiles(ff => ({ ...ff, taxReturns: ff.taxReturns.filter((_, j) => j !== i) })); }} className="hover:text-red-500">&times;</button>
-                              </span>
-                            ))}
-                          </div>
-                        )}
                       </div>
 
-                      <input ref={fundingCreditRef} type="file" accept=".pdf,.txt,.csv" className="hidden" onChange={(e) => { if (e.target.files?.[0]) setFundingFiles(f => ({ ...f, creditReport: e.target.files![0] })); }} data-testid="input-funding-credit-file" />
-                      <div
-                        onClick={() => fundingCreditRef.current?.click()}
-                        className="border-2 border-dashed border-[#d4d0f0] rounded-xl p-4 cursor-pointer hover:border-[#6366f1] hover:bg-[#f8f7ff] transition-colors text-center"
-                        data-testid="upload-zone-credit"
-                      >
-                        <div className="flex items-center justify-center gap-2 mb-1">
-                          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="2" y="3" width="12" height="10" rx="1.5" stroke="#6366f1" strokeWidth="1.3"/><path d="M2 6.5h12M5 9.5h3M9 9.5h2" stroke="#6366f1" strokeWidth="1" strokeLinecap="round"/></svg>
-                          <span className="text-[12px] font-semibold text-[#6366f1]">Credit Report</span>
+                      <div>
+                        <h3 className={secH}>
+                          <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><rect x="1" y="2" width="10" height="8" rx="1.5" stroke="#6366f1" strokeWidth="1.2"/><path d="M4 2V1M8 2V1M1 4.5h10" stroke="#6366f1" strokeWidth="1" strokeLinecap="round"/></svg>
+                          Business Information
+                        </h3>
+                        <div className="grid grid-cols-6 gap-2.5">
+                          <input value={fundingForm.businessName} onChange={e => setFundingForm(f => ({ ...f, businessName: e.target.value }))} placeholder="Legal Business Name *" className={`col-span-3 ${inp}`} data-testid="input-funding-bizname" />
+                          <input value={fundingForm.dba} onChange={e => setFundingForm(f => ({ ...f, dba: e.target.value }))} placeholder="DBA (if different)" className={`col-span-3 ${inp}`} data-testid="input-funding-dba" />
+                          <input value={fundingForm.businessAddress} onChange={e => setFundingForm(f => ({ ...f, businessAddress: e.target.value }))} placeholder="Business Street Address" className={`col-span-6 ${inp}`} data-testid="input-funding-bizaddress" />
+                          <input value={fundingForm.businessCity} onChange={e => setFundingForm(f => ({ ...f, businessCity: e.target.value }))} placeholder="City" className={`col-span-3 ${inp}`} data-testid="input-funding-bizcity" />
+                          <input value={fundingForm.businessState} onChange={e => setFundingForm(f => ({ ...f, businessState: e.target.value }))} placeholder="State" className={`col-span-1 ${inp}`} data-testid="input-funding-bizstate" />
+                          <input value={fundingForm.businessZip} onChange={e => setFundingForm(f => ({ ...f, businessZip: e.target.value }))} placeholder="ZIP" className={`col-span-2 ${inp}`} data-testid="input-funding-bizzip" />
+                          <input value={fundingForm.businessPhone} onChange={e => setFundingForm(f => ({ ...f, businessPhone: e.target.value }))} placeholder="Business Phone" type="tel" className={`col-span-3 ${inp}`} data-testid="input-funding-bizphone" />
+                          <input value={fundingForm.businessEmail} onChange={e => setFundingForm(f => ({ ...f, businessEmail: e.target.value }))} placeholder="Business Email" type="email" className={`col-span-3 ${inp}`} data-testid="input-funding-bizemail" />
+                          <input value={fundingForm.ein} onChange={e => setFundingForm(f => ({ ...f, ein: e.target.value }))} placeholder="EIN / Tax ID" className={`col-span-3 ${inp}`} data-testid="input-funding-ein" />
+                          <select value={fundingForm.entityType} onChange={e => setFundingForm(f => ({ ...f, entityType: e.target.value }))} className={`col-span-3 ${sel}`} data-testid="select-funding-entity">
+                            <option value="">Entity Type</option>
+                            <option value="Sole Proprietorship">Sole Proprietorship</option>
+                            <option value="LLC">LLC</option>
+                            <option value="Corporation">Corporation</option>
+                            <option value="S-Corporation">S-Corporation</option>
+                            <option value="Partnership">Partnership</option>
+                            <option value="Non-Profit">Non-Profit</option>
+                          </select>
+                          <input value={fundingForm.industry} onChange={e => setFundingForm(f => ({ ...f, industry: e.target.value }))} placeholder="Industry / SIC Code" className={`col-span-3 ${inp}`} data-testid="input-funding-industry" />
+                          <input value={fundingForm.dateEstablished} onChange={e => setFundingForm(f => ({ ...f, dateEstablished: e.target.value }))} placeholder="Date Established" type="date" className={`col-span-3 ${inp}`} data-testid="input-funding-established" />
+                          <input value={fundingForm.numEmployees} onChange={e => setFundingForm(f => ({ ...f, numEmployees: e.target.value }))} placeholder="# of Employees" type="number" className={`col-span-3 ${inp}`} data-testid="input-funding-employees" />
+                          <input value={fundingForm.website} onChange={e => setFundingForm(f => ({ ...f, website: e.target.value }))} placeholder="Website URL" className={`col-span-3 ${inp}`} data-testid="input-funding-website" />
                         </div>
-                        <p className="text-[10px] text-[#999]">PDF, TXT, or CSV from any bureau</p>
-                        {fundingFiles.creditReport && (
-                          <div className="mt-2 flex justify-center">
-                            <span className="inline-flex items-center gap-1 text-[9px] bg-[#e8e6ff] text-[#6366f1] rounded-full px-2 py-0.5 font-medium">
-                              {fundingFiles.creditReport.name.length > 25 ? fundingFiles.creditReport.name.slice(0, 22) + "..." : fundingFiles.creditReport.name}
-                              <button onClick={(e) => { e.stopPropagation(); setFundingFiles(f => ({ ...f, creditReport: null })); }} className="hover:text-red-500">&times;</button>
-                            </span>
-                          </div>
-                        )}
                       </div>
-                    </div>
-                  </div>
+
+                      <div>
+                        <h3 className={secH}>
+                          <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 1l2 3h3l-2.5 2.5L9.5 10 6 8 2.5 10l1-3.5L1 4h3z" stroke="#6366f1" strokeWidth="1.2" strokeLinejoin="round"/></svg>
+                          Ownership Details
+                        </h3>
+                        <div className="grid grid-cols-2 gap-2.5">
+                          <input value={fundingForm.ownershipPct} onChange={e => setFundingForm(f => ({ ...f, ownershipPct: e.target.value }))} placeholder="Ownership %" type="number" className={`col-span-1 ${inp}`} data-testid="input-funding-ownership" />
+                          <input value={fundingForm.titlePosition} onChange={e => setFundingForm(f => ({ ...f, titlePosition: e.target.value }))} placeholder="Title / Position" className={`col-span-1 ${inp}`} data-testid="input-funding-title" />
+                        </div>
+                      </div>
+
+                      <div>
+                        <h3 className={secH}>
+                          <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><rect x="1.5" y="3" width="9" height="6.5" rx="1" stroke="#6366f1" strokeWidth="1.2"/><path d="M1.5 5h9" stroke="#6366f1" strokeWidth="1.2"/></svg>
+                          Financial Details
+                        </h3>
+                        <div className="grid grid-cols-6 gap-2.5">
+                          <input value={fundingForm.employerName} onChange={e => setFundingForm(f => ({ ...f, employerName: e.target.value }))} placeholder="Employer Name" className={`col-span-6 ${inp}`} data-testid="input-funding-employer" />
+                          <input value={fundingForm.annualIncome} onChange={e => setFundingForm(f => ({ ...f, annualIncome: e.target.value }))} placeholder="Personal Annual Income" type="number" className={`col-span-3 ${inp}`} data-testid="input-funding-income" />
+                          <input value={fundingForm.monthlyHousing} onChange={e => setFundingForm(f => ({ ...f, monthlyHousing: e.target.value }))} placeholder="Monthly Housing Cost" type="number" className={`col-span-3 ${inp}`} data-testid="input-funding-housing" />
+                          <input value={fundingForm.annualBusinessRevenue} onChange={e => setFundingForm(f => ({ ...f, annualBusinessRevenue: e.target.value }))} placeholder="Annual Business Revenue" type="number" className={`col-span-3 ${inp}`} data-testid="input-funding-biz-revenue" />
+                          <input value={fundingForm.monthlyBusinessRevenue} onChange={e => setFundingForm(f => ({ ...f, monthlyBusinessRevenue: e.target.value }))} placeholder="Monthly Business Revenue" type="number" className={`col-span-3 ${inp}`} data-testid="input-funding-monthly-biz-revenue" />
+                          <input value={fundingForm.desiredLoanAmount} onChange={e => setFundingForm(f => ({ ...f, desiredLoanAmount: e.target.value }))} placeholder="Desired Loan Amount ($)" type="number" className={`col-span-3 ${inp}`} data-testid="input-funding-loan-amount" />
+                          <select value={fundingForm.purposeOfFunds} onChange={e => setFundingForm(f => ({ ...f, purposeOfFunds: e.target.value }))} className={`col-span-3 ${sel}`} data-testid="select-funding-purpose">
+                            <option value="">Purpose of Funds</option>
+                            <option value="Working Capital">Working Capital</option>
+                            <option value="Equipment">Equipment</option>
+                            <option value="Expansion">Expansion</option>
+                            <option value="Inventory">Inventory</option>
+                            <option value="Debt Refinancing">Debt Refinancing</option>
+                            <option value="Real Estate">Real Estate</option>
+                            <option value="Other">Other</option>
+                          </select>
+                          <input value={fundingForm.existingDebts} onChange={e => setFundingForm(f => ({ ...f, existingDebts: e.target.value }))} placeholder="Existing Business Debts ($)" type="number" className={`col-span-3 ${inp}`} data-testid="input-funding-debts" />
+                          <input value={fundingForm.businessBankName} onChange={e => setFundingForm(f => ({ ...f, businessBankName: e.target.value }))} placeholder="Business Bank Name" className={`col-span-3 ${inp}`} data-testid="input-funding-bank-name" />
+                        </div>
+                      </div>
+
+                      <div>
+                        <h3 className={secH}>
+                          <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 2h8v8H2z" stroke="#6366f1" strokeWidth="1.2" strokeLinejoin="round"/><path d="M5 2v8M2 5h8" stroke="#6366f1" strokeWidth="0.8"/></svg>
+                          Document Upload Center
+                        </h3>
+                        <div className="space-y-2">
+                          <input ref={fundingBizBankRef} type="file" accept=".pdf,.jpg,.jpeg,.png" multiple className="hidden" onChange={(e) => { if (e.target.files) setFundingFiles(f => ({ ...f, bizBankStatements: [...f.bizBankStatements, ...Array.from(e.target.files!)] })); }} data-testid="input-funding-bizbankfiles" />
+                          <div onClick={() => fundingBizBankRef.current?.click()} className={fileZone} data-testid="upload-zone-bizbank">
+                            <span className="text-[11px] font-semibold text-[#6366f1]">Business Bank Statements</span>
+                            <p className="text-[9px] text-[#999]">Last 3 months — PDF, JPG, PNG</p>
+                            {renderFiles(fundingFiles.bizBankStatements, "bizBankStatements", setFundingFiles)}
+                          </div>
+
+                          <input ref={fundingPersBankRef} type="file" accept=".pdf,.jpg,.jpeg,.png" multiple className="hidden" onChange={(e) => { if (e.target.files) setFundingFiles(f => ({ ...f, personalBankStatements: [...f.personalBankStatements, ...Array.from(e.target.files!)] })); }} data-testid="input-funding-persbankfiles" />
+                          <div onClick={() => fundingPersBankRef.current?.click()} className={fileZone} data-testid="upload-zone-persbank">
+                            <span className="text-[11px] font-semibold text-[#6366f1]">Personal Bank Statements</span>
+                            <p className="text-[9px] text-[#999]">Last 3 months — PDF, JPG, PNG</p>
+                            {renderFiles(fundingFiles.personalBankStatements, "personalBankStatements", setFundingFiles)}
+                          </div>
+
+                          <input ref={fundingBizTaxRef} type="file" accept=".pdf,.jpg,.jpeg,.png" multiple className="hidden" onChange={(e) => { if (e.target.files) setFundingFiles(f => ({ ...f, bizTaxReturns: [...f.bizTaxReturns, ...Array.from(e.target.files!)] })); }} data-testid="input-funding-biztaxfiles" />
+                          <div onClick={() => fundingBizTaxRef.current?.click()} className={fileZone} data-testid="upload-zone-biztax">
+                            <span className="text-[11px] font-semibold text-[#6366f1]">Business Tax Returns</span>
+                            <p className="text-[9px] text-[#999]">Most recent filing — PDF or image</p>
+                            {renderFiles(fundingFiles.bizTaxReturns, "bizTaxReturns", setFundingFiles)}
+                          </div>
+
+                          <input ref={fundingPersTaxRef} type="file" accept=".pdf,.jpg,.jpeg,.png" multiple className="hidden" onChange={(e) => { if (e.target.files) setFundingFiles(f => ({ ...f, personalTaxReturns: [...f.personalTaxReturns, ...Array.from(e.target.files!)] })); }} data-testid="input-funding-perstaxfiles" />
+                          <div onClick={() => fundingPersTaxRef.current?.click()} className={fileZone} data-testid="upload-zone-perstax">
+                            <span className="text-[11px] font-semibold text-[#6366f1]">Personal Tax Returns</span>
+                            <p className="text-[9px] text-[#999]">Most recent filing — PDF or image</p>
+                            {renderFiles(fundingFiles.personalTaxReturns, "personalTaxReturns", setFundingFiles)}
+                          </div>
+
+                          <input ref={fundingPLRef} type="file" accept=".pdf,.jpg,.jpeg,.png,.xlsx,.csv" multiple className="hidden" onChange={(e) => { if (e.target.files) setFundingFiles(f => ({ ...f, profitLoss: [...f.profitLoss, ...Array.from(e.target.files!)] })); }} data-testid="input-funding-plfiles" />
+                          <div onClick={() => fundingPLRef.current?.click()} className={fileZone} data-testid="upload-zone-pl">
+                            <span className="text-[11px] font-semibold text-[#6366f1]">Profit & Loss Statement</span>
+                            <p className="text-[9px] text-[#999]">Year-to-date — PDF, Excel, CSV</p>
+                            {renderFiles(fundingFiles.profitLoss, "profitLoss", setFundingFiles)}
+                          </div>
+
+                          <input ref={fundingBSRef} type="file" accept=".pdf,.jpg,.jpeg,.png,.xlsx,.csv" multiple className="hidden" onChange={(e) => { if (e.target.files) setFundingFiles(f => ({ ...f, balanceSheet: [...f.balanceSheet, ...Array.from(e.target.files!)] })); }} data-testid="input-funding-bsfiles" />
+                          <div onClick={() => fundingBSRef.current?.click()} className={fileZone} data-testid="upload-zone-bs">
+                            <span className="text-[11px] font-semibold text-[#6366f1]">Balance Sheet</span>
+                            <p className="text-[9px] text-[#999]">Most recent — PDF, Excel, CSV</p>
+                            {renderFiles(fundingFiles.balanceSheet, "balanceSheet", setFundingFiles)}
+                          </div>
+
+                          <input ref={fundingBizLicRef} type="file" accept=".pdf,.jpg,.jpeg,.png" multiple className="hidden" onChange={(e) => { if (e.target.files) setFundingFiles(f => ({ ...f, bizLicense: [...f.bizLicense, ...Array.from(e.target.files!)] })); }} data-testid="input-funding-bizlicfiles" />
+                          <div onClick={() => fundingBizLicRef.current?.click()} className={fileZone} data-testid="upload-zone-bizlic">
+                            <span className="text-[11px] font-semibold text-[#6366f1]">Business License / Articles of Incorporation</span>
+                            <p className="text-[9px] text-[#999]">PDF or image</p>
+                            {renderFiles(fundingFiles.bizLicense, "bizLicense", setFundingFiles)}
+                          </div>
+
+                          <input ref={fundingVoidedRef} type="file" accept=".pdf,.jpg,.jpeg,.png" className="hidden" onChange={(e) => { if (e.target.files?.[0]) setFundingFiles(f => ({ ...f, voidedCheck: e.target.files![0] })); }} data-testid="input-funding-voidedfile" />
+                          <div onClick={() => fundingVoidedRef.current?.click()} className={fileZone} data-testid="upload-zone-voided">
+                            <span className="text-[11px] font-semibold text-[#6366f1]">Voided Business Check</span>
+                            <p className="text-[9px] text-[#999]">PDF or image</p>
+                            {renderSingle(fundingFiles.voidedCheck, "voidedCheck")}
+                          </div>
+
+                          <input ref={fundingCreditRef} type="file" accept=".pdf,.txt,.csv" className="hidden" onChange={(e) => { if (e.target.files?.[0]) setFundingFiles(f => ({ ...f, creditReport: e.target.files![0] })); }} data-testid="input-funding-credit-file" />
+                          <div onClick={() => fundingCreditRef.current?.click()} className={fileZone} data-testid="upload-zone-credit">
+                            <span className="text-[11px] font-semibold text-[#6366f1]">Credit Report</span>
+                            <p className="text-[9px] text-[#999]">PDF, TXT, or CSV from any bureau</p>
+                            {renderSingle(fundingFiles.creditReport, "creditReport")}
+                          </div>
+                        </div>
+                      </div>
+                    </>);
+                  })()}
 
                   <button
                     onClick={async () => {
@@ -5300,6 +5416,7 @@ export default function LandingPage() {
                       if (!fundingForm.lastName) missing.push("Last Name");
                       if (!fundingForm.email) missing.push("Email");
                       if (!fundingForm.phone) missing.push("Phone");
+                      if (!fundingForm.businessName) missing.push("Business Name");
                       if (missing.length > 0) {
                         alert(`Please fill in: ${missing.join(", ")}`);
                         return;
@@ -5307,9 +5424,15 @@ export default function LandingPage() {
                       setIsSubmittingFunding(true);
                       try {
                         const fileNames: string[] = [];
-                        fundingFiles.bankStatements.forEach(f => fileNames.push(`[Bank] ${f.name}`));
-                        fundingFiles.taxReturns.forEach(f => fileNames.push(`[Tax] ${f.name}`));
-                        if (fundingFiles.creditReport) fileNames.push(`[Credit] ${fundingFiles.creditReport.name}`);
+                        fundingFiles.bizBankStatements.forEach(f => fileNames.push(`[Biz Bank] ${f.name}`));
+                        fundingFiles.personalBankStatements.forEach(f => fileNames.push(`[Pers Bank] ${f.name}`));
+                        fundingFiles.bizTaxReturns.forEach(f => fileNames.push(`[Biz Tax] ${f.name}`));
+                        fundingFiles.personalTaxReturns.forEach(f => fileNames.push(`[Pers Tax] ${f.name}`));
+                        fundingFiles.profitLoss.forEach(f => fileNames.push(`[P&L] ${f.name}`));
+                        fundingFiles.balanceSheet.forEach(f => fileNames.push(`[Balance Sheet] ${f.name}`));
+                        fundingFiles.bizLicense.forEach(f => fileNames.push(`[Biz License] ${f.name}`));
+                        if (fundingFiles.voidedCheck) fileNames.push(`[Voided Check] ${fundingFiles.voidedCheck.name}`);
+                        if (fundingFiles.creditReport) fileNames.push(`[Credit Report] ${fundingFiles.creditReport.name}`);
 
                         const res = await fetch("/api/funding-application", {
                           method: "POST",
@@ -5330,8 +5453,8 @@ export default function LandingPage() {
                         setFundingStep("closed");
                         setTermsAccepted(false);
                         setSignatureDataUrl(null);
-                        setFundingForm({ firstName: "", lastName: "", email: "", phone: "", address: "", city: "", state: "", zip: "", ssn4: "", dob: "", employerName: "", annualIncome: "", monthlyHousing: "" });
-                        setFundingFiles({ bankStatements: [], taxReturns: [], creditReport: null });
+                        setFundingForm(emptyFundingForm);
+                        setFundingFiles(emptyFundingFiles);
                       } catch (err) {
                         alert("Application saved. Our team will follow up shortly.");
                         setFundingStep("closed");

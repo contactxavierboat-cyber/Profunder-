@@ -8985,37 +8985,81 @@ Include: sender placeholder [YOUR NAME/ADDRESS], date, bureau address, account d
 
       const signatureBase64 = signatureDataUrl.replace(/^data:image\/\w+;base64,/, "");
 
+      const nr = (v: string) => v || "Not provided";
+      const dollar = (v: string) => v ? "$" + Number(v).toLocaleString() : "Not provided";
+      const maskedSsn = form.ssn ? "***-**-" + form.ssn.replace(/\D/g, "").slice(-4) : "Not provided";
+      const secHead = (title: string) => `<h2 style="font-size: 15px; color: #1a1a2e; border-bottom: 1px solid #eee; padding-bottom: 8px; margin-top: 20px;">${title}</h2>`;
+      const row = (label: string, val: string) => `<tr><td style="padding: 5px 0; color: #888; width: 160px; font-size: 12px;">${label}</td><td style="padding: 5px 0; font-size: 12px;">${val}</td></tr>`;
+      const tbl = (rows: string) => `<table style="width: 100%; border-collapse: collapse;">${rows}</table>`;
+
       const htmlBody = `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        <div style="font-family: Arial, sans-serif; max-width: 640px; margin: 0 auto;">
           <div style="background: #1a1a2e; color: white; padding: 20px; border-radius: 8px 8px 0 0;">
-            <h1 style="margin: 0; font-size: 20px;">New Funding Application</h1>
+            <h1 style="margin: 0; font-size: 20px;">New Business Funding Application</h1>
             <p style="margin: 5px 0 0; font-size: 12px; opacity: 0.7;">Submitted ${new Date().toLocaleString()}</p>
           </div>
           <div style="padding: 20px; border: 1px solid #eee; border-top: none;">
-            <h2 style="font-size: 16px; color: #1a1a2e; border-bottom: 1px solid #eee; padding-bottom: 8px;">Personal Information</h2>
-            <table style="width: 100%; font-size: 13px; border-collapse: collapse;">
-              <tr><td style="padding: 6px 0; color: #888; width: 140px;">Name</td><td style="padding: 6px 0; font-weight: 600;">${form.firstName} ${form.lastName}</td></tr>
-              <tr><td style="padding: 6px 0; color: #888;">Email</td><td style="padding: 6px 0;">${form.email}</td></tr>
-              <tr><td style="padding: 6px 0; color: #888;">Phone</td><td style="padding: 6px 0;">${form.phone}</td></tr>
-              <tr><td style="padding: 6px 0; color: #888;">Date of Birth</td><td style="padding: 6px 0;">${form.dob || "Not provided"}</td></tr>
-              <tr><td style="padding: 6px 0; color: #888;">Last 4 SSN</td><td style="padding: 6px 0;">${form.ssn4 ? "****" + form.ssn4 : "Not provided"}</td></tr>
-            </table>
+            ${secHead("Personal Information")}
+            ${tbl(
+              row("Name", `<strong>${form.firstName} ${form.lastName}</strong>`) +
+              row("Email", form.email) +
+              row("Phone", form.phone) +
+              row("Date of Birth", nr(form.dob)) +
+              row("SSN", maskedSsn)
+            )}
 
-            <h2 style="font-size: 16px; color: #1a1a2e; border-bottom: 1px solid #eee; padding-bottom: 8px; margin-top: 20px;">Address</h2>
-            <table style="width: 100%; font-size: 13px; border-collapse: collapse;">
-              <tr><td style="padding: 6px 0; color: #888; width: 140px;">Street</td><td style="padding: 6px 0;">${form.address || "Not provided"}</td></tr>
-              <tr><td style="padding: 6px 0; color: #888;">City, State ZIP</td><td style="padding: 6px 0;">${[form.city, form.state, form.zip].filter(Boolean).join(", ") || "Not provided"}</td></tr>
-            </table>
+            ${secHead("Home Address")}
+            ${tbl(
+              row("Street", nr(form.address)) +
+              row("City, State ZIP", [form.city, form.state, form.zip].filter(Boolean).join(", ") || "Not provided") +
+              row("Years at Address", nr(form.yearsAtAddress)) +
+              row("Home Ownership", nr(form.homeOwnership))
+            )}
 
-            <h2 style="font-size: 16px; color: #1a1a2e; border-bottom: 1px solid #eee; padding-bottom: 8px; margin-top: 20px;">Financial Details</h2>
-            <table style="width: 100%; font-size: 13px; border-collapse: collapse;">
-              <tr><td style="padding: 6px 0; color: #888; width: 140px;">Employer</td><td style="padding: 6px 0;">${form.employerName || "Not provided"}</td></tr>
-              <tr><td style="padding: 6px 0; color: #888;">Annual Income</td><td style="padding: 6px 0;">${form.annualIncome ? "$" + Number(form.annualIncome).toLocaleString() : "Not provided"}</td></tr>
-              <tr><td style="padding: 6px 0; color: #888;">Monthly Housing</td><td style="padding: 6px 0;">${form.monthlyHousing ? "$" + Number(form.monthlyHousing).toLocaleString() : "Not provided"}</td></tr>
-            </table>
+            ${secHead("Business Information")}
+            ${tbl(
+              row("Legal Business Name", `<strong>${nr(form.businessName)}</strong>`) +
+              row("DBA", nr(form.dba)) +
+              row("Business Address", nr(form.businessAddress)) +
+              row("City, State ZIP", [form.businessCity, form.businessState, form.businessZip].filter(Boolean).join(", ") || "Not provided") +
+              row("Business Phone", nr(form.businessPhone)) +
+              row("Business Email", nr(form.businessEmail)) +
+              row("EIN / Tax ID", nr(form.ein)) +
+              row("Entity Type", nr(form.entityType)) +
+              row("Industry", nr(form.industry)) +
+              row("Date Established", nr(form.dateEstablished)) +
+              row("# of Employees", nr(form.numEmployees)) +
+              row("Website", nr(form.website))
+            )}
 
-            <h2 style="font-size: 16px; color: #1a1a2e; border-bottom: 1px solid #eee; padding-bottom: 8px; margin-top: 20px;">Broker Authorization & Signature</h2>
-            <p style="font-size: 12px; color: #555; line-height: 1.6;">The applicant has signed the Broker Funding Agreement and Terms of Service, authorizing Profundr to act as broker on their behalf for securing funding. Terms accepted at: ${termsAcceptedAt || new Date().toISOString()}</p>
+            ${secHead("Ownership Details")}
+            ${tbl(
+              row("Ownership %", form.ownershipPct ? form.ownershipPct + "%" : "Not provided") +
+              row("Title / Position", nr(form.titlePosition))
+            )}
+
+            ${secHead("Financial Details")}
+            ${tbl(
+              row("Employer", nr(form.employerName)) +
+              row("Personal Annual Income", dollar(form.annualIncome)) +
+              row("Monthly Housing Cost", dollar(form.monthlyHousing)) +
+              row("Annual Business Revenue", dollar(form.annualBusinessRevenue)) +
+              row("Monthly Business Revenue", dollar(form.monthlyBusinessRevenue)) +
+              row("Desired Loan Amount", dollar(form.desiredLoanAmount)) +
+              row("Purpose of Funds", nr(form.purposeOfFunds)) +
+              row("Existing Business Debts", dollar(form.existingDebts)) +
+              row("Business Bank Name", nr(form.businessBankName))
+            )}
+
+            ${req.body.fileNames && req.body.fileNames.length > 0 ? `
+            ${secHead("Uploaded Documents")}
+            <ul style="font-size: 12px; color: #555; padding-left: 20px;">
+              ${req.body.fileNames.map((n: string) => `<li style="padding: 2px 0;">${n}</li>`).join("")}
+            </ul>
+            ` : ""}
+
+            ${secHead("Broker Authorization & Signature")}
+            <p style="font-size: 11px; color: #555; line-height: 1.6;">The applicant has signed the Broker Funding Agreement and Terms of Service, authorizing Profundr to act as broker on their behalf for securing funding. Terms accepted at: ${termsAcceptedAt || new Date().toISOString()}</p>
             <div style="margin-top: 10px; padding: 10px; border: 1px solid #ddd; border-radius: 6px; background: #fafafa;">
               <p style="font-size: 10px; color: #999; margin: 0 0 5px;">Applicant Signature:</p>
               <img src="cid:signature" style="max-width: 300px; height: auto;" />
@@ -9036,11 +9080,8 @@ Include: sender placeholder [YOUR NAME/ADDRESS], date, bureau address, account d
         },
       ];
 
-      if (req.body.fileNames && req.body.fileNames.length > 0) {
-        for (const fileName of req.body.fileNames) {
-          attachments.push({ filename: fileName, content: "See uploaded documents in platform", encoding: "utf-8" });
-        }
-      }
+
+
 
       await transporter.sendMail({
         from: process.env.GMAIL_USER || "contactxavierboat@gmail.com",
