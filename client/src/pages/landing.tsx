@@ -1977,7 +1977,7 @@ function CapitalSimulator({ aisReport }: { aisReport: MissionData }) {
   const hasChanges = simUtil !== baseUtil || simInqRemove > 0 || simAddTradelines > 0 || simAgeBoost > 0;
 
   return (
-    <div className="rounded-lg border border-[#e8e8e8] p-3" data-testid="capital-simulator">
+    <div className="pb-3 mb-3 border-b border-[#f0f0f0]" data-testid="capital-simulator">
       <p className="text-[10px] text-[#111] font-medium tracking-wide mb-3">Capital Simulator</p>
 
       <div className="space-y-3 mb-3">
@@ -2454,7 +2454,7 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
 
       <div className="w-full h-px bg-[#f0f0f0] mt-2"></div>
 
-      <div className="flex-1 overflow-y-auto px-3 py-3 bg-[#fafafa]">
+      <div className="flex-1 overflow-y-auto px-4 py-3 bg-white">
 
         {panelTab === "command" && (<>
 
@@ -2579,7 +2579,7 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
             const mn = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
             return (<>
-              <div className="rounded-lg border border-[#e8e8e8] bg-white p-3" data-testid="denial-simulation">
+              <div className="pb-3 mb-3 border-b border-[#f0f0f0]" data-testid="denial-simulation">
                 <div className="flex items-center justify-between mb-2.5">
                   <p className="text-[10px] text-[#111] font-medium tracking-wide">If You Applied Today</p>
                   <span className="text-[11px] font-semibold" style={{ color: probColor, fontVariantNumeric: "tabular-nums" }}>{approvalProb}%</span>
@@ -2612,7 +2612,7 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
                 </div>
               </div>
 
-              <div className="rounded-lg border border-[#e8e8e8] bg-white p-3" data-testid="underwriting-risk-signals">
+              <div className="pb-3 mb-3 border-b border-[#f0f0f0]" data-testid="underwriting-risk-signals">
                 <div className="flex items-center justify-between mb-2.5">
                   <p className="text-[10px] text-[#111] font-medium tracking-wide">Risk Signals</p>
                   <span className="text-[8px] font-medium" style={{ color: overallColor }}>{riskCount >= 2 ? "High" : riskCount >= 1 || cautionCount >= 3 ? "Moderate" : cautionCount >= 1 ? "Low" : "Clear"}</span>
@@ -2634,7 +2634,7 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
           })()}
 
           {aisReport?.strategyData && aisReport.strategyData.steps.length > 0 && (
-            <div className="rounded-lg border border-[#e8e8e8] bg-white p-3" data-testid="capital-strategy">
+            <div className="pb-3 mb-3 border-b border-[#f0f0f0]" data-testid="capital-strategy">
               <p className="text-[10px] text-[#111] font-medium tracking-wide mb-2.5">Action Plan</p>
               <div className="space-y-0 mb-3">
                 {aisReport.strategyData.steps.map((step, si) => (
@@ -2695,7 +2695,7 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
           )}
 
           {aisReport?.strategyData && aisReport.strategyData.timeline.length > 0 && (
-            <div className="rounded-lg border border-[#e8e8e8] bg-white p-3" data-testid="funding-timeline">
+            <div className="pb-3 mb-3 border-b border-[#f0f0f0]" data-testid="funding-timeline">
               <p className="text-[10px] text-[#111] font-medium tracking-wide mb-2.5">Timeline</p>
               <div className="space-y-0">
                 {aisReport.strategyData.timeline.map((m, i) => {
@@ -2726,13 +2726,13 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
         <div className="space-y-2.5">
 
           {!hasAis && (
-            <div className="rounded-lg border border-[#e8e8e8] bg-white p-4 text-center">
+            <div className="py-4 text-center">
               <p className="text-[9px] text-[#999]">Upload a bureau report to see your funding stack</p>
             </div>
           )}
 
           {aisReport && aisReport.capitalPotential.length > 0 && (
-            <div className="rounded-lg border border-[#e8e8e8] bg-white p-3" data-testid="capital-potential">
+            <div className="pb-3 mb-3 border-b border-[#f0f0f0]" data-testid="capital-potential">
               <p className="text-[10px] text-[#111] font-medium tracking-wide mb-2.5">Capital Potential</p>
               {(() => {
                 const totalLow = aisReport.capitalPotential.reduce((s, e) => s + e.lowEstimate, 0);
@@ -2781,7 +2781,7 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
           )}
 
           {aisReport && aisReport.fundingSequence.length > 0 && (
-            <div className="rounded-lg border border-[#e8e8e8] bg-white p-3" data-testid="funding-sequence">
+            <div className="pb-3 mb-3 border-b border-[#f0f0f0]" data-testid="funding-sequence">
               <p className="text-[10px] text-[#111] font-medium tracking-wide mb-2.5">Funding Sequence</p>
               <div className="space-y-0">
                 {aisReport.fundingSequence.map((entry, i) => {
@@ -2814,7 +2814,7 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
           )}
 
           {aisReport?.strategyData && aisReport.strategyData.fundingMatches.length > 0 && (
-            <div className="rounded-lg border border-[#e8e8e8] bg-white p-3" data-testid="funding-matches">
+            <div className="pb-3 mb-3 border-b border-[#f0f0f0]" data-testid="funding-matches">
               <p className="text-[10px] text-[#111] font-medium tracking-wide mb-2.5">Lender Matches</p>
               <div className="space-y-0">
                 {aisReport.strategyData.fundingMatches.map((match, i) => {
@@ -2840,7 +2840,7 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
 
 
         {repairData && repairData.truthProfile && (
-          <div className="mb-3 rounded-lg border border-[#e8e8e8] bg-white p-3">
+          <div className="pb-3 mb-3 border-b border-[#f0f0f0]">
             <p className="text-[10px] text-[#111] font-medium tracking-wide mb-2">Identity</p>
             <div className="space-y-1">
               <p className="text-[10px] text-[#111] font-medium">{repairData.truthProfile.fullName}</p>
@@ -2857,7 +2857,7 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
         )}
 
         {repairData && repairData.discrepancies.length > 0 && (
-          <div className="mb-3 rounded-lg border border-[#e8e8e8] bg-white p-3">
+          <div className="pb-3 mb-3 border-b border-[#f0f0f0]">
             <div className="flex items-center justify-between mb-2">
               <p className="text-[10px] text-[#111] font-medium tracking-wide">Discrepancies</p>
               <span className="text-[9px] text-[#c0392b] font-medium">{repairData.discrepancies.length}</span>
@@ -2877,7 +2877,7 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
           </div>
         )}
 
-        <div className="mb-3 rounded-lg border border-[#e8e8e8] bg-white p-3">
+        <div className="pb-3 mb-3 border-b border-[#f0f0f0]">
           <div className="flex items-center justify-between mb-2">
             <p className="text-[10px] text-[#111] font-medium tracking-wide">Disputes</p>
             {repairData && <span className="text-[9px] text-[#111] font-medium">{repairData.negativeItems.length}</span>}
