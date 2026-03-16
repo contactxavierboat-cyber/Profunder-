@@ -2564,6 +2564,24 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
             </button>
           ) : null}
 
+          {hasAis && (aisReport?.capitalPotential || []).length > 0 && (() => {
+            const cpTotal = (aisReport!.capitalPotential || []);
+            const totalLow = cpTotal.reduce((s, e) => s + (e.lowEstimate || 0), 0);
+            const totalHigh = cpTotal.reduce((s, e) => s + (e.highEstimate || 0), 0);
+            const lenderCount = cpTotal.length;
+            return (
+              <div className="rounded-lg bg-[#111] p-3" data-testid="potential-funding-card">
+                <p className="text-[8px] text-white/35 font-medium tracking-wider uppercase mb-2">Potential Funding</p>
+                <div className="flex items-baseline gap-1.5 mb-1">
+                  <span className="text-[22px] font-semibold text-white leading-none" style={{ fontVariantNumeric: "tabular-nums" }}>${totalHigh.toLocaleString()}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-[9px] text-white/40" style={{ fontVariantNumeric: "tabular-nums" }}>Range: ${totalLow.toLocaleString()} – ${totalHigh.toLocaleString()}</span>
+                  <span className="text-[7px] text-white/25">{lenderCount} lender{lenderCount !== 1 ? "s" : ""}</span>
+                </div>
+              </div>
+            );
+          })()}
 
           {aisReport?.strategyData && aisReport.strategyData.steps.length > 0 && (
             <div className="pb-3 mb-3 border-b border-[#f0f0f0]" data-testid="capital-strategy">
@@ -2582,28 +2600,6 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
                   </div>
                 ))}
               </div>
-              {(aisReport.strategyData.currentOdds > 0 || aisReport.strategyData.projectedOdds > 0) && (
-                <div className="rounded-md bg-[#f7f7f7] p-2.5">
-                  <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <p className="text-[8px] text-[#999] mb-0.5">Odds</p>
-                      <div className="flex items-center gap-1.5">
-                        <span className="text-[11px] font-semibold text-[#999]" style={{ fontVariantNumeric: "tabular-nums" }}>{aisReport.strategyData.currentOdds}%</span>
-                        <span className="text-[9px] text-[#ccc]">&rarr;</span>
-                        <span className="text-[11px] font-semibold text-[#111]" style={{ fontVariantNumeric: "tabular-nums" }}>{aisReport.strategyData.projectedOdds}%</span>
-                      </div>
-                    </div>
-                    <div>
-                      <p className="text-[8px] text-[#999] mb-0.5">Funding</p>
-                      <div className="flex items-center gap-1.5">
-                        <span className="text-[9px] font-medium text-[#999]" style={{ fontVariantNumeric: "tabular-nums" }}>{aisReport.strategyData.currentFunding}</span>
-                        <span className="text-[9px] text-[#ccc]">&rarr;</span>
-                        <span className="text-[9px] font-medium text-[#111]" style={{ fontVariantNumeric: "tabular-nums" }}>{aisReport.strategyData.projectedFunding}</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
 
               {aisReport.strategyData.capitalUnlock && aisReport.strategyData.capitalUnlock.length > 0 && (
                 <div className="mt-3">
