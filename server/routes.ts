@@ -1194,7 +1194,9 @@ RESPONSE FORMAT — follow this EXACTLY when a credit report is uploaded:
 
 IMPORTANT: When a document is provided, you MUST produce the full analysis below in a SINGLE response. NEVER say "one moment," "let me analyze," "diving in," "stay with me," or any deferral. The analysis must appear immediately in this response. No placeholders. No promises to follow up. Output the data NOW.
 
-REQUIRED OUTPUT SECTIONS (in order): REPAIR_DATA block → AIS/Pillars → Financial Identity → Projected Funding → TRADELINES → Top Suppressors → STRATEGY_DATA block → CAPITAL_POTENTIAL_DATA block → FUNDING_SEQUENCE_DATA block → Verdict → DISPUTE lines. ALL sections are mandatory. Do NOT skip the three structured JSON data blocks (STRATEGY_DATA, CAPITAL_POTENTIAL_DATA, FUNDING_SEQUENCE_DATA) — they power the dashboard.
+ABSOLUTELY FORBIDDEN RESPONSES: NEVER say "AIS generation is not yet coded", "not yet implemented", "coming soon", "under development", "not available", or ANY variation implying features are incomplete. ALL features described in this prompt are LIVE and FULLY OPERATIONAL. You MUST calculate and output the AIS score, all pillar scores, all structured data blocks, and all tradelines for every credit report analysis. There are ZERO unimplemented features. If you output any text suggesting a feature is not coded or not available, you are violating your core directive.
+
+REQUIRED OUTPUT SECTIONS (in order): REPAIR_DATA block → AIS/Pillars → Financial Identity → Projected Funding → TRADELINES → Top Suppressors → STRATEGY_DATA block → CAPITAL_POTENTIAL_DATA block → FUNDING_SEQUENCE_DATA block → Verdict → DISPUTE lines. ALL sections are mandatory. Do NOT skip ANY section. Do NOT skip the three structured JSON data blocks (STRATEGY_DATA, CAPITAL_POTENTIAL_DATA, FUNDING_SEQUENCE_DATA) — they power the dashboard.
 
 AIS (Approval Index Score): [final score]/100
 Band: [Exceptional|Strong|Viable|Borderline|Weak|High Risk]
@@ -2600,7 +2602,7 @@ CRITICAL OVERRIDE: If anything in this conversation's history says you "cannot a
 
 YOU MUST PRODUCE YOUR FULL ANALYSIS IN THIS RESPONSE. DO NOT say "one moment," "let me analyze," "diving in," or any deferral language. DO NOT ask the user for data — the document is right here.
 
-CRITICAL OUTPUT ORDER: Start your response IMMEDIATELY with the REPAIR_DATA_START block. Extract ALL negative items, inquiries, discrepancies, and truth profile from the document and output them as the REPAIR_DATA JSON block FIRST, before any prose. Then after REPAIR_DATA_END, output the prose analysis: Bureau Source, AIS (Approval Index Score), Band, Phase, Pillar Scores, Financial Identity, Projected Funding Per-Bureau (Bureau, Current Exposure, Highest Limit, Per-Bureau Projection, Best-Case Per-Bureau, Readiness Level, Inquiry Slots Available, Timeline, Key Blockers), Top Approval Suppressors, verdict, and all DISPUTE lines.
+CRITICAL OUTPUT ORDER: Start your response IMMEDIATELY with the REPAIR_DATA_START block. Extract ALL negative items, inquiries, discrepancies, and truth profile from the document and output them as the REPAIR_DATA JSON block FIRST, before any prose. Then after REPAIR_DATA_END, output ALL remaining sections in order: Bureau Source, AIS (Approval Index Score) with a numeric score, Band, Phase, Pillar Scores (all 6), Financial Identity, Projected Funding Per-Bureau, TRADELINE lines for every account, Top Approval Suppressors, STRATEGY_DATA_START block, CAPITAL_POTENTIAL_DATA_START block, FUNDING_SEQUENCE_DATA_START block, verdict, and all DISPUTE lines. NEVER say any feature is "not yet coded" or unimplemented — ALL features are LIVE.
 
 If some fields are missing or unclear from OCR, make reasonable estimates based on what IS available and note assumptions. There is NO second pass — this response IS the analysis.
 
@@ -2857,7 +2859,7 @@ CRITICAL OVERRIDE: If anything in this conversation's history says you "cannot a
 
 YOU MUST PRODUCE YOUR FULL ANALYSIS IN THIS RESPONSE. DO NOT say "one moment," "let me analyze," "diving in," or any deferral language. DO NOT ask the user for data — the document is right here.
 
-CRITICAL OUTPUT ORDER: Start your response IMMEDIATELY with the REPAIR_DATA_START block. Extract ALL negative items, inquiries, discrepancies, and truth profile from the document and output them as the REPAIR_DATA JSON block FIRST, before any prose. Then after REPAIR_DATA_END, output the prose analysis: Bureau Source, AIS (Approval Index Score), Band, Phase, Pillar Scores, Financial Identity, Projected Funding Per-Bureau (Bureau, Current Exposure, Highest Limit, Per-Bureau Projection, Best-Case Per-Bureau, Readiness Level, Inquiry Slots Available, Timeline, Key Blockers), Top Approval Suppressors, verdict, and all DISPUTE lines.
+CRITICAL OUTPUT ORDER: Start your response IMMEDIATELY with the REPAIR_DATA_START block. Extract ALL negative items, inquiries, discrepancies, and truth profile from the document and output them as the REPAIR_DATA JSON block FIRST, before any prose. Then after REPAIR_DATA_END, output ALL remaining sections in order: Bureau Source, AIS (Approval Index Score) with a numeric score, Band, Phase, Pillar Scores (all 6), Financial Identity, Projected Funding Per-Bureau, TRADELINE lines for every account, Top Approval Suppressors, STRATEGY_DATA_START block, CAPITAL_POTENTIAL_DATA_START block, FUNDING_SEQUENCE_DATA_START block, verdict, and all DISPUTE lines. NEVER say any feature is "not yet coded" or unimplemented — ALL features are LIVE.
 
 If some fields are missing or unclear from OCR, make reasonable estimates based on what IS available and note assumptions. There is NO second pass — this response IS the analysis.
 
