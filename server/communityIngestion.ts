@@ -495,7 +495,7 @@ export async function seedCommunityDataIfEmpty(): Promise<void> {
       source_key TEXT NOT NULL UNIQUE,
       last_seen_id TEXT,
       last_fetched_at TIMESTAMP NOT NULL DEFAULT NOW(),
-      metadata JSONB DEFAULT '{}'
+      metadata TEXT
     )`);
     await pool.end();
   } catch (tableErr: any) {
