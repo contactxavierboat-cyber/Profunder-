@@ -64,6 +64,7 @@ export default function AdminPage() {
                     <TableHead className="w-[80px]">ID</TableHead>
                     <TableHead>Email</TableHead>
                     <TableHead>Status</TableHead>
+                    <TableHead>Tier</TableHead>
                     <TableHead>Usage</TableHead>
                     <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
@@ -82,6 +83,25 @@ export default function AdminPage() {
                         >
                           {u.subscriptionStatus}
                         </Badge>
+                      </TableCell>
+                      <TableCell>
+                        {u.subscriptionTier ? (
+                          <Badge
+                            variant="outline"
+                            className={
+                              u.subscriptionTier === 'capital'
+                                ? "border-amber-500/50 text-amber-600 bg-amber-500/10"
+                                : u.subscriptionTier === 'repair'
+                                ? "border-purple-500/50 text-purple-500 bg-purple-500/10"
+                                : "border-blue-500/50 text-blue-500 bg-blue-500/10"
+                            }
+                            data-testid={`badge-tier-${u.id}`}
+                          >
+                            {u.subscriptionTier}
+                          </Badge>
+                        ) : (
+                          <span className="text-xs text-muted-foreground" data-testid={`badge-tier-${u.id}`}>—</span>
+                        )}
                       </TableCell>
                       <TableCell className="font-mono">
                         {u.monthlyUsage} / {u.maxUsage}
@@ -117,14 +137,30 @@ export default function AdminPage() {
                 <div key={u.id} className="bg-white/15 border border-white/10 rounded-lg p-3 space-y-2">
                   <div className="flex items-center justify-between">
                     <span className="text-sm font-medium truncate max-w-[180px]">{u.displayName || u.email}</span>
-                    <Badge 
-                      variant="outline" 
-                      className={`text-[10px] px-1.5 py-0 ${u.subscriptionStatus === 'active' 
-                        ? "border-green-500/50 text-green-500 bg-green-500/10" 
-                        : "border-red-500/50 text-red-500 bg-red-500/10"}`}
-                    >
-                      {u.subscriptionStatus}
-                    </Badge>
+                    <div className="flex items-center gap-1.5">
+                      {u.subscriptionTier && (
+                        <Badge
+                          variant="outline"
+                          className={`text-[10px] px-1.5 py-0 ${
+                            u.subscriptionTier === 'capital'
+                              ? "border-amber-500/50 text-amber-600 bg-amber-500/10"
+                              : u.subscriptionTier === 'repair'
+                              ? "border-purple-500/50 text-purple-500 bg-purple-500/10"
+                              : "border-blue-500/50 text-blue-500 bg-blue-500/10"
+                          }`}
+                        >
+                          {u.subscriptionTier}
+                        </Badge>
+                      )}
+                      <Badge 
+                        variant="outline" 
+                        className={`text-[10px] px-1.5 py-0 ${u.subscriptionStatus === 'active' 
+                          ? "border-green-500/50 text-green-500 bg-green-500/10" 
+                          : "border-red-500/50 text-red-500 bg-red-500/10"}`}
+                      >
+                        {u.subscriptionStatus}
+                      </Badge>
+                    </div>
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-xs text-muted-foreground font-mono">

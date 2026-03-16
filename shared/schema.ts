@@ -76,6 +76,7 @@ export const users = pgTable("users", {
   
   // Stripe
   stripeCustomerId: text("stripe_customer_id"),
+  subscriptionTier: text("subscription_tier"),
 
   // Document Flags
   hasCreditReport: boolean("has_credit_report").default(false),

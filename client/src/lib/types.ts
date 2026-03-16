@@ -2,6 +2,7 @@ import { type ReactNode } from "react";
 
 export type UserRole = "user" | "admin";
 export type SubscriptionStatus = "active" | "inactive" | "crowned";
+export type SubscriptionTier = "basic" | "repair" | "capital" | null;
 
 export interface Message {
   id: string;
@@ -16,6 +17,7 @@ export interface UserProfile {
   email: string;
   role: UserRole;
   subscriptionStatus: SubscriptionStatus;
+  subscriptionTier: SubscriptionTier;
   monthlyUsage: number;
   maxUsage: number;
   createdAt: string;
@@ -41,6 +43,7 @@ export const MOCK_USERS: UserProfile[] = [
     email: "demo@startupstudio.com",
     role: "user",
     subscriptionStatus: "active",
+    subscriptionTier: "basic",
     monthlyUsage: 2,
     maxUsage: 5,
     createdAt: "2024-01-15T10:00:00Z",
@@ -65,6 +68,7 @@ export const MOCK_USERS: UserProfile[] = [
     email: "inactive@example.com",
     role: "user",
     subscriptionStatus: "inactive",
+    subscriptionTier: null,
     monthlyUsage: 0,
     maxUsage: 5,
     createdAt: "2024-02-01T14:30:00Z",
@@ -75,6 +79,7 @@ export const MOCK_USERS: UserProfile[] = [
     email: "admin@startupstudio.com",
     role: "admin",
     subscriptionStatus: "active",
+    subscriptionTier: "capital",
     monthlyUsage: 0,
     maxUsage: 9999,
     createdAt: "2023-11-20T09:00:00Z",

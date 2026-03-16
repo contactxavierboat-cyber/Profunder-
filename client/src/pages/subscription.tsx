@@ -1,10 +1,67 @@
 import { useAuth } from "@/lib/store";
 import { ProfundrLogo } from "@/components/profundr-logo";
 import { useLocation } from "wouter";
-import { Loader2 } from "lucide-react";
+import { Loader2, Check, Crown, Shield, Zap, type LucideIcon } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useState, useEffect, useRef } from "react";
 import { useQueryClient } from "@tanstack/react-query";
+
+interface PlanData {
+  product_id: string;
+  name: string;
+  description: string;
+  price_id: string;
+  unit_amount: number;
+  currency: string;
+  tier: "basic" | "repair" | "capital";
+}
+
+const PLAN_FEATURES: Record<string, { features: string[]; icon: LucideIcon; color: string; accent: string }> = {
+  basic: {
+    icon: Shield,
+    color: "#3b82f6",
+    accent: "bg-blue-50 border-blue-200",
+    features: [
+      "Credit analysis",
+      "Capital Readiness Report",
+      "AI Chat Assistant",
+      "Profile monitoring",
+      "Basic underwriting insights",
+    ],
+  },
+  repair: {
+    icon: Zap,
+    color: "#8b5cf6",
+    accent: "bg-purple-50 border-purple-300",
+    features: [
+      "Everything in Basic",
+      "Repair Center",
+      "AI dispute letters",
+      "3-round dispute system",
+      "Negative item identification",
+      "Inquiry analysis",
+      "Credit report error detection",
+      "Dispute tracking dashboard",
+    ],
+  },
+  capital: {
+    icon: Crown,
+    color: "#f59e0b",
+    accent: "bg-amber-50 border-amber-200",
+    features: [
+      "Everything in Basic + Repair",
+      "Funding Sequence Strategy",
+      "Lender targeting",
+      "Capital stacking plan",
+      "Real-time underwriting intelligence",
+      "Credit Unlocks tab",
+      "1-on-1 guidance access",
+      "Approval probability insights",
+    ],
+  },
+};
+
+const TIER_ORDER = ["basic", "repair", "capital"] as const;
 
 export default function SubscriptionPage() {
   const { user, isLoading, loginSilent } = useAuth();
@@ -15,17 +72,16 @@ export default function SubscriptionPage() {
   const [signingUp, setSigningUp] = useState(false);
   const [redirectingToCheckout, setRedirectingToCheckout] = useState(false);
   const [checkoutSuccess, setCheckoutSuccess] = useState(false);
-  const [priceData, setPriceData] = useState<{ price_id: string; unit_amount: number; currency: string; name: string } | null>(null);
-  const hasRedirected = useRef(false);
-
+  const [plans, setPlans] = useState<PlanData[]>([]);
+  const [selectedTier, setSelectedTier] = useState<string | null>(null);
   const params = new URLSearchParams(window.location.search);
   const isSuccess = params.get("success") === "true";
   const isCanceled = params.get("canceled") === "true";
 
   useEffect(() => {
-    fetch("/api/subscription-price")
-      .then(r => r.ok ? r.json() : null)
-      .then(data => { if (data) setPriceData(data); })
+    fetch("/api/subscription-plans")
+      .then(r => r.ok ? r.json() : [])
+      .then(data => { if (Array.isArray(data) && data.length > 0) setPlans(data); })
       .catch(() => {});
   }, []);
 
@@ -58,21 +114,8 @@ export default function SubscriptionPage() {
     }
   }, [isSuccess, isCanceled, user]);
 
-  useEffect(() => {
-    if (user && !isSuccess && !isCanceled) {
-      if (user.subscriptionStatus === "active") {
-        setLocation("/");
-        return;
-      }
-      if (!hasRedirected.current) {
-        hasRedirected.current = true;
-        redirectToCheckout();
-      }
-    }
-  }, [user, priceData]);
-
-  const redirectToCheckout = async () => {
-    if (!priceData) {
+  const redirectToCheckout = async (priceId: string) => {
+    if (!priceId) {
       toast({ variant: "destructive", title: "Error", description: "Could not load subscription details. Please try again." });
       return;
     }
@@ -81,16 +124,22 @@ export default function SubscriptionPage() {
       const res = await fetch("/api/create-checkout-session", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ priceId: priceData.price_id }),
+        body: JSON.stringify({ priceId }),
       });
       const data = await res.json();
-      if (data.url) {
+      if (data.updated) {
+        toast({ title: "Plan Updated", description: `Your plan has been changed to ${data.tier?.charAt(0).toUpperCase()}${data.tier?.slice(1) || "the new plan"}.` });
+        queryClient.invalidateQueries({ queryKey: ["/api/me"] });
+        queryClient.invalidateQueries({ queryKey: ["/api/check-subscription"] });
+        setRedirectingToCheckout(false);
+      } else if (data.url) {
         window.location.href = data.url;
       } else {
         throw new Error(data.error || "Failed to start checkout");
       }
-    } catch (err: any) {
-      toast({ variant: "destructive", title: "Checkout Error", description: err.message || "Something went wrong. Please try again." });
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Something went wrong. Please try again.";
+      toast({ variant: "destructive", title: "Checkout Error", description: message });
       setRedirectingToCheckout(false);
     }
   };
@@ -102,22 +151,6 @@ export default function SubscriptionPage() {
       </div>
     );
   }
-
-  const handleSignIn = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const email = signupEmail.trim();
-    if (!email) return;
-    setSigningUp(true);
-    try {
-      await loginSilent(email);
-      queryClient.invalidateQueries({ queryKey: ["/api/me"] });
-      toast({ title: "Welcome!", description: "Redirecting to checkout..." });
-    } catch (err: any) {
-      toast({ variant: "destructive", title: "Error", description: err.message || "Sign in failed" });
-    } finally {
-      setSigningUp(false);
-    }
-  };
 
   if (checkoutSuccess || (isSuccess && user)) {
     return (
@@ -143,19 +176,42 @@ export default function SubscriptionPage() {
     );
   }
 
-  if (user) {
-    return (
-      <div className="h-[100dvh] flex flex-col items-center justify-center bg-[#fafafa] gap-3" style={{ fontFamily: "'Inter', sans-serif" }}>
-        <Loader2 className="w-5 h-5 animate-spin text-[#1a1a2e]" />
-        <p className="text-[13px] text-[#777]">Setting up your account...</p>
-      </div>
-    );
-  }
+  const userTier = user?.subscriptionTier as string | null;
+  const isActiveSub = user?.subscriptionStatus === "active";
 
-  const formattedPrice = priceData ? `$${(priceData.unit_amount / 100).toFixed(0)}` : "$50";
+  const sortedPlans = TIER_ORDER.map(tier => plans.find(p => p.tier === tier)).filter(Boolean) as PlanData[];
+
+  const handleSelectPlan = (plan: PlanData) => {
+    if (!user) {
+      setSelectedTier(plan.tier);
+      return;
+    }
+    if (isActiveSub && userTier === plan.tier) return;
+    redirectToCheckout(plan.price_id);
+  };
+
+  const handleSignInAndCheckout = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const email = signupEmail.trim();
+    if (!email) return;
+    setSigningUp(true);
+    try {
+      await loginSilent(email);
+      queryClient.invalidateQueries({ queryKey: ["/api/me"] });
+      toast({ title: "Welcome!", description: "Redirecting to checkout..." });
+      const plan = plans.find(p => p.tier === selectedTier);
+      if (plan) {
+        setTimeout(() => redirectToCheckout(plan.price_id), 500);
+      }
+    } catch (err: any) {
+      toast({ variant: "destructive", title: "Error", description: err.message || "Sign in failed" });
+    } finally {
+      setSigningUp(false);
+    }
+  };
 
   return (
-    <div className="min-h-[100dvh] h-[100dvh] flex flex-col bg-[#fafafa]" style={{ fontFamily: "'Inter', sans-serif" }}>
+    <div className="min-h-[100dvh] flex flex-col bg-[#fafafa]" style={{ fontFamily: "'Inter', sans-serif" }}>
       <nav className="sticky top-0 z-30 bg-[#fafafa]/95 backdrop-blur-sm flex items-center justify-between px-4 sm:px-6 py-3 border-b border-[#eee]" data-testid="nav-top">
         <div className="flex items-center gap-2">
           <button onClick={() => setLocation("/")} data-testid="nav-logo">
@@ -172,116 +228,209 @@ export default function SubscriptionPage() {
       </nav>
 
       <div className="flex-1 overflow-y-auto px-4 py-8">
-        <div className="w-full max-w-[440px] mx-auto space-y-6">
+        <div className="w-full max-w-[1100px] mx-auto space-y-8">
           <div className="text-center">
-            <div className="mb-3" data-testid="text-signin-title">
+            <div className="mb-3" data-testid="text-plans-title">
               <ProfundrLogo size="lg" variant="dark" />
             </div>
-            <p className="text-[13px] text-[#888] leading-[1.7] max-w-[340px] mx-auto text-justify">
-              The full capital intelligence system. Everything you need to understand, repair, and expand your financial position.
+            <h1 className="text-[24px] sm:text-[28px] font-bold text-[#1a1a1a] mb-2">Choose Your Plan</h1>
+            <p className="text-[14px] text-[#888] leading-[1.7] max-w-[500px] mx-auto">
+              Select the plan that matches your goals. Upgrade or downgrade anytime.
             </p>
           </div>
 
-          <div className="bg-white rounded-2xl border border-[#eee] p-6 sm:p-8 shadow-sm">
-            <div className="text-center mb-6">
-              <div className="w-12 h-12 rounded-lg bg-[#1a1a2e] flex items-center justify-center mx-auto mb-4">
-                <svg width={48 * 0.57} height={48 * 0.57} viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M12 2C9.5 2 7.5 4 7.5 6.5c0 .5-.4 1-1 1C4.5 7.5 3 9.5 3 11.5c0 1.5.8 2.8 2 3.5 0 0-.5 1.5-.5 2.5C4.5 20 6.5 22 9 22c1.5 0 2.5-.5 3-1.5.5 1 1.5 1.5 3 1.5 2.5 0 4.5-2 4.5-4.5 0-1-.5-2.5-.5-2.5 1.2-.7 2-2 2-3.5 0-2-1.5-4-3.5-4-.6 0-1-.5-1-1C16.5 4 14.5 2 12 2z" />
-                  <path d="M12 2v20" />
-                  <path d="M7.5 7.5C9 8.5 10 10 10.5 12" />
-                  <path d="M16.5 7.5C15 8.5 14 10 13.5 12" />
-                  <path d="M5 15c2-.5 3.5-1 5-3" />
-                  <path d="M19 15c-2-.5-3.5-1-5-3" />
-                </svg>
-              </div>
-              <span className="text-[32px] font-bold text-[#1a1a1a]" data-testid="text-price">{formattedPrice}</span>
-              <span className="text-[32px] font-bold text-[#1a1a1a]">/month</span>
+          {plans.length === 0 ? (
+            <div className="flex justify-center py-12">
+              <Loader2 className="w-6 h-6 animate-spin text-[#999]" />
             </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
+              {sortedPlans.map((plan) => {
+                const meta = PLAN_FEATURES[plan.tier];
+                const IconComponent = meta.icon;
+                const isCurrent = isActiveSub && userTier === plan.tier;
+                const isRecommended = plan.tier === "repair";
+                const formattedPrice = `$${(plan.unit_amount / 100).toFixed(0)}`;
 
-            <div className="space-y-4 mb-6">
-              <div className="flex gap-3" data-testid="feature-capital-readiness">
-                <svg className="w-4 h-4 text-[#1a1a2e] flex-shrink-0 mt-0.5" viewBox="0 0 14 14" fill="none"><path d="M3 7l3 3 5-5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
-                <div>
-                  <p className="text-[13px] font-medium text-[#1a1a1a]">Capital Readiness Index</p>
-                  <p className="text-[11px] text-[#888] leading-[1.5] mt-0.5">A lender-behavior simulation that ranks how fundable you are right now — based on real underwriting triggers.</p>
-                </div>
+                return (
+                  <div
+                    key={plan.tier}
+                    className={`relative bg-white rounded-2xl border p-6 sm:p-7 shadow-sm flex flex-col transition-all ${
+                      isRecommended ? "border-purple-300 ring-2 ring-purple-200" : "border-[#eee]"
+                    } ${isCurrent ? "opacity-90" : "hover:shadow-md"}`}
+                    data-testid={`plan-card-${plan.tier}`}
+                  >
+                    {isRecommended && (
+                      <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-[#8b5cf6] text-white text-[11px] font-semibold px-4 py-1 rounded-full" data-testid="badge-recommended">
+                        RECOMMENDED
+                      </div>
+                    )}
+
+                    {isCurrent && (
+                      <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-[#1a1a2e] text-white text-[11px] font-semibold px-4 py-1 rounded-full" data-testid="badge-current-plan">
+                        CURRENT PLAN
+                      </div>
+                    )}
+
+                    <div className="flex items-center gap-3 mb-4 mt-1">
+                      <div className="w-10 h-10 rounded-lg flex items-center justify-center" style={{ backgroundColor: `${meta.color}15` }}>
+                        <IconComponent className="w-5 h-5" style={{ color: meta.color }} />
+                      </div>
+                      <div>
+                        <h3 className="text-[16px] font-semibold text-[#1a1a1a]" data-testid={`text-plan-name-${plan.tier}`}>{plan.name.replace("Profundr ", "")}</h3>
+                      </div>
+                    </div>
+
+                    <div className="mb-5">
+                      <span className="text-[32px] font-bold text-[#1a1a1a]" data-testid={`text-plan-price-${plan.tier}`}>{formattedPrice}</span>
+                      <span className="text-[14px] text-[#888]">/month</span>
+                    </div>
+
+                    <div className="space-y-2.5 mb-6 flex-1">
+                      {meta.features.map((feature, idx) => (
+                        <div key={idx} className="flex items-start gap-2.5">
+                          <Check className="w-4 h-4 flex-shrink-0 mt-0.5" style={{ color: meta.color }} />
+                          <span className="text-[13px] text-[#555] leading-[1.5]">{feature}</span>
+                        </div>
+                      ))}
+                    </div>
+
+                    <button
+                      onClick={() => handleSelectPlan(plan)}
+                      disabled={isCurrent || redirectingToCheckout}
+                      className={`w-full h-[46px] rounded-full text-[14px] font-medium transition-colors flex items-center justify-center gap-2 ${
+                        isCurrent
+                          ? "bg-[#f0f0f0] text-[#999] cursor-default"
+                          : isRecommended
+                          ? "bg-[#8b5cf6] text-white hover:bg-[#7c3aed]"
+                          : "bg-[#1a1a2e] text-white hover:bg-[#2a2a40]"
+                      } disabled:opacity-60 disabled:cursor-not-allowed`}
+                      data-testid={`button-select-${plan.tier}`}
+                    >
+                      {isCurrent ? "Current Plan" : redirectingToCheckout ? <Loader2 className="w-4 h-4 animate-spin" /> : `Get ${plan.name.replace("Profundr ", "")}`}
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
+          {plans.length > 0 && (
+            <div className="bg-white rounded-2xl border border-[#eee] shadow-sm overflow-hidden" data-testid="feature-comparison-table">
+              <div className="px-6 py-4 border-b border-[#eee]">
+                <h2 className="text-[16px] font-semibold text-[#1a1a1a]">Feature Comparison</h2>
               </div>
-              <div className="flex gap-3" data-testid="feature-risk-signal">
-                <svg className="w-4 h-4 text-[#1a1a2e] flex-shrink-0 mt-0.5" viewBox="0 0 14 14" fill="none"><path d="M3 7l3 3 5-5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
-                <div>
-                  <p className="text-[13px] font-medium text-[#1a1a1a]">Risk Signal Scan</p>
-                  <p className="text-[11px] text-[#888] leading-[1.5] mt-0.5">Detects hidden denial triggers — utilization spikes, thin-file gaps, inquiry stacking, seasoning issues, and structural weaknesses most consumers miss.</p>
-                </div>
-              </div>
-              <div className="flex gap-3" data-testid="feature-dispute-engine">
-                <svg className="w-4 h-4 text-[#1a1a2e] flex-shrink-0 mt-0.5" viewBox="0 0 14 14" fill="none"><path d="M3 7l3 3 5-5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
-                <div>
-                  <p className="text-[13px] font-medium text-[#1a1a1a]">Precision Dispute Engine</p>
-                  <p className="text-[11px] text-[#888] leading-[1.5] mt-0.5">Strategic, FCRA-aligned correction workflows that target data integrity flaws — not random template letters.</p>
-                </div>
-              </div>
-              <div className="flex gap-3" data-testid="feature-approval-strategy">
-                <svg className="w-4 h-4 text-[#1a1a2e] flex-shrink-0 mt-0.5" viewBox="0 0 14 14" fill="none"><path d="M3 7l3 3 5-5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
-                <div>
-                  <p className="text-[13px] font-medium text-[#1a1a1a]">Approval Strategy Map</p>
-                  <p className="text-[11px] text-[#888] leading-[1.5] mt-0.5">Product timing, exposure sequencing, and positioning logic designed to increase approval odds before you apply.</p>
-                </div>
-              </div>
-              <div className="flex gap-3" data-testid="feature-funding-blueprint">
-                <svg className="w-4 h-4 text-[#1a1a2e] flex-shrink-0 mt-0.5" viewBox="0 0 14 14" fill="none"><path d="M3 7l3 3 5-5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
-                <div>
-                  <p className="text-[13px] font-medium text-[#1a1a1a]">Funding Growth Blueprint</p>
-                  <p className="text-[11px] text-[#888] leading-[1.5] mt-0.5">Step-by-step capital stacking roadmap — optimize utilization, strengthen anchors, improve profile symmetry, and raise your exposure ceiling.</p>
-                </div>
-              </div>
-              <div className="flex gap-3" data-testid="feature-underwriter-view">
-                <svg className="w-4 h-4 text-[#1a1a2e] flex-shrink-0 mt-0.5" viewBox="0 0 14 14" fill="none"><path d="M3 7l3 3 5-5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
-                <div>
-                  <p className="text-[13px] font-medium text-[#1a1a1a]">Underwriter View</p>
-                  <p className="text-[11px] text-[#888] leading-[1.5] mt-0.5">See your profile the way a credit analyst does — risk layers, behavioral patterns, stability markers, and automated denial simulations.</p>
-                </div>
+              <div className="overflow-x-auto">
+                <table className="w-full text-[13px]">
+                  <thead>
+                    <tr className="border-b border-[#eee]">
+                      <th className="text-left px-6 py-3 text-[12px] font-medium text-[#888] w-[40%]">Feature</th>
+                      <th className="text-center px-4 py-3 text-[12px] font-medium text-[#3b82f6]">Basic</th>
+                      <th className="text-center px-4 py-3 text-[12px] font-medium text-[#8b5cf6]">Repair</th>
+                      <th className="text-center px-4 py-3 text-[12px] font-medium text-[#f59e0b]">Capital</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {[
+                      { feature: "Credit Analysis", basic: true, repair: true, capital: true },
+                      { feature: "Capital Readiness Report", basic: true, repair: true, capital: true },
+                      { feature: "AI Chat Assistant", basic: true, repair: true, capital: true },
+                      { feature: "Profile Monitoring", basic: true, repair: true, capital: true },
+                      { feature: "Basic Underwriting Insights", basic: true, repair: true, capital: true },
+                      { feature: "Repair Center", basic: false, repair: true, capital: true },
+                      { feature: "AI Dispute Letters", basic: false, repair: true, capital: true },
+                      { feature: "3-Round Dispute System", basic: false, repair: true, capital: true },
+                      { feature: "Negative Item Identification", basic: false, repair: true, capital: true },
+                      { feature: "Inquiry Analysis", basic: false, repair: true, capital: true },
+                      { feature: "Credit Report Error Detection", basic: false, repair: true, capital: true },
+                      { feature: "Dispute Tracking Dashboard", basic: false, repair: true, capital: true },
+                      { feature: "Funding Sequence Strategy", basic: false, repair: false, capital: true },
+                      { feature: "Lender Targeting", basic: false, repair: false, capital: true },
+                      { feature: "Capital Stacking Plan", basic: false, repair: false, capital: true },
+                      { feature: "Real-time Underwriting Intelligence", basic: false, repair: false, capital: true },
+                      { feature: "Credit Unlocks Tab", basic: false, repair: false, capital: true },
+                      { feature: "1-on-1 Guidance Access", basic: false, repair: false, capital: true },
+                      { feature: "Approval Probability Insights", basic: false, repair: false, capital: true },
+                    ].map((row, idx) => (
+                      <tr key={idx} className={idx % 2 === 0 ? "bg-[#fafafa]" : ""} data-testid={`comparison-row-${idx}`}>
+                        <td className="px-6 py-2.5 text-[#333]">{row.feature}</td>
+                        <td className="text-center px-4 py-2.5">
+                          {row.basic ? <Check className="w-4 h-4 text-[#3b82f6] mx-auto" /> : <span className="text-[#ddd]">—</span>}
+                        </td>
+                        <td className="text-center px-4 py-2.5">
+                          {row.repair ? <Check className="w-4 h-4 text-[#8b5cf6] mx-auto" /> : <span className="text-[#ddd]">—</span>}
+                        </td>
+                        <td className="text-center px-4 py-2.5">
+                          {row.capital ? <Check className="w-4 h-4 text-[#f59e0b] mx-auto" /> : <span className="text-[#ddd]">—</span>}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
             </div>
+          )}
 
-            <form onSubmit={handleSignIn} className="space-y-3">
-              <div className="relative">
-                <svg className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#bbb]" viewBox="0 0 16 16" fill="none">
-                  <rect x="1" y="3" width="14" height="10" rx="2" stroke="currentColor" strokeWidth="1.3" fill="none" />
-                  <path d="M1 5l7 4 7-4" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-                <input
-                  data-testid="input-signin-email"
-                  type="email"
-                  placeholder="Enter your email"
-                  className="w-full bg-[#f5f5f5] border border-[#e5e5e5] rounded-xl h-[48px] pl-10 pr-4 text-[14px] text-[#1a1a1a] placeholder:text-[#aaa] outline-none focus:border-[#999] transition-colors"
-                  value={signupEmail}
-                  onChange={(e) => setSignupEmail(e.target.value)}
-                  required
-                  disabled={signingUp}
-                  autoFocus
-                />
+          {!user && selectedTier && (
+            <div className="max-w-[440px] mx-auto">
+              <div className="bg-white rounded-2xl border border-[#eee] p-6 sm:p-8 shadow-sm">
+                <div className="text-center mb-5">
+                  <p className="text-[15px] font-semibold text-[#1a1a1a]">Sign in to subscribe</p>
+                  <p className="text-[12px] text-[#888] mt-1">Enter your email to get started with {selectedTier.charAt(0).toUpperCase() + selectedTier.slice(1)}</p>
+                </div>
+                <form onSubmit={handleSignInAndCheckout} className="space-y-3">
+                  <div className="relative">
+                    <svg className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#bbb]" viewBox="0 0 16 16" fill="none">
+                      <rect x="1" y="3" width="14" height="10" rx="2" stroke="currentColor" strokeWidth="1.3" fill="none" />
+                      <path d="M1 5l7 4 7-4" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                    <input
+                      data-testid="input-signin-email"
+                      type="email"
+                      placeholder="Enter your email"
+                      className="w-full bg-[#f5f5f5] border border-[#e5e5e5] rounded-xl h-[48px] pl-10 pr-4 text-[14px] text-[#1a1a1a] placeholder:text-[#aaa] outline-none focus:border-[#999] transition-colors"
+                      value={signupEmail}
+                      onChange={(e) => setSignupEmail(e.target.value)}
+                      required
+                      disabled={signingUp}
+                      autoFocus
+                    />
+                  </div>
+                  <button
+                    data-testid="button-subscribe"
+                    type="submit"
+                    disabled={signingUp || !signupEmail.trim()}
+                    className="w-full h-[48px] rounded-full bg-[#1a1a2e] text-white text-[14px] font-medium hover:bg-[#2a2a40] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  >
+                    {signingUp ? <Loader2 className="w-4 h-4 animate-spin" /> : "Continue to Checkout"}
+                  </button>
+                </form>
               </div>
+            </div>
+          )}
+
+          {isActiveSub && user && (
+            <div className="text-center">
               <button
-                data-testid="button-subscribe"
-                type="submit"
-                disabled={signingUp || !signupEmail.trim()}
-                className="w-full h-[48px] rounded-full bg-[#1a1a2e] text-white text-[14px] font-medium hover:bg-[#2a2a40] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                onClick={async () => {
+                  try {
+                    const res = await fetch("/api/create-portal-session", { method: "POST" });
+                    const data = await res.json();
+                    if (data.url) window.location.href = data.url;
+                  } catch {}
+                }}
+                className="text-[13px] text-[#8b5cf6] hover:text-[#7c3aed] font-medium transition-colors"
+                data-testid="button-manage-subscription"
               >
-                {signingUp ? <Loader2 className="w-4 h-4 animate-spin" /> : `Subscribe — ${formattedPrice}/mo`}
+                Manage Subscription
               </button>
-            </form>
-          </div>
+            </div>
+          )}
 
-          <div className="text-center space-y-2">
+          <div className="text-center space-y-2 pb-8">
             <p className="text-[11px] text-[#bbb]">
               Secure payment via Stripe. Cancel anytime.
             </p>
-            <button
-              onClick={() => setLocation("/")}
-              className="text-[12px] text-[#aaa] hover:text-[#666] transition-colors"
-            >
-              Back to Home
-            </button>
           </div>
         </div>
       </div>

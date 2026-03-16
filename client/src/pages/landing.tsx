@@ -2480,6 +2480,10 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
   };
 
   const panelTab = activeView || "command";
+  const isSubscriptionActive = user?.subscriptionStatus === "active";
+  const activeTier = isSubscriptionActive ? (user?.subscriptionTier as string | null) : null;
+  const hasCapitalAccess = activeTier === "capital";
+  const hasRepairAccess = activeTier === "repair" || activeTier === "capital";
 
   return (
     <div className={portalOnly ? "hidden" : "h-full flex flex-col bg-white"} data-testid="docs-panel">
@@ -2714,7 +2718,21 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
         </div>
         </>)}
 
-        {panelTab === "stack" && (<>
+        {panelTab === "stack" && !hasCapitalAccess && (
+          <div className="py-12 text-center space-y-4" data-testid="upgrade-prompt-stack">
+            <div className="w-14 h-14 rounded-full bg-amber-50 flex items-center justify-center mx-auto">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            </div>
+            <div>
+              <p className="text-[15px] font-semibold text-[#1a1a1a]">Capital Tier Required</p>
+              <p className="text-[12px] text-[#888] mt-1 max-w-[280px] mx-auto">Funding Sequence, lender targeting, and capital stacking are available on the Capital plan.</p>
+            </div>
+            <a href="/subscription" className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-[#1a1a2e] text-white text-[13px] font-medium hover:bg-[#2a2a40] transition-colors" data-testid="button-upgrade-stack">
+              Upgrade to Capital
+            </a>
+          </div>
+        )}
+        {panelTab === "stack" && hasCapitalAccess && (<>
         <div className="space-y-2.5">
 
           {!hasAis && (
@@ -2958,7 +2976,21 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
         </div>
         </>)}
 
-        {panelTab === "documents" && (<>
+        {panelTab === "documents" && !hasRepairAccess && (
+              <div className="py-12 text-center space-y-4" data-testid="upgrade-prompt-repair">
+                <div className="w-14 h-14 rounded-full bg-purple-50 flex items-center justify-center mx-auto">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#8b5cf6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                </div>
+                <div>
+                  <p className="text-[15px] font-semibold text-[#1a1a1a]">Repair Tier Required</p>
+                  <p className="text-[12px] text-[#888] mt-1 max-w-[280px] mx-auto">AI dispute letters, the Repair Center, and credit report error detection are available on the Repair or Capital plan.</p>
+                </div>
+                <a href="/subscription" className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-[#8b5cf6] text-white text-[13px] font-medium hover:bg-[#7c3aed] transition-colors" data-testid="button-upgrade-repair">
+                  Upgrade to Repair
+                </a>
+              </div>
+        )}
+        {panelTab === "documents" && hasRepairAccess && (<>
 
 
         {repairData && repairData.truthProfile && (
@@ -3514,7 +3546,7 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
         </div>
         </>)}
 
-        {panelTab === "documents" && (<>
+        {panelTab === "documents" && hasRepairAccess && (<>
         {false && <div className="mb-4">
           <div className="flex items-center gap-2 mb-2">
             <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 3h8M2 6h6M2 9h4" stroke="#333" strokeWidth="1.2" strokeLinecap="round" /></svg>
@@ -3828,7 +3860,7 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
         <TeamSection user={user} onOpenTeamChat={onOpenTeamChat} activeTeamChatId={activeTeamChatId} />
         </>)}
 
-        {panelTab === "documents" && (<>
+        {panelTab === "documents" && hasRepairAccess && (<>
         {otherDocs.length > 0 && (
           <div className="mb-4">
             <div className="flex items-center gap-2 mb-2">
@@ -3855,7 +3887,7 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
         )}
         </>)}
 
-        {panelTab === "documents" && (
+        {panelTab === "documents" && hasRepairAccess && (
         <div className="mt-4 pt-3 border-t border-[#eee]">
           <button
             onClick={() => docInputRef.current?.click()}
@@ -3871,7 +3903,21 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
         </div>
         )}
 
-        {panelTab === "unlocks" && (
+        {panelTab === "unlocks" && !hasCapitalAccess && (
+          <div className="py-12 text-center space-y-4" data-testid="upgrade-prompt-unlocks">
+            <div className="w-14 h-14 rounded-full bg-amber-50 flex items-center justify-center mx-auto">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            </div>
+            <div>
+              <p className="text-[15px] font-semibold text-[#1a1a1a]">Capital Tier Required</p>
+              <p className="text-[12px] text-[#888] mt-1 max-w-[280px] mx-auto">Credit Unlocks and community data insights are available on the Capital plan.</p>
+            </div>
+            <a href="/subscription" className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-[#1a1a2e] text-white text-[13px] font-medium hover:bg-[#2a2a40] transition-colors" data-testid="button-upgrade-unlocks">
+              Upgrade to Capital
+            </a>
+          </div>
+        )}
+        {panelTab === "unlocks" && hasCapitalAccess && (
           <CommunityUnlocks userProfile={userProfile} />
         )}
 

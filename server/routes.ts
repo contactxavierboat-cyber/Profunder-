@@ -13,6 +13,7 @@ import Parser from "rss-parser";
 import { getUncachableStripeClient, getStripePublishableKey } from "./stripeClient";
 import { startCommunityIngestion, seedCommunityDataIfEmpty } from "./communityIngestion";
 import { sql } from "drizzle-orm";
+import { detectTierFromProductName } from "./tierUtils";
 import { promisify } from "util";
 import PDFDocument from "pdfkit";
 import { writeFile, readdir, readFile, unlink, mkdir } from "fs/promises";
@@ -2261,8 +2262,67 @@ export async function registerRoutes(
   });
 
   app.get("/api/me", requireAuth, async (req, res) => {
-    const user = await storage.getUser(req.session.userId!);
+    let user = await storage.getUser(req.session.userId!);
     if (!user) return res.status(404).json({ error: "User not found" });
+
+    if (user.stripeCustomerId && user.subscriptionStatus === "active" && !user.subscriptionTier) {
+      try {
+        const { db: checkDb } = await import("./db");
+        const subResult = await checkDb.execute(
+          sql`SELECT s.id, si.price as price_id FROM stripe.subscriptions s
+              JOIN stripe.subscription_items si ON si.subscription = s.id
+              WHERE s.customer = ${user.stripeCustomerId} AND s.status = 'active'
+              ORDER BY s.created DESC LIMIT 1`
+        );
+        if (subResult.rows.length > 0) {
+          const subRow = subResult.rows[0] as Record<string, unknown>;
+          const priceId = subRow.price_id as string | undefined;
+          let tier: "basic" | "repair" | "capital" = "basic";
+          if (priceId) {
+            const priceResult = await checkDb.execute(
+              sql`SELECT p.name FROM stripe.products p
+                  JOIN stripe.prices pr ON pr.product = p.id
+                  WHERE pr.id = ${priceId} LIMIT 1`
+            );
+            if (priceResult.rows.length > 0) {
+              const productRow = priceResult.rows[0] as Record<string, unknown>;
+              tier = detectTierFromProductName(productRow.name as string);
+            }
+          }
+          await storage.updateUser(user.id, { subscriptionTier: tier });
+          user = (await storage.getUser(user.id))!;
+        } else {
+          try {
+            const stripe = await getUncachableStripeClient();
+            const subs = await stripe.subscriptions.list({
+              customer: user.stripeCustomerId,
+              status: "active",
+              limit: 1,
+              expand: ["data.items.data.price.product"],
+            });
+            if (subs.data.length > 0) {
+              let tier: "basic" | "repair" | "capital" = "basic";
+              const item = subs.data[0].items?.data?.[0];
+              if (item?.price?.product) {
+                const product = typeof item.price.product === "string"
+                  ? { name: "" }
+                  : item.price.product;
+                if ("name" in product && product.name) {
+                  tier = detectTierFromProductName(product.name);
+                }
+              }
+              await storage.updateUser(user.id, { subscriptionTier: tier });
+              user = (await storage.getUser(user.id))!;
+            }
+          } catch (stripeErr) {
+            console.error("Tier sync Stripe fallback error in /api/me:", stripeErr);
+          }
+        }
+      } catch (syncErr) {
+        console.error("Tier sync error in /api/me:", syncErr);
+      }
+    }
+
     res.json(stripPassword(user));
   });
 
@@ -2349,6 +2409,33 @@ export async function registerRoutes(
         throw priceErr;
       }
 
+      if (user.subscriptionStatus === "active" && customerId) {
+        const existingSubs = await stripe.subscriptions.list({
+          customer: customerId,
+          status: "active",
+          limit: 1,
+        });
+        if (existingSubs.data.length > 0) {
+          const sub = existingSubs.data[0];
+          const subItem = sub.items.data[0];
+          if (subItem && subItem.price.id !== priceId) {
+            await stripe.subscriptions.update(sub.id, {
+              items: [{ id: subItem.id, price: priceId }],
+              proration_behavior: "create_prorations",
+            });
+
+            const price = await stripe.prices.retrieve(priceId, { expand: ["product"] });
+            let newTier: "basic" | "repair" | "capital" = "basic";
+            if (typeof price.product === "object" && price.product !== null && "name" in price.product) {
+              newTier = detectTierFromProductName((price.product as { name: string }).name);
+            }
+            await storage.updateUser(user.id, { subscriptionTier: newTier });
+            return res.json({ updated: true, tier: newTier });
+          }
+          return res.json({ updated: true, tier: user.subscriptionTier });
+        }
+      }
+
       const baseUrl = `${req.protocol}://${req.get('host')}`;
       const session = await stripe.checkout.sessions.create({
         customer: customerId,
@@ -2428,6 +2515,69 @@ export async function registerRoutes(
     }
   });
 
+
+  app.get("/api/subscription-plans", async (req, res) => {
+    try {
+      const { db } = await import("./db");
+      const result = await db.execute(
+        sql`SELECT p.id as product_id, p.name, p.description, pr.id as price_id, pr.unit_amount, pr.currency
+            FROM stripe.products p
+            JOIN stripe.prices pr ON pr.product = p.id
+            WHERE p.active = true AND pr.active = true
+            ORDER BY pr.unit_amount ASC`
+      );
+
+      interface SubscriptionPlan {
+        product_id: string;
+        name: string;
+        description: string;
+        price_id: string;
+        unit_amount: number;
+        currency: string;
+        tier: "basic" | "repair" | "capital";
+      }
+
+      if (result.rows.length > 0) {
+        const allPlans: SubscriptionPlan[] = result.rows.map((row: Record<string, unknown>) => ({
+          product_id: row.product_id as string,
+          name: row.name as string,
+          description: (row.description as string) || "",
+          price_id: row.price_id as string,
+          unit_amount: row.unit_amount as number,
+          currency: row.currency as string,
+          tier: detectTierFromProductName(row.name as string),
+        }));
+        const profundrPlans = allPlans.filter(p => p.name.toLowerCase().includes("profundr"));
+        return res.json(profundrPlans.length > 0 ? profundrPlans : allPlans);
+      }
+
+      const stripe = await getUncachableStripeClient();
+      const products = await stripe.products.list({ active: true, limit: 10 });
+      const plans: SubscriptionPlan[] = [];
+      for (const product of products.data) {
+        if (!product.name.toLowerCase().includes("profundr")) continue;
+        const prices = await stripe.prices.list({ product: product.id, active: true, limit: 1 });
+        if (prices.data.length > 0) {
+          const price = prices.data[0];
+          plans.push({
+            product_id: product.id,
+            name: product.name,
+            description: product.description || "",
+            price_id: price.id,
+            unit_amount: price.unit_amount ?? 0,
+            currency: price.currency,
+            tier: detectTierFromProductName(product.name),
+          });
+        }
+      }
+      plans.sort((a, b) => a.unit_amount - b.unit_amount);
+      res.json(plans);
+    } catch (error: any) {
+      console.error("Plans fetch error:", error);
+      res.status(500).json({ error: "Failed to fetch plans" });
+    }
+  });
+
   app.post("/api/activate-free", requireAuth, async (req, res) => {
     try {
       const userId = req.session.userId!;
@@ -2442,20 +2592,43 @@ export async function registerRoutes(
     try {
       const user = await storage.getUser(req.session.userId!);
       if (!user || !user.stripeCustomerId) {
-        return res.json({ active: false });
+        return res.json({ active: false, tier: null });
       }
 
-      const { db } = await import("./db");
-      const result = await db.execute(
-        sql`SELECT id, status FROM stripe.subscriptions 
-            WHERE customer = ${user.stripeCustomerId} AND status = 'active' LIMIT 1`
+      const { db: checkDb } = await import("./db");
+
+      const result = await checkDb.execute(
+        sql`SELECT s.id, s.status, si.price as price_id
+            FROM stripe.subscriptions s
+            LEFT JOIN stripe.subscription_items si ON si.subscription = s.id
+            WHERE s.customer = ${user.stripeCustomerId} AND s.status = 'active'
+            ORDER BY s.created DESC LIMIT 1`
       );
 
       if (result.rows.length > 0) {
-        if (user.subscriptionStatus !== "active") {
-          await storage.updateUser(user.id, { subscriptionStatus: "active" });
+        let tier: "basic" | "repair" | "capital" = "basic";
+        const subRow = result.rows[0] as Record<string, unknown>;
+        const priceId = subRow.price_id as string | undefined;
+        if (priceId) {
+          const priceResult = await checkDb.execute(
+            sql`SELECT p.name FROM stripe.products p
+                JOIN stripe.prices pr ON pr.product = p.id
+                WHERE pr.id = ${priceId} LIMIT 1`
+          );
+          if (priceResult.rows.length > 0) {
+            const productRow = priceResult.rows[0] as Record<string, unknown>;
+            tier = detectTierFromProductName(productRow.name as string);
+          }
         }
-        return res.json({ active: true });
+
+        const updates: Partial<{ subscriptionStatus: string; subscriptionTier: string | null }> = { subscriptionStatus: "active" };
+        if (user.subscriptionTier !== tier) {
+          updates.subscriptionTier = tier;
+        }
+        if (user.subscriptionStatus !== "active" || user.subscriptionTier !== tier) {
+          await storage.updateUser(user.id, updates);
+        }
+        return res.json({ active: true, tier });
       }
 
       try {
@@ -2464,19 +2637,31 @@ export async function registerRoutes(
           customer: user.stripeCustomerId,
           status: "active",
           limit: 1,
+          expand: ["data.items.data.price.product"],
         });
         if (subs.data.length > 0) {
-          await storage.updateUser(user.id, { subscriptionStatus: "active" });
-          return res.json({ active: true });
+          let tier: "basic" | "repair" | "capital" = "basic";
+          const sub = subs.data[0];
+          const item = sub.items?.data?.[0];
+          if (item?.price?.product) {
+            const product = typeof item.price.product === "string"
+              ? { name: "" }
+              : item.price.product;
+            if ("name" in product && product.name) {
+              tier = detectTierFromProductName(product.name);
+            }
+          }
+          await storage.updateUser(user.id, { subscriptionStatus: "active", subscriptionTier: tier });
+          return res.json({ active: true, tier });
         }
       } catch (stripeErr: any) {
         console.error("Stripe API check fallback error:", stripeErr.message);
       }
 
-      if (user.subscriptionStatus === "active") {
-        await storage.updateUser(user.id, { subscriptionStatus: "inactive" });
+      if (user.subscriptionStatus === "active" || user.subscriptionTier !== null) {
+        await storage.updateUser(user.id, { subscriptionStatus: "inactive", subscriptionTier: null });
       }
-      res.json({ active: false });
+      res.json({ active: false, tier: null });
     } catch (error: any) {
       console.error("Subscription check error:", error);
       res.status(500).json({ error: "Failed to check subscription" });
