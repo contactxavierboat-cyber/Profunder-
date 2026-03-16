@@ -414,7 +414,7 @@ function parseSingleMessageData(content: string): MissionData {
             condition: u.condition || "",
             currentRange: u.currentRange || "",
             projectedRange: u.projectedRange || "",
-            projectedOdds: u.projectedOdds || 0,
+            projectedOdds: Number(u.projectedOdds) || 0,
           })),
         };
       }
@@ -431,8 +431,8 @@ function parseSingleMessageData(content: string): MissionData {
           capitalPotential.push({
             lender: l.lender || "",
             product: l.product || "",
-            lowEstimate: l.lowEstimate || 0,
-            highEstimate: l.highEstimate || 0,
+            lowEstimate: Number(l.lowEstimate) || 0,
+            highEstimate: Number(l.highEstimate) || 0,
             bureau: l.bureau || "",
             confidence: l.confidence || "Medium",
           });
@@ -449,10 +449,10 @@ function parseSingleMessageData(content: string): MissionData {
       if (parsed && parsed.sequence) {
         for (const s of parsed.sequence) {
           fundingSequence.push({
-            position: s.position || 0,
+            position: Number(s.position) || 0,
             lender: s.lender || "",
             product: s.product || "",
-            approvalProbability: s.approvalProbability || 0,
+            approvalProbability: Number(s.approvalProbability) || 0,
             bureau: s.bureau || "",
             reasoning: s.reasoning || "",
           });
