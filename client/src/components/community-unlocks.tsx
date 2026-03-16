@@ -89,7 +89,8 @@ const defaultFilters: Filters = {
   bureauPulled: "", applicationType: "", dateRange: "", search: "",
 };
 
-export default function CommunityUnlocks({ userProfile }: { userProfile?: any }) {
+export default function CommunityUnlocks({ userProfile, userRole }: { userProfile?: any; userRole?: string }) {
+  const isAdmin = userRole === "admin";
   const [dataPoints, setDataPoints] = useState<CommunityDataPoint[]>([]);
   const [total, setTotal] = useState(0);
   const [trends, setTrends] = useState<Trends | null>(null);
@@ -256,7 +257,7 @@ export default function CommunityUnlocks({ userProfile }: { userProfile?: any })
         { key: "trends" as const, label: "Trends" },
         { key: "similar" as const, label: "My Match" },
         { key: "submit" as const, label: "Submit" },
-        { key: "extract" as const, label: "AI Extract" },
+        ...(isAdmin ? [{ key: "extract" as const, label: "AI Extract" }] : []),
       ] as const).map(s => (
         <button
           key={s.key}
@@ -944,7 +945,7 @@ export default function CommunityUnlocks({ userProfile }: { userProfile?: any })
       {activeSection === "trends" && <TrendsSection />}
       {activeSection === "similar" && <SimilarSection />}
       {activeSection === "submit" && <SubmitSection />}
-      {activeSection === "extract" && <ExtractSection />}
+      {activeSection === "extract" && isAdmin && <ExtractSection />}
 
       <DetailModal />
     </div>
