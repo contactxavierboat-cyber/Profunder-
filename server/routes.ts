@@ -11,6 +11,7 @@ import { execFile } from "child_process";
 // @ts-ignore
 import Parser from "rss-parser";
 import { getUncachableStripeClient, getStripePublishableKey } from "./stripeClient";
+import { startCommunityIngestion } from "./communityIngestion";
 import { sql } from "drizzle-orm";
 import { promisify } from "util";
 import PDFDocument from "pdfkit";
@@ -9595,6 +9596,8 @@ ${text.slice(0, 5000)}`;
       res.status(500).json({ error: error.message });
     }
   });
+
+  startCommunityIngestion();
 
   return httpServer;
 }
