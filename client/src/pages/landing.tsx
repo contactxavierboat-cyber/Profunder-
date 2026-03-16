@@ -1,4 +1,5 @@
-import { useState, useRef, useEffect, useCallback, useMemo } from "react";
+import { useState, useRef, useEffect, useCallback, useMemo, createContext, useContext } from "react";
+import { createPortal } from "react-dom";
 import ReactMarkdown from "react-markdown";
 import { useAuth } from "@/lib/store";
 import { ProfundrLogo } from "@/components/profundr-logo";
@@ -2305,7 +2306,7 @@ function PerfectProfileTab({ aisReport }: { aisReport: MissionData | null }) {
   );
 }
 
-function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, activeTeamChatId, aisReport, onOpenAis, userProfile, onUpdateProfile, repairData, onUpdateRepairData, onSendChat }: { docs: SavedDoc[]; onClose: () => void; onDelete: (id: string) => void; onSave: (doc: SavedDoc) => void; user: any; onOpenTeamChat?: (member: TeamMember) => void; activeTeamChatId?: number | null; aisReport: MissionData | null; onOpenAis: () => void; userProfile: UserProfile; onUpdateProfile: (p: UserProfile) => void; repairData: RepairData | null; onUpdateRepairData: (data: RepairData) => void; onSendChat: (msg: string) => void }) {
+function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, activeTeamChatId, aisReport, onOpenAis, userProfile, onUpdateProfile, repairData, onUpdateRepairData, onSendChat, onSelectTab, activeView, simulatingLender, setSimulatingLender, repairFilter, setRepairFilter, inqCarouselIdx, setInqCarouselIdx, acctCarouselIdx, setAcctCarouselIdx, portalTarget, portalOnly }: { docs: SavedDoc[]; onClose: () => void; onDelete: (id: string) => void; onSave: (doc: SavedDoc) => void; user: any; onOpenTeamChat?: (member: TeamMember) => void; activeTeamChatId?: number | null; aisReport: MissionData | null; onOpenAis: () => void; userProfile: UserProfile; onUpdateProfile: (p: UserProfile) => void; repairData: RepairData | null; onUpdateRepairData: (data: RepairData) => void; onSendChat: (msg: string) => void; onSelectTab: (tab: "command" | "stack" | "documents") => void; activeView: "command" | "stack" | "documents" | null; simulatingLender: number | null; setSimulatingLender: (v: number | null) => void; repairFilter: { bureau: string; category: string }; setRepairFilter: (fn: any) => void; inqCarouselIdx: number; setInqCarouselIdx: (v: number) => void; acctCarouselIdx: number; setAcctCarouselIdx: (v: number) => void; portalTarget: React.RefObject<HTMLDivElement | null>; portalOnly?: boolean }) {
   const docInputRef = useRef<HTMLInputElement>(null);
   const idInputRef = useRef<HTMLInputElement>(null);
   const bankInputRef = useRef<HTMLInputElement>(null);
@@ -2477,14 +2478,10 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
     return pf.readinessLevel;
   };
 
-  const [panelTab, setPanelTab] = useState<"command" | "stack" | "documents">("command");
-  const [simulatingLender, setSimulatingLender] = useState<number | null>(null);
-  const [repairFilter, setRepairFilter] = useState<{ bureau: string; category: string }>({ bureau: "All", category: "All" });
-  const [inqCarouselIdx, setInqCarouselIdx] = useState(0);
-  const [acctCarouselIdx, setAcctCarouselIdx] = useState(0);
+  const panelTab = activeView || "command";
 
   return (
-    <div className="h-full flex flex-col bg-white" data-testid="docs-panel">
+    <div className={portalOnly ? "hidden" : "h-full flex flex-col bg-white"} data-testid="docs-panel">
       <div className="px-3 pt-3 pb-0">
         <div className="flex items-center gap-2 mb-4">
           <div className="flex-1 flex items-center gap-2 px-3 py-2.5 bg-[#f5f5f5] rounded-full">
@@ -2503,11 +2500,11 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
           ]).map(nav => (
             <button
               key={nav.key}
-              onClick={() => setPanelTab(nav.key)}
-              className={`w-full flex items-center gap-3 px-3 py-3 rounded-xl text-left transition-colors ${panelTab === nav.key ? "bg-[#111] text-white" : "text-[#333] hover:bg-[#f5f5f5]"}`}
+              onClick={() => onSelectTab(nav.key)}
+              className={`w-full flex items-center gap-3 px-3 py-3 rounded-xl text-left transition-colors ${activeView === nav.key ? "bg-[#111] text-white" : "text-[#333] hover:bg-[#f5f5f5]"}`}
               data-testid={`tab-${nav.key}`}
             >
-              <span className={panelTab === nav.key ? "text-white" : "text-[#888]"}>{nav.icon}</span>
+              <span className={activeView === nav.key ? "text-white" : "text-[#888]"}>{nav.icon}</span>
               <span className="text-[14px] font-medium">{nav.label}</span>
             </button>
           ))}
@@ -2533,7 +2530,7 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
               {docs.slice(0, 5).map(doc => (
                 <button
                   key={doc.id}
-                  onClick={() => { setPanelTab("documents"); }}
+                  onClick={() => onSelectTab("documents")}
                   className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left text-[#555] hover:bg-[#f5f5f5] transition-colors"
                   data-testid={`doc-history-${doc.id}`}
                 >
@@ -2543,7 +2540,7 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
               ))}
               {docs.length > 5 && (
                 <button
-                  onClick={() => setPanelTab("documents")}
+                  onClick={() => onSelectTab("documents")}
                   className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left text-[#bbb] hover:bg-[#f5f5f5] transition-colors"
                   data-testid="button-see-more-docs"
                 >
@@ -2556,9 +2553,23 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
         )}
       </div>
 
-      <div className="w-full h-px bg-[#ebebeb] mt-2"></div>
+      <div className="flex-1" />
 
+      {portalTarget.current && activeView && createPortal(
       <div className="flex-1 overflow-y-auto px-4 py-3 bg-white">
+        <div className="w-full max-w-[720px] mx-auto">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => onSelectTab(activeView as any)}
+                className="w-7 h-7 flex items-center justify-center rounded-lg text-[#999] hover:text-[#555] hover:bg-[#eee] transition-colors"
+                data-testid="button-close-tab-view"
+              >
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M9 3L4 7l5 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
+              </button>
+              <span className="text-[13px] font-semibold text-[#333]">{panelTab === "command" ? "Command" : panelTab === "stack" ? "Stack" : "Repair"}</span>
+            </div>
+          </div>
 
         {panelTab === "command" && (<>
 
@@ -3841,25 +3852,28 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
           </div>
         )}
         </>)}
-      </div>
+
+        {panelTab === "documents" && (
+        <div className="mt-4 pt-3 border-t border-[#eee]">
+          <button
+            onClick={() => docInputRef.current?.click()}
+            className="w-full flex items-center justify-center gap-2 py-2.5 text-[11px] font-semibold text-white bg-[#1a1a2e] rounded-lg hover:bg-[#2a2a40] transition-colors"
+            data-testid="button-add-doc"
+          >
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 2v8M2 6h8" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" /></svg>
+            Upload New Bureau Data
+          </button>
+          <p className="text-[9px] text-[#bbb] text-center mt-2 leading-[1.5]">
+            Recalculate Capital Readiness Index
+          </p>
+        </div>
+        )}
+        </div>
+      </div>, portalTarget.current
+      )}
 
       <input ref={docInputRef} type="file" className="hidden" onChange={handleUploadDoc} data-testid="input-doc-upload" />
       <input ref={commandUploadRef} type="file" accept=".pdf,.txt,.csv,.html" className="hidden" onChange={handleUploadDoc} data-testid="input-command-upload" />
-      {panelTab === "documents" && (
-      <div className="px-4 py-3 border-t border-[#eee]">
-        <button
-          onClick={() => docInputRef.current?.click()}
-          className="w-full flex items-center justify-center gap-2 py-2.5 text-[11px] font-semibold text-white bg-[#1a1a2e] rounded-lg hover:bg-[#2a2a40] transition-colors"
-          data-testid="button-add-doc"
-        >
-          <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 2v8M2 6h8" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" /></svg>
-          Upload New Bureau Data
-        </button>
-        <p className="text-[9px] text-[#bbb] text-center mt-2 leading-[1.5]">
-          Recalculate Capital Readiness Index
-        </p>
-      </div>
-      )}
     </div>
   );
 }
@@ -3914,6 +3928,12 @@ export default function LandingPage() {
   });
   const [repairData, setRepairData] = useState<RepairData | null>(loadRepairData);
   const [showAisOverlay, setShowAisOverlay] = useState(false);
+  const [activeView, setActiveView] = useState<"command" | "stack" | "documents" | null>(null);
+  const [simulatingLender, setSimulatingLender] = useState<number | null>(null);
+  const [repairFilter, setRepairFilter] = useState<{ bureau: string; category: string }>({ bureau: "All", category: "All" });
+  const [inqCarouselIdx, setInqCarouselIdx] = useState(0);
+  const [acctCarouselIdx, setAcctCarouselIdx] = useState(0);
+  const panelContentRef = useRef<HTMLDivElement>(null);
   const teamConvoLoaded = useRef(false);
   const teamChatLoaded = useRef(false);
   const lastSeenMsgId = useRef(0);
@@ -4767,9 +4787,12 @@ export default function LandingPage() {
         <>
           <div className="sm:hidden fixed inset-0 bg-black/30 z-40" onClick={() => setDocsOpen(false)} />
           <div className="fixed sm:relative z-50 sm:z-auto w-[340px] h-full shrink-0 transition-all" data-testid="docs-sidebar">
-            <DocsPanel docs={savedDocs} onClose={() => setDocsOpen(false)} onDelete={handleDeleteDoc} onSave={handleSaveDoc} user={user} onOpenTeamChat={handleOpenTeamChat} activeTeamChatId={activeTeamChat?.id} aisReport={aisReport} onOpenAis={() => setShowAisOverlay(true)} userProfile={userProfile} onUpdateProfile={handleUpdateProfile} repairData={repairData} onUpdateRepairData={(data) => { setRepairData(data); saveRepairData(data); }} onSendChat={(msg) => { if (!msg.startsWith("__VAULT_REPORT_UPLOAD__")) setDocsOpen(false); setTimeout(() => handleSend(msg), 100); }} />
+            <DocsPanel docs={savedDocs} onClose={() => setDocsOpen(false)} onDelete={handleDeleteDoc} onSave={handleSaveDoc} user={user} onOpenTeamChat={handleOpenTeamChat} activeTeamChatId={activeTeamChat?.id} aisReport={aisReport} onOpenAis={() => setShowAisOverlay(true)} userProfile={userProfile} onUpdateProfile={handleUpdateProfile} repairData={repairData} onUpdateRepairData={(data) => { setRepairData(data); saveRepairData(data); }} onSendChat={(msg) => { if (!msg.startsWith("__VAULT_REPORT_UPLOAD__")) setDocsOpen(false); setTimeout(() => handleSend(msg), 100); }} onSelectTab={(tab) => { setActiveView(prev => prev === tab ? null : tab); setDocsOpen(false); }} activeView={activeView} simulatingLender={simulatingLender} setSimulatingLender={setSimulatingLender} repairFilter={repairFilter} setRepairFilter={setRepairFilter} inqCarouselIdx={inqCarouselIdx} setInqCarouselIdx={setInqCarouselIdx} acctCarouselIdx={acctCarouselIdx} setAcctCarouselIdx={setAcctCarouselIdx} portalTarget={panelContentRef} />
           </div>
         </>
+      )}
+      {!docsOpen && activeView && (
+        <DocsPanel docs={savedDocs} onClose={() => {}} onDelete={handleDeleteDoc} onSave={handleSaveDoc} user={user} onOpenTeamChat={handleOpenTeamChat} activeTeamChatId={activeTeamChat?.id} aisReport={aisReport} onOpenAis={() => setShowAisOverlay(true)} userProfile={userProfile} onUpdateProfile={handleUpdateProfile} repairData={repairData} onUpdateRepairData={(data) => { setRepairData(data); saveRepairData(data); }} onSendChat={(msg) => { setTimeout(() => handleSend(msg), 100); }} onSelectTab={(tab) => { setActiveView(prev => prev === tab ? null : tab); }} activeView={activeView} simulatingLender={simulatingLender} setSimulatingLender={setSimulatingLender} repairFilter={repairFilter} setRepairFilter={setRepairFilter} inqCarouselIdx={inqCarouselIdx} setInqCarouselIdx={setInqCarouselIdx} acctCarouselIdx={acctCarouselIdx} setAcctCarouselIdx={setAcctCarouselIdx} portalTarget={panelContentRef} portalOnly />
       )}
 
       <div className="flex-1 flex flex-col min-w-0 min-h-0 h-full">
@@ -4913,7 +4936,9 @@ export default function LandingPage() {
             </div>
           )}
 
-          {showAisOverlay && aisReport && hasAnalysisData(aisReport) ? (
+          <div ref={panelContentRef} />
+
+          {activeView ? null : showAisOverlay && aisReport && hasAnalysisData(aisReport) ? (
             <div className="w-full max-w-[720px] mx-auto px-4 pt-4 pb-2">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
