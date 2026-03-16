@@ -66,12 +66,16 @@ interface Filters {
   source: string;
   outcome: string;
   lender: string;
+  product: string;
   scoreMin: string;
   scoreMax: string;
   inquiryMin: string;
   inquiryMax: string;
   utilizationMin: string;
   utilizationMax: string;
+  incomeMin: string;
+  incomeMax: string;
+  state: string;
   bureauPulled: string;
   applicationType: string;
   dateRange: string;
@@ -79,8 +83,9 @@ interface Filters {
 }
 
 const defaultFilters: Filters = {
-  source: "", outcome: "", lender: "", scoreMin: "", scoreMax: "",
+  source: "", outcome: "", lender: "", product: "", scoreMin: "", scoreMax: "",
   inquiryMin: "", inquiryMax: "", utilizationMin: "", utilizationMax: "",
+  incomeMin: "", incomeMax: "", state: "",
   bureauPulled: "", applicationType: "", dateRange: "", search: "",
 };
 
@@ -115,12 +120,16 @@ export default function CommunityUnlocks({ userProfile }: { userProfile?: any })
       if (filters.source) params.set("source", filters.source);
       if (filters.outcome) params.set("outcome", filters.outcome);
       if (filters.lender) params.set("lender", filters.lender);
+      if (filters.product) params.set("product", filters.product);
       if (filters.scoreMin) params.set("scoreMin", filters.scoreMin);
       if (filters.scoreMax) params.set("scoreMax", filters.scoreMax);
       if (filters.inquiryMin) params.set("inquiryMin", filters.inquiryMin);
       if (filters.inquiryMax) params.set("inquiryMax", filters.inquiryMax);
       if (filters.utilizationMin) params.set("utilizationMin", filters.utilizationMin);
       if (filters.utilizationMax) params.set("utilizationMax", filters.utilizationMax);
+      if (filters.incomeMin) params.set("incomeMin", filters.incomeMin);
+      if (filters.incomeMax) params.set("incomeMax", filters.incomeMax);
+      if (filters.state) params.set("state", filters.state);
       if (filters.bureauPulled) params.set("bureauPulled", filters.bureauPulled);
       if (filters.applicationType) params.set("applicationType", filters.applicationType);
       if (filters.dateRange) params.set("dateRange", filters.dateRange);
@@ -321,6 +330,20 @@ export default function CommunityUnlocks({ userProfile }: { userProfile?: any })
           className="text-[11px] px-2 py-1.5 bg-white border border-[#ddd] rounded-md"
           data-testid="filter-lender-input"
         />
+        <input
+          value={filters.product}
+          onChange={e => setFilters(p => ({ ...p, product: e.target.value }))}
+          placeholder="Product name..."
+          className="text-[11px] px-2 py-1.5 bg-white border border-[#ddd] rounded-md"
+          data-testid="filter-product-input"
+        />
+        <input
+          value={filters.state}
+          onChange={e => setFilters(p => ({ ...p, state: e.target.value }))}
+          placeholder="State (e.g. CA)"
+          className="text-[11px] px-2 py-1.5 bg-white border border-[#ddd] rounded-md"
+          data-testid="filter-state-input"
+        />
       </div>
       <div className="grid grid-cols-3 gap-2 mb-2">
         <input value={filters.scoreMin} onChange={e => setFilters(p => ({ ...p, scoreMin: e.target.value }))} placeholder="Score min" className="text-[11px] px-2 py-1.5 bg-white border border-[#ddd] rounded-md" data-testid="filter-score-min" />
@@ -329,6 +352,9 @@ export default function CommunityUnlocks({ userProfile }: { userProfile?: any })
         <input value={filters.utilizationMin} onChange={e => setFilters(p => ({ ...p, utilizationMin: e.target.value }))} placeholder="Util min %" className="text-[11px] px-2 py-1.5 bg-white border border-[#ddd] rounded-md" data-testid="filter-util-min" />
         <input value={filters.utilizationMax} onChange={e => setFilters(p => ({ ...p, utilizationMax: e.target.value }))} placeholder="Util max %" className="text-[11px] px-2 py-1.5 bg-white border border-[#ddd] rounded-md" data-testid="filter-util-max" />
         <input value={filters.inquiryMin} onChange={e => setFilters(p => ({ ...p, inquiryMin: e.target.value }))} placeholder="Min inquiries" className="text-[11px] px-2 py-1.5 bg-white border border-[#ddd] rounded-md" data-testid="filter-inq-min" />
+        <input value={filters.incomeMin} onChange={e => setFilters(p => ({ ...p, incomeMin: e.target.value }))} placeholder="Income min" className="text-[11px] px-2 py-1.5 bg-white border border-[#ddd] rounded-md" data-testid="filter-income-min" />
+        <input value={filters.incomeMax} onChange={e => setFilters(p => ({ ...p, incomeMax: e.target.value }))} placeholder="Income max" className="text-[11px] px-2 py-1.5 bg-white border border-[#ddd] rounded-md" data-testid="filter-income-max" />
+        <input value={filters.search} onChange={e => setFilters(p => ({ ...p, search: e.target.value }))} placeholder="Search..." className="text-[11px] px-2 py-1.5 bg-white border border-[#ddd] rounded-md" data-testid="filter-search" />
       </div>
       <div className="flex gap-2">
         <button onClick={() => { setPage(0); fetchData(); }} className="px-3 py-1.5 text-[10px] font-medium bg-[#111] text-white rounded-md" data-testid="button-apply-filters">Apply</button>
