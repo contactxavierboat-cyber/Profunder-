@@ -1696,7 +1696,7 @@ function filterRepairDataFromContent(content: string): string {
 
 function parseAisBeforeStrip(content: string): MissionData | null {
   const parsed = parseSingleMessageData(content);
-  if (hasAnalysisData(parsed) && parsed.approvalIndex !== null) return parsed;
+  if (hasAnalysisData(parsed)) return parsed;
   return null;
 }
 
@@ -2105,11 +2105,14 @@ function CapitalSimulator({ aisReport }: { aisReport: MissionData }) {
 
 function PerfectProfileTab({ aisReport }: { aisReport: MissionData | null }) {
   const [expandedSection, setExpandedSection] = useState<string | null>("revolving");
-  if (!aisReport || !hasAnalysisData(aisReport)) {
+  if (!aisReport) {
     return null;
   }
 
   const tradelines = aisReport.openTradelines || [];
+  if (tradelines.length === 0 && !hasAnalysisData(aisReport)) {
+    return null;
+  }
 
   const parseAge = (age: string): number => {
     const yrMatch = age.match(/(\d+)\s*yr/i);
@@ -4303,8 +4306,8 @@ export default function LandingPage() {
           setSavedDocs(prev => {
             const crDocs = prev.filter(d => d.type === "credit_report");
             const match = crDocs.find(d => d.name === file!.name) || crDocs[crDocs.length - 1];
-            if (match && !match.extractedText) {
-              const updated = prev.map(d => d === match ? { ...d, extractedText: data.extractedText } : d);
+            if (match) {
+              const updated = prev.map(d => d === match ? { ...d, extractedText: data.extractedText, savedAt: Date.now() } : d);
               try { localStorage.setItem("profundr_saved_docs", JSON.stringify(updated)); } catch {}
               return updated;
             }
@@ -4406,8 +4409,8 @@ export default function LandingPage() {
         setSavedDocs(prev => {
           const crDocs = prev.filter(d => d.type === "credit_report");
           const match = crDocs.find(d => d.name === file.name) || crDocs[crDocs.length - 1];
-          if (match && !match.extractedText) {
-            const updated = prev.map(d => d === match ? { ...d, extractedText: data.extractedText } : d);
+          if (match) {
+            const updated = prev.map(d => d === match ? { ...d, extractedText: data.extractedText, savedAt: Date.now() } : d);
             try { localStorage.setItem("profundr_saved_docs", JSON.stringify(updated)); } catch {}
             return updated;
           }
