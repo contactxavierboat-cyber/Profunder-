@@ -4943,7 +4943,7 @@ export default function LandingPage() {
             </div>
           )}
 
-          <div ref={panelContentRef} />
+          <div ref={panelContentRef} className="w-full" />
 
           {activeView ? null : showAisOverlay && aisReport && hasAnalysisData(aisReport) ? (
             <div className="w-full max-w-[720px] mx-auto px-4 pt-4 pb-2">

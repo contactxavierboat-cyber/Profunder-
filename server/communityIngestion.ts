@@ -411,7 +411,29 @@ async function runIngestionCycle(): Promise<void> {
   isRunning = false;
 }
 
-const SEED_DATA = [
+interface SeedRecord {
+  source: string;
+  lender: string;
+  product: string;
+  outcome: string;
+  limitAmount: number | null;
+  score: number;
+  scoreBand: string;
+  income: number;
+  incomeBand: string;
+  utilization: number;
+  inquiryCount: number;
+  oldestAccountAgeMonths: number;
+  bureauPulled: string;
+  state: string;
+  applicationType: string;
+  businessRevenue?: number;
+  notes: string;
+  confidenceScore: number;
+  smartTags: string[];
+}
+
+const SEED_DATA: SeedRecord[] = [
   { source: "reddit", lender: "Chase", product: "Sapphire Preferred", outcome: "approval", limitAmount: 12000, score: 740, scoreBand: "700-749", income: 85000, incomeBand: "75k-100k", utilization: 8, inquiryCount: 2, oldestAccountAgeMonths: 84, bureauPulled: "Experian", state: "CA", applicationType: "personal", notes: "First Chase card. Applied online, instant approval.", confidenceScore: 85, smartTags: ["high-limit approval", "low utilization", "low inquiries", "established profile", "excellent score"] },
   { source: "reddit", lender: "American Express", product: "Gold Card", outcome: "approval", limitAmount: 15000, score: 725, scoreBand: "700-749", income: 72000, incomeBand: "50k-75k", utilization: 12, inquiryCount: 3, oldestAccountAgeMonths: 60, bureauPulled: "Experian", state: "NY", applicationType: "personal", notes: "Had a prior Amex relationship. Auto-approved.", confidenceScore: 90, smartTags: ["high-limit approval", "low utilization", "established profile", "approval with relationship"] },
   { source: "myfico", lender: "Capital One", product: "Venture X", outcome: "approval", limitAmount: 20000, score: 760, scoreBand: "750+", income: 95000, incomeBand: "75k-100k", utilization: 5, inquiryCount: 1, oldestAccountAgeMonths: 120, bureauPulled: "TransUnion", state: "TX", applicationType: "personal", notes: "Long credit history. Zero derogatories.", confidenceScore: 92, smartTags: ["premium approval", "high-limit approval", "low utilization", "low inquiries", "established profile", "excellent score"] },
@@ -481,9 +503,9 @@ export async function seedCommunityDataIfEmpty(): Promise<void> {
   }
 
   try {
-    const { data, total } = await storage.getCommunityDataPoints({ moderationStatus: "approved" });
+    const { data, total } = await storage.getCommunityDataPoints({});
     if (total > 0) {
-      console.log(`[CommunityIngestion] Community data already has ${total} approved records, skipping seed`);
+      console.log(`[CommunityIngestion] Community data already has ${total} records, skipping seed`);
       return;
     }
 
@@ -512,7 +534,7 @@ export async function seedCommunityDataIfEmpty(): Promise<void> {
           bureauPulled: seed.bureauPulled,
           state: seed.state,
           applicationType: seed.applicationType,
-          businessRevenue: (seed as any).businessRevenue || null,
+          businessRevenue: seed.businessRevenue || null,
           relationshipWithLender: null,
           derogatoriesPresent: null,
           rawText: null,
