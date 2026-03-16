@@ -2520,6 +2520,23 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
 
         {panelTab === "command" && (<>
 
+        {hasAis && (aisReport?.capitalPotential || []).length > 0 && (() => {
+          const cpTotal = (aisReport!.capitalPotential || []);
+          const totalLow = cpTotal.reduce((s, e) => s + (e.lowEstimate || 0), 0);
+          const totalHigh = cpTotal.reduce((s, e) => s + (e.highEstimate || 0), 0);
+          const lenderCount = cpTotal.length;
+          return (
+            <div className="mb-3 pb-3 border-b border-[#e5e5e5]" data-testid="potential-funding-card">
+              <p className="text-[8px] text-[#999] font-medium tracking-wider uppercase mb-1.5">Potential Funding</p>
+              <p className="text-[28px] font-semibold text-[#111] leading-none tracking-tight" style={{ fontVariantNumeric: "tabular-nums" }}>${totalHigh.toLocaleString()}</p>
+              <div className="flex items-center gap-2 mt-1.5">
+                <span className="text-[9px] text-[#888]" style={{ fontVariantNumeric: "tabular-nums" }}>${totalLow.toLocaleString()} – ${totalHigh.toLocaleString()}</span>
+                <span className="text-[7px] text-[#bbb]">{lenderCount} lender{lenderCount !== 1 ? "s" : ""}</span>
+              </div>
+            </div>
+          );
+        })()}
+
         {!hasAis && (
           <div className="mb-3">
             <button onClick={triggerCommandUpload} className="w-full rounded-lg bg-[#111] p-4 text-center hover:bg-[#222] transition-colors cursor-pointer group" data-testid="button-upload-command">
@@ -2563,25 +2580,6 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
               )}
             </button>
           ) : null}
-
-          {hasAis && (aisReport?.capitalPotential || []).length > 0 && (() => {
-            const cpTotal = (aisReport!.capitalPotential || []);
-            const totalLow = cpTotal.reduce((s, e) => s + (e.lowEstimate || 0), 0);
-            const totalHigh = cpTotal.reduce((s, e) => s + (e.highEstimate || 0), 0);
-            const lenderCount = cpTotal.length;
-            return (
-              <div className="rounded-lg bg-[#111] p-3" data-testid="potential-funding-card">
-                <p className="text-[8px] text-white/35 font-medium tracking-wider uppercase mb-2">Potential Funding</p>
-                <div className="flex items-baseline gap-1.5 mb-1">
-                  <span className="text-[22px] font-semibold text-white leading-none" style={{ fontVariantNumeric: "tabular-nums" }}>${totalHigh.toLocaleString()}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-[9px] text-white/40" style={{ fontVariantNumeric: "tabular-nums" }}>Range: ${totalLow.toLocaleString()} – ${totalHigh.toLocaleString()}</span>
-                  <span className="text-[7px] text-white/25">{lenderCount} lender{lenderCount !== 1 ? "s" : ""}</span>
-                </div>
-              </div>
-            );
-          })()}
 
           {aisReport?.strategyData && aisReport.strategyData.steps.length > 0 && (
             <div className="pb-3 mb-3 border-b border-[#f0f0f0]" data-testid="capital-strategy">
