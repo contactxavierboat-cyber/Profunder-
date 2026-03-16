@@ -1977,86 +1977,68 @@ function CapitalSimulator({ aisReport }: { aisReport: MissionData }) {
   const hasChanges = simUtil !== baseUtil || simInqRemove > 0 || simAddTradelines > 0 || simAgeBoost > 0;
 
   return (
-    <div className="rounded-xl border border-[#e8e8e8] bg-white p-3" data-testid="capital-simulator">
-      <div className="flex items-center gap-2 mb-1.5">
-        <div className="w-5 h-5 rounded-md bg-[#1a1a2e] flex items-center justify-center shrink-0">
-          <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2 8V5M5 8V3M8 8V1" stroke="white" strokeWidth="1.2" strokeLinecap="round"/></svg>
-        </div>
-        <p className="text-[9px] text-[#333] font-bold uppercase tracking-[0.08em]">Capital Simulator</p>
-      </div>
-      <p className="text-[8px] text-[#999] mb-3">Adjust the sliders to see how changes affect your approval chances</p>
+    <div className="rounded-lg border border-[#e8e8e8] p-3" data-testid="capital-simulator">
+      <p className="text-[10px] text-[#111] font-medium tracking-wide mb-3">Capital Simulator</p>
 
       <div className="space-y-3 mb-3">
         <div>
           <div className="flex items-center justify-between mb-1">
-            <span className="text-[8px] text-[#555] font-medium">Lower utilization to</span>
-            <span className="text-[9px] font-bold text-[#333]" style={{ fontVariantNumeric: "tabular-nums" }}>{simUtil}%</span>
+            <span className="text-[9px] text-[#555]">Utilization</span>
+            <span className="text-[9px] font-semibold text-[#111]" style={{ fontVariantNumeric: "tabular-nums" }}>{simUtil}%</span>
           </div>
-          <input type="range" min="1" max={Math.max(baseUtil, 50)} value={simUtil} onChange={(e) => setSimUtil(parseInt(e.target.value))} className="w-full h-1.5 rounded-full appearance-none cursor-pointer" style={{ background: `linear-gradient(to right, #2d6a4f ${((simUtil - 1) / (Math.max(baseUtil, 50) - 1)) * 100}%, #eee ${((simUtil - 1) / (Math.max(baseUtil, 50) - 1)) * 100}%)` }} data-testid="slider-utilization" />
-          <div className="flex justify-between text-[6px] text-[#bbb] mt-0.5">
-            <span>1%</span>
-            <span>Current: {baseUtil}%</span>
-          </div>
+          <input type="range" min="1" max={Math.max(baseUtil, 50)} value={simUtil} onChange={(e) => setSimUtil(parseInt(e.target.value))} className="w-full h-[3px] rounded-full appearance-none cursor-pointer" style={{ background: `linear-gradient(to right, #111 ${((simUtil - 1) / (Math.max(baseUtil, 50) - 1)) * 100}%, #e5e5e5 ${((simUtil - 1) / (Math.max(baseUtil, 50) - 1)) * 100}%)` }} data-testid="slider-utilization" />
+          <p className="text-[8px] text-[#bbb] mt-0.5 text-right">Current: {baseUtil}%</p>
         </div>
 
         <div>
           <div className="flex items-center justify-between mb-1">
-            <span className="text-[8px] text-[#555] font-medium">Remove inquiries</span>
-            <span className="text-[9px] font-bold text-[#333]" style={{ fontVariantNumeric: "tabular-nums" }}>{simInqRemove}</span>
+            <span className="text-[9px] text-[#555]">Remove Inquiries</span>
+            <span className="text-[9px] font-semibold text-[#111]" style={{ fontVariantNumeric: "tabular-nums" }}>{simInqRemove}</span>
           </div>
-          <input type="range" min="0" max={Math.max(baseInq, 6)} value={simInqRemove} onChange={(e) => setSimInqRemove(parseInt(e.target.value))} className="w-full h-1.5 rounded-full appearance-none cursor-pointer" style={{ background: `linear-gradient(to right, #2d6a4f ${(simInqRemove / Math.max(baseInq, 6)) * 100}%, #eee ${(simInqRemove / Math.max(baseInq, 6)) * 100}%)` }} data-testid="slider-inquiries" />
-          <div className="flex justify-between text-[6px] text-[#bbb] mt-0.5">
-            <span>0</span>
-            <span>Current: {baseInq} inquiries</span>
-          </div>
+          <input type="range" min="0" max={Math.max(baseInq, 6)} value={simInqRemove} onChange={(e) => setSimInqRemove(parseInt(e.target.value))} className="w-full h-[3px] rounded-full appearance-none cursor-pointer" style={{ background: `linear-gradient(to right, #111 ${(simInqRemove / Math.max(baseInq, 6)) * 100}%, #e5e5e5 ${(simInqRemove / Math.max(baseInq, 6)) * 100}%)` }} data-testid="slider-inquiries" />
+          <p className="text-[8px] text-[#bbb] mt-0.5 text-right">{baseInq} on file</p>
         </div>
 
         <div>
           <div className="flex items-center justify-between mb-1">
-            <span className="text-[8px] text-[#555] font-medium">Add new credit accounts</span>
-            <span className="text-[9px] font-bold text-[#333]" style={{ fontVariantNumeric: "tabular-nums" }}>+{simAddTradelines}</span>
+            <span className="text-[9px] text-[#555]">Add Accounts</span>
+            <span className="text-[9px] font-semibold text-[#111]" style={{ fontVariantNumeric: "tabular-nums" }}>+{simAddTradelines}</span>
           </div>
-          <input type="range" min="0" max="5" value={simAddTradelines} onChange={(e) => setSimAddTradelines(parseInt(e.target.value))} className="w-full h-1.5 rounded-full appearance-none cursor-pointer" style={{ background: `linear-gradient(to right, #2d6a4f ${(simAddTradelines / 5) * 100}%, #eee ${(simAddTradelines / 5) * 100}%)` }} data-testid="slider-tradelines" />
-          <div className="flex justify-between text-[6px] text-[#bbb] mt-0.5">
-            <span>0</span>
-            <span>Current: {baseRev} revolving + {instCards.length} installment</span>
-          </div>
+          <input type="range" min="0" max="5" value={simAddTradelines} onChange={(e) => setSimAddTradelines(parseInt(e.target.value))} className="w-full h-[3px] rounded-full appearance-none cursor-pointer" style={{ background: `linear-gradient(to right, #111 ${(simAddTradelines / 5) * 100}%, #e5e5e5 ${(simAddTradelines / 5) * 100}%)` }} data-testid="slider-tradelines" />
+          <p className="text-[8px] text-[#bbb] mt-0.5 text-right">{baseRev}R + {instCards.length}I</p>
         </div>
 
         <div>
           <div className="flex items-center justify-between mb-1">
-            <span className="text-[8px] text-[#555] font-medium">Add months of age</span>
-            <span className="text-[9px] font-bold text-[#333]" style={{ fontVariantNumeric: "tabular-nums" }}>+{simAgeBoost * 6} months</span>
+            <span className="text-[9px] text-[#555]">Age Boost</span>
+            <span className="text-[9px] font-semibold text-[#111]" style={{ fontVariantNumeric: "tabular-nums" }}>+{simAgeBoost * 6}mo</span>
           </div>
-          <input type="range" min="0" max="4" value={simAgeBoost} onChange={(e) => setSimAgeBoost(parseInt(e.target.value))} className="w-full h-1.5 rounded-full appearance-none cursor-pointer" style={{ background: `linear-gradient(to right, #2d6a4f ${(simAgeBoost / 4) * 100}%, #eee ${(simAgeBoost / 4) * 100}%)` }} data-testid="slider-age" />
-          <div className="flex justify-between text-[6px] text-[#bbb] mt-0.5">
-            <span>0</span>
-            <span>Current avg: {baseAge} years</span>
-          </div>
+          <input type="range" min="0" max="4" value={simAgeBoost} onChange={(e) => setSimAgeBoost(parseInt(e.target.value))} className="w-full h-[3px] rounded-full appearance-none cursor-pointer" style={{ background: `linear-gradient(to right, #111 ${(simAgeBoost / 4) * 100}%, #e5e5e5 ${(simAgeBoost / 4) * 100}%)` }} data-testid="slider-age" />
+          <p className="text-[8px] text-[#bbb] mt-0.5 text-right">Avg: {baseAge}yr</p>
         </div>
       </div>
 
-      <div className={`rounded-lg border p-2.5 transition-all ${hasChanges ? "bg-gradient-to-r from-[#f0f2f8] to-[#e8f5e9] border-[#c8e6c9]" : "bg-[#fafafa] border-[#eee]"}`}>
+      <div className={`rounded-md border p-2.5 transition-all ${hasChanges ? "bg-[#f7f7f7] border-[#ddd]" : "bg-[#fafafa] border-[#eee]"}`}>
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <p className="text-[7px] text-[#999] font-medium mb-0.5">Approval Odds</p>
+            <p className="text-[8px] text-[#999] mb-0.5">Approval Odds</p>
             <div className="flex items-center gap-1.5">
-              <span className="text-[14px] font-bold" style={{ color: hasChanges && newOdds > currentOdds ? "#2d6a4f" : "#333", fontVariantNumeric: "tabular-nums" }}>{hasChanges ? newOdds : currentOdds}%</span>
+              <span className="text-[14px] font-semibold text-[#111]" style={{ fontVariantNumeric: "tabular-nums" }}>{hasChanges ? newOdds : currentOdds}%</span>
               {hasChanges && newOdds !== currentOdds && (
-                <span className="text-[8px] font-semibold text-[#2d6a4f]">+{newOdds - currentOdds}%</span>
+                <span className="text-[9px] font-medium text-[#2d6a4f]">+{newOdds - currentOdds}</span>
               )}
             </div>
           </div>
           <div>
-            <p className="text-[7px] text-[#999] font-medium mb-0.5">Estimated Funding</p>
-            <p className="text-[10px] font-bold" style={{ color: hasChanges ? "#2d6a4f" : "#333", fontVariantNumeric: "tabular-nums" }}>{hasChanges ? newFunding : currentFunding}</p>
+            <p className="text-[8px] text-[#999] mb-0.5">Est. Funding</p>
+            <p className="text-[10px] font-semibold text-[#111]" style={{ fontVariantNumeric: "tabular-nums" }}>{hasChanges ? newFunding : currentFunding}</p>
           </div>
         </div>
       </div>
 
       {hasChanges && (
-        <button onClick={() => { setSimUtil(baseUtil); setSimInqRemove(0); setSimAddTradelines(0); setSimAgeBoost(0); }} className="mt-2 text-[7px] text-[#999] hover:text-[#555] transition-colors" data-testid="button-reset-simulator">
-          Reset to current profile
+        <button onClick={() => { setSimUtil(baseUtil); setSimInqRemove(0); setSimAddTradelines(0); setSimAgeBoost(0); }} className="mt-2 text-[8px] text-[#bbb] hover:text-[#666] transition-colors" data-testid="button-reset-simulator">
+          Reset
         </button>
       )}
     </div>
@@ -2226,7 +2208,7 @@ function PerfectProfileTab({ aisReport }: { aisReport: MissionData | null }) {
   return (
     <div className="space-y-2 mt-2" data-testid="perfect-profile-tab">
       <div>
-        <p className="text-[8px] uppercase tracking-[0.12em] text-[#999] font-semibold mb-1 px-0.5">Your Credit Cards</p>
+        <p className="text-[9px] text-[#999] font-medium mb-1 px-0.5">Your Credit Cards</p>
         <div className="space-y-1">
           {primaryRevCards.map((card, i) => renderCard(card, i))}
           {emptyRevCount > 0 && Array.from({ length: emptyRevCount }).map((_, i) => renderEmptySlot("Revolving Card", filledPrimaryRevSlots + i, emptyRevSlotRows))}
@@ -2235,7 +2217,7 @@ function PerfectProfileTab({ aisReport }: { aisReport: MissionData | null }) {
 
       {auCards.length > 0 && (
         <div>
-          <p className="text-[8px] uppercase tracking-[0.12em] text-[#999] font-semibold mb-1 px-0.5">Authorized User Cards <span className="normal-case tracking-normal font-normal text-[7px] text-[#bbb]">(added to someone else's account — doesn't count toward your slots)</span></p>
+          <p className="text-[9px] text-[#999] font-medium mb-1 px-0.5">Authorized User <span className="font-normal text-[8px] text-[#bbb]">(doesn't count toward slots)</span></p>
           <div className="space-y-1">
             {auCards.map((card, i) => renderCard(card, primaryRevCards.length + i))}
           </div>
@@ -2243,7 +2225,7 @@ function PerfectProfileTab({ aisReport }: { aisReport: MissionData | null }) {
       )}
 
       <div>
-        <p className="text-[8px] uppercase tracking-[0.12em] text-[#999] font-semibold mb-1 px-0.5">Your Loans</p>
+        <p className="text-[9px] text-[#999] font-medium mb-1 px-0.5">Your Loans</p>
         <div className="space-y-1">
           {primaryInstCards.map((card, i) => renderCard(card, primaryRevCards.length + auCards.length + i))}
           {emptyInstCount > 0 && Array.from({ length: emptyInstCount }).map((_, i) => renderEmptySlot("Installment Loan", filledPrimaryInstSlots + i, emptyInstSlotRows))}
@@ -2252,7 +2234,7 @@ function PerfectProfileTab({ aisReport }: { aisReport: MissionData | null }) {
 
       {(otherCards.length > 0 || nonPrimaryInstCards.length > 0) && (
         <div>
-          <p className="text-[8px] uppercase tracking-[0.12em] text-[#999] font-semibold mb-1 px-0.5">Other Accounts</p>
+          <p className="text-[9px] text-[#999] font-medium mb-1 px-0.5">Other Accounts</p>
           <div className="space-y-1">
             {[...nonPrimaryInstCards, ...otherCards].map((card, i) => renderCard(card, primaryRevCards.length + auCards.length + primaryInstCards.length + i))}
           </div>
@@ -2440,47 +2422,38 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
   const [acctCarouselIdx, setAcctCarouselIdx] = useState(0);
 
   return (
-    <div className="h-full flex flex-col bg-white border-r border-[#eee]" data-testid="docs-panel">
-      <div className="flex items-center justify-between px-4 py-3 border-b border-[#eee]">
-        <div className="flex items-center gap-2">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1a1a2e" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M12 2C9.5 2 7.5 4 7.5 6.5c0 .5-.4 1-1 1C4.5 7.5 3 9.5 3 11.5c0 1.5.8 2.8 2 3.5 0 0-.5 1.5-.5 2.5C4.5 20 6.5 22 9 22c1.5 0 2.5-.5 3-1.5.5 1 1.5 1.5 3 1.5 2.5 0 4.5-2 4.5-4.5 0-1-.5-2.5-.5-2.5 1.2-.7 2-2 2-3.5 0-2-1.5-4-3.5-4-.6 0-1-.5-1-1C16.5 4 14.5 2 12 2z" />
-            <path d="M12 2v20" />
-            <path d="M7.5 7.5C9 8.5 10 10 10.5 12" />
-            <path d="M16.5 7.5C15 8.5 14 10 13.5 12" />
-          </svg>
+    <div className="h-full flex flex-col bg-[#fafafa] border-r border-[#eee]" data-testid="docs-panel">
+      <div className="flex items-center justify-between px-4 py-2.5 bg-white border-b border-[#eee]">
+        <div className="flex border border-[#e5e5e5] rounded-md overflow-hidden">
+          {(["command", "documents"] as const).map(tab => (
+            <button
+              key={tab}
+              onClick={() => setPanelTab(tab)}
+              className={`px-3 py-1.5 text-[9px] font-medium transition-colors ${panelTab === tab ? "bg-[#111] text-white" : "bg-white text-[#888] hover:text-[#555]"}`}
+              data-testid={`tab-${tab}`}
+            >
+              {tab === "command" ? "Command" : "Repair"}
+            </button>
+          ))}
         </div>
-        <button onClick={onClose} className="text-[#999] hover:text-[#555] transition-colors p-1" data-testid="button-close-docs">
-          <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M11 3L3 11M3 3l8 8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" /></svg>
+        <button onClick={onClose} className="text-[#bbb] hover:text-[#666] transition-colors p-1" data-testid="button-close-docs">
+          <svg width="12" height="12" viewBox="0 0 14 14" fill="none"><path d="M11 3L3 11M3 3l8 8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" /></svg>
         </button>
       </div>
 
-      <div className="flex border-b border-[#eee]">
-        {(["command", "documents"] as const).map(tab => (
-          <button
-            key={tab}
-            onClick={() => setPanelTab(tab)}
-            className={`flex-1 py-2 text-[10px] font-semibold uppercase tracking-wider transition-colors ${panelTab === tab ? "text-[#1a1a2e] border-b-2 border-[#1a1a2e]" : "text-[#aaa] hover:text-[#666]"}`}
-            data-testid={`tab-${tab}`}
-          >
-            {tab === "command" ? "Command" : "Repair Center"}
-          </button>
-        ))}
-      </div>
-
-      <div className="flex-1 overflow-y-auto px-4 py-3">
+      <div className="flex-1 overflow-y-auto px-3 py-3">
 
         {panelTab === "command" && (<>
 
         {!hasAis && (
-          <div className="mb-4">
-            <button onClick={triggerCommandUpload} className="w-full rounded-xl bg-gradient-to-br from-[#1a1a2e] to-[#2a2a40] p-5 text-center hover:from-[#22223a] hover:to-[#333350] transition-all cursor-pointer group" data-testid="button-upload-command">
-              <svg width="22" height="22" viewBox="0 0 18 18" fill="none" className="mx-auto mb-2 text-white/40 group-hover:text-white/60 transition-colors">
+          <div className="mb-3">
+            <button onClick={triggerCommandUpload} className="w-full rounded-lg bg-[#111] p-4 text-center hover:bg-[#222] transition-colors cursor-pointer group" data-testid="button-upload-command">
+              <svg width="18" height="18" viewBox="0 0 18 18" fill="none" className="mx-auto mb-2 text-white/30 group-hover:text-white/50 transition-colors">
                 <path d="M9 3V12M9 3L5.5 6.5M9 3L12.5 6.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
                 <path d="M3 12V14C3 14.5523 3.44772 15 4 15H14C14.5523 15 15 14.5523 15 14V12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
-              <p className="text-[11px] font-semibold text-white/70 group-hover:text-white/90 transition-colors">Upload Report</p>
-              <p className="text-[8px] text-white/30 mt-1 leading-[1.5]">Activates AIS, Repair Center, dispute detection, and full analysis</p>
+              <p className="text-[10px] font-medium text-white/60 group-hover:text-white/80 transition-colors">Upload Bureau Report</p>
+              <p className="text-[8px] text-white/25 mt-1">Activates full analysis</p>
             </button>
           </div>
         )}
@@ -2489,28 +2462,28 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
           {hasAis ? (
             <button
               onClick={onOpenAis}
-              className="w-full text-left rounded-xl bg-gradient-to-br from-[#1a1a2e] to-[#2a2a40] p-3 hover:from-[#22223a] hover:to-[#333350] transition-all group"
+              className="w-full text-left rounded-lg bg-[#111] p-3 hover:bg-[#1a1a1a] transition-colors group"
               data-testid="button-open-ais"
             >
-              <div className="flex items-center justify-between mb-1.5">
-                <p className="text-[8px] font-semibold text-white/40 uppercase tracking-[0.1em]">Capital Readiness Index</p>
-                <svg width="8" height="8" viewBox="0 0 10 10" fill="none" className="text-white/25 group-hover:text-white/50 transition-colors"><path d="M3 1l4 4-4 4" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" /></svg>
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-[8px] text-white/35 font-medium tracking-wider uppercase">Capital Readiness</p>
+                <svg width="8" height="8" viewBox="0 0 10 10" fill="none" className="text-white/20 group-hover:text-white/40 transition-colors"><path d="M3 1l4 4-4 4" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" /></svg>
               </div>
               <div className="flex items-center gap-3">
                 <div className="flex items-baseline gap-1">
-                  <span className="text-[22px] font-bold text-white leading-none" data-testid="text-ais-score" style={{ fontVariantNumeric: "tabular-nums" }}>{aisScore}</span>
-                  <span className="text-[10px] font-medium text-white/30">/ 100</span>
+                  <span className="text-[22px] font-semibold text-white leading-none" data-testid="text-ais-score" style={{ fontVariantNumeric: "tabular-nums" }}>{aisScore}</span>
+                  <span className="text-[10px] text-white/20">/ 100</span>
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p className="text-[9px] text-white/60 font-medium truncate" data-testid="text-ais-status">{getStatusLabel()}</p>
-                  <p className="text-[7px] text-white/30 truncate">{getPhaseAction()}</p>
+                  <p className="text-[9px] text-white/50 font-medium truncate" data-testid="text-ais-status">{getStatusLabel()}</p>
+                  <p className="text-[8px] text-white/25 truncate">{getPhaseAction()}</p>
                 </div>
               </div>
               {(suppressorCount > 0 || pf?.readinessLevel) && (
-                <div className="mt-2 pt-2 border-t border-white/8 flex items-center gap-3 flex-wrap">
-                  {pf?.readinessLevel && <span className="text-[7px] text-white/40">Tier: <span className="text-white/70 font-medium">{getReadinessTier()}</span></span>}
-                  {suppressorCount > 0 && <span className="text-[7px] text-white/40">Suppressors: <span className="text-white/70 font-medium">{suppressorCount}</span></span>}
-                  {aisScore && aisScore < 88 && <span className="text-[7px] text-white/40">Next: <span className="text-white/70 font-medium">{aisScore < 78 ? "78" : aisScore < 82 ? "82" : "88"}</span></span>}
+                <div className="mt-2 pt-2 border-t border-white/5 flex items-center gap-3 flex-wrap">
+                  {pf?.readinessLevel && <span className="text-[7px] text-white/30">{getReadinessTier()}</span>}
+                  {suppressorCount > 0 && <span className="text-[7px] text-white/30">{suppressorCount} suppressors</span>}
+                  {aisScore && aisScore < 88 && <span className="text-[7px] text-white/30">Next: {aisScore < 78 ? "78" : aisScore < 82 ? "82" : "88"}</span>}
                 </div>
               )}
             </button>
@@ -2593,181 +2566,94 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
             const mn = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
             return (<>
-              <div className="rounded-xl border border-[#e8e8e8] bg-white p-3" data-testid="denial-simulation">
-                <div className="flex items-center gap-2.5 mb-2">
-                  <div className="relative w-[36px] h-[36px] flex-shrink-0">
-                    <svg viewBox="0 0 36 36" className="w-full h-full -rotate-90">
-                      <circle cx="18" cy="18" r="15.5" fill="none" stroke="#f0f0f0" strokeWidth="2.5" />
-                      <circle cx="18" cy="18" r="15.5" fill="none" stroke={probColor} strokeWidth="2.5" strokeDasharray={`${approvalProb * 0.974} 100`} strokeLinecap="round" />
-                    </svg>
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <span className="text-[10px] font-bold leading-none" style={{ color: probColor, fontVariantNumeric: "tabular-nums" }}>{approvalProb}%</span>
-                    </div>
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <p className="text-[9px] text-[#333] font-semibold leading-tight">If You Applied Today</p>
-                    <p className="text-[7px] text-[#888] leading-[1.3] mt-0.5">
-                      {approvalProb >= 70
-                        ? "Good chance of approval"
-                        : approvalProb >= 45
-                          ? `~${Math.round(approvalProb / 10)} in 10 apps approved`
-                          : "Most apps would be declined"}
-                    </p>
-                  </div>
+              <div className="rounded-lg border border-[#e8e8e8] bg-white p-3" data-testid="denial-simulation">
+                <div className="flex items-center justify-between mb-2.5">
+                  <p className="text-[10px] text-[#111] font-medium tracking-wide">If You Applied Today</p>
+                  <span className="text-[11px] font-semibold" style={{ color: probColor, fontVariantNumeric: "tabular-nums" }}>{approvalProb}%</span>
                 </div>
                 {highestLimit > 0 && (
-                  <div className="grid grid-cols-2 gap-1.5 mb-2">
-                    <div className="rounded-md bg-[#fafafa] border border-[#eee] px-2 py-1.5">
-                      <p className="text-[6px] text-[#aaa] font-medium uppercase tracking-wider">Typical Range</p>
-                      <p className="text-[9px] text-[#333] font-bold mt-0.5" style={{ fontVariantNumeric: "tabular-nums" }}>${Math.round(highestLimit * 0.6).toLocaleString()} – ${Math.round(highestLimit * 1.2).toLocaleString()}</p>
+                  <div className="grid grid-cols-2 gap-2 mb-2.5">
+                    <div className="rounded-md bg-[#f7f7f7] px-2.5 py-2">
+                      <p className="text-[8px] text-[#999] mb-0.5">Current Range</p>
+                      <p className="text-[10px] text-[#111] font-semibold" style={{ fontVariantNumeric: "tabular-nums" }}>${Math.round(highestLimit * 0.6).toLocaleString()} – ${Math.round(highestLimit * 1.2).toLocaleString()}</p>
                     </div>
-                    <div className="rounded-md bg-[#fafafa] border border-[#eee] px-2 py-1.5">
-                      <p className="text-[6px] text-[#aaa] font-medium uppercase tracking-wider">If Improved</p>
-                      <p className="text-[9px] text-[#2d6a4f] font-bold mt-0.5" style={{ fontVariantNumeric: "tabular-nums" }}>${Math.round(highestLimit * 1.2).toLocaleString()} – ${Math.round(highestLimit * 1.8).toLocaleString()}</p>
+                    <div className="rounded-md bg-[#f7f7f7] px-2.5 py-2">
+                      <p className="text-[8px] text-[#999] mb-0.5">After Repair</p>
+                      <p className="text-[10px] text-[#2d6a4f] font-semibold" style={{ fontVariantNumeric: "tabular-nums" }}>${Math.round(highestLimit * 1.2).toLocaleString()} – ${Math.round(highestLimit * 1.8).toLocaleString()}</p>
                     </div>
                   </div>
                 )}
                 {denialDrivers.length > 0 && (
-                  <div className="rounded-md bg-[#fafafa] border border-[#eee] overflow-hidden">
-                    <div className="px-2 py-1 border-b border-[#eee] bg-[#f5f5f5]">
-                      <p className="text-[6px] text-[#aaa] font-semibold uppercase tracking-wider">Issues Affecting Approval</p>
-                    </div>
+                  <div className="space-y-0">
                     {denialDrivers.slice(0, 4).map((d, di) => (
-                      <div key={di} className={`flex items-center gap-2 px-2 py-1.5 ${di < Math.min(denialDrivers.length, 4) - 1 ? "border-b border-[#f0f0f0]" : ""}`}>
-                        <div className={`w-[4px] h-[4px] rounded-full shrink-0 ${d.level === "risk" ? "bg-[#c0392b]" : "bg-[#c9a227]"}`} />
-                        <span className={`text-[8px] font-semibold flex-1 ${d.level === "risk" ? "text-[#c0392b]" : "text-[#c9a227]"}`}>{d.label}</span>
-                        <span className="text-[7px] text-[#bbb]">{d.status}</span>
+                      <div key={di} className={`flex items-center justify-between py-1.5 ${di < Math.min(denialDrivers.length, 4) - 1 ? "border-b border-[#f0f0f0]" : ""}`}>
+                        <span className="text-[9px] text-[#555]">{d.label}</span>
+                        <span className={`text-[8px] font-medium ${d.level === "risk" ? "text-[#c0392b]" : "text-[#c9a227]"}`}>{d.status}</span>
                       </div>
                     ))}
                   </div>
                 )}
-                <div className="mt-2 pt-1.5 border-t border-[#f0f0f0] flex items-center justify-between">
-                  <p className="text-[7px] text-[#aaa]">Best window</p>
-                  <p className="text-[8px] font-semibold text-[#333]" style={{ fontVariantNumeric: "tabular-nums" }}>{mn[windowStart.getMonth()]}–{mn[windowEnd.getMonth()]} {windowEnd.getFullYear()}</p>
+                <div className="mt-2 pt-2 border-t border-[#f0f0f0] flex items-center justify-between">
+                  <p className="text-[8px] text-[#999]">Best window</p>
+                  <p className="text-[9px] font-medium text-[#111]" style={{ fontVariantNumeric: "tabular-nums" }}>{mn[windowStart.getMonth()]}–{mn[windowEnd.getMonth()]} {windowEnd.getFullYear()}</p>
                 </div>
               </div>
 
-              <div className="rounded-xl border border-[#e8e8e8] bg-white p-3" data-testid="underwriting-risk-signals">
-                <div className="flex items-center justify-between mb-1.5">
-                  <p className="text-[9px] text-[#333] font-semibold">Risk Signals</p>
-                  <span className="text-[7px] font-bold px-1.5 py-[2px] rounded" style={{ color: overallColor, backgroundColor: overallColor + "10" }}>{riskCount >= 2 ? "High Risk" : riskCount >= 1 || cautionCount >= 3 ? "Moderate" : cautionCount >= 1 ? "Low" : "Clear"}</span>
+              <div className="rounded-lg border border-[#e8e8e8] bg-white p-3" data-testid="underwriting-risk-signals">
+                <div className="flex items-center justify-between mb-2.5">
+                  <p className="text-[10px] text-[#111] font-medium tracking-wide">Risk Signals</p>
+                  <span className="text-[8px] font-medium" style={{ color: overallColor }}>{riskCount >= 2 ? "High" : riskCount >= 1 || cautionCount >= 3 ? "Moderate" : cautionCount >= 1 ? "Low" : "Clear"}</span>
                 </div>
-                <p className="text-[8px] text-[#aaa] mb-2.5">These are patterns lenders watch closely when reviewing applications</p>
-                {(() => {
-                  const riskSignals = signals.filter(s => s.level === "risk");
-                  const cautionSignals = signals.filter(s => s.level === "caution");
-                  const safeSignals = signals.filter(s => s.level === "safe");
-                  return (<>
-                    {riskSignals.length > 0 && (
-                      <div className="mb-2">
-                        <p className="text-[7px] text-[#c0392b] font-bold uppercase tracking-wider mb-1.5">High Risk</p>
-                        <div className="space-y-1.5">
-                          {riskSignals.map((s, si) => {
-                            const fix = getSignalFix(s.label, s.level);
-                            return (
-                              <div key={si} className="rounded-lg bg-[#c0392b]/4 border border-[#c0392b]/10 px-2.5 py-2">
-                                <div className="flex items-center justify-between mb-0.5">
-                                  <span className="text-[8px] text-[#333] font-semibold">{s.label}</span>
-                                  <span className="text-[7px] font-bold text-[#c0392b]">{s.status}</span>
-                                </div>
-                                <p className="text-[7px] text-[#888] leading-[1.4]">{getSignalExplanation(s.label)}</p>
-                                {fix && (
-                                  <div className="mt-1 flex items-center gap-1.5">
-                                    <span className="text-[7px] text-[#c0392b] font-semibold">Fix:</span>
-                                    <span className="text-[7px] text-[#666]">{fix}</span>
-                                  </div>
-                                )}
-                              </div>
-                            );
-                          })}
-                        </div>
+                <div className="space-y-0">
+                  {signals.map((s, si) => {
+                    const statusColor = s.level === "risk" ? "#c0392b" : s.level === "caution" ? "#c9a227" : "#2d6a4f";
+                    return (
+                      <div key={si} className={`flex items-center justify-between py-1.5 ${si < signals.length - 1 ? "border-b border-[#f0f0f0]" : ""}`}>
+                        <span className="text-[9px] text-[#555]">{s.label}</span>
+                        <span className="text-[8px] font-medium" style={{ color: statusColor }}>{s.status}</span>
                       </div>
-                    )}
-                    {cautionSignals.length > 0 && (
-                      <div className="mb-2">
-                        <p className="text-[7px] text-[#c9a227] font-bold uppercase tracking-wider mb-1.5">Moderate Risk</p>
-                        <div className="space-y-1.5">
-                          {cautionSignals.map((s, si) => {
-                            const fix = getSignalFix(s.label, s.level);
-                            return (
-                              <div key={si} className="flex items-center justify-between px-2.5 py-1.5 rounded-lg bg-[#c9a227]/4 border border-[#c9a227]/10">
-                                <div className="min-w-0 flex-1">
-                                  <span className="text-[8px] text-[#333] font-semibold">{s.label}</span>
-                                  {fix && <span className="text-[7px] text-[#888] ml-1.5">· {fix}</span>}
-                                </div>
-                                <span className="text-[7px] font-bold text-[#c9a227] ml-2">{s.status}</span>
-                              </div>
-                            );
-                          })}
-                        </div>
-                      </div>
-                    )}
-                    {safeSignals.length > 0 && (
-                      <div>
-                        <p className="text-[7px] text-[#2d6a4f] font-bold uppercase tracking-wider mb-1.5">Positive Signals</p>
-                        <div className="space-y-1">
-                          {safeSignals.map((s, si) => (
-                            <div key={si} className="flex items-center justify-between px-2.5 py-1.5">
-                              <span className="text-[8px] text-[#555]">{s.label}</span>
-                              <span className="text-[7px] font-bold text-[#2d6a4f]">{s.status}</span>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                  </>);
-                })()}
+                    );
+                  })}
+                </div>
               </div>
 
             </>);
           })()}
 
           {aisReport?.strategyData && aisReport.strategyData.steps.length > 0 && (
-            <div className="rounded-xl border border-[#e8e8e8] bg-white p-3" data-testid="capital-strategy">
-              <div className="flex items-center gap-2 mb-1.5">
-                <div className="w-5 h-5 rounded-md bg-[#1a1a2e] flex items-center justify-center shrink-0">
-                  <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M1 9l3-3 2 2 3-5" stroke="white" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                </div>
-                <p className="text-[9px] text-[#333] font-bold uppercase tracking-[0.08em]">Your Action Plan</p>
-              </div>
-              <p className="text-[8px] text-[#999] mb-2.5">Follow these steps in order to improve your approval chances</p>
-              <div className="space-y-2 mb-3">
-                {aisReport.strategyData.steps.map((step) => (
-                  <div key={step.step} className="rounded-lg bg-[#f8f9fb] border border-[#e8e8ee] p-2.5">
-                    <div className="flex items-start gap-2">
-                      <div className="w-5 h-5 rounded-full bg-[#1a1a2e] flex items-center justify-center shrink-0 mt-0.5">
-                        <span className="text-[9px] font-bold text-white" style={{ fontVariantNumeric: "tabular-nums" }}>{step.step}</span>
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <p className="text-[9px] text-[#333] font-semibold mb-0.5">{step.action}</p>
-                        <div className="flex items-center gap-2">
-                          <span className="text-[7px] text-[#2d6a4f] font-semibold">{step.impact}</span>
-                          <span className="text-[7px] text-[#ddd]">|</span>
-                          <span className="text-[7px] text-[#999]">{step.timeframe}</span>
-                        </div>
+            <div className="rounded-lg border border-[#e8e8e8] bg-white p-3" data-testid="capital-strategy">
+              <p className="text-[10px] text-[#111] font-medium tracking-wide mb-2.5">Action Plan</p>
+              <div className="space-y-0 mb-3">
+                {aisReport.strategyData.steps.map((step, si) => (
+                  <div key={step.step} className={`flex items-start gap-2.5 py-2 ${si < aisReport.strategyData!.steps.length - 1 ? "border-b border-[#f0f0f0]" : ""}`}>
+                    <span className="text-[9px] font-semibold text-[#bbb] mt-px w-3 shrink-0" style={{ fontVariantNumeric: "tabular-nums" }}>{step.step}</span>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-[9px] text-[#111] font-medium mb-0.5">{step.action}</p>
+                      <div className="flex items-center gap-2">
+                        <span className="text-[8px] text-[#2d6a4f] font-medium">{step.impact}</span>
+                        <span className="text-[8px] text-[#ccc]">{step.timeframe}</span>
                       </div>
                     </div>
                   </div>
                 ))}
               </div>
               {(aisReport.strategyData.currentOdds > 0 || aisReport.strategyData.projectedOdds > 0) && (
-                <div className="rounded-lg bg-gradient-to-r from-[#f0f2f8] to-[#e8f5e9] border border-[#ddd] p-2.5">
-                  <p className="text-[7px] text-[#999] font-semibold uppercase tracking-wider mb-1.5">Expected Results</p>
+                <div className="rounded-md bg-[#f7f7f7] p-2.5">
                   <div className="grid grid-cols-2 gap-3">
                     <div>
-                      <p className="text-[7px] text-[#aaa] mb-0.5">Approval Odds</p>
+                      <p className="text-[8px] text-[#999] mb-0.5">Odds</p>
                       <div className="flex items-center gap-1.5">
-                        <span className="text-[12px] font-bold text-[#c0392b]" style={{ fontVariantNumeric: "tabular-nums" }}>{aisReport.strategyData.currentOdds}%</span>
-                        <svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4h8M6 1l3 3-3 3" stroke="#2d6a4f" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                        <span className="text-[12px] font-bold text-[#2d6a4f]" style={{ fontVariantNumeric: "tabular-nums" }}>{aisReport.strategyData.projectedOdds}%</span>
+                        <span className="text-[11px] font-semibold text-[#999]" style={{ fontVariantNumeric: "tabular-nums" }}>{aisReport.strategyData.currentOdds}%</span>
+                        <span className="text-[9px] text-[#ccc]">&rarr;</span>
+                        <span className="text-[11px] font-semibold text-[#111]" style={{ fontVariantNumeric: "tabular-nums" }}>{aisReport.strategyData.projectedOdds}%</span>
                       </div>
                     </div>
                     <div>
-                      <p className="text-[7px] text-[#aaa] mb-0.5">Estimated Limits</p>
+                      <p className="text-[8px] text-[#999] mb-0.5">Funding</p>
                       <div className="flex items-center gap-1.5">
-                        <span className="text-[9px] font-bold text-[#c0392b]" style={{ fontVariantNumeric: "tabular-nums" }}>{aisReport.strategyData.currentFunding}</span>
-                        <svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4h8M6 1l3 3-3 3" stroke="#2d6a4f" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                        <span className="text-[9px] font-bold text-[#2d6a4f]" style={{ fontVariantNumeric: "tabular-nums" }}>{aisReport.strategyData.projectedFunding}</span>
+                        <span className="text-[9px] font-medium text-[#999]" style={{ fontVariantNumeric: "tabular-nums" }}>{aisReport.strategyData.currentFunding}</span>
+                        <span className="text-[9px] text-[#ccc]">&rarr;</span>
+                        <span className="text-[9px] font-medium text-[#111]" style={{ fontVariantNumeric: "tabular-nums" }}>{aisReport.strategyData.projectedFunding}</span>
                       </div>
                     </div>
                   </div>
@@ -2776,22 +2662,19 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
 
               {aisReport.strategyData.capitalUnlock && aisReport.strategyData.capitalUnlock.length > 0 && (
                 <div className="mt-3">
-                  <p className="text-[7px] text-[#999] font-semibold uppercase tracking-wider mb-1.5">Capital Unlock Scenarios</p>
-                  <div className="space-y-1.5">
-                    {aisReport.strategyData.capitalUnlock.map((scenario, i) => {
-                      const oddsColor = scenario.projectedOdds >= 70 ? "#2d6a4f" : scenario.projectedOdds >= 45 ? "#c9a227" : "#c0392b";
-                      return (
-                        <div key={i} className="rounded-lg bg-[#f8f9fb] border border-[#e8e8ee] p-2" data-testid={`capital-unlock-${i}`}>
-                          <p className="text-[8px] text-[#555] font-semibold mb-1">{scenario.condition}</p>
-                          <div className="flex items-center gap-1.5">
-                            <span className="text-[8px] font-bold text-[#c0392b]" style={{ fontVariantNumeric: "tabular-nums" }}>{scenario.currentRange}</span>
-                            <svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4h8M6 1l3 3-3 3" stroke="#2d6a4f" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                            <span className="text-[8px] font-bold text-[#2d6a4f]" style={{ fontVariantNumeric: "tabular-nums" }}>{scenario.projectedRange}</span>
-                            <span className="text-[7px] font-bold ml-auto px-1.5 py-[2px] rounded-full" style={{ color: oddsColor, backgroundColor: oddsColor + "15", fontVariantNumeric: "tabular-nums" }}>{scenario.projectedOdds}%</span>
-                          </div>
+                  <p className="text-[9px] text-[#999] font-medium mb-2">Unlock Scenarios</p>
+                  <div className="space-y-0">
+                    {aisReport.strategyData.capitalUnlock.map((scenario, i) => (
+                      <div key={i} className={`py-2 ${i < aisReport.strategyData!.capitalUnlock!.length - 1 ? "border-b border-[#f0f0f0]" : ""}`} data-testid={`capital-unlock-${i}`}>
+                        <p className="text-[9px] text-[#555] font-medium mb-1">{scenario.condition}</p>
+                        <div className="flex items-center gap-2">
+                          <span className="text-[8px] text-[#999]" style={{ fontVariantNumeric: "tabular-nums" }}>{scenario.currentRange}</span>
+                          <span className="text-[8px] text-[#ccc]">&rarr;</span>
+                          <span className="text-[8px] font-medium text-[#111]" style={{ fontVariantNumeric: "tabular-nums" }}>{scenario.projectedRange}</span>
+                          <span className="text-[8px] font-medium ml-auto" style={{ color: scenario.projectedOdds >= 70 ? "#2d6a4f" : scenario.projectedOdds >= 45 ? "#c9a227" : "#c0392b", fontVariantNumeric: "tabular-nums" }}>{scenario.projectedOdds}%</span>
                         </div>
-                      );
-                    })}
+                      </div>
+                    ))}
                   </div>
                 </div>
               )}
@@ -2799,88 +2682,65 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
           )}
 
           {aisReport?.strategyData && aisReport.strategyData.timeline.length > 0 && (
-            <div className="rounded-xl border border-[#e8e8e8] bg-white p-3" data-testid="funding-timeline">
-              <div className="flex items-center gap-2 mb-1.5">
-                <div className="w-5 h-5 rounded-md bg-[#1a1a2e] flex items-center justify-center shrink-0">
-                  <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><circle cx="5" cy="5" r="4" stroke="white" strokeWidth="1" fill="none"/><path d="M5 3v2.5l1.5 1" stroke="white" strokeWidth="1" strokeLinecap="round"/></svg>
-                </div>
-                <p className="text-[9px] text-[#333] font-bold uppercase tracking-[0.08em]">Funding Timeline</p>
-              </div>
-              <p className="text-[8px] text-[#999] mb-3">Projected profile improvement over time</p>
-              <div className="relative pl-4">
-                <div className="absolute left-[7px] top-1 bottom-1 w-[2px] bg-gradient-to-b from-[#c0392b] via-[#c9a227] to-[#2d6a4f] rounded-full" />
-                <div className="space-y-3">
-                  {aisReport.strategyData.timeline.map((m, i) => {
-                    const isLast = i === aisReport.strategyData!.timeline.length - 1;
-                    const dotColor = m.approvalOdds >= 70 ? "#2d6a4f" : m.approvalOdds >= 45 ? "#c9a227" : "#c0392b";
-                    return (
-                      <div key={i} className="relative">
-                        <div className="absolute -left-4 top-1 w-[10px] h-[10px] rounded-full border-2 bg-white" style={{ borderColor: dotColor }} />
-                      <div className={`rounded-lg ${isLast ? "bg-[#e8f5e9] border-[#c8e6c9]" : "bg-[#fafafa] border-[#eee]"} border p-2.5`}>
+            <div className="rounded-lg border border-[#e8e8e8] bg-white p-3" data-testid="funding-timeline">
+              <p className="text-[10px] text-[#111] font-medium tracking-wide mb-2.5">Timeline</p>
+              <div className="space-y-0">
+                {aisReport.strategyData.timeline.map((m, i) => {
+                  const dotColor = m.approvalOdds >= 70 ? "#2d6a4f" : m.approvalOdds >= 45 ? "#c9a227" : "#c0392b";
+                  return (
+                    <div key={i} className={`flex items-start gap-2.5 py-2 ${i < aisReport.strategyData!.timeline.length - 1 ? "border-b border-[#f0f0f0]" : ""}`}>
+                      <div className="w-[6px] h-[6px] rounded-full mt-1 shrink-0" style={{ backgroundColor: dotColor }} />
+                      <div className="min-w-0 flex-1">
                         <div className="flex items-center justify-between mb-0.5">
-                          <span className="text-[9px] font-bold text-[#333]">{m.label}</span>
-                          <span className="text-[10px] font-bold" style={{ color: dotColor, fontVariantNumeric: "tabular-nums" }}>{m.approvalOdds}%</span>
+                          <span className="text-[9px] font-medium text-[#111]">{m.label}</span>
+                          <span className="text-[9px] font-semibold" style={{ color: dotColor, fontVariantNumeric: "tabular-nums" }}>{m.approvalOdds}%</span>
                         </div>
-                        <p className="text-[7px] text-[#888] leading-[1.4]">{m.change}</p>
+                        <p className="text-[8px] text-[#888] leading-[1.4]">{m.change}</p>
                       </div>
                     </div>
                   );
                 })}
               </div>
             </div>
-            </div>
           )}
 
           {aisReport && aisReport.capitalPotential.length > 0 && (
-            <div className="rounded-xl border border-[#e8e8e8] bg-white p-3" data-testid="capital-potential">
-              <div className="flex items-center gap-2 mb-1.5">
-                <div className="w-5 h-5 rounded-md bg-[#1a1a2e] flex items-center justify-center shrink-0">
-                  <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M5 1v8M1 5h8" stroke="white" strokeWidth="1.2" strokeLinecap="round"/></svg>
-                </div>
-                <p className="text-[9px] text-[#333] font-bold uppercase tracking-[0.08em]">Capital Potential Engine</p>
-              </div>
-              <p className="text-[8px] text-[#999] mb-2">Lender-by-lender accessible capital based on your current profile</p>
+            <div className="rounded-lg border border-[#e8e8e8] bg-white p-3" data-testid="capital-potential">
+              <p className="text-[10px] text-[#111] font-medium tracking-wide mb-2.5">Capital Potential</p>
               {(() => {
                 const totalLow = aisReport.capitalPotential.reduce((s, e) => s + e.lowEstimate, 0);
                 const totalHigh = aisReport.capitalPotential.reduce((s, e) => s + e.highEstimate, 0);
                 const maxHigh = Math.max(...aisReport.capitalPotential.map(e => e.highEstimate), 1);
                 return (
                   <>
-                    <div className="rounded-lg bg-gradient-to-r from-[#f0f2f8] to-[#e8f5e9] border border-[#ddd] p-2.5 mb-3">
-                      <p className="text-[7px] text-[#999] font-semibold uppercase tracking-wider mb-0.5">Total Accessible Capital</p>
-                      <p className="text-[14px] font-bold text-[#1a1a2e]" style={{ fontVariantNumeric: "tabular-nums" }}>${totalLow.toLocaleString()} – ${totalHigh.toLocaleString()}</p>
+                    <div className="rounded-md bg-[#f7f7f7] p-2.5 mb-3">
+                      <p className="text-[8px] text-[#999] mb-0.5">Total Accessible</p>
+                      <p className="text-[13px] font-semibold text-[#111]" style={{ fontVariantNumeric: "tabular-nums" }}>${totalLow.toLocaleString()} – ${totalHigh.toLocaleString()}</p>
                     </div>
-                    <div className="space-y-2">
+                    <div className="space-y-0">
                       {aisReport.capitalPotential.map((entry, i) => {
                         const confColor = entry.confidence.toLowerCase() === "high" ? "#2d6a4f" : entry.confidence.toLowerCase() === "medium" ? "#c9a227" : "#c0392b";
                         const barWidth = Math.round((entry.highEstimate / maxHigh) * 100);
                         const barFillWidth = Math.round((entry.lowEstimate / maxHigh) * 100);
                         return (
-                          <div key={i} className="rounded-lg bg-[#fafafa] border border-[#eee] p-2.5" data-testid={`capital-potential-${i}`}>
-                            <div className="flex items-center justify-between mb-0.5">
-                              <div className="flex items-center gap-1.5">
-                                <div className="w-5 h-5 rounded-md bg-[#1a1a2e] flex items-center justify-center shrink-0">
-                                  <span className="text-[8px] font-bold text-white">{entry.lender.charAt(0)}</span>
-                                </div>
-                                <div>
-                                  <span className="text-[9px] text-[#333] font-semibold">{entry.lender}</span>
-                                  <span className="text-[7px] text-[#999] ml-1.5">{entry.product}</span>
-                                </div>
+                          <div key={i} className={`py-2.5 ${i < aisReport.capitalPotential.length - 1 ? "border-b border-[#f0f0f0]" : ""}`} data-testid={`capital-potential-${i}`}>
+                            <div className="flex items-center justify-between mb-1">
+                              <div className="flex items-center gap-1.5 min-w-0">
+                                <span className="text-[9px] text-[#111] font-medium">{entry.lender}</span>
+                                <span className="text-[8px] text-[#bbb]">{entry.product}</span>
                               </div>
                               <div className="flex items-center gap-1.5 shrink-0">
-                                <span className="text-[6px] font-bold uppercase px-1 py-[1px] rounded bg-[#f0f2f8] text-[#555]">{entry.bureau}</span>
-                                <span className="text-[7px] font-bold px-1.5 py-[2px] rounded-full" style={{ color: confColor, backgroundColor: confColor + "15" }}>{entry.confidence}</span>
+                                <span className="text-[7px] text-[#999] px-1 py-[1px] rounded bg-[#f0f0f0]">{entry.bureau}</span>
+                                <span className="text-[7px] font-medium" style={{ color: confColor }}>{entry.confidence}</span>
                               </div>
                             </div>
-                            <div className="mt-1.5">
-                              <div className="flex items-center justify-between mb-0.5">
-                                <span className="text-[8px] font-bold text-[#333]" style={{ fontVariantNumeric: "tabular-nums" }}>${entry.lowEstimate.toLocaleString()} – ${entry.highEstimate.toLocaleString()}</span>
-                              </div>
-                              <div className="w-full h-[6px] bg-[#e8e8ee] rounded-full overflow-hidden">
-                                <div className="h-full rounded-full relative" style={{ width: `${barWidth}%` }}>
-                                  <div className="absolute inset-0 bg-[#c9d5e8] rounded-full" />
-                                  <div className="absolute inset-y-0 left-0 bg-[#1a1a2e] rounded-full" style={{ width: `${barFillWidth > 0 ? Math.round((barFillWidth / barWidth) * 100) : 0}%` }} />
-                                </div>
+                            <div className="flex items-center justify-between mb-1">
+                              <span className="text-[9px] font-semibold text-[#111]" style={{ fontVariantNumeric: "tabular-nums" }}>${entry.lowEstimate.toLocaleString()} – ${entry.highEstimate.toLocaleString()}</span>
+                            </div>
+                            <div className="w-full h-[3px] bg-[#eee] rounded-full overflow-hidden">
+                              <div className="h-full rounded-full relative" style={{ width: `${barWidth}%` }}>
+                                <div className="absolute inset-0 bg-[#ddd] rounded-full" />
+                                <div className="absolute inset-y-0 left-0 bg-[#111] rounded-full" style={{ width: `${barFillWidth > 0 ? Math.round((barFillWidth / barWidth) * 100) : 0}%` }} />
                               </div>
                             </div>
                           </div>
@@ -2894,41 +2754,30 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
           )}
 
           {aisReport && aisReport.fundingSequence.length > 0 && (
-            <div className="rounded-xl border border-[#e8e8e8] bg-white p-3" data-testid="funding-sequence">
-              <div className="flex items-center gap-2 mb-1.5">
-                <div className="w-5 h-5 rounded-md bg-[#1a1a2e] flex items-center justify-center shrink-0">
-                  <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2 2h6v2H2zM2 5.5h6v2H2z" stroke="white" strokeWidth="0.8" fill="none"/><path d="M5 4v1.5" stroke="white" strokeWidth="0.8" strokeLinecap="round"/></svg>
-                </div>
-                <p className="text-[9px] text-[#333] font-bold uppercase tracking-[0.08em]">Funding Sequence</p>
-              </div>
-              <p className="text-[8px] text-[#999] mb-2.5">Optimal application order to maximize approvals</p>
-              <div className="relative pl-4">
-                <div className="absolute left-[7px] top-1 bottom-1 w-[2px] bg-gradient-to-b from-[#1a1a2e] to-[#2d6a4f] rounded-full" />
-                <div className="space-y-2">
-                  {aisReport.fundingSequence.map((entry, i) => {
-                    const probColor = entry.approvalProbability >= 70 ? "#2d6a4f" : entry.approvalProbability >= 45 ? "#c9a227" : "#c0392b";
-                    return (
-                      <div key={i} className="relative" data-testid={`funding-sequence-${i}`}>
-                        <div className="absolute -left-4 top-1.5 w-[10px] h-[10px] rounded-full border-2 bg-white flex items-center justify-center" style={{ borderColor: probColor }}>
-                          <span className="text-[5px] font-bold" style={{ color: probColor }}>{entry.position}</span>
-                        </div>
-                        <div className="rounded-lg bg-[#fafafa] border border-[#eee] p-2.5">
-                          <div className="flex items-center justify-between mb-0.5">
-                            <div className="flex items-center gap-1.5">
-                              <span className="text-[9px] text-[#333] font-semibold">{entry.lender}</span>
-                              <span className="text-[7px] text-[#999]">{entry.product}</span>
-                            </div>
-                            <div className="flex items-center gap-1.5 shrink-0">
-                              <span className="text-[6px] font-bold uppercase px-1 py-[1px] rounded bg-[#f0f2f8] text-[#555]">{entry.bureau}</span>
-                              <span className="text-[10px] font-bold" style={{ color: probColor, fontVariantNumeric: "tabular-nums" }}>{entry.approvalProbability}%</span>
-                            </div>
+            <div className="rounded-lg border border-[#e8e8e8] bg-white p-3" data-testid="funding-sequence">
+              <p className="text-[10px] text-[#111] font-medium tracking-wide mb-2.5">Funding Sequence</p>
+              <div className="space-y-0">
+                {aisReport.fundingSequence.map((entry, i) => {
+                  const probColor = entry.approvalProbability >= 70 ? "#2d6a4f" : entry.approvalProbability >= 45 ? "#c9a227" : "#c0392b";
+                  return (
+                    <div key={i} className={`flex items-start gap-2.5 py-2.5 ${i < aisReport.fundingSequence.length - 1 ? "border-b border-[#f0f0f0]" : ""}`} data-testid={`funding-sequence-${i}`}>
+                      <span className="text-[9px] font-semibold text-[#bbb] mt-px w-3 shrink-0" style={{ fontVariantNumeric: "tabular-nums" }}>{entry.position}</span>
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center justify-between mb-0.5">
+                          <div className="flex items-center gap-1.5 min-w-0">
+                            <span className="text-[9px] text-[#111] font-medium">{entry.lender}</span>
+                            <span className="text-[8px] text-[#bbb]">{entry.product}</span>
                           </div>
-                          <p className="text-[7px] text-[#888] leading-[1.4]">{entry.reasoning}</p>
+                          <div className="flex items-center gap-1.5 shrink-0">
+                            <span className="text-[7px] text-[#999] px-1 py-[1px] rounded bg-[#f0f0f0]">{entry.bureau}</span>
+                            <span className="text-[9px] font-semibold" style={{ color: probColor, fontVariantNumeric: "tabular-nums" }}>{entry.approvalProbability}%</span>
+                          </div>
                         </div>
+                        <p className="text-[8px] text-[#888] leading-[1.4]">{entry.reasoning}</p>
                       </div>
-                    );
-                  })}
-                </div>
+                    </div>
+                  );
+                })}
               </div>
             </div>
           )}
@@ -2938,29 +2787,18 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
           )}
 
           {aisReport?.strategyData && aisReport.strategyData.fundingMatches.length > 0 && (
-            <div className="rounded-xl border border-[#e8e8e8] bg-white p-3" data-testid="funding-matches">
-              <div className="flex items-center gap-2 mb-1.5">
-                <div className="w-5 h-5 rounded-md bg-[#1a1a2e] flex items-center justify-center shrink-0">
-                  <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><rect x="1" y="2" width="8" height="6" rx="1" stroke="white" strokeWidth="1" fill="none"/><path d="M1 4h8" stroke="white" strokeWidth="0.8"/></svg>
-                </div>
-                <p className="text-[9px] text-[#333] font-bold uppercase tracking-[0.08em]">Lender Matches</p>
-              </div>
-              <p className="text-[8px] text-[#999] mb-2.5">Lenders that match your profile based on their approval criteria</p>
-              <div className="space-y-1.5">
+            <div className="rounded-lg border border-[#e8e8e8] bg-white p-3" data-testid="funding-matches">
+              <p className="text-[10px] text-[#111] font-medium tracking-wide mb-2.5">Lender Matches</p>
+              <div className="space-y-0">
                 {aisReport.strategyData.fundingMatches.map((match, i) => {
                   const likelihoodColor = match.likelihood.toLowerCase() === "high" ? "#2d6a4f" : match.likelihood.toLowerCase() === "medium" ? "#c9a227" : "#c0392b";
                   return (
-                    <div key={i} className="rounded-lg bg-[#fafafa] border border-[#eee] p-2.5 flex items-center gap-2.5">
-                      <div className="w-7 h-7 rounded-lg bg-[#1a1a2e] flex items-center justify-center shrink-0">
-                        <span className="text-[9px] font-bold text-white">{match.lender.charAt(0)}</span>
+                    <div key={i} className={`py-2 ${i < aisReport.strategyData!.fundingMatches.length - 1 ? "border-b border-[#f0f0f0]" : ""}`}>
+                      <div className="flex items-center justify-between mb-0.5">
+                        <span className="text-[9px] text-[#111] font-medium">{match.lender}</span>
+                        <span className="text-[8px] font-medium" style={{ color: likelihoodColor }}>{match.likelihood}</span>
                       </div>
-                      <div className="min-w-0 flex-1">
-                        <div className="flex items-center justify-between mb-0.5">
-                          <span className="text-[9px] text-[#333] font-semibold">{match.lender}</span>
-                          <span className="text-[7px] font-bold px-1.5 py-[2px] rounded-full" style={{ color: likelihoodColor, backgroundColor: likelihoodColor + "15" }}>{match.likelihood}</span>
-                        </div>
-                        <p className="text-[7px] text-[#888] leading-[1.4]">{match.reason}</p>
-                      </div>
+                      <p className="text-[8px] text-[#888] leading-[1.4]">{match.reason}</p>
                     </div>
                   );
                 })}
@@ -2977,64 +2815,61 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
 
 
         {repairData && repairData.truthProfile && (
-          <div className="mb-4">
-            <div className="flex items-center gap-2 mb-2">
-              <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="4" r="2.5" stroke="#333" strokeWidth="1" fill="none"/><path d="M2 10.5c0-2.2 1.8-4 4-4s4 1.8 4 4" stroke="#333" strokeWidth="1" strokeLinecap="round" fill="none"/></svg>
-              <span className="text-[10px] font-semibold text-[#555] uppercase tracking-wider">Truth Profile</span>
-            </div>
-            <div className="space-y-0.5 px-2.5 py-2 rounded-md bg-[#fafafa] border border-[#eee]">
-              <div className="text-[10px] text-[#333] font-medium">{repairData.truthProfile.fullName}</div>
-              {repairData.truthProfile.currentAddress && <div className="text-[9px] text-[#888]">{repairData.truthProfile.currentAddress}</div>}
-              {repairData.truthProfile.dob && <div className="text-[9px] text-[#888]">DOB: {repairData.truthProfile.dob}</div>}
-              {repairData.truthProfile.ssnLast4 && <div className="text-[9px] text-[#888]">SSN: ***-**-{repairData.truthProfile.ssnLast4}</div>}
+          <div className="mb-3 rounded-lg border border-[#e8e8e8] bg-white p-3">
+            <p className="text-[10px] text-[#111] font-medium tracking-wide mb-2">Identity</p>
+            <div className="space-y-1">
+              <p className="text-[10px] text-[#111] font-medium">{repairData.truthProfile.fullName}</p>
+              {repairData.truthProfile.currentAddress && <p className="text-[9px] text-[#888]">{repairData.truthProfile.currentAddress}</p>}
+              <div className="flex items-center gap-3">
+                {repairData.truthProfile.dob && <span className="text-[8px] text-[#999]">DOB: {repairData.truthProfile.dob}</span>}
+                {repairData.truthProfile.ssnLast4 && <span className="text-[8px] text-[#999]">SSN: ***-**-{repairData.truthProfile.ssnLast4}</span>}
+              </div>
               {repairData.truthProfile.nameVariants.length > 1 && (
-                <div className="text-[9px] text-[#b0860f] mt-1">Name variants detected: {repairData.truthProfile.nameVariants.join(", ")}</div>
+                <p className="text-[8px] text-[#c9a227] mt-1">Variants: {repairData.truthProfile.nameVariants.join(", ")}</p>
               )}
             </div>
           </div>
         )}
 
         {repairData && repairData.discrepancies.length > 0 && (
-          <div className="mb-4">
-            <div className="flex items-center gap-2 mb-2">
-              <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 1l5 9H1l5-9z" stroke="#e07a5f" strokeWidth="1" fill="none"/><path d="M6 5v2M6 8.5v.5" stroke="#e07a5f" strokeWidth="1" strokeLinecap="round"/></svg>
-              <span className="text-[10px] font-semibold text-[#555] uppercase tracking-wider">Discrepancies</span>
-              <span className="text-[9px] text-[#e07a5f] ml-auto font-semibold">{repairData.discrepancies.length}</span>
+          <div className="mb-3 rounded-lg border border-[#e8e8e8] bg-white p-3">
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-[10px] text-[#111] font-medium tracking-wide">Discrepancies</p>
+              <span className="text-[9px] text-[#c0392b] font-medium">{repairData.discrepancies.length}</span>
             </div>
-            <div className="space-y-1">
+            <div className="space-y-0">
               {repairData.discrepancies.map((d, i) => (
-                <div key={i} className="px-2.5 py-1.5 rounded-md bg-[#fef3f0] border border-[#f0d0c0]" data-testid={`discrepancy-${i}`}>
-                  <div className="flex items-center gap-1.5">
-                    <span className={`text-[7px] font-bold uppercase px-1 py-0.5 rounded ${d.severity === "High" ? "bg-[#e07a5f] text-white" : d.severity === "Med" ? "bg-[#f0ad4e] text-white" : "bg-[#ddd] text-[#555]"}`}>{d.severity}</span>
-                    <span className="text-[10px] font-medium text-[#333] capitalize">{d.field}</span>
+                <div key={i} className={`py-2 ${i < repairData.discrepancies.length - 1 ? "border-b border-[#f0f0f0]" : ""}`} data-testid={`discrepancy-${i}`}>
+                  <div className="flex items-center gap-2 mb-0.5">
+                    <span className="text-[9px] text-[#111] font-medium capitalize">{d.field}</span>
+                    <span className={`text-[7px] font-medium ${d.severity === "High" ? "text-[#c0392b]" : d.severity === "Med" ? "text-[#c9a227]" : "text-[#999]"}`}>{d.severity}</span>
                   </div>
-                  <div className="mt-0.5 text-[9px] text-[#888]">Report: {d.creditReportValue}</div>
-                  {d.documentValue && <div className="text-[9px] text-[#2d6a4f]">Docs: {d.documentValue}</div>}
-                  <div className="text-[8px] text-[#aaa] mt-0.5">Basis: {d.disputeBasis}</div>
+                  <p className="text-[8px] text-[#888]">{d.creditReportValue}</p>
+                  {d.documentValue && <p className="text-[8px] text-[#2d6a4f]">{d.documentValue}</p>}
                 </div>
               ))}
             </div>
           </div>
         )}
 
-        <div className="mb-3">
-          <div className="flex items-center gap-2 mb-2">
-            <span className="text-[12px] font-bold text-[#1a1a2e] tracking-tight">Dispute Items</span>
-            {repairData && <span className="text-[10px] text-white bg-[#1a1a2e] rounded-full px-2 py-0.5 font-bold">{repairData.negativeItems.length}</span>}
+        <div className="mb-3 rounded-lg border border-[#e8e8e8] bg-white p-3">
+          <div className="flex items-center justify-between mb-2">
+            <p className="text-[10px] text-[#111] font-medium tracking-wide">Disputes</p>
+            {repairData && <span className="text-[9px] text-[#111] font-medium">{repairData.negativeItems.length}</span>}
           </div>
 
           {!repairData || repairData.negativeItems.length === 0 ? (
-            <div className="w-full px-3 py-4 rounded-lg bg-[#fafafa] border border-[#eee] text-center">
-              <div className="text-[11px] text-[#888] font-medium">No dispute-eligible items detected yet</div>
-              <div className="text-[10px] text-[#aaa] mt-1">Upload a report in the Command tab to scan for disputable items</div>
+            <div className="py-4 text-center">
+              <p className="text-[9px] text-[#999]">No dispute-eligible items detected</p>
+              <p className="text-[8px] text-[#bbb] mt-1">Upload a report to scan</p>
             </div>
           ) : (<>
             <div className="flex gap-1.5 mb-3">
-              <select value={repairFilter.bureau} onChange={e => setRepairFilter(f => ({ ...f, bureau: e.target.value }))} className="text-[10px] px-2 py-1.5 rounded-md border border-[#ddd] bg-white text-[#555] font-medium" data-testid="filter-bureau">
+              <select value={repairFilter.bureau} onChange={e => setRepairFilter(f => ({ ...f, bureau: e.target.value }))} className="text-[9px] px-2 py-1.5 rounded-md border border-[#e5e5e5] bg-[#fafafa] text-[#555]" data-testid="filter-bureau">
                 <option value="All">All Bureaus</option>
                 {[...new Set(repairData.negativeItems.map(n => n.bureau))].map(b => <option key={b} value={b}>{b}</option>)}
               </select>
-              <select value={repairFilter.category} onChange={e => setRepairFilter(f => ({ ...f, category: e.target.value }))} className="text-[10px] px-2 py-1.5 rounded-md border border-[#ddd] bg-white text-[#555] font-medium" data-testid="filter-category">
+              <select value={repairFilter.category} onChange={e => setRepairFilter(f => ({ ...f, category: e.target.value }))} className="text-[9px] px-2 py-1.5 rounded-md border border-[#e5e5e5] bg-[#fafafa] text-[#555]" data-testid="filter-category">
                 <option value="All">All Types</option>
                 {[...new Set(repairData.negativeItems.map(n => n.category))].map(c => <option key={c} value={c}>{c}</option>)}
               </select>
@@ -3052,10 +2887,9 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
               return (<>
                 {inquiryItems.length > 0 && (repairFilter.category === "All" || repairFilter.category === "Inquiry") && (
                   <div className="mb-3">
-                    <div className="flex items-center gap-1.5 mb-1.5 pb-1 border-b border-[#e8e8f4]">
-                      <svg width="10" height="10" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="5.5" stroke="#6366f1" strokeWidth="1.3"/><path d="M8 5v3.5M8 10.5v.5" stroke="#6366f1" strokeWidth="1.3" strokeLinecap="round"/></svg>
-                      <span className="text-[10px] font-semibold text-[#333]">Inquiry Disputes</span>
-                      <span className="text-[9px] text-white bg-[#6366f1] rounded-full w-[16px] h-[16px] flex items-center justify-center ml-auto font-bold">{inquiryItems.length}</span>
+                    <div className="flex items-center justify-between mb-2 pb-1.5 border-b border-[#f0f0f0]">
+                      <span className="text-[9px] text-[#555] font-medium">Inquiries</span>
+                      <span className="text-[8px] text-[#999]">{inquiryItems.length}</span>
                     </div>
                     {(() => {
                       const clampedIdx = Math.min(inqCarouselIdx, inquiryItems.length - 1);
@@ -3064,20 +2898,20 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
                       const rl = roundLabels[item.disputeRound] || roundLabels[1];
                       const sameDayCount = inquiryItems.filter(n => n.dates?.inquiryDate === item.dates?.inquiryDate && n.dates?.inquiryDate).length;
                       const isCluster = sameDayCount > 1;
-                      const statusColor = item.userAttestation === "not_authorized" ? "bg-[#dc2626] text-white" : item.userAttestation === "recognized" ? "bg-[#16a34a] text-white" : "bg-[#6366f1]/10 text-[#6366f1]";
+                      const statusColor = item.userAttestation === "not_authorized" ? "text-[#c0392b]" : item.userAttestation === "recognized" ? "text-[#2d6a4f]" : "text-[#999]";
                       const statusLabel = item.userAttestation === "not_authorized" ? "Denied" : item.userAttestation === "recognized" ? "Recognized" : "Pending";
                       return (
                         <div className="relative">
                           <div className="flex items-center gap-1">
-                            <button onClick={() => setInqCarouselIdx(Math.max(0, clampedIdx - 1))} disabled={clampedIdx === 0} className="shrink-0 w-6 h-6 flex items-center justify-center rounded-full bg-white border border-[#e0e0e0] text-[#999] hover:bg-[#f5f5f5] disabled:opacity-30 transition-colors" data-testid="button-inquiry-prev">
+                            <button onClick={() => setInqCarouselIdx(Math.max(0, clampedIdx - 1))} disabled={clampedIdx === 0} className="shrink-0 w-5 h-5 flex items-center justify-center text-[#bbb] hover:text-[#666] disabled:opacity-20 transition-colors" data-testid="button-inquiry-prev">
                               <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M6 2L3 5l3 3" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/></svg>
                             </button>
                             <div className="flex-1 min-w-0">
-                              <div className="rounded-md bg-white border border-[#e4e4ed] transition-all" data-testid={`repair-item-${item.itemId}`}>
+                              <div className="rounded-md bg-[#fafafa] border border-[#eee] transition-all" data-testid={`repair-item-${item.itemId}`}>
                                 <div className="px-2.5 py-2">
                                   <div className="flex items-center gap-1.5 mb-1">
-                                    <span className="text-[10px] font-bold text-[#1a1a2e] truncate">{item.furnisherName}</span>
-                                    <span className={`text-[7px] font-bold uppercase px-1 py-[1px] rounded-full ml-auto shrink-0 ${statusColor}`}>{statusLabel}</span>
+                                    <span className="text-[9px] font-medium text-[#111] truncate">{item.furnisherName}</span>
+                                    <span className={`text-[7px] font-medium ml-auto shrink-0 ${statusColor}`}>{statusLabel}</span>
                                   </div>
                                   <div className="flex items-center gap-1 text-[9px] text-[#888] mb-1.5 flex-wrap">
                                     <span>{item.bureau}</span>
@@ -3085,9 +2919,9 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
                                     {item.standaloneInquiry && <><span className="text-[#ddd]">|</span><span className="text-[#dc2626] font-medium">No Account</span></>}
                                     {isCluster && <><span className="text-[#ddd]">|</span><span className="text-[#d97706] font-medium">Cluster</span></>}
                                   </div>
-                                  <div className="flex items-center gap-1 mb-1.5">
-                                    <span className={`text-[8px] font-bold px-1.5 py-[2px] rounded ${item.disputeRound === 1 ? "bg-[#6366f1]/8 text-[#6366f1]" : item.disputeRound === 2 ? "bg-[#f59e0b]/8 text-[#b45309]" : "bg-[#ef4444]/8 text-[#dc2626]"}`}>{rl.label}</span>
-                                    <span className="text-[8px] text-[#aaa] truncate">{rl.desc}</span>
+                                  <div className="flex items-center gap-1.5 mb-1.5">
+                                    <span className="text-[8px] text-[#111] font-medium">{rl.label}</span>
+                                    <span className="text-[7px] text-[#bbb] truncate">{rl.desc}</span>
                                   </div>
                                   <div className="flex gap-1 flex-wrap">
                                     {item.attestationRequired && !item.userAttestation && (
@@ -3098,7 +2932,7 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
                                             const updated = { ...repairData, negativeItems: repairData.negativeItems.map(n => n.itemId === item.itemId ? { ...n, userAttestation: "not_authorized" as const, status: "Attested" as const } : n) };
                                             onUpdateRepairData(updated);
                                           }}
-                                          className="text-[9px] px-2 py-1 rounded bg-[#dc2626] text-white font-semibold hover:bg-[#b91c1c] transition-colors"
+                                          className="text-[8px] px-2 py-1 rounded-md bg-[#111] text-white font-medium hover:bg-[#333] transition-colors"
                                           data-testid={`button-not-authorized-${item.itemId}`}
                                         >
                                           Not Authorized
@@ -3109,10 +2943,10 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
                                             const updated = { ...repairData, negativeItems: repairData.negativeItems.map(n => n.itemId === item.itemId ? { ...n, userAttestation: "recognized" as const, status: "Attested" as const } : n) };
                                             onUpdateRepairData(updated);
                                           }}
-                                          className="text-[9px] px-2 py-1 rounded bg-[#f3f4f6] text-[#555] font-semibold hover:bg-[#e5e7eb] transition-colors border border-[#e5e7eb]"
+                                          className="text-[8px] px-2 py-1 rounded-md bg-white text-[#555] font-medium hover:bg-[#f5f5f5] transition-colors border border-[#e5e5e5]"
                                           data-testid={`button-recognized-${item.itemId}`}
                                         >
-                                          I Recognize This
+                                          Recognized
                                         </button>
                                       </>
                                     )}
@@ -3132,10 +2966,10 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
                                           const disputeText = `${roundInstr}\n\nInquiry: ${item.furnisherName} (${item.bureau}${dateInfo ? `, ${dateInfo}` : ""}${item.userAttestation === "not_authorized" ? ", user attests NOT AUTHORIZED" : ""}).${velocityInfo}${velocitySummary} Use the ACTUAL creditor name and dates — do NOT use placeholder text.\n\nIMPORTANT: After the letter, output a DISPUTE: line in this exact format for EACH disputed item:\nDISPUTE: CreditorName | AccountNumber | Issue Description | Bureau | Reason/Basis\nThen output [GENERATE_DISPUTE_PACKAGE] at the very end.`;
                                           onSendChat(disputeText);
                                         }}
-                                        className="text-[9px] px-2 py-1 rounded bg-[#6366f1] text-white font-semibold hover:bg-[#4f46e5] transition-colors"
+                                        className="text-[8px] px-2 py-1 rounded-md bg-[#111] text-white font-medium hover:bg-[#333] transition-colors"
                                         data-testid={`button-generate-dispute-${item.itemId}`}
                                       >
-                                        Generate Round {item.disputeRound} Letter
+                                        Round {item.disputeRound} Letter
                                       </button>
                                     )}
                                     {(!item.attestationRequired || item.userAttestation) && item.userAttestation !== "recognized" && item.disputeRound < 3 && (
@@ -3146,17 +2980,17 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
                                           const updated = { ...repairData, negativeItems: repairData.negativeItems.map(n => n.itemId === item.itemId ? { ...n, disputeRound: nextRound } : n) };
                                           onUpdateRepairData(updated);
                                         }}
-                                        className="text-[9px] px-2 py-1 rounded bg-white text-[#555] font-semibold hover:bg-[#f3f4f6] transition-colors border border-[#ddd]"
+                                        className="text-[8px] px-2 py-1 rounded-md bg-white text-[#555] font-medium hover:bg-[#f5f5f5] transition-colors border border-[#e5e5e5]"
                                         data-testid={`button-advance-round-${item.itemId}`}
                                       >
-                                        Advance to R{Math.min(item.disputeRound + 1, 3)}
+                                        R{Math.min(item.disputeRound + 1, 3)}
                                       </button>
                                     )}
                                   </div>
                                 </div>
                               </div>
                             </div>
-                            <button onClick={() => setInqCarouselIdx(Math.min(inquiryItems.length - 1, clampedIdx + 1))} disabled={clampedIdx >= inquiryItems.length - 1} className="shrink-0 w-6 h-6 flex items-center justify-center rounded-full bg-white border border-[#e0e0e0] text-[#999] hover:bg-[#f5f5f5] disabled:opacity-30 transition-colors" data-testid="button-inquiry-next">
+                            <button onClick={() => setInqCarouselIdx(Math.min(inquiryItems.length - 1, clampedIdx + 1))} disabled={clampedIdx >= inquiryItems.length - 1} className="shrink-0 w-5 h-5 flex items-center justify-center text-[#bbb] hover:text-[#666] disabled:opacity-20 transition-colors" data-testid="button-inquiry-next">
                               <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M4 2l3 3-3 3" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/></svg>
                             </button>
                           </div>
@@ -3204,10 +3038,10 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
                           prompt += "IMPORTANT: After the letters, output a DISPUTE: line for EACH disputed item in this exact format:\nDISPUTE: CreditorName | AccountNumber | Issue Description | Bureau | Reason/Basis\nThen output [GENERATE_DISPUTE_PACKAGE] at the very end.";
                           onSendChat(prompt);
                         }}
-                        className="mt-2 w-full py-1.5 rounded-lg bg-[#6366f1] text-white text-[10px] font-bold hover:bg-[#4f46e5] transition-colors"
+                        className="mt-2 w-full py-1.5 rounded-md bg-[#111] text-white text-[8px] font-medium hover:bg-[#333] transition-colors"
                         data-testid="button-generate-all-inquiry-disputes"
                       >
-                        Generate All Inquiry Disputes ({inquiryItems.filter(n => n.userAttestation !== "recognized").length})
+                        Generate All ({inquiryItems.filter(n => n.userAttestation !== "recognized").length})
                       </button>
                     )}
                   </div>
@@ -3216,35 +3050,33 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
                 {nonInquiryItems.length > 0 && (repairFilter.category === "All" || repairFilter.category !== "Inquiry") && (
                   <div className="mb-2">
                     {(repairFilter.category === "All" && inquiryItems.length > 0) && (
-                      <div className="flex items-center gap-1.5 mb-1.5 pb-1 border-b border-[#e8e8e8]">
-                        <svg width="10" height="10" viewBox="0 0 12 12" fill="none"><rect x="1" y="2" width="10" height="8" rx="1" stroke="#555" strokeWidth="1" fill="none"/><path d="M3 5h6M3 7h4" stroke="#555" strokeWidth="0.7" strokeLinecap="round"/></svg>
-                        <span className="text-[10px] font-semibold text-[#333]">Account Disputes</span>
-                        <span className="text-[9px] text-white bg-[#555] rounded-full w-[16px] h-[16px] flex items-center justify-center ml-auto font-bold">{nonInquiryItems.length}</span>
+                      <div className="flex items-center justify-between mb-2 pb-1.5 border-b border-[#f0f0f0]">
+                        <span className="text-[9px] text-[#555] font-medium">Accounts</span>
+                        <span className="text-[8px] text-[#999]">{nonInquiryItems.length}</span>
                       </div>
                     )}
                     {(() => {
                       const clampedIdx = Math.min(acctCarouselIdx, nonInquiryItems.length - 1);
                       const item = nonInquiryItems[clampedIdx];
                       if (!item) return null;
-                      const catColor = item.category === "Account" ? "bg-[#e07a5f]" : item.category === "Personal Info" ? "bg-[#f0ad4e]" : item.category === "Public Record" ? "bg-[#6366f1]" : "bg-[#888]";
                       const catLabel = item.category === "Personal Info" ? "PI" : item.category === "Public Record" ? "PR" : item.category.slice(0, 3).toUpperCase();
-                      const statusColor = item.userAttestation === "not_authorized" ? "bg-[#dc2626] text-white" : item.userAttestation === "recognized" ? "bg-[#16a34a] text-white" : item.status === "Packaged" ? "bg-[#ea580c] text-white" : "bg-[#f3f4f6] text-[#555]";
+                      const statusColor = item.userAttestation === "not_authorized" ? "text-[#c0392b]" : item.userAttestation === "recognized" ? "text-[#2d6a4f]" : item.status === "Packaged" ? "text-[#c9a227]" : "text-[#999]";
                       const statusLabel = item.userAttestation === "not_authorized" ? "Denied" : item.userAttestation === "recognized" ? "Recognized" : item.status === "Packaged" ? "Packaged" : "New";
                       return (
                         <div className="relative">
                           <div className="flex items-center gap-1">
-                            <button onClick={() => setAcctCarouselIdx(Math.max(0, clampedIdx - 1))} disabled={clampedIdx === 0} className="shrink-0 w-6 h-6 flex items-center justify-center rounded-full bg-white border border-[#e0e0e0] text-[#999] hover:bg-[#f5f5f5] disabled:opacity-30 transition-colors" data-testid="button-account-prev">
+                            <button onClick={() => setAcctCarouselIdx(Math.max(0, clampedIdx - 1))} disabled={clampedIdx === 0} className="shrink-0 w-5 h-5 flex items-center justify-center text-[#bbb] hover:text-[#666] disabled:opacity-20 transition-colors" data-testid="button-account-prev">
                               <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M6 2L3 5l3 3" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/></svg>
                             </button>
                             <div className="flex-1 min-w-0">
-                              <div className="rounded-md bg-white border border-[#e8e8e8] transition-all" data-testid={`repair-item-${item.itemId}`}>
+                              <div className="rounded-md bg-[#fafafa] border border-[#eee] transition-all" data-testid={`repair-item-${item.itemId}`}>
                                 <div className="px-2.5 py-2">
                                   <div className="flex items-center gap-1.5 mb-0.5">
-                                    <span className={`text-[7px] font-bold uppercase px-1 py-[1px] rounded text-white shrink-0 ${catColor}`}>{catLabel}</span>
-                                    <span className="text-[10px] font-bold text-[#1a1a2e] truncate">{item.furnisherName}</span>
-                                    <span className={`text-[7px] font-bold uppercase px-1 py-[1px] rounded-full ml-auto shrink-0 ${statusColor}`}>{statusLabel}</span>
+                                    <span className="text-[7px] text-[#999] font-medium shrink-0">{catLabel}</span>
+                                    <span className="text-[9px] font-medium text-[#111] truncate">{item.furnisherName}</span>
+                                    <span className={`text-[7px] font-medium ml-auto shrink-0 ${statusColor}`}>{statusLabel}</span>
                                   </div>
-                                  <div className="text-[9px] text-[#666] mb-1 line-clamp-1">{item.issue}</div>
+                                  <div className="text-[8px] text-[#888] mb-1 line-clamp-1">{item.issue}</div>
                                   <div className="flex items-center gap-1 text-[9px] text-[#888] mb-1.5 flex-wrap">
                                     <span>{item.bureau}</span>
                                     {item.accountPartial && <><span className="text-[#ddd]">|</span><span className="truncate max-w-[80px]">...{item.accountPartial}</span></>}
@@ -3259,7 +3091,7 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
                                             const updated = { ...repairData, negativeItems: repairData.negativeItems.map(n => n.itemId === item.itemId ? { ...n, userAttestation: "not_authorized" as const, status: "Attested" as const } : n) };
                                             onUpdateRepairData(updated);
                                           }}
-                                          className="text-[9px] px-2 py-1 rounded bg-[#dc2626] text-white font-semibold hover:bg-[#b91c1c] transition-colors"
+                                          className="text-[8px] px-2 py-1 rounded-md bg-[#111] text-white font-medium hover:bg-[#333] transition-colors"
                                           data-testid={`button-not-authorized-${item.itemId}`}
                                         >
                                           Not Authorized
@@ -3270,10 +3102,10 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
                                             const updated = { ...repairData, negativeItems: repairData.negativeItems.map(n => n.itemId === item.itemId ? { ...n, userAttestation: "recognized" as const, status: "Attested" as const } : n) };
                                             onUpdateRepairData(updated);
                                           }}
-                                          className="text-[9px] px-2 py-1 rounded bg-[#f3f4f6] text-[#555] font-semibold hover:bg-[#e5e7eb] transition-colors border border-[#e5e7eb]"
+                                          className="text-[8px] px-2 py-1 rounded-md bg-white text-[#555] font-medium hover:bg-[#f5f5f5] transition-colors border border-[#e5e5e5]"
                                           data-testid={`button-recognized-${item.itemId}`}
                                         >
-                                          I Recognize This
+                                          Recognized
                                         </button>
                                       </>
                                     )}
@@ -3285,10 +3117,10 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
                                           const disputeText = `Generate a dispute letter for this item: ${item.furnisherName} — ${item.issue} (${item.bureau}, basis: ${item.disputeBasis}${acctInfo}${dateInfo ? `, ${dateInfo}` : ""}${item.userAttestation === "not_authorized" ? ", user attests NOT AUTHORIZED" : ""}). Use the ACTUAL creditor name, dates, and account details provided — do NOT use placeholder text like [Insert Creditor Name]. Reference my credit report data directly.\n\nIMPORTANT: After the letter, output a DISPUTE: line in this exact format:\nDISPUTE: CreditorName | AccountNumber | Issue Description | Bureau | Reason/Basis\nThen output [GENERATE_DISPUTE_PACKAGE] at the very end.`;
                                           onSendChat(disputeText);
                                         }}
-                                        className="text-[9px] px-2 py-1 rounded bg-[#1a1a2e] text-white font-semibold hover:bg-[#2a2a4e] transition-colors"
+                                        className="text-[8px] px-2 py-1 rounded-md bg-[#111] text-white font-medium hover:bg-[#333] transition-colors"
                                         data-testid={`button-generate-dispute-${item.itemId}`}
                                       >
-                                        Generate Bureau Challenge
+                                        Challenge
                                       </button>
                                     )}
                                   </div>
