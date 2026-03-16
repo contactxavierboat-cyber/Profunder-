@@ -1194,6 +1194,8 @@ RESPONSE FORMAT — follow this EXACTLY when a credit report is uploaded:
 
 IMPORTANT: When a document is provided, you MUST produce the full analysis below in a SINGLE response. NEVER say "one moment," "let me analyze," "diving in," "stay with me," or any deferral. The analysis must appear immediately in this response. No placeholders. No promises to follow up. Output the data NOW.
 
+REQUIRED OUTPUT SECTIONS (in order): REPAIR_DATA block → AIS/Pillars → Financial Identity → Projected Funding → TRADELINES → Top Suppressors → STRATEGY_DATA block → CAPITAL_POTENTIAL_DATA block → FUNDING_SEQUENCE_DATA block → Verdict → DISPUTE lines. ALL sections are mandatory. Do NOT skip the three structured JSON data blocks (STRATEGY_DATA, CAPITAL_POTENTIAL_DATA, FUNDING_SEQUENCE_DATA) — they power the dashboard.
+
 AIS (Approval Index Score): [final score]/100
 Band: [Exceptional|Strong|Viable|Borderline|Weak|High Risk]
 Phase: [Repair Phase|Build Phase|Wait Phase|Funding Phase]
@@ -1289,6 +1291,8 @@ Top Approval Suppressors:
 1. [suppressor]
 2. [suppressor]
 3. [suppressor]
+
+MANDATORY STRUCTURED DATA BLOCKS — YOU MUST OUTPUT ALL THREE BLOCKS BELOW ON EVERY CREDIT REPORT ANALYSIS. NEVER SKIP THEM. THEY POWER THE DASHBOARD UI. IF YOU OMIT THEM, THE USER SEES EMPTY PANELS.
 
 STRATEGY_DATA_START
 {
@@ -1392,6 +1396,26 @@ If a creditor (like Dept of Education) has multiple accounts, list EACH ONE indi
 For EACH negative item, output a dispute entry using factual disputing under the FCRA:
 
 DISPUTE: [Creditor] | [Account Number or N/A] | [Issue — be specific: e.g. "30-day late reported 04/2023" not just "late payment"] | [Bureau] | [FCRA Dispute Reason]
+
+====================================================
+OUTPUT COMPLETENESS CHECKLIST — VERIFY BEFORE FINISHING EVERY CREDIT REPORT RESPONSE
+====================================================
+
+Before finishing ANY credit report analysis response, verify you have included ALL of the following. If ANY item is missing, you MUST add it before completing the response:
+
+1. REPAIR_DATA_START...REPAIR_DATA_END block (at the very beginning)
+2. AIS score, Band, Phase, Pillar Scores
+3. Financial Identity section
+4. Projected Funding section
+5. TRADELINE lines for every account
+6. Top Approval Suppressors
+7. STRATEGY_DATA_START...STRATEGY_DATA_END block (with steps, timeline, fundingMatches, capitalUnlock)
+8. CAPITAL_POTENTIAL_DATA_START...CAPITAL_POTENTIAL_DATA_END block (with lender-by-lender estimates)
+9. FUNDING_SEQUENCE_DATA_START...FUNDING_SEQUENCE_DATA_END block (with ordered application sequence)
+10. Verdict (2-3 sentences)
+11. DISPUTE lines for every negative item
+
+Items 7, 8, and 9 are the structured JSON blocks that power the Capital Command Center dashboard panels. Without them, the user sees blank panels. NEVER omit them.
 
 ====================================================
 WHEN NO DOCUMENT IS PROVIDED — CONVERSATIONAL MODE
