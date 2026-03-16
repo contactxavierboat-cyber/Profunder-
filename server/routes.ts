@@ -9464,6 +9464,39 @@ Include: sender placeholder [YOUR NAME/ADDRESS], date, bureau address, account d
     }
   });
 
+  app.patch("/api/community/data-points/:id/moderate", requireAuth, async (req: any, res) => {
+    try {
+      const userId = req.session?.userId;
+      const user = await storage.getUser(userId);
+      if (!user || user.role !== "admin") {
+        return res.status(403).json({ error: "Admin access required" });
+      }
+      const id = parseInt(req.params.id);
+      const { moderationStatus } = req.body;
+      if (!moderationStatus || !["approved", "rejected", "pending"].includes(moderationStatus)) {
+        return res.status(400).json({ error: "Invalid moderation status" });
+      }
+      const updated = await storage.updateCommunityDataPoint(id, { moderationStatus });
+      res.json(updated);
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  app.get("/api/community/data-points/pending", requireAuth, async (req: any, res) => {
+    try {
+      const userId = req.session?.userId;
+      const user = await storage.getUser(userId);
+      if (!user || user.role !== "admin") {
+        return res.status(403).json({ error: "Admin access required" });
+      }
+      const result = await storage.getCommunityDataPoints({ moderationStatus: "pending", limit: 100 });
+      res.json(result);
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
   app.get("/api/community/trends", async (_req, res) => {
     try {
       const trends = await storage.getCommunityTrends();

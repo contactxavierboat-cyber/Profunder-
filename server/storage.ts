@@ -108,6 +108,8 @@ export interface CommunityTrends {
   outcomeByScoreBand: { band: string; approvals: number; denials: number }[];
   bureauByLender: { lender: string; bureau: string; count: number }[];
   recentTrendingLenders: { lender: string; count: number }[];
+  forgivingLendersByInquiries: { lender: string; avgInquiries: number; approvalCount: number }[];
+  commonDenialReasons: { tag: string; count: number }[];
 }
 
 export class DatabaseStorage implements IStorage {
@@ -408,6 +410,23 @@ export class DatabaseStorage implements IStorage {
     }
     const outcomeByScoreBand = Object.entries(bandMap).map(([band, v]) => ({ band, ...v }));
 
+    const forgivingLenders = await db.select({
+      lender: communityDataPoints.lender,
+      avgInq: sql<number>`coalesce(avg(${communityDataPoints.inquiryCount}), 0)`,
+      cnt: count()
+    }).from(communityDataPoints).where(and(approved, eq(communityDataPoints.outcome, "approval"), sql`${communityDataPoints.inquiryCount} is not null`)).groupBy(communityDataPoints.lender).orderBy(desc(sql`avg(${communityDataPoints.inquiryCount})`)).limit(10);
+
+    const deniedRows = await db.select({ smartTags: communityDataPoints.smartTags }).from(communityDataPoints).where(and(approved, eq(communityDataPoints.outcome, "denial")));
+    const tagCounts: Record<string, number> = {};
+    for (const row of deniedRows) {
+      if (row.smartTags) {
+        for (const tag of row.smartTags) {
+          if (tag.includes("denial")) tagCounts[tag] = (tagCounts[tag] || 0) + 1;
+        }
+      }
+    }
+    const commonDenialReasons = Object.entries(tagCounts).sort((a, b) => b[1] - a[1]).slice(0, 10).map(([tag, cnt]) => ({ tag, count: cnt }));
+
     return {
       totalPoints, approvals, denials, avgLimit, topBureau, topLender,
       topLendersByApproval: topLendersByApproval.map(r => ({ lender: r.lender, count: r.cnt })),
@@ -415,6 +434,8 @@ export class DatabaseStorage implements IStorage {
       outcomeByScoreBand,
       bureauByLender: bureauByLender.map(r => ({ lender: r.lender, bureau: r.bureau || "", count: r.cnt })),
       recentTrendingLenders: recentTrendingLenders.map(r => ({ lender: r.lender, count: r.cnt })),
+      forgivingLendersByInquiries: forgivingLenders.map(r => ({ lender: r.lender, avgInquiries: Math.round(Number(r.avgInq) * 10) / 10, approvalCount: r.cnt })),
+      commonDenialReasons,
     };
   }
 
@@ -431,6 +452,14 @@ export class DatabaseStorage implements IStorage {
     if (profile.inquiries !== undefined) {
       conditions.push(gte(communityDataPoints.inquiryCount, Math.max(0, profile.inquiries - 3)));
       conditions.push(lte(communityDataPoints.inquiryCount, profile.inquiries + 3));
+    }
+    if (profile.income) {
+      conditions.push(gte(communityDataPoints.income, Math.round(profile.income * 0.6)));
+      conditions.push(lte(communityDataPoints.income, Math.round(profile.income * 1.5)));
+    }
+    if (profile.oldestAccountMonths) {
+      conditions.push(gte(communityDataPoints.oldestAccountAgeMonths, Math.max(0, profile.oldestAccountMonths - 24)));
+      conditions.push(lte(communityDataPoints.oldestAccountAgeMonths, profile.oldestAccountMonths + 24));
     }
     if (profile.applicationType) {
       conditions.push(eq(communityDataPoints.applicationType, profile.applicationType));

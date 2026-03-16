@@ -48,6 +48,8 @@ interface Trends {
   outcomeByScoreBand: { band: string; approvals: number; denials: number }[];
   bureauByLender: { lender: string; bureau: string; count: number }[];
   recentTrendingLenders: { lender: string; count: number }[];
+  forgivingLendersByInquiries: { lender: string; avgInquiries: number; approvalCount: number }[];
+  commonDenialReasons: { tag: string; count: number }[];
 }
 
 interface SimilarResult {
@@ -365,7 +367,11 @@ export default function CommunityUnlocks({ userProfile }: { userProfile?: any })
       )}
       <div className="flex items-center justify-between mt-2 pt-2 border-t border-[#f0f0f0]">
         <span className="text-[9px] text-[#bbb]">{dp.source} · {new Date(dp.createdAt).toLocaleDateString()}</span>
-        {dp.confidenceScore && <span className="text-[9px] text-[#999]">{dp.confidenceScore}% conf</span>}
+        <button
+          onClick={e => { e.stopPropagation(); setSelectedDP(dp); }}
+          className="text-[9px] font-medium text-[#555] hover:text-[#111] transition-colors"
+          data-testid={`button-view-details-${dp.id}`}
+        >View Details →</button>
       </div>
     </div>
   );
@@ -375,7 +381,7 @@ export default function CommunityUnlocks({ userProfile }: { userProfile?: any })
       <table className="w-full text-[10px]">
         <thead>
           <tr className="border-b border-[#eee]">
-            {["Lender", "Product", "Outcome", "Limit", "Score", "Util", "Inq", "Bureau", "Source"].map(h => (
+            {["Lender", "Product", "Outcome", "Limit", "Score", "Util", "Inq", "Bureau", "Source", ""].map(h => (
               <th key={h} className="text-left py-2 px-2 text-[9px] font-semibold text-[#999] uppercase tracking-wider">{h}</th>
             ))}
           </tr>
@@ -397,6 +403,7 @@ export default function CommunityUnlocks({ userProfile }: { userProfile?: any })
               <td className="py-2 px-2 text-[#333]">{fmt(dp.inquiryCount)}</td>
               <td className="py-2 px-2 text-[#555]">{dp.bureauPulled || "—"}</td>
               <td className="py-2 px-2 text-[#999]">{dp.source}</td>
+              <td className="py-2 px-2"><button onClick={e => { e.stopPropagation(); setSelectedDP(dp); }} className="text-[9px] font-medium text-[#555] hover:text-[#111]" data-testid={`button-table-details-${dp.id}`}>Details →</button></td>
             </tr>
           ))}
         </tbody>
@@ -577,6 +584,30 @@ export default function CommunityUnlocks({ userProfile }: { userProfile?: any })
           ))}
         </div>
 
+        {trends.forgivingLendersByInquiries && trends.forgivingLendersByInquiries.length > 0 && (
+          <div className="p-3 bg-[#fafafa] border border-[#eee] rounded-lg">
+            <p className="text-[10px] text-[#999] font-semibold uppercase tracking-wider mb-2">Most Forgiving Lenders (High Inquiry Tolerance)</p>
+            {trends.forgivingLendersByInquiries.map((l, i) => (
+              <div key={i} className="flex items-center justify-between py-1.5 border-b border-[#f0f0f0] last:border-0">
+                <span className="text-[11px] text-[#333] font-medium">{l.lender}</span>
+                <span className="text-[10px] text-[#555]">avg {l.avgInquiries} inq · {l.approvalCount} approvals</span>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {trends.commonDenialReasons && trends.commonDenialReasons.length > 0 && (
+          <div className="p-3 bg-[#fafafa] border border-[#eee] rounded-lg">
+            <p className="text-[10px] text-[#999] font-semibold uppercase tracking-wider mb-2">Common Denial Reasons</p>
+            {trends.commonDenialReasons.map((r, i) => (
+              <div key={i} className="flex items-center justify-between py-1.5 border-b border-[#f0f0f0] last:border-0">
+                <span className="text-[11px] text-[#333] capitalize">{r.tag.replace(/-/g, " ")}</span>
+                <span className="text-[10px] text-[#c0392b] font-medium">{r.count} cases</span>
+              </div>
+            ))}
+          </div>
+        )}
+
         <p className="text-[8px] text-[#bbb] italic text-center">All trends reflect observed community patterns, not guaranteed outcomes.</p>
       </div>
     );
@@ -714,6 +745,8 @@ export default function CommunityUnlocks({ userProfile }: { userProfile?: any })
     </div>
   );
 
+  const editableExtractFields = ["lender", "product", "outcome", "limitAmount", "score", "income", "utilization", "inquiryCount", "bureauPulled", "state", "applicationType", "notes"];
+
   const ExtractSection = () => (
     <div data-testid="unlocks-extract">
       <p className="text-[11px] text-[#555] mb-3">Paste a Reddit or myFICO post and let AI extract structured data.</p>
@@ -733,12 +766,44 @@ export default function CommunityUnlocks({ userProfile }: { userProfile?: any })
 
       {extractResult && (
         <div className="p-3 bg-[#fafafa] border border-[#eee] rounded-lg">
-          <p className="text-[10px] text-[#999] font-semibold uppercase tracking-wider mb-2">Extracted Data</p>
-          <div className="grid grid-cols-2 gap-2 mb-3">
-            {Object.entries(extractResult).filter(([k]) => !["rawText", "aiSummary"].includes(k)).map(([key, val]) => (
-              <div key={key} className="text-[10px]">
-                <span className="text-[#999] capitalize">{key.replace(/([A-Z])/g, " $1").trim()}: </span>
-                <span className="text-[#333] font-medium">{val === null ? "Unknown" : String(val)}</span>
+          <p className="text-[10px] text-[#999] font-semibold uppercase tracking-wider mb-2">Extracted Data — Review & Edit</p>
+          <div className="space-y-2 mb-3">
+            {editableExtractFields.map(key => (
+              <div key={key} className="flex items-center gap-2">
+                <label className="text-[10px] text-[#999] capitalize w-[90px] shrink-0">{key.replace(/([A-Z])/g, " $1").trim()}</label>
+                {key === "outcome" ? (
+                  <select
+                    value={extractResult[key] || ""}
+                    onChange={e => setExtractResult({ ...extractResult, [key]: e.target.value })}
+                    className={`${inputCls} flex-1`}
+                    data-testid={`extract-edit-${key}`}
+                  >
+                    <option value="approval">Approval</option>
+                    <option value="denial">Denial</option>
+                    <option value="reconsideration">Reconsideration</option>
+                    <option value="cli">CLI</option>
+                    <option value="product_change">Product Change</option>
+                  </select>
+                ) : key === "applicationType" ? (
+                  <select
+                    value={extractResult[key] || "personal"}
+                    onChange={e => setExtractResult({ ...extractResult, [key]: e.target.value })}
+                    className={`${inputCls} flex-1`}
+                    data-testid={`extract-edit-${key}`}
+                  >
+                    <option value="personal">Personal</option>
+                    <option value="business">Business</option>
+                  </select>
+                ) : (
+                  <input
+                    type={["limitAmount", "score", "income", "utilization", "inquiryCount"].includes(key) ? "number" : "text"}
+                    value={extractResult[key] ?? ""}
+                    onChange={e => setExtractResult({ ...extractResult, [key]: e.target.value || null })}
+                    className={`${inputCls} flex-1`}
+                    placeholder={extractResult[key] === null ? "Unknown" : ""}
+                    data-testid={`extract-edit-${key}`}
+                  />
+                )}
               </div>
             ))}
           </div>
