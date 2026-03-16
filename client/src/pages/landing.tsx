@@ -523,7 +523,7 @@ function parseSingleMessageData(content: string): MissionData {
 }
 
 function hasAnalysisData(data: MissionData): boolean {
-  return data.approvalIndex !== null || data.band !== null || data.phase !== null || data.pillarScores.length > 0 || data.suppressors.length > 0 || data.helping.length > 0 || data.hurting.length > 0 || data.bestNextMove !== null || data.financialIdentity !== null || data.projectedFunding !== null || data.openTradelines.length > 0 || data.capitalPotential.length > 0 || data.fundingSequence.length > 0;
+  return data.approvalIndex !== null || data.band !== null || data.phase !== null || (data.pillarScores || []).length > 0 || (data.suppressors || []).length > 0 || (data.helping || []).length > 0 || (data.hurting || []).length > 0 || data.bestNextMove !== null || data.financialIdentity !== null || data.projectedFunding !== null || (data.openTradelines || []).length > 0 || (data.capitalPotential || []).length > 0 || (data.fundingSequence || []).length > 0;
 }
 
 function getBandColor(band: string | null): string {
@@ -2663,18 +2663,19 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
             </div>
           )}
 
-          {aisReport && aisReport.bureauHealth && aisReport.bureauHealth.length > 0 && (
+          {aisReport && (aisReport.bureauHealth || []).length > 0 && (
             <div className="pb-3 mb-3 border-b border-[#f0f0f0]" data-testid="bureau-heatmap">
               <p className="text-[10px] text-[#111] font-medium tracking-wide mb-2.5">Bureau Heatmap</p>
               <div className="grid grid-cols-3 gap-2">
-                {aisReport.bureauHealth.map((bh, i) => {
-                  const strengthColor = bh.strength.toLowerCase() === "strong" ? "#2d6a4f" : bh.strength.toLowerCase() === "moderate" ? "#c9a227" : "#c0392b";
-                  const strengthBg = bh.strength.toLowerCase() === "strong" ? "#f0f7f4" : bh.strength.toLowerCase() === "moderate" ? "#fdf8e8" : "#fdf0ef";
+                {(aisReport.bureauHealth || []).map((bh, i) => {
+                  const str = (bh.strength || "Moderate").toLowerCase();
+                  const strengthColor = str === "strong" ? "#2d6a4f" : str === "moderate" ? "#c9a227" : "#c0392b";
+                  const strengthBg = str === "strong" ? "#f0f7f4" : str === "moderate" ? "#fdf8e8" : "#fdf0ef";
                   return (
-                    <div key={i} className="rounded-md p-2" style={{ backgroundColor: strengthBg }} data-testid={`bureau-health-${bh.bureau.toLowerCase()}`}>
-                      <p className="text-[8px] text-[#888] mb-1">{bh.bureau}</p>
+                    <div key={i} className="rounded-md p-2" style={{ backgroundColor: strengthBg }} data-testid={`bureau-health-${(bh.bureau || "").toLowerCase()}`}>
+                      <p className="text-[8px] text-[#888] mb-1">{bh.bureau || "Unknown"}</p>
                       <p className="text-[10px] font-semibold text-[#111] mb-1" style={{ fontVariantNumeric: "tabular-nums" }}>{bh.score > 0 ? bh.score : "—"}</p>
-                      <p className="text-[7px] font-medium mb-0.5" style={{ color: strengthColor }}>{bh.strength}</p>
+                      <p className="text-[7px] font-medium mb-0.5" style={{ color: strengthColor }}>{bh.strength || "Moderate"}</p>
                       <div className="flex items-center justify-between">
                         <span className="text-[7px] text-[#999]">{bh.inquiries} inq</span>
                         <span className="text-[7px] text-[#999]">{bh.utilization}%</span>
@@ -2686,7 +2687,7 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
             </div>
           )}
 
-          {aisReport && aisReport.capitalPotential.length > 0 && (
+          {aisReport && (aisReport.capitalPotential || []).length > 0 && (
             <div className="pb-3 mb-3 border-b border-[#f0f0f0]" data-testid="capital-potential">
               <p className="text-[10px] text-[#111] font-medium tracking-wide mb-2.5">Capital Potential</p>
               {(() => {
@@ -2701,7 +2702,8 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
                     </div>
                     <div className="space-y-0">
                       {aisReport.capitalPotential.map((entry, i) => {
-                        const confColor = entry.confidence.toLowerCase() === "high" ? "#2d6a4f" : entry.confidence.toLowerCase() === "medium" ? "#c9a227" : "#c0392b";
+                        const conf = (entry.confidence || "Medium").toLowerCase();
+                        const confColor = conf === "high" ? "#2d6a4f" : conf === "medium" ? "#c9a227" : "#c0392b";
                         const denialRisk = entry.denialRisk || "Moderate";
                         const riskColor = denialRisk.toLowerCase() === "low" ? "#2d6a4f" : denialRisk.toLowerCase() === "moderate" ? "#c9a227" : "#c0392b";
                         const barWidth = Math.round((entry.highEstimate / maxHigh) * 100);
@@ -2717,7 +2719,7 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
                               </div>
                               <div className="flex items-center gap-1.5 shrink-0">
                                 <span className="text-[7px] text-[#999] px-1 py-[1px] rounded bg-[#f0f0f0]">{entry.bureau}</span>
-                                <span className="text-[7px] font-medium" style={{ color: confColor }}>{entry.confidence}</span>
+                                <span className="text-[7px] font-medium" style={{ color: confColor }}>{entry.confidence || "Medium"}</span>
                               </div>
                             </div>
                             <div className="flex items-center justify-between mb-1">
@@ -2752,7 +2754,7 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
                                   <div className="flex items-center justify-between">
                                     <span className="text-[7px] text-[#888]">Approval Probability</span>
                                     <span className="text-[8px] font-semibold" style={{ color: confColor, fontVariantNumeric: "tabular-nums" }}>
-                                      {entry.confidence.toLowerCase() === "high" ? "72–88%" : entry.confidence.toLowerCase() === "medium" ? "45–65%" : "15–35%"}
+                                      {conf === "high" ? "72–88%" : conf === "medium" ? "45–65%" : "15–35%"}
                                     </span>
                                   </div>
                                   <div className="flex items-center justify-between">
@@ -2784,18 +2786,18 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
             </div>
           )}
 
-          {aisReport && aisReport.fundingSequence.length > 0 && (
+          {aisReport && (aisReport.fundingSequence || []).length > 0 && (
             <div className="pb-3 mb-3 border-b border-[#f0f0f0]" data-testid="funding-sequence">
               <p className="text-[10px] text-[#111] font-medium tracking-wide mb-2.5">Funding Sequence</p>
               <div className="space-y-0">
-                {aisReport.fundingSequence.map((entry, i) => {
-                  const probColor = entry.approvalProbability >= 70 ? "#2d6a4f" : entry.approvalProbability >= 45 ? "#c9a227" : "#c0392b";
+                {(aisReport.fundingSequence || []).map((entry, i) => {
+                  const probColor = (entry.approvalProbability || 0) >= 70 ? "#2d6a4f" : (entry.approvalProbability || 0) >= 45 ? "#c9a227" : "#c0392b";
                   return (
-                    <div key={i} className={`py-2.5 ${i < aisReport.fundingSequence.length - 1 ? "border-b border-[#f0f0f0]" : ""}`} data-testid={`funding-sequence-${i}`}>
+                    <div key={i} className={`py-2.5 ${i < (aisReport.fundingSequence || []).length - 1 ? "border-b border-[#f0f0f0]" : ""}`} data-testid={`funding-sequence-${i}`}>
                       <div className="flex items-start gap-2.5">
                         <div className="flex flex-col items-center shrink-0 mt-0.5">
                           <span className="text-[9px] font-semibold text-[#bbb] w-3 text-center" style={{ fontVariantNumeric: "tabular-nums" }}>{entry.position}</span>
-                          {i < aisReport.fundingSequence.length - 1 && (
+                          {i < (aisReport.fundingSequence || []).length - 1 && (
                             <div className="w-px h-8 bg-[#e5e5e5] mt-1" />
                           )}
                         </div>
@@ -2847,7 +2849,7 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
               <p className="text-[10px] text-[#111] font-medium tracking-wide mb-2.5">Lender Matches</p>
               <div className="space-y-0">
                 {aisReport.strategyData.fundingMatches.map((match, i) => {
-                  const likelihoodColor = match.likelihood.toLowerCase() === "high" ? "#2d6a4f" : match.likelihood.toLowerCase() === "medium" ? "#c9a227" : "#c0392b";
+                  const likelihoodColor = (match.likelihood || "Medium").toLowerCase() === "high" ? "#2d6a4f" : (match.likelihood || "Medium").toLowerCase() === "medium" ? "#c9a227" : "#c0392b";
                   return (
                     <div key={i} className={`py-2 ${i < aisReport.strategyData!.fundingMatches.length - 1 ? "border-b border-[#f0f0f0]" : ""}`}>
                       <div className="flex items-center justify-between mb-0.5">
@@ -2866,11 +2868,12 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
             <div className="pb-3 mb-3 border-b border-[#f0f0f0]" data-testid="funding-trends">
               <p className="text-[10px] text-[#111] font-medium tracking-wide mb-2.5">Funding Trends</p>
               <div className="space-y-0">
-                {aisReport.fundingTrends.map((trend, i) => {
-                  const trendColor = trend.trend.toLowerCase() === "rising" ? "#2d6a4f" : trend.trend.toLowerCase() === "stable" ? "#c9a227" : "#c0392b";
-                  const trendArrow = trend.trend.toLowerCase() === "rising" ? "↑" : trend.trend.toLowerCase() === "stable" ? "→" : "↓";
+                {(aisReport.fundingTrends || []).map((trend, i) => {
+                  const td = (trend.trend || "Stable").toLowerCase();
+                  const trendColor = td === "rising" ? "#2d6a4f" : td === "stable" ? "#c9a227" : "#c0392b";
+                  const trendArrow = td === "rising" ? "↑" : td === "stable" ? "→" : "↓";
                   return (
-                    <div key={i} className={`py-2 ${i < aisReport.fundingTrends.length - 1 ? "border-b border-[#f0f0f0]" : ""}`} data-testid={`funding-trend-${i}`}>
+                    <div key={i} className={`py-2 ${i < (aisReport.fundingTrends || []).length - 1 ? "border-b border-[#f0f0f0]" : ""}`} data-testid={`funding-trend-${i}`}>
                       <div className="flex items-center justify-between mb-0.5">
                         <div className="flex items-center gap-1.5 min-w-0">
                           <span className="text-[9px] text-[#111] font-medium">{trend.lender}</span>
@@ -2878,7 +2881,7 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
                         </div>
                         <div className="flex items-center gap-1.5 shrink-0">
                           <span className="text-[7px] text-[#999] px-1 py-[1px] rounded bg-[#f0f0f0]">{trend.bureau}</span>
-                          <span className="text-[8px] font-medium" style={{ color: trendColor }}>{trendArrow} {trend.trend}</span>
+                          <span className="text-[8px] font-medium" style={{ color: trendColor }}>{trendArrow} {trend.trend || "Stable"}</span>
                         </div>
                       </div>
                       <div className="flex items-center gap-1">
