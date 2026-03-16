@@ -2525,13 +2525,24 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
           const totalLow = cpTotal.reduce((s, e) => s + (e.lowEstimate || 0), 0);
           const totalHigh = cpTotal.reduce((s, e) => s + (e.highEstimate || 0), 0);
           const lenderCount = cpTotal.length;
+          const bureauSet = [...new Set(cpTotal.map(e => e.bureau).filter(Boolean))];
+          const bureauLabel = bureauSet.length > 0 ? bureauSet.join(", ") : "All Bureaus";
           return (
             <div className="mb-3 pb-3 border-b border-[#e5e5e5]" data-testid="potential-funding-card">
-              <p className="text-[8px] text-[#999] font-medium tracking-wider uppercase mb-1.5">Potential Funding</p>
-              <p className="text-[28px] font-semibold text-[#111] leading-none tracking-tight" style={{ fontVariantNumeric: "tabular-nums" }}>${totalHigh.toLocaleString()}</p>
-              <div className="flex items-center gap-2 mt-1.5">
-                <span className="text-[9px] text-[#888]" style={{ fontVariantNumeric: "tabular-nums" }}>${totalLow.toLocaleString()} – ${totalHigh.toLocaleString()}</span>
-                <span className="text-[7px] text-[#bbb]">{lenderCount} lender{lenderCount !== 1 ? "s" : ""}</span>
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <p className="text-[8px] text-[#999] font-medium tracking-wider uppercase mb-1.5">Potential Funding</p>
+                  <p className="text-[28px] font-semibold text-[#111] leading-none tracking-tight" style={{ fontVariantNumeric: "tabular-nums" }}>${totalHigh.toLocaleString()}</p>
+                  <div className="flex items-center gap-2 mt-1.5">
+                    <span className="text-[9px] text-[#888]" style={{ fontVariantNumeric: "tabular-nums" }}>${totalLow.toLocaleString()} – ${totalHigh.toLocaleString()}</span>
+                    <span className="text-[7px] text-[#bbb]">{lenderCount} lender{lenderCount !== 1 ? "s" : ""}</span>
+                  </div>
+                </div>
+                <div className="text-right shrink-0 mt-0.5">
+                  <p className="text-[7px] text-[#bbb] leading-snug">Per-bureau basis</p>
+                  <p className="text-[7px] text-[#999] leading-snug mt-0.5">Expected funding from</p>
+                  <p className="text-[8px] text-[#111] font-medium mt-0.5">{bureauLabel}</p>
+                </div>
               </div>
             </div>
           );
