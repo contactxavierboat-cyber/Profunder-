@@ -9347,5 +9347,204 @@ Include: sender placeholder [YOUR NAME/ADDRESS], date, bureau address, account d
     }
   });
 
+  function generateSmartTags(data: any): string[] {
+    const tags: string[] = [];
+    if (data.outcome === "approval" && data.limitAmount && data.limitAmount >= 10000) tags.push("high-limit approval");
+    if (data.outcome === "approval" && data.limitAmount && data.limitAmount >= 25000) tags.push("premium approval");
+    if (data.inquiryCount !== undefined && data.inquiryCount >= 6) tags.push("high inquiries");
+    if (data.inquiryCount !== undefined && data.inquiryCount <= 2) tags.push("low inquiries");
+    if (data.utilization !== undefined && data.utilization <= 10) tags.push("low utilization");
+    if (data.utilization !== undefined && data.utilization >= 50) tags.push("high utilization");
+    if (data.oldestAccountAgeMonths !== undefined && data.oldestAccountAgeMonths < 24) tags.push("thin file");
+    if (data.oldestAccountAgeMonths !== undefined && data.oldestAccountAgeMonths >= 60) tags.push("established profile");
+    if (data.newAccounts6m !== undefined && data.newAccounts6m >= 3) tags.push("recent accounts");
+    if (data.applicationType === "business") tags.push("business owner");
+    if (data.derogatoriesPresent) tags.push("derogatories present");
+    if (data.outcome === "denial" && data.inquiryCount && data.inquiryCount >= 5) tags.push("denial due to inquiries");
+    if (data.outcome === "denial" && data.utilization && data.utilization >= 50) tags.push("denial due to utilization");
+    if (data.outcome === "approval" && data.relationshipWithLender) tags.push("approval with relationship");
+    if (data.score && data.score >= 750) tags.push("excellent score");
+    if (data.score && data.score < 600) tags.push("subprime score");
+    if (data.outcome === "reconsideration") tags.push("reconsideration");
+    if (data.outcome === "cli") tags.push("credit limit increase");
+    return tags;
+  }
+
+  app.get("/api/community/data-points", async (req, res) => {
+    try {
+      const filters: any = {};
+      if (req.query.source) filters.source = req.query.source;
+      if (req.query.outcome) filters.outcome = req.query.outcome;
+      if (req.query.lender) filters.lender = req.query.lender;
+      if (req.query.product) filters.product = req.query.product;
+      if (req.query.scoreMin) filters.scoreMin = parseInt(req.query.scoreMin as string);
+      if (req.query.scoreMax) filters.scoreMax = parseInt(req.query.scoreMax as string);
+      if (req.query.inquiryMin) filters.inquiryMin = parseInt(req.query.inquiryMin as string);
+      if (req.query.inquiryMax) filters.inquiryMax = parseInt(req.query.inquiryMax as string);
+      if (req.query.utilizationMin) filters.utilizationMin = parseInt(req.query.utilizationMin as string);
+      if (req.query.utilizationMax) filters.utilizationMax = parseInt(req.query.utilizationMax as string);
+      if (req.query.incomeMin) filters.incomeMin = parseInt(req.query.incomeMin as string);
+      if (req.query.incomeMax) filters.incomeMax = parseInt(req.query.incomeMax as string);
+      if (req.query.state) filters.state = req.query.state;
+      if (req.query.bureauPulled) filters.bureauPulled = req.query.bureauPulled;
+      if (req.query.applicationType) filters.applicationType = req.query.applicationType;
+      if (req.query.search) filters.search = req.query.search;
+      if (req.query.dateRange) filters.dateRange = req.query.dateRange;
+      if (req.query.limit) filters.limit = parseInt(req.query.limit as string);
+      if (req.query.offset) filters.offset = parseInt(req.query.offset as string);
+      filters.moderationStatus = "approved";
+      const result = await storage.getCommunityDataPoints(filters);
+      res.json(result);
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  app.get("/api/community/data-points/:id", async (req, res) => {
+    try {
+      const dp = await storage.getCommunityDataPoint(parseInt(req.params.id));
+      if (!dp) return res.status(404).json({ error: "Not found" });
+      if (dp.moderationStatus !== "approved") return res.status(404).json({ error: "Not found" });
+      res.json(dp);
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  app.post("/api/community/data-points", requireAuth, async (req: any, res) => {
+    try {
+      const { moderationStatus, submittedBy, ...rest } = req.body;
+      const data = {
+        ...rest,
+        submittedBy: req.session?.userId,
+        moderationStatus: "pending" as const,
+        smartTags: generateSmartTags(rest),
+      };
+      if (!data.source || !data.lender || !data.outcome) {
+        return res.status(400).json({ error: "source, lender, and outcome are required" });
+      }
+      const created = await storage.createCommunityDataPoint(data);
+      res.json(created);
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  app.patch("/api/community/data-points/:id", requireAuth, async (req: any, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const existing = await storage.getCommunityDataPoint(id);
+      if (!existing) return res.status(404).json({ error: "Not found" });
+      if (existing.submittedBy !== req.session?.userId) {
+        return res.status(403).json({ error: "Not authorized" });
+      }
+      const { moderationStatus, submittedBy, id: _id, ...updates } = req.body;
+      if (updates.lender || updates.score || updates.utilization || updates.inquiryCount || updates.outcome || updates.limitAmount) {
+        const merged = { ...existing, ...updates };
+        updates.smartTags = generateSmartTags(merged);
+      }
+      const updated = await storage.updateCommunityDataPoint(id, updates);
+      res.json(updated);
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  app.delete("/api/community/data-points/:id", requireAuth, async (req: any, res) => {
+    try {
+      const existing = await storage.getCommunityDataPoint(parseInt(req.params.id));
+      if (!existing) return res.status(404).json({ error: "Not found" });
+      if (existing.submittedBy !== req.session?.userId) {
+        return res.status(403).json({ error: "Not authorized" });
+      }
+      await storage.deleteCommunityDataPoint(parseInt(req.params.id));
+      res.json({ success: true });
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  app.get("/api/community/trends", async (_req, res) => {
+    try {
+      const trends = await storage.getCommunityTrends();
+      res.json(trends);
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  app.post("/api/community/similar-profiles", requireAuth, async (req: any, res) => {
+    try {
+      const profile = req.body;
+      const matches = await storage.getSimilarProfiles(profile);
+      const approvals = matches.filter(m => m.outcome === "approval").length;
+      const denials = matches.filter(m => m.outcome === "denial").length;
+      const reconsiderations = matches.filter(m => m.outcome === "reconsideration").length;
+      const lenderCounts: Record<string, number> = {};
+      const limits: number[] = [];
+      for (const m of matches) {
+        lenderCounts[m.lender] = (lenderCounts[m.lender] || 0) + 1;
+        if (m.limitAmount) limits.push(m.limitAmount);
+      }
+      const topLender = Object.entries(lenderCounts).sort((a, b) => b[1] - a[1])[0]?.[0] || "N/A";
+      limits.sort((a, b) => a - b);
+      const limitRange = limits.length > 0 ? `$${limits[0].toLocaleString()}–$${limits[limits.length - 1].toLocaleString()}` : "N/A";
+      res.json({ total: matches.length, approvals, denials, reconsiderations, topLender, limitRange, dataPoints: matches.slice(0, 20) });
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  app.post("/api/community/extract", requireAuth, async (req: any, res) => {
+    try {
+      const { text } = req.body;
+      if (!text || text.length < 20) return res.status(400).json({ error: "Text too short to extract" });
+      const extractionPrompt = `You are a data extraction AI. Extract structured credit/lending data from the following community post text. Return a JSON object with these fields (use null for unknown/missing values):
+
+{
+  "lender": string or null,
+  "product": string or null,
+  "outcome": "approval" | "denial" | "reconsideration" | "cli" or null,
+  "limitAmount": number or null,
+  "apr": string or null,
+  "score": number or null,
+  "income": number or null,
+  "utilization": number or null,
+  "inquiryCount": number or null,
+  "newAccounts6m": number or null,
+  "oldestAccountAgeMonths": number or null,
+  "avgAccountAgeMonths": number or null,
+  "bureauPulled": "Experian" | "TransUnion" | "Equifax" or null,
+  "state": two-letter state code or null,
+  "applicationType": "personal" | "business" or null,
+  "businessRevenue": number or null,
+  "relationshipWithLender": string or null,
+  "derogatoriesPresent": boolean or null,
+  "notes": string summarizing key details,
+  "confidenceScore": number 1-100 (how confident you are in the extraction)
+}
+
+Return ONLY the JSON object, no markdown, no explanation.
+
+Text to extract from:
+${text.slice(0, 5000)}`;
+
+      const response = await openai.chat.completions.create({
+        model: "gpt-4o-mini",
+        messages: [{ role: "user", content: extractionPrompt }],
+        max_tokens: 1000,
+        temperature: 0.1,
+      });
+      const content = response.choices[0]?.message?.content || "{}";
+      const cleaned = content.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
+      const extracted = JSON.parse(cleaned);
+      extracted.rawText = text.slice(0, 10000);
+      extracted.aiSummary = extracted.notes || null;
+      res.json(extracted);
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
   return httpServer;
 }

@@ -204,6 +204,42 @@ export const systemAlerts = pgTable("system_alerts", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
+export const communityDataPoints = pgTable("community_data_points", {
+  id: serial("id").primaryKey(),
+  source: text("source").notNull().default("manual"),
+  sourceUrl: text("source_url"),
+  sourceReference: text("source_reference"),
+  lender: text("lender").notNull(),
+  product: text("product"),
+  outcome: text("outcome").notNull(),
+  limitAmount: integer("limit_amount"),
+  apr: text("apr"),
+  score: integer("score"),
+  scoreBand: text("score_band"),
+  income: integer("income"),
+  incomeBand: text("income_band"),
+  utilization: integer("utilization"),
+  inquiryCount: integer("inquiry_count"),
+  newAccounts6m: integer("new_accounts_6m"),
+  oldestAccountAgeMonths: integer("oldest_account_age_months"),
+  avgAccountAgeMonths: integer("avg_account_age_months"),
+  bureauPulled: text("bureau_pulled"),
+  state: text("state"),
+  applicationType: text("application_type").default("personal"),
+  businessRevenue: integer("business_revenue"),
+  relationshipWithLender: text("relationship_with_lender"),
+  derogatoriesPresent: boolean("derogatories_present"),
+  rawText: text("raw_text"),
+  aiSummary: text("ai_summary"),
+  notes: text("notes"),
+  confidenceScore: integer("confidence_score"),
+  moderationStatus: text("moderation_status").notNull().default("pending"),
+  smartTags: text("smart_tags").array(),
+  submittedBy: integer("submitted_by").references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
 export const insertCommentSchema = createInsertSchema(comments).omit({ id: true, timestamp: true });
 export const insertPostSchema = createInsertSchema(posts).omit({ id: true, timestamp: true });
 export const insertFriendshipSchema = createInsertSchema(friendships).omit({ id: true, createdAt: true });
@@ -211,6 +247,7 @@ export const insertDashboardQuestionSchema = createInsertSchema(dashboardQuestio
 export const insertDirectMessageSchema = createInsertSchema(directMessages).omit({ id: true, timestamp: true });
 export const insertDisputeCaseSchema = createInsertSchema(disputeCases).omit({ id: true, createdAt: true, updatedAt: true });
 export const insertSystemAlertSchema = createInsertSchema(systemAlerts).omit({ id: true, createdAt: true });
+export const insertCommunityDataPointSchema = createInsertSchema(communityDataPoints).omit({ id: true, createdAt: true, updatedAt: true });
 
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
@@ -230,3 +267,5 @@ export type DisputeCase = typeof disputeCases.$inferSelect;
 export type InsertDisputeCase = z.infer<typeof insertDisputeCaseSchema>;
 export type SystemAlert = typeof systemAlerts.$inferSelect;
 export type InsertSystemAlert = z.infer<typeof insertSystemAlertSchema>;
+export type CommunityDataPoint = typeof communityDataPoints.$inferSelect;
+export type InsertCommunityDataPoint = z.infer<typeof insertCommunityDataPointSchema>;

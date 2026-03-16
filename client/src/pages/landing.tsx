@@ -3,6 +3,7 @@ import { createPortal } from "react-dom";
 import ReactMarkdown from "react-markdown";
 import { useAuth } from "@/lib/store";
 import { ProfundrLogo } from "@/components/profundr-logo";
+import CommunityUnlocks from "@/components/community-unlocks";
 
 interface TeamMember {
   id: number;
@@ -2306,7 +2307,7 @@ function PerfectProfileTab({ aisReport }: { aisReport: MissionData | null }) {
   );
 }
 
-function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, activeTeamChatId, aisReport, onOpenAis, userProfile, onUpdateProfile, repairData, onUpdateRepairData, onSendChat, onSelectTab, activeView, simulatingLender, setSimulatingLender, repairFilter, setRepairFilter, inqCarouselIdx, setInqCarouselIdx, acctCarouselIdx, setAcctCarouselIdx, portalTarget, portalOnly }: { docs: SavedDoc[]; onClose: () => void; onDelete: (id: string) => void; onSave: (doc: SavedDoc) => void; user: any; onOpenTeamChat?: (member: TeamMember) => void; activeTeamChatId?: number | null; aisReport: MissionData | null; onOpenAis: () => void; userProfile: UserProfile; onUpdateProfile: (p: UserProfile) => void; repairData: RepairData | null; onUpdateRepairData: (data: RepairData) => void; onSendChat: (msg: string) => void; onSelectTab: (tab: "command" | "stack" | "documents") => void; activeView: "command" | "stack" | "documents" | null; simulatingLender: number | null; setSimulatingLender: (v: number | null) => void; repairFilter: { bureau: string; category: string }; setRepairFilter: (fn: any) => void; inqCarouselIdx: number; setInqCarouselIdx: (v: number) => void; acctCarouselIdx: number; setAcctCarouselIdx: (v: number) => void; portalTarget: React.RefObject<HTMLDivElement | null>; portalOnly?: boolean }) {
+function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, activeTeamChatId, aisReport, onOpenAis, userProfile, onUpdateProfile, repairData, onUpdateRepairData, onSendChat, onSelectTab, activeView, simulatingLender, setSimulatingLender, repairFilter, setRepairFilter, inqCarouselIdx, setInqCarouselIdx, acctCarouselIdx, setAcctCarouselIdx, portalTarget, portalOnly }: { docs: SavedDoc[]; onClose: () => void; onDelete: (id: string) => void; onSave: (doc: SavedDoc) => void; user: any; onOpenTeamChat?: (member: TeamMember) => void; activeTeamChatId?: number | null; aisReport: MissionData | null; onOpenAis: () => void; userProfile: UserProfile; onUpdateProfile: (p: UserProfile) => void; repairData: RepairData | null; onUpdateRepairData: (data: RepairData) => void; onSendChat: (msg: string) => void; onSelectTab: (tab: "command" | "stack" | "documents" | "unlocks") => void; activeView: "command" | "stack" | "documents" | "unlocks" | null; simulatingLender: number | null; setSimulatingLender: (v: number | null) => void; repairFilter: { bureau: string; category: string }; setRepairFilter: (fn: any) => void; inqCarouselIdx: number; setInqCarouselIdx: (v: number) => void; acctCarouselIdx: number; setAcctCarouselIdx: (v: number) => void; portalTarget: React.RefObject<HTMLDivElement | null>; portalOnly?: boolean }) {
   const docInputRef = useRef<HTMLInputElement>(null);
   const idInputRef = useRef<HTMLInputElement>(null);
   const bankInputRef = useRef<HTMLInputElement>(null);
@@ -2497,6 +2498,7 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
             { key: "command" as const, label: "Command", icon: <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><rect x="3" y="3" width="12" height="12" rx="2.5" stroke="currentColor" strokeWidth="1.3"/><path d="M7 7l2.5 2-2.5 2" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/></svg> },
             { key: "stack" as const, label: "Stack", icon: <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M3 11.5l6 3.5 6-3.5M3 8l6 3.5 6-3.5M3 4.5l6 3.5 6-3.5" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/></svg> },
             { key: "documents" as const, label: "Repair", icon: <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M5.5 3h7a2 2 0 012 2v8a2 2 0 01-2 2h-7a2 2 0 01-2-2V5a2 2 0 012-2z" stroke="currentColor" strokeWidth="1.3"/><path d="M7 8h4M7 10.5h2.5" stroke="currentColor" strokeWidth="1.1" strokeLinecap="round"/></svg> },
+            { key: "unlocks" as const, label: "Unlocks", icon: <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M9 2v4l2-1.5M9 6L7 4.5" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/><circle cx="9" cy="11" r="4.5" stroke="currentColor" strokeWidth="1.3"/><path d="M9 9.5v2l1.2.8" stroke="currentColor" strokeWidth="1.1" strokeLinecap="round" strokeLinejoin="round"/></svg> },
           ]).map(nav => (
             <button
               key={nav.key}
@@ -2567,7 +2569,7 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
               >
                 <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M9 3L4 7l5 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
               </button>
-              <span className="text-[13px] font-semibold text-[#333]">{panelTab === "command" ? "Command" : panelTab === "stack" ? "Stack" : "Repair"}</span>
+              <span className="text-[13px] font-semibold text-[#333]">{panelTab === "command" ? "Command" : panelTab === "stack" ? "Stack" : panelTab === "unlocks" ? "Unlocks" : "Repair"}</span>
             </div>
           </div>
 
@@ -3868,6 +3870,11 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
           </p>
         </div>
         )}
+
+        {panelTab === "unlocks" && (
+          <CommunityUnlocks userProfile={userProfile} />
+        )}
+
         </div>
       </div>, portalTarget.current
       )}
@@ -3928,7 +3935,7 @@ export default function LandingPage() {
   });
   const [repairData, setRepairData] = useState<RepairData | null>(loadRepairData);
   const [showAisOverlay, setShowAisOverlay] = useState(false);
-  const [activeView, setActiveView] = useState<"command" | "stack" | "documents" | null>(null);
+  const [activeView, setActiveView] = useState<"command" | "stack" | "documents" | "unlocks" | null>(null);
   const [simulatingLender, setSimulatingLender] = useState<number | null>(null);
   const [repairFilter, setRepairFilter] = useState<{ bureau: string; category: string }>({ bureau: "All", category: "All" });
   const [inqCarouselIdx, setInqCarouselIdx] = useState(0);
