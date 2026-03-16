@@ -3758,8 +3758,8 @@ export default function LandingPage() {
   const emptyFundingFiles = {
     bizBankStatements: [] as File[], personalBankStatements: [] as File[],
     bizTaxReturns: [] as File[], personalTaxReturns: [] as File[],
-    profitLoss: [] as File[], balanceSheet: [] as File[], bizLicense: [] as File[],
-    voidedCheck: null as File | null, creditReport: null as File | null,
+    bizLicense: [] as File[], driversLicense: null as File | null,
+    proofOfResidency: null as File | null, creditReport: null as File | null,
   };
   const [fundingForm, setFundingForm] = useState(emptyFundingForm);
   const [fundingFiles, setFundingFiles] = useState(emptyFundingFiles);
@@ -3771,10 +3771,9 @@ export default function LandingPage() {
   const fundingPersBankRef = useRef<HTMLInputElement>(null);
   const fundingBizTaxRef = useRef<HTMLInputElement>(null);
   const fundingPersTaxRef = useRef<HTMLInputElement>(null);
-  const fundingPLRef = useRef<HTMLInputElement>(null);
-  const fundingBSRef = useRef<HTMLInputElement>(null);
   const fundingBizLicRef = useRef<HTMLInputElement>(null);
-  const fundingVoidedRef = useRef<HTMLInputElement>(null);
+  const fundingDLRef = useRef<HTMLInputElement>(null);
+  const fundingResidencyRef = useRef<HTMLInputElement>(null);
   const fundingCreditRef = useRef<HTMLInputElement>(null);
 
   const initSigCanvas = useCallback((canvas: HTMLCanvasElement | null) => {
@@ -5128,20 +5127,20 @@ export default function LandingPage() {
                 </div>
 
                 <div className="bg-[#f8f8fc] rounded-xl p-5 text-left mb-5 max-h-[260px] overflow-y-auto border border-[#e8e8f0]">
-                  <h3 className="text-[11px] font-bold text-[#1a1a2e] uppercase tracking-wider mb-3">Broker Funding Authorization & Terms of Service</h3>
+                  <h3 className="text-[11px] font-bold text-[#1a1a2e] uppercase tracking-wider mb-3">Exclusive Broker Funding Authorization, Power of Attorney & Terms of Service</h3>
                   <div className="space-y-2.5 text-[10.5px] text-[#555] leading-[1.7]">
-                    <p><strong>1. Broker Authorization:</strong> By signing below, you ("Client") hereby authorize Profundr LLC ("Broker") to act as your authorized representative and broker for the purpose of identifying, negotiating, and securing funding opportunities on your behalf. This includes, but is not limited to, business lines of credit, term loans, SBA loans, revenue-based financing, equipment financing, and other capital products.</p>
-                    <p><strong>2. Scope of Services:</strong> The Broker will: (a) review and analyze your credit profile, financial documentation, and business information; (b) identify suitable lending partners and funding programs; (c) submit applications to lenders on your behalf; (d) negotiate terms, rates, and conditions; and (e) facilitate the funding process through to disbursement.</p>
-                    <p><strong>3. Client Obligations:</strong> The Client agrees to: (a) provide accurate, complete, and truthful information; (b) promptly supply any additional documentation requested; (c) notify Broker of any material changes to financial circumstances; (d) not apply directly to lenders that Broker has already submitted applications to on Client's behalf.</p>
-                    <p><strong>4. Data Collection & Use:</strong> By signing, you authorize Profundr to collect and securely store personal and financial information including: name, contact details, Social Security Number (last 4 digits), date of birth, employment details, income, bank statements, tax returns, and credit reports. All data is encrypted using AES-256 at rest and TLS 1.3 in transit.</p>
-                    <p><strong>5. Broker Compensation:</strong> Broker compensation is paid by the lending institution upon successful funding. The Client will not be charged any upfront fees for brokerage services. Any fees or costs associated with specific funding products will be clearly disclosed prior to Client's acceptance.</p>
+                    <p><strong>1. Exclusive Broker Authorization & Power of Attorney:</strong> By signing below, you ("Client") hereby grant Profundr LLC ("Broker") an exclusive and irrevocable Power of Attorney to act as your sole authorized representative and broker for the purpose of identifying, negotiating, applying for, and securing funding opportunities on your behalf and on behalf of your business. This Power of Attorney grants Broker the exclusive right to seek, apply for, and negotiate all forms of business funding including, but not limited to, business lines of credit, term loans, SBA loans, revenue-based financing, equipment financing, merchant cash advances, and other capital products. Client agrees not to engage any other broker or intermediary for funding services during the term of this agreement.</p>
+                    <p><strong>2. Scope of Services:</strong> The Broker will: (a) review and analyze your credit profile, financial documentation, and business information; (b) identify suitable lending partners and funding programs; (c) submit applications to lenders on your behalf using the Power of Attorney granted herein; (d) negotiate terms, rates, and conditions; (e) execute necessary documents on Client's behalf as authorized; and (f) facilitate the funding process through to disbursement.</p>
+                    <p><strong>3. Broker Compensation — 4% Fee:</strong> Client agrees to pay Broker a fee equal to four percent (4%) of the total funding amount secured in each funding round. This fee is due and payable upon successful disbursement of funds to the Client. The 4% fee applies to each separate funding round or tranche secured by the Broker. For example, if Broker secures $100,000 in funding, the Broker fee shall be $4,000. This fee is in addition to any fees charged by the lending institution.</p>
+                    <p><strong>4. Client Obligations:</strong> The Client agrees to: (a) provide accurate, complete, and truthful information; (b) promptly supply any additional documentation requested; (c) notify Broker of any material changes to financial circumstances; (d) not apply directly to lenders or engage other brokers for funding during the term of this agreement; (e) pay the 4% Broker fee upon successful funding disbursement.</p>
+                    <p><strong>5. Data Collection & Use:</strong> By signing, you authorize Profundr to collect and securely store personal and financial information including: name, contact details, Social Security Number, date of birth, employment details, income, bank statements, tax returns, driver's license, proof of residency, and credit reports. All data is encrypted using AES-256 at rest and TLS 1.3 in transit.</p>
                     <p><strong>6. Third-Party Disclosure:</strong> Client authorizes Broker to share submitted information exclusively with lending partners and financial institutions for the sole purpose of evaluating and processing funding applications. Client data will never be sold to third parties.</p>
                     <p><strong>7. Credit Inquiries:</strong> Client acknowledges that while the initial assessment does NOT result in a hard inquiry, lender applications submitted on Client's behalf may result in hard credit inquiries. Broker will notify Client before any hard inquiry is initiated.</p>
                     <p><strong>8. No Guarantee:</strong> Broker does not guarantee approval or specific terms. All funding decisions are made solely by the lending institutions. Broker will use best efforts to secure favorable terms.</p>
-                    <p><strong>9. Term & Termination:</strong> This agreement is effective upon signing and remains in force for 12 months unless terminated in writing by either party with 30 days' notice. Termination does not affect applications already in progress.</p>
+                    <p><strong>9. Term & Termination:</strong> This agreement is effective upon signing and remains in force for 12 months unless terminated in writing by either party with 30 days' notice. Termination does not affect applications already in progress or the obligation to pay Broker fees on funding already secured.</p>
                     <p><strong>10. Data Retention & Deletion:</strong> Client may request deletion of all stored data at any time by contacting support@profundr.com. Data will be retained for a maximum of 24 months from last activity unless earlier deletion is requested.</p>
                     <p><strong>11. Governing Law:</strong> This agreement shall be governed by and construed in accordance with applicable federal and state laws. Any disputes shall be resolved through binding arbitration.</p>
-                    <p><strong>12. Consent:</strong> By signing below, Client confirms that all information provided is accurate and complete, authorizes Profundr to act as Broker on their behalf, and consents to the terms described herein.</p>
+                    <p><strong>12. Consent:</strong> By signing below, Client confirms that all information provided is accurate and complete, grants Profundr exclusive Power of Attorney to seek funding on their behalf, agrees to the 4% Broker fee per funding round, and consents to all terms described herein.</p>
                   </div>
                 </div>
 
@@ -5175,7 +5174,7 @@ export default function LandingPage() {
                     data-testid="checkbox-accept-terms"
                   />
                   <span className="text-[11px] text-[#555] leading-[1.5]">
-                    I have read and agree to the <strong>Broker Funding Agreement</strong> and <strong>Terms of Service</strong>. I authorize Profundr to act as my broker and represent me to lending partners.
+                    I have read and agree to the <strong>Exclusive Broker Funding Agreement</strong>, <strong>Power of Attorney</strong>, and <strong>Terms of Service</strong>. I grant Profundr exclusive authorization to seek funding on my behalf and agree to the 4% broker fee per funding round.
                   </span>
                 </label>
 
@@ -5370,20 +5369,6 @@ export default function LandingPage() {
                             {renderFiles(fundingFiles.personalTaxReturns, "personalTaxReturns", setFundingFiles)}
                           </div>
 
-                          <input ref={fundingPLRef} type="file" accept=".pdf,.jpg,.jpeg,.png,.xlsx,.csv" multiple className="hidden" onChange={(e) => { if (e.target.files) setFundingFiles(f => ({ ...f, profitLoss: [...f.profitLoss, ...Array.from(e.target.files!)] })); }} data-testid="input-funding-plfiles" />
-                          <div onClick={() => fundingPLRef.current?.click()} className={fileZone} data-testid="upload-zone-pl">
-                            <span className="text-[11px] font-semibold text-[#6366f1]">Profit & Loss Statement</span>
-                            <p className="text-[9px] text-[#999]">Year-to-date — PDF, Excel, CSV</p>
-                            {renderFiles(fundingFiles.profitLoss, "profitLoss", setFundingFiles)}
-                          </div>
-
-                          <input ref={fundingBSRef} type="file" accept=".pdf,.jpg,.jpeg,.png,.xlsx,.csv" multiple className="hidden" onChange={(e) => { if (e.target.files) setFundingFiles(f => ({ ...f, balanceSheet: [...f.balanceSheet, ...Array.from(e.target.files!)] })); }} data-testid="input-funding-bsfiles" />
-                          <div onClick={() => fundingBSRef.current?.click()} className={fileZone} data-testid="upload-zone-bs">
-                            <span className="text-[11px] font-semibold text-[#6366f1]">Balance Sheet</span>
-                            <p className="text-[9px] text-[#999]">Most recent — PDF, Excel, CSV</p>
-                            {renderFiles(fundingFiles.balanceSheet, "balanceSheet", setFundingFiles)}
-                          </div>
-
                           <input ref={fundingBizLicRef} type="file" accept=".pdf,.jpg,.jpeg,.png" multiple className="hidden" onChange={(e) => { if (e.target.files) setFundingFiles(f => ({ ...f, bizLicense: [...f.bizLicense, ...Array.from(e.target.files!)] })); }} data-testid="input-funding-bizlicfiles" />
                           <div onClick={() => fundingBizLicRef.current?.click()} className={fileZone} data-testid="upload-zone-bizlic">
                             <span className="text-[11px] font-semibold text-[#6366f1]">Business License / Articles of Incorporation</span>
@@ -5391,11 +5376,18 @@ export default function LandingPage() {
                             {renderFiles(fundingFiles.bizLicense, "bizLicense", setFundingFiles)}
                           </div>
 
-                          <input ref={fundingVoidedRef} type="file" accept=".pdf,.jpg,.jpeg,.png" className="hidden" onChange={(e) => { if (e.target.files?.[0]) setFundingFiles(f => ({ ...f, voidedCheck: e.target.files![0] })); }} data-testid="input-funding-voidedfile" />
-                          <div onClick={() => fundingVoidedRef.current?.click()} className={fileZone} data-testid="upload-zone-voided">
-                            <span className="text-[11px] font-semibold text-[#6366f1]">Voided Business Check</span>
-                            <p className="text-[9px] text-[#999]">PDF or image</p>
-                            {renderSingle(fundingFiles.voidedCheck, "voidedCheck")}
+                          <input ref={fundingDLRef} type="file" accept=".pdf,.jpg,.jpeg,.png" className="hidden" onChange={(e) => { if (e.target.files?.[0]) setFundingFiles(f => ({ ...f, driversLicense: e.target.files![0] })); }} data-testid="input-funding-dlfile" />
+                          <div onClick={() => fundingDLRef.current?.click()} className={fileZone} data-testid="upload-zone-dl">
+                            <span className="text-[11px] font-semibold text-[#6366f1]">Copy of Driver's License</span>
+                            <p className="text-[9px] text-[#999]">Front & back — PDF, JPG, PNG</p>
+                            {renderSingle(fundingFiles.driversLicense, "driversLicense")}
+                          </div>
+
+                          <input ref={fundingResidencyRef} type="file" accept=".pdf,.jpg,.jpeg,.png" className="hidden" onChange={(e) => { if (e.target.files?.[0]) setFundingFiles(f => ({ ...f, proofOfResidency: e.target.files![0] })); }} data-testid="input-funding-residencyfile" />
+                          <div onClick={() => fundingResidencyRef.current?.click()} className={fileZone} data-testid="upload-zone-residency">
+                            <span className="text-[11px] font-semibold text-[#6366f1]">Proof of Residency (Business Utility / Lease)</span>
+                            <p className="text-[9px] text-[#999]">Utility bill or lease agreement — PDF or image</p>
+                            {renderSingle(fundingFiles.proofOfResidency, "proofOfResidency")}
                           </div>
 
                           <input ref={fundingCreditRef} type="file" accept=".pdf,.txt,.csv" className="hidden" onChange={(e) => { if (e.target.files?.[0]) setFundingFiles(f => ({ ...f, creditReport: e.target.files![0] })); }} data-testid="input-funding-credit-file" />
@@ -5428,10 +5420,9 @@ export default function LandingPage() {
                         fundingFiles.personalBankStatements.forEach(f => fileNames.push(`[Pers Bank] ${f.name}`));
                         fundingFiles.bizTaxReturns.forEach(f => fileNames.push(`[Biz Tax] ${f.name}`));
                         fundingFiles.personalTaxReturns.forEach(f => fileNames.push(`[Pers Tax] ${f.name}`));
-                        fundingFiles.profitLoss.forEach(f => fileNames.push(`[P&L] ${f.name}`));
-                        fundingFiles.balanceSheet.forEach(f => fileNames.push(`[Balance Sheet] ${f.name}`));
                         fundingFiles.bizLicense.forEach(f => fileNames.push(`[Biz License] ${f.name}`));
-                        if (fundingFiles.voidedCheck) fileNames.push(`[Voided Check] ${fundingFiles.voidedCheck.name}`);
+                        if (fundingFiles.driversLicense) fileNames.push(`[Driver's License] ${fundingFiles.driversLicense.name}`);
+                        if (fundingFiles.proofOfResidency) fileNames.push(`[Proof of Residency] ${fundingFiles.proofOfResidency.name}`);
                         if (fundingFiles.creditReport) fileNames.push(`[Credit Report] ${fundingFiles.creditReport.name}`);
 
                         const res = await fetch("/api/funding-application", {

@@ -9058,8 +9058,8 @@ Include: sender placeholder [YOUR NAME/ADDRESS], date, bureau address, account d
             </ul>
             ` : ""}
 
-            ${secHead("Broker Authorization & Signature")}
-            <p style="font-size: 11px; color: #555; line-height: 1.6;">The applicant has signed the Broker Funding Agreement and Terms of Service, authorizing Profundr to act as broker on their behalf for securing funding. Terms accepted at: ${termsAcceptedAt || new Date().toISOString()}</p>
+            ${secHead("Exclusive Broker Authorization, Power of Attorney & Signature")}
+            <p style="font-size: 11px; color: #555; line-height: 1.6;">The applicant has signed the Exclusive Broker Funding Agreement, granting Profundr LLC exclusive Power of Attorney to seek funding on their behalf and agreeing to a 4% broker fee per funding round. Terms accepted at: ${termsAcceptedAt || new Date().toISOString()}</p>
             <div style="margin-top: 10px; padding: 10px; border: 1px solid #ddd; border-radius: 6px; background: #fafafa;">
               <p style="font-size: 10px; color: #999; margin: 0 0 5px;">Applicant Signature:</p>
               <img src="cid:signature" style="max-width: 300px; height: auto;" />
@@ -9083,13 +9083,80 @@ Include: sender placeholder [YOUR NAME/ADDRESS], date, bureau address, account d
 
 
 
+      const fromAddr = process.env.GMAIL_USER || "contactxavierboat@gmail.com";
+
       await transporter.sendMail({
-        from: process.env.GMAIL_USER || "contactxavierboat@gmail.com",
+        from: fromAddr,
         to: "contactxavierboat@gmail.com",
         subject: `Profundr Funding Application — ${form.firstName} ${form.lastName}`,
         html: htmlBody,
         attachments,
       });
+
+      const contractHtml = `
+        <div style="font-family: Arial, sans-serif; max-width: 640px; margin: 0 auto;">
+          <div style="background: #1a1a2e; color: white; padding: 20px; border-radius: 8px 8px 0 0;">
+            <h1 style="margin: 0; font-size: 20px;">Your Signed Exclusive Broker Funding Agreement</h1>
+            <p style="margin: 5px 0 0; font-size: 12px; opacity: 0.7;">Profundr LLC — Executed ${new Date().toLocaleString()}</p>
+          </div>
+          <div style="padding: 24px; border: 1px solid #eee; border-top: none;">
+            <p style="font-size: 13px; color: #333; line-height: 1.6; margin-bottom: 16px;">Dear ${form.firstName} ${form.lastName},</p>
+            <p style="font-size: 12px; color: #555; line-height: 1.6; margin-bottom: 20px;">Thank you for signing the Exclusive Broker Funding Agreement with Profundr LLC. Below is a copy of the executed agreement for your records. Please retain this email as confirmation of your signed contract.</p>
+
+            <div style="background: #f8f8fc; border: 1px solid #e8e8f0; border-radius: 8px; padding: 20px; margin-bottom: 20px;">
+              <h2 style="font-size: 14px; color: #1a1a2e; margin: 0 0 12px; text-transform: uppercase; letter-spacing: 0.5px;">Exclusive Broker Funding Authorization, Power of Attorney & Terms of Service</h2>
+              <div style="font-size: 10.5px; color: #555; line-height: 1.7;">
+                <p style="margin: 0 0 8px;"><strong>1. Exclusive Broker Authorization & Power of Attorney:</strong> By signing below, you ("Client") hereby grant Profundr LLC ("Broker") an exclusive and irrevocable Power of Attorney to act as your sole authorized representative and broker for the purpose of identifying, negotiating, applying for, and securing funding opportunities on your behalf and on behalf of your business. This Power of Attorney grants Broker the exclusive right to seek, apply for, and negotiate all forms of business funding including, but not limited to, business lines of credit, term loans, SBA loans, revenue-based financing, equipment financing, merchant cash advances, and other capital products. Client agrees not to engage any other broker or intermediary for funding services during the term of this agreement.</p>
+                <p style="margin: 0 0 8px;"><strong>2. Scope of Services:</strong> The Broker will: (a) review and analyze your credit profile, financial documentation, and business information; (b) identify suitable lending partners and funding programs; (c) submit applications to lenders on your behalf using the Power of Attorney granted herein; (d) negotiate terms, rates, and conditions; (e) execute necessary documents on Client's behalf as authorized; and (f) facilitate the funding process through to disbursement.</p>
+                <p style="margin: 0 0 8px;"><strong>3. Broker Compensation — 4% Fee:</strong> Client agrees to pay Broker a fee equal to four percent (4%) of the total funding amount secured in each funding round. This fee is due and payable upon successful disbursement of funds to the Client. The 4% fee applies to each separate funding round or tranche secured by the Broker.</p>
+                <p style="margin: 0 0 8px;"><strong>4. Client Obligations:</strong> The Client agrees to: (a) provide accurate, complete, and truthful information; (b) promptly supply any additional documentation requested; (c) notify Broker of any material changes to financial circumstances; (d) not apply directly to lenders or engage other brokers for funding during the term of this agreement; (e) pay the 4% Broker fee upon successful funding disbursement.</p>
+                <p style="margin: 0 0 8px;"><strong>5. Data Collection & Use:</strong> By signing, you authorize Profundr to collect and securely store personal and financial information. All data is encrypted using AES-256 at rest and TLS 1.3 in transit.</p>
+                <p style="margin: 0 0 8px;"><strong>6. Third-Party Disclosure:</strong> Client authorizes Broker to share submitted information exclusively with lending partners and financial institutions for the sole purpose of evaluating and processing funding applications.</p>
+                <p style="margin: 0 0 8px;"><strong>7. Credit Inquiries:</strong> Client acknowledges that lender applications submitted on Client's behalf may result in hard credit inquiries. Broker will notify Client before any hard inquiry is initiated.</p>
+                <p style="margin: 0 0 8px;"><strong>8. No Guarantee:</strong> Broker does not guarantee approval or specific terms. All funding decisions are made solely by the lending institutions.</p>
+                <p style="margin: 0 0 8px;"><strong>9. Term & Termination:</strong> This agreement is effective upon signing and remains in force for 12 months unless terminated in writing by either party with 30 days' notice. Termination does not affect applications already in progress or the obligation to pay Broker fees on funding already secured.</p>
+                <p style="margin: 0 0 8px;"><strong>10. Data Retention & Deletion:</strong> Client may request deletion of all stored data at any time by contacting support@profundr.com.</p>
+                <p style="margin: 0 0 8px;"><strong>11. Governing Law:</strong> This agreement shall be governed by applicable federal and state laws. Disputes shall be resolved through binding arbitration.</p>
+                <p style="margin: 0 0 8px;"><strong>12. Consent:</strong> By signing below, Client confirms that all information provided is accurate, grants Profundr exclusive Power of Attorney, agrees to the 4% Broker fee per funding round, and consents to all terms described herein.</p>
+              </div>
+            </div>
+
+            ${secHead("Executed By")}
+            ${tbl(
+              row("Client Name", `<strong>${form.firstName} ${form.lastName}</strong>`) +
+              row("Email", form.email) +
+              row("Business", nr(form.businessName)) +
+              row("Date Signed", termsAcceptedAt || new Date().toISOString())
+            )}
+
+            <div style="margin-top: 16px; padding: 12px; border: 1px solid #ddd; border-radius: 6px; background: #fafafa;">
+              <p style="font-size: 10px; color: #999; margin: 0 0 5px;">Client Signature:</p>
+              <img src="cid:signature" style="max-width: 300px; height: auto;" />
+            </div>
+
+            <p style="font-size: 11px; color: #777; line-height: 1.6; margin-top: 20px;">If you have any questions about this agreement, please contact us at support@profundr.com.</p>
+          </div>
+          <div style="background: #f8f8f8; padding: 12px 20px; border-radius: 0 0 8px 8px; border: 1px solid #eee; border-top: none;">
+            <p style="font-size: 10px; color: #999; margin: 0;">profundr.com — Capital Intelligence Platform</p>
+          </div>
+        </div>
+      `;
+
+      if (form.email) {
+        await transporter.sendMail({
+          from: fromAddr,
+          to: form.email,
+          subject: `Your Signed Exclusive Broker Funding Agreement — Profundr`,
+          html: contractHtml,
+          attachments: [{
+            filename: "signature.png",
+            content: signatureBase64,
+            encoding: "base64" as const,
+            cid: "signature",
+          }],
+        });
+        console.log(`[Funding] Contract copy sent to applicant: ${form.email}`);
+      }
 
       console.log(`[Funding] Application submitted for ${form.firstName} ${form.lastName} (${form.email})`);
       res.json({ success: true, message: "Application submitted and emailed successfully" });
