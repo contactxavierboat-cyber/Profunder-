@@ -2495,7 +2495,7 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 4h8M4 8h8M4 12h8" stroke="#555" strokeWidth="1.4" strokeLinecap="round" /></svg>
           </button>
         </div>
-        <div className="space-y-0.5 mb-1">
+        <div className="space-y-0.5">
           {([
             { key: "command" as const, label: "Command", icon: <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><rect x="3" y="3" width="12" height="12" rx="2.5" stroke="currentColor" strokeWidth="1.3"/><path d="M7 7l2.5 2-2.5 2" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/></svg> },
             { key: "stack" as const, label: "Stack", icon: <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M3 11.5l6 3.5 6-3.5M3 8l6 3.5 6-3.5M3 4.5l6 3.5 6-3.5" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/></svg> },
@@ -2512,9 +2512,51 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
             </button>
           ))}
         </div>
+
+        <div className="w-full h-px bg-[#ebebeb] mt-3 mb-2"></div>
+
+        <button
+          onClick={triggerCommandUpload}
+          className="w-full flex items-center gap-3 px-3 py-3 rounded-xl text-left text-[#333] hover:bg-[#f5f5f5] transition-colors"
+          data-testid="button-data-upload-nav"
+        >
+          <span className="text-[#888]">
+            <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M3.5 7.5V5a1.5 1.5 0 011.5-1.5h3l1.5 2h4A1.5 1.5 0 0115 7v6.5a1.5 1.5 0 01-1.5 1.5H5A1.5 1.5 0 013.5 13.5v-6z" stroke="currentColor" strokeWidth="1.3" strokeLinejoin="round"/></svg>
+          </span>
+          <span className="text-[14px] font-medium">Data Upload</span>
+        </button>
+
+        {docs.length > 0 && (
+          <>
+            <p className="text-[11px] text-[#bbb] font-medium px-3 mt-4 mb-1.5">Your uploads</p>
+            <div className="space-y-0">
+              {docs.slice(0, 5).map(doc => (
+                <button
+                  key={doc.id}
+                  onClick={() => { setPanelTab("documents"); }}
+                  className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left text-[#555] hover:bg-[#f5f5f5] transition-colors"
+                  data-testid={`doc-history-${doc.id}`}
+                >
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="shrink-0 text-[#ccc]"><path d="M4 2h5.5L13 5.5V13a1 1 0 01-1 1H4a1 1 0 01-1-1V3a1 1 0 011-1z" stroke="currentColor" strokeWidth="1.2"/><path d="M9.5 2v4h4" stroke="currentColor" strokeWidth="1.2" strokeLinejoin="round"/></svg>
+                  <span className="text-[13px] truncate">{doc.name}</span>
+                </button>
+              ))}
+              {docs.length > 5 && (
+                <button
+                  onClick={() => setPanelTab("documents")}
+                  className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left text-[#bbb] hover:bg-[#f5f5f5] transition-colors"
+                  data-testid="button-see-more-docs"
+                >
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="text-[#ccc]"><circle cx="4" cy="8" r="1" fill="currentColor"/><circle cx="8" cy="8" r="1" fill="currentColor"/><circle cx="12" cy="8" r="1" fill="currentColor"/></svg>
+                  <span className="text-[13px]">See more</span>
+                </button>
+              )}
+            </div>
+          </>
+        )}
       </div>
 
-      <div className="w-full h-px bg-[#ebebeb] mt-1"></div>
+      <div className="w-full h-px bg-[#ebebeb] mt-2"></div>
 
       <div className="flex-1 overflow-y-auto px-4 py-3 bg-white">
 
