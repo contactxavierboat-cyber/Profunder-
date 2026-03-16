@@ -2558,7 +2558,7 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
       <div className="flex-1" />
 
       {portalTarget.current && activeView && createPortal(
-      <div className="flex-1 overflow-y-auto px-4 py-3 bg-white">
+      <div className="w-full min-h-[calc(100dvh-60px)] overflow-y-auto px-4 py-3 bg-white">
         <div className="w-full max-w-[720px] mx-auto">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">

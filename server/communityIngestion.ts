@@ -411,6 +411,129 @@ async function runIngestionCycle(): Promise<void> {
   isRunning = false;
 }
 
+const SEED_DATA = [
+  { source: "reddit", lender: "Chase", product: "Sapphire Preferred", outcome: "approval", limitAmount: 12000, score: 740, scoreBand: "700-749", income: 85000, incomeBand: "75k-100k", utilization: 8, inquiryCount: 2, oldestAccountAgeMonths: 84, bureauPulled: "Experian", state: "CA", applicationType: "personal", notes: "First Chase card. Applied online, instant approval.", confidenceScore: 85, smartTags: ["high-limit approval", "low utilization", "low inquiries", "established profile", "excellent score"] },
+  { source: "reddit", lender: "American Express", product: "Gold Card", outcome: "approval", limitAmount: 15000, score: 725, scoreBand: "700-749", income: 72000, incomeBand: "50k-75k", utilization: 12, inquiryCount: 3, oldestAccountAgeMonths: 60, bureauPulled: "Experian", state: "NY", applicationType: "personal", notes: "Had a prior Amex relationship. Auto-approved.", confidenceScore: 90, smartTags: ["high-limit approval", "low utilization", "established profile", "approval with relationship"] },
+  { source: "myfico", lender: "Capital One", product: "Venture X", outcome: "approval", limitAmount: 20000, score: 760, scoreBand: "750+", income: 95000, incomeBand: "75k-100k", utilization: 5, inquiryCount: 1, oldestAccountAgeMonths: 120, bureauPulled: "TransUnion", state: "TX", applicationType: "personal", notes: "Long credit history. Zero derogatories.", confidenceScore: 92, smartTags: ["premium approval", "high-limit approval", "low utilization", "low inquiries", "established profile", "excellent score"] },
+  { source: "reddit", lender: "Discover", product: "it Cash Back", outcome: "denial", limitAmount: null, score: 650, scoreBand: "650-699", income: 45000, incomeBand: "Under 50k", utilization: 55, inquiryCount: 7, oldestAccountAgeMonths: 18, bureauPulled: "TransUnion", state: "FL", applicationType: "personal", notes: "Too many inquiries and high utilization. Denied.", confidenceScore: 78, smartTags: ["high inquiries", "high utilization", "thin file", "denial due to inquiries", "denial due to utilization"] },
+  { source: "myfico", lender: "Wells Fargo", product: "Active Cash", outcome: "approval", limitAmount: 8000, score: 710, scoreBand: "700-749", income: 60000, incomeBand: "50k-75k", utilization: 18, inquiryCount: 4, oldestAccountAgeMonths: 48, bureauPulled: "Experian", state: "IL", applicationType: "personal", notes: "Existing WF checking customer for 5 years.", confidenceScore: 88, smartTags: ["low utilization", "approval with relationship"] },
+  { source: "reddit", lender: "Bank of America", product: "Customized Cash", outcome: "approval", limitAmount: 5500, score: 690, scoreBand: "650-699", income: 52000, incomeBand: "50k-75k", utilization: 22, inquiryCount: 5, oldestAccountAgeMonths: 36, bureauPulled: "Equifax", state: "GA", applicationType: "personal", notes: "BofA customer with checking. Approved with moderate limit.", confidenceScore: 80, smartTags: ["approval with relationship"] },
+  { source: "myfico", lender: "Citi", product: "Double Cash", outcome: "denial", limitAmount: null, score: 620, scoreBand: "600-649", income: 40000, incomeBand: "Under 50k", utilization: 68, inquiryCount: 8, oldestAccountAgeMonths: 24, bureauPulled: "Equifax", state: "OH", applicationType: "personal", notes: "High utilization and thin file. Citi denied.", confidenceScore: 75, smartTags: ["high inquiries", "high utilization", "thin file", "denial due to inquiries", "denial due to utilization", "subprime score"] },
+  { source: "reddit", lender: "American Express", product: "Blue Business Plus", outcome: "approval", limitAmount: 25000, score: 780, scoreBand: "750+", income: 120000, incomeBand: "100k-150k", utilization: 3, inquiryCount: 1, oldestAccountAgeMonths: 96, bureauPulled: "Experian", state: "WA", applicationType: "business", businessRevenue: 250000, notes: "Business card. Strong profile and existing Amex relationship.", confidenceScore: 95, smartTags: ["premium approval", "high-limit approval", "low utilization", "low inquiries", "established profile", "business owner", "approval with relationship", "excellent score"] },
+  { source: "reddit", lender: "Chase", product: "Freedom Unlimited", outcome: "reconsideration", limitAmount: 6000, score: 705, scoreBand: "700-749", income: 55000, incomeBand: "50k-75k", utilization: 30, inquiryCount: 6, oldestAccountAgeMonths: 30, bureauPulled: "Experian", state: "PA", applicationType: "personal", notes: "Initially denied. Called recon, approved after moving credit.", confidenceScore: 82, smartTags: ["high inquiries", "reconsideration"] },
+  { source: "myfico", lender: "US Bank", product: "Altitude Go", outcome: "approval", limitAmount: 7500, score: 730, scoreBand: "700-749", income: 68000, incomeBand: "50k-75k", utilization: 10, inquiryCount: 3, oldestAccountAgeMonths: 72, bureauPulled: "TransUnion", state: "MN", applicationType: "personal", notes: "Clean profile. No relationship with US Bank prior.", confidenceScore: 87, smartTags: ["low utilization", "low inquiries", "established profile"] },
+  { source: "reddit", lender: "Capital One", product: "SavorOne", outcome: "approval", limitAmount: 4000, score: 670, scoreBand: "650-699", income: 48000, incomeBand: "Under 50k", utilization: 35, inquiryCount: 4, oldestAccountAgeMonths: 42, bureauPulled: "TransUnion", state: "AZ", applicationType: "personal", notes: "Moderate profile. Cap1 approved with lower limit.", confidenceScore: 79, smartTags: [] },
+  { source: "myfico", lender: "Chase", product: "Ink Business Preferred", outcome: "approval", limitAmount: 18000, score: 755, scoreBand: "750+", income: 90000, incomeBand: "75k-100k", utilization: 7, inquiryCount: 2, oldestAccountAgeMonths: 108, bureauPulled: "Experian", state: "CO", applicationType: "business", businessRevenue: 180000, notes: "Strong business profile. Existing Chase personal cards.", confidenceScore: 91, smartTags: ["high-limit approval", "low utilization", "low inquiries", "established profile", "business owner", "approval with relationship", "excellent score"] },
+  { source: "reddit", lender: "Synchrony", product: "Amazon Store Card", outcome: "cli", limitAmount: 8500, score: 715, scoreBand: "700-749", income: 58000, incomeBand: "50k-75k", utilization: 15, inquiryCount: 3, oldestAccountAgeMonths: 60, bureauPulled: "TransUnion", state: "NJ", applicationType: "personal", notes: "CLI from 3500 to 8500 after 1 year of use.", confidenceScore: 83, smartTags: ["low utilization", "established profile", "credit limit increase"] },
+  { source: "myfico", lender: "Barclays", product: "AAdvantage Aviator Red", outcome: "denial", limitAmount: null, score: 680, scoreBand: "650-699", income: 50000, incomeBand: "50k-75k", utilization: 45, inquiryCount: 9, oldestAccountAgeMonths: 28, bureauPulled: "TransUnion", state: "VA", applicationType: "personal", notes: "Too many inquiries. Barclays is inquiry-sensitive.", confidenceScore: 76, smartTags: ["high inquiries", "high utilization", "denial due to inquiries"] },
+  { source: "reddit", lender: "Navy Federal", product: "More Rewards", outcome: "approval", limitAmount: 25000, score: 720, scoreBand: "700-749", income: 75000, incomeBand: "50k-75k", utilization: 12, inquiryCount: 2, oldestAccountAgeMonths: 84, bureauPulled: "Equifax", state: "MD", applicationType: "personal", notes: "Military member. NFCU is generous with limits for members.", confidenceScore: 88, smartTags: ["premium approval", "high-limit approval", "low utilization", "low inquiries", "established profile", "approval with relationship"] },
+];
+
+export async function seedCommunityDataIfEmpty(): Promise<void> {
+  try {
+    const { Pool } = await import("pg");
+    const pool = new Pool({ connectionString: process.env.DATABASE_URL });
+    await pool.query(`CREATE TABLE IF NOT EXISTS community_data_points (
+      id SERIAL PRIMARY KEY,
+      source TEXT,
+      source_url TEXT,
+      source_reference TEXT,
+      lender TEXT,
+      product TEXT,
+      outcome TEXT,
+      limit_amount INTEGER,
+      apr TEXT,
+      score INTEGER,
+      score_band TEXT,
+      income INTEGER,
+      income_band TEXT,
+      utilization INTEGER,
+      inquiry_count INTEGER,
+      new_accounts_6m INTEGER,
+      oldest_account_age_months INTEGER,
+      avg_account_age_months INTEGER,
+      bureau_pulled TEXT,
+      state TEXT,
+      application_type TEXT DEFAULT 'personal',
+      business_revenue INTEGER,
+      relationship_with_lender TEXT,
+      derogatories_present BOOLEAN,
+      raw_text TEXT,
+      ai_summary TEXT,
+      notes TEXT,
+      confidence_score INTEGER DEFAULT 0,
+      moderation_status TEXT DEFAULT 'pending',
+      smart_tags TEXT[] DEFAULT '{}',
+      submitted_by INTEGER REFERENCES users(id),
+      created_at TIMESTAMP DEFAULT NOW(),
+      updated_at TIMESTAMP DEFAULT NOW()
+    )`);
+    await pool.query(`CREATE TABLE IF NOT EXISTS ingestion_state (
+      id SERIAL PRIMARY KEY,
+      source_key TEXT NOT NULL UNIQUE,
+      last_seen_id TEXT,
+      last_fetched_at TIMESTAMP NOT NULL DEFAULT NOW(),
+      metadata JSONB DEFAULT '{}'
+    )`);
+    await pool.end();
+  } catch (tableErr: any) {
+    console.log(`[CommunityIngestion] Table ensure error (non-fatal): ${tableErr.message}`);
+  }
+
+  try {
+    const { data, total } = await storage.getCommunityDataPoints({ moderationStatus: "approved" });
+    if (total > 0) {
+      console.log(`[CommunityIngestion] Community data already has ${total} approved records, skipping seed`);
+      return;
+    }
+
+    console.log("[CommunityIngestion] No community data found, seeding baseline records...");
+    let inserted = 0;
+    for (const seed of SEED_DATA) {
+      try {
+        await storage.createCommunityDataPoint({
+          source: seed.source,
+          sourceUrl: null,
+          sourceReference: null,
+          lender: seed.lender,
+          product: seed.product,
+          outcome: seed.outcome,
+          limitAmount: seed.limitAmount,
+          apr: null,
+          score: seed.score,
+          scoreBand: seed.scoreBand,
+          income: seed.income,
+          incomeBand: seed.incomeBand,
+          utilization: seed.utilization,
+          inquiryCount: seed.inquiryCount,
+          newAccounts6m: null,
+          oldestAccountAgeMonths: seed.oldestAccountAgeMonths,
+          avgAccountAgeMonths: null,
+          bureauPulled: seed.bureauPulled,
+          state: seed.state,
+          applicationType: seed.applicationType,
+          businessRevenue: (seed as any).businessRevenue || null,
+          relationshipWithLender: null,
+          derogatoriesPresent: null,
+          rawText: null,
+          aiSummary: null,
+          notes: seed.notes,
+          confidenceScore: seed.confidenceScore,
+          moderationStatus: "approved",
+          smartTags: seed.smartTags,
+          submittedBy: null,
+        });
+        inserted++;
+      } catch (err: any) {
+        console.log(`[CommunityIngestion] Seed insert error: ${err.message}`);
+      }
+    }
+    console.log(`[CommunityIngestion] Seeded ${inserted} community data points`);
+  } catch (err: any) {
+    console.log(`[CommunityIngestion] Seed check error: ${err.message}`);
+  }
+}
+
 let ingestionTimer: ReturnType<typeof setInterval> | null = null;
 
 export function startCommunityIngestion(): void {

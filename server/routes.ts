@@ -11,7 +11,7 @@ import { execFile } from "child_process";
 // @ts-ignore
 import Parser from "rss-parser";
 import { getUncachableStripeClient, getStripePublishableKey } from "./stripeClient";
-import { startCommunityIngestion } from "./communityIngestion";
+import { startCommunityIngestion, seedCommunityDataIfEmpty } from "./communityIngestion";
 import { sql } from "drizzle-orm";
 import { promisify } from "util";
 import PDFDocument from "pdfkit";
@@ -9597,7 +9597,12 @@ ${text.slice(0, 5000)}`;
     }
   });
 
-  startCommunityIngestion();
+  seedCommunityDataIfEmpty().then(() => {
+    startCommunityIngestion();
+  }).catch(err => {
+    console.log(`[CommunityIngestion] Seed error: ${err.message}`);
+    startCommunityIngestion();
+  });
 
   return httpServer;
 }
