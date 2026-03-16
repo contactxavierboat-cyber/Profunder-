@@ -2660,7 +2660,7 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
             </div>
           )}
 
-          {aisReport && aisReport.bureauHealth.length > 0 && (
+          {aisReport && aisReport.bureauHealth && aisReport.bureauHealth.length > 0 && (
             <div className="pb-3 mb-3 border-b border-[#f0f0f0]" data-testid="bureau-heatmap">
               <p className="text-[10px] text-[#111] font-medium tracking-wide mb-2.5">Bureau Heatmap</p>
               <div className="grid grid-cols-3 gap-2">
@@ -2699,10 +2699,11 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
                     <div className="space-y-0">
                       {aisReport.capitalPotential.map((entry, i) => {
                         const confColor = entry.confidence.toLowerCase() === "high" ? "#2d6a4f" : entry.confidence.toLowerCase() === "medium" ? "#c9a227" : "#c0392b";
-                        const riskColor = entry.denialRisk.toLowerCase() === "low" ? "#2d6a4f" : entry.denialRisk.toLowerCase() === "moderate" ? "#c9a227" : "#c0392b";
+                        const denialRisk = entry.denialRisk || "Moderate";
+                        const riskColor = denialRisk.toLowerCase() === "low" ? "#2d6a4f" : denialRisk.toLowerCase() === "moderate" ? "#c9a227" : "#c0392b";
                         const barWidth = Math.round((entry.highEstimate / maxHigh) * 100);
                         const barFillWidth = Math.round((entry.lowEstimate / maxHigh) * 100);
-                        const bp = entry.bureauProbability;
+                        const bp = entry.bureauProbability || { experian: 0, transunion: 0, equifax: 0 };
                         const showSim = simulatingLender === i;
                         return (
                           <div key={i} className={`py-2.5 ${i < aisReport.capitalPotential.length - 1 ? "border-b border-[#f0f0f0]" : ""}`} data-testid={`capital-potential-${i}`}>
@@ -2718,7 +2719,7 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
                             </div>
                             <div className="flex items-center justify-between mb-1">
                               <span className="text-[9px] font-semibold text-[#111]" style={{ fontVariantNumeric: "tabular-nums" }}>${entry.lowEstimate.toLocaleString()} – ${entry.highEstimate.toLocaleString()}</span>
-                              <span className="text-[7px] font-medium" style={{ color: riskColor }}>Risk: {entry.denialRisk}</span>
+                              <span className="text-[7px] font-medium" style={{ color: riskColor }}>Risk: {denialRisk}</span>
                             </div>
                             <div className="w-full h-[3px] bg-[#eee] rounded-full overflow-hidden mb-1.5">
                               <div className="h-full rounded-full relative" style={{ width: `${barWidth}%` }}>
@@ -2757,7 +2758,7 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
                                   </div>
                                   <div className="flex items-center justify-between">
                                     <span className="text-[7px] text-[#888]">Denial Risk</span>
-                                    <span className="text-[8px] font-medium" style={{ color: riskColor }}>{entry.denialRisk}</span>
+                                    <span className="text-[8px] font-medium" style={{ color: riskColor }}>{denialRisk}</span>
                                   </div>
                                   <div className="flex items-center justify-between">
                                     <span className="text-[7px] text-[#888]">Bureau Pulled</span>
@@ -2822,7 +2823,7 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
             </div>
           )}
 
-          {aisReport && aisReport.stackTiming && (
+          {aisReport && aisReport.stackTiming && aisReport.stackTiming.length > 0 && (
             <div className="pb-3 mb-3 border-b border-[#f0f0f0]" data-testid="stack-timing">
               <p className="text-[10px] text-[#111] font-medium tracking-wide mb-2">Timing</p>
               <div className="rounded-md bg-[#f7f7f7] p-2.5">
@@ -2858,7 +2859,7 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
             </div>
           )}
 
-          {aisReport && aisReport.fundingTrends.length > 0 && (
+          {aisReport && aisReport.fundingTrends && aisReport.fundingTrends.length > 0 && (
             <div className="pb-3 mb-3 border-b border-[#f0f0f0]" data-testid="funding-trends">
               <p className="text-[10px] text-[#111] font-medium tracking-wide mb-2.5">Funding Trends</p>
               <div className="space-y-0">
