@@ -1,0 +1,367 @@
+Create a new tab inside Profundr called:
+
+REDDIT / MYFICO UNLOCKS
+
+Purpose:
+This tab should function as a community-based funding intelligence center that helps users review real-world approval, denial, limit, bureau-pull, and profile data points from sources like Reddit and myFICO-style submissions. The goal is to help users understand which lenders may be more likely to approve or deny based on profile patterns.
+
+Important:
+Do not frame this as guaranteed approval advice.
+This is educational and analytical only.
+Show a disclaimer that all data points are community-sourced, manually entered, user-submitted, or AI-structured from submitted content, and final lending decisions always depend on the lender.
+
+CORE GOAL:
+Allow Profundr to store, organize, filter, and analyze data points related to:
+- approvals
+- denials
+- reconsiderations
+- credit limit amounts
+- bureau pulls
+- income ranges
+- credit score ranges
+- utilization
+- inquiry count
+- account age
+- lender trends
+- product-specific trends
+
+TAB NAME:
+Reddit / myFICO Unlocks
+
+ALTERNATE INTERNAL LABEL:
+Community Approval Intelligence
+
+UI STYLE:
+Match Profundr branding:
+- minimal
+- modern
+- clean
+- premium fintech look
+- matte / dark / high contrast if matching main app
+- simple cards
+- structured data layout
+- modern table + filter experience
+- visually intelligent, not noisy
+- make it feel like underwriting intelligence, not a forum
+
+TOP SECTION:
+Create a header area with:
+Title: Reddit / myFICO Unlocks
+Subtitle: Explore community-sourced approval and denial data points organized by lender, profile strength, and credit behavior.
+
+Add a small disclaimer directly under header:
+“This section is for educational and analytical use only. Community data points do not guarantee approval outcomes.”
+
+Add summary stat cards across top:
+- Total Data Points
+- Approvals Logged
+- Denials Logged
+- Average Reported Limit
+- Most Common Bureau Pulled
+- Top Lender This Month
+
+MAIN FEATURE BLOCKS:
+
+1. FILTER + SEARCH PANEL
+Build a strong filter system on left side or top:
+- Source
+  - Reddit
+  - myFICO
+  - Manual Submission
+- Outcome
+  - Approval
+  - Denial
+  - Reconsideration
+  - CLI
+- Lender
+- Product
+- Credit Score Range
+- Inquiry Count Range
+- Utilization Range
+- Income Range
+- State
+- Bureau Pulled
+- Business / Personal
+- Date Submitted
+- Last 30 days / 90 days / 1 year / all time
+
+Add search bar:
+Search by lender, product, bureau, notes, or keywords
+
+2. DATA TABLE / CARD VIEW
+Allow toggle:
+- Table View
+- Card View
+
+Each entry should include:
+- Lender
+- Product
+- Outcome
+- Credit Limit
+- Reported Score
+- Income
+- Utilization
+- Inquiries
+- New Accounts
+- Oldest Account Age
+- Bureau Pulled
+- State
+- Source
+- Date
+- Confidence / completeness score
+- View Details button
+
+Card layout should be sleek and easy to scan.
+
+3. ENTRY DETAIL MODAL / PAGE
+When user clicks View Details, open full detailed profile:
+Fields:
+- Source
+- Source Link or Source Reference
+- Lender
+- Product Name
+- Outcome
+- Approval Amount / Credit Limit
+- APR if available
+- Reported Credit Score
+- Income
+- Utilization
+- Hard Inquiries
+- Recent New Accounts
+- Oldest Account Age
+- Average Account Age
+- Business Revenue if applicable
+- Stated Relationship with Bank
+- Bureau Pulled
+- State
+- Notes
+- Original Submitted Text
+- AI Summary
+- Similar Profile Matches
+
+Add a right-side insight panel:
+- “Why this may have been approved”
+- “Possible risk signals”
+- “Similar data points in database”
+
+4. AI EXTRACTION / PARSER MODULE
+Create an ingestion panel for admins or internal team.
+
+Input methods:
+- Paste post text
+- Paste thread text
+- Paste screenshot-transcribed text
+- Manual structured entry
+
+When content is pasted in, AI should extract:
+- lender
+- product
+- outcome
+- credit limit
+- score
+- utilization
+- income
+- inquiries
+- new accounts
+- account age
+- bureau
+- state
+- notes
+- confidence level
+
+If a field is missing, mark as:
+Unknown
+
+Add admin edit option before save.
+
+5. MANUAL SUBMISSION FORM
+Allow internal team or users to submit a new data point manually.
+
+Fields:
+- Source
+- Lender
+- Product
+- Outcome
+- Credit Limit
+- APR
+- Score
+- Income
+- Utilization
+- Inquiry Count
+- New Accounts
+- Oldest Account Age
+- Average Account Age
+- Bureau Pulled
+- State
+- Business or Personal
+- Notes
+- Raw source text
+- Source URL if available
+
+Add moderation status:
+- Pending
+- Reviewed
+- Approved
+- Rejected
+
+6. TREND INTELLIGENCE PANEL
+Add an insights section that summarizes trends from the data.
+
+Examples:
+- Most forgiving lenders by inquiry count
+- Highest reported limits by lender
+- Most common denial reasons
+- Most common bureaus pulled by lender
+- Approval patterns by score range
+- Approval likelihood trend bands based on community data
+- Recently trending lenders
+
+This should feel like underwriting intelligence.
+
+Example language:
+- “Community data suggests this lender is more sensitive to recent inquiries.”
+- “Profiles with lower utilization appear more likely to report higher limits here.”
+- “This product shows stronger approval clustering in 700+ score bands.”
+
+Do not present any of these as certainty.
+Frame all insights as observed patterns.
+
+7. SIMILAR PROFILE MATCHING
+Create a feature where a user’s profile can be compared to stored data points.
+
+If user has profile data in Profundr, show:
+“Similar Community Profiles”
+
+Example output:
+- 12 similar profiles found
+- 8 approvals
+- 3 denials
+- 1 reconsideration
+- Common lender: Amex
+- Typical reported limits: $8,000–$18,000
+
+This should use:
+- score band
+- utilization
+- inquiry count
+- account age
+- income
+- business vs personal
+- derogatories if available
+
+8. DATA MODEL / DATABASE STRUCTURE
+Create a database table for unlock data points with fields such as:
+- id
+- source
+- source_url
+- source_reference
+- lender
+- product
+- outcome
+- limit_amount
+- apr
+- score
+- score_band
+- income
+- income_band
+- utilization
+- inquiry_count
+- new_accounts_6m
+- oldest_account_age_months
+- avg_account_age_months
+- bureau_pulled
+- state
+- application_type
+- business_revenue
+- relationship_with_lender
+- derogatories_present
+- raw_text
+- ai_summary
+- notes
+- confidence_score
+- moderation_status
+- created_at
+- updated_at
+- submitted_by
+
+9. SMART TAGGING
+Auto-tag each entry with tags like:
+- high-limit approval
+- thin file
+- high inquiries
+- low utilization
+- recent accounts
+- established profile
+- business owner
+- denial due to inquiries
+- denial due to utilization
+- approval with relationship
+- bureau-sensitive lender
+
+10. ADMIN TOOLS
+Build an internal admin panel for:
+- reviewing submissions
+- editing extracted fields
+- approving / rejecting entries
+- deleting duplicate entries
+- bulk tagging
+- trend recalculation
+- marking entries as featured or high confidence
+
+11. COMPLIANCE / SAFETY
+Display clear disclaimer:
+“Profundr does not guarantee approval outcomes. Community data points are informational only and should not be treated as lending advice or lender promises.”
+
+If source content cannot be verified, label it:
+Unverified Community Data
+
+Do not auto-scrape restricted content unless explicitly supported.
+Design system to accept:
+- manual entry
+- user-submitted data
+- API-ingested or approved-source data
+- pasted text for AI structuring
+
+12. UX BEHAVIOR
+Make experience fast and premium:
+- smooth filtering
+- sortable columns
+- expandable cards
+- sticky filter panel
+- mobile responsive
+- clean modern spacing
+- premium minimal typography
+- subtle icons
+- no clutter
+
+13. OPTIONAL FUTURE FEATURES
+Design structure so it can later support:
+- upvote best data points
+- favorite lenders
+- save searches
+- approval heatmaps
+- lender comparison mode
+- profile-to-lender match recommendations
+- automated Reddit API ingestion
+- lender trend score
+- “best next lender” predictions
+
+14. OUTPUT EXPERIENCE
+This tab should feel like:
+Bloomberg terminal meets credit forum intelligence meets funding underwriting dashboard.
+
+It should not feel like a message board.
+It should feel like organized capital intelligence.
+
+FINAL BUILD REQUIREMENT:
+Build the tab fully integrated into Profundr with:
+- front-end UI
+- structured database
+- filter system
+- detail views
+- admin ingestion form
+- AI extraction workflow
+- trend summaries
+- similar profile matching
+- compliance disclaimer
+- premium minimal design consistent with Profundr branding
