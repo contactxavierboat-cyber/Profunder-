@@ -269,7 +269,6 @@ async function processRedditSubreddit(subreddit: string): Promise<IngestionStats
     if (!newestId) newestId = post.id;
 
     if (lastSeenId && post.id === lastSeenId) {
-      stats.skipped += posts.length - stats.fetched;
       break;
     }
 
