@@ -2485,36 +2485,36 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
 
   return (
     <div className="h-full flex flex-col bg-white" data-testid="docs-panel">
-      <div className="px-3 pt-3 pb-1">
-        <div className="flex items-center gap-2 mb-3">
-          <div className="flex-1 flex items-center gap-2 px-3 py-2 bg-[#f5f5f5] rounded-xl">
+      <div className="px-3 pt-3 pb-0">
+        <div className="flex items-center gap-2 mb-4">
+          <div className="flex-1 flex items-center gap-2 px-3 py-2.5 bg-[#f5f5f5] rounded-full">
             <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><circle cx="7" cy="7" r="5" stroke="#999" strokeWidth="1.3"/><path d="M11 11l3 3" stroke="#999" strokeWidth="1.3" strokeLinecap="round"/></svg>
-            <span className="text-[12px] text-[#999]">Search</span>
+            <span className="text-[13px] text-[#999]">Search</span>
           </div>
-          <button onClick={onClose} className="w-8 h-8 flex items-center justify-center rounded-xl hover:bg-[#f5f5f5] transition-colors" data-testid="button-close-docs">
-            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M11 3L3 11M3 3l8 8" stroke="#999" strokeWidth="1.5" strokeLinecap="round" /></svg>
+          <button onClick={onClose} className="w-9 h-9 flex items-center justify-center rounded-full hover:bg-[#f5f5f5] transition-colors" data-testid="button-close-docs">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 4h8M4 8h8M4 12h8" stroke="#555" strokeWidth="1.4" strokeLinecap="round" /></svg>
           </button>
         </div>
-        <div className="space-y-0.5">
+        <div className="space-y-0.5 mb-1">
           {([
-            { key: "command" as const, label: "Command", icon: <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="3" y="3" width="10" height="10" rx="2" stroke="currentColor" strokeWidth="1.3"/><path d="M6 6l2 2-2 2" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/></svg> },
-            { key: "stack" as const, label: "Stack", icon: <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 10l5 3 5-3M3 7l5 3 5-3M3 4l5 3 5-3" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/></svg> },
-            { key: "documents" as const, label: "Repair", icon: <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M5 3h6a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2z" stroke="currentColor" strokeWidth="1.3"/><path d="M6 7h4M6 9h2.5" stroke="currentColor" strokeWidth="1.1" strokeLinecap="round"/></svg> },
+            { key: "command" as const, label: "Command", icon: <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><rect x="3" y="3" width="12" height="12" rx="2.5" stroke="currentColor" strokeWidth="1.3"/><path d="M7 7l2.5 2-2.5 2" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/></svg> },
+            { key: "stack" as const, label: "Stack", icon: <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M3 11.5l6 3.5 6-3.5M3 8l6 3.5 6-3.5M3 4.5l6 3.5 6-3.5" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/></svg> },
+            { key: "documents" as const, label: "Repair", icon: <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M5.5 3h7a2 2 0 012 2v8a2 2 0 01-2 2h-7a2 2 0 01-2-2V5a2 2 0 012-2z" stroke="currentColor" strokeWidth="1.3"/><path d="M7 8h4M7 10.5h2.5" stroke="currentColor" strokeWidth="1.1" strokeLinecap="round"/></svg> },
           ]).map(nav => (
             <button
               key={nav.key}
               onClick={() => setPanelTab(nav.key)}
-              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left transition-colors ${panelTab === nav.key ? "bg-[#111] text-white" : "text-[#333] hover:bg-[#f5f5f5]"}`}
+              className={`w-full flex items-center gap-3 px-3 py-3 rounded-xl text-left transition-colors ${panelTab === nav.key ? "bg-[#111] text-white" : "text-[#333] hover:bg-[#f5f5f5]"}`}
               data-testid={`tab-${nav.key}`}
             >
-              <span className={panelTab === nav.key ? "text-white" : "text-[#999]"}>{nav.icon}</span>
-              <span className="text-[13px] font-medium">{nav.label}</span>
+              <span className={panelTab === nav.key ? "text-white" : "text-[#888]"}>{nav.icon}</span>
+              <span className="text-[14px] font-medium">{nav.label}</span>
             </button>
           ))}
         </div>
       </div>
 
-      <div className="w-full h-px bg-[#f0f0f0] mt-2"></div>
+      <div className="w-full h-px bg-[#ebebeb] mt-1"></div>
 
       <div className="flex-1 overflow-y-auto px-4 py-3 bg-white">
 
