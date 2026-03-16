@@ -2422,26 +2422,39 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
   const [acctCarouselIdx, setAcctCarouselIdx] = useState(0);
 
   return (
-    <div className="h-full flex flex-col bg-[#fafafa] border-r border-[#eee]" data-testid="docs-panel">
-      <div className="flex items-center justify-between px-4 py-2.5 bg-white border-b border-[#eee]">
-        <div className="flex border border-[#e5e5e5] rounded-md overflow-hidden">
-          {(["command", "stack", "documents"] as const).map(tab => (
+    <div className="h-full flex flex-col bg-white" data-testid="docs-panel">
+      <div className="px-3 pt-3 pb-1">
+        <div className="flex items-center gap-2 mb-3">
+          <div className="flex-1 flex items-center gap-2 px-3 py-2 bg-[#f5f5f5] rounded-xl">
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><circle cx="7" cy="7" r="5" stroke="#999" strokeWidth="1.3"/><path d="M11 11l3 3" stroke="#999" strokeWidth="1.3" strokeLinecap="round"/></svg>
+            <span className="text-[12px] text-[#999]">Search</span>
+          </div>
+          <button onClick={onClose} className="w-8 h-8 flex items-center justify-center rounded-xl hover:bg-[#f5f5f5] transition-colors" data-testid="button-close-docs">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M11 3L3 11M3 3l8 8" stroke="#999" strokeWidth="1.5" strokeLinecap="round" /></svg>
+          </button>
+        </div>
+        <div className="space-y-0.5">
+          {([
+            { key: "command" as const, label: "Command", icon: <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="3" y="3" width="10" height="10" rx="2" stroke="currentColor" strokeWidth="1.3"/><path d="M6 6l2 2-2 2" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/></svg> },
+            { key: "stack" as const, label: "Stack", icon: <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 10l5 3 5-3M3 7l5 3 5-3M3 4l5 3 5-3" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/></svg> },
+            { key: "documents" as const, label: "Repair", icon: <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M5 3h6a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2z" stroke="currentColor" strokeWidth="1.3"/><path d="M6 7h4M6 9h2.5" stroke="currentColor" strokeWidth="1.1" strokeLinecap="round"/></svg> },
+          ]).map(nav => (
             <button
-              key={tab}
-              onClick={() => setPanelTab(tab)}
-              className={`px-3 py-1.5 text-[9px] font-medium transition-colors ${panelTab === tab ? "bg-[#111] text-white" : "bg-white text-[#888] hover:text-[#555]"}`}
-              data-testid={`tab-${tab}`}
+              key={nav.key}
+              onClick={() => setPanelTab(nav.key)}
+              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left transition-colors ${panelTab === nav.key ? "bg-[#111] text-white" : "text-[#333] hover:bg-[#f5f5f5]"}`}
+              data-testid={`tab-${nav.key}`}
             >
-              {tab === "command" ? "Command" : tab === "stack" ? "Stack" : "Repair"}
+              <span className={panelTab === nav.key ? "text-white" : "text-[#999]"}>{nav.icon}</span>
+              <span className="text-[13px] font-medium">{nav.label}</span>
             </button>
           ))}
         </div>
-        <button onClick={onClose} className="text-[#bbb] hover:text-[#666] transition-colors p-1" data-testid="button-close-docs">
-          <svg width="12" height="12" viewBox="0 0 14 14" fill="none"><path d="M11 3L3 11M3 3l8 8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" /></svg>
-        </button>
       </div>
 
-      <div className="flex-1 overflow-y-auto px-3 py-3">
+      <div className="w-full h-px bg-[#f0f0f0] mt-2"></div>
+
+      <div className="flex-1 overflow-y-auto px-3 py-3 bg-[#fafafa]">
 
         {panelTab === "command" && (<>
 
