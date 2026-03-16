@@ -115,6 +115,12 @@ interface StrategyData {
   capitalUnlock: CapitalUnlockScenario[];
 }
 
+interface BureauPullProbability {
+  experian: number;
+  transunion: number;
+  equifax: number;
+}
+
 interface CapitalPotentialEntry {
   lender: string;
   product: string;
@@ -122,6 +128,8 @@ interface CapitalPotentialEntry {
   highEstimate: number;
   bureau: string;
   confidence: string;
+  bureauProbability: BureauPullProbability;
+  denialRisk: string;
 }
 
 interface FundingSequenceEntry {
@@ -131,6 +139,23 @@ interface FundingSequenceEntry {
   approvalProbability: number;
   bureau: string;
   reasoning: string;
+  exposureUnlock: string;
+}
+
+interface FundingTrend {
+  lender: string;
+  product: string;
+  medianApproval: number;
+  trend: string;
+  bureau: string;
+}
+
+interface BureauHealth {
+  bureau: string;
+  score: number;
+  inquiries: number;
+  utilization: number;
+  strength: string;
 }
 
 interface MissionData {
@@ -149,6 +174,9 @@ interface MissionData {
   strategyData: StrategyData | null;
   capitalPotential: CapitalPotentialEntry[];
   fundingSequence: FundingSequenceEntry[];
+  fundingTrends: FundingTrend[];
+  bureauHealth: BureauHealth[];
+  stackTiming: string;
 }
 
 interface DisputeItem {
@@ -422,12 +450,16 @@ function parseSingleMessageData(content: string): MissionData {
   }
 
   const capitalPotential: CapitalPotentialEntry[] = [];
+  let bureauHealth: BureauHealth[] = [];
+  let stackTiming = "";
+  const fundingTrends: FundingTrend[] = [];
   const cpBlockMatch = content.match(/CAPITAL_POTENTIAL_DATA_START\s*([\s\S]*?)\s*CAPITAL_POTENTIAL_DATA_END/);
   if (cpBlockMatch) {
     try {
       const parsed = JSON.parse(cpBlockMatch[1].trim());
       if (parsed && parsed.lenders) {
         for (const l of parsed.lenders) {
+          const bp = l.bureauProbability || {};
           capitalPotential.push({
             lender: l.lender || "",
             product: l.product || "",
@@ -435,6 +467,31 @@ function parseSingleMessageData(content: string): MissionData {
             highEstimate: Number(l.highEstimate) || 0,
             bureau: l.bureau || "",
             confidence: l.confidence || "Medium",
+            bureauProbability: { experian: Number(bp.experian) || 0, transunion: Number(bp.transunion) || 0, equifax: Number(bp.equifax) || 0 },
+            denialRisk: l.denialRisk || "Moderate",
+          });
+        }
+      }
+      if (parsed && parsed.bureauHealth) {
+        bureauHealth = parsed.bureauHealth.map((b: any) => ({
+          bureau: b.bureau || "",
+          score: Number(b.score) || 0,
+          inquiries: Number(b.inquiries) || 0,
+          utilization: Number(b.utilization) || 0,
+          strength: b.strength || "Moderate",
+        }));
+      }
+      if (parsed && parsed.stackTiming) {
+        stackTiming = parsed.stackTiming;
+      }
+      if (parsed && parsed.fundingTrends) {
+        for (const t of parsed.fundingTrends) {
+          fundingTrends.push({
+            lender: t.lender || "",
+            product: t.product || "",
+            medianApproval: Number(t.medianApproval) || 0,
+            trend: t.trend || "Stable",
+            bureau: t.bureau || "",
           });
         }
       }
@@ -455,13 +512,14 @@ function parseSingleMessageData(content: string): MissionData {
             approvalProbability: Number(s.approvalProbability) || 0,
             bureau: s.bureau || "",
             reasoning: s.reasoning || "",
+            exposureUnlock: s.exposureUnlock || "",
           });
         }
       }
     } catch {}
   }
 
-  return { approvalIndex, band, phase, bureauSource, pillarScores, suppressors, helping, hurting, bestNextMove, financialIdentity, projectedFunding, openTradelines, strategyData, capitalPotential, fundingSequence };
+  return { approvalIndex, band, phase, bureauSource, pillarScores, suppressors, helping, hurting, bestNextMove, financialIdentity, projectedFunding, openTradelines, strategyData, capitalPotential, fundingSequence, fundingTrends, bureauHealth, stackTiming };
 }
 
 function hasAnalysisData(data: MissionData): boolean {
@@ -2417,6 +2475,7 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
   };
 
   const [panelTab, setPanelTab] = useState<"command" | "stack" | "documents">("command");
+  const [simulatingLender, setSimulatingLender] = useState<number | null>(null);
   const [repairFilter, setRepairFilter] = useState<{ bureau: string; category: string }>({ bureau: "All", category: "All" });
   const [inqCarouselIdx, setInqCarouselIdx] = useState(0);
   const [acctCarouselIdx, setAcctCarouselIdx] = useState(0);
@@ -2601,6 +2660,29 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
             </div>
           )}
 
+          {aisReport && aisReport.bureauHealth.length > 0 && (
+            <div className="pb-3 mb-3 border-b border-[#f0f0f0]" data-testid="bureau-heatmap">
+              <p className="text-[10px] text-[#111] font-medium tracking-wide mb-2.5">Bureau Heatmap</p>
+              <div className="grid grid-cols-3 gap-2">
+                {aisReport.bureauHealth.map((bh, i) => {
+                  const strengthColor = bh.strength.toLowerCase() === "strong" ? "#2d6a4f" : bh.strength.toLowerCase() === "moderate" ? "#c9a227" : "#c0392b";
+                  const strengthBg = bh.strength.toLowerCase() === "strong" ? "#f0f7f4" : bh.strength.toLowerCase() === "moderate" ? "#fdf8e8" : "#fdf0ef";
+                  return (
+                    <div key={i} className="rounded-md p-2" style={{ backgroundColor: strengthBg }} data-testid={`bureau-health-${bh.bureau.toLowerCase()}`}>
+                      <p className="text-[8px] text-[#888] mb-1">{bh.bureau}</p>
+                      <p className="text-[10px] font-semibold text-[#111] mb-1" style={{ fontVariantNumeric: "tabular-nums" }}>{bh.score > 0 ? bh.score : "—"}</p>
+                      <p className="text-[7px] font-medium mb-0.5" style={{ color: strengthColor }}>{bh.strength}</p>
+                      <div className="flex items-center justify-between">
+                        <span className="text-[7px] text-[#999]">{bh.inquiries} inq</span>
+                        <span className="text-[7px] text-[#999]">{bh.utilization}%</span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
           {aisReport && aisReport.capitalPotential.length > 0 && (
             <div className="pb-3 mb-3 border-b border-[#f0f0f0]" data-testid="capital-potential">
               <p className="text-[10px] text-[#111] font-medium tracking-wide mb-2.5">Capital Potential</p>
@@ -2617,8 +2699,11 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
                     <div className="space-y-0">
                       {aisReport.capitalPotential.map((entry, i) => {
                         const confColor = entry.confidence.toLowerCase() === "high" ? "#2d6a4f" : entry.confidence.toLowerCase() === "medium" ? "#c9a227" : "#c0392b";
+                        const riskColor = entry.denialRisk.toLowerCase() === "low" ? "#2d6a4f" : entry.denialRisk.toLowerCase() === "moderate" ? "#c9a227" : "#c0392b";
                         const barWidth = Math.round((entry.highEstimate / maxHigh) * 100);
                         const barFillWidth = Math.round((entry.lowEstimate / maxHigh) * 100);
+                        const bp = entry.bureauProbability;
+                        const showSim = simulatingLender === i;
                         return (
                           <div key={i} className={`py-2.5 ${i < aisReport.capitalPotential.length - 1 ? "border-b border-[#f0f0f0]" : ""}`} data-testid={`capital-potential-${i}`}>
                             <div className="flex items-center justify-between mb-1">
@@ -2633,13 +2718,58 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
                             </div>
                             <div className="flex items-center justify-between mb-1">
                               <span className="text-[9px] font-semibold text-[#111]" style={{ fontVariantNumeric: "tabular-nums" }}>${entry.lowEstimate.toLocaleString()} – ${entry.highEstimate.toLocaleString()}</span>
+                              <span className="text-[7px] font-medium" style={{ color: riskColor }}>Risk: {entry.denialRisk}</span>
                             </div>
-                            <div className="w-full h-[3px] bg-[#eee] rounded-full overflow-hidden">
+                            <div className="w-full h-[3px] bg-[#eee] rounded-full overflow-hidden mb-1.5">
                               <div className="h-full rounded-full relative" style={{ width: `${barWidth}%` }}>
                                 <div className="absolute inset-0 bg-[#ddd] rounded-full" />
                                 <div className="absolute inset-y-0 left-0 bg-[#111] rounded-full" style={{ width: `${barFillWidth > 0 ? Math.round((barFillWidth / barWidth) * 100) : 0}%` }} />
                               </div>
                             </div>
+                            {(bp.experian > 0 || bp.transunion > 0 || bp.equifax > 0) && (
+                              <div className="flex items-center gap-1 mb-1.5">
+                                <span className="text-[7px] text-[#999]">Pull:</span>
+                                {bp.experian > 0 && <span className="text-[7px] text-[#888] px-1 py-[1px] rounded bg-[#f5f5f5]" style={{ fontVariantNumeric: "tabular-nums" }}>EX {bp.experian}%</span>}
+                                {bp.transunion > 0 && <span className="text-[7px] text-[#888] px-1 py-[1px] rounded bg-[#f5f5f5]" style={{ fontVariantNumeric: "tabular-nums" }}>TU {bp.transunion}%</span>}
+                                {bp.equifax > 0 && <span className="text-[7px] text-[#888] px-1 py-[1px] rounded bg-[#f5f5f5]" style={{ fontVariantNumeric: "tabular-nums" }}>EQ {bp.equifax}%</span>}
+                              </div>
+                            )}
+                            <button
+                              onClick={() => setSimulatingLender(showSim ? null : i)}
+                              className="text-[7px] text-[#111] bg-white border border-[#e5e5e5] px-2 py-1 rounded hover:bg-[#f5f5f5] transition-colors"
+                              data-testid={`simulate-btn-${i}`}
+                            >
+                              {showSim ? "Close" : "Simulate Application"}
+                            </button>
+                            {showSim && (
+                              <div className="mt-2 rounded-md bg-[#f7f7f7] p-2.5">
+                                <p className="text-[8px] text-[#111] font-medium mb-1.5">Application Simulation</p>
+                                <div className="space-y-1">
+                                  <div className="flex items-center justify-between">
+                                    <span className="text-[7px] text-[#888]">Approval Probability</span>
+                                    <span className="text-[8px] font-semibold" style={{ color: confColor, fontVariantNumeric: "tabular-nums" }}>
+                                      {entry.confidence.toLowerCase() === "high" ? "72–88%" : entry.confidence.toLowerCase() === "medium" ? "45–65%" : "15–35%"}
+                                    </span>
+                                  </div>
+                                  <div className="flex items-center justify-between">
+                                    <span className="text-[7px] text-[#888]">Expected Limit</span>
+                                    <span className="text-[8px] font-semibold text-[#111]" style={{ fontVariantNumeric: "tabular-nums" }}>${entry.lowEstimate.toLocaleString()} – ${entry.highEstimate.toLocaleString()}</span>
+                                  </div>
+                                  <div className="flex items-center justify-between">
+                                    <span className="text-[7px] text-[#888]">Denial Risk</span>
+                                    <span className="text-[8px] font-medium" style={{ color: riskColor }}>{entry.denialRisk}</span>
+                                  </div>
+                                  <div className="flex items-center justify-between">
+                                    <span className="text-[7px] text-[#888]">Bureau Pulled</span>
+                                    <span className="text-[8px] text-[#111]">{entry.bureau} ({Math.max(bp.experian, bp.transunion, bp.equifax)}% likely)</span>
+                                  </div>
+                                  <div className="flex items-center justify-between">
+                                    <span className="text-[7px] text-[#888]">Hard Inquiry Impact</span>
+                                    <span className="text-[8px] text-[#c9a227]">−3 to −5 pts on {entry.bureau}</span>
+                                  </div>
+                                </div>
+                              </div>
+                            )}
                           </div>
                         );
                       })}
@@ -2657,24 +2787,49 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
                 {aisReport.fundingSequence.map((entry, i) => {
                   const probColor = entry.approvalProbability >= 70 ? "#2d6a4f" : entry.approvalProbability >= 45 ? "#c9a227" : "#c0392b";
                   return (
-                    <div key={i} className={`flex items-start gap-2.5 py-2.5 ${i < aisReport.fundingSequence.length - 1 ? "border-b border-[#f0f0f0]" : ""}`} data-testid={`funding-sequence-${i}`}>
-                      <span className="text-[9px] font-semibold text-[#bbb] mt-px w-3 shrink-0" style={{ fontVariantNumeric: "tabular-nums" }}>{entry.position}</span>
-                      <div className="min-w-0 flex-1">
-                        <div className="flex items-center justify-between mb-0.5">
-                          <div className="flex items-center gap-1.5 min-w-0">
-                            <span className="text-[9px] text-[#111] font-medium">{entry.lender}</span>
-                            <span className="text-[8px] text-[#bbb]">{entry.product}</span>
-                          </div>
-                          <div className="flex items-center gap-1.5 shrink-0">
-                            <span className="text-[7px] text-[#999] px-1 py-[1px] rounded bg-[#f0f0f0]">{entry.bureau}</span>
-                            <span className="text-[9px] font-semibold" style={{ color: probColor, fontVariantNumeric: "tabular-nums" }}>{entry.approvalProbability}%</span>
-                          </div>
+                    <div key={i} className={`py-2.5 ${i < aisReport.fundingSequence.length - 1 ? "border-b border-[#f0f0f0]" : ""}`} data-testid={`funding-sequence-${i}`}>
+                      <div className="flex items-start gap-2.5">
+                        <div className="flex flex-col items-center shrink-0 mt-0.5">
+                          <span className="text-[9px] font-semibold text-[#bbb] w-3 text-center" style={{ fontVariantNumeric: "tabular-nums" }}>{entry.position}</span>
+                          {i < aisReport.fundingSequence.length - 1 && (
+                            <div className="w-px h-8 bg-[#e5e5e5] mt-1" />
+                          )}
                         </div>
-                        <p className="text-[8px] text-[#888] leading-[1.4]">{entry.reasoning}</p>
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center justify-between mb-0.5">
+                            <div className="flex items-center gap-1.5 min-w-0">
+                              <span className="text-[9px] text-[#111] font-medium">{entry.lender}</span>
+                              <span className="text-[8px] text-[#bbb]">{entry.product}</span>
+                            </div>
+                            <div className="flex items-center gap-1.5 shrink-0">
+                              <span className="text-[7px] text-[#999] px-1 py-[1px] rounded bg-[#f0f0f0]">{entry.bureau}</span>
+                              <span className="text-[9px] font-semibold" style={{ color: probColor, fontVariantNumeric: "tabular-nums" }}>{entry.approvalProbability}%</span>
+                            </div>
+                          </div>
+                          <p className="text-[8px] text-[#888] leading-[1.4] mb-1">{entry.reasoning}</p>
+                          {entry.exposureUnlock && (
+                            <div className="flex items-start gap-1">
+                              <span className="text-[7px] text-[#2d6a4f] shrink-0 mt-px">↗</span>
+                              <p className="text-[7px] text-[#2d6a4f] leading-[1.4]">{entry.exposureUnlock}</p>
+                            </div>
+                          )}
+                        </div>
                       </div>
                     </div>
                   );
                 })}
+              </div>
+            </div>
+          )}
+
+          {aisReport && aisReport.stackTiming && (
+            <div className="pb-3 mb-3 border-b border-[#f0f0f0]" data-testid="stack-timing">
+              <p className="text-[10px] text-[#111] font-medium tracking-wide mb-2">Timing</p>
+              <div className="rounded-md bg-[#f7f7f7] p-2.5">
+                <div className="flex items-start gap-2">
+                  <span className="text-[10px] shrink-0 mt-px">⏱</span>
+                  <p className="text-[8px] text-[#555] leading-[1.5]">{aisReport.stackTiming}</p>
+                </div>
               </div>
             </div>
           )}
@@ -2696,6 +2851,36 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
                         <span className="text-[8px] font-medium" style={{ color: likelihoodColor }}>{match.likelihood}</span>
                       </div>
                       <p className="text-[8px] text-[#888] leading-[1.4]">{match.reason}</p>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {aisReport && aisReport.fundingTrends.length > 0 && (
+            <div className="pb-3 mb-3 border-b border-[#f0f0f0]" data-testid="funding-trends">
+              <p className="text-[10px] text-[#111] font-medium tracking-wide mb-2.5">Funding Trends</p>
+              <div className="space-y-0">
+                {aisReport.fundingTrends.map((trend, i) => {
+                  const trendColor = trend.trend.toLowerCase() === "rising" ? "#2d6a4f" : trend.trend.toLowerCase() === "stable" ? "#c9a227" : "#c0392b";
+                  const trendArrow = trend.trend.toLowerCase() === "rising" ? "↑" : trend.trend.toLowerCase() === "stable" ? "→" : "↓";
+                  return (
+                    <div key={i} className={`py-2 ${i < aisReport.fundingTrends.length - 1 ? "border-b border-[#f0f0f0]" : ""}`} data-testid={`funding-trend-${i}`}>
+                      <div className="flex items-center justify-between mb-0.5">
+                        <div className="flex items-center gap-1.5 min-w-0">
+                          <span className="text-[9px] text-[#111] font-medium">{trend.lender}</span>
+                          <span className="text-[8px] text-[#bbb]">{trend.product}</span>
+                        </div>
+                        <div className="flex items-center gap-1.5 shrink-0">
+                          <span className="text-[7px] text-[#999] px-1 py-[1px] rounded bg-[#f0f0f0]">{trend.bureau}</span>
+                          <span className="text-[8px] font-medium" style={{ color: trendColor }}>{trendArrow} {trend.trend}</span>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <span className="text-[7px] text-[#888]">Median Approval:</span>
+                        <span className="text-[8px] font-semibold text-[#111]" style={{ fontVariantNumeric: "tabular-nums" }}>${trend.medianApproval.toLocaleString()}</span>
+                      </div>
                     </div>
                   );
                 })}
@@ -3661,7 +3846,16 @@ export default function LandingPage() {
       const saved = localStorage.getItem("profundr_ais_report");
       if (!saved) return null;
       const parsed = JSON.parse(saved);
-      return { ...parsed, capitalPotential: parsed.capitalPotential || [], fundingSequence: parsed.fundingSequence || [], strategyData: parsed.strategyData ? { ...parsed.strategyData, capitalUnlock: parsed.strategyData.capitalUnlock || [] } : parsed.strategyData };
+      const normalizedCP = (parsed.capitalPotential || []).map((e: any) => ({
+        ...e,
+        bureauProbability: e.bureauProbability || { experian: 0, transunion: 0, equifax: 0 },
+        denialRisk: e.denialRisk || "Moderate",
+      }));
+      const normalizedFS = (parsed.fundingSequence || []).map((e: any) => ({
+        ...e,
+        exposureUnlock: e.exposureUnlock || "",
+      }));
+      return { ...parsed, capitalPotential: normalizedCP, fundingSequence: normalizedFS, fundingTrends: parsed.fundingTrends || [], bureauHealth: parsed.bureauHealth || [], stackTiming: parsed.stackTiming || "", strategyData: parsed.strategyData ? { ...parsed.strategyData, capitalUnlock: parsed.strategyData.capitalUnlock || [] } : parsed.strategyData };
     } catch { return null; }
   });
   const [repairData, setRepairData] = useState<RepairData | null>(loadRepairData);

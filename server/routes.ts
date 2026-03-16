@@ -1329,8 +1329,18 @@ CAPITAL_POTENTIAL_DATA_START
   "totalLow": [total low estimate across all lenders as number],
   "totalHigh": [total high estimate across all lenders as number],
   "lenders": [
-    {"lender": "[Bank name, e.g. American Express]", "product": "[Specific product, e.g. Blue Business Plus]", "lowEstimate": [low dollar amount as number], "highEstimate": [high dollar amount as number], "bureau": "[Primary bureau pulled: Experian|Equifax|TransUnion]", "confidence": "[High|Medium|Low — based on how well the profile matches this lender's criteria]"},
-    {"lender": "[Bank name]", "product": "[product]", "lowEstimate": [low], "highEstimate": [high], "bureau": "[bureau]", "confidence": "[confidence]"}
+    {"lender": "[Bank name, e.g. American Express]", "product": "[Specific product, e.g. Blue Business Plus]", "lowEstimate": [low dollar amount as number], "highEstimate": [high dollar amount as number], "bureau": "[Primary bureau pulled: Experian|Equifax|TransUnion]", "confidence": "[High|Medium|Low]", "bureauProbability": {"experian": [0-100], "transunion": [0-100], "equifax": [0-100]}, "denialRisk": "[Low|Moderate|High — based on inquiry count, utilization, and profile gaps for this specific lender]"},
+    {"lender": "[Bank name]", "product": "[product]", "lowEstimate": [low], "highEstimate": [high], "bureau": "[bureau]", "confidence": "[confidence]", "bureauProbability": {"experian": [pct], "transunion": [pct], "equifax": [pct]}, "denialRisk": "[risk]"}
+  ],
+  "bureauHealth": [
+    {"bureau": "Experian", "score": [estimated score on this bureau or 0 if unknown], "inquiries": [hard inquiry count on this bureau], "utilization": [utilization % as seen on this bureau], "strength": "[Strong|Moderate|Weak]"},
+    {"bureau": "TransUnion", "score": [score], "inquiries": [count], "utilization": [util], "strength": "[strength]"},
+    {"bureau": "Equifax", "score": [score], "inquiries": [count], "utilization": [util], "strength": "[strength]"}
+  ],
+  "stackTiming": "[Timing guidance — e.g. 'Apply all Round 1 within 48 hours before bureaus update inquiry counts' or 'Wait 30 days for inquiries to season before Round 2']",
+  "fundingTrends": [
+    {"lender": "[Bank name]", "product": "[product]", "medianApproval": [median starting limit from forum data as number], "trend": "[Rising|Stable|Declining — current approval trend]", "bureau": "[primary bureau]"},
+    {"lender": "[Bank name]", "product": "[product]", "medianApproval": [amount], "trend": "[trend]", "bureau": "[bureau]"}
   ]
 }
 CAPITAL_POTENTIAL_DATA_END
@@ -1338,9 +1348,9 @@ CAPITAL_POTENTIAL_DATA_END
 FUNDING_SEQUENCE_DATA_START
 {
   "sequence": [
-    {"position": 1, "lender": "[Bank name]", "product": "[Product name]", "approvalProbability": [0-100 realistic approval percentage], "bureau": "[Bureau pulled]", "reasoning": "[Why this lender is in this position — e.g. 'Highest approval probability, pulls Experian which has cleanest file']"},
-    {"position": 2, "lender": "[Bank name]", "product": "[product]", "approvalProbability": [percentage], "bureau": "[bureau]", "reasoning": "[reasoning]"},
-    {"position": 3, "lender": "[Bank name]", "product": "[product]", "approvalProbability": [percentage], "bureau": "[bureau]", "reasoning": "[reasoning]"}
+    {"position": 1, "lender": "[Bank name]", "product": "[Product name]", "approvalProbability": [0-100 realistic approval percentage], "bureau": "[Bureau pulled]", "reasoning": "[Why this lender is in this position]", "exposureUnlock": "[What this approval unlocks — e.g. '$10k limit signals to next lender, enabling higher limits']"},
+    {"position": 2, "lender": "[Bank name]", "product": "[product]", "approvalProbability": [percentage], "bureau": "[bureau]", "reasoning": "[reasoning]", "exposureUnlock": "[unlock effect]"},
+    {"position": 3, "lender": "[Bank name]", "product": "[product]", "approvalProbability": [percentage], "bureau": "[bureau]", "reasoning": "[reasoning]", "exposureUnlock": "[unlock effect]"}
   ]
 }
 FUNDING_SEQUENCE_DATA_END
@@ -1367,6 +1377,11 @@ CAPITAL POTENTIAL DATA RULES:
 - totalLow/totalHigh: sum of all individual lender low/high estimates
 - Use REAL lender names: American Express, Chase, Capital One, Discover, Bank of America, Wells Fargo, Citi, US Bank, Navy Federal, PenFed, Barclays, Synchrony, etc.
 - Do NOT inflate estimates. A user with a $5k highest limit should NOT see $50k estimates per lender. Use forum-reported ranges scaled to the user's profile
+- bureauProbability: For each lender, estimate the probability of pulling each bureau (must sum to ~100). Use forum-reported pull patterns, state/region tendencies, and recent datapoints. Example: Amex → {experian: 80, transunion: 10, equifax: 10}
+- denialRisk: Assess denial risk specifically for THIS user applying to THIS lender. Low = profile matches well, Moderate = some risk factors, High = likely denial
+- bureauHealth: Estimate user's strength on each of the 3 bureaus based on the report data. Score = estimated FICO on that bureau (use the uploaded report's score for the matching bureau, estimate others). Inquiries = hard inquiry count per bureau. Utilization = utilization as seen on that bureau. Strength = Strong (score 720+, <3 inquiries), Moderate (680-719 or 3-5 inquiries), Weak (<680 or 6+ inquiries)
+- stackTiming: Provide specific timing guidance for the funding stack. Reference the 48-hour bureau update window, inquiry seasoning periods, and optimal application spacing
+- fundingTrends: List 3-5 lenders with current approval trends from your Forum Intelligence. medianApproval = typical starting limit. trend = Rising/Stable/Declining based on recent forum-reported approval patterns
 
 FUNDING SEQUENCE DATA RULES:
 - Output FUNDING_SEQUENCE_DATA block on EVERY credit report analysis — this is mandatory
@@ -1374,6 +1389,7 @@ FUNDING SEQUENCE DATA RULES:
 - USE YOUR FORUM INTELLIGENCE stacking sequence data: (1) Start with the lender that pulls the user's strongest bureau, (2) Amex first if Experian is cleanest (most approval-tolerant per forum consensus), (3) Chase second if within 5/24, (4) Diversify bureau pulls — never stack same-bureau lenders back-to-back, (5) Save inquiry-sensitive lenders (US Bank, Citi, Barclays) for later positions, (6) Capital One last or separate round (triple-pull), (7) Factor in the user's inquiry count and slots remaining
 - approvalProbability: realistic 0-100 percentage based on forum-reported approval patterns for the user's profile type and the specific lender's known sensitivity to inquiries, utilization, credit age, and depth
 - reasoning: explain WHY this lender is in this position — reference bureau strategy, inquiry sensitivity, forum-reported approval patterns, or tactical advantage
+- exposureUnlock: describe how this approval improves the next application — e.g. "New $10k limit signals credit depth to Chase, enabling higher starting limit" or "Establishes Experian tradeline that Amex can reference". This is the exposure ladder — each approval cascades into better odds for the next
 - Use the same real lender names as in the Capital Potential data
 
 Then write your verdict — 2-3 sentences max. Sound like a real operator protecting the file. State whether they are fundable or not, the current phase, and the key structural reasons. No numbers, no scores, no data regurgitation in this text. Do not label it "Verdict:".
