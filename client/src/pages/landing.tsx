@@ -97,6 +97,13 @@ interface FundingMatch {
   reason: string;
 }
 
+interface CapitalUnlockScenario {
+  condition: string;
+  currentRange: string;
+  projectedRange: string;
+  projectedOdds: number;
+}
+
 interface StrategyData {
   steps: StrategyStep[];
   currentOdds: number;
@@ -105,6 +112,25 @@ interface StrategyData {
   projectedFunding: string;
   timeline: TimelineMilestone[];
   fundingMatches: FundingMatch[];
+  capitalUnlock: CapitalUnlockScenario[];
+}
+
+interface CapitalPotentialEntry {
+  lender: string;
+  product: string;
+  lowEstimate: number;
+  highEstimate: number;
+  bureau: string;
+  confidence: string;
+}
+
+interface FundingSequenceEntry {
+  position: number;
+  lender: string;
+  product: string;
+  approvalProbability: number;
+  bureau: string;
+  reasoning: string;
 }
 
 interface MissionData {
@@ -121,6 +147,8 @@ interface MissionData {
   projectedFunding: ProjectedFundingData | null;
   openTradelines: TradeLine[];
   strategyData: StrategyData | null;
+  capitalPotential: CapitalPotentialEntry[];
+  fundingSequence: FundingSequenceEntry[];
 }
 
 interface DisputeItem {
@@ -382,16 +410,62 @@ function parseSingleMessageData(content: string): MissionData {
             likelihood: f.likelihood || "",
             reason: f.reason || "",
           })),
+          capitalUnlock: (parsed.capitalUnlock || []).map((u: any) => ({
+            condition: u.condition || "",
+            currentRange: u.currentRange || "",
+            projectedRange: u.projectedRange || "",
+            projectedOdds: u.projectedOdds || 0,
+          })),
         };
       }
     } catch {}
   }
 
-  return { approvalIndex, band, phase, bureauSource, pillarScores, suppressors, helping, hurting, bestNextMove, financialIdentity, projectedFunding, openTradelines, strategyData };
+  const capitalPotential: CapitalPotentialEntry[] = [];
+  const cpBlockMatch = content.match(/CAPITAL_POTENTIAL_DATA_START\s*([\s\S]*?)\s*CAPITAL_POTENTIAL_DATA_END/);
+  if (cpBlockMatch) {
+    try {
+      const parsed = JSON.parse(cpBlockMatch[1].trim());
+      if (parsed && parsed.lenders) {
+        for (const l of parsed.lenders) {
+          capitalPotential.push({
+            lender: l.lender || "",
+            product: l.product || "",
+            lowEstimate: l.lowEstimate || 0,
+            highEstimate: l.highEstimate || 0,
+            bureau: l.bureau || "",
+            confidence: l.confidence || "Medium",
+          });
+        }
+      }
+    } catch {}
+  }
+
+  const fundingSequence: FundingSequenceEntry[] = [];
+  const fsBlockMatch = content.match(/FUNDING_SEQUENCE_DATA_START\s*([\s\S]*?)\s*FUNDING_SEQUENCE_DATA_END/);
+  if (fsBlockMatch) {
+    try {
+      const parsed = JSON.parse(fsBlockMatch[1].trim());
+      if (parsed && parsed.sequence) {
+        for (const s of parsed.sequence) {
+          fundingSequence.push({
+            position: s.position || 0,
+            lender: s.lender || "",
+            product: s.product || "",
+            approvalProbability: s.approvalProbability || 0,
+            bureau: s.bureau || "",
+            reasoning: s.reasoning || "",
+          });
+        }
+      }
+    } catch {}
+  }
+
+  return { approvalIndex, band, phase, bureauSource, pillarScores, suppressors, helping, hurting, bestNextMove, financialIdentity, projectedFunding, openTradelines, strategyData, capitalPotential, fundingSequence };
 }
 
 function hasAnalysisData(data: MissionData): boolean {
-  return data.approvalIndex !== null || data.band !== null || data.phase !== null || data.pillarScores.length > 0 || data.suppressors.length > 0 || data.helping.length > 0 || data.hurting.length > 0 || data.bestNextMove !== null || data.financialIdentity !== null || data.projectedFunding !== null || data.openTradelines.length > 0;
+  return data.approvalIndex !== null || data.band !== null || data.phase !== null || data.pillarScores.length > 0 || data.suppressors.length > 0 || data.helping.length > 0 || data.hurting.length > 0 || data.bestNextMove !== null || data.financialIdentity !== null || data.projectedFunding !== null || data.openTradelines.length > 0 || data.capitalPotential.length > 0 || data.fundingSequence.length > 0;
 }
 
 function getBandColor(band: string | null): string {
@@ -444,6 +518,8 @@ function filterMarkdown(content: string): string {
     .replace(/^={3,}.*$/gm, "")
     .replace(/REPAIR_DATA_START[\s\S]*?REPAIR_DATA_END/g, "")
     .replace(/STRATEGY_DATA_START[\s\S]*?STRATEGY_DATA_END/g, "")
+    .replace(/CAPITAL_POTENTIAL_DATA_START[\s\S]*?CAPITAL_POTENTIAL_DATA_END/g, "")
+    .replace(/FUNDING_SEQUENCE_DATA_START[\s\S]*?FUNDING_SEQUENCE_DATA_END/g, "")
     .replace(/^\s*DISPUTE:\s*.+$/gm, "")
     .replace(/\[GENERATE_DISPUTE_PACKAGE\]/g, "");
   const lines = cleaned.split("\n");
@@ -1557,7 +1633,13 @@ function filterRepairDataFromContent(content: string): string {
   if (filtered.includes("REPAIR_DATA_START")) {
     filtered = filtered.replace(/REPAIR_DATA_START[\s\S]*/g, "");
   }
-  return filtered.replace(/STRATEGY_DATA_START[\s\S]*?STRATEGY_DATA_END/g, "").trim();
+  return filtered.replace(/STRATEGY_DATA_START[\s\S]*?STRATEGY_DATA_END/g, "").replace(/CAPITAL_POTENTIAL_DATA_START[\s\S]*?CAPITAL_POTENTIAL_DATA_END/g, "").replace(/FUNDING_SEQUENCE_DATA_START[\s\S]*?FUNDING_SEQUENCE_DATA_END/g, "").trim();
+}
+
+function parseAisBeforeStrip(content: string): MissionData | null {
+  const parsed = parseSingleMessageData(content);
+  if (hasAnalysisData(parsed) && parsed.approvalIndex !== null) return parsed;
+  return null;
 }
 
 function loadUserProfile(): UserProfile {
@@ -2691,6 +2773,28 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
                   </div>
                 </div>
               )}
+
+              {aisReport.strategyData.capitalUnlock && aisReport.strategyData.capitalUnlock.length > 0 && (
+                <div className="mt-3">
+                  <p className="text-[7px] text-[#999] font-semibold uppercase tracking-wider mb-1.5">Capital Unlock Scenarios</p>
+                  <div className="space-y-1.5">
+                    {aisReport.strategyData.capitalUnlock.map((scenario, i) => {
+                      const oddsColor = scenario.projectedOdds >= 70 ? "#2d6a4f" : scenario.projectedOdds >= 45 ? "#c9a227" : "#c0392b";
+                      return (
+                        <div key={i} className="rounded-lg bg-[#f8f9fb] border border-[#e8e8ee] p-2" data-testid={`capital-unlock-${i}`}>
+                          <p className="text-[8px] text-[#555] font-semibold mb-1">{scenario.condition}</p>
+                          <div className="flex items-center gap-1.5">
+                            <span className="text-[8px] font-bold text-[#c0392b]" style={{ fontVariantNumeric: "tabular-nums" }}>{scenario.currentRange}</span>
+                            <svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4h8M6 1l3 3-3 3" stroke="#2d6a4f" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                            <span className="text-[8px] font-bold text-[#2d6a4f]" style={{ fontVariantNumeric: "tabular-nums" }}>{scenario.projectedRange}</span>
+                            <span className="text-[7px] font-bold ml-auto px-1.5 py-[2px] rounded-full" style={{ color: oddsColor, backgroundColor: oddsColor + "15", fontVariantNumeric: "tabular-nums" }}>{scenario.projectedOdds}%</span>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
             </div>
           )}
 
@@ -2724,6 +2828,108 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
                 })}
               </div>
             </div>
+            </div>
+          )}
+
+          {aisReport && aisReport.capitalPotential.length > 0 && (
+            <div className="rounded-xl border border-[#e8e8e8] bg-white p-3" data-testid="capital-potential">
+              <div className="flex items-center gap-2 mb-1.5">
+                <div className="w-5 h-5 rounded-md bg-[#1a1a2e] flex items-center justify-center shrink-0">
+                  <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M5 1v8M1 5h8" stroke="white" strokeWidth="1.2" strokeLinecap="round"/></svg>
+                </div>
+                <p className="text-[9px] text-[#333] font-bold uppercase tracking-[0.08em]">Capital Potential Engine</p>
+              </div>
+              <p className="text-[8px] text-[#999] mb-2">Lender-by-lender accessible capital based on your current profile</p>
+              {(() => {
+                const totalLow = aisReport.capitalPotential.reduce((s, e) => s + e.lowEstimate, 0);
+                const totalHigh = aisReport.capitalPotential.reduce((s, e) => s + e.highEstimate, 0);
+                const maxHigh = Math.max(...aisReport.capitalPotential.map(e => e.highEstimate), 1);
+                return (
+                  <>
+                    <div className="rounded-lg bg-gradient-to-r from-[#f0f2f8] to-[#e8f5e9] border border-[#ddd] p-2.5 mb-3">
+                      <p className="text-[7px] text-[#999] font-semibold uppercase tracking-wider mb-0.5">Total Accessible Capital</p>
+                      <p className="text-[14px] font-bold text-[#1a1a2e]" style={{ fontVariantNumeric: "tabular-nums" }}>${totalLow.toLocaleString()} – ${totalHigh.toLocaleString()}</p>
+                    </div>
+                    <div className="space-y-2">
+                      {aisReport.capitalPotential.map((entry, i) => {
+                        const confColor = entry.confidence.toLowerCase() === "high" ? "#2d6a4f" : entry.confidence.toLowerCase() === "medium" ? "#c9a227" : "#c0392b";
+                        const barWidth = Math.round((entry.highEstimate / maxHigh) * 100);
+                        const barFillWidth = Math.round((entry.lowEstimate / maxHigh) * 100);
+                        return (
+                          <div key={i} className="rounded-lg bg-[#fafafa] border border-[#eee] p-2.5" data-testid={`capital-potential-${i}`}>
+                            <div className="flex items-center justify-between mb-0.5">
+                              <div className="flex items-center gap-1.5">
+                                <div className="w-5 h-5 rounded-md bg-[#1a1a2e] flex items-center justify-center shrink-0">
+                                  <span className="text-[8px] font-bold text-white">{entry.lender.charAt(0)}</span>
+                                </div>
+                                <div>
+                                  <span className="text-[9px] text-[#333] font-semibold">{entry.lender}</span>
+                                  <span className="text-[7px] text-[#999] ml-1.5">{entry.product}</span>
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-1.5 shrink-0">
+                                <span className="text-[6px] font-bold uppercase px-1 py-[1px] rounded bg-[#f0f2f8] text-[#555]">{entry.bureau}</span>
+                                <span className="text-[7px] font-bold px-1.5 py-[2px] rounded-full" style={{ color: confColor, backgroundColor: confColor + "15" }}>{entry.confidence}</span>
+                              </div>
+                            </div>
+                            <div className="mt-1.5">
+                              <div className="flex items-center justify-between mb-0.5">
+                                <span className="text-[8px] font-bold text-[#333]" style={{ fontVariantNumeric: "tabular-nums" }}>${entry.lowEstimate.toLocaleString()} – ${entry.highEstimate.toLocaleString()}</span>
+                              </div>
+                              <div className="w-full h-[6px] bg-[#e8e8ee] rounded-full overflow-hidden">
+                                <div className="h-full rounded-full relative" style={{ width: `${barWidth}%` }}>
+                                  <div className="absolute inset-0 bg-[#c9d5e8] rounded-full" />
+                                  <div className="absolute inset-y-0 left-0 bg-[#1a1a2e] rounded-full" style={{ width: `${barFillWidth > 0 ? Math.round((barFillWidth / barWidth) * 100) : 0}%` }} />
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </>
+                );
+              })()}
+            </div>
+          )}
+
+          {aisReport && aisReport.fundingSequence.length > 0 && (
+            <div className="rounded-xl border border-[#e8e8e8] bg-white p-3" data-testid="funding-sequence">
+              <div className="flex items-center gap-2 mb-1.5">
+                <div className="w-5 h-5 rounded-md bg-[#1a1a2e] flex items-center justify-center shrink-0">
+                  <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2 2h6v2H2zM2 5.5h6v2H2z" stroke="white" strokeWidth="0.8" fill="none"/><path d="M5 4v1.5" stroke="white" strokeWidth="0.8" strokeLinecap="round"/></svg>
+                </div>
+                <p className="text-[9px] text-[#333] font-bold uppercase tracking-[0.08em]">Funding Sequence</p>
+              </div>
+              <p className="text-[8px] text-[#999] mb-2.5">Optimal application order to maximize approvals</p>
+              <div className="relative pl-4">
+                <div className="absolute left-[7px] top-1 bottom-1 w-[2px] bg-gradient-to-b from-[#1a1a2e] to-[#2d6a4f] rounded-full" />
+                <div className="space-y-2">
+                  {aisReport.fundingSequence.map((entry, i) => {
+                    const probColor = entry.approvalProbability >= 70 ? "#2d6a4f" : entry.approvalProbability >= 45 ? "#c9a227" : "#c0392b";
+                    return (
+                      <div key={i} className="relative" data-testid={`funding-sequence-${i}`}>
+                        <div className="absolute -left-4 top-1.5 w-[10px] h-[10px] rounded-full border-2 bg-white flex items-center justify-center" style={{ borderColor: probColor }}>
+                          <span className="text-[5px] font-bold" style={{ color: probColor }}>{entry.position}</span>
+                        </div>
+                        <div className="rounded-lg bg-[#fafafa] border border-[#eee] p-2.5">
+                          <div className="flex items-center justify-between mb-0.5">
+                            <div className="flex items-center gap-1.5">
+                              <span className="text-[9px] text-[#333] font-semibold">{entry.lender}</span>
+                              <span className="text-[7px] text-[#999]">{entry.product}</span>
+                            </div>
+                            <div className="flex items-center gap-1.5 shrink-0">
+                              <span className="text-[6px] font-bold uppercase px-1 py-[1px] rounded bg-[#f0f2f8] text-[#555]">{entry.bureau}</span>
+                              <span className="text-[10px] font-bold" style={{ color: probColor, fontVariantNumeric: "tabular-nums" }}>{entry.approvalProbability}%</span>
+                            </div>
+                          </div>
+                          <p className="text-[7px] text-[#888] leading-[1.4]">{entry.reasoning}</p>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
             </div>
           )}
 
@@ -3726,7 +3932,9 @@ export default function LandingPage() {
   const [aisReport, setAisReport] = useState<MissionData | null>(() => {
     try {
       const saved = localStorage.getItem("profundr_ais_report");
-      return saved ? JSON.parse(saved) : null;
+      if (!saved) return null;
+      const parsed = JSON.parse(saved);
+      return { ...parsed, capitalPotential: parsed.capitalPotential || [], fundingSequence: parsed.fundingSequence || [], strategyData: parsed.strategyData ? { ...parsed.strategyData, capitalUnlock: parsed.strategyData.capitalUnlock || [] } : parsed.strategyData };
     } catch { return null; }
   });
   const [repairData, setRepairData] = useState<RepairData | null>(loadRepairData);
@@ -4313,6 +4521,7 @@ export default function LandingPage() {
         setRepairData(merged);
         saveRepairData(merged);
       }
+      const parsedAisEarly = parseAisBeforeStrip(responseContent);
       responseContent = filterRepairDataFromContent(responseContent);
 
       if (!user) {
@@ -4337,7 +4546,7 @@ export default function LandingPage() {
       const aiMsg: GuestMessage = { id: aiMsgId, role: "assistant", content: responseContent };
       setGuestMessages((prev) => [...prev, aiMsg]);
       setNextId((n) => n + 1);
-      const isStructured = /(?:STRATEGY_DATA_START|TRADELINE:|DISPUTE:.*\|.*\||Pillar\s*Scores:|Payment\s*Integrity:\s*\d|Utilization\s*Control:\s*\d|AIS.*(?:Approval\s*Index|Score).*:\s*\d)/i.test(responseContent);
+      const isStructured = /(?:STRATEGY_DATA_START|CAPITAL_POTENTIAL_DATA_START|FUNDING_SEQUENCE_DATA_START|TRADELINE:|DISPUTE:.*\|.*\||Pillar\s*Scores:|Payment\s*Integrity:\s*\d|Utilization\s*Control:\s*\d|AIS.*(?:Approval\s*Index|Score).*:\s*\d)/i.test(responseContent);
       if (!isStructured) {
         setStreamingMsgId(aiMsgId);
       }
@@ -4390,11 +4599,10 @@ export default function LandingPage() {
         }
       }
 
-      const parsedAis = parseSingleMessageData(responseContent);
-      if (hasAnalysisData(parsedAis) && parsedAis.approvalIndex !== null) {
-        setAisReport(parsedAis);
+      if (parsedAisEarly) {
+        setAisReport(parsedAisEarly);
         try {
-          localStorage.setItem("profundr_ais_report", JSON.stringify(parsedAis));
+          localStorage.setItem("profundr_ais_report", JSON.stringify(parsedAisEarly));
           localStorage.setItem("profundr_ais_calculated_at", new Date().toISOString());
         } catch {}
       }
@@ -4768,7 +4976,7 @@ export default function LandingPage() {
             </div>
           ) : (
             <div className="w-full max-w-[720px] mx-auto px-4 pt-4 pb-2" data-testid="chat-messages">
-              {displayMessages.some(m => m.role === "assistant" && /(?:STRATEGY_DATA_START|TRADELINE:|DISPUTE:.*\|.*\||Pillar\s*Scores:|Payment\s*Integrity:\s*\d)/i.test(m.content)) && (
+              {displayMessages.some(m => m.role === "assistant" && /(?:STRATEGY_DATA_START|CAPITAL_POTENTIAL_DATA_START|FUNDING_SEQUENCE_DATA_START|TRADELINE:|DISPUTE:.*\|.*\||Pillar\s*Scores:|Payment\s*Integrity:\s*\d)/i.test(m.content)) && (
               <div className="flex justify-end gap-1.5 mb-2">
                 <button
                   onClick={downloadChatAsPdf}
@@ -4834,7 +5042,7 @@ export default function LandingPage() {
                               </>
                             );
                           })() : (() => {
-                            const isStructuredReport = /(?:STRATEGY_DATA_START|TRADELINE:|DISPUTE:.*\|.*\||Pillar\s*Scores:|Payment\s*Integrity:\s*\d|Utilization\s*Control:\s*\d|AIS.*(?:Approval\s*Index|Score).*:\s*\d)/i.test(msg.content);
+                            const isStructuredReport = /(?:STRATEGY_DATA_START|CAPITAL_POTENTIAL_DATA_START|FUNDING_SEQUENCE_DATA_START|TRADELINE:|DISPUTE:.*\|.*\||Pillar\s*Scores:|Payment\s*Integrity:\s*\d|Utilization\s*Control:\s*\d|AIS.*(?:Approval\s*Index|Score).*:\s*\d)/i.test(msg.content);
                             const isCurrentlyStreaming = streamingMsgId === msg.id;
                             return isStructuredReport ? (
                               <BrandedResponse content={msg.content} userQuestion={prevUserMsg?.content} msgId={msg.id} />
