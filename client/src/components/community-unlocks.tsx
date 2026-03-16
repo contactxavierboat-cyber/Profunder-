@@ -325,7 +325,10 @@ export default function CommunityUnlocks({ userProfile }: { userProfile?: any })
       <div className="grid grid-cols-3 gap-2 mb-2">
         <input value={filters.scoreMin} onChange={e => setFilters(p => ({ ...p, scoreMin: e.target.value }))} placeholder="Score min" className="text-[11px] px-2 py-1.5 bg-white border border-[#ddd] rounded-md" data-testid="filter-score-min" />
         <input value={filters.scoreMax} onChange={e => setFilters(p => ({ ...p, scoreMax: e.target.value }))} placeholder="Score max" className="text-[11px] px-2 py-1.5 bg-white border border-[#ddd] rounded-md" data-testid="filter-score-max" />
-        <input value={filters.inquiryMax} onChange={e => setFilters(p => ({ ...p, inquiryMax: e.target.value }))} placeholder="Max inq" className="text-[11px] px-2 py-1.5 bg-white border border-[#ddd] rounded-md" data-testid="filter-inq-max" />
+        <input value={filters.inquiryMax} onChange={e => setFilters(p => ({ ...p, inquiryMax: e.target.value }))} placeholder="Max inquiries" className="text-[11px] px-2 py-1.5 bg-white border border-[#ddd] rounded-md" data-testid="filter-inq-max" />
+        <input value={filters.utilizationMin} onChange={e => setFilters(p => ({ ...p, utilizationMin: e.target.value }))} placeholder="Util min %" className="text-[11px] px-2 py-1.5 bg-white border border-[#ddd] rounded-md" data-testid="filter-util-min" />
+        <input value={filters.utilizationMax} onChange={e => setFilters(p => ({ ...p, utilizationMax: e.target.value }))} placeholder="Util max %" className="text-[11px] px-2 py-1.5 bg-white border border-[#ddd] rounded-md" data-testid="filter-util-max" />
+        <input value={filters.inquiryMin} onChange={e => setFilters(p => ({ ...p, inquiryMin: e.target.value }))} placeholder="Min inquiries" className="text-[11px] px-2 py-1.5 bg-white border border-[#ddd] rounded-md" data-testid="filter-inq-min" />
       </div>
       <div className="flex gap-2">
         <button onClick={() => { setPage(0); fetchData(); }} className="px-3 py-1.5 text-[10px] font-medium bg-[#111] text-white rounded-md" data-testid="button-apply-filters">Apply</button>
@@ -366,7 +369,7 @@ export default function CommunityUnlocks({ userProfile }: { userProfile?: any })
         </div>
       )}
       <div className="flex items-center justify-between mt-2 pt-2 border-t border-[#f0f0f0]">
-        <span className="text-[9px] text-[#bbb]">{dp.source} · {new Date(dp.createdAt).toLocaleDateString()}</span>
+        <span className="text-[9px] text-[#bbb]">{dp.source} · {new Date(dp.createdAt).toLocaleDateString()}{dp.confidenceScore ? ` · ${dp.confidenceScore}%` : ""}</span>
         <button
           onClick={e => { e.stopPropagation(); setSelectedDP(dp); }}
           className="text-[9px] font-medium text-[#555] hover:text-[#111] transition-colors"
@@ -381,8 +384,8 @@ export default function CommunityUnlocks({ userProfile }: { userProfile?: any })
       <table className="w-full text-[10px]">
         <thead>
           <tr className="border-b border-[#eee]">
-            {["Lender", "Product", "Outcome", "Limit", "Score", "Util", "Inq", "Bureau", "Source", ""].map(h => (
-              <th key={h} className="text-left py-2 px-2 text-[9px] font-semibold text-[#999] uppercase tracking-wider">{h}</th>
+            {["Lender", "Product", "Outcome", "Limit", "Score", "Income", "Util", "Inq", "Bureau", "Source", "Date", "Conf", ""].map(h => (
+              <th key={h} className="text-left py-2 px-2 text-[9px] font-semibold text-[#999] uppercase tracking-wider whitespace-nowrap">{h}</th>
             ))}
           </tr>
         </thead>
@@ -399,10 +402,13 @@ export default function CommunityUnlocks({ userProfile }: { userProfile?: any })
               <td className="py-2 px-2"><span className="px-1.5 py-0.5 rounded text-[9px] font-semibold capitalize" style={{ color: outcomeColor(dp.outcome), backgroundColor: outcomeBg(dp.outcome) }}>{dp.outcome}</span></td>
               <td className="py-2 px-2 text-[#333]">{fmtDollar(dp.limitAmount)}</td>
               <td className="py-2 px-2 text-[#333]">{fmt(dp.score)}</td>
+              <td className="py-2 px-2 text-[#333]">{fmtDollar(dp.income)}</td>
               <td className="py-2 px-2 text-[#333]">{dp.utilization != null ? `${dp.utilization}%` : "—"}</td>
               <td className="py-2 px-2 text-[#333]">{fmt(dp.inquiryCount)}</td>
               <td className="py-2 px-2 text-[#555]">{dp.bureauPulled || "—"}</td>
               <td className="py-2 px-2 text-[#999]">{dp.source}</td>
+              <td className="py-2 px-2 text-[#999] whitespace-nowrap">{new Date(dp.createdAt).toLocaleDateString()}</td>
+              <td className="py-2 px-2 text-[#999]">{dp.confidenceScore ? `${dp.confidenceScore}%` : "—"}</td>
               <td className="py-2 px-2"><button onClick={e => { e.stopPropagation(); setSelectedDP(dp); }} className="text-[9px] font-medium text-[#555] hover:text-[#111]" data-testid={`button-table-details-${dp.id}`}>Details →</button></td>
             </tr>
           ))}
@@ -496,6 +502,27 @@ export default function CommunityUnlocks({ userProfile }: { userProfile?: any })
               ))}
               <p className="text-[8px] text-[#bbb] mt-2 italic">Based on observed community patterns — not a guarantee of outcomes</p>
             </div>
+
+            {(() => {
+              const similar = dataPoints.filter(
+                d => d.id !== dp.id && d.lender === dp.lender && d.outcome !== dp.outcome
+              ).slice(0, 3);
+              if (similar.length === 0) return null;
+              return (
+                <div className="mb-4 p-3 bg-[#f8f9fa] border border-[#eee] rounded-lg">
+                  <p className="text-[9px] text-[#999] font-semibold uppercase tracking-wider mb-2">Similar Data Points</p>
+                  {similar.map(s => (
+                    <div key={s.id} className="flex items-center justify-between py-1.5 border-b border-[#f0f0f0] last:border-0 cursor-pointer hover:bg-[#f0f0f0] px-1 rounded" onClick={() => setSelectedDP(s)} data-testid={`similar-dp-${s.id}`}>
+                      <div>
+                        <p className="text-[10px] text-[#333] font-medium">{s.product || s.lender} · <span className="capitalize" style={{ color: outcomeColor(s.outcome) }}>{s.outcome}</span></p>
+                        <p className="text-[9px] text-[#999]">Score: {fmt(s.score)} · Util: {s.utilization != null ? `${s.utilization}%` : "—"} · Inq: {fmt(s.inquiryCount)}</p>
+                      </div>
+                      <span className="text-[9px] text-[#999]">{fmtDollar(s.limitAmount)}</span>
+                    </div>
+                  ))}
+                </div>
+              );
+            })()}
 
             {dp.rawText && (
               <div className="mb-3">
@@ -742,6 +769,7 @@ export default function CommunityUnlocks({ userProfile }: { userProfile?: any })
         className="w-full py-2.5 bg-[#111] text-white text-[12px] font-semibold rounded-lg hover:bg-[#222] disabled:opacity-40 transition-colors"
         data-testid="button-submit-dp"
       >{submitting ? "Submitting..." : "Submit Data Point"}</button>
+      <p className="text-[9px] text-[#bbb] text-center mt-2">Submissions are reviewed before appearing publicly (status: pending).</p>
     </div>
   );
 

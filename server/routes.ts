@@ -9400,6 +9400,20 @@ Include: sender placeholder [YOUR NAME/ADDRESS], date, bureau address, account d
     }
   });
 
+  app.get("/api/community/data-points/pending", requireAuth, async (req: any, res) => {
+    try {
+      const userId = req.session?.userId;
+      const user = await storage.getUser(userId);
+      if (!user || user.role !== "admin") {
+        return res.status(403).json({ error: "Admin access required" });
+      }
+      const result = await storage.getCommunityDataPoints({ moderationStatus: "pending", limit: 100 });
+      res.json(result);
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
   app.get("/api/community/data-points/:id", async (req, res) => {
     try {
       const dp = await storage.getCommunityDataPoint(parseInt(req.params.id));
@@ -9483,20 +9497,6 @@ Include: sender placeholder [YOUR NAME/ADDRESS], date, bureau address, account d
     }
   });
 
-  app.get("/api/community/data-points/pending", requireAuth, async (req: any, res) => {
-    try {
-      const userId = req.session?.userId;
-      const user = await storage.getUser(userId);
-      if (!user || user.role !== "admin") {
-        return res.status(403).json({ error: "Admin access required" });
-      }
-      const result = await storage.getCommunityDataPoints({ moderationStatus: "pending", limit: 100 });
-      res.json(result);
-    } catch (error: any) {
-      res.status(500).json({ error: error.message });
-    }
-  });
-
   app.get("/api/community/trends", async (_req, res) => {
     try {
       const trends = await storage.getCommunityTrends();
@@ -9508,7 +9508,17 @@ Include: sender placeholder [YOUR NAME/ADDRESS], date, bureau address, account d
 
   app.post("/api/community/similar-profiles", requireAuth, async (req: any, res) => {
     try {
-      const profile = req.body;
+      const userId = req.session?.userId;
+      const user = await storage.getUser(userId);
+      const profile: any = {};
+      if (user?.creditScore) profile.score = user.creditScore;
+      if (user?.annualIncome) profile.income = user.annualIncome;
+      if (req.body.utilization !== undefined) profile.utilization = req.body.utilization;
+      if (req.body.inquiries !== undefined) profile.inquiries = req.body.inquiries;
+      if (req.body.oldestAccountMonths !== undefined) profile.oldestAccountMonths = req.body.oldestAccountMonths;
+      if (req.body.applicationType) profile.applicationType = req.body.applicationType;
+      if (req.body.score && !profile.score) profile.score = req.body.score;
+      if (req.body.income && !profile.income) profile.income = req.body.income;
       const matches = await storage.getSimilarProfiles(profile);
       const approvals = matches.filter(m => m.outcome === "approval").length;
       const denials = matches.filter(m => m.outcome === "denial").length;
@@ -9530,6 +9540,11 @@ Include: sender placeholder [YOUR NAME/ADDRESS], date, bureau address, account d
 
   app.post("/api/community/extract", requireAuth, async (req: any, res) => {
     try {
+      const userId = req.session?.userId;
+      const user = await storage.getUser(userId);
+      if (!user || user.role !== "admin") {
+        return res.status(403).json({ error: "Admin access required for AI extraction" });
+      }
       const { text } = req.body;
       if (!text || text.length < 20) return res.status(400).json({ error: "Text too short to extract" });
       const extractionPrompt = `You are a data extraction AI. Extract structured credit/lending data from the following community post text. Return a JSON object with these fields (use null for unknown/missing values):
