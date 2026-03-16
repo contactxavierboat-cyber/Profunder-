@@ -1,4 +1,4 @@
-import { users, messages, comments, posts, friendships, dashboardQuestions, directMessages, disputeCases, systemAlerts, communityDataPoints, type User, type InsertUser, type Message, type InsertMessage, type Comment, type InsertComment, type Post, type InsertPost, type Friendship, type DashboardQuestion, type InsertDashboardQuestion, type DirectMessage, type InsertDirectMessage, type DisputeCase, type InsertDisputeCase, type SystemAlert, type InsertSystemAlert, type CommunityDataPoint, type InsertCommunityDataPoint } from "@shared/schema";
+import { users, messages, comments, posts, friendships, dashboardQuestions, directMessages, disputeCases, systemAlerts, communityDataPoints, ingestionState, type User, type InsertUser, type Message, type InsertMessage, type Comment, type InsertComment, type Post, type InsertPost, type Friendship, type DashboardQuestion, type InsertDashboardQuestion, type DirectMessage, type InsertDirectMessage, type DisputeCase, type InsertDisputeCase, type SystemAlert, type InsertSystemAlert, type CommunityDataPoint, type InsertCommunityDataPoint } from "@shared/schema";
 import { db } from "./db";
 import { eq, count, desc, or, and, ne, ilike, isNull, sql, asc, gte, lte, inArray } from "drizzle-orm";
 
@@ -62,6 +62,9 @@ export interface IStorage {
   deleteCommunityDataPoint(id: number): Promise<void>;
   getCommunityTrends(): Promise<CommunityTrends>;
   getSimilarProfiles(profile: SimilarProfileQuery): Promise<CommunityDataPoint[]>;
+  communityDataPointExistsBySourceUrl(sourceUrl: string): Promise<boolean>;
+  getIngestionState(sourceKey: string): Promise<{ lastSeenId: string | null; lastFetchedAt: Date } | null>;
+  upsertIngestionState(sourceKey: string, lastSeenId: string | null): Promise<void>;
 }
 
 export interface CommunityFilters {
@@ -465,6 +468,26 @@ export class DatabaseStorage implements IStorage {
       conditions.push(eq(communityDataPoints.applicationType, profile.applicationType));
     }
     return db.select().from(communityDataPoints).where(and(...conditions)).orderBy(desc(communityDataPoints.createdAt)).limit(50);
+  }
+
+  async communityDataPointExistsBySourceUrl(sourceUrl: string): Promise<boolean> {
+    const [result] = await db.select({ value: count() }).from(communityDataPoints).where(eq(communityDataPoints.sourceUrl, sourceUrl));
+    return (result?.value || 0) > 0;
+  }
+
+  async getIngestionState(sourceKey: string): Promise<{ lastSeenId: string | null; lastFetchedAt: Date } | null> {
+    const [row] = await db.select().from(ingestionState).where(eq(ingestionState.sourceKey, sourceKey));
+    if (!row) return null;
+    return { lastSeenId: row.lastSeenId, lastFetchedAt: row.lastFetchedAt };
+  }
+
+  async upsertIngestionState(sourceKey: string, lastSeenId: string | null): Promise<void> {
+    const existing = await this.getIngestionState(sourceKey);
+    if (existing) {
+      await db.update(ingestionState).set({ lastSeenId, lastFetchedAt: new Date() }).where(eq(ingestionState.sourceKey, sourceKey));
+    } else {
+      await db.insert(ingestionState).values({ sourceKey, lastSeenId, lastFetchedAt: new Date() });
+    }
   }
 }
 

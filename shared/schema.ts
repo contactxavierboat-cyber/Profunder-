@@ -240,6 +240,14 @@ export const communityDataPoints = pgTable("community_data_points", {
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
+export const ingestionState = pgTable("ingestion_state", {
+  id: serial("id").primaryKey(),
+  sourceKey: text("source_key").notNull(),
+  lastSeenId: text("last_seen_id"),
+  lastFetchedAt: timestamp("last_fetched_at").defaultNow().notNull(),
+  metadata: text("metadata"),
+});
+
 export const insertCommentSchema = createInsertSchema(comments).omit({ id: true, timestamp: true });
 export const insertPostSchema = createInsertSchema(posts).omit({ id: true, timestamp: true });
 export const insertFriendshipSchema = createInsertSchema(friendships).omit({ id: true, createdAt: true });
