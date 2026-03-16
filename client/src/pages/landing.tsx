@@ -2416,7 +2416,7 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
     return pf.readinessLevel;
   };
 
-  const [panelTab, setPanelTab] = useState<"command" | "documents">("command");
+  const [panelTab, setPanelTab] = useState<"command" | "stack" | "documents">("command");
   const [repairFilter, setRepairFilter] = useState<{ bureau: string; category: string }>({ bureau: "All", category: "All" });
   const [inqCarouselIdx, setInqCarouselIdx] = useState(0);
   const [acctCarouselIdx, setAcctCarouselIdx] = useState(0);
@@ -2425,14 +2425,14 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
     <div className="h-full flex flex-col bg-[#fafafa] border-r border-[#eee]" data-testid="docs-panel">
       <div className="flex items-center justify-between px-4 py-2.5 bg-white border-b border-[#eee]">
         <div className="flex border border-[#e5e5e5] rounded-md overflow-hidden">
-          {(["command", "documents"] as const).map(tab => (
+          {(["command", "stack", "documents"] as const).map(tab => (
             <button
               key={tab}
               onClick={() => setPanelTab(tab)}
               className={`px-3 py-1.5 text-[9px] font-medium transition-colors ${panelTab === tab ? "bg-[#111] text-white" : "bg-white text-[#888] hover:text-[#555]"}`}
               data-testid={`tab-${tab}`}
             >
-              {tab === "command" ? "Command" : "Repair"}
+              {tab === "command" ? "Command" : tab === "stack" ? "Stack" : "Repair"}
             </button>
           ))}
         </div>
@@ -2704,6 +2704,20 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
             </div>
           )}
 
+          <PerfectProfileTab aisReport={aisReport} />
+
+        </div>
+        </>)}
+
+        {panelTab === "stack" && (<>
+        <div className="space-y-2.5">
+
+          {!hasAis && (
+            <div className="rounded-lg border border-[#e8e8e8] bg-white p-4 text-center">
+              <p className="text-[9px] text-[#999]">Upload a bureau report to see your funding stack</p>
+            </div>
+          )}
+
           {aisReport && aisReport.capitalPotential.length > 0 && (
             <div className="rounded-lg border border-[#e8e8e8] bg-white p-3" data-testid="capital-potential">
               <p className="text-[10px] text-[#111] font-medium tracking-wide mb-2.5">Capital Potential</p>
@@ -2805,8 +2819,6 @@ function DocsPanel({ docs, onClose, onDelete, onSave, user, onOpenTeamChat, acti
               </div>
             </div>
           )}
-
-          <PerfectProfileTab aisReport={aisReport} />
 
         </div>
         </>)}
