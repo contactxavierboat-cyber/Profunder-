@@ -2554,7 +2554,7 @@ FINAL REMINDER: The REPAIR_DATA block at the start of your response MUST contain
       const rawAiContent = response.choices[0]?.message?.content || "I'm sorry, I couldn't generate a response right now.";
       const finishReasonAuth = response.choices[0]?.finish_reason;
       const tokenUsageAuth = response.usage;
-      console.log(`[Auth Chat] finish_reason=${finishReasonAuth}, tokens=${tokenUsageAuth?.completion_tokens}/${tokenUsageAuth?.total_tokens}, hasRepairData=${rawAiContent.includes("REPAIR_DATA_START")}, hasRepairEnd=${rawAiContent.includes("REPAIR_DATA_END")}, responseLen=${rawAiContent.length}`);
+      console.log(`[Auth Chat] finish_reason=${finishReasonAuth}, tokens=${tokenUsageAuth?.completion_tokens}/${tokenUsageAuth?.total_tokens}, hasRepairData=${rawAiContent.includes("REPAIR_DATA_START")}, hasRepairEnd=${rawAiContent.includes("REPAIR_DATA_END")}, hasStrategyData=${rawAiContent.includes("STRATEGY_DATA_START")}, hasCapitalPotential=${rawAiContent.includes("CAPITAL_POTENTIAL_DATA_START")}, hasFundingSequence=${rawAiContent.includes("FUNDING_SEQUENCE_DATA_START")}, responseLen=${rawAiContent.length}`);
       if (finishReasonAuth === "length") {
         console.warn("[Auth Chat] WARNING: Response truncated by max_tokens! REPAIR_DATA may be incomplete.");
       }
@@ -3034,7 +3034,7 @@ Never give advice that ignores the current date or economic climate. Your intell
       const rawAiContent = response.choices[0]?.message?.content || "I'm sorry, I couldn't generate a response right now.";
       const finishReason = response.choices[0]?.finish_reason;
       const tokenUsage = response.usage;
-      console.log(`[Guest Chat] finish_reason=${finishReason}, tokens=${tokenUsage?.completion_tokens}/${tokenUsage?.total_tokens}, hasRepairData=${rawAiContent.includes("REPAIR_DATA_START")}, hasRepairEnd=${rawAiContent.includes("REPAIR_DATA_END")}, responseLen=${rawAiContent.length}`);
+      console.log(`[Guest Chat] finish_reason=${finishReason}, tokens=${tokenUsage?.completion_tokens}/${tokenUsage?.total_tokens}, hasRepairData=${rawAiContent.includes("REPAIR_DATA_START")}, hasRepairEnd=${rawAiContent.includes("REPAIR_DATA_END")}, hasStrategyData=${rawAiContent.includes("STRATEGY_DATA_START")}, hasCapitalPotential=${rawAiContent.includes("CAPITAL_POTENTIAL_DATA_START")}, hasFundingSequence=${rawAiContent.includes("FUNDING_SEQUENCE_DATA_START")}, responseLen=${rawAiContent.length}`);
       if (finishReason === "length") {
         console.warn("[Guest Chat] WARNING: Response truncated by max_tokens! REPAIR_DATA may be incomplete.");
       }
