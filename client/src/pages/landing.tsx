@@ -3941,6 +3941,9 @@ function setGuestPreviewCount(n: number) {
 export default function LandingPage() {
   const [input, setInput] = useState("");
   const [isSending, setIsSending] = useState(false);
+  const [msgFeedback, setMsgFeedback] = useState<Record<number, "up" | "down">>({});
+  const [copiedMsgId, setCopiedMsgId] = useState<number | null>(null);
+  const [sharedMsgId, setSharedMsgId] = useState<number | null>(null);
   const [guestMessages, setGuestMessages] = useState<GuestMessage[]>([]);
   const [streamingMsgId, setStreamingMsgId] = useState<number | null>(null);
   const [nextId, setNextId] = useState(1);
@@ -5116,6 +5119,137 @@ export default function LandingPage() {
                           <ProfileAvatar photo={msg.senderPhoto || user?.profilePhoto} name={msg.senderName || user?.displayName || user?.email} size={28} className="mt-0.5" />
                         )}
                       </div>
+                      )}
+                      {msg.role === "assistant" && !isSending && streamingMsgId !== msg.id && (
+                        <div className="flex items-center gap-0.5 ml-10 mt-1" data-testid={`actions-msg-${msg.id}`}>
+                          <button
+                            data-testid={`btn-copy-${msg.id}`}
+                            aria-label="Copy response"
+                            onClick={() => {
+                              const clean = msg.content
+                                .replace(/STRATEGY_DATA_START[\s\S]*?STRATEGY_DATA_END/g, "")
+                                .replace(/CAPITAL_POTENTIAL_DATA_START[\s\S]*?CAPITAL_POTENTIAL_DATA_END/g, "")
+                                .replace(/FUNDING_SEQUENCE_DATA_START[\s\S]*?FUNDING_SEQUENCE_DATA_END/g, "")
+                                .replace(/REPAIR_DATA_START[\s\S]*?REPAIR_DATA_END/g, "")
+                                .replace(/TRADELINE:[^\n]*/g, "")
+                                .replace(/DISPUTE:[^\n]*/g, "")
+                                .replace(/\n{3,}/g, "\n\n")
+                                .trim();
+                              navigator.clipboard.writeText(clean).then(() => {
+                                setCopiedMsgId(msg.id);
+                                setTimeout(() => setCopiedMsgId(prev => prev === msg.id ? null : prev), 2000);
+                              }).catch(() => {});
+                            }}
+                            className="p-1.5 rounded-md hover:bg-[#f0f0f0] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#555] transition-colors"
+                          >
+                            {copiedMsgId === msg.id ? (
+                              <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M4 8.5l2.5 2.5L12 5" stroke="#555" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                            ) : (
+                              <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><rect x="5.5" y="5.5" width="7" height="7" rx="1.5" stroke="#999" strokeWidth="1.3" /><path d="M3.5 10.5v-7a1.5 1.5 0 011.5-1.5h7" stroke="#999" strokeWidth="1.3" strokeLinecap="round" /></svg>
+                            )}
+                          </button>
+                          <button
+                            data-testid={`btn-thumbsup-${msg.id}`}
+                            aria-label="Good response"
+                            aria-pressed={msgFeedback[msg.id] === "up"}
+                            onClick={() => setMsgFeedback(prev => {
+                              const next = { ...prev };
+                              if (next[msg.id] === "up") delete next[msg.id]; else next[msg.id] = "up";
+                              return next;
+                            })}
+                            className={`p-1.5 rounded-md transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#555] ${msgFeedback[msg.id] === "up" ? "bg-[#f0f0f0]" : "hover:bg-[#f0f0f0]"}`}
+                          >
+                            <svg width="14" height="14" viewBox="0 0 16 16" fill={msgFeedback[msg.id] === "up" ? "#555" : "none"}><path d="M5 14V7.5m0 0H3a1 1 0 01-1-1V5a1 1 0 011-1l2.3-2.3a1 1 0 01.7-.3h3.5a1 1 0 011 .8l.7 3.5a1 1 0 01-1 1.2H8l.5 2.5a.5.5 0 01-.85.4L5 7.5zM13.5 2.5H12a.5.5 0 00-.5.5v4a.5.5 0 00.5.5h1.5a.5.5 0 00.5-.5V3a.5.5 0 00-.5-.5z" stroke={msgFeedback[msg.id] === "up" ? "#555" : "#999"} strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                          </button>
+                          <button
+                            data-testid={`btn-thumbsdown-${msg.id}`}
+                            aria-label="Bad response"
+                            aria-pressed={msgFeedback[msg.id] === "down"}
+                            onClick={() => setMsgFeedback(prev => {
+                              const next = { ...prev };
+                              if (next[msg.id] === "down") delete next[msg.id]; else next[msg.id] = "down";
+                              return next;
+                            })}
+                            className={`p-1.5 rounded-md transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#555] ${msgFeedback[msg.id] === "down" ? "bg-[#f0f0f0]" : "hover:bg-[#f0f0f0]"}`}
+                          >
+                            <svg width="14" height="14" viewBox="0 0 16 16" fill={msgFeedback[msg.id] === "down" ? "#555" : "none"} style={{ transform: "rotate(180deg)" }}><path d="M5 14V7.5m0 0H3a1 1 0 01-1-1V5a1 1 0 011-1l2.3-2.3a1 1 0 01.7-.3h3.5a1 1 0 011 .8l.7 3.5a1 1 0 01-1 1.2H8l.5 2.5a.5.5 0 01-.85.4L5 7.5zM13.5 2.5H12a.5.5 0 00-.5.5v4a.5.5 0 00.5.5h1.5a.5.5 0 00.5-.5V3a.5.5 0 00-.5-.5z" stroke={msgFeedback[msg.id] === "down" ? "#555" : "#999"} strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                          </button>
+                          <button
+                            data-testid={`btn-share-${msg.id}`}
+                            aria-label="Share response"
+                            onClick={() => {
+                              const clean = msg.content
+                                .replace(/STRATEGY_DATA_START[\s\S]*?STRATEGY_DATA_END/g, "")
+                                .replace(/CAPITAL_POTENTIAL_DATA_START[\s\S]*?CAPITAL_POTENTIAL_DATA_END/g, "")
+                                .replace(/FUNDING_SEQUENCE_DATA_START[\s\S]*?FUNDING_SEQUENCE_DATA_END/g, "")
+                                .replace(/REPAIR_DATA_START[\s\S]*?REPAIR_DATA_END/g, "")
+                                .replace(/TRADELINE:[^\n]*/g, "")
+                                .replace(/DISPUTE:[^\n]*/g, "")
+                                .replace(/\n{3,}/g, "\n\n")
+                                .trim();
+                              if (navigator.share) {
+                                navigator.share({ title: "Profundr Analysis", text: clean }).then(() => {
+                                  setSharedMsgId(msg.id);
+                                  setTimeout(() => setSharedMsgId(prev => prev === msg.id ? null : prev), 2000);
+                                }).catch(() => {});
+                              } else {
+                                navigator.clipboard.writeText(clean).then(() => {
+                                  setSharedMsgId(msg.id);
+                                  setTimeout(() => setSharedMsgId(prev => prev === msg.id ? null : prev), 2000);
+                                }).catch(() => {});
+                              }
+                            }}
+                            className="p-1.5 rounded-md hover:bg-[#f0f0f0] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#555] transition-colors"
+                          >
+                            {sharedMsgId === msg.id ? (
+                              <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M4 8.5l2.5 2.5L12 5" stroke="#555" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                            ) : (
+                              <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M8 2v7M8 2L5 5M8 2l3 3" stroke="#999" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" /><path d="M3 10v3a1 1 0 001 1h8a1 1 0 001-1v-3" stroke="#999" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                            )}
+                          </button>
+                          <button
+                            data-testid={`btn-regenerate-${msg.id}`}
+                            aria-label="Regenerate response"
+                            onClick={async () => {
+                              const idx = displayMessages.findIndex(m => m.id === msg.id);
+                              const prevUser = displayMessages.slice(0, idx).reverse().find(m => m.role === "user");
+                              if (!prevUser || isSending) return;
+                              const msgsBeforeThis = guestMessages.filter(m => m.id !== msg.id);
+                              setGuestMessages(msgsBeforeThis);
+                              setIsSending(true);
+                              isSendingRef.current = true;
+                              try {
+                                const history = msgsBeforeThis.slice(-10).map(m => ({
+                                  role: (m.role === "user" || m.role === "assistant") ? m.role : "user" as const,
+                                  content: m.content,
+                                }));
+                                const res = await fetch("/api/chat/guest", {
+                                  method: "POST",
+                                  headers: { "Content-Type": "application/json" },
+                                  body: JSON.stringify({
+                                    content: prevUser.content.replace(/\n*\[Attached: .+?\]/, "").trim(),
+                                    history,
+                                    userProfile: buildProfilePayload(),
+                                    documentContext: buildDocContext(),
+                                  }),
+                                });
+                                if (!res.ok) throw new Error("Failed");
+                                const data = await res.json();
+                                const newMsg: GuestMessage = { id: msg.id, role: "assistant", content: data.content };
+                                setGuestMessages(prev => [...prev, newMsg]);
+                              } catch {
+                                const errMsg: GuestMessage = { id: msg.id, role: "assistant", content: "Sorry, something went wrong. Please try again." };
+                                setGuestMessages(prev => [...prev, errMsg]);
+                              } finally {
+                                setIsSending(false);
+                                isSendingRef.current = false;
+                              }
+                            }}
+                            className="p-1.5 rounded-md hover:bg-[#f0f0f0] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#555] transition-colors"
+                          >
+                            <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M2.5 8a5.5 5.5 0 019.7-3.5M13.5 8a5.5 5.5 0 01-9.7 3.5" stroke="#999" strokeWidth="1.3" strokeLinecap="round" /><path d="M12.2 2v2.5h-2.5M3.8 14v-2.5h2.5" stroke="#999" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                          </button>
+                        </div>
                       )}
                       {showDashboard && (
                         <div className="ml-10">
