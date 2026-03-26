@@ -5,36 +5,39 @@ interface ProfundrLogoProps {
 }
 
 const SIZES = {
-  xs: { fontSize: "13px" },
-  sm: { fontSize: "16px" },
-  md: { fontSize: "20px" },
-  lg: { fontSize: "28px" },
-};
-
-const GRADIENTS = {
-  light: "linear-gradient(135deg, #a5a5c0 0%, #d0d0e0 50%, #ffffff 100%)",
-  dark: "linear-gradient(135deg, #1a1a2e 0%, #4a4a6a 50%, #8a8aa5 100%)",
+  xs: { fontSize: "13px", iconSize: 16 },
+  sm: { fontSize: "16px", iconSize: 20 },
+  md: { fontSize: "20px", iconSize: 26 },
+  lg: { fontSize: "28px", iconSize: 34 },
 };
 
 export function ProfundrLogo({ size = "sm", variant = "light", className = "" }: ProfundrLogoProps) {
   const s = SIZES[size];
+  const color = variant === "light" ? "#fff" : "#111";
   return (
     <span
-      className={`inline-flex items-baseline select-none ${className}`}
-      style={{
-        fontFamily: "'Inter', sans-serif",
-        fontSize: s.fontSize,
-        fontWeight: 800,
-        letterSpacing: "-0.05em",
-        lineHeight: 1,
-        background: GRADIENTS[variant],
-        WebkitBackgroundClip: "text",
-        WebkitTextFillColor: "transparent",
-        backgroundClip: "text",
-      }}
+      className={`inline-flex items-center select-none gap-1.5 ${className}`}
+      style={{ lineHeight: 1 }}
       aria-label="profundr."
     >
-      profundr<span style={{ marginLeft: "-0.15em" }}>.</span>
+      <img
+        src="/profundr-logo.png"
+        alt=""
+        width={s.iconSize}
+        height={s.iconSize}
+        style={{ display: "block" }}
+      />
+      <span
+        style={{
+          fontFamily: "'Inter', sans-serif",
+          fontSize: s.fontSize,
+          fontWeight: 800,
+          letterSpacing: "-0.05em",
+          color,
+        }}
+      >
+        profundr<span style={{ marginLeft: "-0.15em" }}>.</span>
+      </span>
     </span>
   );
 }
