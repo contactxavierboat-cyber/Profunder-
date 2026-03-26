@@ -4921,6 +4921,40 @@ export default function LandingPage() {
           </div>
         </section>
 
+        <section className="pt-4 pb-10 overflow-hidden" data-testid="front-founders-strip">
+          <style>{`
+            @keyframes scrollFounders {
+              0% { transform: translateX(0); }
+              100% { transform: translateX(-50%); }
+            }
+          `}</style>
+          <div className="flex" style={{ animation: "scrollFounders 30s linear infinite", width: "max-content" }}>
+            {[...Array(2)].map((_, setIdx) => (
+              <div key={setIdx} className="flex gap-5 px-2.5">
+                {[
+                  { img: "/founders/founder1.png", name: "Keisha M.", title: "E-commerce Founder", result: "Approved $45K LOC" },
+                  { img: "/founders/founder2.png", name: "Carlos R.", title: "Restaurant Owner", result: "Score +92 pts in 60 days" },
+                  { img: "/founders/founder3.png", name: "Michelle L.", title: "Tech Startup CEO", result: "Funded $120K SBA" },
+                  { img: "/founders/founder4.png", name: "Ryan P.", title: "Agency Founder", result: "4 approvals in 3 weeks" },
+                  { img: "/founders/founder5.png", name: "Darius J.", title: "Real Estate Investor", result: "Matched with 6 lenders" },
+                  { img: "/founders/founder6.png", name: "Priya S.", title: "SaaS Founder", result: "Removed 5 neg items" },
+                  { img: "/founders/founder7.png", name: "Omar H.", title: "Import/Export Business", result: "Approved $75K term loan" },
+                  { img: "/founders/founder8.png", name: "Sarah K.", title: "Consulting Firm Owner", result: "AIS 41 → 78 in 90 days" },
+                ].map((founder) => (
+                  <div key={founder.name} className="w-[220px] shrink-0" data-testid={`founder-card-${founder.name.replace(/\s+/g, "-").toLowerCase()}`}>
+                    <div className="w-[220px] h-[280px] rounded-2xl overflow-hidden mb-3 bg-[#f0f0f0]">
+                      <img src={founder.img} alt={founder.name} className="w-full h-full object-cover" loading="lazy" />
+                    </div>
+                    <p className="text-[14px] font-semibold text-[#111]">{founder.name}</p>
+                    <p className="text-[12px] text-[#888]">{founder.title}</p>
+                    <p className="text-[11px] text-[#555] font-medium mt-0.5">{founder.result}</p>
+                  </div>
+                ))}
+              </div>
+            ))}
+          </div>
+        </section>
+
         <section className="py-6 border-y border-[#f0f0f0] bg-[#fafafa]" data-testid="front-social-proof">
           <div className="max-w-[900px] mx-auto px-6 flex flex-wrap items-center justify-center gap-x-10 gap-y-3">
             {["23 Data Points Analyzed", "FCRA-Compliant Letters", "Real Lender Matching", "AES-256 Encryption", "No Hard Inquiries"].map((item) => (
