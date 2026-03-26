@@ -4835,6 +4835,258 @@ export default function LandingPage() {
     }
   };
 
+  const [showFrontPage, setShowFrontPage] = useState(!user && !hasMessages);
+  const [faqOpen, setFaqOpen] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (user || hasMessages) setShowFrontPage(false);
+  }, [user, hasMessages]);
+
+  if (showFrontPage && !user) {
+    const features = [
+      { title: "AIS Score Engine", desc: "Your Approval Index Score analyzes 23 data points banks check before saying yes. Know where you stand before you apply.", icon: <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#111" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg> },
+      { title: "Credit Repair Center", desc: "FCRA-compliant dispute letters generated instantly. Target negative items bureau-by-bureau with legal precision.", icon: <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#111" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/><path d="M9 15l2 2 4-4"/></svg> },
+      { title: "Capital Simulator", desc: "Model different credit scenarios and see how each change impacts your fundability. Test before you commit.", icon: <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#111" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M3 3v18h18"/><path d="M7 16l4-8 4 4 4-8"/></svg> },
+      { title: "Lender Match Engine", desc: "Get matched with lenders based on your actual profile — not ads. See real approval odds for each product.", icon: <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#111" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg> },
+      { title: "Funding Timeline", desc: "A step-by-step roadmap showing exactly what to do and when. Hit each milestone to unlock higher limits.", icon: <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#111" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg> },
+      { title: "Community Intelligence", desc: "Real approval data from thousands of applicants. See what's actually getting funded and by whom.", icon: <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#111" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg> },
+    ];
+
+    const faqs = [
+      { q: "Is this a lender?", a: "No. Profundr is a capital intelligence platform. We analyze your credit and financial profile to show you where you stand, what to fix, and which lenders are most likely to approve you. We never lend money or run hard inquiries." },
+      { q: "How does the AIS score work?", a: "Your Approval Index Score is calculated from 23 data points that banks evaluate during underwriting — including utilization, payment history, account age, inquiry velocity, and derogatory marks. Upload your bureau report and get your score in seconds." },
+      { q: "What makes this different from Credit Karma?", a: "Credit Karma shows you a Vantage score and serves you ads. Profundr analyzes your full bureau data the way a bank underwriter would, generates FCRA-compliant dispute letters, runs capital simulations, and matches you with lenders based on real approval data." },
+      { q: "Is my data safe?", a: "Yes. All data is encrypted with AES-256 at rest and TLS 1.3 in transit. Your information is never sold. You can request full data deletion at any time." },
+      { q: "What's included in each plan?", a: "Basic ($25/mo) includes AI chat and your AIS score. Repair ($50/mo) adds the Repair Center and dispute letters. Capital ($150/mo) unlocks everything including the Capital Simulator, Lender Match, Funding Timeline, and Community Intelligence." },
+    ];
+
+    return (
+      <div className="min-h-screen bg-white" style={{ fontFamily: "'Inter', sans-serif" }} data-testid="front-page">
+        <input ref={fileInputRef} type="file" accept=".pdf,.txt,.csv" className="hidden" onChange={handleFileSelect} data-testid="input-file-upload" />
+
+        <nav className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-sm border-b border-[#f0f0f0]" data-testid="front-nav">
+          <div className="max-w-[1200px] mx-auto px-6 h-[64px] flex items-center justify-between">
+            <ProfundrLogo size="md" variant="dark" />
+            <div className="hidden md:flex items-center gap-8">
+              <a href="#features" className="text-[14px] text-[#555] hover:text-[#111] transition-colors">Features</a>
+              <a href="#how-it-works" className="text-[14px] text-[#555] hover:text-[#111] transition-colors">How It Works</a>
+              <a href="#pricing" className="text-[14px] text-[#555] hover:text-[#111] transition-colors">Pricing</a>
+              <a href="#faq" className="text-[14px] text-[#555] hover:text-[#111] transition-colors">FAQ</a>
+            </div>
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => setShowFrontPage(false)}
+                className="text-[13px] text-[#555] hover:text-[#111] font-medium transition-colors"
+                data-testid="front-btn-login"
+              >
+                Log In
+              </button>
+              <button
+                onClick={() => window.location.href = '/subscription'}
+                className="px-5 py-2.5 bg-[#111] text-white text-[13px] font-medium rounded-full hover:bg-[#333] transition-colors"
+                data-testid="front-btn-get-started"
+              >
+                Get Started
+              </button>
+            </div>
+          </div>
+        </nav>
+
+        <section className="pt-[140px] pb-[80px] px-6" data-testid="front-hero">
+          <div className="max-w-[800px] mx-auto text-center">
+            <p className="text-[13px] font-medium text-[#888] tracking-[0.1em] uppercase mb-5" data-testid="text-hero-eyebrow">Capital Operating System</p>
+            <h1 className="text-[42px] sm:text-[56px] md:text-[64px] font-bold text-[#111] leading-[1.05] tracking-[-0.03em] mb-6" data-testid="text-front-hero-headline">
+              Know if you're fundable<br className="hidden sm:block" /> before you apply
+            </h1>
+            <p className="text-[17px] sm:text-[19px] text-[#666] leading-[1.6] max-w-[560px] mx-auto mb-10" data-testid="text-front-hero-sub">
+              Profundr analyzes your credit like a bank would, shows your approval odds, generates dispute letters, and matches you with the right lenders.
+            </p>
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-6">
+              <button
+                onClick={() => { setShowFrontPage(false); setAutoSendFile(true); handleUploadClick(); }}
+                className="px-8 py-3.5 bg-[#111] text-white text-[15px] font-semibold rounded-full hover:bg-[#333] transition-colors shadow-sm"
+                data-testid="front-btn-upload-hero"
+              >
+                Upload Your Report — Free Analysis
+              </button>
+              <button
+                onClick={() => { setShowFrontPage(false); }}
+                className="px-8 py-3.5 border border-[#ddd] text-[#555] text-[15px] font-medium rounded-full hover:bg-[#f8f8f8] hover:border-[#ccc] transition-colors"
+                data-testid="front-btn-try-chat"
+              >
+                Try the AI Chat
+              </button>
+            </div>
+            <p className="text-[12px] text-[#bbb]">No hard inquiry. No credit card required to start.</p>
+          </div>
+        </section>
+
+        <section className="py-6 border-y border-[#f0f0f0] bg-[#fafafa]" data-testid="front-social-proof">
+          <div className="max-w-[900px] mx-auto px-6 flex flex-wrap items-center justify-center gap-x-10 gap-y-3">
+            {["23 Data Points Analyzed", "FCRA-Compliant Letters", "Real Lender Matching", "AES-256 Encryption", "No Hard Inquiries"].map((item) => (
+              <span key={item} className="text-[12px] text-[#999] font-medium tracking-wide uppercase flex items-center gap-2">
+                <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M4 8l3 3 5-5" stroke="#999" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                {item}
+              </span>
+            ))}
+          </div>
+        </section>
+
+        <section id="features" className="py-[80px] px-6" data-testid="front-features">
+          <div className="max-w-[1100px] mx-auto">
+            <div className="text-center mb-14">
+              <p className="text-[12px] font-medium text-[#888] tracking-[0.1em] uppercase mb-3">Everything You Need</p>
+              <h2 className="text-[32px] sm:text-[40px] font-bold text-[#111] tracking-[-0.02em] mb-4">Six engines. One platform.</h2>
+              <p className="text-[16px] text-[#666] max-w-[480px] mx-auto leading-[1.6]">Every tool you need to go from denied to funded, all working together.</p>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {features.map((f) => (
+                <div key={f.title} className="bg-[#fafafa] border border-[#f0f0f0] rounded-2xl p-7 hover:border-[#ddd] transition-colors" data-testid={`card-feature-${f.title.toLowerCase().replace(/\s+/g, "-")}`}>
+                  <div className="w-12 h-12 rounded-xl bg-white border border-[#eee] flex items-center justify-center mb-5">{f.icon}</div>
+                  <h3 className="text-[17px] font-semibold text-[#111] mb-2">{f.title}</h3>
+                  <p className="text-[14px] text-[#777] leading-[1.65]">{f.desc}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section id="how-it-works" className="py-[80px] px-6 bg-[#fafafa] border-y border-[#f0f0f0]" data-testid="front-how-it-works">
+          <div className="max-w-[900px] mx-auto">
+            <div className="text-center mb-14">
+              <p className="text-[12px] font-medium text-[#888] tracking-[0.1em] uppercase mb-3">Simple Process</p>
+              <h2 className="text-[32px] sm:text-[40px] font-bold text-[#111] tracking-[-0.02em]">Three steps to capital clarity</h2>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              {[
+                { step: "01", title: "Upload your report", desc: "Drop your credit bureau PDF into the chat. Profundr extracts and analyzes every data point instantly." },
+                { step: "02", title: "Get your AIS score", desc: "See your Approval Index Score across all five pillars — the same metrics banks use to underwrite." },
+                { step: "03", title: "Take action", desc: "Generate dispute letters, simulate credit changes, and get matched with lenders who approve your profile." },
+              ].map((s) => (
+                <div key={s.step} className="text-center" data-testid={`step-${s.step}`}>
+                  <div className="w-14 h-14 rounded-full bg-[#111] text-white text-[18px] font-bold flex items-center justify-center mx-auto mb-5">{s.step}</div>
+                  <h3 className="text-[17px] font-semibold text-[#111] mb-2">{s.title}</h3>
+                  <p className="text-[14px] text-[#777] leading-[1.65]">{s.desc}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section className="py-[80px] px-6" data-testid="front-testimonials">
+          <div className="max-w-[1000px] mx-auto">
+            <div className="text-center mb-14">
+              <p className="text-[12px] font-medium text-[#888] tracking-[0.1em] uppercase mb-3">Results</p>
+              <h2 className="text-[32px] sm:text-[40px] font-bold text-[#111] tracking-[-0.02em]">From denied to funded</h2>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {[
+                { name: "Marcus T.", result: "Approved for $35K business line", quote: "I uploaded my report and in 60 seconds knew exactly what was holding me back. Fixed two items, reapplied, and got approved." },
+                { name: "Jasmine R.", result: "Score improved 84 points in 90 days", quote: "The dispute letters worked. Three negative items removed across two bureaus. My AIS went from 41 to a 73." },
+                { name: "David K.", result: "Matched with 4 lenders, funded in 3 weeks", quote: "I'd been applying blindly for months. Profundr showed me which lenders actually approve my profile. Got funded on the second try." },
+              ].map((t) => (
+                <div key={t.name} className="bg-[#fafafa] border border-[#f0f0f0] rounded-2xl p-7" data-testid={`testimonial-${t.name.replace(/\s+/g, "-").toLowerCase()}`}>
+                  <div className="flex items-center gap-1 mb-4">
+                    {[...Array(5)].map((_, i) => <svg key={i} width="14" height="14" viewBox="0 0 16 16" fill="#111"><path d="M8 1l2.2 4.5 5 .7-3.6 3.5.8 5L8 12.4 3.6 14.7l.8-5L.8 6.2l5-.7L8 1z"/></svg>)}
+                  </div>
+                  <p className="text-[14px] text-[#555] leading-[1.65] mb-5">"{t.quote}"</p>
+                  <div>
+                    <p className="text-[13px] font-semibold text-[#111]">{t.name}</p>
+                    <p className="text-[12px] text-[#999]">{t.result}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section id="pricing" className="py-[80px] px-6 bg-[#111]" data-testid="front-pricing-cta">
+          <div className="max-w-[700px] mx-auto text-center">
+            <p className="text-[12px] font-medium text-[#888] tracking-[0.1em] uppercase mb-4">Ready to Start</p>
+            <h2 className="text-[32px] sm:text-[40px] font-bold text-white tracking-[-0.02em] mb-4">Stop guessing. Start building.</h2>
+            <p className="text-[16px] text-[#999] leading-[1.6] max-w-[460px] mx-auto mb-10">Plans start at $25/mo. Upload your first report free — no credit card required.</p>
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+              <button
+                onClick={() => window.location.href = '/subscription'}
+                className="px-8 py-3.5 bg-white text-[#111] text-[15px] font-semibold rounded-full hover:bg-[#f0f0f0] transition-colors"
+                data-testid="front-btn-pricing"
+              >
+                View Plans & Pricing
+              </button>
+              <button
+                onClick={() => { setShowFrontPage(false); setAutoSendFile(true); handleUploadClick(); }}
+                className="px-8 py-3.5 border border-[#555] text-white text-[15px] font-medium rounded-full hover:bg-[#222] transition-colors"
+                data-testid="front-btn-free-analysis"
+              >
+                Try Free Analysis
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <section id="faq" className="py-[80px] px-6 bg-[#fafafa] border-t border-[#f0f0f0]" data-testid="front-faq">
+          <div className="max-w-[680px] mx-auto">
+            <div className="text-center mb-14">
+              <h2 className="text-[32px] sm:text-[40px] font-bold text-[#111] tracking-[-0.02em]">Frequently asked questions</h2>
+            </div>
+            <div className="space-y-3">
+              {faqs.map((faq, i) => (
+                <div key={i} className="border border-[#e8e8e8] rounded-xl bg-white overflow-hidden" data-testid={`faq-item-${i}`}>
+                  <button
+                    onClick={() => setFaqOpen(faqOpen === i ? null : i)}
+                    className="w-full flex items-center justify-between px-6 py-4 text-left"
+                    aria-expanded={faqOpen === i}
+                    aria-controls={`faq-panel-${i}`}
+                  >
+                    <span className="text-[15px] font-medium text-[#111]">{faq.q}</span>
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className={`shrink-0 transition-transform ${faqOpen === i ? "rotate-180" : ""}`}><path d="M4 6l4 4 4-4" stroke="#999" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                  </button>
+                  {faqOpen === i && (
+                    <div id={`faq-panel-${i}`} className="px-6 pb-5" role="region">
+                      <p className="text-[14px] text-[#666] leading-[1.65]">{faq.a}</p>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <footer className="py-12 px-6 bg-white border-t border-[#f0f0f0]" data-testid="front-footer">
+          <div className="max-w-[1100px] mx-auto">
+            <div className="flex flex-col md:flex-row items-start justify-between gap-8 mb-10">
+              <div>
+                <ProfundrLogo size="md" variant="dark" />
+                <p className="text-[13px] text-[#999] mt-3 max-w-[280px] leading-[1.6]">Capital intelligence platform. Analyze, repair, and fund — all from one system.</p>
+              </div>
+              <div className="flex gap-16">
+                <div>
+                  <p className="text-[11px] font-semibold text-[#111] uppercase tracking-wider mb-3">Product</p>
+                  <div className="space-y-2">
+                    <a href="#features" className="block text-[13px] text-[#777] hover:text-[#111] transition-colors">Features</a>
+                    <a href="#pricing" className="block text-[13px] text-[#777] hover:text-[#111] transition-colors">Pricing</a>
+                    <a href="#faq" className="block text-[13px] text-[#777] hover:text-[#111] transition-colors">FAQ</a>
+                  </div>
+                </div>
+                <div>
+                  <p className="text-[11px] font-semibold text-[#111] uppercase tracking-wider mb-3">Legal</p>
+                  <div className="space-y-2">
+                    <span className="block text-[13px] text-[#777] cursor-pointer hover:text-[#111] transition-colors">Terms</span>
+                    <span className="block text-[13px] text-[#777] cursor-pointer hover:text-[#111] transition-colors">Privacy</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className="border-t border-[#f0f0f0] pt-6 flex flex-col sm:flex-row items-center justify-between gap-3">
+              <p className="text-[12px] text-[#bbb]">Profundr is a capital intelligence platform, not a lender.</p>
+              <p className="text-[12px] text-[#bbb]">contactxavierboat@gmail.com</p>
+            </div>
+          </div>
+        </footer>
+      </div>
+    );
+  }
+
   return (
     <div className="relative h-[100dvh] flex bg-[#fafafa]" style={{ fontFamily: "'Inter', sans-serif" }}>
       <input ref={fileInputRef} type="file" accept=".pdf,.txt,.csv" className="hidden" onChange={handleFileSelect} data-testid="input-file-upload" />
