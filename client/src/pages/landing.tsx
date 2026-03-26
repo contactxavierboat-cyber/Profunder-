@@ -4932,14 +4932,17 @@ export default function LandingPage() {
             {[...Array(2)].map((_, setIdx) => (
               <div key={setIdx} className="flex gap-5 px-2.5">
                 {[
-                  { img: "/founders/founder1.png", name: "Keisha M.", title: "E-commerce Founder", result: "Approved $45K LOC" },
-                  { img: "/founders/founder2.png", name: "Carlos R.", title: "Restaurant Owner", result: "Score +92 pts in 60 days" },
-                  { img: "/founders/founder3.png", name: "Michelle L.", title: "Tech Startup CEO", result: "Funded $120K SBA" },
-                  { img: "/founders/founder4.png", name: "Ryan P.", title: "Agency Founder", result: "4 approvals in 3 weeks" },
-                  { img: "/founders/founder5.png", name: "Darius J.", title: "Real Estate Investor", result: "Matched with 6 lenders" },
-                  { img: "/founders/founder6.png", name: "Priya S.", title: "SaaS Founder", result: "Removed 5 neg items" },
-                  { img: "/founders/founder7.png", name: "Omar H.", title: "Import/Export Business", result: "Approved $75K term loan" },
-                  { img: "/founders/founder8.png", name: "Sarah K.", title: "Consulting Firm Owner", result: "AIS 41 → 78 in 90 days" },
+                  { img: "/founders/founder1.jpg", name: "Maya R.", title: "E-commerce Founder", result: "Approved $45K LOC" },
+                  { img: "/founders/founder2.jpg", name: "Sofia L.", title: "Marketing Agency", result: "Score +92 pts in 60 days" },
+                  { img: "/founders/founder3.jpg", name: "Kwame A.", title: "Tech Startup CEO", result: "Funded $120K SBA" },
+                  { img: "/founders/founder4.jpg", name: "Darius J.", title: "Real Estate Investor", result: "4 approvals in 3 weeks" },
+                  { img: "/founders/founder5.jpg", name: "Arjun P.", title: "SaaS Founder", result: "Matched with 6 lenders" },
+                  { img: "/founders/founder6.jpg", name: "Ravi M.", title: "Import/Export Business", result: "Removed 5 neg items" },
+                  { img: "/founders/founder7.jpg", name: "Suresh K.", title: "Consulting Firm Owner", result: "Approved $75K term loan" },
+                  { img: "/founders/founder8.jpg", name: "Amara N.", title: "Restaurant Owner", result: "AIS 41 → 78 in 90 days" },
+                  { img: "/founders/founder9.jpg", name: "Keisha T.", title: "Agency Founder", result: "3 tradelines added" },
+                  { img: "/founders/founder10.jpg", name: "Carmen D.", title: "Boutique Owner", result: "$60K business LOC" },
+                  { img: "/founders/founder11.jpg", name: "Jasmine W.", title: "Freelance Creative", result: "Score 580 → 720" },
                 ].map((founder) => (
                   <div key={founder.name} className="w-[220px] shrink-0" data-testid={`founder-card-${founder.name.replace(/\s+/g, "-").toLowerCase()}`}>
                     <div className="w-[220px] h-[280px] rounded-2xl overflow-hidden mb-3 bg-[#f0f0f0]">
