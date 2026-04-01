@@ -5662,13 +5662,6 @@ export default function LandingPage() {
           </div>
         </section>
 
-        <section className="py-10 sm:py-6 px-5 sm:px-6 bg-[#111] border-t border-white/10" data-testid="front-cta-bar">
-          <div className="max-w-[1100px] mx-auto flex flex-col sm:flex-row items-center justify-between gap-6 sm:gap-4">
-            <h3 className="text-[22px] sm:text-[22px] md:text-[28px] font-bold text-white text-center sm:text-left leading-[1.2]" style={{ letterSpacing: "-0.02em" }}>Profundr shows you how banks see you</h3>
-            <button onClick={() => { setShowFrontPage(false); setAutoSendFile(true); handleUploadClick(); }} className="px-5 py-2.5 bg-white text-[#111] text-[13px] font-semibold hover:bg-white/90 transition-colors shrink-0" data-testid="front-btn-final-cta">Check Your Profile</button>
-          </div>
-        </section>
-
         <section className="py-[60px] sm:py-[80px] px-5 sm:px-6 bg-[#111]" data-testid="front-closing-cta">
           <div className="max-w-[600px] mx-auto text-center">
             <h2 className="text-[28px] sm:text-[36px] md:text-[46px] text-white leading-[1.1] mb-4" style={{ fontFamily: "'Inter', system-ui, sans-serif", fontWeight: 900, letterSpacing: "-0.03em" }}>Stop guessing. Start qualifying.</h2>
