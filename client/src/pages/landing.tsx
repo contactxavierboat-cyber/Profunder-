@@ -5473,36 +5473,36 @@ export default function LandingPage() {
           const prevIdx = testIdx === 0 ? testimonials.length - 1 : testIdx - 1;
           const nextIdx = testIdx === testimonials.length - 1 ? 0 : testIdx + 1;
           return (
-            <section className="py-[50px] sm:py-[80px] bg-white sm:bg-[#111]" data-testid="front-testimonials-kajabi">
-              <h2 className="text-[30px] sm:text-[32px] md:text-[42px] text-[#111] sm:text-white leading-[1.1] sm:leading-[1.05] mb-8 sm:mb-12 px-5 sm:px-6 sm:text-center" style={{ fontFamily: "'Inter', system-ui, sans-serif", fontWeight: 900, letterSpacing: "-0.03em" }}>Why founders choose Profundr</h2>
+            <section className="py-[50px] sm:py-[80px] bg-[#111]" data-testid="front-testimonials-kajabi">
+              <h2 className="text-[30px] sm:text-[32px] md:text-[42px] text-white leading-[1.1] sm:leading-[1.05] mb-8 sm:mb-12 px-5 sm:px-6 sm:text-center" style={{ fontFamily: "'Inter', system-ui, sans-serif", fontWeight: 900, letterSpacing: "-0.03em" }}>Why founders choose Profundr</h2>
 
               <div className="md:hidden px-5">
                 <div className="rounded-2xl overflow-hidden mb-6">
                   <img src={t.photo} alt={t.name} className="w-full h-[380px] object-cover object-top" style={{ background: "#222" }} />
                 </div>
                 <div className="mb-2">
-                  <svg width="36" height="28" viewBox="0 0 36 28" fill="none"><path d="M0 28V16.8C0 7.47 5.4 1.87 16.2 0l1.8 3.74C11.7 5.6 9 9.33 8.1 14H15.75V28H0zm19.8 0V16.8C19.8 7.47 25.2 1.87 36 0l-1.8 3.74C28.5 5.6 25.8 9.33 24.9 14H32.55v14H19.8z" fill="#111"/></svg>
+                  <svg width="36" height="28" viewBox="0 0 36 28" fill="none"><path d="M0 28V16.8C0 7.47 5.4 1.87 16.2 0l1.8 3.74C11.7 5.6 9 9.33 8.1 14H15.75V28H0zm19.8 0V16.8C19.8 7.47 25.2 1.87 36 0l-1.8 3.74C28.5 5.6 25.8 9.33 24.9 14H32.55v14H19.8z" fill="#444"/></svg>
                 </div>
-                <p className="text-[18px] text-[#111] leading-[1.6] mb-6" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>{t.quote}</p>
+                <p className="text-[18px] text-white/80 leading-[1.6] mb-6" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>{t.quote}</p>
                 <div className="flex items-center gap-3 mb-2">
                   <div>
-                    <p className="text-[15px] font-bold text-[#111]">{t.name}</p>
-                    <p className="text-[13px] text-[#888]">{t.role}</p>
+                    <p className="text-[15px] font-bold text-white">{t.name}</p>
+                    <p className="text-[13px] text-white/50">{t.role}</p>
                   </div>
                 </div>
-                <div className="mt-4 pt-4 border-t border-[#f0f0f0]">
-                  <p className="text-[32px] font-black text-[#111] leading-none">{t.amount}</p>
-                  <p className="text-[13px] text-[#888] mt-1">{t.label}</p>
+                <div className="mt-4 pt-4 border-t border-white/10">
+                  <p className="text-[32px] font-black text-white leading-none">{t.amount}</p>
+                  <p className="text-[13px] text-white/50 mt-1">{t.label}</p>
                 </div>
                 <div className="flex items-center justify-between mt-8">
                   <div className="flex items-center gap-2">
                     {testimonials.map((_, i) => (
-                      <div key={i} onClick={() => setTestIdx(i)} className={`h-[3px] cursor-pointer transition-all ${testIdx === i ? "w-8 bg-[#111]" : "w-5 bg-[#ddd]"}`} />
+                      <div key={i} onClick={() => setTestIdx(i)} className={`h-[3px] cursor-pointer transition-all ${testIdx === i ? "w-8 bg-white" : "w-5 bg-white/20"}`} />
                     ))}
                   </div>
                   <div className="flex items-center gap-2">
-                    <button onClick={() => setTestIdx(prevIdx)} className="w-10 h-10 border border-[#ddd] flex items-center justify-center" data-testid="btn-test-prev-m"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M10 4l-4 4 4 4" stroke="#111" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg></button>
-                    <button onClick={() => setTestIdx(nextIdx)} className="w-10 h-10 border border-[#ddd] flex items-center justify-center" data-testid="btn-test-next-m"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M6 4l4 4-4 4" stroke="#111" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg></button>
+                    <button onClick={() => setTestIdx(prevIdx)} className="w-10 h-10 border border-white/20 flex items-center justify-center" data-testid="btn-test-prev-m"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M10 4l-4 4 4 4" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg></button>
+                    <button onClick={() => setTestIdx(nextIdx)} className="w-10 h-10 border border-white/20 flex items-center justify-center" data-testid="btn-test-next-m"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M6 4l4 4-4 4" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg></button>
                   </div>
                 </div>
               </div>
