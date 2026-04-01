@@ -4892,13 +4892,13 @@ export default function LandingPage() {
           </div>
         </nav>
 
-        <section className="pt-[130px] pb-[60px] px-6" data-testid="front-hero">
+        <section className="pt-[120px] pb-[50px] px-6" data-testid="front-hero">
           <div className="max-w-[900px] mx-auto text-center">
-            <h1 className="text-[48px] sm:text-[64px] md:text-[76px] font-black text-[#111] leading-[1.0] tracking-[-0.04em] mb-7" style={{ fontFamily: "'Inter', sans-serif" }} data-testid="text-front-hero-headline">
-              Know if you're fundable<br className="hidden sm:block" /> before you apply
+            <h1 className="text-[46px] sm:text-[62px] md:text-[72px] text-[#111] leading-[0.95] mb-8" style={{ fontFamily: "'Inter', system-ui, sans-serif", fontWeight: 900, letterSpacing: "-0.035em" }} data-testid="text-front-hero-headline">
+              Know if you're fundable before you apply
             </h1>
-            <p className="text-[17px] sm:text-[19px] text-[#555] leading-[1.65] max-w-[520px] mx-auto mb-10" data-testid="text-front-hero-sub">
-              Everything you need to analyze your credit profile —<br className="hidden sm:block" /> plus an <span className="underline underline-offset-2 decoration-[#999]">AI capital partner</span> to help you get funded.
+            <p className="text-[16px] sm:text-[18px] text-[#444] leading-[1.6] max-w-[480px] mx-auto mb-10" style={{ fontFamily: "'Inter', system-ui, sans-serif" }} data-testid="text-front-hero-sub">
+              Everything you need to analyze your credit profile — plus an <span className="underline underline-offset-[3px] decoration-[1px] decoration-[#999]">AI capital partner</span> to help you get funded.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-6">
               <button
