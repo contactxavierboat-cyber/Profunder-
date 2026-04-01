@@ -4923,7 +4923,7 @@ export default function LandingPage() {
 
         <section className="pt-[90px] sm:pt-[120px] pb-[40px] sm:pb-[50px] px-5 sm:px-6" data-testid="front-hero">
           <div className="max-w-[900px] mx-auto text-center">
-            <h1 className="text-[28px] sm:text-[50px] md:text-[60px] text-[#111] leading-[1.1] sm:leading-[0.95] mb-4 sm:mb-8" style={{ fontFamily: "'Inter', system-ui, sans-serif", fontWeight: 900, letterSpacing: "-0.035em" }} data-testid="text-front-hero-headline">
+            <h1 className="text-[32px] sm:text-[50px] md:text-[60px] text-[#111] leading-[1.1] sm:leading-[0.95] mb-4 sm:mb-8 max-w-[280px] sm:max-w-none mx-auto" style={{ fontFamily: "'Inter', system-ui, sans-serif", fontWeight: 900, letterSpacing: "-0.035em" }} data-testid="text-front-hero-headline">
               Know if you're fundable before you apply
             </h1>
             <p className="text-[15px] sm:text-[18px] text-[#555] leading-[1.7] sm:leading-[1.6] max-w-[340px] sm:max-w-[480px] mx-auto mb-8 sm:mb-10" style={{ fontFamily: "'Inter', system-ui, sans-serif" }} data-testid="text-front-hero-sub">
