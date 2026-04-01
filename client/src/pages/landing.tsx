@@ -5209,44 +5209,53 @@ export default function LandingPage() {
           return (
             <section className="py-[50px] sm:py-[80px] px-5 sm:px-6 bg-[#111]" data-testid="front-product-showcase">
               <div className="max-w-[1100px] mx-auto">
-                <h2 className="text-[26px] sm:text-[36px] md:text-[46px] text-white leading-[1.1] sm:leading-[1.05] mb-8 sm:mb-10 text-center max-w-[260px] sm:max-w-none mx-auto" style={{ fontFamily: "'Inter', system-ui, sans-serif", fontWeight: 900, letterSpacing: "-0.03em" }}>Choose how you turn credit into capital</h2>
+                <h2 className="text-[28px] sm:text-[36px] md:text-[46px] text-white leading-[1.1] sm:leading-[1.05] mb-8 sm:mb-10 text-center max-w-[280px] sm:max-w-none mx-auto" style={{ fontFamily: "'Inter', system-ui, sans-serif", fontWeight: 900, letterSpacing: "-0.03em" }}>Choose how you turn credit into capital</h2>
                 <div className="hidden sm:flex overflow-x-auto no-scrollbar items-center justify-center gap-2 sm:gap-3 mb-8 sm:mb-10">
                   {showcaseTabs.map((tab, i) => (
                     <span key={tab.label} onClick={() => setShowcaseTab(i)} className={`px-4 sm:px-5 py-2 text-[12px] sm:text-[13px] font-medium border cursor-pointer transition-colors whitespace-nowrap shrink-0 ${showcaseTab === i ? "bg-white text-[#111] border-white" : "bg-transparent text-white/70 border-white/20 hover:border-white/40"}`} data-testid={`showcase-tab-${tab.label.replace(/\s+/g, "-").toLowerCase()}`}>{tab.label}</span>
                   ))}
                 </div>
-                <div className="rounded-xl sm:rounded-2xl overflow-hidden relative" style={{ background: showcaseTabs[showcaseTab].bg, minHeight: "400px" }}>
-                  <div className="absolute top-5 left-5 sm:top-8 sm:left-10 z-30 max-w-[85%] sm:max-w-[280px]">
-                    <p className="text-[22px] sm:text-[26px] font-bold text-white mb-2 leading-[1.15]">{showcaseTabs[showcaseTab].title}</p>
-                    <p className="text-[13px] sm:text-[13px] text-white/60 leading-[1.5]">{showcaseTabs[showcaseTab].desc}</p>
-                  </div>
-                  <div className="absolute right-0 top-0 bottom-0 w-[58%] hidden md:block">
-                    <img src={showcaseTabs[showcaseTab].photo} alt="" className="w-full h-full object-cover" style={{ borderRadius: "12px", margin: "16px", width: "calc(100% - 32px)", height: "calc(100% - 32px)" }} />
-                  </div>
-                  <div className="absolute z-20 hidden md:block" style={{ left: "28%", top: "130px" }}>
-                    <div className="relative">
-                      <div className="relative z-10">
-                        {showcaseTabs[showcaseTab].cards[0]}
+                <div className="rounded-xl sm:rounded-2xl overflow-hidden relative" style={{ minHeight: "400px" }}>
+                  {showcaseTabs.map((tab, i) => (
+                    <div
+                      key={tab.label}
+                      className="absolute inset-0 transition-all duration-700 ease-in-out"
+                      style={{
+                        background: tab.bg,
+                        opacity: showcaseTab === i ? 1 : 0,
+                        transform: showcaseTab === i ? "translateX(0)" : showcaseTab > i ? "translateX(-30px)" : "translateX(30px)",
+                        pointerEvents: showcaseTab === i ? "auto" : "none",
+                        zIndex: showcaseTab === i ? 2 : 1,
+                      }}
+                    >
+                      <div className="absolute top-5 left-5 sm:top-8 sm:left-10 z-30 max-w-[85%] sm:max-w-[280px]">
+                        <p className="text-[22px] sm:text-[26px] font-bold text-white mb-2 leading-[1.15]">{tab.title}</p>
+                        <p className="text-[13px] text-white/60 leading-[1.5]">{tab.desc}</p>
                       </div>
-                      {showcaseTabs[showcaseTab].cards[1] && (
-                        <div className="relative z-[5] -mt-3 ml-4">
-                          {showcaseTabs[showcaseTab].cards[1]}
+                      <div className="absolute right-0 top-0 bottom-0 w-[58%] hidden md:block">
+                        <img src={tab.photo} alt="" className="w-full h-full object-cover" style={{ borderRadius: "12px", margin: "16px", width: "calc(100% - 32px)", height: "calc(100% - 32px)" }} />
+                      </div>
+                      <div className="absolute z-20 hidden md:block" style={{ left: "28%", top: "130px" }}>
+                        <div className="relative">
+                          <div className="relative z-10">{tab.cards[0]}</div>
+                          {tab.cards[1] && <div className="relative z-[5] -mt-3 ml-4">{tab.cards[1]}</div>}
                         </div>
-                      )}
+                      </div>
+                      <div className="md:hidden absolute z-20 left-4 right-4" style={{ top: "120px" }}>
+                        <div className="bg-white/95 backdrop-blur-sm rounded-xl p-4 shadow-lg">
+                          <img src={tab.photo} alt="" className="w-full h-[160px] object-cover rounded-lg mb-3" />
+                          <div className="text-[12px] text-[#555]">{tab.desc}</div>
+                        </div>
+                      </div>
+                      {tab.cards[2] && <div className="absolute z-20 hidden md:block" style={{ bottom: "28px", right: "40px" }}>{tab.cards[2]}</div>}
+                      <div className="hidden md:block absolute left-0 top-0 bottom-0 w-[48%] z-10" style={{ background: `linear-gradient(to right, ${tab.gradientBase} 50%, transparent 100%)` }} />
                     </div>
-                  </div>
-                  <div className="md:hidden absolute z-20 left-4 right-4" style={{ top: "120px" }}>
-                    <div className="bg-white/95 backdrop-blur-sm rounded-xl p-4 shadow-lg">
-                      <img src={showcaseTabs[showcaseTab].photo} alt="" className="w-full h-[160px] object-cover rounded-lg mb-3" />
-                      <div className="text-[12px] text-[#555]">{showcaseTabs[showcaseTab].desc}</div>
-                    </div>
-                  </div>
-                  {showcaseTabs[showcaseTab].cards[2] && (
-                    <div className="absolute z-20 hidden md:block" style={{ bottom: "28px", right: "40px" }}>
-                      {showcaseTabs[showcaseTab].cards[2]}
-                    </div>
-                  )}
-                  <div className="hidden md:block absolute left-0 top-0 bottom-0 w-[48%] z-10" style={{ background: `linear-gradient(to right, ${showcaseTabs[showcaseTab].gradientBase} 50%, transparent 100%)` }} />
+                  ))}
+                </div>
+                <div className="flex sm:hidden items-center justify-center gap-2 mt-6">
+                  {showcaseTabs.map((_, i) => (
+                    <div key={i} className={`h-[3px] rounded-full transition-all ${showcaseTab === i ? "w-6 bg-white" : "w-3 bg-white/25"}`} />
+                  ))}
                 </div>
               </div>
             </section>
