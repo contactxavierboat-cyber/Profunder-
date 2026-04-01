@@ -5366,16 +5366,16 @@ export default function LandingPage() {
         </section>
 
         <section className="py-[60px] px-6 bg-white border-t border-[#f0f0f0]" data-testid="front-value-props">
-          <div className="max-w-[1100px] mx-auto grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="max-w-[1100px] mx-auto grid grid-cols-1 md:grid-cols-3 gap-5">
             {[
-              { icon: <svg width="28" height="28" viewBox="0 0 24 24" fill="none"><path d="M12 2L3 7v10l9 5 9-5V7l-9-5z" stroke="#111" strokeWidth="1.5" strokeLinejoin="round"/><path d="M12 12v10M12 12L3 7M12 12l9-5" stroke="#111" strokeWidth="1.5"/></svg>, title: "AES-256 encrypted", desc: "Your bureau data is encrypted end-to-end with bank-level security. We never share or sell your information." },
-              { icon: <svg width="28" height="28" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="4" stroke="#111" strokeWidth="1.5"/><path d="M4 20c0-4 4-7 8-7s8 3 8 7" stroke="#111" strokeWidth="1.5" strokeLinecap="round"/></svg>, title: "Real expert support", desc: "Get help from real credit and funding specialists who understand founder finance. Available when you need it." },
-              { icon: <svg width="28" height="28" viewBox="0 0 24 24" fill="none"><rect x="4" y="2" width="16" height="20" rx="2" stroke="#111" strokeWidth="1.5"/><path d="M8 6h8M8 10h8M8 14h4" stroke="#111" strokeWidth="1.5" strokeLinecap="round"/></svg>, title: "FCRA compliant", desc: "Every dispute letter and process follows federal Fair Credit Reporting Act standards. Built for legal defensibility." },
+              { icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M12 2L3 7v10l9 5 9-5V7l-9-5z" stroke="#111" strokeWidth="1.5" strokeLinejoin="round"/><path d="M12 12v10M12 12L3 7M12 12l9-5" stroke="#111" strokeWidth="1.5"/></svg>, title: "AES-256 encrypted", desc: "Your bureau data is encrypted end-to-end with bank-level security. We never share or sell your information." },
+              { icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="4" stroke="#111" strokeWidth="1.5"/><path d="M4 20c0-4 4-7 8-7s8 3 8 7" stroke="#111" strokeWidth="1.5" strokeLinecap="round"/></svg>, title: "Human support 24/7", desc: "Get help from real credit and funding specialists who understand founder finance. Support is available at any hour." },
+              { icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="18" height="18" rx="2" stroke="#111" strokeWidth="1.5"/><path d="M7 12h2v5H7zM11 8h2v9h-2zM15 10h2v7h-2z" fill="#111"/></svg>, title: "Built to last", desc: "Profundr powers millions in funded capital with a stable, secure platform you can rely on as you grow." },
             ].map((item) => (
-              <div key={item.title} className="text-center">
-                <div className="w-14 h-14 rounded-full bg-[#fafafa] border border-[#f0f0f0] flex items-center justify-center mx-auto mb-4">{item.icon}</div>
-                <h4 className="text-[16px] font-semibold text-[#111] mb-2">{item.title}</h4>
-                <p className="text-[13px] text-[#888] leading-[1.6]">{item.desc}</p>
+              <div key={item.title} className="border border-[#e8e8e8] rounded-2xl p-8 bg-white">
+                <div className="w-12 h-12 rounded-xl border border-[#e8e8e8] flex items-center justify-center mb-16">{item.icon}</div>
+                <h4 className="text-[18px] font-bold text-[#111] mb-2">{item.title}</h4>
+                <p className="text-[14px] text-[#888] leading-[1.6]">{item.desc}</p>
               </div>
             ))}
           </div>
