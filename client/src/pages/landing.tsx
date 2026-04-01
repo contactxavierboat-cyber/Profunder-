@@ -4863,11 +4863,12 @@ export default function LandingPage() {
     ];
 
     const faqs = [
-      { q: "Is this a lender?", a: "No. Profundr is a capital intelligence platform. We analyze your credit and financial profile to show you where you stand, what to fix, and which lenders are most likely to approve you. We never lend money or run hard inquiries." },
-      { q: "How does the AIS score work?", a: "Your Approval Index Score is calculated from 23 data points that banks evaluate during underwriting — including utilization, payment history, account age, inquiry velocity, and derogatory marks. Upload your bureau report and get your score in seconds." },
-      { q: "What makes this different from Credit Karma?", a: "Credit Karma shows you a Vantage score and serves you ads. Profundr analyzes your full bureau data the way a bank underwriter would, generates FCRA-compliant dispute letters, runs capital simulations, and matches you with lenders based on real approval data." },
-      { q: "Is my data safe?", a: "Yes. All data is encrypted with AES-256 at rest and TLS 1.3 in transit. Your information is never sold. You can request full data deletion at any time." },
-      { q: "What's included in each plan?", a: "Basic ($25/mo) includes AI chat and your AIS score. Repair ($50/mo) adds the Repair Center and dispute letters. Capital ($150/mo) unlocks everything including the Capital Simulator, Lender Match, Funding Timeline, and Community Intelligence." },
+      { q: "How does Profundr help me get funding?", a: "Profundr shows how banks evaluate your profile before you apply. It tells you if you're likely to be approved, how much you may qualify for, and what's holding you back." },
+      { q: "How much funding can I qualify for?", a: "Profundr estimates your potential approval range based on your current profile and shows what's realistically accessible from banks." },
+      { q: "Will this affect my credit?", a: "No. Checking your profile with Profundr does not impact your credit." },
+      { q: "Is this guaranteed approval?", a: "No. But it shows how lenders are likely to evaluate your profile, so you can apply at the right time with higher confidence." },
+      { q: "What if I'm not ready yet?", a: "Profundr shows exactly what's holding you back and what to fix before applying, so you can improve your approval odds." },
+      { q: "Why does this work?", a: "Banks approve profiles based on patterns — balances, inquiries, timing, and history. Profundr analyzes those same signals before you apply." },
     ];
 
     return (
@@ -4934,7 +4935,7 @@ export default function LandingPage() {
               See if you qualify for $50K–$250K in bank funding
             </h1>
             <p className="text-[15px] sm:text-[18px] text-[#555] leading-[1.7] sm:leading-[1.6] max-w-[340px] sm:max-w-[480px] mx-auto mb-8 sm:mb-10" style={{ fontFamily: "'Inter', system-ui, sans-serif" }} data-testid="text-front-hero-sub">
-              Profundr analyzes your profile like a bank — <span className="underline underline-offset-[3px] decoration-[1px] decoration-[#999]">before you apply</span>. See how much you may qualify for.
+              Profundr shows how banks evaluate your profile — <span className="underline underline-offset-[3px] decoration-[1px] decoration-[#999]">before you apply</span>.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-4 mb-5 sm:mb-6 w-full sm:max-w-none mx-auto">
               <button
@@ -4942,7 +4943,7 @@ export default function LandingPage() {
                 className="px-8 py-3 sm:py-3.5 bg-[#111] border border-[#111] text-white text-[14px] font-semibold hover:bg-[#333] transition-colors"
                 data-testid="front-btn-upload-hero"
               >
-                Check Your Profile
+                Check Before You Apply
               </button>
               <button
                 onClick={() => { setShowFrontPage(false); }}
@@ -4952,7 +4953,7 @@ export default function LandingPage() {
                 See Where You Stand
               </button>
             </div>
-            <p className="text-[12px] text-[#bbb]">No hard inquiry. No credit card required. +$9M funded through Profundr.</p>
+            <p className="text-[12px] text-[#bbb]">+9,000,000 funded · approvals from $5K–$250K · updated daily</p>
           </div>
         </section>
 
@@ -4994,15 +4995,97 @@ export default function LandingPage() {
 
         <section className="py-[50px] sm:py-[60px] px-5 sm:px-6 bg-white" data-testid="front-problem-awareness">
           <div className="max-w-[600px] mx-auto text-center">
-            <h2 className="text-[26px] sm:text-[34px] md:text-[40px] text-[#111] leading-[1.1] mb-4" style={{ fontFamily: "'Inter', system-ui, sans-serif", fontWeight: 900, letterSpacing: "-0.03em" }}>Most people get denied before they even apply</h2>
-            <p className="text-[14px] sm:text-[15px] text-[#555] leading-[1.7] mb-3">Banks don't guess. They read signals.</p>
-            <p className="text-[14px] sm:text-[15px] text-[#555] leading-[1.7] mb-6">Your profile already tells them yes or no — you just can't see what they see.</p>
+            <h2 className="text-[26px] sm:text-[34px] md:text-[40px] text-[#111] leading-[1.1] mb-5" style={{ fontFamily: "'Inter', system-ui, sans-serif", fontWeight: 900, letterSpacing: "-0.03em" }}>Most people get denied before they even apply</h2>
+            <p className="text-[14px] sm:text-[15px] text-[#555] leading-[1.7] mb-2">Banks don't guess. They read signals.</p>
+            <p className="text-[14px] sm:text-[15px] text-[#555] leading-[1.7] mb-2">Balances. Inquiries. Timing. Account history.</p>
+            <p className="text-[14px] sm:text-[15px] text-[#555] leading-[1.7]">Your profile already tells them yes or no — you just don't see it.</p>
+          </div>
+        </section>
+
+        <section className="py-[40px] sm:py-[50px] px-5 sm:px-6 border-t border-[#f0f0f0]" style={{ backgroundColor: "#fafafa" }} data-testid="front-the-shift">
+          <div className="max-w-[600px] mx-auto text-center">
+            <h2 className="text-[24px] sm:text-[32px] md:text-[38px] text-[#111] leading-[1.1] mb-5" style={{ fontFamily: "'Inter', system-ui, sans-serif", fontWeight: 900, letterSpacing: "-0.03em" }}>Banks already know if you'll be approved</h2>
+            <p className="text-[14px] sm:text-[15px] text-[#555] leading-[1.7] mb-2">The decision isn't random.</p>
+            <p className="text-[14px] sm:text-[15px] text-[#555] leading-[1.7] mb-2">The same profile can be approved or denied based on how it looks at the moment you apply.</p>
+            <p className="text-[16px] sm:text-[18px] font-bold text-[#111] leading-[1.4] mt-4" style={{ fontStyle: "italic" }}>Timing matters more than your score.</p>
+          </div>
+        </section>
+
+        <section className="py-[50px] sm:py-[60px] px-5 sm:px-6 border-t border-[#f0f0f0]" style={{ backgroundColor: "#f8f6f3" }} data-testid="front-applying-blind">
+          <div className="max-w-[600px] mx-auto text-center">
+            <h2 className="text-[24px] sm:text-[32px] md:text-[38px] text-[#111] leading-[1.1] mb-5" style={{ fontFamily: "'Inter', system-ui, sans-serif", fontWeight: 900, letterSpacing: "-0.03em" }}>Applying blind is expensive</h2>
+            <p className="text-[14px] sm:text-[15px] text-[#555] leading-[1.7] mb-2">Every application leaves a mark.</p>
+            <p className="text-[14px] sm:text-[15px] text-[#555] leading-[1.7] mb-2">Too many, too fast — and banks see risk.</p>
+            <p className="text-[14px] sm:text-[15px] text-[#555] leading-[1.7]">Most denials are predictable. You just don't see what they see.</p>
+          </div>
+        </section>
+
+        <section className="py-[50px] sm:py-[60px] px-5 sm:px-6 bg-white border-t border-[#f0f0f0]" data-testid="front-what-profundr-does">
+          <div className="max-w-[600px] mx-auto text-center">
+            <h2 className="text-[24px] sm:text-[32px] md:text-[38px] text-[#111] leading-[1.1] mb-5" style={{ fontFamily: "'Inter', system-ui, sans-serif", fontWeight: 900, letterSpacing: "-0.03em" }}>This is how banks see you</h2>
+            <p className="text-[14px] sm:text-[15px] text-[#555] leading-[1.7] mb-6">Profundr analyzes your profile the same way lenders do — before you apply.</p>
+            <div className="text-left max-w-[400px] mx-auto mb-8">
+              {["If you're likely to be approved", "How much you may qualify for", "What's blocking your approval", "What to fix to unlock higher limits"].map((item) => (
+                <div key={item} className="flex items-start gap-3 mb-3 last:mb-0">
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="mt-0.5 shrink-0"><path d="M4 8l3 3 5-5" stroke="#111" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                  <span className="text-[14px] text-[#555] leading-[1.6]">{item}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section className="py-[40px] sm:py-[50px] px-5 sm:px-6 border-t border-[#f0f0f0]" style={{ backgroundColor: "#fafafa" }} data-testid="front-money-moment">
+          <div className="max-w-[500px] mx-auto text-center">
+            <h2 className="text-[24px] sm:text-[32px] md:text-[38px] text-[#111] leading-[1.1] mb-5" style={{ fontFamily: "'Inter', system-ui, sans-serif", fontWeight: 900, letterSpacing: "-0.03em" }}>Your potential funding range</h2>
+            <div className="inline-flex flex-col items-center gap-1 bg-white border border-[#f0f0f0] rounded-xl px-8 py-6 mb-5 shadow-sm">
+              <p className="text-[32px] sm:text-[40px] font-black text-[#111] leading-none">$15,000 – $75,000+</p>
+              <p className="text-[12px] text-[#888] mt-2">Based on your current profile signals</p>
+            </div>
+            <p className="text-[14px] sm:text-[15px] text-[#555] leading-[1.7]">What you qualify for isn't guesswork — it's already in your data.</p>
+          </div>
+        </section>
+
+        <section id="how-it-works" className="py-[50px] sm:py-[60px] px-5 sm:px-6 bg-white border-t border-[#f0f0f0] scroll-mt-16" data-testid="front-how-it-works-detail">
+          <div className="max-w-[600px] mx-auto text-center">
+            <h2 className="text-[24px] sm:text-[32px] md:text-[38px] text-[#111] leading-[1.1] mb-5" style={{ fontFamily: "'Inter', system-ui, sans-serif", fontWeight: 900, letterSpacing: "-0.03em" }}>Know before you apply</h2>
+            <p className="text-[14px] sm:text-[15px] text-[#555] leading-[1.7] mb-6">Profundr gives you a bank-level evaluation of your profile. If you applied today, it shows:</p>
+            <div className="text-left max-w-[400px] mx-auto mb-6">
+              {["Your approval odds", "Your estimated funding range", "The exact risks affecting your profile"].map((item) => (
+                <div key={item} className="flex items-start gap-3 mb-3 last:mb-0">
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="mt-0.5 shrink-0"><path d="M4 8l3 3 5-5" stroke="#111" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                  <span className="text-[14px] text-[#555] leading-[1.6]">{item}</span>
+                </div>
+              ))}
+            </div>
+            <p className="text-[14px] sm:text-[15px] text-[#555] leading-[1.7]">So you can move with precision — not guesswork.</p>
+          </div>
+        </section>
+
+        <section className="py-[50px] sm:py-[60px] px-5 sm:px-6 border-t border-[#f0f0f0]" style={{ backgroundColor: "#fafafa" }} data-testid="front-positioning">
+          <div className="max-w-[600px] mx-auto text-center">
+            <h2 className="text-[24px] sm:text-[32px] md:text-[38px] text-[#111] leading-[1.1] mb-5" style={{ fontFamily: "'Inter', system-ui, sans-serif", fontWeight: 900, letterSpacing: "-0.03em" }}>Banks approve profiles, not people</h2>
+            <p className="text-[14px] sm:text-[15px] text-[#555] leading-[1.7] mb-4">It's not about who you are. It's about:</p>
+            <div className="text-left max-w-[400px] mx-auto mb-6">
+              {["How your accounts are structured", "How your balances look", "How your timing signals risk or stability"].map((item) => (
+                <div key={item} className="flex items-start gap-3 mb-3 last:mb-0">
+                  <span className="text-[14px] text-[#555] leading-[1.6]">• {item}</span>
+                </div>
+              ))}
+            </div>
+            <p className="text-[14px] sm:text-[15px] text-[#555] leading-[1.7]">Profundr helps you understand that — before it costs you.</p>
+          </div>
+        </section>
+
+        <section className="py-[50px] sm:py-[60px] px-5 sm:px-6 bg-[#111] border-t border-[#222]" data-testid="front-mid-cta">
+          <div className="max-w-[600px] mx-auto text-center">
+            <h2 className="text-[26px] sm:text-[34px] md:text-[40px] text-white leading-[1.1] mb-5" style={{ fontFamily: "'Inter', system-ui, sans-serif", fontWeight: 900, letterSpacing: "-0.03em" }}>See where you stand before you apply</h2>
             <button
               onClick={() => { setShowFrontPage(false); setAutoSendFile(true); handleUploadClick(); }}
-              className="px-8 py-3 bg-[#111] text-white text-[14px] font-semibold hover:bg-[#333] transition-colors"
-              data-testid="front-btn-problem-cta"
+              className="px-10 py-3.5 bg-white text-[#111] text-[14px] font-semibold hover:bg-white/90 transition-colors"
+              data-testid="front-btn-mid-cta"
             >
-              Check Before You Apply
+              Check Your Profile
             </button>
           </div>
         </section>
@@ -5022,7 +5105,7 @@ export default function LandingPage() {
           </div>
         </section>
 
-        <section id="how-it-works" className="py-12 sm:py-16 px-5 sm:px-6 scroll-mt-16" style={{ backgroundColor: "#e8e5e0" }} data-testid="front-newsletter">
+        <section className="py-12 sm:py-16 px-5 sm:px-6 scroll-mt-16" style={{ backgroundColor: "#e8e5e0" }} data-testid="front-newsletter">
           <div className="max-w-[1000px] mx-auto flex flex-col md:flex-row items-center md:items-center justify-between gap-6 sm:gap-8">
             <div className="max-w-[420px] text-center md:text-left">
               <h3 className="text-[20px] sm:text-[24px] font-black text-[#111] leading-[1.15] mb-3" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>Banks approve profiles, not people</h3>
@@ -5513,43 +5596,6 @@ export default function LandingPage() {
           </div>
         </section>
 
-        <section className="py-[50px] sm:py-[60px] px-5 sm:px-6 border-t border-[#f0f0f0]" style={{ backgroundColor: "#f8f6f3" }} data-testid="front-applying-blind">
-          <div className="max-w-[600px] mx-auto text-center">
-            <h2 className="text-[24px] sm:text-[32px] md:text-[38px] text-[#111] leading-[1.1] mb-4" style={{ fontFamily: "'Inter', system-ui, sans-serif", fontWeight: 900, letterSpacing: "-0.03em" }}>Applying blind is expensive</h2>
-            <p className="text-[14px] sm:text-[15px] text-[#555] leading-[1.7] mb-4">Every application leaves a mark on your profile. Too many, too fast — and banks see risk.</p>
-            <p className="text-[14px] sm:text-[15px] text-[#555] leading-[1.7] mb-6">Most denials are predictable. You just don't see what they see.</p>
-            <p className="text-[16px] sm:text-[18px] font-bold text-[#111] leading-[1.4] mb-8" style={{ fontStyle: "italic" }}>Banks approve profiles, not people.</p>
-            <button
-              onClick={() => { setShowFrontPage(false); setAutoSendFile(true); handleUploadClick(); }}
-              className="px-8 py-3 bg-[#111] text-white text-[14px] font-semibold hover:bg-[#333] transition-colors"
-              data-testid="front-btn-applying-blind"
-            >
-              See What Banks See
-            </button>
-          </div>
-        </section>
-
-        <section className="py-[50px] sm:py-[60px] px-5 sm:px-6 bg-white border-t border-[#f0f0f0]" data-testid="front-bank-perspective">
-          <div className="max-w-[600px] mx-auto text-center">
-            <h2 className="text-[24px] sm:text-[32px] md:text-[38px] text-[#111] leading-[1.1] mb-4" style={{ fontFamily: "'Inter', system-ui, sans-serif", fontWeight: 900, letterSpacing: "-0.03em" }}>This is how banks see you</h2>
-            <p className="text-[14px] sm:text-[15px] text-[#555] leading-[1.7] mb-3">Balances. Inquiries. Timing. Payment patterns.</p>
-            <p className="text-[14px] sm:text-[15px] text-[#555] leading-[1.7] mb-6">These signals determine approval — not just your score. Profundr reads them the same way a bank does, and shows you the result before you apply.</p>
-            <div className="inline-flex flex-col items-center gap-1 bg-[#fafafa] border border-[#f0f0f0] rounded-xl px-8 py-5 mb-6">
-              <p className="text-[10px] text-[#888] uppercase tracking-wider">Estimated Funding Range</p>
-              <p className="text-[28px] sm:text-[36px] font-black text-[#111] leading-none">$15,000 – $75,000</p>
-              <p className="text-[11px] text-[#2d6a4f] font-semibold">Based on current profile signals</p>
-            </div>
-            <div className="block">
-              <button
-                onClick={() => { setShowFrontPage(false); setAutoSendFile(true); handleUploadClick(); }}
-                className="px-8 py-3 bg-[#111] text-white text-[14px] font-semibold hover:bg-[#333] transition-colors"
-                data-testid="front-btn-bank-perspective"
-              >
-                See Where You Stand
-              </button>
-            </div>
-          </div>
-        </section>
 
         <section className="py-[50px] sm:py-[60px] px-5 sm:px-6 bg-white border-t border-[#f0f0f0]" data-testid="front-value-props">
           <div className="max-w-[1100px] mx-auto grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-5">
@@ -5702,15 +5748,14 @@ export default function LandingPage() {
         <section className="py-[60px] sm:py-[80px] px-5 sm:px-6 bg-[#111]" data-testid="front-closing-cta">
           <div className="max-w-[600px] mx-auto text-center">
             <h2 className="text-[28px] sm:text-[36px] md:text-[46px] text-white leading-[1.1] mb-4" style={{ fontFamily: "'Inter', system-ui, sans-serif", fontWeight: 900, letterSpacing: "-0.03em" }}>Stop guessing. Start qualifying.</h2>
-            <p className="text-[14px] sm:text-[16px] text-white/60 leading-[1.6] mb-8 max-w-[400px] mx-auto">See how banks see you — before you apply. Based on your current profile, at this moment.</p>
+            <p className="text-[14px] sm:text-[16px] text-white/60 leading-[1.6] mb-8 max-w-[400px] mx-auto">See how banks see you — before you apply.</p>
             <button
               onClick={() => { setShowFrontPage(false); setAutoSendFile(true); handleUploadClick(); }}
               className="px-10 py-3.5 bg-white text-[#111] text-[14px] font-semibold hover:bg-white/90 transition-colors"
               data-testid="front-btn-closing-cta"
             >
-              Find Out If You Qualify
+              Check Before You Apply
             </button>
-            <p className="text-[12px] text-white/30 mt-4">No hard inquiry. No credit card required.</p>
           </div>
         </section>
 
