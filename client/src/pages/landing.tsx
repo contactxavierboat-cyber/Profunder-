@@ -5391,7 +5391,7 @@ export default function LandingPage() {
           const t = testimonials[testIdx];
           return (
             <section className="py-[80px] px-6 bg-[#111]" data-testid="front-testimonials-kajabi">
-              <div className="max-w-[900px] mx-auto">
+              <div className="max-w-[1100px] mx-auto">
                 <h2 className="text-[32px] sm:text-[42px] text-white leading-[1.05] mb-12 text-center" style={{ fontFamily: "'Inter', system-ui, sans-serif", fontWeight: 900, letterSpacing: "-0.03em" }}>Why founders choose Profundr</h2>
                 <div className="bg-[#1a1a1a] rounded-2xl overflow-hidden">
                   <div className="flex flex-col md:flex-row">
