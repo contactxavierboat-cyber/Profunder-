@@ -4921,25 +4921,25 @@ export default function LandingPage() {
           )}
         </nav>
 
-        <section className="pt-[90px] sm:pt-[120px] pb-[40px] sm:pb-[50px] px-4 sm:px-6" data-testid="front-hero">
+        <section className="pt-[90px] sm:pt-[120px] pb-[40px] sm:pb-[50px] px-5 sm:px-6" data-testid="front-hero">
           <div className="max-w-[900px] mx-auto text-center">
-            <h1 className="text-[30px] sm:text-[50px] md:text-[60px] text-[#111] leading-[1.05] sm:leading-[0.95] mb-5 sm:mb-8" style={{ fontFamily: "'Inter', system-ui, sans-serif", fontWeight: 900, letterSpacing: "-0.035em" }} data-testid="text-front-hero-headline">
-              Know if you're fundable<br className="hidden sm:inline" /> before you apply
+            <h1 className="text-[28px] sm:text-[50px] md:text-[60px] text-[#111] leading-[1.1] sm:leading-[0.95] mb-4 sm:mb-8" style={{ fontFamily: "'Inter', system-ui, sans-serif", fontWeight: 900, letterSpacing: "-0.035em" }} data-testid="text-front-hero-headline">
+              Know if you're fundable before you apply
             </h1>
-            <p className="text-[15px] sm:text-[18px] text-[#444] leading-[1.6] max-w-[320px] sm:max-w-[480px] mx-auto mb-8 sm:mb-10" style={{ fontFamily: "'Inter', system-ui, sans-serif" }} data-testid="text-front-hero-sub">
+            <p className="text-[15px] sm:text-[18px] text-[#555] leading-[1.7] sm:leading-[1.6] max-w-[340px] sm:max-w-[480px] mx-auto mb-8 sm:mb-10" style={{ fontFamily: "'Inter', system-ui, sans-serif" }} data-testid="text-front-hero-sub">
               Everything you need to analyze your credit profile — plus an <span className="underline underline-offset-[3px] decoration-[1px] decoration-[#999]">AI capital partner</span> to help you get funded.
             </p>
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 mb-5 sm:mb-6 w-full max-w-[340px] sm:max-w-none mx-auto">
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-0 sm:gap-4 mb-5 sm:mb-6 w-full sm:max-w-none mx-auto px-1 sm:px-0">
               <button
                 onClick={() => { setShowFrontPage(false); setAutoSendFile(true); handleUploadClick(); }}
-                className="w-full sm:w-auto px-8 py-3.5 bg-transparent border border-[#111] sm:border-0 sm:bg-[#111] text-[#111] sm:text-white text-[15px] font-semibold sm:hover:bg-[#333] transition-colors"
+                className="w-full sm:w-auto px-8 py-4 sm:py-3.5 bg-transparent border border-[#111] sm:border-0 sm:bg-[#111] text-[#111] sm:text-white text-[15px] font-semibold sm:hover:bg-[#333] transition-colors"
                 data-testid="front-btn-upload-hero"
               >
                 Upload Report
               </button>
               <button
                 onClick={() => { setShowFrontPage(false); }}
-                className="w-full sm:w-auto px-8 py-2 sm:py-3.5 border-0 sm:border sm:border-[#ddd] text-[#555] text-[15px] font-medium hover:underline sm:hover:no-underline sm:hover:bg-[#f8f8f8] sm:hover:border-[#ccc] transition-colors"
+                className="w-full sm:w-auto px-8 py-3 sm:py-3.5 text-[#555] text-[15px] font-medium sm:border sm:border-[#ddd] sm:hover:bg-[#f8f8f8] sm:hover:border-[#ccc] transition-colors"
                 data-testid="front-btn-try-chat"
               >
                 Try the AI Chat
@@ -4985,26 +4985,26 @@ export default function LandingPage() {
           </div>
         </section>
 
-        <section className="py-10 sm:py-16 px-4 sm:px-6 bg-white" data-testid="front-stats">
-          <div className="max-w-[1000px] mx-auto flex flex-col sm:flex-row sm:flex-wrap items-center sm:justify-center gap-y-8 sm:gap-x-20 sm:gap-y-8">
+        <section className="py-12 sm:py-16 px-5 sm:px-6 bg-white" data-testid="front-stats">
+          <div className="max-w-[1000px] mx-auto flex flex-col sm:flex-row sm:flex-wrap items-center sm:justify-center gap-y-7 sm:gap-x-20 sm:gap-y-8">
             {[
               { value: "12,400+", label: "Credit deletions generated" },
               { value: "$38M+", label: "Funding matched to founders" },
               { value: "94%", label: "Dispute success rate" },
             ].map((stat) => (
               <div key={stat.label} className="text-center" data-testid={`stat-${stat.label.replace(/\s+/g, "-").toLowerCase()}`}>
-                <p className="text-[34px] sm:text-[42px] font-bold text-[#111] tracking-tight leading-none">{stat.value}</p>
+                <p className="text-[38px] sm:text-[42px] font-bold text-[#111] tracking-tight leading-none">{stat.value}</p>
                 <p className="text-[13px] sm:text-[14px] text-[#888] mt-1.5 sm:mt-2">{stat.label}</p>
               </div>
             ))}
           </div>
         </section>
 
-        <section className="py-12 sm:py-16 px-4 sm:px-6" style={{ backgroundColor: "#e8e5e0" }} data-testid="front-newsletter">
+        <section className="py-12 sm:py-16 px-5 sm:px-6" style={{ backgroundColor: "#e8e5e0" }} data-testid="front-newsletter">
           <div className="max-w-[1000px] mx-auto flex flex-col md:flex-row items-start md:items-center justify-between gap-6 sm:gap-8">
             <div className="max-w-[420px]">
               <h3 className="text-[20px] sm:text-[24px] font-black text-[#111] leading-[1.15] mb-3" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>You already know more than you think</h3>
-              <p className="text-[14px] sm:text-[15px] text-[#555] leading-[1.6]">Every week, we break down how real founders turn credit into capital, with strategy and tools you can actually use.</p>
+              <p className="text-[14px] sm:text-[15px] text-[#555] leading-[1.7] sm:leading-[1.6]">Every week, we break down how real founders turn credit into capital, with strategy and tools you can actually use.</p>
             </div>
             <div className="flex flex-col sm:flex-row w-full md:w-auto gap-2 sm:gap-0">
               <input
@@ -5200,7 +5200,7 @@ export default function LandingPage() {
             },
           ];
           return (
-            <section className="py-[50px] sm:py-[80px] px-4 sm:px-6 bg-[#111]" data-testid="front-product-showcase">
+            <section className="py-[50px] sm:py-[80px] px-5 sm:px-6 bg-[#111]" data-testid="front-product-showcase">
               <div className="max-w-[1100px] mx-auto">
                 <h2 className="text-[26px] sm:text-[36px] md:text-[46px] text-white leading-[1.1] sm:leading-[1.05] mb-8 sm:mb-10 text-center" style={{ fontFamily: "'Inter', system-ui, sans-serif", fontWeight: 900, letterSpacing: "-0.03em" }}>Choose how you turn credit into capital</h2>
                 <div className="flex overflow-x-auto no-scrollbar items-center justify-start sm:justify-center gap-2 sm:gap-3 mb-8 sm:mb-10 -mx-4 px-4 sm:mx-0 sm:px-0">
@@ -5257,15 +5257,15 @@ export default function LandingPage() {
           </div>
         </section>
 
-        <section className="py-[50px] sm:py-[80px] px-4 sm:px-6 bg-white" data-testid="front-operating-system">
+        <section className="py-[50px] sm:py-[80px] px-5 sm:px-6 bg-white" data-testid="front-operating-system">
           <div className="max-w-[900px] mx-auto text-center">
-            <h2 className="text-[26px] sm:text-[36px] md:text-[48px] text-[#111] leading-[1.1] sm:leading-[1.05] mb-4 sm:mb-4" style={{ fontFamily: "'Inter', system-ui, sans-serif", fontWeight: 900, letterSpacing: "-0.03em" }}>The operating system<br className="hidden sm:inline" /> for financial identity</h2>
-            <p className="text-[14px] sm:text-[16px] text-[#888] max-w-[300px] sm:max-w-[500px] mx-auto leading-[1.6]">Profundr brings your entire credit, capital, and funding journey into one unified system. Founders grow faster when everything works together.</p>
+            <h2 className="text-[28px] sm:text-[36px] md:text-[48px] text-[#111] leading-[1.1] sm:leading-[1.05] mb-4" style={{ fontFamily: "'Inter', system-ui, sans-serif", fontWeight: 900, letterSpacing: "-0.03em" }}>The operating system for financial identity</h2>
+            <p className="text-[14px] sm:text-[16px] text-[#888] max-w-[320px] sm:max-w-[500px] mx-auto leading-[1.7] sm:leading-[1.6]">Profundr brings your entire credit, capital, and funding journey into one unified system. Founders grow faster when everything works together.</p>
           </div>
         </section>
 
-        <section className="py-[50px] sm:py-[80px] px-4 sm:px-6 bg-white border-t border-[#f0f0f0]" data-testid="front-all-in-one">
-          <div className="max-w-[1100px] mx-auto flex flex-col md:flex-row items-center gap-8 sm:gap-12">
+        <section className="py-[50px] sm:py-[80px] px-5 sm:px-6 bg-white border-t border-[#f0f0f0]" data-testid="front-all-in-one">
+          <div className="max-w-[1100px] mx-auto flex flex-col md:flex-row items-center gap-10 sm:gap-12">
             <div className="flex-1">
               <div className="bg-[#fafafa] border border-[#e8e8e8] rounded-xl p-4 sm:p-6 shadow-sm">
                 <div className="flex items-center gap-3 mb-5 pb-4 border-b border-[#f0f0f0]">
@@ -5296,41 +5296,41 @@ export default function LandingPage() {
               </div>
             </div>
             <div className="flex-1">
-              <h3 className="text-[26px] sm:text-[32px] font-bold text-[#111] leading-[1.1] mb-3" style={{ letterSpacing: "-0.02em" }}>All-in-one that actually works</h3>
-              <p className="text-[14px] sm:text-[15px] text-[#888] leading-[1.6] mb-6 sm:mb-6">Profundr gives you one connected system to analyze credit, generate disputes, match with lenders, and track your AIS score — all in real time.</p>
-              <ul className="space-y-4 sm:space-y-3 mb-6">
+              <h3 className="text-[24px] sm:text-[32px] font-bold text-[#111] leading-[1.15] mb-3" style={{ letterSpacing: "-0.02em" }}>All-in-one that actually works</h3>
+              <p className="text-[14px] sm:text-[15px] text-[#555] leading-[1.7] sm:leading-[1.6] mb-7 sm:mb-6">Profundr gives you one connected system to analyze credit, generate disputes, match with lenders, and track your AIS score — all in real time.</p>
+              <ul className="space-y-5 sm:space-y-3 mb-8 sm:mb-6">
                 {["AIS scoring, disputes, and capital matching fully connected", "Centralized view of your financial identity across 3 bureaus", "Tools built specifically for founder and business funding", "Less complexity — one upload, full analysis"].map((item) => (
-                  <li key={item} className="flex items-start gap-2.5"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="mt-0.5 shrink-0"><path d="M4 8l3 3 5-5" stroke="#111" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg><span className="text-[14px] text-[#555] leading-[1.5]">{item}</span></li>
+                  <li key={item} className="flex items-start gap-3"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="mt-0.5 shrink-0"><path d="M4 8l3 3 5-5" stroke="#111" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg><span className="text-[14px] text-[#555] leading-[1.6]">{item}</span></li>
                 ))}
               </ul>
-              <p className="text-[11px] text-[#888] uppercase tracking-wider mb-3">Replaces</p>
-              <div className="flex flex-wrap items-center gap-2 mb-7 sm:mb-6">
+              <p className="text-[11px] text-[#888] uppercase tracking-wider mb-4">Replaces</p>
+              <div className="flex flex-wrap items-center gap-2 mb-8 sm:mb-6">
                 {["Credit Karma", "Nav.com", "Spreadsheets"].map((r) => (
                   <span key={r} className="text-[12px] px-3 py-1.5 bg-[#f5f5f5] text-[#666] font-medium rounded-full flex items-center gap-1.5"><span className="w-4 h-4 rounded-full bg-[#ddd] shrink-0" />{r}</span>
                 ))}
               </div>
-              <button className="w-full sm:w-auto px-6 py-3.5 border border-[#ddd] sm:border-0 sm:bg-[#111] text-[#111] sm:text-white text-[14px] font-semibold hover:bg-[#f5f5f5] sm:hover:bg-[#333] transition-colors" data-testid="btn-watch-demo-1">Get Started</button>
+              <button className="w-full sm:w-auto px-6 py-4 sm:py-3.5 border border-[#ddd] sm:border-0 sm:bg-[#111] text-[#111] sm:text-white text-[14px] font-semibold hover:bg-[#f5f5f5] sm:hover:bg-[#333] transition-colors" data-testid="btn-watch-demo-1">Get Started</button>
             </div>
           </div>
         </section>
 
-        <section className="py-[50px] sm:py-[80px] px-4 sm:px-6 bg-white border-t border-[#f0f0f0]" data-testid="front-sell-confidence">
-          <div className="max-w-[1100px] mx-auto flex flex-col md:flex-row items-center gap-8 sm:gap-12">
+        <section className="py-[50px] sm:py-[80px] px-5 sm:px-6 bg-white border-t border-[#f0f0f0]" data-testid="front-sell-confidence">
+          <div className="max-w-[1100px] mx-auto flex flex-col md:flex-row items-center gap-10 sm:gap-12">
             <div className="flex-1 order-2 md:order-1">
-              <h3 className="text-[26px] sm:text-[32px] font-bold text-[#111] leading-[1.1] mb-3" style={{ letterSpacing: "-0.02em" }}>Dispute and delete with precision</h3>
-              <p className="text-[14px] sm:text-[15px] text-[#888] leading-[1.6] mb-6">FCRA-compliant dispute letters generated in seconds. Track every deletion across Equifax, TransUnion, and Experian in real time.</p>
-              <ul className="space-y-4 sm:space-y-3 mb-6">
+              <h3 className="text-[24px] sm:text-[32px] font-bold text-[#111] leading-[1.15] mb-3" style={{ letterSpacing: "-0.02em" }}>Dispute and delete with precision</h3>
+              <p className="text-[14px] sm:text-[15px] text-[#555] leading-[1.7] sm:leading-[1.6] mb-7 sm:mb-6">FCRA-compliant dispute letters generated in seconds. Track every deletion across Equifax, TransUnion, and Experian in real time.</p>
+              <ul className="space-y-5 sm:space-y-3 mb-8 sm:mb-6">
                 {["AI-generated dispute letters with legal compliance", "Track deletions across all three bureaus in one view", "Automated follow-ups and escalation paths", "Bureau response tracking with timeline", "Success rate analytics per dispute type"].map((item) => (
-                  <li key={item} className="flex items-start gap-2.5"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="mt-0.5 shrink-0"><path d="M4 8l3 3 5-5" stroke="#111" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg><span className="text-[14px] text-[#555] leading-[1.5]">{item}</span></li>
+                  <li key={item} className="flex items-start gap-3"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="mt-0.5 shrink-0"><path d="M4 8l3 3 5-5" stroke="#111" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg><span className="text-[14px] text-[#555] leading-[1.6]">{item}</span></li>
                 ))}
               </ul>
-              <p className="text-[11px] text-[#888] uppercase tracking-wider mb-3">Replaces</p>
-              <div className="flex flex-wrap items-center gap-2 mb-7 sm:mb-5">
+              <p className="text-[11px] text-[#888] uppercase tracking-wider mb-4">Replaces</p>
+              <div className="flex flex-wrap items-center gap-2 mb-8 sm:mb-6">
                 {["DisputeBee", "Credit Saint", "Manual Letters"].map((r) => (
                   <span key={r} className="text-[12px] px-3 py-1.5 bg-[#f5f5f5] text-[#666] font-medium rounded-full flex items-center gap-1.5"><span className="w-4 h-4 rounded-full bg-[#ddd] shrink-0" />{r}</span>
                 ))}
               </div>
-              <button className="w-full sm:w-auto px-6 py-3.5 border border-[#ddd] sm:border-0 sm:bg-[#111] text-[#111] sm:text-white text-[14px] font-semibold hover:bg-[#f5f5f5] sm:hover:bg-[#333] transition-colors" data-testid="btn-watch-demo-2">Upload Report</button>
+              <button className="w-full sm:w-auto px-6 py-4 sm:py-3.5 border border-[#ddd] sm:border-0 sm:bg-[#111] text-[#111] sm:text-white text-[14px] font-semibold hover:bg-[#f5f5f5] sm:hover:bg-[#333] transition-colors" data-testid="btn-watch-demo-2">Upload Report</button>
             </div>
             <div className="flex-1 order-1 md:order-2">
               <div className="relative">
@@ -5354,8 +5354,8 @@ export default function LandingPage() {
           </div>
         </section>
 
-        <section className="py-[50px] sm:py-[80px] px-4 sm:px-6 bg-[#fafafa] border-t border-[#f0f0f0]" data-testid="front-funnels">
-          <div className="max-w-[1100px] mx-auto flex flex-col md:flex-row items-center gap-8 sm:gap-12">
+        <section className="py-[50px] sm:py-[80px] px-5 sm:px-6 bg-[#fafafa] border-t border-[#f0f0f0]" data-testid="front-funnels">
+          <div className="max-w-[1100px] mx-auto flex flex-col md:flex-row items-center gap-10 sm:gap-12">
             <div className="flex-1 hidden md:block">
               <div className="relative">
                 <div className="bg-white rounded-xl p-5 shadow-lg border border-[#f0f0f0] w-full max-w-[260px] mb-4">
@@ -5378,26 +5378,26 @@ export default function LandingPage() {
               </div>
             </div>
             <div className="flex-1">
-              <h3 className="text-[26px] sm:text-[32px] font-bold text-[#111] leading-[1.1] mb-3" style={{ letterSpacing: "-0.02em" }}>Capital matching that works</h3>
-              <p className="text-[14px] sm:text-[15px] text-[#888] leading-[1.6] mb-6">Get matched with real lenders based on your AIS score, bureau profile, and business data. No guessing — just funded founders.</p>
-              <ul className="space-y-4 sm:space-y-3 mb-6">
+              <h3 className="text-[24px] sm:text-[32px] font-bold text-[#111] leading-[1.15] mb-3" style={{ letterSpacing: "-0.02em" }}>Capital matching that works</h3>
+              <p className="text-[14px] sm:text-[15px] text-[#555] leading-[1.7] sm:leading-[1.6] mb-7 sm:mb-6">Get matched with real lenders based on your AIS score, bureau profile, and business data. No guessing — just funded founders.</p>
+              <ul className="space-y-5 sm:space-y-3 mb-8 sm:mb-6">
                 {["AI-powered lender matching across 50+ products", "Real approval odds based on your AIS profile", "Track applications from match to funded", "Success stories from real Profundr users"].map((item) => (
-                  <li key={item} className="flex items-start gap-2.5"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="mt-0.5 shrink-0"><path d="M4 8l3 3 5-5" stroke="#111" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg><span className="text-[14px] text-[#555] leading-[1.5]">{item}</span></li>
+                  <li key={item} className="flex items-start gap-3"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="mt-0.5 shrink-0"><path d="M4 8l3 3 5-5" stroke="#111" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg><span className="text-[14px] text-[#555] leading-[1.6]">{item}</span></li>
                 ))}
               </ul>
-              <p className="text-[11px] text-[#888] uppercase tracking-wider mb-3">Replaces</p>
-              <div className="flex flex-wrap items-center gap-2 mb-7 sm:mb-5">
+              <p className="text-[11px] text-[#888] uppercase tracking-wider mb-4">Replaces</p>
+              <div className="flex flex-wrap items-center gap-2 mb-8 sm:mb-6">
                 {["Lendio", "Fundera", "Cold Applications"].map((r) => (
                   <span key={r} className="text-[12px] px-3 py-1.5 bg-[#f5f5f5] text-[#666] font-medium rounded-full flex items-center gap-1.5"><span className="w-4 h-4 rounded-full bg-[#ddd] shrink-0" />{r}</span>
                 ))}
               </div>
-              <button className="w-full sm:w-auto px-6 py-3.5 border border-[#ddd] sm:border-0 sm:bg-[#111] text-[#111] sm:text-white text-[14px] font-semibold hover:bg-[#f5f5f5] sm:hover:bg-[#333] transition-colors" data-testid="btn-watch-demo-3">See Your Matches</button>
+              <button className="w-full sm:w-auto px-6 py-4 sm:py-3.5 border border-[#ddd] sm:border-0 sm:bg-[#111] text-[#111] sm:text-white text-[14px] font-semibold hover:bg-[#f5f5f5] sm:hover:bg-[#333] transition-colors" data-testid="btn-watch-demo-3">See Your Matches</button>
             </div>
           </div>
         </section>
 
-        <section className="py-[50px] sm:py-[60px] px-4 sm:px-6 bg-white border-t border-[#f0f0f0]" data-testid="front-value-props">
-          <div className="max-w-[1100px] mx-auto grid grid-cols-1 md:grid-cols-3 gap-5 sm:gap-5">
+        <section className="py-[50px] sm:py-[60px] px-5 sm:px-6 bg-white border-t border-[#f0f0f0]" data-testid="front-value-props">
+          <div className="max-w-[1100px] mx-auto grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-5">
             {[
               { icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M12 2L3 7v10l9 5 9-5V7l-9-5z" stroke="#111" strokeWidth="1.5" strokeLinejoin="round"/><path d="M12 12v10M12 12L3 7M12 12l9-5" stroke="#111" strokeWidth="1.5"/></svg>, title: "AES-256 encrypted", desc: "Your bureau data is encrypted end-to-end with bank-level security. We never share or sell your information." },
               { icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="4" stroke="#111" strokeWidth="1.5"/><path d="M4 20c0-4 4-7 8-7s8 3 8 7" stroke="#111" strokeWidth="1.5" strokeLinecap="round"/></svg>, title: "Human support 24/7", desc: "Get help from real credit and funding specialists who understand founder finance. Support is available at any hour." },
@@ -5423,7 +5423,7 @@ export default function LandingPage() {
           const nextIdx = testIdx === testimonials.length - 1 ? 0 : testIdx + 1;
           return (
             <section className="py-[50px] sm:py-[80px] bg-[#111]" data-testid="front-testimonials-kajabi">
-              <h2 className="text-[26px] sm:text-[32px] md:text-[42px] text-white leading-[1.1] sm:leading-[1.05] mb-8 sm:mb-12 text-center px-4 sm:px-6" style={{ fontFamily: "'Inter', system-ui, sans-serif", fontWeight: 900, letterSpacing: "-0.03em" }}>Why founders choose Profundr</h2>
+              <h2 className="text-[26px] sm:text-[32px] md:text-[42px] text-white leading-[1.1] sm:leading-[1.05] mb-8 sm:mb-12 text-center px-5 sm:px-6" style={{ fontFamily: "'Inter', system-ui, sans-serif", fontWeight: 900, letterSpacing: "-0.03em" }}>Why founders choose Profundr</h2>
               <div className="px-0 sm:px-12 md:px-16 lg:px-24">
                 <div className="bg-[#1a1a1a] overflow-hidden">
                   <div className="flex flex-col md:flex-row">
@@ -5458,14 +5458,14 @@ export default function LandingPage() {
           );
         })()}
 
-        <section className="py-10 sm:py-6 px-4 sm:px-6 bg-white sm:bg-[#111] border-t border-[#f0f0f0] sm:border-white/10" data-testid="front-cta-bar">
-          <div className="max-w-[1100px] mx-auto flex flex-col sm:flex-row items-center justify-between gap-5 sm:gap-4">
-            <h3 className="text-[22px] sm:text-[22px] md:text-[28px] font-bold text-[#111] sm:text-white text-center sm:text-left leading-[1.15]" style={{ letterSpacing: "-0.02em" }}>Build your financial identity on Profundr</h3>
-            <button onClick={() => { setShowFrontPage(false); setAutoSendFile(true); handleUploadClick(); }} className="w-full sm:w-auto px-6 py-3.5 border border-[#111] sm:border-white text-[#111] sm:text-white text-[14px] font-semibold hover:bg-[#111] hover:text-white sm:hover:bg-white sm:hover:text-[#111] transition-colors shrink-0" data-testid="front-btn-final-cta">Start Free Trial</button>
+        <section className="py-10 sm:py-6 px-5 sm:px-6 bg-white sm:bg-[#111] border-t border-[#f0f0f0] sm:border-white/10" data-testid="front-cta-bar">
+          <div className="max-w-[1100px] mx-auto flex flex-col sm:flex-row items-center justify-between gap-6 sm:gap-4">
+            <h3 className="text-[22px] sm:text-[22px] md:text-[28px] font-bold text-[#111] sm:text-white text-center sm:text-left leading-[1.2]" style={{ letterSpacing: "-0.02em" }}>Build your financial identity on Profundr</h3>
+            <button onClick={() => { setShowFrontPage(false); setAutoSendFile(true); handleUploadClick(); }} className="w-full sm:w-auto px-6 py-4 sm:py-3.5 border border-[#111] sm:border-white text-[#111] sm:text-white text-[14px] font-semibold sm:hover:bg-white sm:hover:text-[#111] transition-colors shrink-0" data-testid="front-btn-final-cta">Start Free Trial</button>
           </div>
         </section>
 
-        <footer className="py-10 sm:py-14 px-4 sm:px-6 bg-[#111] border-t border-white/10" data-testid="front-footer">
+        <footer className="py-10 sm:py-14 px-5 sm:px-6 bg-[#111] border-t border-white/10" data-testid="front-footer">
           <div className="max-w-[1100px] mx-auto">
             <div className="flex flex-col md:flex-row items-start justify-between gap-8 sm:gap-10 mb-10 sm:mb-12">
               <div>
