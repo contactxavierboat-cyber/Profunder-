@@ -5181,31 +5181,34 @@ export default function LandingPage() {
                   ))}
                 </div>
                 <div className="rounded-2xl overflow-hidden relative" style={{ background: showcaseTabs[showcaseTab].bg, minHeight: "520px" }}>
-                  <div className="absolute top-6 left-6 sm:top-8 sm:left-10 z-20">
+                  <div className="absolute top-6 left-6 sm:top-8 sm:left-10 z-30">
                     <p className="text-[26px] font-bold text-white mb-1">{showcaseTabs[showcaseTab].title}</p>
                     <p className="text-[13px] text-white/50 leading-[1.5] max-w-[280px]">{showcaseTabs[showcaseTab].desc}</p>
                   </div>
-                  <div className="absolute right-0 top-0 bottom-0 w-[55%] hidden md:block">
-                    <img src={showcaseTabs[showcaseTab].photo} alt="" className="w-full h-full object-cover rounded-xl" style={{ margin: "16px", width: "calc(100% - 32px)", height: "calc(100% - 32px)" }} />
+                  <div className="absolute right-0 top-0 bottom-0 w-[58%] hidden md:block">
+                    <img src={showcaseTabs[showcaseTab].photo} alt="" className="w-full h-full object-cover" style={{ borderRadius: "12px", margin: "16px", width: "calc(100% - 32px)", height: "calc(100% - 32px)" }} />
                   </div>
-                  <div className="absolute z-20 left-5 sm:left-10" style={{ top: "120px" }}>
+                  <div className="absolute z-20 hidden md:block" style={{ left: "28%", top: "130px" }}>
                     <div className="relative">
                       <div className="relative z-10">
                         {showcaseTabs[showcaseTab].cards[0]}
                       </div>
                       {showcaseTabs[showcaseTab].cards[1] && (
-                        <div className="relative z-[5] -mt-4 ml-6">
+                        <div className="relative z-[5] -mt-3 ml-4">
                           {showcaseTabs[showcaseTab].cards[1]}
                         </div>
                       )}
                     </div>
                   </div>
+                  <div className="md:hidden absolute z-20 left-5 sm:left-8" style={{ top: "120px" }}>
+                    {showcaseTabs[showcaseTab].cards[0]}
+                  </div>
                   {showcaseTabs[showcaseTab].cards[2] && (
-                    <div className="absolute z-20 hidden md:block" style={{ bottom: "24px", right: "calc(55% - 60px)" }}>
+                    <div className="absolute z-20 hidden md:block" style={{ bottom: "28px", right: "40px" }}>
                       {showcaseTabs[showcaseTab].cards[2]}
                     </div>
                   )}
-                  <div className="hidden md:block absolute left-0 top-0 bottom-0 w-[50%] z-10" style={{ background: `linear-gradient(to right, ${showcaseTabs[showcaseTab].gradientBase} 40%, transparent 100%)` }} />
+                  <div className="hidden md:block absolute left-0 top-0 bottom-0 w-[48%] z-10" style={{ background: `linear-gradient(to right, ${showcaseTabs[showcaseTab].gradientBase} 50%, transparent 100%)` }} />
                 </div>
               </div>
             </section>
