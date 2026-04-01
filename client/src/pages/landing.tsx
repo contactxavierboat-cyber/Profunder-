@@ -5360,7 +5360,7 @@ export default function LandingPage() {
                   <span key={r} className="text-[12px] px-3 py-1.5 bg-[#f5f5f5] text-[#666] font-medium rounded-full flex items-center gap-1.5"><span className="w-4 h-4 rounded-full bg-[#ddd] shrink-0" />{r}</span>
                 ))}
               </div>
-              <button className="w-full sm:w-auto px-6 py-4 sm:py-3.5 border border-[#ddd] sm:border-0 sm:bg-[#111] text-[#111] sm:text-white text-[14px] font-semibold hover:bg-[#f5f5f5] sm:hover:bg-[#333] transition-colors" data-testid="btn-watch-demo-1">Get Started</button>
+              <button className="px-5 py-2.5 bg-[#111] text-white text-[13px] font-semibold hover:bg-[#333] transition-colors" data-testid="btn-watch-demo-1">Get Started</button>
             </div>
           </div>
         </section>
@@ -5381,7 +5381,7 @@ export default function LandingPage() {
                   <span key={r} className="text-[12px] px-3 py-1.5 bg-[#f5f5f5] text-[#666] font-medium rounded-full flex items-center gap-1.5"><span className="w-4 h-4 rounded-full bg-[#ddd] shrink-0" />{r}</span>
                 ))}
               </div>
-              <button className="w-full sm:w-auto px-6 py-4 sm:py-3.5 border border-[#ddd] sm:border-0 sm:bg-[#111] text-[#111] sm:text-white text-[14px] font-semibold hover:bg-[#f5f5f5] sm:hover:bg-[#333] transition-colors" data-testid="btn-watch-demo-2">Upload Report</button>
+              <button className="px-5 py-2.5 bg-[#111] text-white text-[13px] font-semibold hover:bg-[#333] transition-colors" data-testid="btn-watch-demo-2">Upload Report</button>
             </div>
             <div className="flex-1 order-1 md:order-2">
               <div className="relative">
@@ -5442,7 +5442,7 @@ export default function LandingPage() {
                   <span key={r} className="text-[12px] px-3 py-1.5 bg-[#f5f5f5] text-[#666] font-medium rounded-full flex items-center gap-1.5"><span className="w-4 h-4 rounded-full bg-[#ddd] shrink-0" />{r}</span>
                 ))}
               </div>
-              <button className="w-full sm:w-auto px-6 py-4 sm:py-3.5 border border-[#ddd] sm:border-0 sm:bg-[#111] text-[#111] sm:text-white text-[14px] font-semibold hover:bg-[#f5f5f5] sm:hover:bg-[#333] transition-colors" data-testid="btn-watch-demo-3">See Your Matches</button>
+              <button className="px-5 py-2.5 bg-[#111] text-white text-[13px] font-semibold hover:bg-[#333] transition-colors" data-testid="btn-watch-demo-3">See Your Matches</button>
             </div>
           </div>
         </section>
@@ -5541,10 +5541,10 @@ export default function LandingPage() {
           );
         })()}
 
-        <section className="py-10 sm:py-6 px-5 sm:px-6 bg-white sm:bg-[#111] border-t border-[#f0f0f0] sm:border-white/10" data-testid="front-cta-bar">
+        <section className="py-10 sm:py-6 px-5 sm:px-6 bg-[#111] border-t border-white/10" data-testid="front-cta-bar">
           <div className="max-w-[1100px] mx-auto flex flex-col sm:flex-row items-center justify-between gap-6 sm:gap-4">
-            <h3 className="text-[22px] sm:text-[22px] md:text-[28px] font-bold text-[#111] sm:text-white text-center sm:text-left leading-[1.2]" style={{ letterSpacing: "-0.02em" }}>Build your financial identity on Profundr</h3>
-            <button onClick={() => { setShowFrontPage(false); setAutoSendFile(true); handleUploadClick(); }} className="w-full sm:w-auto px-6 py-4 sm:py-3.5 border border-[#111] sm:border-white text-[#111] sm:text-white text-[14px] font-semibold sm:hover:bg-white sm:hover:text-[#111] transition-colors shrink-0" data-testid="front-btn-final-cta">Start Free Trial</button>
+            <h3 className="text-[22px] sm:text-[22px] md:text-[28px] font-bold text-white text-center sm:text-left leading-[1.2]" style={{ letterSpacing: "-0.02em" }}>Build your financial identity on Profundr</h3>
+            <button onClick={() => { setShowFrontPage(false); setAutoSendFile(true); handleUploadClick(); }} className="px-5 py-2.5 bg-white text-[#111] text-[13px] font-semibold hover:bg-white/90 transition-colors shrink-0" data-testid="front-btn-final-cta">Start Free Trial</button>
           </div>
         </section>
 
