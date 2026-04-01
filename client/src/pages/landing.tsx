@@ -4921,38 +4921,53 @@ export default function LandingPage() {
           </div>
         </section>
 
-        <section className="pt-4 pb-10 overflow-hidden" data-testid="front-founders-strip">
+        <section className="overflow-hidden" data-testid="front-founders-strip">
           <style>{`
             @keyframes scrollFounders {
               0% { transform: translateX(0); }
               100% { transform: translateX(-50%); }
             }
           `}</style>
-          <div className="flex" style={{ animation: "scrollFounders 30s linear infinite", width: "max-content" }}>
+          <div className="flex" style={{ animation: "scrollFounders 35s linear infinite", width: "max-content" }}>
             {[...Array(2)].map((_, setIdx) => (
-              <div key={setIdx} className="flex gap-5 px-2.5">
+              <div key={setIdx} className="flex gap-[6px]">
                 {[
-                  { img: "/founders/founder1.jpg", name: "Maya R.", title: "E-commerce Founder", result: "Approved $45K LOC" },
-                  { img: "/founders/founder2.jpg", name: "Sofia L.", title: "Marketing Agency", result: "Score +92 pts in 60 days" },
-                  { img: "/founders/founder3.jpg", name: "Kwame A.", title: "Tech Startup CEO", result: "Funded $120K SBA" },
-                  { img: "/founders/founder4.jpg", name: "Darius J.", title: "Real Estate Investor", result: "4 approvals in 3 weeks" },
-                  { img: "/founders/founder5.jpg", name: "Arjun P.", title: "SaaS Founder", result: "Matched with 6 lenders" },
-                  { img: "/founders/founder6.jpg", name: "Ravi M.", title: "Import/Export Business", result: "Removed 5 neg items" },
-                  { img: "/founders/founder7.jpg", name: "Suresh K.", title: "Consulting Firm Owner", result: "Approved $75K term loan" },
-                  { img: "/founders/founder8.jpg", name: "Amara N.", title: "Restaurant Owner", result: "AIS 41 → 78 in 90 days" },
-                  { img: "/founders/founder9.jpg", name: "Keisha T.", title: "Agency Founder", result: "3 tradelines added" },
-                  { img: "/founders/founder10.jpg", name: "Carmen D.", title: "Boutique Owner", result: "$60K business LOC" },
-                  { img: "/founders/founder11.jpg", name: "Jasmine W.", title: "Freelance Creative", result: "Score 580 → 720" },
+                  { img: "/founders/founder1.jpg", name: "Maya R.", title: "E-commerce founder" },
+                  { img: "/founders/founder2.jpg", name: "Sofia L.", title: "Marketing agency" },
+                  { img: "/founders/founder3.jpg", name: "Kwame A.", title: "Tech startup CEO" },
+                  { img: "/founders/founder4.jpg", name: "Darius J.", title: "Real estate investor" },
+                  { img: "/founders/founder5.jpg", name: "Arjun P.", title: "SaaS founder" },
+                  { img: "/founders/founder6.jpg", name: "Ravi M.", title: "Import/export business" },
+                  { img: "/founders/founder7.jpg", name: "Suresh K.", title: "Consulting firm owner" },
+                  { img: "/founders/founder8.jpg", name: "Amara N.", title: "Restaurant owner" },
+                  { img: "/founders/founder9.jpg", name: "Keisha T.", title: "Agency founder" },
+                  { img: "/founders/founder10.jpg", name: "Carmen D.", title: "Boutique owner" },
+                  { img: "/founders/founder11.jpg", name: "Jasmine W.", title: "Freelance creative" },
                 ].map((founder) => (
-                  <div key={founder.name} className="w-[220px] shrink-0" data-testid={`founder-card-${founder.name.replace(/\s+/g, "-").toLowerCase()}`}>
-                    <div className="w-[220px] h-[280px] rounded-2xl overflow-hidden mb-3 bg-[#f0f0f0]">
-                      <img src={founder.img} alt={founder.name} className="w-full h-full object-cover" loading="lazy" />
+                  <div key={founder.name} className="w-[300px] h-[380px] shrink-0 relative overflow-hidden" data-testid={`founder-card-${founder.name.replace(/\s+/g, "-").toLowerCase()}`}>
+                    <img src={founder.img} alt={founder.name} className="w-full h-full object-cover" loading="lazy" />
+                    <div className="absolute bottom-0 left-0 right-0 p-5" style={{ background: "linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0) 100%)" }}>
+                      <p className="text-[15px] font-semibold text-white">{founder.name}</p>
+                      <p className="text-[13px] text-white/80">{founder.title}</p>
                     </div>
-                    <p className="text-[14px] font-semibold text-[#111]">{founder.name}</p>
-                    <p className="text-[12px] text-[#888]">{founder.title}</p>
-                    <p className="text-[11px] text-[#555] font-medium mt-0.5">{founder.result}</p>
                   </div>
                 ))}
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <section className="py-16 px-6 bg-white" data-testid="front-stats">
+          <div className="max-w-[1000px] mx-auto flex flex-wrap items-start justify-center gap-x-20 gap-y-8">
+            {[
+              { value: "12,400+", label: "Credit deletions generated" },
+              { value: "$38M+", label: "Funding matched to founders" },
+              { value: "23", label: "Data points analyzed per report" },
+              { value: "94%", label: "Dispute success rate" },
+            ].map((stat) => (
+              <div key={stat.label} className="text-center" data-testid={`stat-${stat.label.replace(/\s+/g, "-").toLowerCase()}`}>
+                <p className="text-[42px] font-bold text-[#111] tracking-tight leading-none">{stat.value}</p>
+                <p className="text-[14px] text-[#888] mt-2">{stat.label}</p>
               </div>
             ))}
           </div>
