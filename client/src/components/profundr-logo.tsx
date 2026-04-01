@@ -21,11 +21,15 @@ export function ProfundrLogo({ size = "sm", variant = "light", className = "" }:
       aria-label="profundr."
     >
       <img
-        src="/profundr-logo.png"
+        src="/profundr-brain-logo.png"
         alt=""
         width={s.iconSize}
         height={s.iconSize}
-        style={{ display: "block" }}
+        style={{
+          display: "block",
+          borderRadius: "4px",
+          filter: variant === "dark" ? "invert(1)" : "none",
+        }}
       />
       <span
         style={{
