@@ -5318,47 +5318,51 @@ export default function LandingPage() {
         <section className="py-[50px] sm:py-[80px] px-2 sm:px-6 bg-white border-t border-[#f0f0f0]" data-testid="front-all-in-one">
           <div className="max-w-[1100px] mx-auto flex flex-col md:flex-row items-center gap-10 sm:gap-12">
             <div className="flex-1 w-full">
-              <div className="rounded-xl sm:rounded-2xl relative" style={{ background: "#f0ede8", minHeight: "460px", padding: "32px 24px" }}>
-                <div className="bg-white rounded-xl p-4 shadow-md inline-block mb-3" style={{ maxWidth: "180px" }}>
-                  <p className="text-[13px] font-semibold text-[#111] mb-2">Upload bureau report</p>
-                  <div className="flex items-center gap-2 bg-[#f5f5f5] rounded-lg px-3 py-2">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12l7-7 7 7" stroke="#111" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                    <span className="text-[11px] text-[#555]">credit_report.pdf</span>
-                  </div>
-                  <div className="mt-2 bg-[#111] text-white text-[11px] font-semibold rounded-lg px-3 py-1.5 text-center">Analyze</div>
-                </div>
-
-                <svg className="absolute" style={{ left: "60px", top: "175px" }} width="2" height="40"><line x1="1" y1="0" x2="1" y2="40" stroke="#ccc" strokeWidth="1.5" strokeDasharray="4 3"/></svg>
-
-                <div className="flex items-center gap-2 mb-3" style={{ marginTop: "12px" }}>
-                  <div className="w-5 h-5 rounded-full bg-[#2d6a4f] flex items-center justify-center"><svg width="10" height="10" viewBox="0 0 16 16" fill="none"><path d="M4 8l3 3 5-5" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg></div>
-                  <span className="text-[12px] font-medium text-[#333]">AIS Score generated</span>
-                </div>
-
-                <svg className="absolute" style={{ left: "60px", top: "248px" }} width="2" height="30"><line x1="1" y1="0" x2="1" y2="30" stroke="#ccc" strokeWidth="1.5" strokeDasharray="4 3"/></svg>
-
-                <div className="flex items-center gap-2" style={{ marginTop: "8px" }}>
-                  <div className="w-5 h-5 rounded-full bg-[#111] flex items-center justify-center"><svg width="10" height="10" viewBox="0 0 24 24" fill="none"><path d="M4 4h16v16H4z" stroke="white" strokeWidth="2"/><path d="M8 12h8M12 8v8" stroke="white" strokeWidth="1.5"/></svg></div>
-                  <span className="text-[12px] font-medium text-[#333]">Dispute letters ready</span>
-                </div>
-
-                <div className="absolute bg-white rounded-xl shadow-lg border border-[#f0f0f0] overflow-hidden" style={{ right: "20px", top: "80px", width: "55%" }}>
-                  <img src="/founders/founder6.jpg" alt="" className="w-full h-[140px] object-cover object-top" />
-                  <div className="p-3">
-                    <p className="text-[13px] font-bold text-[#111]">AIS Score: 84</p>
-                    <div className="flex items-center justify-between mt-2">
-                      <span className="text-[10px] text-[#888]">Bureau Health</span>
-                      <span className="text-[10px] font-semibold text-[#2d6a4f]">Strong</span>
+              <div className="rounded-xl sm:rounded-2xl" style={{ background: "#f0ede8", padding: "28px 20px" }}>
+                <div className="flex gap-4 items-start">
+                  <div className="shrink-0" style={{ width: "42%" }}>
+                    <div className="bg-white rounded-xl p-3 shadow-md mb-3">
+                      <p className="text-[12px] font-semibold text-[#111] mb-2">Upload bureau report</p>
+                      <div className="flex items-center gap-2 bg-[#f5f5f5] rounded-lg px-2.5 py-1.5">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12l7-7 7 7" stroke="#111" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                        <span className="text-[10px] text-[#555]">credit_report.pdf</span>
+                      </div>
+                      <div className="mt-2 bg-[#111] text-white text-[10px] font-semibold rounded-lg px-2.5 py-1.5 text-center">Analyze</div>
                     </div>
-                    <div className="flex items-center justify-between mt-1">
-                      <span className="text-[10px] text-[#888]">Disputes Filed</span>
-                      <span className="text-[10px] font-semibold text-[#111]">7</span>
+
+                    <svg className="ml-5" width="2" height="24"><line x1="1" y1="0" x2="1" y2="24" stroke="#ccc" strokeWidth="1.5" strokeDasharray="4 3"/></svg>
+
+                    <div className="flex items-center gap-2 my-2">
+                      <div className="w-5 h-5 rounded-full bg-[#2d6a4f] flex items-center justify-center shrink-0"><svg width="10" height="10" viewBox="0 0 16 16" fill="none"><path d="M4 8l3 3 5-5" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg></div>
+                      <span className="text-[11px] font-medium text-[#333]">AIS Score generated</span>
                     </div>
-                    <div className="mt-2 w-full h-1.5 bg-[#e8e8e8] rounded-full overflow-hidden"><div className="h-full bg-[#2d6a4f] rounded-full" style={{ width: "84%" }} /></div>
+
+                    <svg className="ml-5" width="2" height="20"><line x1="1" y1="0" x2="1" y2="20" stroke="#ccc" strokeWidth="1.5" strokeDasharray="4 3"/></svg>
+
+                    <div className="flex items-center gap-2 mt-2">
+                      <div className="w-5 h-5 rounded-full bg-[#111] flex items-center justify-center shrink-0"><svg width="10" height="10" viewBox="0 0 24 24" fill="none"><path d="M4 4h16v16H4z" stroke="white" strokeWidth="2"/><path d="M8 12h8M12 8v8" stroke="white" strokeWidth="1.5"/></svg></div>
+                      <span className="text-[11px] font-medium text-[#333]">Dispute letters ready</span>
+                    </div>
+                  </div>
+
+                  <div className="flex-1 pt-4">
+                    <div className="bg-white rounded-xl shadow-lg border border-[#f0f0f0] overflow-hidden">
+                      <img src="/founders/founder6.jpg" alt="" className="w-full h-[140px] object-cover object-top" />
+                      <div className="p-3">
+                        <p className="text-[13px] font-bold text-[#111]">AIS Score: 84</p>
+                        <div className="flex items-center justify-between mt-2">
+                          <span className="text-[10px] text-[#888]">Bureau Health</span>
+                          <span className="text-[10px] font-semibold text-[#2d6a4f]">Strong</span>
+                        </div>
+                        <div className="flex items-center justify-between mt-1">
+                          <span className="text-[10px] text-[#888]">Disputes Filed</span>
+                          <span className="text-[10px] font-semibold text-[#111]">7</span>
+                        </div>
+                        <div className="mt-2 w-full h-1.5 bg-[#e8e8e8] rounded-full overflow-hidden"><div className="h-full bg-[#2d6a4f] rounded-full" style={{ width: "84%" }} /></div>
+                      </div>
+                    </div>
                   </div>
                 </div>
-
-                <svg className="absolute hidden sm:block" style={{ left: "180px", top: "160px" }} width="60" height="2"><line x1="0" y1="1" x2="60" y2="1" stroke="#ccc" strokeWidth="1.5" strokeDasharray="4 3"/></svg>
               </div>
             </div>
             <div className="flex-1">
@@ -5399,48 +5403,45 @@ export default function LandingPage() {
               <div className="text-center sm:text-left"><button className="px-5 py-2.5 bg-[#111] text-white text-[13px] font-semibold hover:bg-[#333] transition-colors" data-testid="btn-watch-demo-2">Upload Report</button></div>
             </div>
             <div className="flex-1 order-1 md:order-2 w-full">
-              <div className="rounded-xl sm:rounded-2xl relative" style={{ background: "#f0ede8", minHeight: "460px", padding: "32px 24px" }}>
-                <div className="bg-white rounded-xl px-4 py-3 shadow-md inline-flex items-center gap-2 mb-3">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="18" height="18" rx="3" stroke="#111" strokeWidth="1.5"/><path d="M8 12h8" stroke="#111" strokeWidth="1.5" strokeLinecap="round"/></svg>
-                  <span className="text-[13px] font-semibold text-[#111]">Disputes</span>
-                </div>
-
-                <div className="flex items-center gap-2 mb-2 ml-2" style={{ marginTop: "6px" }}>
-                  <div className="w-4 h-4 rounded-full bg-[#2d6a4f] flex items-center justify-center"><svg width="8" height="8" viewBox="0 0 16 16" fill="none"><path d="M4 8l3 3 5-5" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/></svg></div>
-                  <span className="text-[11px] text-[#333]">Late Payment — Chase</span>
-                  <span className="text-[9px] font-semibold px-1.5 py-0.5 rounded bg-[#e8f5e9] text-[#2d6a4f]">Deleted</span>
-                </div>
-
-                <svg className="ml-4" width="2" height="20"><line x1="1" y1="0" x2="1" y2="20" stroke="#ccc" strokeWidth="1.5" strokeDasharray="4 3"/></svg>
-
-                <div className="flex items-center gap-2 mb-2 ml-2">
-                  <div className="w-4 h-4 rounded-full bg-[#f59e0b] flex items-center justify-center"><span className="text-[8px] text-white font-bold">!</span></div>
-                  <span className="text-[11px] text-[#333]">Collection — Midland</span>
-                  <span className="text-[9px] font-semibold px-1.5 py-0.5 rounded bg-[#fff8e1] text-[#f57f17]">Pending</span>
-                </div>
-
-                <svg className="ml-4" width="2" height="20"><line x1="1" y1="0" x2="1" y2="20" stroke="#ccc" strokeWidth="1.5" strokeDasharray="4 3"/></svg>
-
-                <div className="flex items-center gap-2 ml-2">
-                  <div className="w-4 h-4 rounded-full bg-[#1565c0] flex items-center justify-center"><span className="text-[8px] text-white font-bold">→</span></div>
-                  <span className="text-[11px] text-[#333]">Hard Inquiry — Amex</span>
-                  <span className="text-[9px] font-semibold px-1.5 py-0.5 rounded bg-[#e3f2fd] text-[#1565c0]">Filed</span>
-                </div>
-
-                <div className="absolute bg-white rounded-xl shadow-lg border border-[#f0f0f0] overflow-hidden" style={{ right: "20px", top: "60px", width: "55%" }}>
-                  <img src="/founders/founder5.jpg" alt="" className="w-full h-[140px] object-cover object-top" />
-                  <div className="p-3">
-                    <p className="text-[13px] font-bold text-[#111]">FCRA Dispute Letter</p>
-                    <p className="text-[10px] text-[#888] mt-1">Auto-generated · Equifax</p>
-                    <div className="flex items-center justify-between mt-2">
-                      <span className="text-[10px] text-[#888]">Deletion Rate</span>
-                      <span className="text-[14px] font-black text-[#2d6a4f]">73%</span>
+              <div className="rounded-xl sm:rounded-2xl" style={{ background: "#f0ede8", padding: "28px 20px" }}>
+                <div className="flex gap-4 items-start">
+                  <div className="shrink-0" style={{ width: "42%" }}>
+                    <div className="bg-white rounded-xl px-3 py-2.5 shadow-md inline-flex items-center gap-2 mb-3">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="18" height="18" rx="3" stroke="#111" strokeWidth="1.5"/><path d="M8 12h8" stroke="#111" strokeWidth="1.5" strokeLinecap="round"/></svg>
+                      <span className="text-[12px] font-semibold text-[#111]">Disputes</span>
                     </div>
-                    <div className="mt-2 bg-[#e8f5e9] text-[#2d6a4f] text-[11px] font-semibold rounded-lg px-3 py-1.5 text-center">Ready to Send</div>
+
+                    {[
+                      { color: "bg-[#2d6a4f]", icon: <svg width="8" height="8" viewBox="0 0 16 16" fill="none"><path d="M4 8l3 3 5-5" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/></svg>, name: "Late Payment — Chase", badge: "Deleted", bc: "bg-[#e8f5e9] text-[#2d6a4f]" },
+                      { color: "bg-[#f59e0b]", icon: <span className="text-[7px] text-white font-bold">!</span>, name: "Collection — Midland", badge: "Pending", bc: "bg-[#fff8e1] text-[#f57f17]" },
+                      { color: "bg-[#1565c0]", icon: <span className="text-[7px] text-white font-bold">→</span>, name: "Hard Inquiry — Amex", badge: "Filed", bc: "bg-[#e3f2fd] text-[#1565c0]" },
+                    ].map((d, i) => (
+                      <div key={d.name}>
+                        {i > 0 && <svg className="ml-4" width="2" height="16"><line x1="1" y1="0" x2="1" y2="16" stroke="#ccc" strokeWidth="1.5" strokeDasharray="4 3"/></svg>}
+                        <div className="flex items-center gap-1.5 my-1.5">
+                          <div className={`w-4 h-4 rounded-full ${d.color} flex items-center justify-center shrink-0`}>{d.icon}</div>
+                          <span className="text-[10px] text-[#333] leading-tight">{d.name}</span>
+                          <span className={`text-[8px] font-semibold px-1 py-0.5 rounded shrink-0 ${d.bc}`}>{d.badge}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="flex-1 pt-4">
+                    <div className="bg-white rounded-xl shadow-lg border border-[#f0f0f0] overflow-hidden">
+                      <img src="/founders/founder5.jpg" alt="" className="w-full h-[140px] object-cover object-top" />
+                      <div className="p-3">
+                        <p className="text-[13px] font-bold text-[#111]">FCRA Dispute Letter</p>
+                        <p className="text-[10px] text-[#888] mt-1">Auto-generated · Equifax</p>
+                        <div className="flex items-center justify-between mt-2">
+                          <span className="text-[10px] text-[#888]">Deletion Rate</span>
+                          <span className="text-[14px] font-black text-[#2d6a4f]">73%</span>
+                        </div>
+                        <div className="mt-2 bg-[#e8f5e9] text-[#2d6a4f] text-[11px] font-semibold rounded-lg px-3 py-1.5 text-center">Ready to Send</div>
+                      </div>
+                    </div>
                   </div>
                 </div>
-
-                <svg className="absolute hidden sm:block" style={{ left: "170px", top: "140px" }} width="50" height="2"><line x1="0" y1="1" x2="50" y2="1" stroke="#ccc" strokeWidth="1.5" strokeDasharray="4 3"/></svg>
               </div>
             </div>
           </div>
@@ -5449,44 +5450,50 @@ export default function LandingPage() {
         <section className="py-[50px] sm:py-[80px] px-2 sm:px-6 bg-[#fafafa] border-t border-[#f0f0f0]" data-testid="front-funnels">
           <div className="max-w-[1100px] mx-auto flex flex-col md:flex-row items-center gap-10 sm:gap-12">
             <div className="flex-1 w-full">
-              <div className="rounded-xl sm:rounded-2xl relative" style={{ background: "#f0ede8", minHeight: "460px", padding: "32px 24px" }}>
-                <div className="bg-white rounded-xl px-4 py-3 shadow-md inline-flex items-center gap-2 mb-3">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 2L3 7v10l9 5 9-5V7l-9-5z" stroke="#111" strokeWidth="1.5" strokeLinejoin="round"/></svg>
-                  <span className="text-[13px] font-semibold text-[#111]">Capital Match</span>
-                </div>
-
-                {[{ icon: "B", name: "Bluevine", detail: "LOC · $75K" }, { icon: "O", name: "OnDeck", detail: "Term · $50K" }, { icon: "F", name: "Fundbox", detail: "LOC · $35K" }].map((l, i) => (
-                  <div key={l.name}>
-                    <div className="flex items-center gap-2 ml-2 mb-1" style={{ marginTop: i === 0 ? "6px" : "2px" }}>
-                      <div className="w-4 h-4 rounded-full bg-[#111] flex items-center justify-center"><span className="text-[8px] text-white font-bold">{l.icon}</span></div>
-                      <span className="text-[11px] text-[#333]">{l.name}</span>
-                      <span className="text-[9px] text-[#888]">{l.detail}</span>
+              <div className="rounded-xl sm:rounded-2xl" style={{ background: "#f0ede8", padding: "28px 20px" }}>
+                <div className="flex gap-4 items-start">
+                  <div className="shrink-0" style={{ width: "42%" }}>
+                    <div className="bg-white rounded-xl px-3 py-2.5 shadow-md inline-flex items-center gap-2 mb-3">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M12 2L3 7v10l9 5 9-5V7l-9-5z" stroke="#111" strokeWidth="1.5" strokeLinejoin="round"/></svg>
+                      <span className="text-[12px] font-semibold text-[#111]">Capital Match</span>
                     </div>
-                    {i < 2 && <svg className="ml-4" width="2" height="16"><line x1="1" y1="0" x2="1" y2="16" stroke="#ccc" strokeWidth="1.5" strokeDasharray="4 3"/></svg>}
-                  </div>
-                ))}
 
-                <div className="flex items-center gap-2 ml-2 mt-3">
-                  <div className="w-4 h-4 rounded-full bg-[#2d6a4f] flex items-center justify-center"><svg width="8" height="8" viewBox="0 0 16 16" fill="none"><path d="M4 8l3 3 5-5" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/></svg></div>
-                  <span className="text-[11px] font-medium text-[#2d6a4f]">3 matches ready</span>
-                </div>
+                    {[{ icon: "B", name: "Bluevine", detail: "LOC · $75K" }, { icon: "O", name: "OnDeck", detail: "Term · $50K" }, { icon: "F", name: "Fundbox", detail: "LOC · $35K" }].map((l, i) => (
+                      <div key={l.name}>
+                        {i > 0 && <svg className="ml-4" width="2" height="16"><line x1="1" y1="0" x2="1" y2="16" stroke="#ccc" strokeWidth="1.5" strokeDasharray="4 3"/></svg>}
+                        <div className="flex items-center gap-1.5 my-1.5">
+                          <div className="w-4 h-4 rounded-full bg-[#111] flex items-center justify-center shrink-0"><span className="text-[7px] text-white font-bold">{l.icon}</span></div>
+                          <span className="text-[10px] text-[#333]">{l.name}</span>
+                          <span className="text-[8px] text-[#888]">{l.detail}</span>
+                        </div>
+                      </div>
+                    ))}
 
-                <div className="absolute bg-white rounded-xl shadow-lg border border-[#f0f0f0] overflow-hidden" style={{ right: "20px", top: "60px", width: "55%" }}>
-                  <img src="/founders/founder10.jpg" alt="" className="w-full h-[140px] object-cover object-top" />
-                  <div className="p-3">
-                    <p className="text-[13px] font-bold text-[#111]">Funded: $120K LOC</p>
-                    <p className="text-[10px] text-[#888] mt-1">AIS 58 → funded in 47 days</p>
-                    <div className="flex items-center justify-between mt-2">
-                      <span className="text-[10px] text-[#888]">Match Rate</span>
-                      <span className="text-[14px] font-black text-[#2d6a4f]">92%</span>
-                    </div>
-                    <div className="mt-2 flex items-center gap-1">
-                      {[1,2,3,4,5].map((s) => (<svg key={s} width="11" height="11" viewBox="0 0 16 16"><polygon points="8,1 10,6 16,6 11,9.5 13,15 8,11.5 3,15 5,9.5 0,6 6,6" fill="#f59e0b"/></svg>))}
+                    <svg className="ml-4" width="2" height="16"><line x1="1" y1="0" x2="1" y2="16" stroke="#ccc" strokeWidth="1.5" strokeDasharray="4 3"/></svg>
+
+                    <div className="flex items-center gap-1.5 mt-1">
+                      <div className="w-4 h-4 rounded-full bg-[#2d6a4f] flex items-center justify-center shrink-0"><svg width="8" height="8" viewBox="0 0 16 16" fill="none"><path d="M4 8l3 3 5-5" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/></svg></div>
+                      <span className="text-[10px] font-medium text-[#2d6a4f]">3 matches ready</span>
                     </div>
                   </div>
-                </div>
 
-                <svg className="absolute hidden sm:block" style={{ left: "160px", top: "120px" }} width="50" height="2"><line x1="0" y1="1" x2="50" y2="1" stroke="#ccc" strokeWidth="1.5" strokeDasharray="4 3"/></svg>
+                  <div className="flex-1 pt-4">
+                    <div className="bg-white rounded-xl shadow-lg border border-[#f0f0f0] overflow-hidden">
+                      <img src="/founders/founder10.jpg" alt="" className="w-full h-[140px] object-cover object-top" />
+                      <div className="p-3">
+                        <p className="text-[13px] font-bold text-[#111]">Funded: $120K LOC</p>
+                        <p className="text-[10px] text-[#888] mt-1">AIS 58 → funded in 47 days</p>
+                        <div className="flex items-center justify-between mt-2">
+                          <span className="text-[10px] text-[#888]">Match Rate</span>
+                          <span className="text-[14px] font-black text-[#2d6a4f]">92%</span>
+                        </div>
+                        <div className="mt-2 flex items-center gap-1">
+                          {[1,2,3,4,5].map((s) => (<svg key={s} width="11" height="11" viewBox="0 0 16 16"><polygon points="8,1 10,6 16,6 11,9.5 13,15 8,11.5 3,15 5,9.5 0,6 6,6" fill="#f59e0b"/></svg>))}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
             <div className="flex-1">
