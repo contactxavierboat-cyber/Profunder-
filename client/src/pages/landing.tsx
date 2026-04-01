@@ -5360,7 +5360,7 @@ export default function LandingPage() {
                   <span key={r} className="text-[12px] px-3 py-1.5 bg-[#f5f5f5] text-[#666] font-medium rounded-full flex items-center gap-1.5"><span className="w-4 h-4 rounded-full bg-[#ddd] shrink-0" />{r}</span>
                 ))}
               </div>
-              <button className="px-5 py-2.5 bg-[#111] text-white text-[13px] font-semibold hover:bg-[#333] transition-colors" data-testid="btn-watch-demo-1">Get Started</button>
+              <div className="text-center sm:text-left"><button className="px-5 py-2.5 bg-[#111] text-white text-[13px] font-semibold hover:bg-[#333] transition-colors" data-testid="btn-watch-demo-1">Get Started</button></div>
             </div>
           </div>
         </section>
@@ -5381,7 +5381,7 @@ export default function LandingPage() {
                   <span key={r} className="text-[12px] px-3 py-1.5 bg-[#f5f5f5] text-[#666] font-medium rounded-full flex items-center gap-1.5"><span className="w-4 h-4 rounded-full bg-[#ddd] shrink-0" />{r}</span>
                 ))}
               </div>
-              <button className="px-5 py-2.5 bg-[#111] text-white text-[13px] font-semibold hover:bg-[#333] transition-colors" data-testid="btn-watch-demo-2">Upload Report</button>
+              <div className="text-center sm:text-left"><button className="px-5 py-2.5 bg-[#111] text-white text-[13px] font-semibold hover:bg-[#333] transition-colors" data-testid="btn-watch-demo-2">Upload Report</button></div>
             </div>
             <div className="flex-1 order-1 md:order-2">
               <div className="relative">
@@ -5442,7 +5442,7 @@ export default function LandingPage() {
                   <span key={r} className="text-[12px] px-3 py-1.5 bg-[#f5f5f5] text-[#666] font-medium rounded-full flex items-center gap-1.5"><span className="w-4 h-4 rounded-full bg-[#ddd] shrink-0" />{r}</span>
                 ))}
               </div>
-              <button className="px-5 py-2.5 bg-[#111] text-white text-[13px] font-semibold hover:bg-[#333] transition-colors" data-testid="btn-watch-demo-3">See Your Matches</button>
+              <div className="text-center sm:text-left"><button className="px-5 py-2.5 bg-[#111] text-white text-[13px] font-semibold hover:bg-[#333] transition-colors" data-testid="btn-watch-demo-3">See Your Matches</button></div>
             </div>
           </div>
         </section>
