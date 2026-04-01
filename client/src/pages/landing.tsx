@@ -4838,6 +4838,7 @@ export default function LandingPage() {
   const [showFrontPage, setShowFrontPage] = useState(!user && !hasMessages);
   const [showcaseTab, setShowcaseTab] = useState(0);
   const [testIdx, setTestIdx] = useState(0);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [faqOpen, setFaqOpen] = useState<number | null>(null);
 
   useEffect(() => {
@@ -4894,27 +4895,30 @@ export default function LandingPage() {
                 Get Started
               </button>
               <button
-                onClick={() => {
-                  const mobileMenu = document.getElementById('mobile-menu');
-                  if (mobileMenu) mobileMenu.classList.toggle('hidden');
-                }}
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
                 className="sm:hidden w-10 h-10 flex items-center justify-center"
                 data-testid="front-btn-hamburger"
               >
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#111" strokeWidth="2" strokeLinecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+                {mobileMenuOpen ? (
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#111" strokeWidth="2" strokeLinecap="round"><line x1="6" y1="6" x2="18" y2="18"/><line x1="6" y1="18" x2="18" y2="6"/></svg>
+                ) : (
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#111" strokeWidth="2" strokeLinecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+                )}
               </button>
             </div>
           </div>
-          <div id="mobile-menu" className="hidden sm:hidden border-t border-[#f0f0f0] bg-white px-4 py-4 space-y-4">
-            <a href="#features" className="block text-[15px] text-[#555]">Features</a>
-            <a href="#how-it-works" className="block text-[15px] text-[#555]">How It Works</a>
-            <a href="#pricing" className="block text-[15px] text-[#555]">Pricing</a>
-            <a href="#faq" className="block text-[15px] text-[#555]">FAQ</a>
-            <div className="pt-2 border-t border-[#f0f0f0] flex flex-col gap-3">
-              <button onClick={() => setShowFrontPage(false)} className="text-[15px] text-[#555] text-left" data-testid="front-mobile-login">Log In</button>
-              <button onClick={() => window.location.href = '/subscription'} className="w-full py-3 bg-[#111] text-white text-[14px] font-semibold" data-testid="front-mobile-get-started">Get Started</button>
+          {mobileMenuOpen && (
+            <div className="sm:hidden border-t border-[#f0f0f0] bg-white px-4 py-4 space-y-4">
+              <a href="#features" onClick={() => setMobileMenuOpen(false)} className="block text-[15px] text-[#555]">Features</a>
+              <a href="#how-it-works" onClick={() => setMobileMenuOpen(false)} className="block text-[15px] text-[#555]">How It Works</a>
+              <a href="#pricing" onClick={() => setMobileMenuOpen(false)} className="block text-[15px] text-[#555]">Pricing</a>
+              <a href="#faq" onClick={() => setMobileMenuOpen(false)} className="block text-[15px] text-[#555]">FAQ</a>
+              <div className="pt-2 border-t border-[#f0f0f0] flex flex-col gap-3">
+                <button onClick={() => { setMobileMenuOpen(false); setShowFrontPage(false); }} className="text-[15px] text-[#555] text-left" data-testid="front-mobile-login">Log In</button>
+                <button onClick={() => { setMobileMenuOpen(false); window.location.href = '/subscription'; }} className="w-full py-3 bg-[#111] text-white text-[14px] font-semibold" data-testid="front-mobile-get-started">Get Started</button>
+              </div>
             </div>
-          </div>
+          )}
         </nav>
 
         <section className="pt-[80px] sm:pt-[120px] pb-[40px] sm:pb-[50px] px-4 sm:px-6" data-testid="front-hero">
