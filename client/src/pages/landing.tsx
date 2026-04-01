@@ -4929,17 +4929,17 @@ export default function LandingPage() {
             <p className="text-[15px] sm:text-[18px] text-[#555] leading-[1.7] sm:leading-[1.6] max-w-[340px] sm:max-w-[480px] mx-auto mb-8 sm:mb-10" style={{ fontFamily: "'Inter', system-ui, sans-serif" }} data-testid="text-front-hero-sub">
               Everything you need to analyze your credit profile — plus an <span className="underline underline-offset-[3px] decoration-[1px] decoration-[#999]">AI capital partner</span> to help you get funded.
             </p>
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-0 sm:gap-4 mb-5 sm:mb-6 w-full sm:max-w-none mx-auto px-1 sm:px-0">
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-4 mb-5 sm:mb-6 w-full sm:max-w-none mx-auto">
               <button
                 onClick={() => { setShowFrontPage(false); setAutoSendFile(true); handleUploadClick(); }}
-                className="w-full sm:w-auto px-8 py-4 sm:py-3.5 bg-transparent border border-[#111] sm:border-0 sm:bg-[#111] text-[#111] sm:text-white text-[15px] font-semibold sm:hover:bg-[#333] transition-colors"
+                className="px-8 py-3 sm:py-3.5 bg-[#111] border border-[#111] text-white text-[14px] font-semibold hover:bg-[#333] transition-colors"
                 data-testid="front-btn-upload-hero"
               >
                 Upload Report
               </button>
               <button
                 onClick={() => { setShowFrontPage(false); }}
-                className="w-full sm:w-auto px-8 py-3 sm:py-3.5 text-[#555] text-[15px] font-medium sm:border sm:border-[#ddd] sm:hover:bg-[#f8f8f8] sm:hover:border-[#ccc] transition-colors"
+                className="px-8 py-2.5 sm:py-3.5 text-[#555] text-[14px] font-medium sm:border sm:border-[#ddd] sm:hover:bg-[#f8f8f8] transition-colors"
                 data-testid="front-btn-try-chat"
               >
                 Try the AI Chat
