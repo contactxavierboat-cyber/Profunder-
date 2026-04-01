@@ -4996,88 +4996,93 @@ export default function LandingPage() {
         <section className="py-[50px] sm:py-[60px] px-5 sm:px-6 bg-white" data-testid="front-problem-awareness">
           <div className="max-w-[600px] mx-auto text-center">
             <h2 className="text-[26px] sm:text-[34px] md:text-[40px] text-[#111] leading-[1.1] mb-5" style={{ fontFamily: "'Inter', system-ui, sans-serif", fontWeight: 900, letterSpacing: "-0.03em" }}>Most people get denied before they even apply</h2>
-            <p className="text-[14px] sm:text-[15px] text-[#555] leading-[1.7] mb-2">Banks don't guess. They read signals.</p>
-            <p className="text-[14px] sm:text-[15px] text-[#555] leading-[1.7] mb-2">Balances. Inquiries. Timing. Account history.</p>
-            <p className="text-[14px] sm:text-[15px] text-[#555] leading-[1.7]">Your profile already tells them yes or no — you just don't see it.</p>
+            <p className="text-[14px] sm:text-[15px] text-[#555] leading-[1.7] mb-2" style={{ textAlign: "justify", textAlignLast: "center" }}>Banks don't guess. They read signals.</p>
+            <p className="text-[14px] sm:text-[15px] text-[#555] leading-[1.7] mb-2" style={{ textAlign: "justify", textAlignLast: "center" }}>Balances. Inquiries. Timing. Account history.</p>
+            <p className="text-[14px] sm:text-[15px] text-[#555] leading-[1.7]" style={{ textAlign: "justify", textAlignLast: "center" }}>Your profile already tells them yes or no — you just don't see it.</p>
           </div>
         </section>
 
-        <section className="py-[40px] sm:py-[50px] px-5 sm:px-6 border-t border-[#f0f0f0]" style={{ backgroundColor: "#fafafa" }} data-testid="front-the-shift">
+        <section className="py-[50px] sm:py-[60px] px-5 sm:px-6" style={{ backgroundColor: "#fafafa" }} data-testid="front-the-shift">
           <div className="max-w-[600px] mx-auto text-center">
             <h2 className="text-[24px] sm:text-[32px] md:text-[38px] text-[#111] leading-[1.1] mb-5" style={{ fontFamily: "'Inter', system-ui, sans-serif", fontWeight: 900, letterSpacing: "-0.03em" }}>Banks already know if you'll be approved</h2>
-            <p className="text-[14px] sm:text-[15px] text-[#555] leading-[1.7] mb-2">The decision isn't random.</p>
-            <p className="text-[14px] sm:text-[15px] text-[#555] leading-[1.7] mb-2">The same profile can be approved or denied based on how it looks at the moment you apply.</p>
+            <p className="text-[14px] sm:text-[15px] text-[#555] leading-[1.7] mb-2" style={{ textAlign: "justify", textAlignLast: "center" }}>The decision isn't random.</p>
+            <p className="text-[14px] sm:text-[15px] text-[#555] leading-[1.7] mb-2" style={{ textAlign: "justify", textAlignLast: "center" }}>The same profile can be approved or denied based on how it looks at the moment you apply.</p>
             <p className="text-[16px] sm:text-[18px] font-bold text-[#111] leading-[1.4] mt-4" style={{ fontStyle: "italic" }}>Timing matters more than your score.</p>
           </div>
         </section>
 
-        <section className="py-[50px] sm:py-[60px] px-5 sm:px-6 border-t border-[#f0f0f0]" style={{ backgroundColor: "#f8f6f3" }} data-testid="front-applying-blind">
-          <div className="max-w-[600px] mx-auto text-center">
-            <h2 className="text-[24px] sm:text-[32px] md:text-[38px] text-[#111] leading-[1.1] mb-5" style={{ fontFamily: "'Inter', system-ui, sans-serif", fontWeight: 900, letterSpacing: "-0.03em" }}>Applying blind is expensive</h2>
-            <p className="text-[14px] sm:text-[15px] text-[#555] leading-[1.7] mb-2">Every application leaves a mark.</p>
-            <p className="text-[14px] sm:text-[15px] text-[#555] leading-[1.7] mb-2">Too many, too fast — and banks see risk.</p>
-            <p className="text-[14px] sm:text-[15px] text-[#555] leading-[1.7]">Most denials are predictable. You just don't see what they see.</p>
-          </div>
-        </section>
-
-        <section className="py-[50px] sm:py-[60px] px-5 sm:px-6 bg-white border-t border-[#f0f0f0]" data-testid="front-what-profundr-does">
+        <section className="py-[50px] sm:py-[60px] px-5 sm:px-6 bg-white" data-testid="front-what-profundr-does">
           <div className="max-w-[600px] mx-auto text-center">
             <h2 className="text-[24px] sm:text-[32px] md:text-[38px] text-[#111] leading-[1.1] mb-5" style={{ fontFamily: "'Inter', system-ui, sans-serif", fontWeight: 900, letterSpacing: "-0.03em" }}>This is how banks see you</h2>
-            <p className="text-[14px] sm:text-[15px] text-[#555] leading-[1.7] mb-6">Profundr analyzes your profile the same way lenders do — before you apply.</p>
-            <div className="text-left max-w-[400px] mx-auto mb-8">
+            <p className="text-[14px] sm:text-[15px] text-[#555] leading-[1.7] mb-6" style={{ textAlign: "justify", textAlignLast: "center" }}>Profundr analyzes your profile the same way lenders do — before you apply.</p>
+            <div className="max-w-[420px] mx-auto mb-6">
               {["If you're likely to be approved", "How much you may qualify for", "What's blocking your approval", "What to fix to unlock higher limits"].map((item) => (
-                <div key={item} className="flex items-start gap-3 mb-3 last:mb-0">
-                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="mt-0.5 shrink-0"><path d="M4 8l3 3 5-5" stroke="#111" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
-                  <span className="text-[14px] text-[#555] leading-[1.6]">{item}</span>
+                <div key={item} className="flex items-center gap-3 mb-3 last:mb-0 bg-[#fafafa] rounded-lg px-4 py-2.5">
+                  <div className="w-5 h-5 rounded-full bg-[#111] flex items-center justify-center shrink-0">
+                    <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M4 8l3 3 5-5" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                  </div>
+                  <span className="text-[14px] text-[#333] leading-[1.5] font-medium">{item}</span>
                 </div>
               ))}
             </div>
           </div>
         </section>
 
-        <section className="py-[40px] sm:py-[50px] px-5 sm:px-6 border-t border-[#f0f0f0]" style={{ backgroundColor: "#fafafa" }} data-testid="front-money-moment">
+        <section className="py-[50px] sm:py-[60px] px-5 sm:px-6 bg-[#111]" data-testid="front-money-moment">
           <div className="max-w-[500px] mx-auto text-center">
-            <h2 className="text-[24px] sm:text-[32px] md:text-[38px] text-[#111] leading-[1.1] mb-5" style={{ fontFamily: "'Inter', system-ui, sans-serif", fontWeight: 900, letterSpacing: "-0.03em" }}>Your potential funding range</h2>
-            <div className="inline-flex flex-col items-center gap-1 bg-white border border-[#f0f0f0] rounded-xl px-8 py-6 mb-5 shadow-sm">
-              <p className="text-[32px] sm:text-[40px] font-black text-[#111] leading-none">$15,000 – $75,000+</p>
-              <p className="text-[12px] text-[#888] mt-2">Based on your current profile signals</p>
+            <h2 className="text-[24px] sm:text-[32px] md:text-[38px] text-white leading-[1.1] mb-6" style={{ fontFamily: "'Inter', system-ui, sans-serif", fontWeight: 900, letterSpacing: "-0.03em" }}>Your potential funding range</h2>
+            <div className="inline-flex flex-col items-center gap-1 bg-white rounded-xl px-10 py-7 mb-6 shadow-2xl">
+              <p className="text-[36px] sm:text-[48px] font-black text-[#111] leading-none tracking-tight">$15,000 – $75,000<span className="text-[#2d6a4f]">+</span></p>
+              <p className="text-[12px] text-[#888] mt-2 uppercase tracking-wider">Based on your current profile signals</p>
             </div>
-            <p className="text-[14px] sm:text-[15px] text-[#555] leading-[1.7]">What you qualify for isn't guesswork — it's already in your data.</p>
+            <p className="text-[14px] sm:text-[15px] text-white/60 leading-[1.7]" style={{ textAlign: "justify", textAlignLast: "center" }}>What you qualify for isn't guesswork — it's already in your data.</p>
           </div>
         </section>
 
-        <section id="how-it-works" className="py-[50px] sm:py-[60px] px-5 sm:px-6 bg-white border-t border-[#f0f0f0] scroll-mt-16" data-testid="front-how-it-works-detail">
+        <section className="py-[50px] sm:py-[60px] px-5 sm:px-6" style={{ backgroundColor: "#f8f6f3" }} data-testid="front-applying-blind">
+          <div className="max-w-[600px] mx-auto text-center">
+            <h2 className="text-[24px] sm:text-[32px] md:text-[38px] text-[#111] leading-[1.1] mb-5" style={{ fontFamily: "'Inter', system-ui, sans-serif", fontWeight: 900, letterSpacing: "-0.03em" }}>Applying blind is expensive</h2>
+            <p className="text-[14px] sm:text-[15px] text-[#555] leading-[1.7] mb-2" style={{ textAlign: "justify", textAlignLast: "center" }}>Every application leaves a mark.</p>
+            <p className="text-[14px] sm:text-[15px] text-[#555] leading-[1.7] mb-2" style={{ textAlign: "justify", textAlignLast: "center" }}>Too many, too fast — and banks see risk.</p>
+            <p className="text-[14px] sm:text-[15px] text-[#555] leading-[1.7]" style={{ textAlign: "justify", textAlignLast: "center" }}>Most denials are predictable. You just don't see what they see.</p>
+          </div>
+        </section>
+
+        <section id="how-it-works" className="py-[50px] sm:py-[60px] px-5 sm:px-6 bg-white scroll-mt-16" data-testid="front-how-it-works-detail">
           <div className="max-w-[600px] mx-auto text-center">
             <h2 className="text-[24px] sm:text-[32px] md:text-[38px] text-[#111] leading-[1.1] mb-5" style={{ fontFamily: "'Inter', system-ui, sans-serif", fontWeight: 900, letterSpacing: "-0.03em" }}>Know before you apply</h2>
-            <p className="text-[14px] sm:text-[15px] text-[#555] leading-[1.7] mb-6">Profundr gives you a bank-level evaluation of your profile. If you applied today, it shows:</p>
-            <div className="text-left max-w-[400px] mx-auto mb-6">
+            <p className="text-[14px] sm:text-[15px] text-[#555] leading-[1.7] mb-6" style={{ textAlign: "justify", textAlignLast: "center" }}>If you applied today, Profundr shows:</p>
+            <div className="max-w-[420px] mx-auto mb-6">
               {["Your approval odds", "Your estimated funding range", "The exact risks affecting your profile"].map((item) => (
-                <div key={item} className="flex items-start gap-3 mb-3 last:mb-0">
-                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="mt-0.5 shrink-0"><path d="M4 8l3 3 5-5" stroke="#111" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
-                  <span className="text-[14px] text-[#555] leading-[1.6]">{item}</span>
+                <div key={item} className="flex items-center gap-3 mb-3 last:mb-0 bg-[#fafafa] rounded-lg px-4 py-2.5">
+                  <div className="w-5 h-5 rounded-full bg-[#111] flex items-center justify-center shrink-0">
+                    <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M4 8l3 3 5-5" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                  </div>
+                  <span className="text-[14px] text-[#333] leading-[1.5] font-medium">{item}</span>
                 </div>
               ))}
             </div>
-            <p className="text-[14px] sm:text-[15px] text-[#555] leading-[1.7]">So you can move with precision — not guesswork.</p>
+            <p className="text-[14px] sm:text-[15px] text-[#555] leading-[1.7]" style={{ textAlign: "justify", textAlignLast: "center" }}>So you can move with precision — not guesswork.</p>
           </div>
         </section>
 
-        <section className="py-[50px] sm:py-[60px] px-5 sm:px-6 border-t border-[#f0f0f0]" style={{ backgroundColor: "#fafafa" }} data-testid="front-positioning">
+        <section className="py-[50px] sm:py-[60px] px-5 sm:px-6" style={{ backgroundColor: "#fafafa" }} data-testid="front-positioning">
           <div className="max-w-[600px] mx-auto text-center">
             <h2 className="text-[24px] sm:text-[32px] md:text-[38px] text-[#111] leading-[1.1] mb-5" style={{ fontFamily: "'Inter', system-ui, sans-serif", fontWeight: 900, letterSpacing: "-0.03em" }}>Banks approve profiles, not people</h2>
-            <p className="text-[14px] sm:text-[15px] text-[#555] leading-[1.7] mb-4">It's not about who you are. It's about:</p>
-            <div className="text-left max-w-[400px] mx-auto mb-6">
+            <p className="text-[14px] sm:text-[15px] text-[#555] leading-[1.7] mb-5" style={{ textAlign: "justify", textAlignLast: "center" }}>It's not about who you are. It's about:</p>
+            <div className="max-w-[420px] mx-auto mb-6">
               {["How your accounts are structured", "How your balances look", "How your timing signals risk or stability"].map((item) => (
-                <div key={item} className="flex items-start gap-3 mb-3 last:mb-0">
-                  <span className="text-[14px] text-[#555] leading-[1.6]">• {item}</span>
+                <div key={item} className="flex items-center gap-3 mb-3 last:mb-0 bg-white rounded-lg px-4 py-2.5 shadow-sm">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#111] shrink-0" />
+                  <span className="text-[14px] text-[#333] leading-[1.5] font-medium">{item}</span>
                 </div>
               ))}
             </div>
-            <p className="text-[14px] sm:text-[15px] text-[#555] leading-[1.7]">Profundr helps you understand that — before it costs you.</p>
+            <p className="text-[14px] sm:text-[15px] text-[#555] leading-[1.7]" style={{ textAlign: "justify", textAlignLast: "center" }}>Profundr helps you understand that — before it costs you.</p>
           </div>
         </section>
 
-        <section className="py-[50px] sm:py-[60px] px-5 sm:px-6 bg-[#111] border-t border-[#222]" data-testid="front-mid-cta">
+        <section className="py-[50px] sm:py-[60px] px-5 sm:px-6 bg-[#111]" data-testid="front-mid-cta">
           <div className="max-w-[600px] mx-auto text-center">
             <h2 className="text-[26px] sm:text-[34px] md:text-[40px] text-white leading-[1.1] mb-5" style={{ fontFamily: "'Inter', system-ui, sans-serif", fontWeight: 900, letterSpacing: "-0.03em" }}>See where you stand before you apply</h2>
             <button
@@ -5090,7 +5095,7 @@ export default function LandingPage() {
           </div>
         </section>
 
-        <section className="py-12 sm:py-16 px-5 sm:px-6 bg-white" data-testid="front-stats">
+        <section className="py-[50px] sm:py-[60px] px-5 sm:px-6 bg-white" data-testid="front-stats">
           <div className="max-w-[1000px] mx-auto flex flex-col sm:flex-row sm:flex-wrap items-center sm:justify-center gap-y-7 sm:gap-x-20 sm:gap-y-8">
             {[
               { value: "12K+", label: "Credit deletions generated" },
@@ -5105,7 +5110,7 @@ export default function LandingPage() {
           </div>
         </section>
 
-        <section className="py-12 sm:py-16 px-5 sm:px-6 scroll-mt-16" style={{ backgroundColor: "#e8e5e0" }} data-testid="front-newsletter">
+        <section className="py-[50px] sm:py-[60px] px-5 sm:px-6 scroll-mt-16" style={{ backgroundColor: "#e8e5e0" }} data-testid="front-newsletter">
           <div className="max-w-[1000px] mx-auto flex flex-col md:flex-row items-center md:items-center justify-between gap-6 sm:gap-8">
             <div className="max-w-[420px] text-center md:text-left">
               <h3 className="text-[20px] sm:text-[24px] font-black text-[#111] leading-[1.15] mb-3" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>Banks approve profiles, not people</h3>
@@ -5375,7 +5380,7 @@ export default function LandingPage() {
           );
         })()}
 
-        <section className="py-4 sm:py-6 border-y border-[#f0f0f0] bg-[#fafafa] overflow-hidden" data-testid="front-social-proof">
+        <section className="py-4 sm:py-6 bg-[#fafafa] overflow-hidden" data-testid="front-social-proof">
           <style>{`
             @keyframes scrollProof {
               0% { transform: translateX(0); }
@@ -5409,15 +5414,15 @@ export default function LandingPage() {
         <section id="features" className="py-[50px] sm:py-[80px] px-5 sm:px-6 bg-white scroll-mt-16" data-testid="front-operating-system">
           <div className="max-w-[900px] mx-auto text-center">
             <h2 className="text-[28px] sm:text-[36px] md:text-[48px] text-[#111] leading-[1.1] sm:leading-[1.05] mb-4" style={{ fontFamily: "'Inter', system-ui, sans-serif", fontWeight: 900, letterSpacing: "-0.03em" }}>The operating system for financial identity</h2>
-            <p className="text-[14px] sm:text-[16px] text-[#888] max-w-[320px] sm:max-w-[500px] mx-auto leading-[1.7] sm:leading-[1.6]">Profundr brings your entire credit, capital, and funding journey into one unified system. Founders grow faster when everything works together.</p>
+            <p className="text-[14px] sm:text-[16px] text-[#888] max-w-[320px] sm:max-w-[500px] mx-auto leading-[1.7] sm:leading-[1.6]" style={{ textAlign: "justify", textAlignLast: "center" }}>Profundr brings your entire credit, capital, and funding journey into one unified system. Founders grow faster when everything works together.</p>
           </div>
         </section>
 
-        <section className="py-[50px] sm:py-[80px] px-2 sm:px-6 bg-white border-t border-[#f0f0f0]" data-testid="front-all-in-one">
+        <section className="py-[50px] sm:py-[80px] px-2 sm:px-6 bg-white" data-testid="front-all-in-one">
           <div className="max-w-[1100px] mx-auto flex flex-col md:flex-row items-center gap-10 sm:gap-12">
             <div className="flex-1 w-full">
-              <div className="rounded-xl sm:rounded-2xl" style={{ background: "#f0ede8", padding: "20px 16px" }}>
-                <div className="bg-white rounded-xl p-4 shadow-sm">
+              <div className="rounded-xl sm:rounded-2xl transition-transform duration-300 hover:scale-[1.02]" style={{ background: "#f0ede8", padding: "20px 16px", boxShadow: "0 20px 60px rgba(0,0,0,0.08), 0 4px 16px rgba(0,0,0,0.04)" }}>
+                <div className="bg-white rounded-xl p-4 shadow-lg">
                   <div className="flex items-center gap-3 mb-4 pb-3 border-b border-[#f0f0f0]">
                     <img src="/profundr-brain-logo.png" alt="" className="w-7 h-7" />
                     <span className="text-[13px] font-semibold text-[#111]">profundr</span>
@@ -5448,7 +5453,7 @@ export default function LandingPage() {
             </div>
             <div className="flex-1">
               <h3 className="text-[24px] sm:text-[32px] font-bold text-[#111] leading-[1.15] mb-3 text-center md:text-left" style={{ letterSpacing: "-0.02em" }}>Your funding snapshot — instantly</h3>
-              <p className="text-[14px] sm:text-[15px] text-[#555] leading-[1.7] sm:leading-[1.6] mb-7 sm:mb-6 text-center md:text-left">Profundr shows you how banks see you. One upload reveals your approval range, risk alerts, and exactly what's blocking your next funding round.</p>
+              <p className="text-[14px] sm:text-[15px] text-[#555] leading-[1.7] sm:leading-[1.6] mb-7 sm:mb-6 text-center md:text-left" style={{ textAlign: "justify" }}>Profundr shows you how banks see you. One upload reveals your approval range, risk alerts, and exactly what's blocking your next funding round.</p>
               <ul className="space-y-5 sm:space-y-3 mb-8 sm:mb-6">
                 {["See your estimated approval range from $5K–$250K", "Bank-level analysis across all 3 bureaus in one view", "Built for founders accessing real capital, not just scores", "One upload — full funding picture in seconds"].map((item) => (
                   <li key={item} className="flex items-start gap-3"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="mt-0.5 shrink-0"><path d="M4 8l3 3 5-5" stroke="#111" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg><span className="text-[14px] text-[#555] leading-[1.6]">{item}</span></li>
@@ -5465,11 +5470,11 @@ export default function LandingPage() {
           </div>
         </section>
 
-        <section className="py-[50px] sm:py-[80px] px-2 sm:px-6 bg-white border-t border-[#f0f0f0]" data-testid="front-sell-confidence">
+        <section className="py-[50px] sm:py-[80px] px-2 sm:px-6 bg-white" data-testid="front-sell-confidence">
           <div className="max-w-[1100px] mx-auto flex flex-col md:flex-row items-center gap-10 sm:gap-12">
             <div className="flex-1 order-2 md:order-1">
               <h3 className="text-[24px] sm:text-[32px] font-bold text-[#111] leading-[1.15] mb-3 text-center md:text-left" style={{ letterSpacing: "-0.02em" }}>Remove what's blocking your approval</h3>
-              <p className="text-[14px] sm:text-[15px] text-[#555] leading-[1.7] sm:leading-[1.6] mb-7 sm:mb-6 text-center md:text-left">Negative items can reduce your approval odds instantly. Profundr generates FCRA-compliant dispute letters and tracks every deletion in real time.</p>
+              <p className="text-[14px] sm:text-[15px] text-[#555] leading-[1.7] sm:leading-[1.6] mb-7 sm:mb-6 text-center md:text-left" style={{ textAlign: "justify" }}>Negative items can reduce your approval odds instantly. Profundr generates FCRA-compliant dispute letters and tracks every deletion in real time.</p>
               <ul className="space-y-5 sm:space-y-3 mb-8 sm:mb-6">
                 {["AI-generated dispute letters — legally compliant, ready to send", "Too many recent inquiries may trigger automatic denial — we flag them", "High balances can reduce your approval odds — we show the impact", "Track deletions across all three bureaus in one view", "94% dispute success rate across all Profundr users"].map((item) => (
                   <li key={item} className="flex items-start gap-3"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="mt-0.5 shrink-0"><path d="M4 8l3 3 5-5" stroke="#111" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg><span className="text-[14px] text-[#555] leading-[1.6]">{item}</span></li>
@@ -5484,7 +5489,7 @@ export default function LandingPage() {
               <div className="text-center sm:text-left"><button className="px-5 py-2.5 bg-[#111] text-white text-[13px] font-semibold hover:bg-[#333] transition-colors" data-testid="btn-watch-demo-2">See If You Qualify</button></div>
             </div>
             <div className="flex-1 order-1 md:order-2 w-full">
-              <div className="rounded-xl sm:rounded-2xl" style={{ background: "#f0ede8", padding: "28px 20px" }}>
+              <div className="rounded-xl sm:rounded-2xl transition-transform duration-300 hover:scale-[1.02]" style={{ background: "#f0ede8", padding: "28px 20px", boxShadow: "0 20px 60px rgba(0,0,0,0.08), 0 4px 16px rgba(0,0,0,0.04)" }}>
                 <div className="flex gap-4 items-start">
                   <div className="shrink-0" style={{ width: "42%" }}>
                     <div className="bg-white rounded-xl px-3 py-2.5 shadow-md inline-flex items-center gap-2 mb-3">
@@ -5528,10 +5533,10 @@ export default function LandingPage() {
           </div>
         </section>
 
-        <section className="py-[50px] sm:py-[80px] px-2 sm:px-6 bg-[#fafafa] border-t border-[#f0f0f0]" data-testid="front-funnels">
+        <section className="py-[50px] sm:py-[80px] px-2 sm:px-6 bg-[#fafafa]" data-testid="front-funnels">
           <div className="max-w-[1100px] mx-auto flex flex-col md:flex-row items-center gap-10 sm:gap-12">
             <div className="flex-1 w-full">
-              <div className="rounded-xl sm:rounded-2xl" style={{ background: "#f0ede8", padding: "28px 20px" }}>
+              <div className="rounded-xl sm:rounded-2xl transition-transform duration-300 hover:scale-[1.02]" style={{ background: "#f0ede8", padding: "28px 20px", boxShadow: "0 20px 60px rgba(0,0,0,0.08), 0 4px 16px rgba(0,0,0,0.04)" }}>
                 <div className="flex gap-4 items-start">
                   <div className="shrink-0" style={{ width: "42%" }}>
                     <div className="bg-white rounded-xl px-3 py-2.5 shadow-md inline-flex items-center gap-2 mb-3">
@@ -5579,7 +5584,7 @@ export default function LandingPage() {
             </div>
             <div className="flex-1">
               <h3 className="text-[24px] sm:text-[32px] font-bold text-[#111] leading-[1.15] mb-3 text-center md:text-left" style={{ letterSpacing: "-0.02em" }}>Find your approval range instantly</h3>
-              <p className="text-[14px] sm:text-[15px] text-[#555] leading-[1.7] sm:leading-[1.6] mb-7 sm:mb-6 text-center md:text-left">See how much you may qualify for — matched to real lenders based on your AIS score and bureau profile. Timing matters more than your score.</p>
+              <p className="text-[14px] sm:text-[15px] text-[#555] leading-[1.7] sm:leading-[1.6] mb-7 sm:mb-6 text-center md:text-left" style={{ textAlign: "justify" }}>See how much you may qualify for — matched to real lenders based on your AIS score and bureau profile. Timing matters more than your score.</p>
               <ul className="space-y-5 sm:space-y-3 mb-8 sm:mb-6">
                 {["Unlock higher limits and approvals with AI-powered matching", "The same profile can be approved or denied based on timing alone", "See real approval odds across 50+ funding products", "Track applications from match to funded — $9M+ matched so far"].map((item) => (
                   <li key={item} className="flex items-start gap-3"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="mt-0.5 shrink-0"><path d="M4 8l3 3 5-5" stroke="#111" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg><span className="text-[14px] text-[#555] leading-[1.6]">{item}</span></li>
@@ -5597,17 +5602,17 @@ export default function LandingPage() {
         </section>
 
 
-        <section className="py-[50px] sm:py-[60px] px-5 sm:px-6 bg-white border-t border-[#f0f0f0]" data-testid="front-value-props">
+        <section className="py-[50px] sm:py-[60px] px-5 sm:px-6 bg-white" data-testid="front-value-props">
           <div className="max-w-[1100px] mx-auto grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-5">
             {[
-              { icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M12 2L3 7v10l9 5 9-5V7l-9-5z" stroke="#111" strokeWidth="1.5" strokeLinejoin="round"/><path d="M12 12v10M12 12L3 7M12 12l9-5" stroke="#111" strokeWidth="1.5"/></svg>, title: "AES-256 encrypted", desc: "Your bureau data is encrypted end-to-end with bank-level security. We never share or sell your information." },
-              { icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="4" stroke="#111" strokeWidth="1.5"/><path d="M4 20c0-4 4-7 8-7s8 3 8 7" stroke="#111" strokeWidth="1.5" strokeLinecap="round"/></svg>, title: "Human support 24/7", desc: "Get help from real credit and funding specialists who understand founder finance. Support is available at any hour." },
-              { icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="18" height="18" rx="2" stroke="#111" strokeWidth="1.5"/><path d="M7 12h2v5H7zM11 8h2v9h-2zM15 10h2v7h-2z" fill="#111"/></svg>, title: "Built to last", desc: "Profundr powers millions in funded capital with a stable, secure platform you can rely on as you grow." },
+              { icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M12 2L3 7v10l9 5 9-5V7l-9-5z" stroke="white" strokeWidth="1.5" strokeLinejoin="round"/><path d="M12 12v10M12 12L3 7M12 12l9-5" stroke="white" strokeWidth="1.5"/></svg>, title: "AES-256 encrypted", desc: "Your bureau data is encrypted end-to-end with bank-level security. We never share or sell your information." },
+              { icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="4" stroke="white" strokeWidth="1.5"/><path d="M4 20c0-4 4-7 8-7s8 3 8 7" stroke="white" strokeWidth="1.5" strokeLinecap="round"/></svg>, title: "Human support 24/7", desc: "Get help from real credit and funding specialists who understand founder finance. Support is available at any hour." },
+              { icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="18" height="18" rx="2" stroke="white" strokeWidth="1.5"/><path d="M7 12h2v5H7zM11 8h2v9h-2zM15 10h2v7h-2z" fill="white"/></svg>, title: "Built to last", desc: "Profundr powers millions in funded capital with a stable, secure platform you can rely on as you grow." },
             ].map((item) => (
-              <div key={item.title} className="border border-[#e8e8e8] rounded-2xl p-6 sm:p-8 bg-white text-center sm:text-left">
-                <div className="w-12 h-12 rounded-xl border border-[#e8e8e8] flex items-center justify-center mb-6 sm:mb-16 mx-auto sm:mx-0">{item.icon}</div>
+              <div key={item.title} className="rounded-2xl p-6 sm:p-8 bg-[#fafafa] text-center sm:text-left transition-all duration-300 hover:bg-white hover:shadow-lg">
+                <div className="w-12 h-12 rounded-xl bg-[#111] flex items-center justify-center mb-6 sm:mb-10 mx-auto sm:mx-0" style={{ color: "white" }}>{item.icon}</div>
                 <h4 className="text-[18px] font-bold text-[#111] mb-2">{item.title}</h4>
-                <p className="text-[14px] text-[#888] leading-[1.6]">{item.desc}</p>
+                <p className="text-[14px] text-[#888] leading-[1.6]" style={{ textAlign: "justify" }}>{item.desc}</p>
               </div>
             ))}
           </div>
@@ -5691,7 +5696,7 @@ export default function LandingPage() {
           );
         })()}
 
-        <section id="pricing" className="py-[50px] sm:py-[80px] px-5 sm:px-6 bg-white border-t border-[#f0f0f0] scroll-mt-16" data-testid="front-pricing">
+        <section id="pricing" className="py-[50px] sm:py-[80px] px-5 sm:px-6 bg-white scroll-mt-16" data-testid="front-pricing">
           <div className="max-w-[1100px] mx-auto">
             <h2 className="text-[28px] sm:text-[36px] md:text-[46px] text-[#111] leading-[1.1] sm:leading-[1.05] mb-3 text-center" style={{ fontFamily: "'Inter', system-ui, sans-serif", fontWeight: 900, letterSpacing: "-0.03em" }}>Simple, transparent pricing</h2>
             <p className="text-[14px] sm:text-[16px] text-[#888] text-center mb-10 sm:mb-14 max-w-[400px] mx-auto leading-[1.6]">Choose the plan that matches where you are in your funding journey.</p>
@@ -5724,7 +5729,7 @@ export default function LandingPage() {
           </div>
         </section>
 
-        <section id="faq" className="py-[50px] sm:py-[80px] px-5 sm:px-6 bg-[#fafafa] border-t border-[#f0f0f0] scroll-mt-16" data-testid="front-faq">
+        <section id="faq" className="py-[50px] sm:py-[80px] px-5 sm:px-6 bg-[#fafafa] scroll-mt-16" data-testid="front-faq">
           <div className="max-w-[700px] mx-auto">
             <h2 className="text-[28px] sm:text-[36px] md:text-[46px] text-[#111] leading-[1.1] sm:leading-[1.05] mb-10 sm:mb-14 text-center" style={{ fontFamily: "'Inter', system-ui, sans-serif", fontWeight: 900, letterSpacing: "-0.03em" }}>Frequently asked questions</h2>
             <div className="space-y-0">
