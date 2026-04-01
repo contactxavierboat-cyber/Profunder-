@@ -5226,6 +5226,164 @@ export default function LandingPage() {
           </div>
         </section>
 
+        <section className="py-[80px] px-6 bg-white" data-testid="front-operating-system">
+          <div className="max-w-[900px] mx-auto text-center">
+            <h2 className="text-[36px] sm:text-[48px] text-[#111] leading-[1.05] mb-4" style={{ fontFamily: "'Inter', system-ui, sans-serif", fontWeight: 900, letterSpacing: "-0.03em" }}>The operating system<br />for financial identity</h2>
+            <p className="text-[16px] text-[#888] max-w-[500px] mx-auto leading-[1.6]">Profundr brings your entire credit, capital, and funding journey into one unified system. Founders grow faster when everything works together.</p>
+          </div>
+        </section>
+
+        <section className="py-[80px] px-6 bg-white border-t border-[#f0f0f0]" data-testid="front-all-in-one">
+          <div className="max-w-[1100px] mx-auto flex flex-col md:flex-row items-center gap-12">
+            <div className="flex-1">
+              <div className="bg-[#fafafa] border border-[#e8e8e8] rounded-xl p-6 shadow-sm">
+                <div className="flex items-center gap-3 mb-5 pb-4 border-b border-[#f0f0f0]">
+                  <div className="w-8 h-8 rounded-lg bg-[#111] flex items-center justify-center"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 2L2 7l10 5 10-5-10-5z" fill="white" opacity="0.8"/><path d="M2 17l10 5 10-5" stroke="white" strokeWidth="2"/><path d="M2 12l10 5 10-5" stroke="white" strokeWidth="2"/></svg></div>
+                  <span className="text-[14px] font-semibold text-[#111]">profundr</span>
+                </div>
+                <div className="flex gap-4">
+                  <div className="w-[160px] shrink-0">
+                    <div className="flex items-center gap-2 mb-4">
+                      <div className="w-6 h-6 rounded-full bg-[#ddd]" />
+                      <span className="text-[11px] text-[#888]">Sydney Adams</span>
+                    </div>
+                    {["Dashboard", "Products", "Sales", "Marketing", "Contacts", "Websites", "Analytics"].map((item, i) => (
+                      <div key={item} className={`text-[12px] py-1.5 px-2 rounded ${i === 0 ? "bg-white font-semibold text-[#111] shadow-sm" : "text-[#888]"}`}>{item}</div>
+                    ))}
+                  </div>
+                  <div className="flex-1 bg-white rounded-lg p-4 border border-[#f0f0f0]">
+                    <p className="text-[10px] text-[#888] mb-1">Dashboard</p>
+                    <p className="text-[14px] font-semibold text-[#111] mb-3">Welcome back, Sydney</p>
+                    <p className="text-[10px] text-[#888] mb-0.5">Gross revenue</p>
+                    <p className="text-[22px] font-black text-[#111] mb-3">$186,420</p>
+                    <div className="h-[60px] relative">
+                      <svg viewBox="0 0 200 60" className="w-full h-full"><path d="M0 55 Q40 50 80 35 T160 15 L200 5" stroke="#111" strokeWidth="2" fill="none"/></svg>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className="flex-1">
+              <h3 className="text-[28px] sm:text-[32px] font-bold text-[#111] leading-[1.1] mb-3" style={{ letterSpacing: "-0.02em" }}>All-in-one that actually works</h3>
+              <p className="text-[15px] text-[#888] leading-[1.6] mb-6">Profundr gives you one connected system to plan, build, and grow your financial identity.</p>
+              <ul className="space-y-3 mb-6">
+                {["Credit, capital, and scoring fully connected", "Centralized view of your financial identity", "Tools built specifically for founder funding", "Less complexity and more momentum"].map((item) => (
+                  <li key={item} className="flex items-start gap-2.5"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="mt-0.5 shrink-0"><path d="M4 8l3 3 5-5" stroke="#111" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg><span className="text-[14px] text-[#555] leading-[1.5]">{item}</span></li>
+                ))}
+              </ul>
+              <p className="text-[11px] text-[#888] uppercase tracking-wider mb-2">Replaces</p>
+              <div className="flex items-center gap-2 mb-5">
+                {["Credit Karma", "Nav.com", "Spreadsheets"].map((r) => (
+                  <span key={r} className="text-[11px] px-3 py-1.5 bg-[#f5f5f5] text-[#666] font-medium rounded-full">{r}</span>
+                ))}
+              </div>
+              <button className="px-6 py-3 bg-[#111] text-white text-[14px] font-semibold" data-testid="btn-watch-demo-1">Watch Demo</button>
+            </div>
+          </div>
+        </section>
+
+        <section className="py-[80px] px-6 bg-white border-t border-[#f0f0f0]" data-testid="front-sell-confidence">
+          <div className="max-w-[1100px] mx-auto flex flex-col md:flex-row items-center gap-12">
+            <div className="flex-1 order-2 md:order-1">
+              <h3 className="text-[28px] sm:text-[32px] font-bold text-[#111] leading-[1.1] mb-3" style={{ letterSpacing: "-0.02em" }}>Sell with confidence</h3>
+              <p className="text-[15px] text-[#888] leading-[1.6] mb-6">Subscription tiers, one-time assessments, and capital packages — all managed in one place with transparent pricing.</p>
+              <ul className="space-y-3 mb-6">
+                {["Offer subscriptions, one-time reports, and plans", "Capital matching that drives real revenue", "Affiliate tools that turn customers into partners", "Lower transaction costs and fast, predictable payouts", "Automated compliance tracking"].map((item) => (
+                  <li key={item} className="flex items-start gap-2.5"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="mt-0.5 shrink-0"><path d="M4 8l3 3 5-5" stroke="#111" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg><span className="text-[14px] text-[#555] leading-[1.5]">{item}</span></li>
+                ))}
+              </ul>
+              <p className="text-[11px] text-[#888] uppercase tracking-wider mb-2">Replaces</p>
+              <div className="flex items-center gap-2 mb-5">
+                {["Thinkific", "SamCart", "Gumroad"].map((r) => (
+                  <span key={r} className="text-[11px] px-3 py-1.5 bg-[#f5f5f5] text-[#666] font-medium rounded-full">{r}</span>
+                ))}
+              </div>
+              <button className="px-6 py-3 bg-[#111] text-white text-[14px] font-semibold" data-testid="btn-watch-demo-2">Watch Demo</button>
+            </div>
+            <div className="flex-1 order-1 md:order-2">
+              <div className="relative">
+                <img src="/founders/founder5.jpg" alt="" className="w-full h-[340px] object-cover rounded-xl" />
+                <div className="absolute top-4 left-4 bg-white rounded-xl p-4 shadow-xl w-[180px]">
+                  <div className="flex items-center gap-2 mb-3">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><rect x="2" y="4" width="20" height="16" rx="2" stroke="#111" strokeWidth="2"/><path d="M2 10h20" stroke="#111" strokeWidth="2"/></svg>
+                    <span className="text-[12px] font-semibold text-[#111]">Payments</span>
+                  </div>
+                  {["Apple Pay", "Google Pay", "Klarna", "Afterpay", "Credit Card"].map((m) => (
+                    <div key={m} className="flex items-center gap-2 py-1.5"><div className="w-4 h-4 rounded-full bg-[#2d6a4f] flex items-center justify-center"><svg width="8" height="8" viewBox="0 0 16 16" fill="none"><path d="M4 8l3 3 5-5" stroke="white" strokeWidth="2" strokeLinecap="round" /></svg></div><span className="text-[11px] text-[#555]">{m}</span></div>
+                  ))}
+                </div>
+                <div className="absolute bottom-4 right-4 bg-white rounded-xl p-4 shadow-xl w-[200px]">
+                  <p className="text-[13px] font-bold text-[#111] mb-2">Capital Coaching Program</p>
+                  <div className="flex items-center justify-between text-[11px] text-[#888] mb-1"><span>6 Weeks</span><span className="font-semibold text-[#111]">$997</span></div>
+                  <div className="flex items-center justify-between text-[11px] text-[#888] mb-3"><span>12 Weeks</span><span className="font-semibold text-[#111]">$1,497</span></div>
+                  <div className="w-full py-2.5 bg-[#c0392b] text-white text-[12px] font-semibold text-center rounded-lg">Purchase</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section className="py-[80px] px-6 bg-[#fafafa] border-t border-[#f0f0f0]" data-testid="front-funnels">
+          <div className="max-w-[1100px] mx-auto flex flex-col md:flex-row items-center gap-12">
+            <div className="flex-1">
+              <div className="relative">
+                <div className="bg-white rounded-xl p-5 shadow-lg border border-[#f0f0f0] w-[260px] mb-4">
+                  <p className="text-[13px] font-semibold text-[#111] mb-3">Join our weekly newsletter</p>
+                  <div className="w-full h-9 bg-[#f5f5f5] rounded-lg mb-2" />
+                  <div className="w-full py-2 bg-[#c0392b] text-white text-[12px] font-semibold text-center rounded-lg">Subscribe</div>
+                  <div className="mt-3 flex items-center gap-2"><div className="w-5 h-5 rounded-full bg-[#e8f5e9] flex items-center justify-center"><svg width="10" height="10" viewBox="0 0 16 16" fill="none"><path d="M4 8l3 3 5-5" stroke="#2d6a4f" strokeWidth="2" strokeLinecap="round" /></svg></div><span className="text-[11px] text-[#2d6a4f] font-medium">New subscriber</span></div>
+                  <div className="mt-2 flex items-center gap-2"><div className="w-5 h-5 rounded-full bg-[#e3f2fd] flex items-center justify-center"><svg width="10" height="10" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M8 3v10" stroke="#1565c0" strokeWidth="2" strokeLinecap="round" /></svg></div><span className="text-[11px] text-[#1565c0] font-medium">Send welcome email</span></div>
+                </div>
+                <div className="bg-white rounded-xl p-5 shadow-lg border border-[#f0f0f0] w-[280px] ml-8">
+                  <img src="/founders/founder7.jpg" alt="" className="w-full h-[120px] object-cover rounded-lg mb-3" />
+                  <p className="text-[14px] font-bold text-[#111]">Welcome to the Capital Club</p>
+                  <p className="text-[11px] text-[#888] mt-1">Your journey to funding starts here...</p>
+                </div>
+              </div>
+            </div>
+            <div className="flex-1">
+              <h3 className="text-[28px] sm:text-[32px] font-bold text-[#111] leading-[1.1] mb-3" style={{ letterSpacing: "-0.02em" }}>Funnels that convert</h3>
+              <p className="text-[15px] text-[#888] leading-[1.6] mb-6">Reach your audience, nurture trust, and turn interest into revenue with email, automations, and landing pages built to convert.</p>
+              <ul className="space-y-3 mb-6">
+                {["Email, automations, and pages in one system", "Automated journeys that save you hours", "Behavior-based triggers", "Conversion-focused landing pages"].map((item) => (
+                  <li key={item} className="flex items-start gap-2.5"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="mt-0.5 shrink-0"><path d="M4 8l3 3 5-5" stroke="#111" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg><span className="text-[14px] text-[#555] leading-[1.5]">{item}</span></li>
+                ))}
+              </ul>
+              <p className="text-[11px] text-[#888] uppercase tracking-wider mb-2">Replaces</p>
+              <div className="flex items-center gap-2 mb-5">
+                {["Mailchimp", "ConvertKit", "ActiveCampaign"].map((r) => (
+                  <span key={r} className="text-[11px] px-3 py-1.5 bg-[#f5f5f5] text-[#666] font-medium rounded-full">{r}</span>
+                ))}
+              </div>
+              <button className="px-6 py-3 bg-[#111] text-white text-[14px] font-semibold" data-testid="btn-watch-demo-3">Watch Demo</button>
+            </div>
+          </div>
+        </section>
+
+        <section className="py-[60px] px-6 bg-white border-t border-[#f0f0f0]" data-testid="front-value-props">
+          <div className="max-w-[1100px] mx-auto grid grid-cols-1 md:grid-cols-3 gap-8">
+            {[
+              { icon: <svg width="28" height="28" viewBox="0 0 24 24" fill="none"><rect x="4" y="2" width="16" height="20" rx="2" stroke="#111" strokeWidth="1.5"/><path d="M8 6h8M8 10h8M8 14h4" stroke="#111" strokeWidth="1.5" strokeLinecap="round"/></svg>, title: "Your own branded experience", desc: "Give your audience a premium mobile experience with your own fully branded app." },
+              { icon: <svg width="28" height="28" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="4" stroke="#111" strokeWidth="1.5"/><path d="M4 20c0-4 4-7 8-7s8 3 8 7" stroke="#111" strokeWidth="1.5" strokeLinecap="round"/></svg>, title: "Expert support, always available", desc: "Get help from real people who understand expert businesses. Support is available at any hour." },
+              { icon: <svg width="28" height="28" viewBox="0 0 24 24" fill="none"><path d="M12 2L3 7v10l9 5 9-5V7l-9-5z" stroke="#111" strokeWidth="1.5" strokeLinejoin="round"/><path d="M12 12v10M12 12L3 7M12 12l9-5" stroke="#111" strokeWidth="1.5"/></svg>, title: "Built for scale", desc: "Profundr powers billions in expert revenue with a reliable, secure platform you can rely on as you grow." },
+            ].map((item) => (
+              <div key={item.title} className="text-center">
+                <div className="w-14 h-14 rounded-full bg-[#fafafa] border border-[#f0f0f0] flex items-center justify-center mx-auto mb-4">{item.icon}</div>
+                <h4 className="text-[16px] font-semibold text-[#111] mb-2">{item.title}</h4>
+                <p className="text-[13px] text-[#888] leading-[1.6]">{item.desc}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <section className="py-[60px] px-6 bg-[#111]" data-testid="front-qa-cta">
+          <div className="max-w-[700px] mx-auto text-center">
+            <h3 className="text-[28px] sm:text-[36px] font-bold text-white leading-[1.1] mb-3" style={{ letterSpacing: "-0.02em" }}>Have more questions?<br />Join our live Q&A</h3>
+            <p className="text-[14px] text-white/50 leading-[1.6] mb-6 max-w-[500px] mx-auto">Join us for a live Q&A workshop where an expert will walk you through the basics, discover tips, and explore best practices — tailored for you.</p>
+            <button className="px-8 py-3 bg-white text-[#111] text-[14px] font-semibold" data-testid="btn-save-spot">Save Your Spot</button>
+          </div>
+        </section>
+
         <section id="features" className="py-[80px] px-6" data-testid="front-features">
           <div className="max-w-[1100px] mx-auto">
             <div className="text-center mb-14">
