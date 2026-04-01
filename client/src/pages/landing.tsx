@@ -4932,7 +4932,7 @@ export default function LandingPage() {
               100% { transform: translateX(-50%); }
             }
           `}</style>
-          <div className="flex" style={{ animation: "scrollFounders 60s linear infinite", width: "max-content" }}>
+          <div className="flex gap-[6px]" style={{ animation: "scrollFounders 30s linear infinite", width: "max-content", WebkitAnimation: "scrollFounders 30s linear infinite" }}>
             {[...Array(2)].map((_, setIdx) => (
               <div key={setIdx} className="flex gap-[6px]">
                 {[
@@ -5247,8 +5247,8 @@ export default function LandingPage() {
                   <img src="/profundr-logo.png" alt="" className="w-8 h-8 rounded-lg" />
                   <span className="text-[14px] font-semibold text-[#111]">profundr</span>
                 </div>
-                <div className="flex gap-4">
-                  <div className="w-[150px] shrink-0">
+                <div className="flex gap-3 sm:gap-4">
+                  <div className="w-[120px] sm:w-[150px] shrink-0">
                     <div className="flex items-center gap-2 mb-4">
                       <img src="/founders/founder6.jpg" alt="" className="w-6 h-6 rounded-full object-cover" />
                       <span className="text-[11px] text-[#888]">Marcus J.</span>
@@ -5310,7 +5310,7 @@ export default function LandingPage() {
             <div className="flex-1 order-1 md:order-2">
               <div className="relative">
                 <img src="/founders/founder5.jpg" alt="" className="w-full h-[340px] object-cover rounded-xl" />
-                <div className="absolute top-4 left-4 bg-white rounded-xl p-4 shadow-xl w-[190px]">
+                <div className="absolute top-4 left-4 bg-white rounded-xl p-3 sm:p-4 shadow-xl w-[160px] sm:w-[190px]">
                   <p className="text-[11px] text-[#888] uppercase tracking-wider mb-2">Dispute Status</p>
                   {[{ item: "Late Payment — Chase", s: "Deleted", c: "bg-[#e8f5e9] text-[#2d6a4f]" }, { item: "Collection — Midland", s: "Pending", c: "bg-[#fff8e1] text-[#f57f17]" }, { item: "Hard Inquiry — Amex", s: "Filed", c: "bg-[#e3f2fd] text-[#1565c0]" }].map((d) => (
                     <div key={d.item} className="flex items-center justify-between py-1.5 border-b border-[#f0f0f0] last:border-0">
@@ -5319,7 +5319,7 @@ export default function LandingPage() {
                     </div>
                   ))}
                 </div>
-                <div className="absolute bottom-4 right-4 bg-white/95 backdrop-blur-sm rounded-xl p-4 shadow-xl w-[160px]">
+                <div className="absolute bottom-4 right-4 bg-white/95 backdrop-blur-sm rounded-xl p-3 sm:p-4 shadow-xl w-[130px] sm:w-[160px]">
                   <p className="text-[10px] text-[#888] mb-1">Deletion Rate</p>
                   <p className="text-[32px] font-black text-[#111] leading-none">73%</p>
                   <p className="text-[10px] text-[#2d6a4f] font-semibold">Above industry avg</p>
@@ -5333,7 +5333,7 @@ export default function LandingPage() {
           <div className="max-w-[1100px] mx-auto flex flex-col md:flex-row items-center gap-8 sm:gap-12">
             <div className="flex-1">
               <div className="relative">
-                <div className="bg-white rounded-xl p-5 shadow-lg border border-[#f0f0f0] w-[260px] mb-4">
+                <div className="bg-white rounded-xl p-5 shadow-lg border border-[#f0f0f0] w-full max-w-[260px] mb-4">
                   <p className="text-[13px] font-semibold text-[#111] mb-2">Capital Matches</p>
                   {[{ lender: "Bluevine", match: "92%", amt: "$75K", type: "LOC" }, { lender: "OnDeck", match: "84%", amt: "$50K", type: "Term" }, { lender: "Fundbox", match: "78%", amt: "$35K", type: "LOC" }].map((l) => (
                     <div key={l.lender} className="flex items-center justify-between py-2 border-b border-[#f0f0f0] last:border-0">
@@ -5342,7 +5342,7 @@ export default function LandingPage() {
                     </div>
                   ))}
                 </div>
-                <div className="bg-white rounded-xl p-5 shadow-lg border border-[#f0f0f0] w-[240px] ml-10">
+                <div className="bg-white rounded-xl p-5 shadow-lg border border-[#f0f0f0] w-full max-w-[240px] ml-0 sm:ml-10">
                   <img src="/founders/founder10.jpg" alt="" className="w-full h-[100px] object-cover rounded-lg mb-3" />
                   <p className="text-[14px] font-bold text-[#111]">Funded: $120K LOC</p>
                   <p className="text-[11px] text-[#888] mt-1">Marcus went from AIS 58 to funded in 47 days</p>
