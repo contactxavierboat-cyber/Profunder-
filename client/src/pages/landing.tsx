@@ -5455,7 +5455,7 @@ export default function LandingPage() {
               { icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="18" height="18" rx="2" stroke="#111" strokeWidth="1.5"/><path d="M7 12h2v5H7zM11 8h2v9h-2zM15 10h2v7h-2z" fill="#111"/></svg>, title: "Built to last", desc: "Profundr powers millions in funded capital with a stable, secure platform you can rely on as you grow." },
             ].map((item) => (
               <div key={item.title} className="border border-[#e8e8e8] rounded-2xl p-6 sm:p-8 bg-white">
-                <div className="w-12 h-12 rounded-xl border border-[#e8e8e8] flex items-center justify-center mb-6 sm:mb-16 sm:mx-auto">{item.icon}</div>
+                <div className="w-12 h-12 rounded-xl border border-[#e8e8e8] flex items-center justify-center mb-6 sm:mb-16 mx-auto sm:mx-auto">{item.icon}</div>
                 <h4 className="text-[18px] font-bold text-[#111] mb-2">{item.title}</h4>
                 <p className="text-[14px] text-[#888] leading-[1.6]">{item.desc}</p>
               </div>
