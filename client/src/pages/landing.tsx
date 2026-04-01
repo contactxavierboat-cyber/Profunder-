@@ -5474,7 +5474,7 @@ export default function LandingPage() {
           const nextIdx = testIdx === testimonials.length - 1 ? 0 : testIdx + 1;
           return (
             <section className="py-[50px] sm:py-[80px] bg-[#111]" data-testid="front-testimonials-kajabi">
-              <h2 className="text-[30px] sm:text-[32px] md:text-[42px] text-white leading-[1.1] sm:leading-[1.05] mb-8 sm:mb-12 px-5 sm:px-6 sm:text-center" style={{ fontFamily: "'Inter', system-ui, sans-serif", fontWeight: 900, letterSpacing: "-0.03em" }}>Why founders choose Profundr</h2>
+              <h2 className="text-[30px] sm:text-[32px] md:text-[42px] text-white leading-[1.1] sm:leading-[1.05] mb-8 sm:mb-12 px-5 sm:px-6 text-center" style={{ fontFamily: "'Inter', system-ui, sans-serif", fontWeight: 900, letterSpacing: "-0.03em" }}>Why founders choose Profundr</h2>
 
               <div className="md:hidden px-5">
                 <div className="rounded-2xl overflow-hidden mb-6">
