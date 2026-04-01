@@ -4956,7 +4956,7 @@ export default function LandingPage() {
               100% { transform: translateX(-50%); }
             }
           `}</style>
-          <div className="flex gap-[6px]" style={{ animation: "scrollFounders 30s linear infinite", width: "max-content", WebkitAnimation: "scrollFounders 30s linear infinite" }}>
+          <div className="flex gap-[6px]" style={{ animation: "scrollFounders 60s linear infinite", width: "max-content", WebkitAnimation: "scrollFounders 60s linear infinite" }}>
             {[...Array(2)].map((_, setIdx) => (
               <div key={setIdx} className="flex gap-[6px]">
                 {[
