@@ -4930,11 +4930,11 @@ export default function LandingPage() {
 
         <section className="pt-[115px] sm:pt-[120px] pb-[40px] sm:pb-[50px] px-5 sm:px-6" data-testid="front-hero">
           <div className="max-w-[900px] mx-auto text-center">
-            <h1 className="text-[36px] sm:text-[50px] md:text-[60px] text-[#111] leading-[1.08] sm:leading-[0.95] mb-4 sm:mb-8 max-w-[300px] sm:max-w-none mx-auto" style={{ fontFamily: "'Inter', system-ui, sans-serif", fontWeight: 900, letterSpacing: "-0.035em" }} data-testid="text-front-hero-headline">
-              Know if you're fundable before you apply
+            <h1 className="text-[36px] sm:text-[50px] md:text-[60px] text-[#111] leading-[1.08] sm:leading-[0.95] mb-4 sm:mb-8 max-w-[340px] sm:max-w-none mx-auto" style={{ fontFamily: "'Inter', system-ui, sans-serif", fontWeight: 900, letterSpacing: "-0.035em" }} data-testid="text-front-hero-headline">
+              See if you qualify for $50K–$250K in funding
             </h1>
             <p className="text-[15px] sm:text-[18px] text-[#555] leading-[1.7] sm:leading-[1.6] max-w-[340px] sm:max-w-[480px] mx-auto mb-8 sm:mb-10" style={{ fontFamily: "'Inter', system-ui, sans-serif" }} data-testid="text-front-hero-sub">
-              Everything you need to analyze your credit profile — plus an <span className="underline underline-offset-[3px] decoration-[1px] decoration-[#999]">AI capital partner</span> to help you get funded.
+              Profundr analyzes your credit profile like a bank — <span className="underline underline-offset-[3px] decoration-[1px] decoration-[#999]">before you apply</span>. Know your approval range instantly.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-4 mb-5 sm:mb-6 w-full sm:max-w-none mx-auto">
               <button
@@ -4942,7 +4942,7 @@ export default function LandingPage() {
                 className="px-8 py-3 sm:py-3.5 bg-[#111] border border-[#111] text-white text-[14px] font-semibold hover:bg-[#333] transition-colors"
                 data-testid="front-btn-upload-hero"
               >
-                Upload Report
+                Check Your Profile
               </button>
               <button
                 onClick={() => { setShowFrontPage(false); }}
@@ -4953,6 +4953,68 @@ export default function LandingPage() {
               </button>
             </div>
             <p className="text-[12px] text-[#bbb]">No hard inquiry. No credit card required to start.</p>
+          </div>
+        </section>
+
+        <section className="py-6 sm:py-8 px-5 sm:px-6 bg-white" data-testid="front-proof-strip">
+          <style>{`
+            @keyframes proofScroll {
+              0% { transform: translateX(0); }
+              100% { transform: translateX(-50%); }
+            }
+          `}</style>
+          <div className="overflow-hidden max-w-[1100px] mx-auto">
+            <div className="flex gap-4" style={{ animation: "proofScroll 25s linear infinite", width: "max-content" }}>
+              {[...Array(2)].map((_, setIdx) => (
+                <div key={setIdx} className="flex gap-4">
+                  {[
+                    { amount: "$42,000", time: "2 hours ago", type: "Business LOC" },
+                    { amount: "$18,500", time: "Today", type: "Term Loan" },
+                    { amount: "$75,000", time: "Yesterday", type: "SBA Pre-qual" },
+                    { amount: "$120,000", time: "3 hours ago", type: "Business LOC" },
+                    { amount: "$31,000", time: "Today", type: "Equipment Finance" },
+                    { amount: "$55,000", time: "Yesterday", type: "Working Capital" },
+                  ].map((proof, i) => (
+                    <div key={`${setIdx}-${i}`} className="flex items-center gap-3 bg-[#fafafa] border border-[#f0f0f0] rounded-lg px-4 py-2.5 shrink-0">
+                      <div className="w-2 h-2 rounded-full bg-[#2d6a4f] shrink-0" />
+                      <span className="text-[13px] font-semibold text-[#111] whitespace-nowrap">{proof.amount} Approved</span>
+                      <span className="text-[11px] text-[#888] whitespace-nowrap">{proof.type}</span>
+                      <span className="text-[11px] text-[#bbb] whitespace-nowrap">{proof.time}</span>
+                    </div>
+                  ))}
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section className="py-8 sm:py-12 px-5 sm:px-6 bg-white border-t border-[#f0f0f0]" data-testid="front-result-block">
+          <div className="max-w-[600px] mx-auto">
+            <p className="text-[12px] font-semibold text-[#888] tracking-wider uppercase text-center mb-4">What you'll see in seconds</p>
+            <div className="bg-[#fafafa] rounded-xl border border-[#f0f0f0] p-5 sm:p-6">
+              <div className="grid grid-cols-2 gap-4 sm:gap-5">
+                <div className="bg-white rounded-lg p-4 border border-[#f0f0f0]">
+                  <p className="text-[10px] text-[#888] uppercase tracking-wider mb-1">Capital Readiness</p>
+                  <p className="text-[28px] font-black text-[#111] leading-none">84</p>
+                  <p className="text-[11px] text-[#2d6a4f] font-semibold mt-1">Strong</p>
+                </div>
+                <div className="bg-white rounded-lg p-4 border border-[#f0f0f0]">
+                  <p className="text-[10px] text-[#888] uppercase tracking-wider mb-1">Approval Range</p>
+                  <p className="text-[22px] font-black text-[#111] leading-none">$50K–$150K</p>
+                  <p className="text-[11px] text-[#2d6a4f] font-semibold mt-1">Pre-qualified</p>
+                </div>
+                <div className="bg-white rounded-lg p-4 border border-[#f0f0f0]">
+                  <p className="text-[10px] text-[#888] uppercase tracking-wider mb-1">Risk Alerts</p>
+                  <p className="text-[18px] font-bold text-[#111] leading-none">2 found</p>
+                  <p className="text-[11px] text-[#c0392b] font-semibold mt-1">Action needed</p>
+                </div>
+                <div className="bg-white rounded-lg p-4 border border-[#f0f0f0]">
+                  <p className="text-[10px] text-[#888] uppercase tracking-wider mb-1">Next Steps</p>
+                  <p className="text-[18px] font-bold text-[#111] leading-none">3 actions</p>
+                  <p className="text-[11px] text-[#555] font-semibold mt-1">Ready to go</p>
+                </div>
+              </div>
+            </div>
           </div>
         </section>
 
@@ -4995,8 +5057,8 @@ export default function LandingPage() {
         <section className="py-12 sm:py-16 px-5 sm:px-6 bg-white" data-testid="front-stats">
           <div className="max-w-[1000px] mx-auto flex flex-col sm:flex-row sm:flex-wrap items-center sm:justify-center gap-y-7 sm:gap-x-20 sm:gap-y-8">
             {[
+              { value: "$9M+", label: "Capital matched to founders" },
               { value: "12K+", label: "Credit deletions generated" },
-              { value: "$38M+", label: "Funding matched to founders" },
               { value: "94%", label: "Dispute success rate" },
             ].map((stat) => (
               <div key={stat.label} className="text-center" data-testid={`stat-${stat.label.replace(/\s+/g, "-").toLowerCase()}`}>
