@@ -4883,7 +4883,7 @@ export default function LandingPage() {
               </button>
               <button
                 onClick={() => window.location.href = '/subscription'}
-                className="px-5 py-2.5 bg-[#111] text-white text-[13px] font-medium rounded-full hover:bg-[#333] transition-colors"
+                className="px-5 py-2.5 bg-[#111] text-white text-[13px] font-medium hover:bg-[#333] transition-colors"
                 data-testid="front-btn-get-started"
               >
                 Get Started
@@ -4903,14 +4903,14 @@ export default function LandingPage() {
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-6">
               <button
                 onClick={() => { setShowFrontPage(false); setAutoSendFile(true); handleUploadClick(); }}
-                className="px-8 py-3.5 bg-[#111] text-white text-[15px] font-semibold rounded-full hover:bg-[#333] transition-colors shadow-sm"
+                className="px-8 py-3.5 bg-[#111] text-white text-[15px] font-semibold hover:bg-[#333] transition-colors shadow-sm"
                 data-testid="front-btn-upload-hero"
               >
                 Upload Your Report — Free Analysis
               </button>
               <button
                 onClick={() => { setShowFrontPage(false); }}
-                className="px-8 py-3.5 border border-[#ddd] text-[#555] text-[15px] font-medium rounded-full hover:bg-[#f8f8f8] hover:border-[#ccc] transition-colors"
+                className="px-8 py-3.5 border border-[#ddd] text-[#555] text-[15px] font-medium hover:bg-[#f8f8f8] hover:border-[#ccc] transition-colors"
                 data-testid="front-btn-try-chat"
               >
                 Try the AI Chat
@@ -5058,14 +5058,14 @@ export default function LandingPage() {
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
               <button
                 onClick={() => window.location.href = '/subscription'}
-                className="px-8 py-3.5 bg-white text-[#111] text-[15px] font-semibold rounded-full hover:bg-[#f0f0f0] transition-colors"
+                className="px-8 py-3.5 bg-white text-[#111] text-[15px] font-semibold hover:bg-[#f0f0f0] transition-colors"
                 data-testid="front-btn-pricing"
               >
                 View Plans & Pricing
               </button>
               <button
                 onClick={() => { setShowFrontPage(false); setAutoSendFile(true); handleUploadClick(); }}
-                className="px-8 py-3.5 border border-[#555] text-white text-[15px] font-medium rounded-full hover:bg-[#222] transition-colors"
+                className="px-8 py-3.5 border border-[#555] text-white text-[15px] font-medium hover:bg-[#222] transition-colors"
                 data-testid="front-btn-free-analysis"
               >
                 Try Free Analysis
