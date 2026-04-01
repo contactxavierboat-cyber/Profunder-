@@ -5680,9 +5680,6 @@ export default function LandingPage() {
         <footer className="py-10 sm:py-14 px-5 sm:px-6 bg-[#111] border-t border-white/10" data-testid="front-footer">
           <div className="max-w-[1100px] mx-auto">
             <div className="flex flex-col md:flex-row items-start justify-between gap-8 sm:gap-10 mb-10 sm:mb-12">
-              <div>
-                <ProfundrLogo size="md" variant="light" />
-              </div>
               <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-x-12 sm:gap-x-16 gap-y-6">
                 <div>
                   <p className="text-[11px] font-semibold text-white uppercase tracking-wider mb-3">Company</p>
