@@ -4999,76 +4999,106 @@ export default function LandingPage() {
           const showcaseTabs = [
             {
               label: "AIS Score",
-              bg: "linear-gradient(145deg, #2a2a3e 0%, #1a1a2e 100%)",
-              gradientBase: "#1a1a2e",
+              bg: "linear-gradient(135deg, #5a7a50 0%, #3d5c3a 25%, #2a4a35 50%, #1a3a2e 75%, #0f2b22 100%)",
+              gradientBase: "#1a3a2e",
               title: "AIS Score",
               desc: "Your Approval Intelligence Score — 23 data points analyzed to predict real lender decisions.",
               photo: "/founders/founder3.jpg",
               cards: [
-                <div key="ais1" className="bg-white rounded-xl p-5 shadow-2xl w-[220px] shrink-0">
+                <div key="ais1" className="bg-white rounded-xl p-5 shadow-2xl w-[210px] shrink-0">
                   <p className="text-[11px] text-[#888] font-medium uppercase tracking-wider mb-1">AIS</p>
                   <p className="text-[40px] font-black text-[#111] leading-none mb-1">72</p>
                   <p className="text-[12px] text-[#2d6a4f] font-semibold mb-3">Strong — Approval Likely</p>
                   <div className="w-full h-1.5 bg-[#f0f0f0] rounded-full overflow-hidden"><div className="h-full bg-[#2d6a4f] rounded-full" style={{ width: "72%" }} /></div>
                 </div>,
+                <div key="ais2" className="bg-white rounded-xl p-4 shadow-2xl w-[180px] shrink-0">
+                  <p className="text-[11px] text-[#888] font-medium uppercase tracking-wider mb-2">Pillars</p>
+                  {[{ n: "Payment", v: 98 }, { n: "Utilization", v: 88 }, { n: "Age", v: 65 }].map((p) => (
+                    <div key={p.n} className="mb-2 last:mb-0"><div className="flex justify-between text-[10px] mb-0.5"><span className="text-[#666]">{p.n}</span><span className="font-semibold text-[#111]">{p.v}%</span></div><div className="w-full h-1 bg-[#f0f0f0] rounded-full"><div className="h-full bg-[#111] rounded-full" style={{ width: `${p.v}%` }} /></div></div>
+                  ))}
+                </div>,
               ],
             },
             {
               label: "Credit Repair",
-              bg: "linear-gradient(145deg, #3a4a3e 0%, #1e2e22 100%)",
-              gradientBase: "#1e2e22",
+              bg: "linear-gradient(135deg, #6b8f71 0%, #4a7a5a 25%, #2d5a40 50%, #1a4030 75%, #0f2a1e 100%)",
+              gradientBase: "#1a4030",
               title: "Credit Repair",
               desc: "Generate FCRA-compliant dispute letters and track deletions across all three bureaus.",
               photo: "/founders/founder1.jpg",
               cards: [
-                <div key="cr1" className="bg-white rounded-xl p-5 shadow-2xl w-[220px] shrink-0">
+                <div key="cr1" className="bg-white rounded-xl p-5 shadow-2xl w-[210px] shrink-0">
                   <p className="text-[11px] text-[#888] font-medium uppercase tracking-wider mb-1">Dispute</p>
                   <p className="text-[14px] font-bold text-[#111] mb-1">Late Payment — Equifax</p>
                   <div className="flex items-center gap-1.5 mb-3">{["EQ", "TU", "EX"].map((b) => (<span key={b} className="text-[9px] px-2 py-0.5 bg-[#f5f5f5] text-[#666] font-medium rounded">{b}</span>))}</div>
                   <div className="bg-[#e8f5e9] rounded-lg px-3 py-2"><p className="text-[12px] font-semibold text-[#2d6a4f]">Ready to Send</p></div>
                 </div>,
+                <div key="cr2" className="bg-white rounded-xl p-4 shadow-2xl w-[180px] shrink-0">
+                  <p className="text-[11px] text-[#888] font-medium uppercase tracking-wider mb-2">Deletions</p>
+                  {[{ item: "Chase Late", s: "Deleted" }, { item: "Midland Coll.", s: "Pending" }, { item: "Amex Inquiry", s: "Disputed" }].map((d) => (
+                    <div key={d.item} className="flex items-center justify-between py-1.5 border-b border-[#f0f0f0] last:border-0">
+                      <span className="text-[10px] text-[#555]">{d.item}</span>
+                      <span className={`text-[9px] font-semibold px-1.5 py-0.5 rounded ${d.s === "Deleted" ? "bg-[#e8f5e9] text-[#2d6a4f]" : d.s === "Pending" ? "bg-[#fff8e1] text-[#f57f17]" : "bg-[#e3f2fd] text-[#1565c0]"}`}>{d.s}</span>
+                    </div>
+                  ))}
+                </div>,
               ],
             },
             {
               label: "Capital Matching",
-              bg: "linear-gradient(145deg, #1a2a3e 0%, #0f1e2e 100%)",
-              gradientBase: "#0f1e2e",
+              bg: "linear-gradient(135deg, #5a7a8a 0%, #3d5c6e 25%, #2a4555 50%, #1a3040 75%, #0f1e2e 100%)",
+              gradientBase: "#1a3040",
               title: "Capital Matching",
               desc: "Get matched with real lenders based on your AIS score, bureau data, and funding profile.",
               photo: "/founders/founder8.jpg",
               cards: [
-                <div key="cm1" className="bg-white rounded-xl p-5 shadow-2xl w-[220px] shrink-0">
+                <div key="cm1" className="bg-white rounded-xl p-5 shadow-2xl w-[210px] shrink-0">
                   <p className="text-[11px] text-[#888] font-medium uppercase tracking-wider mb-1">Top Match</p>
                   <div className="flex items-center gap-2.5 mb-2"><div className="w-8 h-8 rounded-full bg-[#e8f0fe] flex items-center justify-center text-[10px] font-bold text-[#1a73e8]">BV</div><div><p className="text-[13px] font-semibold text-[#111]">Bluevine</p><p className="text-[10px] text-[#888]">87% match</p></div></div>
                   <p className="text-[20px] font-black text-[#111]">$50,000</p>
                   <p className="text-[11px] text-[#888]">Business Line of Credit</p>
                 </div>,
+                <div key="cm2" className="bg-white rounded-xl p-4 shadow-2xl w-[180px] shrink-0">
+                  <p className="text-[11px] text-[#888] font-medium uppercase tracking-wider mb-2">More</p>
+                  {[{ name: "Fundbox", m: "82%" }, { name: "OnDeck", m: "76%" }, { name: "Kabbage", m: "71%" }].map((l) => (
+                    <div key={l.name} className="flex items-center justify-between py-1.5 border-b border-[#f0f0f0] last:border-0">
+                      <span className="text-[11px] font-semibold text-[#111]">{l.name}</span>
+                      <span className="text-[10px] font-semibold text-[#2d6a4f]">{l.m}</span>
+                    </div>
+                  ))}
+                </div>,
               ],
             },
             {
               label: "Simulator",
-              bg: "linear-gradient(145deg, #3e2a3a 0%, #2e1a2e 100%)",
-              gradientBase: "#2e1a2e",
+              bg: "linear-gradient(135deg, #8a6a7a 0%, #6e4d60 25%, #553a4a 50%, #3e2835 75%, #2a1a22 100%)",
+              gradientBase: "#3e2835",
               title: "Capital Simulator",
               desc: "See how changes to utilization, inquiries, and tradelines affect your approval odds in real time.",
               photo: "/founders/founder2.jpg",
               cards: [
-                <div key="sim1" className="bg-white rounded-xl p-5 shadow-2xl w-[220px] shrink-0">
+                <div key="sim1" className="bg-white rounded-xl p-5 shadow-2xl w-[210px] shrink-0">
                   <p className="text-[11px] text-[#888] font-medium uppercase tracking-wider mb-1">Projected</p>
                   <div className="flex items-end gap-2 mb-1"><span className="text-[32px] font-black text-[#111] leading-none">72</span><span className="text-[18px] font-bold text-[#2d6a4f] leading-none mb-0.5">→ 81</span></div>
                   <p className="text-[12px] text-[#2d6a4f] font-semibold">+9 points projected</p>
+                </div>,
+                <div key="sim2" className="bg-white rounded-xl p-4 shadow-2xl w-[180px] shrink-0">
+                  <p className="text-[11px] text-[#888] font-medium uppercase tracking-wider mb-2">Variables</p>
+                  {[{ label: "Utilization", val: "8%" }, { label: "Inquiries", val: "-3" }, { label: "Tradelines", val: "+2" }].map((s) => (
+                    <div key={s.label} className="flex justify-between py-1 text-[10px]"><span className="text-[#666]">{s.label}</span><span className="font-semibold text-[#111]">{s.val}</span></div>
+                  ))}
                 </div>,
               ],
             },
             {
               label: "Funding Timeline",
-              bg: "linear-gradient(145deg, #2a3a3e 0%, #1a2a2e 100%)",
-              gradientBase: "#1a2a2e",
+              bg: "linear-gradient(135deg, #6a8a8e 0%, #4d6e72 25%, #3a5558 50%, #283e42 75%, #1a2a2e 100%)",
+              gradientBase: "#283e42",
               title: "Funding Timeline",
               desc: "Track your journey from report upload to funded — every milestone mapped out.",
               photo: "/founders/founder4.jpg",
               cards: [
-                <div key="ft1" className="bg-white rounded-xl p-5 shadow-2xl w-[240px] shrink-0">
+                <div key="ft1" className="bg-white rounded-xl p-5 shadow-2xl w-[210px] shrink-0">
                   <p className="text-[11px] text-[#888] font-medium uppercase tracking-wider mb-3">Timeline</p>
                   {[{ step: "Report Uploaded", done: true }, { step: "AIS Generated", done: true }, { step: "Disputes Filed", done: true }, { step: "First Deletion", done: false }].map((t, i) => (
                     <div key={t.step} className="flex items-center gap-2 mb-2 last:mb-0">
@@ -5077,23 +5107,35 @@ export default function LandingPage() {
                     </div>
                   ))}
                 </div>,
+                <div key="ft2" className="bg-white rounded-xl p-4 shadow-2xl w-[160px] shrink-0">
+                  <p className="text-[11px] text-[#888] font-medium uppercase tracking-wider mb-2">Progress</p>
+                  <p className="text-[28px] font-black text-[#111] leading-none mb-1">60%</p>
+                  <p className="text-[10px] text-[#888]">3 of 5 milestones</p>
+                  <div className="w-full h-1.5 bg-[#f0f0f0] rounded-full overflow-hidden mt-2"><div className="h-full bg-[#111] rounded-full" style={{ width: "60%" }} /></div>
+                </div>,
               ],
             },
             {
               label: "Community",
-              bg: "linear-gradient(145deg, #3a3a2a 0%, #2e2e1a 100%)",
-              gradientBase: "#2e2e1a",
+              bg: "linear-gradient(135deg, #8a8a5a 0%, #6e6e3d 25%, #55552a 50%, #3e3e1a 75%, #2a2a0f 100%)",
+              gradientBase: "#3e3e1a",
               title: "Community Intelligence",
               desc: "Real data points from Reddit, myFICO, and founder communities — extracted and scored by AI.",
               photo: "/founders/founder9.jpg",
               cards: [
-                <div key="co1" className="bg-white rounded-xl p-5 shadow-2xl w-[220px] shrink-0">
+                <div key="co1" className="bg-white rounded-xl p-5 shadow-2xl w-[210px] shrink-0">
                   <p className="text-[11px] text-[#888] font-medium uppercase tracking-wider mb-2">Trending</p>
-                  {[{ text: "Chase Ink at AIS 62", src: "r/CreditCards" }, { text: "Navy Fed auto recon", src: "myFICO" }].map((p) => (
+                  {[{ text: "Chase Ink at AIS 62", src: "r/CreditCards" }, { text: "Navy Fed auto recon", src: "myFICO" }, { text: "Amex CLI trick", src: "r/churning" }].map((p) => (
                     <div key={p.text} className="py-1.5 border-b border-[#f0f0f0] last:border-0">
                       <p className="text-[11px] text-[#111] font-medium">{p.text}</p>
                       <p className="text-[9px] text-[#888]">{p.src}</p>
                     </div>
+                  ))}
+                </div>,
+                <div key="co2" className="bg-white rounded-xl p-4 shadow-2xl w-[160px] shrink-0">
+                  <p className="text-[11px] text-[#888] font-medium uppercase tracking-wider mb-2">Stats</p>
+                  {[{ l: "Data Points", v: "2.4K+" }, { l: "Sources", v: "12" }, { l: "Updated", v: "1hr" }].map((s) => (
+                    <div key={s.l} className="flex justify-between py-1 text-[10px]"><span className="text-[#666]">{s.l}</span><span className="font-semibold text-[#111]">{s.v}</span></div>
                   ))}
                 </div>,
               ],
