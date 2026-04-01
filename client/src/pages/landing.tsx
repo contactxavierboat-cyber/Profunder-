@@ -5036,14 +5036,14 @@ export default function LandingPage() {
               label: "AIS Score",
               bg: "linear-gradient(135deg, #5a7a50 0%, #3d5c3a 25%, #2a4a35 50%, #1a3a2e 75%, #0f2b22 100%)",
               gradientBase: "#1a3a2e",
-              title: "AIS Score",
-              desc: "Your Approval Intelligence Score — 23 data points analyzed to predict real lender decisions.",
+              title: "Bank Evaluation",
+              desc: "If you applied today — this is how banks would evaluate your profile. 23 data points, real lender decisions.",
               photo: "/founders/founder3.jpg",
               cards: [
                 <div key="ais1" className="bg-white rounded-xl p-5 shadow-2xl w-[210px] shrink-0">
-                  <p className="text-[11px] text-[#888] font-medium uppercase tracking-wider mb-1">AIS</p>
+                  <p className="text-[11px] text-[#888] font-medium uppercase tracking-wider mb-1">Approval Status</p>
                   <p className="text-[40px] font-black text-[#111] leading-none mb-1">72</p>
-                  <p className="text-[12px] text-[#2d6a4f] font-semibold mb-3">Strong — Approval Likely</p>
+                  <p className="text-[10px] font-bold text-white bg-[#2d6a4f] rounded-full px-2.5 py-0.5 inline-block mb-2">Fundable</p>
                   <div className="w-full h-1.5 bg-[#f0f0f0] rounded-full overflow-hidden"><div className="h-full bg-[#2d6a4f] rounded-full" style={{ width: "72%" }} /></div>
                 </div>,
                 <div key="ais2" className="bg-white rounded-xl p-4 shadow-2xl w-[220px] shrink-0">
@@ -5053,9 +5053,9 @@ export default function LandingPage() {
                   ))}
                 </div>,
                 <div key="ais3" className="bg-white/90 backdrop-blur-sm rounded-xl p-4 shadow-lg w-[150px] shrink-0">
-                  <p className="text-[10px] text-[#888] mb-1">Approval Odds</p>
-                  <p className="text-[28px] font-black text-[#111] leading-none">89%</p>
-                  <p className="text-[10px] text-[#2d6a4f] font-semibold">High confidence</p>
+                  <p className="text-[10px] text-[#888] mb-1">Funding Range</p>
+                  <p className="text-[22px] font-black text-[#111] leading-none">$50K–$150K</p>
+                  <p className="text-[10px] text-[#2d6a4f] font-semibold">If you applied today</p>
                 </div>,
               ],
             },
@@ -5063,8 +5063,8 @@ export default function LandingPage() {
               label: "Credit Repair",
               bg: "linear-gradient(135deg, #6b8f71 0%, #4a7a5a 25%, #2d5a40 50%, #1a4030 75%, #0f2a1e 100%)",
               gradientBase: "#1a4030",
-              title: "Credit Repair",
-              desc: "Generate FCRA-compliant dispute letters and track deletions across all three bureaus.",
+              title: "Remove Blockers",
+              desc: "Negative items reduce your approval odds instantly. We generate dispute letters and track every deletion.",
               photo: "/founders/founder1.jpg",
               cards: [
                 <div key="cr1" className="bg-white rounded-xl p-5 shadow-2xl w-[210px] shrink-0">
@@ -5093,8 +5093,8 @@ export default function LandingPage() {
               label: "Capital Matching",
               bg: "linear-gradient(135deg, #5a7a8a 0%, #3d5c6e 25%, #2a4555 50%, #1a3040 75%, #0f1e2e 100%)",
               gradientBase: "#1a3040",
-              title: "Capital Matching",
-              desc: "Get matched with real lenders based on your AIS score, bureau data, and funding profile.",
+              title: "Capital Access",
+              desc: "See how much you may qualify for — matched to real lenders based on your profile. If you applied today.",
               photo: "/founders/founder8.jpg",
               cards: [
                 <div key="cm1" className="bg-white rounded-xl p-5 shadow-2xl w-[210px] shrink-0">
@@ -5124,7 +5124,7 @@ export default function LandingPage() {
               bg: "linear-gradient(135deg, #8a6a7a 0%, #6e4d60 25%, #553a4a 50%, #3e2835 75%, #2a1a22 100%)",
               gradientBase: "#3e2835",
               title: "Capital Simulator",
-              desc: "See how changes to utilization, inquiries, and tradelines affect your approval odds in real time.",
+              desc: "Lower utilization to increase approval odds for higher limits. See exactly what to change to unlock more capital.",
               photo: "/founders/founder2.jpg",
               cards: [
                 <div key="sim1" className="bg-white rounded-xl p-5 shadow-2xl w-[210px] shrink-0">
@@ -5498,6 +5498,22 @@ export default function LandingPage() {
           </div>
         </section>
 
+        <section className="py-[50px] sm:py-[60px] px-5 sm:px-6 border-t border-[#f0f0f0]" style={{ backgroundColor: "#f8f6f3" }} data-testid="front-applying-blind">
+          <div className="max-w-[600px] mx-auto text-center">
+            <h2 className="text-[24px] sm:text-[32px] md:text-[38px] text-[#111] leading-[1.1] mb-4" style={{ fontFamily: "'Inter', system-ui, sans-serif", fontWeight: 900, letterSpacing: "-0.03em" }}>Applying blind is expensive</h2>
+            <p className="text-[14px] sm:text-[15px] text-[#555] leading-[1.7] mb-4">Every application leaves a mark on your profile. Too many, too fast — and banks see risk.</p>
+            <p className="text-[14px] sm:text-[15px] text-[#555] leading-[1.7] mb-6">Most denials are predictable. You just don't see what they see.</p>
+            <p className="text-[16px] sm:text-[18px] font-bold text-[#111] leading-[1.4] mb-8" style={{ fontStyle: "italic" }}>Banks approve profiles, not people.</p>
+            <button
+              onClick={() => { setShowFrontPage(false); setAutoSendFile(true); handleUploadClick(); }}
+              className="px-8 py-3 bg-[#111] text-white text-[14px] font-semibold hover:bg-[#333] transition-colors"
+              data-testid="front-btn-applying-blind"
+            >
+              See What Banks See
+            </button>
+          </div>
+        </section>
+
         <section className="py-[50px] sm:py-[60px] px-5 sm:px-6 bg-white border-t border-[#f0f0f0]" data-testid="front-value-props">
           <div className="max-w-[1100px] mx-auto grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-5">
             {[
@@ -5525,7 +5541,7 @@ export default function LandingPage() {
           const nextIdx = testIdx === testimonials.length - 1 ? 0 : testIdx + 1;
           return (
             <section className="py-[50px] sm:py-[80px] bg-[#111]" data-testid="front-testimonials-kajabi">
-              <h2 className="text-[30px] sm:text-[32px] md:text-[42px] text-white leading-[1.1] sm:leading-[1.05] mb-8 sm:mb-12 px-5 sm:px-6 text-center" style={{ fontFamily: "'Inter', system-ui, sans-serif", fontWeight: 900, letterSpacing: "-0.03em" }}>Why founders choose Profundr</h2>
+              <h2 className="text-[30px] sm:text-[32px] md:text-[42px] text-white leading-[1.1] sm:leading-[1.05] mb-8 sm:mb-12 px-5 sm:px-6 text-center" style={{ fontFamily: "'Inter', system-ui, sans-serif", fontWeight: 900, letterSpacing: "-0.03em" }}>Founders who stopped guessing — and got funded</h2>
 
               <div className="md:hidden px-5">
                 <div className="rounded-2xl overflow-hidden mb-6">
@@ -5648,8 +5664,23 @@ export default function LandingPage() {
 
         <section className="py-10 sm:py-6 px-5 sm:px-6 bg-[#111] border-t border-white/10" data-testid="front-cta-bar">
           <div className="max-w-[1100px] mx-auto flex flex-col sm:flex-row items-center justify-between gap-6 sm:gap-4">
-            <h3 className="text-[22px] sm:text-[22px] md:text-[28px] font-bold text-white text-center sm:text-left leading-[1.2]" style={{ letterSpacing: "-0.02em" }}>Build your financial identity on Profundr</h3>
-            <button onClick={() => { setShowFrontPage(false); setAutoSendFile(true); handleUploadClick(); }} className="px-5 py-2.5 bg-white text-[#111] text-[13px] font-semibold hover:bg-white/90 transition-colors shrink-0" data-testid="front-btn-final-cta">Start Free Trial</button>
+            <h3 className="text-[22px] sm:text-[22px] md:text-[28px] font-bold text-white text-center sm:text-left leading-[1.2]" style={{ letterSpacing: "-0.02em" }}>Profundr shows you how banks see you</h3>
+            <button onClick={() => { setShowFrontPage(false); setAutoSendFile(true); handleUploadClick(); }} className="px-5 py-2.5 bg-white text-[#111] text-[13px] font-semibold hover:bg-white/90 transition-colors shrink-0" data-testid="front-btn-final-cta">Check Your Profile</button>
+          </div>
+        </section>
+
+        <section className="py-[60px] sm:py-[80px] px-5 sm:px-6 bg-[#111]" data-testid="front-closing-cta">
+          <div className="max-w-[600px] mx-auto text-center">
+            <h2 className="text-[28px] sm:text-[36px] md:text-[46px] text-white leading-[1.1] mb-4" style={{ fontFamily: "'Inter', system-ui, sans-serif", fontWeight: 900, letterSpacing: "-0.03em" }}>Stop guessing. Start qualifying.</h2>
+            <p className="text-[14px] sm:text-[16px] text-white/60 leading-[1.6] mb-8 max-w-[400px] mx-auto">See how banks see you — before you apply. Based on your current profile, at this moment.</p>
+            <button
+              onClick={() => { setShowFrontPage(false); setAutoSendFile(true); handleUploadClick(); }}
+              className="px-10 py-3.5 bg-white text-[#111] text-[14px] font-semibold hover:bg-white/90 transition-colors"
+              data-testid="front-btn-closing-cta"
+            >
+              Check Your Profile
+            </button>
+            <p className="text-[12px] text-white/30 mt-4">No hard inquiry. No credit card required.</p>
           </div>
         </section>
 
