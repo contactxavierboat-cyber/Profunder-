@@ -4899,7 +4899,7 @@ export default function LandingPage() {
                 className="hidden sm:inline-block px-5 py-2.5 bg-[#111] text-white text-[13px] font-medium hover:bg-[#333] transition-colors"
                 data-testid="front-btn-get-started"
               >
-                Get Started
+                Check Your Profile
               </button>
               <button
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -4922,7 +4922,7 @@ export default function LandingPage() {
               <a href="#faq" onClick={() => setMobileMenuOpen(false)} className="block text-[15px] text-[#555]">FAQ</a>
               <div className="pt-2 border-t border-[#f0f0f0] flex flex-col gap-3">
                 <button onClick={() => { setMobileMenuOpen(false); setShowFrontPage(false); }} className="text-[15px] text-[#555] text-left" data-testid="front-mobile-login">Log In</button>
-                <button onClick={() => { setMobileMenuOpen(false); window.location.href = '/subscription'; }} className="w-full py-3 bg-[#111] text-white text-[14px] font-semibold" data-testid="front-mobile-get-started">Get Started</button>
+                <button onClick={() => { setMobileMenuOpen(false); window.location.href = '/subscription'; }} className="w-full py-3 bg-[#111] text-white text-[14px] font-semibold" data-testid="front-mobile-get-started">Check Your Profile</button>
               </div>
             </div>
           )}
@@ -4931,10 +4931,10 @@ export default function LandingPage() {
         <section className="pt-[115px] sm:pt-[120px] pb-[40px] sm:pb-[50px] px-5 sm:px-6" data-testid="front-hero">
           <div className="max-w-[900px] mx-auto text-center">
             <h1 className="text-[36px] sm:text-[50px] md:text-[60px] text-[#111] leading-[1.08] sm:leading-[0.95] mb-4 sm:mb-8 max-w-[300px] sm:max-w-none mx-auto" style={{ fontFamily: "'Inter', system-ui, sans-serif", fontWeight: 900, letterSpacing: "-0.035em" }} data-testid="text-front-hero-headline">
-              Know if you're fundable before you apply
+              See if you qualify for $50K–$250K in bank funding
             </h1>
             <p className="text-[15px] sm:text-[18px] text-[#555] leading-[1.7] sm:leading-[1.6] max-w-[340px] sm:max-w-[480px] mx-auto mb-8 sm:mb-10" style={{ fontFamily: "'Inter', system-ui, sans-serif" }} data-testid="text-front-hero-sub">
-              Everything you need to analyze your credit profile — plus an <span className="underline underline-offset-[3px] decoration-[1px] decoration-[#999]">AI capital partner</span> to help you get funded.
+              Profundr analyzes your profile like a bank — <span className="underline underline-offset-[3px] decoration-[1px] decoration-[#999]">before you apply</span>. See how much you may qualify for.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-4 mb-5 sm:mb-6 w-full sm:max-w-none mx-auto">
               <button
@@ -4942,17 +4942,17 @@ export default function LandingPage() {
                 className="px-8 py-3 sm:py-3.5 bg-[#111] border border-[#111] text-white text-[14px] font-semibold hover:bg-[#333] transition-colors"
                 data-testid="front-btn-upload-hero"
               >
-                Upload Report
+                Check Your Profile
               </button>
               <button
                 onClick={() => { setShowFrontPage(false); }}
                 className="px-8 py-2.5 sm:py-3.5 text-[#555] text-[14px] font-medium sm:border sm:border-[#ddd] sm:hover:bg-[#f8f8f8] transition-colors"
                 data-testid="front-btn-try-chat"
               >
-                Try the AI Chat
+                See Where You Stand
               </button>
             </div>
-            <p className="text-[12px] text-[#bbb]">No hard inquiry. No credit card required to start.</p>
+            <p className="text-[12px] text-[#bbb]">No hard inquiry. No credit card required. +$9M funded through Profundr.</p>
           </div>
         </section>
 
@@ -5010,8 +5010,8 @@ export default function LandingPage() {
         <section id="how-it-works" className="py-12 sm:py-16 px-5 sm:px-6 scroll-mt-16" style={{ backgroundColor: "#e8e5e0" }} data-testid="front-newsletter">
           <div className="max-w-[1000px] mx-auto flex flex-col md:flex-row items-center md:items-center justify-between gap-6 sm:gap-8">
             <div className="max-w-[420px] text-center md:text-left">
-              <h3 className="text-[20px] sm:text-[24px] font-black text-[#111] leading-[1.15] mb-3" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>You already know more than you think</h3>
-              <p className="text-[14px] sm:text-[15px] text-[#555] leading-[1.7] sm:leading-[1.6]">Every week, we break down how real founders turn credit into capital, with strategy and tools you can actually use.</p>
+              <h3 className="text-[20px] sm:text-[24px] font-black text-[#111] leading-[1.15] mb-3" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>Banks approve profiles, not people</h3>
+              <p className="text-[14px] sm:text-[15px] text-[#555] leading-[1.7] sm:leading-[1.6]">Every week, we show real founders how to build the profile banks say yes to — with strategy, timing, and tools you can actually use.</p>
             </div>
             <div className="flex flex-col sm:flex-row w-full md:w-auto gap-2 sm:gap-0">
               <input
@@ -5349,10 +5349,10 @@ export default function LandingPage() {
               </div>
             </div>
             <div className="flex-1">
-              <h3 className="text-[24px] sm:text-[32px] font-bold text-[#111] leading-[1.15] mb-3 text-center md:text-left" style={{ letterSpacing: "-0.02em" }}>All-in-one that actually works</h3>
-              <p className="text-[14px] sm:text-[15px] text-[#555] leading-[1.7] sm:leading-[1.6] mb-7 sm:mb-6 text-center md:text-left">Profundr gives you one connected system to analyze credit, generate disputes, match with lenders, and track your AIS score — all in real time.</p>
+              <h3 className="text-[24px] sm:text-[32px] font-bold text-[#111] leading-[1.15] mb-3 text-center md:text-left" style={{ letterSpacing: "-0.02em" }}>Your funding snapshot — instantly</h3>
+              <p className="text-[14px] sm:text-[15px] text-[#555] leading-[1.7] sm:leading-[1.6] mb-7 sm:mb-6 text-center md:text-left">Profundr shows you how banks see you. One upload reveals your approval range, risk alerts, and exactly what's blocking your next funding round.</p>
               <ul className="space-y-5 sm:space-y-3 mb-8 sm:mb-6">
-                {["AIS scoring, disputes, and capital matching fully connected", "Centralized view of your financial identity across 3 bureaus", "Tools built specifically for founder and business funding", "Less complexity — one upload, full analysis"].map((item) => (
+                {["See your estimated approval range from $5K–$250K", "Bank-level analysis across all 3 bureaus in one view", "Built for founders accessing real capital, not just scores", "One upload — full funding picture in seconds"].map((item) => (
                   <li key={item} className="flex items-start gap-3"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="mt-0.5 shrink-0"><path d="M4 8l3 3 5-5" stroke="#111" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg><span className="text-[14px] text-[#555] leading-[1.6]">{item}</span></li>
                 ))}
               </ul>
@@ -5362,7 +5362,7 @@ export default function LandingPage() {
                   <span key={r} className="text-[12px] px-3 py-1.5 bg-[#f5f5f5] text-[#666] font-medium rounded-full flex items-center gap-1.5"><span className="w-4 h-4 rounded-full bg-[#ddd] shrink-0" />{r}</span>
                 ))}
               </div>
-              <div className="text-center sm:text-left"><button className="px-5 py-2.5 bg-[#111] text-white text-[13px] font-semibold hover:bg-[#333] transition-colors" data-testid="btn-watch-demo-1">Get Started</button></div>
+              <div className="text-center sm:text-left"><button className="px-5 py-2.5 bg-[#111] text-white text-[13px] font-semibold hover:bg-[#333] transition-colors" data-testid="btn-watch-demo-1">Check Before You Apply</button></div>
             </div>
           </div>
         </section>
@@ -5370,10 +5370,10 @@ export default function LandingPage() {
         <section className="py-[50px] sm:py-[80px] px-2 sm:px-6 bg-white border-t border-[#f0f0f0]" data-testid="front-sell-confidence">
           <div className="max-w-[1100px] mx-auto flex flex-col md:flex-row items-center gap-10 sm:gap-12">
             <div className="flex-1 order-2 md:order-1">
-              <h3 className="text-[24px] sm:text-[32px] font-bold text-[#111] leading-[1.15] mb-3 text-center md:text-left" style={{ letterSpacing: "-0.02em" }}>Dispute and delete with precision</h3>
-              <p className="text-[14px] sm:text-[15px] text-[#555] leading-[1.7] sm:leading-[1.6] mb-7 sm:mb-6 text-center md:text-left">FCRA-compliant dispute letters generated in seconds. Track every deletion across Equifax, TransUnion, and Experian in real time.</p>
+              <h3 className="text-[24px] sm:text-[32px] font-bold text-[#111] leading-[1.15] mb-3 text-center md:text-left" style={{ letterSpacing: "-0.02em" }}>Remove what's blocking your approval</h3>
+              <p className="text-[14px] sm:text-[15px] text-[#555] leading-[1.7] sm:leading-[1.6] mb-7 sm:mb-6 text-center md:text-left">Negative items can reduce your approval odds instantly. Profundr generates FCRA-compliant dispute letters and tracks every deletion in real time.</p>
               <ul className="space-y-5 sm:space-y-3 mb-8 sm:mb-6">
-                {["AI-generated dispute letters with legal compliance", "Track deletions across all three bureaus in one view", "Automated follow-ups and escalation paths", "Bureau response tracking with timeline", "Success rate analytics per dispute type"].map((item) => (
+                {["AI-generated dispute letters — legally compliant, ready to send", "Too many recent inquiries may trigger automatic denial — we flag them", "High balances can reduce your approval odds — we show the impact", "Track deletions across all three bureaus in one view", "94% dispute success rate across all Profundr users"].map((item) => (
                   <li key={item} className="flex items-start gap-3"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="mt-0.5 shrink-0"><path d="M4 8l3 3 5-5" stroke="#111" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg><span className="text-[14px] text-[#555] leading-[1.6]">{item}</span></li>
                 ))}
               </ul>
@@ -5383,7 +5383,7 @@ export default function LandingPage() {
                   <span key={r} className="text-[12px] px-3 py-1.5 bg-[#f5f5f5] text-[#666] font-medium rounded-full flex items-center gap-1.5"><span className="w-4 h-4 rounded-full bg-[#ddd] shrink-0" />{r}</span>
                 ))}
               </div>
-              <div className="text-center sm:text-left"><button className="px-5 py-2.5 bg-[#111] text-white text-[13px] font-semibold hover:bg-[#333] transition-colors" data-testid="btn-watch-demo-2">Upload Report</button></div>
+              <div className="text-center sm:text-left"><button className="px-5 py-2.5 bg-[#111] text-white text-[13px] font-semibold hover:bg-[#333] transition-colors" data-testid="btn-watch-demo-2">See If You Qualify</button></div>
             </div>
             <div className="flex-1 order-1 md:order-2 w-full">
               <div className="rounded-xl sm:rounded-2xl" style={{ background: "#f0ede8", padding: "28px 20px" }}>
@@ -5480,10 +5480,10 @@ export default function LandingPage() {
               </div>
             </div>
             <div className="flex-1">
-              <h3 className="text-[24px] sm:text-[32px] font-bold text-[#111] leading-[1.15] mb-3 text-center md:text-left" style={{ letterSpacing: "-0.02em" }}>Capital matching that works</h3>
-              <p className="text-[14px] sm:text-[15px] text-[#555] leading-[1.7] sm:leading-[1.6] mb-7 sm:mb-6 text-center md:text-left">Get matched with real lenders based on your AIS score, bureau profile, and business data. No guessing — just funded founders.</p>
+              <h3 className="text-[24px] sm:text-[32px] font-bold text-[#111] leading-[1.15] mb-3 text-center md:text-left" style={{ letterSpacing: "-0.02em" }}>Find your approval range instantly</h3>
+              <p className="text-[14px] sm:text-[15px] text-[#555] leading-[1.7] sm:leading-[1.6] mb-7 sm:mb-6 text-center md:text-left">See how much you may qualify for — matched to real lenders based on your AIS score and bureau profile. Timing matters more than your score.</p>
               <ul className="space-y-5 sm:space-y-3 mb-8 sm:mb-6">
-                {["AI-powered lender matching across 50+ products", "Real approval odds based on your AIS profile", "Track applications from match to funded", "Success stories from real Profundr users"].map((item) => (
+                {["Unlock higher limits and approvals with AI-powered matching", "The same profile can be approved or denied based on timing alone", "See real approval odds across 50+ funding products", "Track applications from match to funded — $9M+ matched so far"].map((item) => (
                   <li key={item} className="flex items-start gap-3"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="mt-0.5 shrink-0"><path d="M4 8l3 3 5-5" stroke="#111" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg><span className="text-[14px] text-[#555] leading-[1.6]">{item}</span></li>
                 ))}
               </ul>
@@ -5493,7 +5493,7 @@ export default function LandingPage() {
                   <span key={r} className="text-[12px] px-3 py-1.5 bg-[#f5f5f5] text-[#666] font-medium rounded-full flex items-center gap-1.5"><span className="w-4 h-4 rounded-full bg-[#ddd] shrink-0" />{r}</span>
                 ))}
               </div>
-              <div className="text-center sm:text-left"><button className="px-5 py-2.5 bg-[#111] text-white text-[13px] font-semibold hover:bg-[#333] transition-colors" data-testid="btn-watch-demo-3">See Your Matches</button></div>
+              <div className="text-center sm:text-left"><button className="px-5 py-2.5 bg-[#111] text-white text-[13px] font-semibold hover:bg-[#333] transition-colors" data-testid="btn-watch-demo-3">See If You Qualify</button></div>
             </div>
           </div>
         </section>
@@ -5905,7 +5905,7 @@ export default function LandingPage() {
                 Upload Report
               </button>
               <p className="text-[11px] text-[#999] text-center max-w-[240px] leading-[1.6]" data-testid="text-upload-description">
-                Profundr reviews your report like a bank would and shows your funding potential before you apply. No hard inquiry, no lending — just secure, clear analysis.
+                Profundr shows you how banks see you — your approval range, risk alerts, and what to fix. No hard inquiry, no lending — just clarity before you apply.
               </p>
             </div>
           ) : (
