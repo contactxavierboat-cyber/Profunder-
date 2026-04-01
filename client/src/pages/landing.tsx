@@ -4996,37 +4996,47 @@ export default function LandingPage() {
 
         <section className="py-[80px] px-6 bg-[#111]" data-testid="front-product-showcase">
           <div className="max-w-[1100px] mx-auto">
-            <h2 className="text-[36px] sm:text-[44px] text-white leading-[1.0] mb-12 text-center" style={{ fontFamily: "'Inter', system-ui, sans-serif", fontWeight: 900, letterSpacing: "-0.03em", fontStyle: "italic" }}>Choose how you turn credit into capital</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="rounded-xl overflow-hidden" style={{ background: "linear-gradient(135deg, #2a3a2e 0%, #1a2e20 100%)" }}>
-                <div className="p-8">
-                  <p className="text-[22px] font-bold text-white mb-2">Credit Repair</p>
-                  <p className="text-[14px] text-white/60 leading-[1.6] mb-6">Generate FCRA-compliant dispute letters and track deletions across all three bureaus.</p>
-                  <div className="bg-white rounded-lg p-5 shadow-lg max-w-[280px]">
-                    <p className="text-[15px] font-bold text-[#111] mb-1">Dispute Letter Generated</p>
-                    <p className="text-[12px] text-[#888] mb-4">Late Payment — Equifax</p>
-                    <div className="flex items-center gap-2 mb-3">
-                      <span className="text-[11px] px-2 py-1 bg-[#e8f5e9] text-[#2d6a4f] font-semibold rounded">Ready to Send</span>
+            <h2 className="text-[36px] sm:text-[46px] text-white leading-[1.05] mb-10 text-center" style={{ fontFamily: "Georgia, 'Times New Roman', serif", fontWeight: 400, letterSpacing: "-0.02em", fontStyle: "italic" }}>Choose how you turn credit into capital</h2>
+            <div className="flex flex-wrap items-center justify-center gap-3 mb-10">
+              {["AIS Score", "Credit Repair", "Capital Matching", "Simulator", "Funding Timeline", "Community"].map((tab, i) => (
+                <span key={tab} className={`px-5 py-2 text-[13px] font-medium border cursor-pointer transition-colors ${i === 1 ? "bg-white text-[#111] border-white" : "bg-transparent text-white/70 border-white/20 hover:border-white/40"}`}>{tab}</span>
+              ))}
+            </div>
+            <div className="rounded-2xl overflow-hidden" style={{ background: "linear-gradient(145deg, #3a4a3e 0%, #2a3a2e 40%, #1e2e22 100%)" }}>
+              <div className="p-6 sm:p-10">
+                <p className="text-[28px] font-bold text-white mb-2" style={{ fontFamily: "Georgia, 'Times New Roman', serif", fontStyle: "italic" }}>Credit Repair</p>
+                <p className="text-[14px] text-white/50 leading-[1.6] mb-8 max-w-[340px]">Generate FCRA-compliant dispute letters and track deletions across all three bureaus.</p>
+                <div className="flex flex-col sm:flex-row items-start gap-6">
+                  <div className="bg-white rounded-xl p-6 shadow-2xl w-full sm:w-[300px] shrink-0">
+                    <p className="text-[16px] font-bold text-[#111] mb-1">Dispute Letter Generated</p>
+                    <p className="text-[13px] text-[#888] mb-5">Late Payment — Equifax</p>
+                    <div className="flex items-center gap-2 mb-4">
+                      {["Equifax", "TransUnion", "Experian"].map((b) => (
+                        <span key={b} className="text-[10px] px-2.5 py-1 bg-[#f5f5f5] text-[#666] font-medium rounded">{b}</span>
+                      ))}
                     </div>
-                    <div className="w-full py-2.5 bg-[#111] text-white text-[13px] font-semibold text-center">Download PDF</div>
+                    <div className="bg-[#f8f8f8] rounded-lg px-4 py-3 mb-4">
+                      <p className="text-[12px] text-[#888]">Status</p>
+                      <p className="text-[14px] font-semibold text-[#2d6a4f]">Ready to Send</p>
+                    </div>
+                    <div className="w-full py-3 bg-[#111] text-white text-[13px] font-semibold text-center cursor-pointer hover:bg-[#333] transition-colors">Download PDF</div>
                   </div>
-                </div>
-              </div>
-              <div className="rounded-xl overflow-hidden" style={{ background: "linear-gradient(135deg, #1a2a3e 0%, #0f1e2e 100%)" }}>
-                <div className="p-8">
-                  <p className="text-[22px] font-bold text-white mb-2">Capital Matching</p>
-                  <p className="text-[14px] text-white/60 leading-[1.6] mb-6">Get matched with real lenders based on your AIS score, bureau data, and funding profile.</p>
-                  <div className="bg-white rounded-lg p-5 shadow-lg max-w-[280px]">
-                    <p className="text-[15px] font-bold text-[#111] mb-1">Lender Match Found</p>
-                    <p className="text-[12px] text-[#888] mb-3">Business Line of Credit — $50K</p>
-                    <div className="flex items-center gap-3 mb-3">
-                      <div className="w-8 h-8 rounded-full bg-[#f0f0f0] flex items-center justify-center text-[10px] font-bold text-[#555]">BF</div>
+                  <div className="bg-white rounded-xl p-6 shadow-2xl w-full sm:w-[300px] shrink-0">
+                    <p className="text-[16px] font-bold text-[#111] mb-1">Lender Match</p>
+                    <p className="text-[13px] text-[#888] mb-4">Business LOC — $50K</p>
+                    <div className="flex items-center gap-3 mb-4 pb-4 border-b border-[#f0f0f0]">
+                      <div className="w-10 h-10 rounded-full bg-[#e8f0fe] flex items-center justify-center text-[12px] font-bold text-[#1a73e8]">BV</div>
                       <div>
-                        <p className="text-[13px] font-semibold text-[#111]">Bluevine Financial</p>
+                        <p className="text-[14px] font-semibold text-[#111]">Bluevine Financial</p>
                         <p className="text-[11px] text-[#888]">87% match score</p>
                       </div>
                     </div>
-                    <div className="w-full py-2.5 bg-[#111] text-white text-[13px] font-semibold text-center">View Details</div>
+                    <div className="flex items-center justify-between text-[12px] text-[#888] mb-1">
+                      <span>Min. AIS Score</span><span className="font-semibold text-[#111]">55</span>
+                    </div>
+                    <div className="flex items-center justify-between text-[12px] text-[#888]">
+                      <span>Avg. Approval</span><span className="font-semibold text-[#111]">5 days</span>
+                    </div>
                   </div>
                 </div>
               </div>
