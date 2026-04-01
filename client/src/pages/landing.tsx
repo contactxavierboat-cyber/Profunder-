@@ -4887,11 +4887,11 @@ export default function LandingPage() {
                 Log In
               </button>
               <button
-                onClick={() => { setShowFrontPage(false); setAutoSendFile(true); handleUploadClick(); }}
+                onClick={() => window.location.href = '/subscription'}
                 className="px-5 py-2.5 bg-[#111] text-white text-[13px] font-medium hover:bg-[#333] transition-colors"
                 data-testid="front-btn-get-started"
               >
-                Upload Report
+                Get Started
               </button>
             </div>
           </div>
@@ -4911,7 +4911,7 @@ export default function LandingPage() {
                 className="px-8 py-3.5 bg-[#111] text-white text-[15px] font-semibold hover:bg-[#333] transition-colors shadow-sm"
                 data-testid="front-btn-upload-hero"
               >
-                Upload Your Report — Free Analysis
+                Upload Report
               </button>
               <button
                 onClick={() => { setShowFrontPage(false); }}
