@@ -4839,6 +4839,13 @@ export default function LandingPage() {
   const [showcaseTab, setShowcaseTab] = useState(0);
   const [testIdx, setTestIdx] = useState(0);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setShowcaseTab((prev) => (prev + 1) % 4);
+    }, 4000);
+    return () => clearInterval(interval);
+  }, []);
   const [faqOpen, setFaqOpen] = useState<number | null>(null);
 
   useEffect(() => {
@@ -5203,7 +5210,7 @@ export default function LandingPage() {
             <section className="py-[50px] sm:py-[80px] px-5 sm:px-6 bg-[#111]" data-testid="front-product-showcase">
               <div className="max-w-[1100px] mx-auto">
                 <h2 className="text-[26px] sm:text-[36px] md:text-[46px] text-white leading-[1.1] sm:leading-[1.05] mb-8 sm:mb-10 text-center" style={{ fontFamily: "'Inter', system-ui, sans-serif", fontWeight: 900, letterSpacing: "-0.03em" }}>Choose how you turn credit into capital</h2>
-                <div className="flex overflow-x-auto no-scrollbar items-center justify-start sm:justify-center gap-2 sm:gap-3 mb-8 sm:mb-10 -mx-4 px-4 sm:mx-0 sm:px-0">
+                <div className="hidden sm:flex overflow-x-auto no-scrollbar items-center justify-center gap-2 sm:gap-3 mb-8 sm:mb-10">
                   {showcaseTabs.map((tab, i) => (
                     <span key={tab.label} onClick={() => setShowcaseTab(i)} className={`px-4 sm:px-5 py-2 text-[12px] sm:text-[13px] font-medium border cursor-pointer transition-colors whitespace-nowrap shrink-0 ${showcaseTab === i ? "bg-white text-[#111] border-white" : "bg-transparent text-white/70 border-white/20 hover:border-white/40"}`} data-testid={`showcase-tab-${tab.label.replace(/\s+/g, "-").toLowerCase()}`}>{tab.label}</span>
                   ))}
