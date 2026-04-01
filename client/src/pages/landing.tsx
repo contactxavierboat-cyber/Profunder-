@@ -5392,22 +5392,19 @@ export default function LandingPage() {
           const prevIdx = testIdx === 0 ? testimonials.length - 1 : testIdx - 1;
           const nextIdx = testIdx === testimonials.length - 1 ? 0 : testIdx + 1;
           return (
-            <section className="py-[80px] bg-[#111] overflow-hidden" data-testid="front-testimonials-kajabi">
+            <section className="py-[80px] bg-[#111]" data-testid="front-testimonials-kajabi">
               <h2 className="text-[32px] sm:text-[42px] text-white leading-[1.05] mb-12 text-center px-6" style={{ fontFamily: "'Inter', system-ui, sans-serif", fontWeight: 900, letterSpacing: "-0.03em" }}>Why founders choose Profundr</h2>
-              <div className="relative flex items-stretch justify-center gap-5 px-6" style={{ maxWidth: "100vw" }}>
-                <div className="hidden md:block w-[120px] shrink-0 rounded-2xl overflow-hidden opacity-40 cursor-pointer transition-opacity hover:opacity-60" onClick={() => setTestIdx(prevIdx)}>
-                  <img src={testimonials[prevIdx].photo} alt={testimonials[prevIdx].name} className="w-full h-full object-cover" />
-                </div>
-                <div className="bg-[#1a1a1a] rounded-2xl overflow-hidden flex-1" style={{ maxWidth: "900px" }}>
+              <div className="px-8 sm:px-12 md:px-16 lg:px-24">
+                <div className="bg-[#1a1a1a] overflow-hidden">
                   <div className="flex flex-col md:flex-row">
-                    <div className="md:w-[40%] shrink-0">
+                    <div className="md:w-[42%] shrink-0">
                       <img src={t.photo} alt={t.name} className="w-full h-[300px] md:h-full object-cover" />
                     </div>
-                    <div className="flex-1 p-8 md:p-10 flex flex-col justify-center">
+                    <div className="flex-1 p-8 md:p-12 flex flex-col justify-center">
                       <svg width="32" height="24" viewBox="0 0 32 24" fill="none" className="mb-6"><path d="M0 24V14.4C0 6.4 4.8 1.6 14.4 0l1.6 3.2C10.4 4.8 8 8 7.2 12H14V24H0zm18 0V14.4C18 6.4 22.8 1.6 32 0l-1.6 3.2C24.8 4.8 22.4 8 21.6 12H28v12H18z" fill="#444"/></svg>
                       <p className="text-[15px] text-white/80 leading-[1.7] mb-6">"{t.quote}"</p>
                       <p className="text-[16px] font-bold text-white mb-0.5">{t.name}</p>
-                      <p className="text-[13px] text-white/50 mb-6">{t.role}</p>
+                      <p className="text-[13px] text-white/50 mb-8">{t.role}</p>
                       <div>
                         <p className="text-[36px] font-black text-white leading-none">{t.amount}</p>
                         <p className="text-[13px] text-white/50 mt-1">{t.label}</p>
@@ -5415,19 +5412,16 @@ export default function LandingPage() {
                     </div>
                   </div>
                 </div>
-                <div className="hidden md:block w-[120px] shrink-0 rounded-2xl overflow-hidden opacity-40 cursor-pointer transition-opacity hover:opacity-60" onClick={() => setTestIdx(nextIdx)}>
-                  <img src={testimonials[nextIdx].photo} alt={testimonials[nextIdx].name} className="w-full h-full object-cover" />
-                </div>
               </div>
-              <div className="flex items-center justify-between mt-8 max-w-[900px] mx-auto px-6">
+              <div className="flex items-center justify-between mt-10 px-8 sm:px-12 md:px-16 lg:px-24">
                 <div className="flex items-center gap-2">
                   {testimonials.map((_, i) => (
-                    <div key={i} onClick={() => setTestIdx(i)} className={`h-1 rounded-full cursor-pointer transition-all ${testIdx === i ? "w-8 bg-white" : "w-4 bg-white/30"}`} />
+                    <div key={i} onClick={() => setTestIdx(i)} className={`h-[3px] cursor-pointer transition-all ${testIdx === i ? "w-8 bg-white" : "w-5 bg-white/20"}`} />
                   ))}
                 </div>
                 <div className="flex items-center gap-2">
-                  <button onClick={() => setTestIdx(prevIdx)} className="w-9 h-9 border border-white/20 flex items-center justify-center hover:border-white/50 transition-colors" data-testid="btn-test-prev"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M10 4l-4 4 4 4" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg></button>
-                  <button onClick={() => setTestIdx(nextIdx)} className="w-9 h-9 border border-white/20 flex items-center justify-center hover:border-white/50 transition-colors" data-testid="btn-test-next"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M6 4l4 4-4 4" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg></button>
+                  <button onClick={() => setTestIdx(prevIdx)} className="w-10 h-10 border border-white/20 flex items-center justify-center hover:border-white/50 transition-colors" data-testid="btn-test-prev"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M10 4l-4 4 4 4" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg></button>
+                  <button onClick={() => setTestIdx(nextIdx)} className="w-10 h-10 border border-white/20 flex items-center justify-center hover:border-white/50 transition-colors" data-testid="btn-test-next"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M6 4l4 4-4 4" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg></button>
                 </div>
               </div>
             </section>
