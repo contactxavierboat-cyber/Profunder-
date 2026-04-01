@@ -5247,13 +5247,33 @@ export default function LandingPage() {
         })()}
 
         <section className="py-4 sm:py-6 border-y border-[#f0f0f0] bg-[#fafafa] overflow-hidden" data-testid="front-social-proof">
-          <div className="max-w-[900px] mx-auto px-4 sm:px-6 flex overflow-x-auto no-scrollbar items-center justify-start sm:justify-center gap-x-6 sm:gap-x-10 whitespace-nowrap">
-            {["23 Data Points Analyzed", "FCRA-Compliant Letters", "Real Lender Matching", "AES-256 Encryption", "No Hard Inquiries"].map((item) => (
-              <span key={item} className="text-[11px] sm:text-[12px] text-[#999] font-medium tracking-wide uppercase flex items-center gap-2 shrink-0">
-                <svg width="14" height="14" viewBox="0 0 16 16" fill="none" className="shrink-0"><path d="M4 8l3 3 5-5" stroke="#999" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
-                {item}
-              </span>
-            ))}
+          <style>{`
+            @keyframes scrollProof {
+              0% { transform: translateX(0); }
+              100% { transform: translateX(-50%); }
+            }
+          `}</style>
+          <div className="sm:max-w-[900px] sm:mx-auto sm:px-6 sm:flex sm:justify-center sm:gap-x-10">
+            <div className="flex sm:hidden gap-x-8" style={{ animation: "scrollProof 25s linear infinite", width: "max-content", WebkitAnimation: "scrollProof 25s linear infinite" }}>
+              {[...Array(2)].map((_, setIdx) => (
+                <div key={setIdx} className="flex gap-x-8">
+                  {["23 Data Points Analyzed", "FCRA-Compliant Letters", "Real Lender Matching", "AES-256 Encryption", "No Hard Inquiries"].map((item) => (
+                    <span key={item} className="text-[11px] text-[#999] font-medium tracking-wide uppercase flex items-center gap-2 shrink-0 whitespace-nowrap">
+                      <svg width="14" height="14" viewBox="0 0 16 16" fill="none" className="shrink-0"><path d="M4 8l3 3 5-5" stroke="#999" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                      {item}
+                    </span>
+                  ))}
+                </div>
+              ))}
+            </div>
+            <div className="hidden sm:contents">
+              {["23 Data Points Analyzed", "FCRA-Compliant Letters", "Real Lender Matching", "AES-256 Encryption", "No Hard Inquiries"].map((item) => (
+                <span key={item} className="text-[12px] text-[#999] font-medium tracking-wide uppercase flex items-center gap-2 shrink-0 whitespace-nowrap">
+                  <svg width="14" height="14" viewBox="0 0 16 16" fill="none" className="shrink-0"><path d="M4 8l3 3 5-5" stroke="#999" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                  {item}
+                </span>
+              ))}
+            </div>
           </div>
         </section>
 
