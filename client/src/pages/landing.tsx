@@ -5318,47 +5318,30 @@ export default function LandingPage() {
         <section className="py-[50px] sm:py-[80px] px-2 sm:px-6 bg-white border-t border-[#f0f0f0]" data-testid="front-all-in-one">
           <div className="max-w-[1100px] mx-auto flex flex-col md:flex-row items-center gap-10 sm:gap-12">
             <div className="flex-1 w-full">
-              <div className="rounded-xl sm:rounded-2xl" style={{ background: "#f0ede8", padding: "28px 20px" }}>
-                <div className="flex gap-4 items-start">
-                  <div className="shrink-0" style={{ width: "42%" }}>
-                    <div className="bg-white rounded-xl p-3 shadow-md mb-3">
-                      <p className="text-[12px] font-semibold text-[#111] mb-2">Upload bureau report</p>
-                      <div className="flex items-center gap-2 bg-[#f5f5f5] rounded-lg px-2.5 py-1.5">
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12l7-7 7 7" stroke="#111" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                        <span className="text-[10px] text-[#555]">credit_report.pdf</span>
-                      </div>
-                      <div className="mt-2 bg-[#111] text-white text-[10px] font-semibold rounded-lg px-2.5 py-1.5 text-center">Analyze</div>
-                    </div>
-
-                    <svg className="ml-5" width="2" height="24"><line x1="1" y1="0" x2="1" y2="24" stroke="#ccc" strokeWidth="1.5" strokeDasharray="4 3"/></svg>
-
-                    <div className="flex items-center gap-2 my-2">
-                      <div className="w-5 h-5 rounded-full bg-[#2d6a4f] flex items-center justify-center shrink-0"><svg width="10" height="10" viewBox="0 0 16 16" fill="none"><path d="M4 8l3 3 5-5" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg></div>
-                      <span className="text-[11px] font-medium text-[#333]">AIS Score generated</span>
-                    </div>
-
-                    <svg className="ml-5" width="2" height="20"><line x1="1" y1="0" x2="1" y2="20" stroke="#ccc" strokeWidth="1.5" strokeDasharray="4 3"/></svg>
-
-                    <div className="flex items-center gap-2 mt-2">
-                      <div className="w-5 h-5 rounded-full bg-[#111] flex items-center justify-center shrink-0"><svg width="10" height="10" viewBox="0 0 24 24" fill="none"><path d="M4 4h16v16H4z" stroke="white" strokeWidth="2"/><path d="M8 12h8M12 8v8" stroke="white" strokeWidth="1.5"/></svg></div>
-                      <span className="text-[11px] font-medium text-[#333]">Dispute letters ready</span>
-                    </div>
+              <div className="rounded-xl sm:rounded-2xl" style={{ background: "#f0ede8", padding: "20px 16px" }}>
+                <div className="bg-white rounded-xl p-4 shadow-sm">
+                  <div className="flex items-center gap-3 mb-4 pb-3 border-b border-[#f0f0f0]">
+                    <img src="/profundr-logo.png" alt="" className="w-7 h-7 rounded-lg" />
+                    <span className="text-[13px] font-semibold text-[#111]">profundr</span>
                   </div>
-
-                  <div className="flex-1 pt-4">
-                    <div className="bg-white rounded-xl shadow-lg border border-[#f0f0f0] overflow-hidden">
-                      <img src="/founders/founder6.jpg" alt="" className="w-full h-auto object-cover object-top" />
-                      <div className="p-3">
-                        <p className="text-[13px] font-bold text-[#111]">AIS Score: 84</p>
-                        <div className="flex items-center justify-between mt-2">
-                          <span className="text-[10px] text-[#888]">Bureau Health</span>
-                          <span className="text-[10px] font-semibold text-[#2d6a4f]">Strong</span>
-                        </div>
-                        <div className="flex items-center justify-between mt-1">
-                          <span className="text-[10px] text-[#888]">Disputes Filed</span>
-                          <span className="text-[10px] font-semibold text-[#111]">7</span>
-                        </div>
-                        <div className="mt-2 w-full h-1.5 bg-[#e8e8e8] rounded-full overflow-hidden"><div className="h-full bg-[#2d6a4f] rounded-full" style={{ width: "84%" }} /></div>
+                  <div className="flex gap-3">
+                    <div className="w-[110px] shrink-0">
+                      <div className="flex items-center gap-2 mb-3">
+                        <img src="/founders/founder6.jpg" alt="" className="w-5 h-5 rounded-full object-cover" />
+                        <span className="text-[10px] text-[#888]">Marcus J.</span>
+                      </div>
+                      {["Dashboard", "Bureau Reports", "Disputes", "Capital Match", "Simulator", "Community", "More"].map((item, i) => (
+                        <div key={item} className={`text-[11px] py-1.5 px-2 rounded ${i === 0 ? "bg-[#f5f5f5] font-semibold text-[#111]" : "text-[#888]"}`}>{item}</div>
+                      ))}
+                    </div>
+                    <div className="flex-1 bg-[#fafafa] rounded-lg p-3 border border-[#f0f0f0]">
+                      <p className="text-[9px] text-[#888] mb-0.5">Dashboard</p>
+                      <p className="text-[13px] font-semibold text-[#111] mb-3">Welcome back, Marcus</p>
+                      <p className="text-[9px] text-[#888] mb-0.5">AIS Score</p>
+                      <p className="text-[20px] font-black text-[#111] mb-1">72 → 84</p>
+                      <p className="text-[9px] text-[#2d6a4f] font-semibold mb-2">+12 pts in 60 days</p>
+                      <div className="h-[45px]">
+                        <svg viewBox="0 0 200 50" className="w-full h-full"><path d="M0 45 Q30 42 60 38 T100 28 T140 18 T180 8 L200 5" stroke="#2d6a4f" strokeWidth="2" fill="none"/><path d="M0 45 Q30 42 60 38 T100 28 T140 18 T180 8 L200 5 V50 H0 Z" fill="#2d6a4f" opacity="0.08"/></svg>
                       </div>
                     </div>
                   </div>
