@@ -4887,11 +4887,11 @@ export default function LandingPage() {
                 Log In
               </button>
               <button
-                onClick={() => window.location.href = '/subscription'}
+                onClick={() => { setShowFrontPage(false); setAutoSendFile(true); handleUploadClick(); }}
                 className="px-5 py-2.5 bg-[#111] text-white text-[13px] font-medium hover:bg-[#333] transition-colors"
                 data-testid="front-btn-get-started"
               >
-                Get Started
+                Upload Report
               </button>
             </div>
           </div>
