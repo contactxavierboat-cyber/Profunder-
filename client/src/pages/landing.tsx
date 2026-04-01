@@ -5321,7 +5321,7 @@ export default function LandingPage() {
               <div className="rounded-xl sm:rounded-2xl" style={{ background: "#f0ede8", padding: "20px 16px" }}>
                 <div className="bg-white rounded-xl p-4 shadow-sm">
                   <div className="flex items-center gap-3 mb-4 pb-3 border-b border-[#f0f0f0]">
-                    <img src="/profundr-logo.png" alt="" className="w-7 h-7 rounded-lg" />
+                    <img src="/profundr-brain-logo.png" alt="" className="w-7 h-7" />
                     <span className="text-[13px] font-semibold text-[#111]">profundr</span>
                   </div>
                   <div className="flex gap-3">
