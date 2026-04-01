@@ -4946,9 +4946,9 @@ export default function LandingPage() {
                 ].map((founder) => (
                   <div key={founder.name} className="w-[320px] h-[440px] shrink-0 relative overflow-hidden" data-testid={`founder-card-${founder.name.replace(/\s+/g, "-").toLowerCase()}`}>
                     <img src={founder.img} alt={founder.name} className="w-full h-full object-cover object-top" loading="lazy" />
-                    <div className="absolute bottom-0 left-0 right-0 px-5 pb-5 pt-16" style={{ background: "linear-gradient(to top, rgba(0,0,0,0.65) 0%, rgba(0,0,0,0.35) 50%, transparent 100%)" }}>
-                      <p className="text-[16px] font-bold text-white leading-tight">{founder.name}</p>
-                      <p className="text-[14px] text-white/75 mt-0.5">{founder.title}</p>
+                    <div className="absolute bottom-0 left-0 right-0 px-4 pb-4 pt-20" style={{ background: "linear-gradient(to top, rgba(0,0,0,0.5) 0%, transparent 100%)" }}>
+                      <p className="text-[15px] font-semibold text-white leading-snug">{founder.name}</p>
+                      <p className="text-[13px] text-white/80 leading-snug">{founder.title}</p>
                     </div>
                   </div>
                 ))}
