@@ -5389,11 +5389,16 @@ export default function LandingPage() {
             { name: "David Kim", role: "Agency Owner", amount: "$200K+", label: "Funded on Profundr", quote: "I'd been applying blindly for months. Profundr showed me which lenders actually approve my profile. Got funded on the second try — the capital matching is unreal.", photo: "/founders/founder3.jpg" },
           ];
           const t = testimonials[testIdx];
+          const prevIdx = testIdx === 0 ? testimonials.length - 1 : testIdx - 1;
+          const nextIdx = testIdx === testimonials.length - 1 ? 0 : testIdx + 1;
           return (
-            <section className="py-[80px] px-6 bg-[#111]" data-testid="front-testimonials-kajabi">
-              <div className="max-w-[1100px] mx-auto">
-                <h2 className="text-[32px] sm:text-[42px] text-white leading-[1.05] mb-12 text-center" style={{ fontFamily: "'Inter', system-ui, sans-serif", fontWeight: 900, letterSpacing: "-0.03em" }}>Why founders choose Profundr</h2>
-                <div className="bg-[#1a1a1a] rounded-2xl overflow-hidden">
+            <section className="py-[80px] bg-[#111] overflow-hidden" data-testid="front-testimonials-kajabi">
+              <h2 className="text-[32px] sm:text-[42px] text-white leading-[1.05] mb-12 text-center px-6" style={{ fontFamily: "'Inter', system-ui, sans-serif", fontWeight: 900, letterSpacing: "-0.03em" }}>Why founders choose Profundr</h2>
+              <div className="relative flex items-stretch justify-center gap-5 px-6" style={{ maxWidth: "100vw" }}>
+                <div className="hidden md:block w-[120px] shrink-0 rounded-2xl overflow-hidden opacity-40 cursor-pointer transition-opacity hover:opacity-60" onClick={() => setTestIdx(prevIdx)}>
+                  <img src={testimonials[prevIdx].photo} alt={testimonials[prevIdx].name} className="w-full h-full object-cover" />
+                </div>
+                <div className="bg-[#1a1a1a] rounded-2xl overflow-hidden flex-1" style={{ maxWidth: "900px" }}>
                   <div className="flex flex-col md:flex-row">
                     <div className="md:w-[40%] shrink-0">
                       <img src={t.photo} alt={t.name} className="w-full h-[300px] md:h-full object-cover" />
@@ -5410,16 +5415,19 @@ export default function LandingPage() {
                     </div>
                   </div>
                 </div>
-                <div className="flex items-center justify-between mt-6">
-                  <div className="flex items-center gap-2">
-                    {testimonials.map((_, i) => (
-                      <div key={i} onClick={() => setTestIdx(i)} className={`h-1 rounded-full cursor-pointer transition-all ${testIdx === i ? "w-8 bg-white" : "w-4 bg-white/30"}`} />
-                    ))}
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <button onClick={() => setTestIdx(testIdx === 0 ? testimonials.length - 1 : testIdx - 1)} className="w-9 h-9 border border-white/20 flex items-center justify-center hover:border-white/50 transition-colors" data-testid="btn-test-prev"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M10 4l-4 4 4 4" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg></button>
-                    <button onClick={() => setTestIdx(testIdx === testimonials.length - 1 ? 0 : testIdx + 1)} className="w-9 h-9 border border-white/20 flex items-center justify-center hover:border-white/50 transition-colors" data-testid="btn-test-next"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M6 4l4 4-4 4" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg></button>
-                  </div>
+                <div className="hidden md:block w-[120px] shrink-0 rounded-2xl overflow-hidden opacity-40 cursor-pointer transition-opacity hover:opacity-60" onClick={() => setTestIdx(nextIdx)}>
+                  <img src={testimonials[nextIdx].photo} alt={testimonials[nextIdx].name} className="w-full h-full object-cover" />
+                </div>
+              </div>
+              <div className="flex items-center justify-between mt-8 max-w-[900px] mx-auto px-6">
+                <div className="flex items-center gap-2">
+                  {testimonials.map((_, i) => (
+                    <div key={i} onClick={() => setTestIdx(i)} className={`h-1 rounded-full cursor-pointer transition-all ${testIdx === i ? "w-8 bg-white" : "w-4 bg-white/30"}`} />
+                  ))}
+                </div>
+                <div className="flex items-center gap-2">
+                  <button onClick={() => setTestIdx(prevIdx)} className="w-9 h-9 border border-white/20 flex items-center justify-center hover:border-white/50 transition-colors" data-testid="btn-test-prev"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M10 4l-4 4 4 4" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg></button>
+                  <button onClick={() => setTestIdx(nextIdx)} className="w-9 h-9 border border-white/20 flex items-center justify-center hover:border-white/50 transition-colors" data-testid="btn-test-next"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M6 4l4 4-4 4" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg></button>
                 </div>
               </div>
             </section>
