@@ -5228,8 +5228,8 @@ export default function LandingPage() {
                         zIndex: showcaseTab === i ? 2 : 1,
                       }}
                     >
-                      <div className="absolute top-5 left-5 sm:top-8 sm:left-10 z-30 max-w-[85%] sm:max-w-[280px]">
-                        <p className="text-[22px] sm:text-[26px] font-bold text-white mb-2 leading-[1.15]">{tab.title}</p>
+                      <div className="absolute top-5 left-5 sm:top-8 sm:left-10 z-30 max-w-[85%] sm:max-w-[280px] hidden md:block">
+                        <p className="text-[26px] font-bold text-white mb-2 leading-[1.15]">{tab.title}</p>
                         <p className="text-[13px] text-white/60 leading-[1.5]">{tab.desc}</p>
                       </div>
                       <div className="absolute right-0 top-0 bottom-0 w-[58%] hidden md:block">
@@ -5241,10 +5241,18 @@ export default function LandingPage() {
                           {tab.cards[1] && <div className="relative z-[5] -mt-3 ml-4">{tab.cards[1]}</div>}
                         </div>
                       </div>
-                      <div className="md:hidden absolute z-20 left-4 right-4" style={{ top: "120px" }}>
-                        <div className="bg-white/95 backdrop-blur-sm rounded-xl p-4 shadow-lg">
-                          <img src={tab.photo} alt="" className="w-full h-[160px] object-cover rounded-lg mb-3" />
-                          <div className="text-[12px] text-[#555]">{tab.desc}</div>
+                      <div className="md:hidden absolute inset-0 z-0">
+                        <img src={tab.photo} alt="" className="w-full h-full object-cover" />
+                        <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(0,0,0,0.15) 0%, rgba(0,0,0,0.55) 100%)" }} />
+                      </div>
+                      <div className="md:hidden absolute z-20 top-5 left-4 right-4">
+                        <p className="text-[20px] font-bold text-white mb-1 leading-[1.15]">{tab.title}</p>
+                        <p className="text-[12px] text-white/70 leading-[1.5]">{tab.desc}</p>
+                      </div>
+                      <div className="md:hidden absolute z-20 left-4 right-4 bottom-5">
+                        <div className="relative">
+                          <div className="relative z-10 transform -rotate-1">{tab.cards[0]}</div>
+                          {tab.cards[2] && <div className="absolute z-[5] top-3 right-0 left-2 transform rotate-2 opacity-70 scale-[0.92]">{tab.cards[2]}</div>}
                         </div>
                       </div>
                       {tab.cards[2] && <div className="absolute z-20 hidden md:block" style={{ bottom: "28px", right: "40px" }}>{tab.cards[2]}</div>}
