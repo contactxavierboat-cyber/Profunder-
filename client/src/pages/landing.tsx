@@ -5315,10 +5315,10 @@ export default function LandingPage() {
           </div>
         </section>
 
-        <section className="py-[50px] sm:py-[80px] px-5 sm:px-6 bg-white border-t border-[#f0f0f0]" data-testid="front-all-in-one">
+        <section className="py-[50px] sm:py-[80px] px-2 sm:px-6 bg-white border-t border-[#f0f0f0]" data-testid="front-all-in-one">
           <div className="max-w-[1100px] mx-auto flex flex-col md:flex-row items-center gap-10 sm:gap-12">
-            <div className="flex-1">
-              <div className="rounded-2xl relative overflow-hidden" style={{ background: "#f0ede8", minHeight: "420px", padding: "32px 24px" }}>
+            <div className="flex-1 w-full">
+              <div className="rounded-xl sm:rounded-2xl relative overflow-hidden" style={{ background: "#f0ede8", minHeight: "420px", padding: "32px 24px" }}>
                 <div className="bg-white rounded-xl p-4 shadow-md inline-block mb-3" style={{ maxWidth: "180px" }}>
                   <p className="text-[13px] font-semibold text-[#111] mb-2">Upload bureau report</p>
                   <div className="flex items-center gap-2 bg-[#f5f5f5] rounded-lg px-3 py-2">
@@ -5380,7 +5380,7 @@ export default function LandingPage() {
           </div>
         </section>
 
-        <section className="py-[50px] sm:py-[80px] px-5 sm:px-6 bg-white border-t border-[#f0f0f0]" data-testid="front-sell-confidence">
+        <section className="py-[50px] sm:py-[80px] px-2 sm:px-6 bg-white border-t border-[#f0f0f0]" data-testid="front-sell-confidence">
           <div className="max-w-[1100px] mx-auto flex flex-col md:flex-row items-center gap-10 sm:gap-12">
             <div className="flex-1 order-2 md:order-1">
               <h3 className="text-[24px] sm:text-[32px] font-bold text-[#111] leading-[1.15] mb-3 text-center md:text-left" style={{ letterSpacing: "-0.02em" }}>Dispute and delete with precision</h3>
@@ -5398,8 +5398,8 @@ export default function LandingPage() {
               </div>
               <div className="text-center sm:text-left"><button className="px-5 py-2.5 bg-[#111] text-white text-[13px] font-semibold hover:bg-[#333] transition-colors" data-testid="btn-watch-demo-2">Upload Report</button></div>
             </div>
-            <div className="flex-1 order-1 md:order-2">
-              <div className="rounded-2xl relative overflow-hidden" style={{ background: "#f0ede8", minHeight: "420px", padding: "32px 24px" }}>
+            <div className="flex-1 order-1 md:order-2 w-full">
+              <div className="rounded-xl sm:rounded-2xl relative overflow-hidden" style={{ background: "#f0ede8", minHeight: "420px", padding: "32px 24px" }}>
                 <div className="bg-white rounded-xl px-4 py-3 shadow-md inline-flex items-center gap-2 mb-3">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="18" height="18" rx="3" stroke="#111" strokeWidth="1.5"/><path d="M8 12h8" stroke="#111" strokeWidth="1.5" strokeLinecap="round"/></svg>
                   <span className="text-[13px] font-semibold text-[#111]">Disputes</span>
@@ -5446,10 +5446,10 @@ export default function LandingPage() {
           </div>
         </section>
 
-        <section className="py-[50px] sm:py-[80px] px-5 sm:px-6 bg-[#fafafa] border-t border-[#f0f0f0]" data-testid="front-funnels">
+        <section className="py-[50px] sm:py-[80px] px-2 sm:px-6 bg-[#fafafa] border-t border-[#f0f0f0]" data-testid="front-funnels">
           <div className="max-w-[1100px] mx-auto flex flex-col md:flex-row items-center gap-10 sm:gap-12">
-            <div className="flex-1">
-              <div className="rounded-2xl relative overflow-hidden" style={{ background: "#f0ede8", minHeight: "420px", padding: "32px 24px" }}>
+            <div className="flex-1 w-full">
+              <div className="rounded-xl sm:rounded-2xl relative overflow-hidden" style={{ background: "#f0ede8", minHeight: "420px", padding: "32px 24px" }}>
                 <div className="bg-white rounded-xl px-4 py-3 shadow-md inline-flex items-center gap-2 mb-3">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 2L3 7v10l9 5 9-5V7l-9-5z" stroke="#111" strokeWidth="1.5" strokeLinejoin="round"/></svg>
                   <span className="text-[13px] font-semibold text-[#111]">Capital Match</span>
