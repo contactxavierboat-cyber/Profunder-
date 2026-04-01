@@ -4932,7 +4932,7 @@ export default function LandingPage() {
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 mb-5 sm:mb-6 w-full max-w-[340px] sm:max-w-none mx-auto">
               <button
                 onClick={() => { setShowFrontPage(false); setAutoSendFile(true); handleUploadClick(); }}
-                className="w-full sm:w-auto px-8 py-3.5 border border-[#111] sm:border-0 sm:bg-[#111] text-[#111] sm:text-white text-[15px] font-semibold hover:bg-[#111] hover:text-white sm:hover:bg-[#333] transition-colors"
+                className="w-full sm:w-auto px-8 py-3.5 bg-transparent border border-[#111] sm:border-0 sm:bg-[#111] text-[#111] sm:text-white text-[15px] font-semibold sm:hover:bg-[#333] transition-colors"
                 data-testid="front-btn-upload-hero"
               >
                 Upload Report
