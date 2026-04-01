@@ -4992,6 +4992,21 @@ export default function LandingPage() {
           </div>
         </section>
 
+        <section className="py-[50px] sm:py-[60px] px-5 sm:px-6 bg-white" data-testid="front-problem-awareness">
+          <div className="max-w-[600px] mx-auto text-center">
+            <h2 className="text-[26px] sm:text-[34px] md:text-[40px] text-[#111] leading-[1.1] mb-4" style={{ fontFamily: "'Inter', system-ui, sans-serif", fontWeight: 900, letterSpacing: "-0.03em" }}>Most people get denied before they even apply</h2>
+            <p className="text-[14px] sm:text-[15px] text-[#555] leading-[1.7] mb-3">Banks don't guess. They read signals.</p>
+            <p className="text-[14px] sm:text-[15px] text-[#555] leading-[1.7] mb-6">Your profile already tells them yes or no — you just can't see what they see.</p>
+            <button
+              onClick={() => { setShowFrontPage(false); setAutoSendFile(true); handleUploadClick(); }}
+              className="px-8 py-3 bg-[#111] text-white text-[14px] font-semibold hover:bg-[#333] transition-colors"
+              data-testid="front-btn-problem-cta"
+            >
+              Check Before You Apply
+            </button>
+          </div>
+        </section>
+
         <section className="py-12 sm:py-16 px-5 sm:px-6 bg-white" data-testid="front-stats">
           <div className="max-w-[1000px] mx-auto flex flex-col sm:flex-row sm:flex-wrap items-center sm:justify-center gap-y-7 sm:gap-x-20 sm:gap-y-8">
             {[
@@ -5514,6 +5529,28 @@ export default function LandingPage() {
           </div>
         </section>
 
+        <section className="py-[50px] sm:py-[60px] px-5 sm:px-6 bg-white border-t border-[#f0f0f0]" data-testid="front-bank-perspective">
+          <div className="max-w-[600px] mx-auto text-center">
+            <h2 className="text-[24px] sm:text-[32px] md:text-[38px] text-[#111] leading-[1.1] mb-4" style={{ fontFamily: "'Inter', system-ui, sans-serif", fontWeight: 900, letterSpacing: "-0.03em" }}>This is how banks see you</h2>
+            <p className="text-[14px] sm:text-[15px] text-[#555] leading-[1.7] mb-3">Balances. Inquiries. Timing. Payment patterns.</p>
+            <p className="text-[14px] sm:text-[15px] text-[#555] leading-[1.7] mb-6">These signals determine approval — not just your score. Profundr reads them the same way a bank does, and shows you the result before you apply.</p>
+            <div className="inline-flex flex-col items-center gap-1 bg-[#fafafa] border border-[#f0f0f0] rounded-xl px-8 py-5 mb-6">
+              <p className="text-[10px] text-[#888] uppercase tracking-wider">Estimated Funding Range</p>
+              <p className="text-[28px] sm:text-[36px] font-black text-[#111] leading-none">$15,000 – $75,000</p>
+              <p className="text-[11px] text-[#2d6a4f] font-semibold">Based on current profile signals</p>
+            </div>
+            <div className="block">
+              <button
+                onClick={() => { setShowFrontPage(false); setAutoSendFile(true); handleUploadClick(); }}
+                className="px-8 py-3 bg-[#111] text-white text-[14px] font-semibold hover:bg-[#333] transition-colors"
+                data-testid="front-btn-bank-perspective"
+              >
+                See Where You Stand
+              </button>
+            </div>
+          </div>
+        </section>
+
         <section className="py-[50px] sm:py-[60px] px-5 sm:px-6 bg-white border-t border-[#f0f0f0]" data-testid="front-value-props">
           <div className="max-w-[1100px] mx-auto grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-5">
             {[
@@ -5671,7 +5708,7 @@ export default function LandingPage() {
               className="px-10 py-3.5 bg-white text-[#111] text-[14px] font-semibold hover:bg-white/90 transition-colors"
               data-testid="front-btn-closing-cta"
             >
-              Check Your Profile
+              Find Out If You Qualify
             </button>
             <p className="text-[12px] text-white/30 mt-4">No hard inquiry. No credit card required.</p>
           </div>
