@@ -5,10 +5,10 @@ interface ProfundrLogoProps {
 }
 
 const SIZES = {
-  xs: { fontSize: "13px", iconSize: 16 },
-  sm: { fontSize: "16px", iconSize: 20 },
-  md: { fontSize: "20px", iconSize: 26 },
-  lg: { fontSize: "28px", iconSize: 34 },
+  xs: { fontSize: "13px", iconSize: 16, gap: "5px" },
+  sm: { fontSize: "16px", iconSize: 20, gap: "6px" },
+  md: { fontSize: "20px", iconSize: 24, gap: "7px" },
+  lg: { fontSize: "28px", iconSize: 32, gap: "8px" },
 };
 
 export function ProfundrLogo({ size = "sm", variant = "light", className = "" }: ProfundrLogoProps) {
@@ -16,8 +16,8 @@ export function ProfundrLogo({ size = "sm", variant = "light", className = "" }:
   const color = variant === "light" ? "#fff" : "#111";
   return (
     <span
-      className={`inline-flex items-center select-none gap-1.5 ${className}`}
-      style={{ lineHeight: 1 }}
+      className={`select-none ${className}`}
+      style={{ display: "inline-flex", alignItems: "center", gap: s.gap, lineHeight: 1, verticalAlign: "middle" }}
       aria-label="profundr."
     >
       <img
@@ -27,7 +27,7 @@ export function ProfundrLogo({ size = "sm", variant = "light", className = "" }:
         height={s.iconSize}
         style={{
           display: "block",
-          borderRadius: "4px",
+          flexShrink: 0,
           filter: variant === "dark" ? "invert(1)" : "none",
         }}
       />
@@ -38,6 +38,8 @@ export function ProfundrLogo({ size = "sm", variant = "light", className = "" }:
           fontWeight: 800,
           letterSpacing: "-0.05em",
           color,
+          lineHeight: 1,
+          display: "block",
         }}
       >
         profundr<span style={{ marginLeft: "-0.15em" }}>.</span>
