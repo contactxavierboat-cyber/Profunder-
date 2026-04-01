@@ -5347,7 +5347,7 @@ export default function LandingPage() {
 
                   <div className="flex-1 pt-4">
                     <div className="bg-white rounded-xl shadow-lg border border-[#f0f0f0] overflow-hidden">
-                      <img src="/founders/founder6.jpg" alt="" className="w-full h-[140px] object-cover object-top" />
+                      <img src="/founders/founder6.jpg" alt="" className="w-full h-auto object-cover object-top" />
                       <div className="p-3">
                         <p className="text-[13px] font-bold text-[#111]">AIS Score: 84</p>
                         <div className="flex items-center justify-between mt-2">
@@ -5429,7 +5429,7 @@ export default function LandingPage() {
 
                   <div className="flex-1 pt-4">
                     <div className="bg-white rounded-xl shadow-lg border border-[#f0f0f0] overflow-hidden">
-                      <img src="/founders/founder5.jpg" alt="" className="w-full h-[140px] object-cover object-top" />
+                      <img src="/founders/founder5.jpg" alt="" className="w-full h-auto object-cover object-top" />
                       <div className="p-3">
                         <p className="text-[13px] font-bold text-[#111]">FCRA Dispute Letter</p>
                         <p className="text-[10px] text-[#888] mt-1">Auto-generated · Equifax</p>
@@ -5479,7 +5479,7 @@ export default function LandingPage() {
 
                   <div className="flex-1 pt-4">
                     <div className="bg-white rounded-xl shadow-lg border border-[#f0f0f0] overflow-hidden">
-                      <img src="/founders/founder10.jpg" alt="" className="w-full h-[140px] object-cover object-top" />
+                      <img src="/founders/founder10.jpg" alt="" className="w-full h-auto object-cover object-top" />
                       <div className="p-3">
                         <p className="text-[13px] font-bold text-[#111]">Funded: $120K LOC</p>
                         <p className="text-[10px] text-[#888] mt-1">AIS 58 → funded in 47 days</p>
