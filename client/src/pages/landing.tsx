@@ -4988,12 +4988,12 @@ export default function LandingPage() {
         <section className="py-12 sm:py-16 px-5 sm:px-6 bg-white" data-testid="front-stats">
           <div className="max-w-[1000px] mx-auto flex flex-col sm:flex-row sm:flex-wrap items-center sm:justify-center gap-y-7 sm:gap-x-20 sm:gap-y-8">
             {[
-              { value: "12,400+", label: "Credit deletions generated" },
+              { value: "12K+", label: "Credit deletions generated" },
               { value: "$38M+", label: "Funding matched to founders" },
               { value: "94%", label: "Dispute success rate" },
             ].map((stat) => (
               <div key={stat.label} className="text-center" data-testid={`stat-${stat.label.replace(/\s+/g, "-").toLowerCase()}`}>
-                <p className="text-[44px] sm:text-[42px] font-bold text-[#111] tracking-tight leading-none">{stat.value}</p>
+                <p className="text-[44px] sm:text-[42px] font-semibold text-[#111] tracking-tight leading-none">{stat.value}</p>
                 <p className="text-[14px] sm:text-[14px] text-[#888] mt-2 sm:mt-2">{stat.label}</p>
               </div>
             ))}
