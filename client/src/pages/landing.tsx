@@ -4869,6 +4869,7 @@ export default function LandingPage() {
       { q: "Is this guaranteed approval?", a: "No. But it shows how lenders are likely to evaluate your profile, so you can apply at the right time with higher confidence." },
       { q: "What if I'm not ready yet?", a: "Profundr shows exactly what's holding you back and what to fix before applying, so you can improve your approval odds." },
       { q: "Why does this work?", a: "Banks approve profiles based on patterns — balances, inquiries, timing, and history. Profundr analyzes those same signals before you apply." },
+      { q: "When should I check my profile?", a: "Before every application. Timing and profile signals change constantly — and applying at the wrong time can reduce your approval odds instantly." },
     ];
 
     return (
@@ -4953,6 +4954,7 @@ export default function LandingPage() {
                 See Where You Stand
               </button>
             </div>
+            <p className="text-[13px] sm:text-[14px] text-[#999] italic mb-3">If you applied today, would you be approved — or denied?</p>
             <p className="text-[12px] text-[#bbb]">+9,000,000 funded · approvals from $5K–$250K · updated daily</p>
           </div>
         </section>
@@ -4990,6 +4992,24 @@ export default function LandingPage() {
                 ))}
               </div>
             ))}
+          </div>
+        </section>
+
+        <section className="py-[50px] sm:py-[60px] px-5 sm:px-6 bg-white" data-testid="front-stats">
+          <div className="max-w-[900px] mx-auto">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              {[
+                { value: "12K+", label: "Credit deletions generated", icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M9 11l3 3L22 4" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg> },
+                { value: "$38M+", label: "Funding matched to founders", icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg> },
+                { value: "94%", label: "Dispute success rate", icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M22 11.08V12a10 10 0 11-5.93-9.14" stroke="white" strokeWidth="2" strokeLinecap="round"/><path d="M22 4L12 14.01l-3-3" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg> },
+              ].map((stat) => (
+                <div key={stat.label} className="bg-[#fafafa] rounded-2xl p-6 text-center transition-all duration-300 hover:shadow-lg hover:bg-white" style={{ boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }} data-testid={`card-stat-${stat.label.replace(/\s+/g, "-").toLowerCase()}`}>
+                  <div className="w-12 h-12 rounded-xl bg-[#111] flex items-center justify-center mx-auto mb-4" aria-hidden="true">{stat.icon}</div>
+                  <p className="text-[42px] sm:text-[48px] font-black text-[#111] tracking-tight leading-none mb-1">{stat.value}</p>
+                  <p className="text-[13px] text-[#888] mt-2">{stat.label}</p>
+                </div>
+              ))}
+            </div>
           </div>
         </section>
 
@@ -5081,7 +5101,8 @@ export default function LandingPage() {
 
         <section className="py-[50px] sm:py-[70px] px-5 sm:px-6 bg-white" data-testid="front-applying-blind">
           <div className="max-w-[900px] mx-auto">
-            <h2 className="text-[24px] sm:text-[32px] md:text-[38px] text-[#111] leading-[1.1] mb-8 text-center" style={{ fontFamily: "'Inter', system-ui, sans-serif", fontWeight: 900, letterSpacing: "-0.03em" }}>Applying blind is expensive</h2>
+            <h2 className="text-[24px] sm:text-[32px] md:text-[38px] text-[#111] leading-[1.1] mb-4 text-center" style={{ fontFamily: "'Inter', system-ui, sans-serif", fontWeight: 900, letterSpacing: "-0.03em" }}>Applying blind is expensive</h2>
+            <p className="text-[14px] sm:text-[15px] text-[#555] leading-[1.7] mb-8 text-center max-w-[500px] mx-auto italic">Most people don't get denied because they're unqualified — they get denied because they applied at the wrong time.</p>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               {[
                 { num: "01", title: "Every app leaves a mark", body: "Each application creates a hard inquiry on your report that stays for 2 years.", color: "#f59e0b" },
@@ -5150,21 +5171,6 @@ export default function LandingPage() {
             >
               Check Your Profile
             </button>
-          </div>
-        </section>
-
-        <section className="py-[50px] sm:py-[60px] px-5 sm:px-6 bg-white" data-testid="front-stats">
-          <div className="max-w-[1000px] mx-auto flex flex-col sm:flex-row sm:flex-wrap items-center sm:justify-center gap-y-7 sm:gap-x-20 sm:gap-y-8">
-            {[
-              { value: "12K+", label: "Credit deletions generated" },
-              { value: "$38M+", label: "Funding matched to founders" },
-              { value: "94%", label: "Dispute success rate" },
-            ].map((stat) => (
-              <div key={stat.label} className="text-center" data-testid={`stat-${stat.label.replace(/\s+/g, "-").toLowerCase()}`}>
-                <p className="text-[52px] sm:text-[48px] font-semibold text-[#111] tracking-tight leading-none">{stat.value}</p>
-                <p className="text-[14px] sm:text-[14px] text-[#888] mt-2 sm:mt-2">{stat.label}</p>
-              </div>
-            ))}
           </div>
         </section>
 
@@ -5810,8 +5816,8 @@ export default function LandingPage() {
 
         <section className="py-[60px] sm:py-[80px] px-5 sm:px-6 bg-[#111]" data-testid="front-closing-cta">
           <div className="max-w-[600px] mx-auto text-center">
-            <h2 className="text-[28px] sm:text-[36px] md:text-[46px] text-white leading-[1.1] mb-4" style={{ fontFamily: "'Inter', system-ui, sans-serif", fontWeight: 900, letterSpacing: "-0.03em" }}>Stop guessing. Start qualifying.</h2>
-            <p className="text-[14px] sm:text-[16px] text-white/60 leading-[1.6] mb-8 max-w-[400px] mx-auto">See how banks see you — before you apply.</p>
+            <h2 className="text-[28px] sm:text-[36px] md:text-[46px] text-white leading-[1.1] mb-4" style={{ fontFamily: "'Inter', system-ui, sans-serif", fontWeight: 900, letterSpacing: "-0.03em" }}>Stop Guessing. Start Qualifying.</h2>
+            <p className="text-[14px] sm:text-[16px] text-white/60 leading-[1.6] mb-8 max-w-[400px] mx-auto">See how banks see you — before it costs you.</p>
             <button
               onClick={() => { setShowFrontPage(false); setAutoSendFile(true); handleUploadClick(); }}
               className="px-10 py-3.5 bg-white text-[#111] text-[14px] font-semibold hover:bg-white/90 transition-colors"
