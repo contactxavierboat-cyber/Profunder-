@@ -4895,7 +4895,7 @@ export default function LandingPage() {
         <section className="pt-[120px] pb-[50px] px-6" data-testid="front-hero">
           <div className="max-w-[900px] mx-auto text-center">
             <h1 className="text-[38px] sm:text-[50px] md:text-[60px] text-[#111] leading-[0.95] mb-8" style={{ fontFamily: "'Inter', system-ui, sans-serif", fontWeight: 900, letterSpacing: "-0.035em" }} data-testid="text-front-hero-headline">
-              Know if you're fundable before you apply
+              Know if you're fundable<br /> before you apply
             </h1>
             <p className="text-[16px] sm:text-[18px] text-[#444] leading-[1.6] max-w-[480px] mx-auto mb-10" style={{ fontFamily: "'Inter', system-ui, sans-serif" }} data-testid="text-front-hero-sub">
               Everything you need to analyze your credit profile — plus an <span className="underline underline-offset-[3px] decoration-[1px] decoration-[#999]">AI capital partner</span> to help you get funded.
