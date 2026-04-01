@@ -4995,186 +4995,22 @@ export default function LandingPage() {
           </div>
         </section>
 
-        <section className="py-[50px] sm:py-[60px] px-5 sm:px-6 bg-white" data-testid="front-stats">
-          <div className="max-w-[900px] mx-auto">
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              {[
-                { value: "12K+", label: "Credit deletions generated", icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M9 11l3 3L22 4" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg> },
-                { value: "$38M+", label: "Funding matched to founders", icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg> },
-                { value: "94%", label: "Dispute success rate", icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M22 11.08V12a10 10 0 11-5.93-9.14" stroke="white" strokeWidth="2" strokeLinecap="round"/><path d="M22 4L12 14.01l-3-3" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg> },
-              ].map((stat) => (
-                <div key={stat.label} className="bg-[#fafafa] rounded-2xl p-6 text-center transition-all duration-300 hover:shadow-lg hover:bg-white" style={{ boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }} data-testid={`card-stat-${stat.label.replace(/\s+/g, "-").toLowerCase()}`}>
-                  <div className="w-12 h-12 rounded-xl bg-[#111] flex items-center justify-center mx-auto mb-4" aria-hidden="true">{stat.icon}</div>
-                  <p className="text-[42px] sm:text-[48px] font-black text-[#111] tracking-tight leading-none mb-1">{stat.value}</p>
-                  <p className="text-[13px] text-[#888] mt-2">{stat.label}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        <section className="py-[50px] sm:py-[70px] px-5 sm:px-6 bg-white" data-testid="front-problem-awareness">
-          <div className="max-w-[900px] mx-auto">
-            <h2 className="text-[26px] sm:text-[34px] md:text-[40px] text-[#111] leading-[1.1] mb-8 text-center" style={{ fontFamily: "'Inter', system-ui, sans-serif", fontWeight: 900, letterSpacing: "-0.03em" }}>Most people get denied before they even apply</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              {[
-                { icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z" stroke="white" strokeWidth="1.5"/><path d="M15 9l-6 6M9 9l6 6" stroke="white" strokeWidth="1.5" strokeLinecap="round"/></svg>, title: "Signals, not scores", body: "Banks don't guess. They read signals — balances, inquiries, timing, account history." },
-                { icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8S1 12 1 12z" stroke="white" strokeWidth="1.5"/><circle cx="12" cy="12" r="3" stroke="white" strokeWidth="1.5"/></svg>, title: "Invisible verdict", body: "Your profile already tells them yes or no — you just don't see it." },
-                { icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M12 9v4M12 17h.01" stroke="white" strokeWidth="1.5" strokeLinecap="round"/><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" stroke="white" strokeWidth="1.5"/></svg>, title: "Pre-decided", body: "Most denials happen before you even submit the application." },
-              ].map((c) => (
-                <div key={c.title} className="bg-[#fafafa] rounded-2xl p-6 transition-all duration-300 hover:shadow-lg hover:bg-white" style={{ boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }} data-testid={`card-problem-${c.title.toLowerCase().replace(/[^a-z]+/g, "-")}`}>
-                  <div className="w-10 h-10 rounded-xl bg-[#111] flex items-center justify-center mb-4" style={{ color: "white" }} aria-hidden="true">{c.icon}</div>
-                  <h4 className="text-[15px] font-bold text-[#111] mb-2">{c.title}</h4>
-                  <p className="text-[13px] text-[#666] leading-[1.6]" style={{ textAlign: "justify" }}>{c.body}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        <section className="py-[50px] sm:py-[70px] px-5 sm:px-6 bg-[#111]" data-testid="front-the-shift">
-          <div className="max-w-[700px] mx-auto">
-            <h2 className="text-[24px] sm:text-[32px] md:text-[38px] text-white leading-[1.1] mb-8 text-center" style={{ fontFamily: "'Inter', system-ui, sans-serif", fontWeight: 900, letterSpacing: "-0.03em" }}>Banks already know if you'll be approved</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/10" data-testid="card-shift-reality">
-                <p className="text-[11px] text-white/50 uppercase tracking-wider font-semibold mb-2">The reality</p>
-                <p className="text-[14px] text-white/80 leading-[1.7]" style={{ textAlign: "justify" }}>The decision isn't random. The same profile can be approved or denied based on how it looks at the moment you apply.</p>
+        <section className="py-12 sm:py-16 px-5 sm:px-6 bg-white" data-testid="front-stats">
+          <div className="max-w-[1000px] mx-auto flex flex-col sm:flex-row sm:flex-wrap items-center sm:justify-center gap-y-7 sm:gap-x-20 sm:gap-y-8">
+            {[
+              { value: "12K+", label: "Credit deletions generated" },
+              { value: "$38M+", label: "Funding matched to founders" },
+              { value: "94%", label: "Dispute success rate" },
+            ].map((stat) => (
+              <div key={stat.label} className="text-center" data-testid={`stat-${stat.label.replace(/\s+/g, "-").toLowerCase()}`}>
+                <p className="text-[52px] sm:text-[48px] font-semibold text-[#111] tracking-tight leading-none">{stat.value}</p>
+                <p className="text-[14px] sm:text-[14px] text-[#888] mt-2 sm:mt-2">{stat.label}</p>
               </div>
-              <div className="bg-white rounded-2xl p-6" style={{ boxShadow: "0 8px 30px rgba(0,0,0,0.3)" }} data-testid="card-shift-insight">
-                <p className="text-[11px] text-[#888] uppercase tracking-wider font-semibold mb-2">The key insight</p>
-                <p className="text-[20px] sm:text-[24px] font-black text-[#111] leading-[1.2]" style={{ fontStyle: "italic" }}>Timing matters more than your score.</p>
-              </div>
-            </div>
+            ))}
           </div>
         </section>
 
-        <section className="py-[50px] sm:py-[70px] px-5 sm:px-6 bg-white" data-testid="front-what-profundr-does">
-          <div className="max-w-[900px] mx-auto">
-            <h2 className="text-[24px] sm:text-[32px] md:text-[38px] text-[#111] leading-[1.1] mb-3 text-center" style={{ fontFamily: "'Inter', system-ui, sans-serif", fontWeight: 900, letterSpacing: "-0.03em" }}>This is how banks see you</h2>
-            <p className="text-[14px] sm:text-[15px] text-[#555] leading-[1.7] mb-8 text-center max-w-[500px] mx-auto" style={{ textAlign: "justify", textAlignLast: "center" }}>Profundr analyzes your profile the same way lenders do — before you apply.</p>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {[
-                { icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M22 11.08V12a10 10 0 11-5.93-9.14" stroke="white" strokeWidth="2" strokeLinecap="round"/><path d="M22 4L12 14.01l-3-3" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>, label: "If you're likely to be approved", detail: "Bank-level evaluation across 23 data points" },
-                { icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>, label: "How much you may qualify for", detail: "Estimated funding range from $5K–$250K" },
-                { icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" stroke="white" strokeWidth="2"/></svg>, label: "What's blocking your approval", detail: "Negative items, inquiry velocity, utilization" },
-                { icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>, label: "What to fix to unlock higher limits", detail: "Actionable steps to increase approval odds" },
-              ].map((c) => (
-                <div key={c.label} className="flex items-start gap-4 bg-[#fafafa] rounded-2xl p-5 transition-all duration-300 hover:shadow-lg hover:bg-white" style={{ boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }} data-testid={`card-profundr-${c.label.slice(0, 20).toLowerCase().replace(/[^a-z]+/g, "-")}`}>
-                  <div className="w-10 h-10 rounded-xl bg-[#111] flex items-center justify-center shrink-0" aria-hidden="true">{c.icon}</div>
-                  <div>
-                    <p className="text-[14px] font-bold text-[#111] mb-1">{c.label}</p>
-                    <p className="text-[12px] text-[#888] leading-[1.5]">{c.detail}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        <section className="py-[50px] sm:py-[70px] px-5 sm:px-6" style={{ backgroundColor: "#fafafa" }} data-testid="front-money-moment">
-          <div className="max-w-[900px] mx-auto">
-            <h2 className="text-[24px] sm:text-[32px] md:text-[38px] text-[#111] leading-[1.1] mb-8 text-center" style={{ fontFamily: "'Inter', system-ui, sans-serif", fontWeight: 900, letterSpacing: "-0.03em" }}>Your potential funding range</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-stretch">
-              <div className="bg-white rounded-2xl p-6 text-center transition-all duration-300 hover:shadow-lg" style={{ boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }} data-testid="card-money-status">
-                <p className="text-[11px] text-[#888] uppercase tracking-wider font-semibold mb-3">Profile Status</p>
-                <div className="w-14 h-14 rounded-full bg-[#e8f5e9] flex items-center justify-center mx-auto mb-3">
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M22 11.08V12a10 10 0 11-5.93-9.14" stroke="#2d6a4f" strokeWidth="2" strokeLinecap="round"/><path d="M22 4L12 14.01l-3-3" stroke="#2d6a4f" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                </div>
-                <p className="text-[16px] font-black text-[#2d6a4f]">Fundable</p>
-                <p className="text-[11px] text-[#888] mt-1">Ready to apply</p>
-              </div>
-              <div className="bg-[#111] rounded-2xl p-6 text-center sm:scale-[1.05] relative z-10" style={{ boxShadow: "0 20px 60px rgba(0,0,0,0.15)" }} data-testid="card-money-range">
-                <p className="text-[11px] text-white/50 uppercase tracking-wider font-semibold mb-3">Estimated Range</p>
-                <p className="text-[36px] sm:text-[42px] font-black text-white leading-none tracking-tight mb-1" data-testid="text-money-range">$15K–$75K<span className="text-[#2d6a4f]">+</span></p>
-                <p className="text-[11px] text-white/60 mt-2">Based on current profile signals</p>
-              </div>
-              <div className="bg-white rounded-2xl p-6 text-center transition-all duration-300 hover:shadow-lg" style={{ boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }} data-testid="card-money-confidence">
-                <p className="text-[11px] text-[#888] uppercase tracking-wider font-semibold mb-3">Confidence</p>
-                <p className="text-[36px] font-black text-[#111] leading-none mb-1" data-testid="text-confidence-percent">87%</p>
-                <p className="text-[11px] text-[#888] mt-1">Approval likelihood</p>
-                <div className="w-full h-1.5 bg-[#f0f0f0] rounded-full mt-3 overflow-hidden"><div className="h-full bg-[#2d6a4f] rounded-full" style={{ width: "87%" }} /></div>
-              </div>
-            </div>
-            <p className="text-[14px] text-[#888] text-center mt-6">What you qualify for isn't guesswork — it's already in your data.</p>
-          </div>
-        </section>
-
-        <section className="py-[50px] sm:py-[70px] px-5 sm:px-6 bg-white" data-testid="front-applying-blind">
-          <div className="max-w-[900px] mx-auto">
-            <h2 className="text-[24px] sm:text-[32px] md:text-[38px] text-[#111] leading-[1.1] mb-4 text-center" style={{ fontFamily: "'Inter', system-ui, sans-serif", fontWeight: 900, letterSpacing: "-0.03em" }}>Applying blind is expensive</h2>
-            <p className="text-[14px] sm:text-[15px] text-[#555] leading-[1.7] mb-8 text-center max-w-[500px] mx-auto italic">Most people don't get denied because they're unqualified — they get denied because they applied at the wrong time.</p>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              {[
-                { num: "01", title: "Every app leaves a mark", body: "Each application creates a hard inquiry on your report that stays for 2 years.", color: "#f59e0b" },
-                { num: "02", title: "Too many = automatic risk", body: "Too many applications too fast — and banks see a pattern of desperation.", color: "#ef4444" },
-                { num: "03", title: "Denials are predictable", body: "Most denials are predictable. You just don't see what they see.", color: "#111" },
-              ].map((c) => (
-                <div key={c.num} className="bg-[#fafafa] rounded-2xl p-6 transition-all duration-300 hover:shadow-lg hover:bg-white" style={{ boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }} data-testid={`card-blind-${c.num}`}>
-                  <span className="text-[11px] font-bold px-2 py-1 rounded-md text-white mb-4 inline-block" style={{ backgroundColor: c.color }}>{c.num}</span>
-                  <h4 className="text-[15px] font-bold text-[#111] mb-2">{c.title}</h4>
-                  <p className="text-[13px] text-[#666] leading-[1.6]" style={{ textAlign: "justify" }}>{c.body}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        <section id="how-it-works" className="py-[50px] sm:py-[70px] px-5 sm:px-6 bg-[#111] scroll-mt-16" data-testid="front-how-it-works-detail">
-          <div className="max-w-[900px] mx-auto">
-            <h2 className="text-[24px] sm:text-[32px] md:text-[38px] text-white leading-[1.1] mb-3 text-center" style={{ fontFamily: "'Inter', system-ui, sans-serif", fontWeight: 900, letterSpacing: "-0.03em" }}>Know before you apply</h2>
-            <p className="text-[14px] sm:text-[15px] text-white/60 leading-[1.7] mb-8 text-center">If you applied today, Profundr shows:</p>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              {[
-                { icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M22 11.08V12a10 10 0 11-5.93-9.14" stroke="#2d6a4f" strokeWidth="2" strokeLinecap="round"/><path d="M22 4L12 14.01l-3-3" stroke="#2d6a4f" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>, title: "Approval odds", body: "See how likely you are to be approved based on current profile signals." },
-                { icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6" stroke="#2d6a4f" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>, title: "Funding range", body: "Your estimated approval range from real lender data." },
-                { icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" stroke="#2d6a4f" strokeWidth="2"/></svg>, title: "Risk factors", body: "The exact risks affecting your profile and how to fix them." },
-              ].map((c) => (
-                <div key={c.title} className="bg-white rounded-2xl p-6 text-center" style={{ boxShadow: "0 8px 30px rgba(0,0,0,0.15)" }} data-testid={`card-howitworks-${c.title.toLowerCase().replace(/\s+/g, "-")}`}>
-                  <div className="w-12 h-12 rounded-full bg-[#e8f5e9] flex items-center justify-center mx-auto mb-4" aria-hidden="true">{c.icon}</div>
-                  <h4 className="text-[15px] font-bold text-[#111] mb-2">{c.title}</h4>
-                  <p className="text-[13px] text-[#666] leading-[1.6]" style={{ textAlign: "justify", textAlignLast: "center" }}>{c.body}</p>
-                </div>
-              ))}
-            </div>
-            <p className="text-[14px] text-white/60 text-center mt-8">So you can move with precision — not guesswork.</p>
-          </div>
-        </section>
-
-        <section className="py-[50px] sm:py-[70px] px-5 sm:px-6" style={{ backgroundColor: "#fafafa" }} data-testid="front-positioning">
-          <div className="max-w-[900px] mx-auto">
-            <h2 className="text-[24px] sm:text-[32px] md:text-[38px] text-[#111] leading-[1.1] mb-3 text-center" style={{ fontFamily: "'Inter', system-ui, sans-serif", fontWeight: 900, letterSpacing: "-0.03em" }}>Banks approve profiles, not people</h2>
-            <p className="text-[14px] sm:text-[15px] text-[#555] leading-[1.7] mb-8 text-center">It's not about who you are. It's about:</p>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              {[
-                { icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="18" height="18" rx="2" stroke="white" strokeWidth="1.5"/><path d="M7 7h10M7 12h10M7 17h6" stroke="white" strokeWidth="1.5" strokeLinecap="round"/></svg>, title: "Account structure", body: "How your accounts are organized and the types of credit you carry." },
-                { icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>, title: "Balance signals", body: "How your balances look relative to your limits and overall exposure." },
-                { icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="white" strokeWidth="1.5"/><path d="M12 6v6l4 2" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>, title: "Timing patterns", body: "How your timing signals risk or stability to automated underwriting." },
-              ].map((c) => (
-                <div key={c.title} className="bg-white rounded-2xl p-6 transition-all duration-300 hover:shadow-lg" style={{ boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }} data-testid={`card-positioning-${c.title.toLowerCase().replace(/\s+/g, "-")}`}>
-                  <div className="w-10 h-10 rounded-xl bg-[#111] flex items-center justify-center mb-4" aria-hidden="true">{c.icon}</div>
-                  <h4 className="text-[15px] font-bold text-[#111] mb-2">{c.title}</h4>
-                  <p className="text-[13px] text-[#666] leading-[1.6]" style={{ textAlign: "justify" }}>{c.body}</p>
-                </div>
-              ))}
-            </div>
-            <p className="text-[15px] text-[#555] text-center mt-8">Profundr helps you understand that — before it costs you.</p>
-          </div>
-        </section>
-
-        <section className="py-[50px] sm:py-[60px] px-5 sm:px-6 bg-[#111]" data-testid="front-mid-cta">
-          <div className="max-w-[600px] mx-auto text-center">
-            <h2 className="text-[26px] sm:text-[34px] md:text-[40px] text-white leading-[1.1] mb-5" style={{ fontFamily: "'Inter', system-ui, sans-serif", fontWeight: 900, letterSpacing: "-0.03em" }}>See where you stand before you apply</h2>
-            <button
-              onClick={() => { setShowFrontPage(false); setAutoSendFile(true); handleUploadClick(); }}
-              className="px-10 py-3.5 bg-white text-[#111] text-[14px] font-semibold hover:bg-white/90 transition-colors"
-              data-testid="front-btn-mid-cta"
-            >
-              Check Your Profile
-            </button>
-          </div>
-        </section>
-
-        <section className="py-[50px] sm:py-[60px] px-5 sm:px-6 scroll-mt-16" style={{ backgroundColor: "#e8e5e0" }} data-testid="front-newsletter">
+        <section id="how-it-works" className="py-12 sm:py-16 px-5 sm:px-6 scroll-mt-16" style={{ backgroundColor: "#e8e5e0" }} data-testid="front-newsletter">
           <div className="max-w-[1000px] mx-auto flex flex-col md:flex-row items-center md:items-center justify-between gap-6 sm:gap-8">
             <div className="max-w-[420px] text-center md:text-left">
               <h3 className="text-[20px] sm:text-[24px] font-black text-[#111] leading-[1.15] mb-3" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>Banks approve profiles, not people</h3>
@@ -5203,14 +5039,14 @@ export default function LandingPage() {
               label: "AIS Score",
               bg: "linear-gradient(135deg, #5a7a50 0%, #3d5c3a 25%, #2a4a35 50%, #1a3a2e 75%, #0f2b22 100%)",
               gradientBase: "#1a3a2e",
-              title: "Bank Evaluation",
-              desc: "If you applied today — this is how banks would evaluate your profile. 23 data points, real lender decisions.",
+              title: "AIS Score",
+              desc: "Your Approval Intelligence Score — 23 data points analyzed to show how banks evaluate your profile before you apply.",
               photo: "/founders/founder3.jpg",
               cards: [
                 <div key="ais1" className="bg-white rounded-xl p-5 shadow-2xl w-[210px] shrink-0">
-                  <p className="text-[11px] text-[#888] font-medium uppercase tracking-wider mb-1">Approval Status</p>
+                  <p className="text-[11px] text-[#888] font-medium uppercase tracking-wider mb-1">AIS</p>
                   <p className="text-[40px] font-black text-[#111] leading-none mb-1">72</p>
-                  <p className="text-[10px] font-bold text-white bg-[#2d6a4f] rounded-full px-2.5 py-0.5 inline-block mb-2">Fundable</p>
+                  <p className="text-[12px] text-[#2d6a4f] font-semibold mb-3">Strong — Approval Likely</p>
                   <div className="w-full h-1.5 bg-[#f0f0f0] rounded-full overflow-hidden"><div className="h-full bg-[#2d6a4f] rounded-full" style={{ width: "72%" }} /></div>
                 </div>,
                 <div key="ais2" className="bg-white rounded-xl p-4 shadow-2xl w-[220px] shrink-0">
@@ -5220,9 +5056,9 @@ export default function LandingPage() {
                   ))}
                 </div>,
                 <div key="ais3" className="bg-white/90 backdrop-blur-sm rounded-xl p-4 shadow-lg w-[150px] shrink-0">
-                  <p className="text-[10px] text-[#888] mb-1">Funding Range</p>
-                  <p className="text-[22px] font-black text-[#111] leading-none">$50K–$150K</p>
-                  <p className="text-[10px] text-[#2d6a4f] font-semibold">If you applied today</p>
+                  <p className="text-[10px] text-[#888] mb-1">Approval Odds</p>
+                  <p className="text-[28px] font-black text-[#111] leading-none">89%</p>
+                  <p className="text-[10px] text-[#2d6a4f] font-semibold">High confidence</p>
                 </div>,
               ],
             },
@@ -5230,8 +5066,8 @@ export default function LandingPage() {
               label: "Credit Repair",
               bg: "linear-gradient(135deg, #6b8f71 0%, #4a7a5a 25%, #2d5a40 50%, #1a4030 75%, #0f2a1e 100%)",
               gradientBase: "#1a4030",
-              title: "Remove Blockers",
-              desc: "Negative items reduce your approval odds instantly. We generate dispute letters and track every deletion.",
+              title: "Credit Repair",
+              desc: "Generate FCRA-compliant dispute letters and track deletions — remove what's blocking your approval.",
               photo: "/founders/founder1.jpg",
               cards: [
                 <div key="cr1" className="bg-white rounded-xl p-5 shadow-2xl w-[210px] shrink-0">
@@ -5260,8 +5096,8 @@ export default function LandingPage() {
               label: "Capital Matching",
               bg: "linear-gradient(135deg, #5a7a8a 0%, #3d5c6e 25%, #2a4555 50%, #1a3040 75%, #0f1e2e 100%)",
               gradientBase: "#1a3040",
-              title: "Capital Access",
-              desc: "See how much you may qualify for — matched to real lenders based on your profile. If you applied today.",
+              title: "Capital Matching",
+              desc: "See which lenders approve your profile — matched to real approval data, not ads.",
               photo: "/founders/founder8.jpg",
               cards: [
                 <div key="cm1" className="bg-white rounded-xl p-5 shadow-2xl w-[210px] shrink-0">
@@ -5291,7 +5127,7 @@ export default function LandingPage() {
               bg: "linear-gradient(135deg, #8a6a7a 0%, #6e4d60 25%, #553a4a 50%, #3e2835 75%, #2a1a22 100%)",
               gradientBase: "#3e2835",
               title: "Capital Simulator",
-              desc: "Lower utilization to increase approval odds for higher limits. See exactly what to change to unlock more capital.",
+              desc: "See how changes to utilization, inquiries, and tradelines affect your approval odds in real time.",
               photo: "/founders/founder2.jpg",
               cards: [
                 <div key="sim1" className="bg-white rounded-xl p-5 shadow-2xl w-[210px] shrink-0">
@@ -5444,7 +5280,7 @@ export default function LandingPage() {
           );
         })()}
 
-        <section className="py-4 sm:py-6 bg-[#fafafa] overflow-hidden" data-testid="front-social-proof">
+        <section className="py-4 sm:py-6 border-y border-[#f0f0f0] bg-[#fafafa] overflow-hidden" data-testid="front-social-proof">
           <style>{`
             @keyframes scrollProof {
               0% { transform: translateX(0); }
@@ -5455,7 +5291,7 @@ export default function LandingPage() {
             <div className="flex sm:hidden gap-x-8" style={{ animation: "scrollProof 25s linear infinite", width: "max-content", WebkitAnimation: "scrollProof 25s linear infinite" }}>
               {[...Array(2)].map((_, setIdx) => (
                 <div key={setIdx} className="flex gap-x-8">
-                  {["23 Data Points Analyzed", "FCRA-Compliant Letters", "Real Lender Matching", "AES-256 Encryption", "No Hard Inquiries"].map((item) => (
+                  {["23 Data Points Analyzed", "FCRA-Compliant Letters", "Real Lender Matching", "Bank-Level Encryption", "No Hard Inquiries"].map((item) => (
                     <span key={item} className="text-[11px] text-[#999] font-medium tracking-wide uppercase flex items-center gap-2 shrink-0 whitespace-nowrap">
                       <svg width="14" height="14" viewBox="0 0 16 16" fill="none" className="shrink-0"><path d="M4 8l3 3 5-5" stroke="#999" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
                       {item}
@@ -5465,7 +5301,7 @@ export default function LandingPage() {
               ))}
             </div>
             <div className="hidden sm:contents">
-              {["23 Data Points Analyzed", "FCRA-Compliant Letters", "Real Lender Matching", "AES-256 Encryption", "No Hard Inquiries"].map((item) => (
+              {["23 Data Points Analyzed", "FCRA-Compliant Letters", "Real Lender Matching", "Bank-Level Encryption", "No Hard Inquiries"].map((item) => (
                 <span key={item} className="text-[12px] text-[#999] font-medium tracking-wide uppercase flex items-center gap-2 shrink-0 whitespace-nowrap">
                   <svg width="14" height="14" viewBox="0 0 16 16" fill="none" className="shrink-0"><path d="M4 8l3 3 5-5" stroke="#999" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
                   {item}
@@ -5478,15 +5314,15 @@ export default function LandingPage() {
         <section id="features" className="py-[50px] sm:py-[80px] px-5 sm:px-6 bg-white scroll-mt-16" data-testid="front-operating-system">
           <div className="max-w-[900px] mx-auto text-center">
             <h2 className="text-[28px] sm:text-[36px] md:text-[48px] text-[#111] leading-[1.1] sm:leading-[1.05] mb-4" style={{ fontFamily: "'Inter', system-ui, sans-serif", fontWeight: 900, letterSpacing: "-0.03em" }}>The operating system for financial identity</h2>
-            <p className="text-[14px] sm:text-[16px] text-[#888] max-w-[320px] sm:max-w-[500px] mx-auto leading-[1.7] sm:leading-[1.6]" style={{ textAlign: "justify", textAlignLast: "center" }}>Profundr brings your entire credit, capital, and funding journey into one unified system. Founders grow faster when everything works together.</p>
+            <p className="text-[14px] sm:text-[16px] text-[#888] max-w-[320px] sm:max-w-[500px] mx-auto leading-[1.7] sm:leading-[1.6]">Profundr brings your credit, capital, and funding journey into one system — so you can see what banks see before you apply.</p>
           </div>
         </section>
 
-        <section className="py-[50px] sm:py-[80px] px-2 sm:px-6 bg-white" data-testid="front-all-in-one">
+        <section className="py-[50px] sm:py-[80px] px-2 sm:px-6 bg-white border-t border-[#f0f0f0]" data-testid="front-all-in-one">
           <div className="max-w-[1100px] mx-auto flex flex-col md:flex-row items-center gap-10 sm:gap-12">
             <div className="flex-1 w-full">
-              <div className="rounded-xl sm:rounded-2xl transition-transform duration-300 hover:scale-[1.02]" style={{ background: "#f0ede8", padding: "20px 16px", boxShadow: "0 20px 60px rgba(0,0,0,0.08), 0 4px 16px rgba(0,0,0,0.04)" }}>
-                <div className="bg-white rounded-xl p-4 shadow-lg">
+              <div className="rounded-xl sm:rounded-2xl" style={{ background: "#f0ede8", padding: "20px 16px" }}>
+                <div className="bg-white rounded-xl p-4 shadow-sm">
                   <div className="flex items-center gap-3 mb-4 pb-3 border-b border-[#f0f0f0]">
                     <img src="/profundr-brain-logo.png" alt="" className="w-7 h-7" />
                     <span className="text-[13px] font-semibold text-[#111]">profundr</span>
@@ -5516,10 +5352,10 @@ export default function LandingPage() {
               </div>
             </div>
             <div className="flex-1">
-              <h3 className="text-[24px] sm:text-[32px] font-bold text-[#111] leading-[1.15] mb-3 text-center md:text-left" style={{ letterSpacing: "-0.02em" }}>Your funding snapshot — instantly</h3>
-              <p className="text-[14px] sm:text-[15px] text-[#555] leading-[1.7] sm:leading-[1.6] mb-7 sm:mb-6 text-center md:text-left" style={{ textAlign: "justify" }}>Profundr shows you how banks see you. One upload reveals your approval range, risk alerts, and exactly what's blocking your next funding round.</p>
+              <h3 className="text-[24px] sm:text-[32px] font-bold text-[#111] leading-[1.15] mb-3 text-center md:text-left" style={{ letterSpacing: "-0.02em" }}>All-in-one that actually works</h3>
+              <p className="text-[14px] sm:text-[15px] text-[#555] leading-[1.7] sm:leading-[1.6] mb-7 sm:mb-6 text-center md:text-left">Profundr gives you one connected system to analyze credit, generate disputes, match with lenders, and track your AIS score — all in real time.</p>
               <ul className="space-y-5 sm:space-y-3 mb-8 sm:mb-6">
-                {["See your estimated approval range from $5K–$250K", "Bank-level analysis across all 3 bureaus in one view", "Built for founders accessing real capital, not just scores", "One upload — full funding picture in seconds"].map((item) => (
+                {["AIS scoring, disputes, and capital matching fully connected", "Centralized view of your financial identity across 3 bureaus", "Tools built specifically for founder and business funding", "Less complexity — one upload, full analysis"].map((item) => (
                   <li key={item} className="flex items-start gap-3"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="mt-0.5 shrink-0"><path d="M4 8l3 3 5-5" stroke="#111" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg><span className="text-[14px] text-[#555] leading-[1.6]">{item}</span></li>
                 ))}
               </ul>
@@ -5529,18 +5365,18 @@ export default function LandingPage() {
                   <span key={r} className="text-[12px] px-3 py-1.5 bg-[#f5f5f5] text-[#666] font-medium rounded-full flex items-center gap-1.5"><span className="w-4 h-4 rounded-full bg-[#ddd] shrink-0" />{r}</span>
                 ))}
               </div>
-              <div className="text-center sm:text-left"><button className="px-5 py-2.5 bg-[#111] text-white text-[13px] font-semibold hover:bg-[#333] transition-colors" data-testid="btn-watch-demo-1">Check Before You Apply</button></div>
+              <div className="text-center sm:text-left"><button className="px-5 py-2.5 bg-[#111] text-white text-[13px] font-semibold hover:bg-[#333] transition-colors" data-testid="btn-watch-demo-1">Check Your Profile</button></div>
             </div>
           </div>
         </section>
 
-        <section className="py-[50px] sm:py-[80px] px-2 sm:px-6 bg-white" data-testid="front-sell-confidence">
+        <section className="py-[50px] sm:py-[80px] px-2 sm:px-6 bg-white border-t border-[#f0f0f0]" data-testid="front-sell-confidence">
           <div className="max-w-[1100px] mx-auto flex flex-col md:flex-row items-center gap-10 sm:gap-12">
             <div className="flex-1 order-2 md:order-1">
-              <h3 className="text-[24px] sm:text-[32px] font-bold text-[#111] leading-[1.15] mb-3 text-center md:text-left" style={{ letterSpacing: "-0.02em" }}>Remove what's blocking your approval</h3>
-              <p className="text-[14px] sm:text-[15px] text-[#555] leading-[1.7] sm:leading-[1.6] mb-7 sm:mb-6 text-center md:text-left" style={{ textAlign: "justify" }}>Negative items can reduce your approval odds instantly. Profundr generates FCRA-compliant dispute letters and tracks every deletion in real time.</p>
+              <h3 className="text-[24px] sm:text-[32px] font-bold text-[#111] leading-[1.15] mb-3 text-center md:text-left" style={{ letterSpacing: "-0.02em" }}>Dispute and delete with precision</h3>
+              <p className="text-[14px] sm:text-[15px] text-[#555] leading-[1.7] sm:leading-[1.6] mb-7 sm:mb-6 text-center md:text-left">FCRA-compliant dispute letters generated in seconds. Track every deletion across Equifax, TransUnion, and Experian in real time.</p>
               <ul className="space-y-5 sm:space-y-3 mb-8 sm:mb-6">
-                {["AI-generated dispute letters — legally compliant, ready to send", "Too many recent inquiries may trigger automatic denial — we flag them", "High balances can reduce your approval odds — we show the impact", "Track deletions across all three bureaus in one view", "94% dispute success rate across all Profundr users"].map((item) => (
+                {["AI-generated dispute letters with legal compliance", "Track deletions across all three bureaus in one view", "Automated follow-ups and escalation paths", "Bureau response tracking with timeline", "Success rate analytics per dispute type"].map((item) => (
                   <li key={item} className="flex items-start gap-3"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="mt-0.5 shrink-0"><path d="M4 8l3 3 5-5" stroke="#111" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg><span className="text-[14px] text-[#555] leading-[1.6]">{item}</span></li>
                 ))}
               </ul>
@@ -5550,10 +5386,10 @@ export default function LandingPage() {
                   <span key={r} className="text-[12px] px-3 py-1.5 bg-[#f5f5f5] text-[#666] font-medium rounded-full flex items-center gap-1.5"><span className="w-4 h-4 rounded-full bg-[#ddd] shrink-0" />{r}</span>
                 ))}
               </div>
-              <div className="text-center sm:text-left"><button className="px-5 py-2.5 bg-[#111] text-white text-[13px] font-semibold hover:bg-[#333] transition-colors" data-testid="btn-watch-demo-2">See If You Qualify</button></div>
+              <div className="text-center sm:text-left"><button className="px-5 py-2.5 bg-[#111] text-white text-[13px] font-semibold hover:bg-[#333] transition-colors" data-testid="btn-watch-demo-2">Upload Report</button></div>
             </div>
             <div className="flex-1 order-1 md:order-2 w-full">
-              <div className="rounded-xl sm:rounded-2xl transition-transform duration-300 hover:scale-[1.02]" style={{ background: "#f0ede8", padding: "28px 20px", boxShadow: "0 20px 60px rgba(0,0,0,0.08), 0 4px 16px rgba(0,0,0,0.04)" }}>
+              <div className="rounded-xl sm:rounded-2xl" style={{ background: "#f0ede8", padding: "28px 20px" }}>
                 <div className="flex gap-4 items-start">
                   <div className="shrink-0" style={{ width: "42%" }}>
                     <div className="bg-white rounded-xl px-3 py-2.5 shadow-md inline-flex items-center gap-2 mb-3">
@@ -5597,10 +5433,10 @@ export default function LandingPage() {
           </div>
         </section>
 
-        <section className="py-[50px] sm:py-[80px] px-2 sm:px-6 bg-[#fafafa]" data-testid="front-funnels">
+        <section className="py-[50px] sm:py-[80px] px-2 sm:px-6 bg-[#fafafa] border-t border-[#f0f0f0]" data-testid="front-funnels">
           <div className="max-w-[1100px] mx-auto flex flex-col md:flex-row items-center gap-10 sm:gap-12">
             <div className="flex-1 w-full">
-              <div className="rounded-xl sm:rounded-2xl transition-transform duration-300 hover:scale-[1.02]" style={{ background: "#f0ede8", padding: "28px 20px", boxShadow: "0 20px 60px rgba(0,0,0,0.08), 0 4px 16px rgba(0,0,0,0.04)" }}>
+              <div className="rounded-xl sm:rounded-2xl" style={{ background: "#f0ede8", padding: "28px 20px" }}>
                 <div className="flex gap-4 items-start">
                   <div className="shrink-0" style={{ width: "42%" }}>
                     <div className="bg-white rounded-xl px-3 py-2.5 shadow-md inline-flex items-center gap-2 mb-3">
@@ -5647,10 +5483,10 @@ export default function LandingPage() {
               </div>
             </div>
             <div className="flex-1">
-              <h3 className="text-[24px] sm:text-[32px] font-bold text-[#111] leading-[1.15] mb-3 text-center md:text-left" style={{ letterSpacing: "-0.02em" }}>Find your approval range instantly</h3>
-              <p className="text-[14px] sm:text-[15px] text-[#555] leading-[1.7] sm:leading-[1.6] mb-7 sm:mb-6 text-center md:text-left" style={{ textAlign: "justify" }}>See how much you may qualify for — matched to real lenders based on your AIS score and bureau profile. Timing matters more than your score.</p>
+              <h3 className="text-[24px] sm:text-[32px] font-bold text-[#111] leading-[1.15] mb-3 text-center md:text-left" style={{ letterSpacing: "-0.02em" }}>Capital matching that works</h3>
+              <p className="text-[14px] sm:text-[15px] text-[#555] leading-[1.7] sm:leading-[1.6] mb-7 sm:mb-6 text-center md:text-left">Get matched with real lenders based on your AIS score, bureau profile, and business data. No guessing — just funded founders.</p>
               <ul className="space-y-5 sm:space-y-3 mb-8 sm:mb-6">
-                {["Unlock higher limits and approvals with AI-powered matching", "The same profile can be approved or denied based on timing alone", "See real approval odds across 50+ funding products", "Track applications from match to funded — $9M+ matched so far"].map((item) => (
+                {["AI-powered lender matching across 50+ products", "Real approval odds based on your AIS profile", "Track applications from match to funded", "Success stories from real Profundr users"].map((item) => (
                   <li key={item} className="flex items-start gap-3"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="mt-0.5 shrink-0"><path d="M4 8l3 3 5-5" stroke="#111" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg><span className="text-[14px] text-[#555] leading-[1.6]">{item}</span></li>
                 ))}
               </ul>
@@ -5660,23 +5496,22 @@ export default function LandingPage() {
                   <span key={r} className="text-[12px] px-3 py-1.5 bg-[#f5f5f5] text-[#666] font-medium rounded-full flex items-center gap-1.5"><span className="w-4 h-4 rounded-full bg-[#ddd] shrink-0" />{r}</span>
                 ))}
               </div>
-              <div className="text-center sm:text-left"><button className="px-5 py-2.5 bg-[#111] text-white text-[13px] font-semibold hover:bg-[#333] transition-colors" data-testid="btn-watch-demo-3">See If You Qualify</button></div>
+              <div className="text-center sm:text-left"><button className="px-5 py-2.5 bg-[#111] text-white text-[13px] font-semibold hover:bg-[#333] transition-colors" data-testid="btn-watch-demo-3">See Your Matches</button></div>
             </div>
           </div>
         </section>
 
-
-        <section className="py-[50px] sm:py-[60px] px-5 sm:px-6 bg-white" data-testid="front-value-props">
+        <section className="py-[50px] sm:py-[60px] px-5 sm:px-6 bg-white border-t border-[#f0f0f0]" data-testid="front-value-props">
           <div className="max-w-[1100px] mx-auto grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-5">
             {[
-              { icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M12 2L3 7v10l9 5 9-5V7l-9-5z" stroke="white" strokeWidth="1.5" strokeLinejoin="round"/><path d="M12 12v10M12 12L3 7M12 12l9-5" stroke="white" strokeWidth="1.5"/></svg>, title: "AES-256 encrypted", desc: "Your bureau data is encrypted end-to-end with bank-level security. We never share or sell your information." },
-              { icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="4" stroke="white" strokeWidth="1.5"/><path d="M4 20c0-4 4-7 8-7s8 3 8 7" stroke="white" strokeWidth="1.5" strokeLinecap="round"/></svg>, title: "Human support 24/7", desc: "Get help from real credit and funding specialists who understand founder finance. Support is available at any hour." },
-              { icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="18" height="18" rx="2" stroke="white" strokeWidth="1.5"/><path d="M7 12h2v5H7zM11 8h2v9h-2zM15 10h2v7h-2z" fill="white"/></svg>, title: "Built to last", desc: "Profundr powers millions in funded capital with a stable, secure platform you can rely on as you grow." },
+              { icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M12 2L3 7v10l9 5 9-5V7l-9-5z" stroke="#111" strokeWidth="1.5" strokeLinejoin="round"/><path d="M12 12v10M12 12L3 7M12 12l9-5" stroke="#111" strokeWidth="1.5"/></svg>, title: "AES-256 encrypted", desc: "Your bureau data is encrypted end-to-end with bank-level security. We never share or sell your information." },
+              { icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="4" stroke="#111" strokeWidth="1.5"/><path d="M4 20c0-4 4-7 8-7s8 3 8 7" stroke="#111" strokeWidth="1.5" strokeLinecap="round"/></svg>, title: "Human support 24/7", desc: "Real credit and funding specialists who understand founder finance — available whenever you need them." },
+              { icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="18" height="18" rx="2" stroke="#111" strokeWidth="1.5"/><path d="M7 12h2v5H7zM11 8h2v9h-2zM15 10h2v7h-2z" fill="#111"/></svg>, title: "Built to last", desc: "Powering millions in funded capital with a stable, secure platform founders rely on." },
             ].map((item) => (
-              <div key={item.title} className="rounded-2xl p-6 sm:p-8 bg-[#fafafa] text-center sm:text-left transition-all duration-300 hover:bg-white hover:shadow-lg">
-                <div className="w-12 h-12 rounded-xl bg-[#111] flex items-center justify-center mb-6 sm:mb-10 mx-auto sm:mx-0" style={{ color: "white" }}>{item.icon}</div>
+              <div key={item.title} className="border border-[#e8e8e8] rounded-2xl p-6 sm:p-8 bg-white text-center sm:text-left">
+                <div className="w-12 h-12 rounded-xl border border-[#e8e8e8] flex items-center justify-center mb-6 sm:mb-16 mx-auto sm:mx-0">{item.icon}</div>
                 <h4 className="text-[18px] font-bold text-[#111] mb-2">{item.title}</h4>
-                <p className="text-[14px] text-[#888] leading-[1.6]" style={{ textAlign: "justify" }}>{item.desc}</p>
+                <p className="text-[14px] text-[#888] leading-[1.6]">{item.desc}</p>
               </div>
             ))}
           </div>
@@ -5693,7 +5528,7 @@ export default function LandingPage() {
           const nextIdx = testIdx === testimonials.length - 1 ? 0 : testIdx + 1;
           return (
             <section className="py-[50px] sm:py-[80px] bg-[#111]" data-testid="front-testimonials-kajabi">
-              <h2 className="text-[30px] sm:text-[32px] md:text-[42px] text-white leading-[1.1] sm:leading-[1.05] mb-8 sm:mb-12 px-5 sm:px-6 text-center" style={{ fontFamily: "'Inter', system-ui, sans-serif", fontWeight: 900, letterSpacing: "-0.03em" }}>Founders who stopped guessing — and got funded</h2>
+              <h2 className="text-[30px] sm:text-[32px] md:text-[42px] text-white leading-[1.1] sm:leading-[1.05] mb-8 sm:mb-12 px-5 sm:px-6 text-center" style={{ fontFamily: "'Inter', system-ui, sans-serif", fontWeight: 900, letterSpacing: "-0.03em" }}>Founders who checked before they applied</h2>
 
               <div className="md:hidden px-5">
                 <div className="rounded-2xl overflow-hidden mb-6">
@@ -5760,15 +5595,15 @@ export default function LandingPage() {
           );
         })()}
 
-        <section id="pricing" className="py-[50px] sm:py-[80px] px-5 sm:px-6 bg-white scroll-mt-16" data-testid="front-pricing">
+        <section id="pricing" className="py-[50px] sm:py-[80px] px-5 sm:px-6 bg-white border-t border-[#f0f0f0] scroll-mt-16" data-testid="front-pricing">
           <div className="max-w-[1100px] mx-auto">
             <h2 className="text-[28px] sm:text-[36px] md:text-[46px] text-[#111] leading-[1.1] sm:leading-[1.05] mb-3 text-center" style={{ fontFamily: "'Inter', system-ui, sans-serif", fontWeight: 900, letterSpacing: "-0.03em" }}>Simple, transparent pricing</h2>
-            <p className="text-[14px] sm:text-[16px] text-[#888] text-center mb-10 sm:mb-14 max-w-[400px] mx-auto leading-[1.6]">Choose the plan that matches where you are in your funding journey.</p>
+            <p className="text-[14px] sm:text-[16px] text-[#888] text-center mb-10 sm:mb-14 max-w-[400px] mx-auto leading-[1.6]">See how banks see you — then choose the plan that fits where you are.</p>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-5">
               {[
-                { name: "Basic", price: "$25", period: "/mo", desc: "Get your AIS score and AI chat.", features: ["AI capital chat", "AIS score analysis", "23-point credit breakdown", "Bureau report upload"], cta: "Start Basic" },
-                { name: "Repair", price: "$50", period: "/mo", desc: "Fix your credit with precision.", features: ["Everything in Basic", "FCRA dispute letter generator", "Bureau deletion tracking", "Automated follow-ups", "Success rate analytics"], popular: true, cta: "Start Repair" },
-                { name: "Capital", price: "$150", period: "/mo", desc: "Full capital operating system.", features: ["Everything in Repair", "Capital Simulator", "Lender Match Engine", "Funding Timeline", "Community Intelligence", "Priority support"], cta: "Start Capital" },
+                { name: "Basic", price: "$25", period: "/mo", desc: "See how banks evaluate your profile.", features: ["AI capital chat", "AIS score analysis", "23-point credit breakdown", "Bureau report upload"], cta: "Check Your Profile" },
+                { name: "Repair", price: "$50", period: "/mo", desc: "Fix what's blocking your approval.", features: ["Everything in Basic", "FCRA dispute letter generator", "Bureau deletion tracking", "Automated follow-ups", "Success rate analytics"], popular: true, cta: "Start Repair" },
+                { name: "Capital", price: "$150", period: "/mo", desc: "Full capital operating system.", features: ["Everything in Repair", "Capital Simulator", "Lender Match Engine", "Funding Timeline", "Community Intelligence", "Priority support"], cta: "Get Capital" },
               ].map((plan) => (
                 <div key={plan.name} className={`border rounded-2xl p-6 sm:p-8 relative ${plan.popular ? "border-[#111] bg-[#fafafa]" : "border-[#e8e8e8] bg-white"}`} data-testid={`pricing-${plan.name.toLowerCase()}`}>
                   {plan.popular && <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 bg-[#111] text-white text-[10px] font-semibold uppercase tracking-wider">Most Popular</div>}
@@ -5793,7 +5628,7 @@ export default function LandingPage() {
           </div>
         </section>
 
-        <section id="faq" className="py-[50px] sm:py-[80px] px-5 sm:px-6 bg-[#fafafa] scroll-mt-16" data-testid="front-faq">
+        <section id="faq" className="py-[50px] sm:py-[80px] px-5 sm:px-6 bg-[#fafafa] border-t border-[#f0f0f0] scroll-mt-16" data-testid="front-faq">
           <div className="max-w-[700px] mx-auto">
             <h2 className="text-[28px] sm:text-[36px] md:text-[46px] text-[#111] leading-[1.1] sm:leading-[1.05] mb-10 sm:mb-14 text-center" style={{ fontFamily: "'Inter', system-ui, sans-serif", fontWeight: 900, letterSpacing: "-0.03em" }}>Frequently asked questions</h2>
             <div className="space-y-0">
@@ -5814,23 +5649,19 @@ export default function LandingPage() {
           </div>
         </section>
 
-        <section className="py-[60px] sm:py-[80px] px-5 sm:px-6 bg-[#111]" data-testid="front-closing-cta">
-          <div className="max-w-[600px] mx-auto text-center">
-            <h2 className="text-[28px] sm:text-[36px] md:text-[46px] text-white leading-[1.1] mb-4" style={{ fontFamily: "'Inter', system-ui, sans-serif", fontWeight: 900, letterSpacing: "-0.03em" }}>Stop Guessing. Start Qualifying.</h2>
-            <p className="text-[14px] sm:text-[16px] text-white/60 leading-[1.6] mb-8 max-w-[400px] mx-auto">See how banks see you — before it costs you.</p>
-            <button
-              onClick={() => { setShowFrontPage(false); setAutoSendFile(true); handleUploadClick(); }}
-              className="px-10 py-3.5 bg-white text-[#111] text-[14px] font-semibold hover:bg-white/90 transition-colors"
-              data-testid="front-btn-closing-cta"
-            >
-              Check Before You Apply
-            </button>
+        <section className="py-10 sm:py-6 px-5 sm:px-6 bg-[#111] border-t border-white/10" data-testid="front-cta-bar">
+          <div className="max-w-[1100px] mx-auto flex flex-col sm:flex-row items-center justify-between gap-6 sm:gap-4">
+            <h3 className="text-[22px] sm:text-[22px] md:text-[28px] font-bold text-white text-center sm:text-left leading-[1.2]" style={{ letterSpacing: "-0.02em" }}>Stop Guessing. Start Qualifying.</h3>
+            <button onClick={() => { setShowFrontPage(false); setAutoSendFile(true); handleUploadClick(); }} className="px-5 py-2.5 bg-white text-[#111] text-[13px] font-semibold hover:bg-white/90 transition-colors shrink-0" data-testid="front-btn-final-cta">Check Before You Apply</button>
           </div>
         </section>
 
         <footer className="py-10 sm:py-14 px-5 sm:px-6 bg-[#111] border-t border-white/10" data-testid="front-footer">
           <div className="max-w-[1100px] mx-auto">
             <div className="flex flex-col md:flex-row items-start justify-between gap-8 sm:gap-10 mb-10 sm:mb-12">
+              <div>
+                <ProfundrLogo size="md" variant="light" />
+              </div>
               <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-x-12 sm:gap-x-16 gap-y-6">
                 <div>
                   <p className="text-[11px] font-semibold text-white uppercase tracking-wider mb-3">Company</p>
@@ -5905,47 +5736,55 @@ export default function LandingPage() {
         <div ref={scrollAreaRef} className="flex-1 min-h-0 overflow-y-auto relative" data-testid="main-scroll-area">
           <nav className="sticky top-0 z-30 bg-[#fafafa]/95 backdrop-blur-sm flex items-center justify-between px-4 sm:px-6 py-3 border-b border-[#eee]" data-testid="nav-top">
             <div className="flex items-center gap-2">
-              <div className="relative">
-                <button
-                  onClick={() => {
-                    if (!docsOpen) {
+              {!docsOpen && (
+                <div className="relative">
+                  <button
+                    onClick={() => {
                       setDocsOpen(true);
                       if (showBrainHint) {
                         setShowBrainHint(false);
                         try { sessionStorage.setItem("profundr_brain_hint_dismissed", "1"); } catch {}
                       }
-                    }
-                  }}
-                  className="flex items-center gap-0 cursor-pointer"
-                  title="Workspace"
-                  data-testid="button-toggle-docs"
-                >
-                  <ProfundrLogo size="md" variant="dark" />
-                </button>
-                {!docsOpen && showBrainHint && (
-                  <div
-                    className="absolute top-full left-0 mt-2 z-50 animate-in fade-in slide-in-from-top-1 duration-300"
-                    data-testid="popup-brain-hint"
+                    }}
+                    className="relative w-8 h-8 flex items-center justify-center rounded-lg text-[#888] hover:text-[#555] hover:bg-[#eee] transition-colors mr-1"
+                    title="Workspace"
+                    data-testid="button-toggle-docs"
                   >
-                    <div className="relative bg-[#1a1a2e] text-white rounded-xl px-4 py-3 shadow-lg" style={{ width: "220px" }}>
-                      <div className="absolute -top-[6px] left-4 w-3 h-3 bg-[#1a1a2e] rotate-45" />
-                      <p className="text-[12px] leading-[1.5] font-medium">
-                        Tap the brain for your dashboard, documents, team, and full capabilities.
-                      </p>
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setShowBrainHint(false);
-                          try { sessionStorage.setItem("profundr_brain_hint_dismissed", "1"); } catch {}
-                        }}
-                        className="mt-2 text-[10px] text-white/60 hover:text-white/90 transition-colors"
-                        data-testid="button-dismiss-brain-hint"
-                      >
-                        Got it
-                      </button>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M12 2C9.5 2 7.5 4 7.5 6.5c0 .5-.4 1-1 1C4.5 7.5 3 9.5 3 11.5c0 1.5.8 2.8 2 3.5 0 0-.5 1.5-.5 2.5C4.5 20 6.5 22 9 22c1.5 0 2.5-.5 3-1.5.5 1 1.5 1.5 3 1.5 2.5 0 4.5-2 4.5-4.5 0-1-.5-2.5-.5-2.5 1.2-.7 2-2 2-3.5 0-2-1.5-4-3.5-4-.6 0-1-.5-1-1C16.5 4 14.5 2 12 2z" />
+                      <path d="M12 2v20" />
+                      <path d="M7.5 7.5C9 8.5 10 10 10.5 12" />
+                      <path d="M16.5 7.5C15 8.5 14 10 13.5 12" />
+                    </svg>
+                  </button>
+                  {showBrainHint && (
+                    <div
+                      className="absolute top-full left-0 mt-2 z-50 animate-in fade-in slide-in-from-top-1 duration-300"
+                      data-testid="popup-brain-hint"
+                    >
+                      <div className="relative bg-[#1a1a2e] text-white rounded-xl px-4 py-3 shadow-lg" style={{ width: "220px" }}>
+                        <div className="absolute -top-[6px] left-4 w-3 h-3 bg-[#1a1a2e] rotate-45" />
+                        <p className="text-[12px] leading-[1.5] font-medium">
+                          Tap the brain for your dashboard, documents, team, and full capabilities.
+                        </p>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setShowBrainHint(false);
+                            try { sessionStorage.setItem("profundr_brain_hint_dismissed", "1"); } catch {}
+                          }}
+                          className="mt-2 text-[10px] text-white/60 hover:text-white/90 transition-colors"
+                          data-testid="button-dismiss-brain-hint"
+                        >
+                          Got it
+                        </button>
+                      </div>
                     </div>
-                  </div>
-                )}
+                  )}
+                </div>
+              )}
+              <div data-testid="nav-logo">
+                <ProfundrLogo size="md" variant="dark" />
               </div>
             </div>
             {user ? (
@@ -6069,7 +5908,7 @@ export default function LandingPage() {
                 Upload Report
               </button>
               <p className="text-[11px] text-[#999] text-center max-w-[240px] leading-[1.6]" data-testid="text-upload-description">
-                Profundr shows you how banks see you — your approval range, risk alerts, and what to fix. No hard inquiry, no lending — just clarity before you apply.
+                Profundr reviews your report like a bank would and shows your funding potential before you apply. No hard inquiry, no lending — just secure, clear analysis.
               </p>
             </div>
           ) : (
