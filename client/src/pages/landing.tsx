@@ -4881,18 +4881,38 @@ export default function LandingPage() {
             <div className="flex items-center gap-3">
               <button
                 onClick={() => setShowFrontPage(false)}
-                className="text-[13px] text-[#555] hover:text-[#111] font-medium transition-colors"
+                className="hidden sm:inline-block text-[13px] text-[#555] hover:text-[#111] font-medium transition-colors"
                 data-testid="front-btn-login"
               >
                 Log In
               </button>
               <button
                 onClick={() => window.location.href = '/subscription'}
-                className="px-5 py-2.5 bg-[#111] text-white text-[13px] font-medium hover:bg-[#333] transition-colors"
+                className="hidden sm:inline-block px-5 py-2.5 bg-[#111] text-white text-[13px] font-medium hover:bg-[#333] transition-colors"
                 data-testid="front-btn-get-started"
               >
                 Get Started
               </button>
+              <button
+                onClick={() => {
+                  const mobileMenu = document.getElementById('mobile-menu');
+                  if (mobileMenu) mobileMenu.classList.toggle('hidden');
+                }}
+                className="sm:hidden w-10 h-10 flex items-center justify-center"
+                data-testid="front-btn-hamburger"
+              >
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#111" strokeWidth="2" strokeLinecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+              </button>
+            </div>
+          </div>
+          <div id="mobile-menu" className="hidden sm:hidden border-t border-[#f0f0f0] bg-white px-4 py-4 space-y-4">
+            <a href="#features" className="block text-[15px] text-[#555]">Features</a>
+            <a href="#how-it-works" className="block text-[15px] text-[#555]">How It Works</a>
+            <a href="#pricing" className="block text-[15px] text-[#555]">Pricing</a>
+            <a href="#faq" className="block text-[15px] text-[#555]">FAQ</a>
+            <div className="pt-2 border-t border-[#f0f0f0] flex flex-col gap-3">
+              <button onClick={() => setShowFrontPage(false)} className="text-[15px] text-[#555] text-left" data-testid="front-mobile-login">Log In</button>
+              <button onClick={() => window.location.href = '/subscription'} className="w-full py-3 bg-[#111] text-white text-[14px] font-semibold" data-testid="front-mobile-get-started">Get Started</button>
             </div>
           </div>
         </nav>
@@ -4962,15 +4982,15 @@ export default function LandingPage() {
         </section>
 
         <section className="py-10 sm:py-16 px-4 sm:px-6 bg-white" data-testid="front-stats">
-          <div className="max-w-[1000px] mx-auto flex flex-wrap items-start justify-center gap-x-12 sm:gap-x-20 gap-y-6 sm:gap-y-8">
+          <div className="max-w-[1000px] mx-auto flex flex-col sm:flex-row sm:flex-wrap items-start sm:items-start sm:justify-center gap-y-6 sm:gap-x-20 sm:gap-y-8">
             {[
               { value: "12,400+", label: "Credit deletions generated" },
               { value: "$38M+", label: "Funding matched to founders" },
               { value: "94%", label: "Dispute success rate" },
             ].map((stat) => (
-              <div key={stat.label} className="text-center" data-testid={`stat-${stat.label.replace(/\s+/g, "-").toLowerCase()}`}>
-                <p className="text-[32px] sm:text-[42px] font-bold text-[#111] tracking-tight leading-none">{stat.value}</p>
-                <p className="text-[13px] sm:text-[14px] text-[#888] mt-2">{stat.label}</p>
+              <div key={stat.label} className="text-left sm:text-center" data-testid={`stat-${stat.label.replace(/\s+/g, "-").toLowerCase()}`}>
+                <p className="text-[36px] sm:text-[42px] font-bold text-[#111] tracking-tight leading-none">{stat.value}</p>
+                <p className="text-[13px] sm:text-[14px] text-[#888] mt-1 sm:mt-2">{stat.label}</p>
               </div>
             ))}
           </div>
@@ -5242,7 +5262,7 @@ export default function LandingPage() {
         <section className="py-[50px] sm:py-[80px] px-4 sm:px-6 bg-white border-t border-[#f0f0f0]" data-testid="front-all-in-one">
           <div className="max-w-[1100px] mx-auto flex flex-col md:flex-row items-center gap-8 sm:gap-12">
             <div className="flex-1">
-              <div className="bg-[#fafafa] border border-[#e8e8e8] rounded-xl p-6 shadow-sm">
+              <div className="bg-[#fafafa] border border-[#e8e8e8] rounded-xl p-4 sm:p-6 shadow-sm">
                 <div className="flex items-center gap-3 mb-5 pb-4 border-b border-[#f0f0f0]">
                   <img src="/profundr-logo.png" alt="" className="w-8 h-8 rounded-lg" />
                   <span className="text-[14px] font-semibold text-[#111]">profundr</span>
@@ -5284,7 +5304,7 @@ export default function LandingPage() {
                   <span key={r} className="text-[11px] px-3 py-1.5 bg-[#f5f5f5] text-[#666] font-medium rounded-full">{r}</span>
                 ))}
               </div>
-              <button className="px-6 py-3 bg-[#111] text-white text-[14px] font-semibold" data-testid="btn-watch-demo-1">Get Started</button>
+              <button className="w-full sm:w-auto px-6 py-3.5 border border-[#ddd] sm:border-0 sm:bg-[#111] text-[#111] sm:text-white text-[14px] font-semibold hover:bg-[#f5f5f5] sm:hover:bg-[#333] transition-colors" data-testid="btn-watch-demo-1">Get Started</button>
             </div>
           </div>
         </section>
@@ -5305,7 +5325,7 @@ export default function LandingPage() {
                   <span key={r} className="text-[11px] px-3 py-1.5 bg-[#f5f5f5] text-[#666] font-medium rounded-full">{r}</span>
                 ))}
               </div>
-              <button className="px-6 py-3 bg-[#111] text-white text-[14px] font-semibold" data-testid="btn-watch-demo-2">Upload Report</button>
+              <button className="w-full sm:w-auto px-6 py-3.5 border border-[#ddd] sm:border-0 sm:bg-[#111] text-[#111] sm:text-white text-[14px] font-semibold hover:bg-[#f5f5f5] sm:hover:bg-[#333] transition-colors" data-testid="btn-watch-demo-2">Upload Report</button>
             </div>
             <div className="flex-1 order-1 md:order-2">
               <div className="relative">
@@ -5331,7 +5351,7 @@ export default function LandingPage() {
 
         <section className="py-[50px] sm:py-[80px] px-4 sm:px-6 bg-[#fafafa] border-t border-[#f0f0f0]" data-testid="front-funnels">
           <div className="max-w-[1100px] mx-auto flex flex-col md:flex-row items-center gap-8 sm:gap-12">
-            <div className="flex-1">
+            <div className="flex-1 hidden md:block">
               <div className="relative">
                 <div className="bg-white rounded-xl p-5 shadow-lg border border-[#f0f0f0] w-full max-w-[260px] mb-4">
                   <p className="text-[13px] font-semibold text-[#111] mb-2">Capital Matches</p>
@@ -5366,7 +5386,7 @@ export default function LandingPage() {
                   <span key={r} className="text-[11px] px-3 py-1.5 bg-[#f5f5f5] text-[#666] font-medium rounded-full">{r}</span>
                 ))}
               </div>
-              <button className="px-6 py-3 bg-[#111] text-white text-[14px] font-semibold" data-testid="btn-watch-demo-3">See Your Matches</button>
+              <button className="w-full sm:w-auto px-6 py-3.5 border border-[#ddd] sm:border-0 sm:bg-[#111] text-[#111] sm:text-white text-[14px] font-semibold hover:bg-[#f5f5f5] sm:hover:bg-[#333] transition-colors" data-testid="btn-watch-demo-3">See Your Matches</button>
             </div>
           </div>
         </section>
@@ -5379,7 +5399,7 @@ export default function LandingPage() {
               { icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="18" height="18" rx="2" stroke="#111" strokeWidth="1.5"/><path d="M7 12h2v5H7zM11 8h2v9h-2zM15 10h2v7h-2z" fill="#111"/></svg>, title: "Built to last", desc: "Profundr powers millions in funded capital with a stable, secure platform you can rely on as you grow." },
             ].map((item) => (
               <div key={item.title} className="border border-[#e8e8e8] rounded-2xl p-6 sm:p-8 bg-white">
-                <div className="w-12 h-12 rounded-xl border border-[#e8e8e8] flex items-center justify-center mb-10 sm:mb-16 mx-auto">{item.icon}</div>
+                <div className="w-12 h-12 rounded-xl border border-[#e8e8e8] flex items-center justify-center mb-6 sm:mb-16 sm:mx-auto">{item.icon}</div>
                 <h4 className="text-[18px] font-bold text-[#111] mb-2">{item.title}</h4>
                 <p className="text-[14px] text-[#888] leading-[1.6]">{item.desc}</p>
               </div>
@@ -5399,11 +5419,11 @@ export default function LandingPage() {
           return (
             <section className="py-[50px] sm:py-[80px] bg-[#111]" data-testid="front-testimonials-kajabi">
               <h2 className="text-[26px] sm:text-[32px] md:text-[42px] text-white leading-[1.1] sm:leading-[1.05] mb-8 sm:mb-12 text-center px-4 sm:px-6" style={{ fontFamily: "'Inter', system-ui, sans-serif", fontWeight: 900, letterSpacing: "-0.03em" }}>Why founders choose Profundr</h2>
-              <div className="px-4 sm:px-12 md:px-16 lg:px-24">
+              <div className="px-0 sm:px-12 md:px-16 lg:px-24">
                 <div className="bg-[#1a1a1a] overflow-hidden">
                   <div className="flex flex-col md:flex-row">
                     <div className="md:w-[42%] shrink-0">
-                      <img src={t.photo} alt={t.name} className="w-full h-[220px] sm:h-[300px] md:h-full object-cover" />
+                      <img src={t.photo} alt={t.name} className="w-full h-[350px] sm:h-[300px] md:h-full object-cover object-top" />
                     </div>
                     <div className="flex-1 p-6 sm:p-8 md:p-12 flex flex-col justify-center">
                       <svg width="28" height="20" viewBox="0 0 32 24" fill="none" className="mb-4 sm:mb-6"><path d="M0 24V14.4C0 6.4 4.8 1.6 14.4 0l1.6 3.2C10.4 4.8 8 8 7.2 12H14V24H0zm18 0V14.4C18 6.4 22.8 1.6 32 0l-1.6 3.2C24.8 4.8 22.4 8 21.6 12H28v12H18z" fill="#444"/></svg>
@@ -5418,7 +5438,7 @@ export default function LandingPage() {
                   </div>
                 </div>
               </div>
-              <div className="flex items-center justify-between mt-6 sm:mt-10 px-4 sm:px-12 md:px-16 lg:px-24">
+              <div className="flex items-center justify-between mt-6 sm:mt-10 px-4 sm:px-12 md:px-16 lg:px-24" data-testid="testimonial-nav">
                 <div className="flex items-center gap-2">
                   {testimonials.map((_, i) => (
                     <div key={i} onClick={() => setTestIdx(i)} className={`h-[3px] cursor-pointer transition-all ${testIdx === i ? "w-8 bg-white" : "w-5 bg-white/20"}`} />
@@ -5433,10 +5453,10 @@ export default function LandingPage() {
           );
         })()}
 
-        <section className="py-5 sm:py-6 px-4 sm:px-6 bg-[#111] border-t border-white/10" data-testid="front-cta-bar">
+        <section className="py-8 sm:py-6 px-4 sm:px-6 bg-white sm:bg-[#111] border-t border-[#f0f0f0] sm:border-white/10" data-testid="front-cta-bar">
           <div className="max-w-[1100px] mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-            <h3 className="text-[18px] sm:text-[22px] md:text-[28px] font-bold text-white text-center sm:text-left" style={{ letterSpacing: "-0.02em" }}>Build your financial identity on Profundr</h3>
-            <button onClick={() => { setShowFrontPage(false); setAutoSendFile(true); handleUploadClick(); }} className="w-full sm:w-auto px-6 py-3 border border-white text-white text-[14px] font-semibold hover:bg-white hover:text-[#111] transition-colors shrink-0" data-testid="front-btn-final-cta">Start Free Trial</button>
+            <h3 className="text-[22px] sm:text-[22px] md:text-[28px] font-bold text-[#111] sm:text-white text-center sm:text-left" style={{ letterSpacing: "-0.02em" }}>Build your financial identity on Profundr</h3>
+            <button onClick={() => { setShowFrontPage(false); setAutoSendFile(true); handleUploadClick(); }} className="w-full sm:w-auto px-6 py-3.5 border border-[#111] sm:border-white text-[#111] sm:text-white text-[14px] font-semibold hover:bg-[#111] hover:text-white sm:hover:bg-white sm:hover:text-[#111] transition-colors shrink-0" data-testid="front-btn-final-cta">Start Free Trial</button>
           </div>
         </section>
 
@@ -5481,8 +5501,8 @@ export default function LandingPage() {
                 </div>
               </div>
             </div>
-            <div className="border-t border-white/10 pt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
-              <div className="flex items-center gap-4">
+            <div className="border-t border-white/10 pt-6 flex flex-col items-center sm:flex-row sm:justify-between gap-4">
+              <div className="flex items-center gap-4 order-1 sm:order-none">
                 {[
                   <svg key="li" width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M16 8a6 6 0 016 6v7h-4v-7a2 2 0 00-4 0v7h-4v-7a6 6 0 016-6zM2 9h4v12H2zM4 6a2 2 0 100-4 2 2 0 000 4z" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" opacity="0.4"/></svg>,
                   <svg key="ig" width="18" height="18" viewBox="0 0 24 24" fill="none"><rect x="2" y="2" width="20" height="20" rx="5" stroke="white" strokeWidth="1.5" opacity="0.4"/><circle cx="12" cy="12" r="5" stroke="white" strokeWidth="1.5" opacity="0.4"/><circle cx="17.5" cy="6.5" r="1" fill="white" opacity="0.4"/></svg>,
@@ -5492,7 +5512,7 @@ export default function LandingPage() {
                   <span key={icon.key} className="cursor-pointer hover:opacity-100 transition-opacity">{icon}</span>
                 ))}
               </div>
-              <p className="text-[12px] text-white/30">© 2026 Profundr. All rights reserved.</p>
+              <p className="text-[12px] text-white/30 order-2 sm:order-none">© 2026 Profundr. All rights reserved.</p>
             </div>
           </div>
         </footer>
