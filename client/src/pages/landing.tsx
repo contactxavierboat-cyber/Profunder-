@@ -4892,14 +4892,13 @@ export default function LandingPage() {
           </div>
         </nav>
 
-        <section className="pt-[140px] pb-[80px] px-6" data-testid="front-hero">
-          <div className="max-w-[800px] mx-auto text-center">
-            <p className="text-[13px] font-medium text-[#888] tracking-[0.1em] uppercase mb-5" data-testid="text-hero-eyebrow">Capital Operating System</p>
-            <h1 className="text-[42px] sm:text-[56px] md:text-[64px] font-bold text-[#111] leading-[1.05] tracking-[-0.03em] mb-6" data-testid="text-front-hero-headline">
+        <section className="pt-[130px] pb-[60px] px-6" data-testid="front-hero">
+          <div className="max-w-[900px] mx-auto text-center">
+            <h1 className="text-[48px] sm:text-[64px] md:text-[76px] font-black text-[#111] leading-[1.0] tracking-[-0.04em] mb-7" style={{ fontFamily: "'Inter', sans-serif" }} data-testid="text-front-hero-headline">
               Know if you're fundable<br className="hidden sm:block" /> before you apply
             </h1>
-            <p className="text-[17px] sm:text-[19px] text-[#666] leading-[1.6] max-w-[560px] mx-auto mb-10" data-testid="text-front-hero-sub">
-              Profundr analyzes your credit like a bank would, shows your approval odds, generates dispute letters, and matches you with the right lenders.
+            <p className="text-[17px] sm:text-[19px] text-[#555] leading-[1.65] max-w-[520px] mx-auto mb-10" data-testid="text-front-hero-sub">
+              Everything you need to analyze your credit profile —<br className="hidden sm:block" /> plus an <span className="underline underline-offset-2 decoration-[#999]">AI capital partner</span> to help you get funded.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-6">
               <button
