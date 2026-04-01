@@ -4971,6 +4971,29 @@ export default function LandingPage() {
           </div>
         </section>
 
+        <section className="py-16 px-6" style={{ backgroundColor: "#e8e5e0" }} data-testid="front-newsletter">
+          <div className="max-w-[1000px] mx-auto flex flex-col md:flex-row items-start md:items-center justify-between gap-8">
+            <div className="max-w-[420px]">
+              <h3 className="text-[24px] font-black text-[#111] leading-[1.15] mb-3" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>You already know more than you think</h3>
+              <p className="text-[15px] text-[#555] leading-[1.6]">Every week, we break down how real founders turn credit into capital, with strategy and tools you can actually use.</p>
+            </div>
+            <div className="flex w-full md:w-auto">
+              <input
+                type="email"
+                placeholder="Enter email..."
+                className="flex-1 md:w-[260px] px-4 py-3 bg-white border border-[#ccc] text-[14px] text-[#111] outline-none placeholder-[#999]"
+                data-testid="input-newsletter-email"
+              />
+              <button
+                className="px-6 py-3 bg-[#111] text-white text-[14px] font-semibold hover:bg-[#333] transition-colors whitespace-nowrap"
+                data-testid="button-newsletter-submit"
+              >
+                Get Weekly Insights
+              </button>
+            </div>
+          </div>
+        </section>
+
         <section className="py-6 border-y border-[#f0f0f0] bg-[#fafafa]" data-testid="front-social-proof">
           <div className="max-w-[900px] mx-auto px-6 flex flex-wrap items-center justify-center gap-x-10 gap-y-3">
             {["23 Data Points Analyzed", "FCRA-Compliant Letters", "Real Lender Matching", "AES-256 Encryption", "No Hard Inquiries"].map((item) => (
