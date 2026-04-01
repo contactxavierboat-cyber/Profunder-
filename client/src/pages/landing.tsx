@@ -5002,6 +5002,7 @@ export default function LandingPage() {
               bg: "linear-gradient(145deg, #2a2a3e 0%, #1a1a2e 100%)",
               title: "AIS Score",
               desc: "Your Approval Intelligence Score — 23 data points analyzed to predict real lender decisions.",
+              photo: "/founders/founder3.jpg",
               cards: [
                 <div key="ais1" className="bg-white rounded-xl p-6 shadow-2xl w-full sm:w-[300px] shrink-0">
                   <p className="text-[16px] font-bold text-[#111] mb-1">Your AIS Score</p>
@@ -5027,6 +5028,7 @@ export default function LandingPage() {
               bg: "linear-gradient(145deg, #3a4a3e 0%, #1e2e22 100%)",
               title: "Credit Repair",
               desc: "Generate FCRA-compliant dispute letters and track deletions across all three bureaus.",
+              photo: "/founders/founder1.jpg",
               cards: [
                 <div key="cr1" className="bg-white rounded-xl p-6 shadow-2xl w-full sm:w-[300px] shrink-0">
                   <p className="text-[16px] font-bold text-[#111] mb-1">Dispute Letter Generated</p>
@@ -5051,6 +5053,7 @@ export default function LandingPage() {
               bg: "linear-gradient(145deg, #1a2a3e 0%, #0f1e2e 100%)",
               title: "Capital Matching",
               desc: "Get matched with real lenders based on your AIS score, bureau data, and funding profile.",
+              photo: "/founders/founder8.jpg",
               cards: [
                 <div key="cm1" className="bg-white rounded-xl p-6 shadow-2xl w-full sm:w-[300px] shrink-0">
                   <p className="text-[16px] font-bold text-[#111] mb-1">Lender Match</p>
@@ -5075,6 +5078,7 @@ export default function LandingPage() {
               bg: "linear-gradient(145deg, #3e2a3a 0%, #2e1a2e 100%)",
               title: "Capital Simulator",
               desc: "See how changes to utilization, inquiries, and tradelines affect your approval odds in real time.",
+              photo: "/founders/founder2.jpg",
               cards: [
                 <div key="sim1" className="bg-white rounded-xl p-6 shadow-2xl w-full sm:w-[300px] shrink-0">
                   <p className="text-[16px] font-bold text-[#111] mb-4">Adjust Variables</p>
@@ -5095,6 +5099,7 @@ export default function LandingPage() {
               bg: "linear-gradient(145deg, #2a3a3e 0%, #1a2a2e 100%)",
               title: "Funding Timeline",
               desc: "Track your journey from report upload to funded — every milestone mapped out.",
+              photo: "/founders/founder4.jpg",
               cards: [
                 <div key="ft1" className="bg-white rounded-xl p-6 shadow-2xl w-full sm:w-[340px] shrink-0">
                   <p className="text-[16px] font-bold text-[#111] mb-4">Your Timeline</p>
@@ -5112,6 +5117,7 @@ export default function LandingPage() {
               bg: "linear-gradient(145deg, #3a3a2a 0%, #2e2e1a 100%)",
               title: "Community Intelligence",
               desc: "Real data points from Reddit, myFICO, and founder communities — extracted and scored by AI.",
+              photo: "/founders/founder9.jpg",
               cards: [
                 <div key="co1" className="bg-white rounded-xl p-6 shadow-2xl w-full sm:w-[300px] shrink-0">
                   <p className="text-[16px] font-bold text-[#111] mb-3">Trending Insights</p>
@@ -5143,12 +5149,17 @@ export default function LandingPage() {
                     <span key={tab.label} onClick={() => setShowcaseTab(i)} className={`px-5 py-2 text-[13px] font-medium border cursor-pointer transition-colors ${showcaseTab === i ? "bg-white text-[#111] border-white" : "bg-transparent text-white/70 border-white/20 hover:border-white/40"}`} data-testid={`showcase-tab-${tab.label.replace(/\s+/g, "-").toLowerCase()}`}>{tab.label}</span>
                   ))}
                 </div>
-                <div className="rounded-2xl overflow-hidden" style={{ background: showcaseTabs[showcaseTab].bg }}>
-                  <div className="p-6 sm:p-10">
-                    <p className="text-[28px] font-bold text-white mb-2">{showcaseTabs[showcaseTab].title}</p>
-                    <p className="text-[14px] text-white/50 leading-[1.6] mb-8 max-w-[380px]">{showcaseTabs[showcaseTab].desc}</p>
-                    <div className="flex flex-col sm:flex-row items-start gap-6">
-                      {showcaseTabs[showcaseTab].cards}
+                <div className="rounded-2xl overflow-hidden relative" style={{ background: showcaseTabs[showcaseTab].bg, minHeight: "480px" }}>
+                  <div className="flex flex-col md:flex-row">
+                    <div className="p-6 sm:p-10 flex-1 relative z-10">
+                      <p className="text-[28px] font-bold text-white mb-2">{showcaseTabs[showcaseTab].title}</p>
+                      <p className="text-[14px] text-white/50 leading-[1.6] mb-8 max-w-[340px]">{showcaseTabs[showcaseTab].desc}</p>
+                      <div className="flex flex-col items-start gap-5">
+                        {showcaseTabs[showcaseTab].cards}
+                      </div>
+                    </div>
+                    <div className="hidden md:block w-[380px] shrink-0 relative">
+                      <img src={showcaseTabs[showcaseTab].photo} alt="" className="absolute inset-0 w-full h-full object-cover rounded-xl m-4" style={{ width: "calc(100% - 32px)", height: "calc(100% - 32px)" }} />
                     </div>
                   </div>
                 </div>
