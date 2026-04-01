@@ -5000,113 +5000,80 @@ export default function LandingPage() {
             {
               label: "AIS Score",
               bg: "linear-gradient(145deg, #2a2a3e 0%, #1a1a2e 100%)",
+              gradientBase: "#1a1a2e",
               title: "AIS Score",
               desc: "Your Approval Intelligence Score — 23 data points analyzed to predict real lender decisions.",
               photo: "/founders/founder3.jpg",
               cards: [
-                <div key="ais1" className="bg-white rounded-xl p-6 shadow-2xl w-full sm:w-[300px] shrink-0">
-                  <p className="text-[16px] font-bold text-[#111] mb-1">Your AIS Score</p>
-                  <p className="text-[48px] font-black text-[#111] leading-none my-3">72</p>
-                  <p className="text-[13px] text-[#2d6a4f] font-semibold mb-4">Strong — Approval Likely</p>
-                  <div className="w-full h-2 bg-[#f0f0f0] rounded-full overflow-hidden mb-4"><div className="h-full bg-[#2d6a4f] rounded-full" style={{ width: "72%" }} /></div>
-                  <div className="flex items-center justify-between text-[12px] text-[#888] mb-1"><span>Utilization</span><span className="font-semibold text-[#111]">12%</span></div>
-                  <div className="flex items-center justify-between text-[12px] text-[#888]"><span>Payment History</span><span className="font-semibold text-[#111]">98%</span></div>
-                </div>,
-                <div key="ais2" className="bg-white rounded-xl p-6 shadow-2xl w-full sm:w-[300px] shrink-0">
-                  <p className="text-[16px] font-bold text-[#111] mb-3">Score Pillars</p>
-                  {[{ name: "Payment History", pct: 98 }, { name: "Utilization", pct: 88 }, { name: "Age of Accounts", pct: 65 }, { name: "Derog Items", pct: 80 }].map((p) => (
-                    <div key={p.name} className="mb-3">
-                      <div className="flex justify-between text-[12px] mb-1"><span className="text-[#666]">{p.name}</span><span className="font-semibold text-[#111]">{p.pct}%</span></div>
-                      <div className="w-full h-1.5 bg-[#f0f0f0] rounded-full"><div className="h-full bg-[#111] rounded-full" style={{ width: `${p.pct}%` }} /></div>
-                    </div>
-                  ))}
+                <div key="ais1" className="bg-white rounded-xl p-5 shadow-2xl w-[220px] shrink-0">
+                  <p className="text-[11px] text-[#888] font-medium uppercase tracking-wider mb-1">AIS</p>
+                  <p className="text-[40px] font-black text-[#111] leading-none mb-1">72</p>
+                  <p className="text-[12px] text-[#2d6a4f] font-semibold mb-3">Strong — Approval Likely</p>
+                  <div className="w-full h-1.5 bg-[#f0f0f0] rounded-full overflow-hidden"><div className="h-full bg-[#2d6a4f] rounded-full" style={{ width: "72%" }} /></div>
                 </div>,
               ],
             },
             {
               label: "Credit Repair",
               bg: "linear-gradient(145deg, #3a4a3e 0%, #1e2e22 100%)",
+              gradientBase: "#1e2e22",
               title: "Credit Repair",
               desc: "Generate FCRA-compliant dispute letters and track deletions across all three bureaus.",
               photo: "/founders/founder1.jpg",
               cards: [
-                <div key="cr1" className="bg-white rounded-xl p-6 shadow-2xl w-full sm:w-[300px] shrink-0">
-                  <p className="text-[16px] font-bold text-[#111] mb-1">Dispute Letter Generated</p>
-                  <p className="text-[13px] text-[#888] mb-5">Late Payment — Equifax</p>
-                  <div className="flex items-center gap-2 mb-4">{["Equifax", "TransUnion", "Experian"].map((b) => (<span key={b} className="text-[10px] px-2.5 py-1 bg-[#f5f5f5] text-[#666] font-medium rounded">{b}</span>))}</div>
-                  <div className="bg-[#f8f8f8] rounded-lg px-4 py-3 mb-4"><p className="text-[12px] text-[#888]">Status</p><p className="text-[14px] font-semibold text-[#2d6a4f]">Ready to Send</p></div>
-                  <div className="w-full py-3 bg-[#111] text-white text-[13px] font-semibold text-center">Download PDF</div>
-                </div>,
-                <div key="cr2" className="bg-white rounded-xl p-6 shadow-2xl w-full sm:w-[300px] shrink-0">
-                  <p className="text-[16px] font-bold text-[#111] mb-3">Deletion Tracker</p>
-                  {[{ item: "Late Payment — Chase", status: "Deleted" }, { item: "Collection — Midland", status: "Pending" }, { item: "Hard Inquiry — Amex", status: "Disputed" }].map((d) => (
-                    <div key={d.item} className="flex items-center justify-between py-2.5 border-b border-[#f0f0f0] last:border-0">
-                      <span className="text-[12px] text-[#555]">{d.item}</span>
-                      <span className={`text-[11px] font-semibold px-2 py-0.5 rounded ${d.status === "Deleted" ? "bg-[#e8f5e9] text-[#2d6a4f]" : d.status === "Pending" ? "bg-[#fff8e1] text-[#f57f17]" : "bg-[#e3f2fd] text-[#1565c0]"}`}>{d.status}</span>
-                    </div>
-                  ))}
+                <div key="cr1" className="bg-white rounded-xl p-5 shadow-2xl w-[220px] shrink-0">
+                  <p className="text-[11px] text-[#888] font-medium uppercase tracking-wider mb-1">Dispute</p>
+                  <p className="text-[14px] font-bold text-[#111] mb-1">Late Payment — Equifax</p>
+                  <div className="flex items-center gap-1.5 mb-3">{["EQ", "TU", "EX"].map((b) => (<span key={b} className="text-[9px] px-2 py-0.5 bg-[#f5f5f5] text-[#666] font-medium rounded">{b}</span>))}</div>
+                  <div className="bg-[#e8f5e9] rounded-lg px-3 py-2"><p className="text-[12px] font-semibold text-[#2d6a4f]">Ready to Send</p></div>
                 </div>,
               ],
             },
             {
               label: "Capital Matching",
               bg: "linear-gradient(145deg, #1a2a3e 0%, #0f1e2e 100%)",
+              gradientBase: "#0f1e2e",
               title: "Capital Matching",
               desc: "Get matched with real lenders based on your AIS score, bureau data, and funding profile.",
               photo: "/founders/founder8.jpg",
               cards: [
-                <div key="cm1" className="bg-white rounded-xl p-6 shadow-2xl w-full sm:w-[300px] shrink-0">
-                  <p className="text-[16px] font-bold text-[#111] mb-1">Lender Match</p>
-                  <p className="text-[13px] text-[#888] mb-4">Business LOC — $50K</p>
-                  <div className="flex items-center gap-3 mb-4 pb-4 border-b border-[#f0f0f0]"><div className="w-10 h-10 rounded-full bg-[#e8f0fe] flex items-center justify-center text-[12px] font-bold text-[#1a73e8]">BV</div><div><p className="text-[14px] font-semibold text-[#111]">Bluevine Financial</p><p className="text-[11px] text-[#888]">87% match score</p></div></div>
-                  <div className="flex items-center justify-between text-[12px] text-[#888] mb-1"><span>Min. AIS Score</span><span className="font-semibold text-[#111]">55</span></div>
-                  <div className="flex items-center justify-between text-[12px] text-[#888]"><span>Avg. Approval</span><span className="font-semibold text-[#111]">5 days</span></div>
-                </div>,
-                <div key="cm2" className="bg-white rounded-xl p-6 shadow-2xl w-full sm:w-[300px] shrink-0">
-                  <p className="text-[16px] font-bold text-[#111] mb-3">More Matches</p>
-                  {[{ name: "Fundbox", match: "82%", amt: "$35K" }, { name: "OnDeck", match: "76%", amt: "$75K" }, { name: "Kabbage", match: "71%", amt: "$40K" }].map((l) => (
-                    <div key={l.name} className="flex items-center justify-between py-2.5 border-b border-[#f0f0f0] last:border-0">
-                      <div><p className="text-[13px] font-semibold text-[#111]">{l.name}</p><p className="text-[11px] text-[#888]">Up to {l.amt}</p></div>
-                      <span className="text-[12px] font-semibold text-[#2d6a4f]">{l.match}</span>
-                    </div>
-                  ))}
+                <div key="cm1" className="bg-white rounded-xl p-5 shadow-2xl w-[220px] shrink-0">
+                  <p className="text-[11px] text-[#888] font-medium uppercase tracking-wider mb-1">Top Match</p>
+                  <div className="flex items-center gap-2.5 mb-2"><div className="w-8 h-8 rounded-full bg-[#e8f0fe] flex items-center justify-center text-[10px] font-bold text-[#1a73e8]">BV</div><div><p className="text-[13px] font-semibold text-[#111]">Bluevine</p><p className="text-[10px] text-[#888]">87% match</p></div></div>
+                  <p className="text-[20px] font-black text-[#111]">$50,000</p>
+                  <p className="text-[11px] text-[#888]">Business Line of Credit</p>
                 </div>,
               ],
             },
             {
               label: "Simulator",
               bg: "linear-gradient(145deg, #3e2a3a 0%, #2e1a2e 100%)",
+              gradientBase: "#2e1a2e",
               title: "Capital Simulator",
               desc: "See how changes to utilization, inquiries, and tradelines affect your approval odds in real time.",
               photo: "/founders/founder2.jpg",
               cards: [
-                <div key="sim1" className="bg-white rounded-xl p-6 shadow-2xl w-full sm:w-[300px] shrink-0">
-                  <p className="text-[16px] font-bold text-[#111] mb-4">Adjust Variables</p>
-                  {[{ label: "Utilization", val: "12% → 8%" }, { label: "Remove Inquiries", val: "3 removed" }, { label: "Add Tradelines", val: "+2 accounts" }].map((s) => (
-                    <div key={s.label} className="mb-3"><div className="flex justify-between text-[12px] mb-1"><span className="text-[#666]">{s.label}</span><span className="font-semibold text-[#111]">{s.val}</span></div><div className="w-full h-1.5 bg-[#f0f0f0] rounded-full"><div className="h-full bg-[#111] rounded-full" style={{ width: "65%" }} /></div></div>
-                  ))}
-                </div>,
-                <div key="sim2" className="bg-white rounded-xl p-6 shadow-2xl w-full sm:w-[300px] shrink-0">
-                  <p className="text-[16px] font-bold text-[#111] mb-1">Projected AIS</p>
-                  <div className="flex items-end gap-3 my-3"><span className="text-[36px] font-black text-[#111] leading-none">72</span><span className="text-[20px] font-bold text-[#2d6a4f] leading-none mb-1">→ 81</span></div>
-                  <p className="text-[13px] text-[#2d6a4f] font-semibold mb-4">+9 points projected</p>
-                  <div className="bg-[#f8f8f8] rounded-lg px-4 py-3"><p className="text-[12px] text-[#888]">New Tier</p><p className="text-[14px] font-semibold text-[#111]">Strong → Excellent</p></div>
+                <div key="sim1" className="bg-white rounded-xl p-5 shadow-2xl w-[220px] shrink-0">
+                  <p className="text-[11px] text-[#888] font-medium uppercase tracking-wider mb-1">Projected</p>
+                  <div className="flex items-end gap-2 mb-1"><span className="text-[32px] font-black text-[#111] leading-none">72</span><span className="text-[18px] font-bold text-[#2d6a4f] leading-none mb-0.5">→ 81</span></div>
+                  <p className="text-[12px] text-[#2d6a4f] font-semibold">+9 points projected</p>
                 </div>,
               ],
             },
             {
               label: "Funding Timeline",
               bg: "linear-gradient(145deg, #2a3a3e 0%, #1a2a2e 100%)",
+              gradientBase: "#1a2a2e",
               title: "Funding Timeline",
               desc: "Track your journey from report upload to funded — every milestone mapped out.",
               photo: "/founders/founder4.jpg",
               cards: [
-                <div key="ft1" className="bg-white rounded-xl p-6 shadow-2xl w-full sm:w-[340px] shrink-0">
-                  <p className="text-[16px] font-bold text-[#111] mb-4">Your Timeline</p>
-                  {[{ step: "Report Uploaded", time: "Day 1", done: true }, { step: "AIS Score Generated", time: "Day 1", done: true }, { step: "Disputes Filed", time: "Day 3", done: true }, { step: "First Deletion", time: "Day 18", done: false }, { step: "Lender Application", time: "Day 30", done: false }].map((t, i) => (
-                    <div key={t.step} className="flex items-start gap-3 mb-3">
-                      <div className="flex flex-col items-center"><div className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] ${t.done ? "bg-[#111] text-white" : "border-2 border-[#ddd] text-[#ccc]"}`}>{t.done ? "✓" : i + 1}</div>{i < 4 && <div className="w-px h-4 bg-[#e0e0e0]" />}</div>
-                      <div><p className={`text-[13px] font-semibold ${t.done ? "text-[#111]" : "text-[#999]"}`}>{t.step}</p><p className="text-[11px] text-[#888]">{t.time}</p></div>
+                <div key="ft1" className="bg-white rounded-xl p-5 shadow-2xl w-[240px] shrink-0">
+                  <p className="text-[11px] text-[#888] font-medium uppercase tracking-wider mb-3">Timeline</p>
+                  {[{ step: "Report Uploaded", done: true }, { step: "AIS Generated", done: true }, { step: "Disputes Filed", done: true }, { step: "First Deletion", done: false }].map((t, i) => (
+                    <div key={t.step} className="flex items-center gap-2 mb-2 last:mb-0">
+                      <div className={`w-4 h-4 rounded-full flex items-center justify-center text-[8px] ${t.done ? "bg-[#111] text-white" : "border-2 border-[#ddd] text-[#ccc]"}`}>{t.done ? "✓" : ""}</div>
+                      <p className={`text-[12px] font-medium ${t.done ? "text-[#111]" : "text-[#999]"}`}>{t.step}</p>
                     </div>
                   ))}
                 </div>,
@@ -5115,25 +5082,17 @@ export default function LandingPage() {
             {
               label: "Community",
               bg: "linear-gradient(145deg, #3a3a2a 0%, #2e2e1a 100%)",
+              gradientBase: "#2e2e1a",
               title: "Community Intelligence",
               desc: "Real data points from Reddit, myFICO, and founder communities — extracted and scored by AI.",
               photo: "/founders/founder9.jpg",
               cards: [
-                <div key="co1" className="bg-white rounded-xl p-6 shadow-2xl w-full sm:w-[300px] shrink-0">
-                  <p className="text-[16px] font-bold text-[#111] mb-3">Trending Insights</p>
-                  {[{ text: "Chase Ink approved at AIS 62", src: "r/CreditCards", votes: 142 }, { text: "Amex Plat CLI after 6 months", src: "r/churning", votes: 89 }, { text: "Navy Fed auto recon trick", src: "myFICO", votes: 203 }].map((p) => (
-                    <div key={p.text} className="py-2.5 border-b border-[#f0f0f0] last:border-0">
-                      <p className="text-[12px] text-[#111] font-medium mb-1">{p.text}</p>
-                      <div className="flex items-center gap-2"><span className="text-[10px] text-[#888]">{p.src}</span><span className="text-[10px] text-[#bbb]">·</span><span className="text-[10px] text-[#888]">{p.votes} upvotes</span></div>
-                    </div>
-                  ))}
-                </div>,
-                <div key="co2" className="bg-white rounded-xl p-6 shadow-2xl w-full sm:w-[300px] shrink-0">
-                  <p className="text-[16px] font-bold text-[#111] mb-3">Community Stats</p>
-                  {[{ label: "Data Points", val: "2,400+" }, { label: "Active Sources", val: "12" }, { label: "Updated", val: "Every hour" }].map((s) => (
-                    <div key={s.label} className="flex items-center justify-between py-2.5 border-b border-[#f0f0f0] last:border-0">
-                      <span className="text-[13px] text-[#666]">{s.label}</span>
-                      <span className="text-[13px] font-semibold text-[#111]">{s.val}</span>
+                <div key="co1" className="bg-white rounded-xl p-5 shadow-2xl w-[220px] shrink-0">
+                  <p className="text-[11px] text-[#888] font-medium uppercase tracking-wider mb-2">Trending</p>
+                  {[{ text: "Chase Ink at AIS 62", src: "r/CreditCards" }, { text: "Navy Fed auto recon", src: "myFICO" }].map((p) => (
+                    <div key={p.text} className="py-1.5 border-b border-[#f0f0f0] last:border-0">
+                      <p className="text-[11px] text-[#111] font-medium">{p.text}</p>
+                      <p className="text-[9px] text-[#888]">{p.src}</p>
                     </div>
                   ))}
                 </div>,
@@ -5149,19 +5108,18 @@ export default function LandingPage() {
                     <span key={tab.label} onClick={() => setShowcaseTab(i)} className={`px-5 py-2 text-[13px] font-medium border cursor-pointer transition-colors ${showcaseTab === i ? "bg-white text-[#111] border-white" : "bg-transparent text-white/70 border-white/20 hover:border-white/40"}`} data-testid={`showcase-tab-${tab.label.replace(/\s+/g, "-").toLowerCase()}`}>{tab.label}</span>
                   ))}
                 </div>
-                <div className="rounded-2xl overflow-hidden relative" style={{ background: showcaseTabs[showcaseTab].bg, minHeight: "480px" }}>
-                  <div className="flex flex-col md:flex-row">
-                    <div className="p-6 sm:p-10 flex-1 relative z-10">
-                      <p className="text-[28px] font-bold text-white mb-2">{showcaseTabs[showcaseTab].title}</p>
-                      <p className="text-[14px] text-white/50 leading-[1.6] mb-8 max-w-[340px]">{showcaseTabs[showcaseTab].desc}</p>
-                      <div className="flex flex-col items-start gap-5">
-                        {showcaseTabs[showcaseTab].cards}
-                      </div>
-                    </div>
-                    <div className="hidden md:block w-[380px] shrink-0 relative">
-                      <img src={showcaseTabs[showcaseTab].photo} alt="" className="absolute inset-0 w-full h-full object-cover rounded-xl m-4" style={{ width: "calc(100% - 32px)", height: "calc(100% - 32px)" }} />
-                    </div>
+                <div className="rounded-2xl overflow-hidden relative" style={{ background: showcaseTabs[showcaseTab].bg, minHeight: "520px" }}>
+                  <div className="absolute top-6 left-6 sm:top-8 sm:left-10 z-20">
+                    <p className="text-[26px] font-bold text-white mb-1">{showcaseTabs[showcaseTab].title}</p>
+                    <p className="text-[13px] text-white/50 leading-[1.5] max-w-[280px]">{showcaseTabs[showcaseTab].desc}</p>
                   </div>
+                  <div className="absolute right-0 top-0 bottom-0 w-[55%] hidden md:block">
+                    <img src={showcaseTabs[showcaseTab].photo} alt="" className="w-full h-full object-cover rounded-xl" style={{ margin: "16px", width: "calc(100% - 32px)", height: "calc(100% - 32px)" }} />
+                  </div>
+                  <div className="absolute bottom-5 left-5 sm:bottom-8 sm:left-10 z-20 flex flex-row items-end gap-4">
+                    {showcaseTabs[showcaseTab].cards}
+                  </div>
+                  <div className="hidden md:block absolute right-0 bottom-0 w-[55%] h-[60%] z-10" style={{ background: `linear-gradient(to right, ${showcaseTabs[showcaseTab].gradientBase} 0%, transparent 30%)` }} />
                 </div>
               </div>
             </section>
