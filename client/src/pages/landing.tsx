@@ -4962,7 +4962,6 @@ export default function LandingPage() {
             {[
               { value: "12,400+", label: "Credit deletions generated" },
               { value: "$38M+", label: "Funding matched to founders" },
-              { value: "23", label: "Data points analyzed per report" },
               { value: "94%", label: "Dispute success rate" },
             ].map((stat) => (
               <div key={stat.label} className="text-center" data-testid={`stat-${stat.label.replace(/\s+/g, "-").toLowerCase()}`}>
