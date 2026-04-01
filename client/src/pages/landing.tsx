@@ -4894,7 +4894,7 @@ export default function LandingPage() {
 
         <section className="pt-[120px] pb-[50px] px-6" data-testid="front-hero">
           <div className="max-w-[900px] mx-auto text-center">
-            <h1 className="text-[46px] sm:text-[62px] md:text-[72px] text-[#111] leading-[0.95] mb-8" style={{ fontFamily: "'Inter', system-ui, sans-serif", fontWeight: 900, letterSpacing: "-0.035em" }} data-testid="text-front-hero-headline">
+            <h1 className="text-[32px] sm:text-[42px] md:text-[50px] text-[#111] leading-[0.95] mb-8" style={{ fontFamily: "'Inter', system-ui, sans-serif", fontWeight: 900, letterSpacing: "-0.035em" }} data-testid="text-front-hero-headline">
               Know if you're fundable before you apply
             </h1>
             <p className="text-[16px] sm:text-[18px] text-[#444] leading-[1.6] max-w-[480px] mx-auto mb-10" style={{ fontFamily: "'Inter', system-ui, sans-serif" }} data-testid="text-front-hero-sub">
