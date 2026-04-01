@@ -4921,7 +4921,7 @@ export default function LandingPage() {
           )}
         </nav>
 
-        <section className="pt-[90px] sm:pt-[120px] pb-[40px] sm:pb-[50px] px-5 sm:px-6" data-testid="front-hero">
+        <section className="pt-[100px] sm:pt-[120px] pb-[40px] sm:pb-[50px] px-5 sm:px-6" data-testid="front-hero">
           <div className="max-w-[900px] mx-auto text-center">
             <h1 className="text-[36px] sm:text-[50px] md:text-[60px] text-[#111] leading-[1.08] sm:leading-[0.95] mb-4 sm:mb-8 max-w-[300px] sm:max-w-none mx-auto" style={{ fontFamily: "'Inter', system-ui, sans-serif", fontWeight: 900, letterSpacing: "-0.035em" }} data-testid="text-front-hero-headline">
               Know if you're fundable before you apply
