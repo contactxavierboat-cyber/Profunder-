@@ -4993,92 +4993,150 @@ export default function LandingPage() {
           </div>
         </section>
 
-        <section className="py-[50px] sm:py-[60px] px-5 sm:px-6 bg-white" data-testid="front-problem-awareness">
-          <div className="max-w-[600px] mx-auto text-center">
-            <h2 className="text-[26px] sm:text-[34px] md:text-[40px] text-[#111] leading-[1.1] mb-5" style={{ fontFamily: "'Inter', system-ui, sans-serif", fontWeight: 900, letterSpacing: "-0.03em" }}>Most people get denied before they even apply</h2>
-            <p className="text-[14px] sm:text-[15px] text-[#555] leading-[1.7] mb-2" style={{ textAlign: "justify", textAlignLast: "center" }}>Banks don't guess. They read signals.</p>
-            <p className="text-[14px] sm:text-[15px] text-[#555] leading-[1.7] mb-2" style={{ textAlign: "justify", textAlignLast: "center" }}>Balances. Inquiries. Timing. Account history.</p>
-            <p className="text-[14px] sm:text-[15px] text-[#555] leading-[1.7]" style={{ textAlign: "justify", textAlignLast: "center" }}>Your profile already tells them yes or no — you just don't see it.</p>
+        <section className="py-[50px] sm:py-[70px] px-5 sm:px-6 bg-white" data-testid="front-problem-awareness">
+          <div className="max-w-[900px] mx-auto">
+            <h2 className="text-[26px] sm:text-[34px] md:text-[40px] text-[#111] leading-[1.1] mb-8 text-center" style={{ fontFamily: "'Inter', system-ui, sans-serif", fontWeight: 900, letterSpacing: "-0.03em" }}>Most people get denied before they even apply</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              {[
+                { icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z" stroke="white" strokeWidth="1.5"/><path d="M15 9l-6 6M9 9l6 6" stroke="white" strokeWidth="1.5" strokeLinecap="round"/></svg>, title: "Signals, not scores", body: "Banks don't guess. They read signals — balances, inquiries, timing, account history." },
+                { icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8S1 12 1 12z" stroke="white" strokeWidth="1.5"/><circle cx="12" cy="12" r="3" stroke="white" strokeWidth="1.5"/></svg>, title: "Invisible verdict", body: "Your profile already tells them yes or no — you just don't see it." },
+                { icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M12 9v4M12 17h.01" stroke="white" strokeWidth="1.5" strokeLinecap="round"/><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" stroke="white" strokeWidth="1.5"/></svg>, title: "Pre-decided", body: "Most denials happen before you even submit the application." },
+              ].map((c) => (
+                <div key={c.title} className="bg-[#fafafa] rounded-2xl p-6 transition-all duration-300 hover:shadow-lg hover:bg-white" style={{ boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }} data-testid={`card-problem-${c.title.toLowerCase().replace(/[^a-z]+/g, "-")}`}>
+                  <div className="w-10 h-10 rounded-xl bg-[#111] flex items-center justify-center mb-4" style={{ color: "white" }} aria-hidden="true">{c.icon}</div>
+                  <h4 className="text-[15px] font-bold text-[#111] mb-2">{c.title}</h4>
+                  <p className="text-[13px] text-[#666] leading-[1.6]" style={{ textAlign: "justify" }}>{c.body}</p>
+                </div>
+              ))}
+            </div>
           </div>
         </section>
 
-        <section className="py-[50px] sm:py-[60px] px-5 sm:px-6" style={{ backgroundColor: "#fafafa" }} data-testid="front-the-shift">
-          <div className="max-w-[600px] mx-auto text-center">
-            <h2 className="text-[24px] sm:text-[32px] md:text-[38px] text-[#111] leading-[1.1] mb-5" style={{ fontFamily: "'Inter', system-ui, sans-serif", fontWeight: 900, letterSpacing: "-0.03em" }}>Banks already know if you'll be approved</h2>
-            <p className="text-[14px] sm:text-[15px] text-[#555] leading-[1.7] mb-2" style={{ textAlign: "justify", textAlignLast: "center" }}>The decision isn't random.</p>
-            <p className="text-[14px] sm:text-[15px] text-[#555] leading-[1.7] mb-2" style={{ textAlign: "justify", textAlignLast: "center" }}>The same profile can be approved or denied based on how it looks at the moment you apply.</p>
-            <p className="text-[16px] sm:text-[18px] font-bold text-[#111] leading-[1.4] mt-4" style={{ fontStyle: "italic" }}>Timing matters more than your score.</p>
+        <section className="py-[50px] sm:py-[70px] px-5 sm:px-6 bg-[#111]" data-testid="front-the-shift">
+          <div className="max-w-[700px] mx-auto">
+            <h2 className="text-[24px] sm:text-[32px] md:text-[38px] text-white leading-[1.1] mb-8 text-center" style={{ fontFamily: "'Inter', system-ui, sans-serif", fontWeight: 900, letterSpacing: "-0.03em" }}>Banks already know if you'll be approved</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/10" data-testid="card-shift-reality">
+                <p className="text-[11px] text-white/50 uppercase tracking-wider font-semibold mb-2">The reality</p>
+                <p className="text-[14px] text-white/80 leading-[1.7]" style={{ textAlign: "justify" }}>The decision isn't random. The same profile can be approved or denied based on how it looks at the moment you apply.</p>
+              </div>
+              <div className="bg-white rounded-2xl p-6" style={{ boxShadow: "0 8px 30px rgba(0,0,0,0.3)" }} data-testid="card-shift-insight">
+                <p className="text-[11px] text-[#888] uppercase tracking-wider font-semibold mb-2">The key insight</p>
+                <p className="text-[20px] sm:text-[24px] font-black text-[#111] leading-[1.2]" style={{ fontStyle: "italic" }}>Timing matters more than your score.</p>
+              </div>
+            </div>
           </div>
         </section>
 
-        <section className="py-[50px] sm:py-[60px] px-5 sm:px-6 bg-white" data-testid="front-what-profundr-does">
-          <div className="max-w-[600px] mx-auto text-center">
-            <h2 className="text-[24px] sm:text-[32px] md:text-[38px] text-[#111] leading-[1.1] mb-5" style={{ fontFamily: "'Inter', system-ui, sans-serif", fontWeight: 900, letterSpacing: "-0.03em" }}>This is how banks see you</h2>
-            <p className="text-[14px] sm:text-[15px] text-[#555] leading-[1.7] mb-6" style={{ textAlign: "justify", textAlignLast: "center" }}>Profundr analyzes your profile the same way lenders do — before you apply.</p>
-            <div className="max-w-[420px] mx-auto mb-6">
-              {["If you're likely to be approved", "How much you may qualify for", "What's blocking your approval", "What to fix to unlock higher limits"].map((item) => (
-                <div key={item} className="flex items-center gap-3 mb-3 last:mb-0 bg-[#fafafa] rounded-lg px-4 py-2.5">
-                  <div className="w-5 h-5 rounded-full bg-[#111] flex items-center justify-center shrink-0">
-                    <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M4 8l3 3 5-5" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
+        <section className="py-[50px] sm:py-[70px] px-5 sm:px-6 bg-white" data-testid="front-what-profundr-does">
+          <div className="max-w-[900px] mx-auto">
+            <h2 className="text-[24px] sm:text-[32px] md:text-[38px] text-[#111] leading-[1.1] mb-3 text-center" style={{ fontFamily: "'Inter', system-ui, sans-serif", fontWeight: 900, letterSpacing: "-0.03em" }}>This is how banks see you</h2>
+            <p className="text-[14px] sm:text-[15px] text-[#555] leading-[1.7] mb-8 text-center max-w-[500px] mx-auto" style={{ textAlign: "justify", textAlignLast: "center" }}>Profundr analyzes your profile the same way lenders do — before you apply.</p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {[
+                { icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M22 11.08V12a10 10 0 11-5.93-9.14" stroke="white" strokeWidth="2" strokeLinecap="round"/><path d="M22 4L12 14.01l-3-3" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>, label: "If you're likely to be approved", detail: "Bank-level evaluation across 23 data points" },
+                { icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>, label: "How much you may qualify for", detail: "Estimated funding range from $5K–$250K" },
+                { icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" stroke="white" strokeWidth="2"/></svg>, label: "What's blocking your approval", detail: "Negative items, inquiry velocity, utilization" },
+                { icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>, label: "What to fix to unlock higher limits", detail: "Actionable steps to increase approval odds" },
+              ].map((c) => (
+                <div key={c.label} className="flex items-start gap-4 bg-[#fafafa] rounded-2xl p-5 transition-all duration-300 hover:shadow-lg hover:bg-white" style={{ boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }} data-testid={`card-profundr-${c.label.slice(0, 20).toLowerCase().replace(/[^a-z]+/g, "-")}`}>
+                  <div className="w-10 h-10 rounded-xl bg-[#111] flex items-center justify-center shrink-0" aria-hidden="true">{c.icon}</div>
+                  <div>
+                    <p className="text-[14px] font-bold text-[#111] mb-1">{c.label}</p>
+                    <p className="text-[12px] text-[#888] leading-[1.5]">{c.detail}</p>
                   </div>
-                  <span className="text-[14px] text-[#333] leading-[1.5] font-medium">{item}</span>
                 </div>
               ))}
             </div>
           </div>
         </section>
 
-        <section className="py-[50px] sm:py-[60px] px-5 sm:px-6 bg-[#111]" data-testid="front-money-moment">
-          <div className="max-w-[500px] mx-auto text-center">
-            <h2 className="text-[24px] sm:text-[32px] md:text-[38px] text-white leading-[1.1] mb-6" style={{ fontFamily: "'Inter', system-ui, sans-serif", fontWeight: 900, letterSpacing: "-0.03em" }}>Your potential funding range</h2>
-            <div className="inline-flex flex-col items-center gap-1 bg-white rounded-xl px-10 py-7 mb-6 shadow-2xl">
-              <p className="text-[36px] sm:text-[48px] font-black text-[#111] leading-none tracking-tight">$15,000 – $75,000<span className="text-[#2d6a4f]">+</span></p>
-              <p className="text-[12px] text-[#888] mt-2 uppercase tracking-wider">Based on your current profile signals</p>
+        <section className="py-[50px] sm:py-[70px] px-5 sm:px-6" style={{ backgroundColor: "#fafafa" }} data-testid="front-money-moment">
+          <div className="max-w-[900px] mx-auto">
+            <h2 className="text-[24px] sm:text-[32px] md:text-[38px] text-[#111] leading-[1.1] mb-8 text-center" style={{ fontFamily: "'Inter', system-ui, sans-serif", fontWeight: 900, letterSpacing: "-0.03em" }}>Your potential funding range</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-stretch">
+              <div className="bg-white rounded-2xl p-6 text-center transition-all duration-300 hover:shadow-lg" style={{ boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }} data-testid="card-money-status">
+                <p className="text-[11px] text-[#888] uppercase tracking-wider font-semibold mb-3">Profile Status</p>
+                <div className="w-14 h-14 rounded-full bg-[#e8f5e9] flex items-center justify-center mx-auto mb-3">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M22 11.08V12a10 10 0 11-5.93-9.14" stroke="#2d6a4f" strokeWidth="2" strokeLinecap="round"/><path d="M22 4L12 14.01l-3-3" stroke="#2d6a4f" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                </div>
+                <p className="text-[16px] font-black text-[#2d6a4f]">Fundable</p>
+                <p className="text-[11px] text-[#888] mt-1">Ready to apply</p>
+              </div>
+              <div className="bg-[#111] rounded-2xl p-6 text-center sm:scale-[1.05] relative z-10" style={{ boxShadow: "0 20px 60px rgba(0,0,0,0.15)" }} data-testid="card-money-range">
+                <p className="text-[11px] text-white/50 uppercase tracking-wider font-semibold mb-3">Estimated Range</p>
+                <p className="text-[36px] sm:text-[42px] font-black text-white leading-none tracking-tight mb-1" data-testid="text-money-range">$15K–$75K<span className="text-[#2d6a4f]">+</span></p>
+                <p className="text-[11px] text-white/60 mt-2">Based on current profile signals</p>
+              </div>
+              <div className="bg-white rounded-2xl p-6 text-center transition-all duration-300 hover:shadow-lg" style={{ boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }} data-testid="card-money-confidence">
+                <p className="text-[11px] text-[#888] uppercase tracking-wider font-semibold mb-3">Confidence</p>
+                <p className="text-[36px] font-black text-[#111] leading-none mb-1" data-testid="text-confidence-percent">87%</p>
+                <p className="text-[11px] text-[#888] mt-1">Approval likelihood</p>
+                <div className="w-full h-1.5 bg-[#f0f0f0] rounded-full mt-3 overflow-hidden"><div className="h-full bg-[#2d6a4f] rounded-full" style={{ width: "87%" }} /></div>
+              </div>
             </div>
-            <p className="text-[14px] sm:text-[15px] text-white/60 leading-[1.7]" style={{ textAlign: "justify", textAlignLast: "center" }}>What you qualify for isn't guesswork — it's already in your data.</p>
+            <p className="text-[14px] text-[#888] text-center mt-6">What you qualify for isn't guesswork — it's already in your data.</p>
           </div>
         </section>
 
-        <section className="py-[50px] sm:py-[60px] px-5 sm:px-6" style={{ backgroundColor: "#f8f6f3" }} data-testid="front-applying-blind">
-          <div className="max-w-[600px] mx-auto text-center">
-            <h2 className="text-[24px] sm:text-[32px] md:text-[38px] text-[#111] leading-[1.1] mb-5" style={{ fontFamily: "'Inter', system-ui, sans-serif", fontWeight: 900, letterSpacing: "-0.03em" }}>Applying blind is expensive</h2>
-            <p className="text-[14px] sm:text-[15px] text-[#555] leading-[1.7] mb-2" style={{ textAlign: "justify", textAlignLast: "center" }}>Every application leaves a mark.</p>
-            <p className="text-[14px] sm:text-[15px] text-[#555] leading-[1.7] mb-2" style={{ textAlign: "justify", textAlignLast: "center" }}>Too many, too fast — and banks see risk.</p>
-            <p className="text-[14px] sm:text-[15px] text-[#555] leading-[1.7]" style={{ textAlign: "justify", textAlignLast: "center" }}>Most denials are predictable. You just don't see what they see.</p>
-          </div>
-        </section>
-
-        <section id="how-it-works" className="py-[50px] sm:py-[60px] px-5 sm:px-6 bg-white scroll-mt-16" data-testid="front-how-it-works-detail">
-          <div className="max-w-[600px] mx-auto text-center">
-            <h2 className="text-[24px] sm:text-[32px] md:text-[38px] text-[#111] leading-[1.1] mb-5" style={{ fontFamily: "'Inter', system-ui, sans-serif", fontWeight: 900, letterSpacing: "-0.03em" }}>Know before you apply</h2>
-            <p className="text-[14px] sm:text-[15px] text-[#555] leading-[1.7] mb-6" style={{ textAlign: "justify", textAlignLast: "center" }}>If you applied today, Profundr shows:</p>
-            <div className="max-w-[420px] mx-auto mb-6">
-              {["Your approval odds", "Your estimated funding range", "The exact risks affecting your profile"].map((item) => (
-                <div key={item} className="flex items-center gap-3 mb-3 last:mb-0 bg-[#fafafa] rounded-lg px-4 py-2.5">
-                  <div className="w-5 h-5 rounded-full bg-[#111] flex items-center justify-center shrink-0">
-                    <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M4 8l3 3 5-5" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
-                  </div>
-                  <span className="text-[14px] text-[#333] leading-[1.5] font-medium">{item}</span>
+        <section className="py-[50px] sm:py-[70px] px-5 sm:px-6 bg-white" data-testid="front-applying-blind">
+          <div className="max-w-[900px] mx-auto">
+            <h2 className="text-[24px] sm:text-[32px] md:text-[38px] text-[#111] leading-[1.1] mb-8 text-center" style={{ fontFamily: "'Inter', system-ui, sans-serif", fontWeight: 900, letterSpacing: "-0.03em" }}>Applying blind is expensive</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              {[
+                { num: "01", title: "Every app leaves a mark", body: "Each application creates a hard inquiry on your report that stays for 2 years.", color: "#f59e0b" },
+                { num: "02", title: "Too many = automatic risk", body: "Too many applications too fast — and banks see a pattern of desperation.", color: "#ef4444" },
+                { num: "03", title: "Denials are predictable", body: "Most denials are predictable. You just don't see what they see.", color: "#111" },
+              ].map((c) => (
+                <div key={c.num} className="bg-[#fafafa] rounded-2xl p-6 transition-all duration-300 hover:shadow-lg hover:bg-white" style={{ boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }} data-testid={`card-blind-${c.num}`}>
+                  <span className="text-[11px] font-bold px-2 py-1 rounded-md text-white mb-4 inline-block" style={{ backgroundColor: c.color }}>{c.num}</span>
+                  <h4 className="text-[15px] font-bold text-[#111] mb-2">{c.title}</h4>
+                  <p className="text-[13px] text-[#666] leading-[1.6]" style={{ textAlign: "justify" }}>{c.body}</p>
                 </div>
               ))}
             </div>
-            <p className="text-[14px] sm:text-[15px] text-[#555] leading-[1.7]" style={{ textAlign: "justify", textAlignLast: "center" }}>So you can move with precision — not guesswork.</p>
           </div>
         </section>
 
-        <section className="py-[50px] sm:py-[60px] px-5 sm:px-6" style={{ backgroundColor: "#fafafa" }} data-testid="front-positioning">
-          <div className="max-w-[600px] mx-auto text-center">
-            <h2 className="text-[24px] sm:text-[32px] md:text-[38px] text-[#111] leading-[1.1] mb-5" style={{ fontFamily: "'Inter', system-ui, sans-serif", fontWeight: 900, letterSpacing: "-0.03em" }}>Banks approve profiles, not people</h2>
-            <p className="text-[14px] sm:text-[15px] text-[#555] leading-[1.7] mb-5" style={{ textAlign: "justify", textAlignLast: "center" }}>It's not about who you are. It's about:</p>
-            <div className="max-w-[420px] mx-auto mb-6">
-              {["How your accounts are structured", "How your balances look", "How your timing signals risk or stability"].map((item) => (
-                <div key={item} className="flex items-center gap-3 mb-3 last:mb-0 bg-white rounded-lg px-4 py-2.5 shadow-sm">
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#111] shrink-0" />
-                  <span className="text-[14px] text-[#333] leading-[1.5] font-medium">{item}</span>
+        <section id="how-it-works" className="py-[50px] sm:py-[70px] px-5 sm:px-6 bg-[#111] scroll-mt-16" data-testid="front-how-it-works-detail">
+          <div className="max-w-[900px] mx-auto">
+            <h2 className="text-[24px] sm:text-[32px] md:text-[38px] text-white leading-[1.1] mb-3 text-center" style={{ fontFamily: "'Inter', system-ui, sans-serif", fontWeight: 900, letterSpacing: "-0.03em" }}>Know before you apply</h2>
+            <p className="text-[14px] sm:text-[15px] text-white/60 leading-[1.7] mb-8 text-center">If you applied today, Profundr shows:</p>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              {[
+                { icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M22 11.08V12a10 10 0 11-5.93-9.14" stroke="#2d6a4f" strokeWidth="2" strokeLinecap="round"/><path d="M22 4L12 14.01l-3-3" stroke="#2d6a4f" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>, title: "Approval odds", body: "See how likely you are to be approved based on current profile signals." },
+                { icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6" stroke="#2d6a4f" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>, title: "Funding range", body: "Your estimated approval range from real lender data." },
+                { icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" stroke="#2d6a4f" strokeWidth="2"/></svg>, title: "Risk factors", body: "The exact risks affecting your profile and how to fix them." },
+              ].map((c) => (
+                <div key={c.title} className="bg-white rounded-2xl p-6 text-center" style={{ boxShadow: "0 8px 30px rgba(0,0,0,0.15)" }} data-testid={`card-howitworks-${c.title.toLowerCase().replace(/\s+/g, "-")}`}>
+                  <div className="w-12 h-12 rounded-full bg-[#e8f5e9] flex items-center justify-center mx-auto mb-4" aria-hidden="true">{c.icon}</div>
+                  <h4 className="text-[15px] font-bold text-[#111] mb-2">{c.title}</h4>
+                  <p className="text-[13px] text-[#666] leading-[1.6]" style={{ textAlign: "justify", textAlignLast: "center" }}>{c.body}</p>
                 </div>
               ))}
             </div>
-            <p className="text-[14px] sm:text-[15px] text-[#555] leading-[1.7]" style={{ textAlign: "justify", textAlignLast: "center" }}>Profundr helps you understand that — before it costs you.</p>
+            <p className="text-[14px] text-white/60 text-center mt-8">So you can move with precision — not guesswork.</p>
+          </div>
+        </section>
+
+        <section className="py-[50px] sm:py-[70px] px-5 sm:px-6" style={{ backgroundColor: "#fafafa" }} data-testid="front-positioning">
+          <div className="max-w-[900px] mx-auto">
+            <h2 className="text-[24px] sm:text-[32px] md:text-[38px] text-[#111] leading-[1.1] mb-3 text-center" style={{ fontFamily: "'Inter', system-ui, sans-serif", fontWeight: 900, letterSpacing: "-0.03em" }}>Banks approve profiles, not people</h2>
+            <p className="text-[14px] sm:text-[15px] text-[#555] leading-[1.7] mb-8 text-center">It's not about who you are. It's about:</p>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              {[
+                { icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="18" height="18" rx="2" stroke="white" strokeWidth="1.5"/><path d="M7 7h10M7 12h10M7 17h6" stroke="white" strokeWidth="1.5" strokeLinecap="round"/></svg>, title: "Account structure", body: "How your accounts are organized and the types of credit you carry." },
+                { icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>, title: "Balance signals", body: "How your balances look relative to your limits and overall exposure." },
+                { icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="white" strokeWidth="1.5"/><path d="M12 6v6l4 2" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>, title: "Timing patterns", body: "How your timing signals risk or stability to automated underwriting." },
+              ].map((c) => (
+                <div key={c.title} className="bg-white rounded-2xl p-6 transition-all duration-300 hover:shadow-lg" style={{ boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }} data-testid={`card-positioning-${c.title.toLowerCase().replace(/\s+/g, "-")}`}>
+                  <div className="w-10 h-10 rounded-xl bg-[#111] flex items-center justify-center mb-4" aria-hidden="true">{c.icon}</div>
+                  <h4 className="text-[15px] font-bold text-[#111] mb-2">{c.title}</h4>
+                  <p className="text-[13px] text-[#666] leading-[1.6]" style={{ textAlign: "justify" }}>{c.body}</p>
+                </div>
+              ))}
+            </div>
+            <p className="text-[15px] text-[#555] text-center mt-8">Profundr helps you understand that — before it costs you.</p>
           </div>
         </section>
 
