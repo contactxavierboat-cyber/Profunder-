@@ -4994,6 +4994,46 @@ export default function LandingPage() {
           </div>
         </section>
 
+        <section className="py-[80px] px-6 bg-[#111]" data-testid="front-product-showcase">
+          <div className="max-w-[1100px] mx-auto">
+            <h2 className="text-[36px] sm:text-[44px] text-white leading-[1.0] mb-12 text-center" style={{ fontFamily: "'Inter', system-ui, sans-serif", fontWeight: 900, letterSpacing: "-0.03em", fontStyle: "italic" }}>Choose how you turn credit into capital</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="rounded-xl overflow-hidden" style={{ background: "linear-gradient(135deg, #2a3a2e 0%, #1a2e20 100%)" }}>
+                <div className="p-8">
+                  <p className="text-[22px] font-bold text-white mb-2">Credit Repair</p>
+                  <p className="text-[14px] text-white/60 leading-[1.6] mb-6">Generate FCRA-compliant dispute letters and track deletions across all three bureaus.</p>
+                  <div className="bg-white rounded-lg p-5 shadow-lg max-w-[280px]">
+                    <p className="text-[15px] font-bold text-[#111] mb-1">Dispute Letter Generated</p>
+                    <p className="text-[12px] text-[#888] mb-4">Late Payment — Equifax</p>
+                    <div className="flex items-center gap-2 mb-3">
+                      <span className="text-[11px] px-2 py-1 bg-[#e8f5e9] text-[#2d6a4f] font-semibold rounded">Ready to Send</span>
+                    </div>
+                    <div className="w-full py-2.5 bg-[#111] text-white text-[13px] font-semibold text-center">Download PDF</div>
+                  </div>
+                </div>
+              </div>
+              <div className="rounded-xl overflow-hidden" style={{ background: "linear-gradient(135deg, #1a2a3e 0%, #0f1e2e 100%)" }}>
+                <div className="p-8">
+                  <p className="text-[22px] font-bold text-white mb-2">Capital Matching</p>
+                  <p className="text-[14px] text-white/60 leading-[1.6] mb-6">Get matched with real lenders based on your AIS score, bureau data, and funding profile.</p>
+                  <div className="bg-white rounded-lg p-5 shadow-lg max-w-[280px]">
+                    <p className="text-[15px] font-bold text-[#111] mb-1">Lender Match Found</p>
+                    <p className="text-[12px] text-[#888] mb-3">Business Line of Credit — $50K</p>
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className="w-8 h-8 rounded-full bg-[#f0f0f0] flex items-center justify-center text-[10px] font-bold text-[#555]">BF</div>
+                      <div>
+                        <p className="text-[13px] font-semibold text-[#111]">Bluevine Financial</p>
+                        <p className="text-[11px] text-[#888]">87% match score</p>
+                      </div>
+                    </div>
+                    <div className="w-full py-2.5 bg-[#111] text-white text-[13px] font-semibold text-center">View Details</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
         <section className="py-6 border-y border-[#f0f0f0] bg-[#fafafa]" data-testid="front-social-proof">
           <div className="max-w-[900px] mx-auto px-6 flex flex-wrap items-center justify-center gap-x-10 gap-y-3">
             {["23 Data Points Analyzed", "FCRA-Compliant Letters", "Real Lender Matching", "AES-256 Encryption", "No Hard Inquiries"].map((item) => (
