@@ -4837,6 +4837,7 @@ export default function LandingPage() {
 
   const [showFrontPage, setShowFrontPage] = useState(!user && !hasMessages);
   const [showcaseTab, setShowcaseTab] = useState(0);
+  const [testIdx, setTestIdx] = useState(0);
   const [faqOpen, setFaqOpen] = useState<number | null>(null);
 
   useEffect(() => {
@@ -5381,162 +5382,110 @@ export default function LandingPage() {
           </div>
         </section>
 
-        <section className="py-[60px] px-6 bg-[#111]" data-testid="front-qa-cta">
-          <div className="max-w-[700px] mx-auto text-center">
-            <h3 className="text-[28px] sm:text-[36px] font-bold text-white leading-[1.1] mb-3" style={{ letterSpacing: "-0.02em" }}>Ready to build your<br />financial identity?</h3>
-            <p className="text-[14px] text-white/50 leading-[1.6] mb-6 max-w-[500px] mx-auto">Upload your bureau report and get your AIS score, dispute letters, and capital matches in minutes — not weeks. Join thousands of founders already using Profundr.</p>
-            <button className="px-8 py-3 bg-white text-[#111] text-[14px] font-semibold" data-testid="btn-save-spot">Start Free Analysis</button>
-          </div>
-        </section>
-
-        <section id="features" className="py-[80px] px-6" data-testid="front-features">
-          <div className="max-w-[1100px] mx-auto">
-            <div className="text-center mb-14">
-              <p className="text-[12px] font-medium text-[#888] tracking-[0.1em] uppercase mb-3">Everything You Need</p>
-              <h2 className="text-[32px] sm:text-[40px] font-bold text-[#111] tracking-[-0.02em] mb-4">Six engines. One platform.</h2>
-              <p className="text-[16px] text-[#666] max-w-[480px] mx-auto leading-[1.6]">Every tool you need to go from denied to funded, all working together.</p>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {features.map((f) => (
-                <div key={f.title} className="bg-[#fafafa] border border-[#f0f0f0] rounded-2xl p-7 hover:border-[#ddd] transition-colors" data-testid={`card-feature-${f.title.toLowerCase().replace(/\s+/g, "-")}`}>
-                  <div className="w-12 h-12 rounded-xl bg-white border border-[#eee] flex items-center justify-center mb-5">{f.icon}</div>
-                  <h3 className="text-[17px] font-semibold text-[#111] mb-2">{f.title}</h3>
-                  <p className="text-[14px] text-[#777] leading-[1.65]">{f.desc}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        <section id="how-it-works" className="py-[80px] px-6 bg-[#fafafa] border-y border-[#f0f0f0]" data-testid="front-how-it-works">
-          <div className="max-w-[900px] mx-auto">
-            <div className="text-center mb-14">
-              <p className="text-[12px] font-medium text-[#888] tracking-[0.1em] uppercase mb-3">Simple Process</p>
-              <h2 className="text-[32px] sm:text-[40px] font-bold text-[#111] tracking-[-0.02em]">Three steps to capital clarity</h2>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              {[
-                { step: "01", title: "Upload your report", desc: "Drop your credit bureau PDF into the chat. Profundr extracts and analyzes every data point instantly." },
-                { step: "02", title: "Get your AIS score", desc: "See your Approval Index Score across all five pillars — the same metrics banks use to underwrite." },
-                { step: "03", title: "Take action", desc: "Generate dispute letters, simulate credit changes, and get matched with lenders who approve your profile." },
-              ].map((s) => (
-                <div key={s.step} className="text-center" data-testid={`step-${s.step}`}>
-                  <div className="w-14 h-14 rounded-full bg-[#111] text-white text-[18px] font-bold flex items-center justify-center mx-auto mb-5">{s.step}</div>
-                  <h3 className="text-[17px] font-semibold text-[#111] mb-2">{s.title}</h3>
-                  <p className="text-[14px] text-[#777] leading-[1.65]">{s.desc}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        <section className="py-[80px] px-6" data-testid="front-testimonials">
-          <div className="max-w-[1000px] mx-auto">
-            <div className="text-center mb-14">
-              <p className="text-[12px] font-medium text-[#888] tracking-[0.1em] uppercase mb-3">Results</p>
-              <h2 className="text-[32px] sm:text-[40px] font-bold text-[#111] tracking-[-0.02em]">From denied to funded</h2>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {[
-                { name: "Marcus T.", result: "Approved for $35K business line", quote: "I uploaded my report and in 60 seconds knew exactly what was holding me back. Fixed two items, reapplied, and got approved." },
-                { name: "Jasmine R.", result: "Score improved 84 points in 90 days", quote: "The dispute letters worked. Three negative items removed across two bureaus. My AIS went from 41 to a 73." },
-                { name: "David K.", result: "Matched with 4 lenders, funded in 3 weeks", quote: "I'd been applying blindly for months. Profundr showed me which lenders actually approve my profile. Got funded on the second try." },
-              ].map((t) => (
-                <div key={t.name} className="bg-[#fafafa] border border-[#f0f0f0] rounded-2xl p-7" data-testid={`testimonial-${t.name.replace(/\s+/g, "-").toLowerCase()}`}>
-                  <div className="flex items-center gap-1 mb-4">
-                    {[...Array(5)].map((_, i) => <svg key={i} width="14" height="14" viewBox="0 0 16 16" fill="#111"><path d="M8 1l2.2 4.5 5 .7-3.6 3.5.8 5L8 12.4 3.6 14.7l.8-5L.8 6.2l5-.7L8 1z"/></svg>)}
-                  </div>
-                  <p className="text-[14px] text-[#555] leading-[1.65] mb-5">"{t.quote}"</p>
-                  <div>
-                    <p className="text-[13px] font-semibold text-[#111]">{t.name}</p>
-                    <p className="text-[12px] text-[#999]">{t.result}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        <section id="pricing" className="py-[80px] px-6 bg-[#111]" data-testid="front-pricing-cta">
-          <div className="max-w-[700px] mx-auto text-center">
-            <p className="text-[12px] font-medium text-[#888] tracking-[0.1em] uppercase mb-4">Ready to Start</p>
-            <h2 className="text-[32px] sm:text-[40px] font-bold text-white tracking-[-0.02em] mb-4">Stop guessing. Start building.</h2>
-            <p className="text-[16px] text-[#999] leading-[1.6] max-w-[460px] mx-auto mb-10">Plans start at $25/mo. Upload your first report free — no credit card required.</p>
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-              <button
-                onClick={() => window.location.href = '/subscription'}
-                className="px-8 py-3.5 bg-white text-[#111] text-[15px] font-semibold hover:bg-[#f0f0f0] transition-colors"
-                data-testid="front-btn-pricing"
-              >
-                View Plans & Pricing
-              </button>
-              <button
-                onClick={() => { setShowFrontPage(false); setAutoSendFile(true); handleUploadClick(); }}
-                className="px-8 py-3.5 border border-[#555] text-white text-[15px] font-medium hover:bg-[#222] transition-colors"
-                data-testid="front-btn-free-analysis"
-              >
-                Try Free Analysis
-              </button>
-            </div>
-          </div>
-        </section>
-
-        <section id="faq" className="py-[80px] px-6 bg-[#fafafa] border-t border-[#f0f0f0]" data-testid="front-faq">
-          <div className="max-w-[680px] mx-auto">
-            <div className="text-center mb-14">
-              <h2 className="text-[32px] sm:text-[40px] font-bold text-[#111] tracking-[-0.02em]">Frequently asked questions</h2>
-            </div>
-            <div className="space-y-3">
-              {faqs.map((faq, i) => (
-                <div key={i} className="border border-[#e8e8e8] rounded-xl bg-white overflow-hidden" data-testid={`faq-item-${i}`}>
-                  <button
-                    onClick={() => setFaqOpen(faqOpen === i ? null : i)}
-                    className="w-full flex items-center justify-between px-6 py-4 text-left"
-                    aria-expanded={faqOpen === i}
-                    aria-controls={`faq-panel-${i}`}
-                  >
-                    <span className="text-[15px] font-medium text-[#111]">{faq.q}</span>
-                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className={`shrink-0 transition-transform ${faqOpen === i ? "rotate-180" : ""}`}><path d="M4 6l4 4 4-4" stroke="#999" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
-                  </button>
-                  {faqOpen === i && (
-                    <div id={`faq-panel-${i}`} className="px-6 pb-5" role="region">
-                      <p className="text-[14px] text-[#666] leading-[1.65]">{faq.a}</p>
+        {(() => {
+          const testimonials = [
+            { name: "Marcus Thompson", role: "E-commerce Founder", amount: "$120K+", label: "Funded on Profundr", quote: "I uploaded my bureau report and within a day I realized how much easier everything was for me. It wasn't until I joined Profundr and got my AIS score that I actually started getting approved.", photo: "/founders/founder6.jpg" },
+            { name: "Jasmine Rivera", role: "SaaS Founder", amount: "$85K+", label: "Funded on Profundr", quote: "The dispute letters worked instantly. Three negative items removed across two bureaus in 30 days. My AIS went from 41 to 73 and I got matched with four lenders.", photo: "/founders/founder1.jpg" },
+            { name: "David Kim", role: "Agency Owner", amount: "$200K+", label: "Funded on Profundr", quote: "I'd been applying blindly for months. Profundr showed me which lenders actually approve my profile. Got funded on the second try — the capital matching is unreal.", photo: "/founders/founder3.jpg" },
+          ];
+          const t = testimonials[testIdx];
+          return (
+            <section className="py-[80px] px-6 bg-[#111]" data-testid="front-testimonials-kajabi">
+              <div className="max-w-[900px] mx-auto">
+                <h2 className="text-[32px] sm:text-[42px] text-white leading-[1.05] mb-12 text-center" style={{ fontFamily: "'Inter', system-ui, sans-serif", fontWeight: 900, letterSpacing: "-0.03em" }}>Why founders choose Profundr</h2>
+                <div className="bg-[#1a1a1a] rounded-2xl overflow-hidden">
+                  <div className="flex flex-col md:flex-row">
+                    <div className="md:w-[40%] shrink-0">
+                      <img src={t.photo} alt={t.name} className="w-full h-[300px] md:h-full object-cover" />
                     </div>
-                  )}
+                    <div className="flex-1 p-8 md:p-10 flex flex-col justify-center">
+                      <svg width="32" height="24" viewBox="0 0 32 24" fill="none" className="mb-6"><path d="M0 24V14.4C0 6.4 4.8 1.6 14.4 0l1.6 3.2C10.4 4.8 8 8 7.2 12H14V24H0zm18 0V14.4C18 6.4 22.8 1.6 32 0l-1.6 3.2C24.8 4.8 22.4 8 21.6 12H28v12H18z" fill="#444"/></svg>
+                      <p className="text-[15px] text-white/80 leading-[1.7] mb-6">"{t.quote}"</p>
+                      <p className="text-[16px] font-bold text-white mb-0.5">{t.name}</p>
+                      <p className="text-[13px] text-white/50 mb-6">{t.role}</p>
+                      <div>
+                        <p className="text-[36px] font-black text-white leading-none">{t.amount}</p>
+                        <p className="text-[13px] text-white/50 mt-1">{t.label}</p>
+                      </div>
+                    </div>
+                  </div>
                 </div>
-              ))}
-            </div>
+                <div className="flex items-center justify-between mt-6">
+                  <div className="flex items-center gap-2">
+                    {testimonials.map((_, i) => (
+                      <div key={i} onClick={() => setTestIdx(i)} className={`h-1 rounded-full cursor-pointer transition-all ${testIdx === i ? "w-8 bg-white" : "w-4 bg-white/30"}`} />
+                    ))}
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <button onClick={() => setTestIdx(testIdx === 0 ? testimonials.length - 1 : testIdx - 1)} className="w-9 h-9 border border-white/20 flex items-center justify-center hover:border-white/50 transition-colors" data-testid="btn-test-prev"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M10 4l-4 4 4 4" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg></button>
+                    <button onClick={() => setTestIdx(testIdx === testimonials.length - 1 ? 0 : testIdx + 1)} className="w-9 h-9 border border-white/20 flex items-center justify-center hover:border-white/50 transition-colors" data-testid="btn-test-next"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M6 4l4 4-4 4" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg></button>
+                  </div>
+                </div>
+              </div>
+            </section>
+          );
+        })()}
+
+        <section className="py-6 px-6 bg-[#111] border-t border-white/10" data-testid="front-cta-bar">
+          <div className="max-w-[1100px] mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+            <h3 className="text-[22px] sm:text-[28px] font-bold text-white" style={{ letterSpacing: "-0.02em" }}>Build your financial identity on Profundr</h3>
+            <button onClick={() => { setShowFrontPage(false); setAutoSendFile(true); handleUploadClick(); }} className="px-6 py-3 border border-white text-white text-[14px] font-semibold hover:bg-white hover:text-[#111] transition-colors shrink-0" data-testid="front-btn-final-cta">Start Free Trial</button>
           </div>
         </section>
 
-        <footer className="py-12 px-6 bg-white border-t border-[#f0f0f0]" data-testid="front-footer">
+        <footer className="py-14 px-6 bg-[#111] border-t border-white/10" data-testid="front-footer">
           <div className="max-w-[1100px] mx-auto">
-            <div className="flex flex-col md:flex-row items-start justify-between gap-8 mb-10">
+            <div className="flex flex-col md:flex-row items-start justify-between gap-10 mb-12">
               <div>
-                <ProfundrLogo size="md" variant="dark" />
-                <p className="text-[13px] text-[#999] mt-3 max-w-[280px] leading-[1.6]">Capital intelligence platform. Analyze, repair, and fund — all from one system.</p>
+                <ProfundrLogo size="md" variant="light" />
               </div>
-              <div className="flex gap-16">
+              <div className="flex flex-wrap gap-x-16 gap-y-6">
                 <div>
-                  <p className="text-[11px] font-semibold text-[#111] uppercase tracking-wider mb-3">Product</p>
+                  <p className="text-[11px] font-semibold text-white uppercase tracking-wider mb-3">Company</p>
                   <div className="space-y-2">
-                    <a href="#features" className="block text-[13px] text-[#777] hover:text-[#111] transition-colors">Features</a>
-                    <a href="#pricing" className="block text-[13px] text-[#777] hover:text-[#111] transition-colors">Pricing</a>
-                    <a href="#faq" className="block text-[13px] text-[#777] hover:text-[#111] transition-colors">FAQ</a>
+                    <span className="block text-[13px] text-white/50 hover:text-white cursor-pointer transition-colors">About</span>
+                    <span className="block text-[13px] text-white/50 hover:text-white cursor-pointer transition-colors">Careers</span>
+                    <span className="block text-[13px] text-white/50 hover:text-white cursor-pointer transition-colors">Contact</span>
                   </div>
                 </div>
                 <div>
-                  <p className="text-[11px] font-semibold text-[#111] uppercase tracking-wider mb-3">Legal</p>
+                  <p className="text-[11px] font-semibold text-white uppercase tracking-wider mb-3">Product</p>
                   <div className="space-y-2">
-                    <span className="block text-[13px] text-[#777] cursor-pointer hover:text-[#111] transition-colors">Terms</span>
-                    <span className="block text-[13px] text-[#777] cursor-pointer hover:text-[#111] transition-colors">Privacy</span>
+                    <a href="#features" className="block text-[13px] text-white/50 hover:text-white transition-colors">Overview</a>
+                    <a href="#pricing" className="block text-[13px] text-white/50 hover:text-white transition-colors">Pricing</a>
+                    <span className="block text-[13px] text-white/50 hover:text-white cursor-pointer transition-colors">Updates</span>
+                  </div>
+                </div>
+                <div>
+                  <p className="text-[11px] font-semibold text-white uppercase tracking-wider mb-3">Resources</p>
+                  <div className="space-y-2">
+                    <span className="block text-[13px] text-white/50 hover:text-white cursor-pointer transition-colors">Blog</span>
+                    <span className="block text-[13px] text-white/50 hover:text-white cursor-pointer transition-colors">Help Center</span>
+                    <a href="#faq" className="block text-[13px] text-white/50 hover:text-white transition-colors">FAQ</a>
+                  </div>
+                </div>
+                <div>
+                  <p className="text-[11px] font-semibold text-white uppercase tracking-wider mb-3">Legal</p>
+                  <div className="space-y-2">
+                    <span className="block text-[13px] text-white/50 hover:text-white cursor-pointer transition-colors">Privacy Notice</span>
+                    <span className="block text-[13px] text-white/50 hover:text-white cursor-pointer transition-colors">Terms</span>
+                    <span className="block text-[13px] text-white/50 hover:text-white cursor-pointer transition-colors">Income Disclaimer</span>
                   </div>
                 </div>
               </div>
             </div>
-            <div className="border-t border-[#f0f0f0] pt-6 flex flex-col sm:flex-row items-center justify-between gap-3">
-              <p className="text-[12px] text-[#bbb]">Profundr is a capital intelligence platform, not a lender.</p>
-              <p className="text-[12px] text-[#bbb]">contactxavierboat@gmail.com</p>
+            <div className="border-t border-white/10 pt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+              <div className="flex items-center gap-4">
+                {[
+                  <svg key="li" width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M16 8a6 6 0 016 6v7h-4v-7a2 2 0 00-4 0v7h-4v-7a6 6 0 016-6zM2 9h4v12H2zM4 6a2 2 0 100-4 2 2 0 000 4z" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" opacity="0.4"/></svg>,
+                  <svg key="ig" width="18" height="18" viewBox="0 0 24 24" fill="none"><rect x="2" y="2" width="20" height="20" rx="5" stroke="white" strokeWidth="1.5" opacity="0.4"/><circle cx="12" cy="12" r="5" stroke="white" strokeWidth="1.5" opacity="0.4"/><circle cx="17.5" cy="6.5" r="1" fill="white" opacity="0.4"/></svg>,
+                  <svg key="yt" width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M22.54 6.42a2.78 2.78 0 00-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 00-1.94 2A29 29 0 001 12a29 29 0 00.46 5.58 2.78 2.78 0 001.94 2c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 001.94-2A29 29 0 0023 12a29 29 0 00-.46-5.58z" stroke="white" strokeWidth="1.5" opacity="0.4"/><path d="M9.75 15.02l5.75-3.27-5.75-3.27v6.54z" fill="white" opacity="0.4"/></svg>,
+                  <svg key="x" width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M4 4l6.5 8L4 20h2l5.5-6.8L16 20h4l-6.8-8.5L20 4h-2l-5.2 6.3L8 4H4z" stroke="white" strokeWidth="1.5" opacity="0.4"/></svg>,
+                ].map((icon) => (
+                  <span key={icon.key} className="cursor-pointer hover:opacity-100 transition-opacity">{icon}</span>
+                ))}
+              </div>
+              <p className="text-[12px] text-white/30">© 2026 Profundr. All rights reserved.</p>
             </div>
           </div>
         </footer>
