@@ -4867,10 +4867,10 @@ export default function LandingPage() {
         <input ref={fileInputRef} type="file" accept=".pdf,.txt,.csv" className="hidden" onChange={handleFileSelect} data-testid="input-file-upload" />
 
         <nav className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-sm border-b border-[#f0f0f0]" data-testid="front-nav">
-          <div className="max-w-[1200px] mx-auto px-6 h-[64px] flex items-center justify-between">
-            <span className="inline-flex items-center select-none gap-2" aria-label="profundr.">
-              <img src="/profundr-brain-logo.png" alt="" width={32} height={32} style={{ display: "block", borderRadius: "6px" }} />
-              <span style={{ fontFamily: "'Inter', sans-serif", fontSize: "20px", fontWeight: 800, letterSpacing: "-0.05em", color: "#111" }}>profundr<span style={{ marginLeft: "-0.15em" }}>.</span></span>
+          <div className="max-w-[1200px] mx-auto px-4 sm:px-6 h-[56px] sm:h-[64px] flex items-center justify-between">
+            <span className="inline-flex items-center select-none gap-1.5 sm:gap-2" aria-label="profundr.">
+              <img src="/profundr-brain-logo.png" alt="" className="w-7 h-7 sm:w-8 sm:h-8" style={{ display: "block", borderRadius: "6px" }} />
+              <span style={{ fontFamily: "'Inter', sans-serif", fontWeight: 800, letterSpacing: "-0.05em", color: "#111" }} className="text-[16px] sm:text-[20px]">profundr<span style={{ marginLeft: "-0.15em" }}>.</span></span>
             </span>
             <div className="hidden md:flex items-center gap-8">
               <a href="#features" className="text-[14px] text-[#555] hover:text-[#111] transition-colors">Features</a>
@@ -4897,25 +4897,25 @@ export default function LandingPage() {
           </div>
         </nav>
 
-        <section className="pt-[120px] pb-[50px] px-6" data-testid="front-hero">
+        <section className="pt-[80px] sm:pt-[120px] pb-[40px] sm:pb-[50px] px-4 sm:px-6" data-testid="front-hero">
           <div className="max-w-[900px] mx-auto text-center">
-            <h1 className="text-[38px] sm:text-[50px] md:text-[60px] text-[#111] leading-[0.95] mb-8" style={{ fontFamily: "'Inter', system-ui, sans-serif", fontWeight: 900, letterSpacing: "-0.035em" }} data-testid="text-front-hero-headline">
+            <h1 className="text-[32px] sm:text-[50px] md:text-[60px] text-[#111] leading-[1] sm:leading-[0.95] mb-6 sm:mb-8" style={{ fontFamily: "'Inter', system-ui, sans-serif", fontWeight: 900, letterSpacing: "-0.035em" }} data-testid="text-front-hero-headline">
               Know if you're fundable<br /> before you apply
             </h1>
-            <p className="text-[16px] sm:text-[18px] text-[#444] leading-[1.6] max-w-[480px] mx-auto mb-10" style={{ fontFamily: "'Inter', system-ui, sans-serif" }} data-testid="text-front-hero-sub">
+            <p className="text-[15px] sm:text-[18px] text-[#444] leading-[1.6] max-w-[480px] mx-auto mb-8 sm:mb-10" style={{ fontFamily: "'Inter', system-ui, sans-serif" }} data-testid="text-front-hero-sub">
               Everything you need to analyze your credit profile — plus an <span className="underline underline-offset-[3px] decoration-[1px] decoration-[#999]">AI capital partner</span> to help you get funded.
             </p>
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-6">
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 mb-6 w-full max-w-[400px] sm:max-w-none mx-auto">
               <button
                 onClick={() => { setShowFrontPage(false); setAutoSendFile(true); handleUploadClick(); }}
-                className="px-8 py-3.5 bg-[#111] text-white text-[15px] font-semibold hover:bg-[#333] transition-colors shadow-sm"
+                className="w-full sm:w-auto px-8 py-3.5 bg-[#111] text-white text-[15px] font-semibold hover:bg-[#333] transition-colors shadow-sm"
                 data-testid="front-btn-upload-hero"
               >
                 Upload Report
               </button>
               <button
                 onClick={() => { setShowFrontPage(false); }}
-                className="px-8 py-3.5 border border-[#ddd] text-[#555] text-[15px] font-medium hover:bg-[#f8f8f8] hover:border-[#ccc] transition-colors"
+                className="w-full sm:w-auto px-8 py-3.5 border border-[#ddd] text-[#555] text-[15px] font-medium hover:bg-[#f8f8f8] hover:border-[#ccc] transition-colors"
                 data-testid="front-btn-try-chat"
               >
                 Try the AI Chat
@@ -4948,7 +4948,7 @@ export default function LandingPage() {
                   { img: "/founders/founder10.jpg", name: "Carmen D.", title: "Boutique owner" },
                   { img: "/founders/founder11.jpg", name: "Jasmine W.", title: "Freelance creative" },
                 ].map((founder) => (
-                  <div key={founder.name} className="w-[320px] h-[440px] shrink-0 relative overflow-hidden" data-testid={`founder-card-${founder.name.replace(/\s+/g, "-").toLowerCase()}`}>
+                  <div key={founder.name} className="w-[220px] h-[300px] sm:w-[320px] sm:h-[440px] shrink-0 relative overflow-hidden" data-testid={`founder-card-${founder.name.replace(/\s+/g, "-").toLowerCase()}`}>
                     <img src={founder.img} alt={founder.name} className="w-full h-full object-cover object-top" loading="lazy" />
                     <div className="absolute bottom-0 left-0 right-0 px-4 pb-4 pt-3" style={{ backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)", background: "rgba(0,0,0,0.25)" }}>
                       <p className="text-[15px] font-semibold text-white leading-snug">{founder.name}</p>
@@ -4961,28 +4961,28 @@ export default function LandingPage() {
           </div>
         </section>
 
-        <section className="py-16 px-6 bg-white" data-testid="front-stats">
-          <div className="max-w-[1000px] mx-auto flex flex-wrap items-start justify-center gap-x-20 gap-y-8">
+        <section className="py-10 sm:py-16 px-4 sm:px-6 bg-white" data-testid="front-stats">
+          <div className="max-w-[1000px] mx-auto flex flex-wrap items-start justify-center gap-x-12 sm:gap-x-20 gap-y-6 sm:gap-y-8">
             {[
               { value: "12,400+", label: "Credit deletions generated" },
               { value: "$38M+", label: "Funding matched to founders" },
               { value: "94%", label: "Dispute success rate" },
             ].map((stat) => (
               <div key={stat.label} className="text-center" data-testid={`stat-${stat.label.replace(/\s+/g, "-").toLowerCase()}`}>
-                <p className="text-[42px] font-bold text-[#111] tracking-tight leading-none">{stat.value}</p>
-                <p className="text-[14px] text-[#888] mt-2">{stat.label}</p>
+                <p className="text-[32px] sm:text-[42px] font-bold text-[#111] tracking-tight leading-none">{stat.value}</p>
+                <p className="text-[13px] sm:text-[14px] text-[#888] mt-2">{stat.label}</p>
               </div>
             ))}
           </div>
         </section>
 
-        <section className="py-16 px-6" style={{ backgroundColor: "#e8e5e0" }} data-testid="front-newsletter">
-          <div className="max-w-[1000px] mx-auto flex flex-col md:flex-row items-start md:items-center justify-between gap-8">
+        <section className="py-12 sm:py-16 px-4 sm:px-6" style={{ backgroundColor: "#e8e5e0" }} data-testid="front-newsletter">
+          <div className="max-w-[1000px] mx-auto flex flex-col md:flex-row items-start md:items-center justify-between gap-6 sm:gap-8">
             <div className="max-w-[420px]">
-              <h3 className="text-[24px] font-black text-[#111] leading-[1.15] mb-3" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>You already know more than you think</h3>
-              <p className="text-[15px] text-[#555] leading-[1.6]">Every week, we break down how real founders turn credit into capital, with strategy and tools you can actually use.</p>
+              <h3 className="text-[20px] sm:text-[24px] font-black text-[#111] leading-[1.15] mb-3" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>You already know more than you think</h3>
+              <p className="text-[14px] sm:text-[15px] text-[#555] leading-[1.6]">Every week, we break down how real founders turn credit into capital, with strategy and tools you can actually use.</p>
             </div>
-            <div className="flex w-full md:w-auto">
+            <div className="flex flex-col sm:flex-row w-full md:w-auto gap-2 sm:gap-0">
               <input
                 type="email"
                 placeholder="Enter email..."
@@ -5176,18 +5176,18 @@ export default function LandingPage() {
             },
           ];
           return (
-            <section className="py-[80px] px-6 bg-[#111]" data-testid="front-product-showcase">
+            <section className="py-[50px] sm:py-[80px] px-4 sm:px-6 bg-[#111]" data-testid="front-product-showcase">
               <div className="max-w-[1100px] mx-auto">
-                <h2 className="text-[36px] sm:text-[46px] text-white leading-[1.05] mb-10 text-center" style={{ fontFamily: "'Inter', system-ui, sans-serif", fontWeight: 900, letterSpacing: "-0.03em" }}>Choose how you turn credit into capital</h2>
-                <div className="flex flex-wrap items-center justify-center gap-3 mb-10">
+                <h2 className="text-[26px] sm:text-[36px] md:text-[46px] text-white leading-[1.1] sm:leading-[1.05] mb-8 sm:mb-10 text-center" style={{ fontFamily: "'Inter', system-ui, sans-serif", fontWeight: 900, letterSpacing: "-0.03em" }}>Choose how you turn credit into capital</h2>
+                <div className="flex overflow-x-auto no-scrollbar items-center justify-start sm:justify-center gap-2 sm:gap-3 mb-8 sm:mb-10 -mx-4 px-4 sm:mx-0 sm:px-0">
                   {showcaseTabs.map((tab, i) => (
-                    <span key={tab.label} onClick={() => setShowcaseTab(i)} className={`px-5 py-2 text-[13px] font-medium border cursor-pointer transition-colors ${showcaseTab === i ? "bg-white text-[#111] border-white" : "bg-transparent text-white/70 border-white/20 hover:border-white/40"}`} data-testid={`showcase-tab-${tab.label.replace(/\s+/g, "-").toLowerCase()}`}>{tab.label}</span>
+                    <span key={tab.label} onClick={() => setShowcaseTab(i)} className={`px-4 sm:px-5 py-2 text-[12px] sm:text-[13px] font-medium border cursor-pointer transition-colors whitespace-nowrap shrink-0 ${showcaseTab === i ? "bg-white text-[#111] border-white" : "bg-transparent text-white/70 border-white/20 hover:border-white/40"}`} data-testid={`showcase-tab-${tab.label.replace(/\s+/g, "-").toLowerCase()}`}>{tab.label}</span>
                   ))}
                 </div>
-                <div className="rounded-2xl overflow-hidden relative" style={{ background: showcaseTabs[showcaseTab].bg, minHeight: "520px" }}>
-                  <div className="absolute top-6 left-6 sm:top-8 sm:left-10 z-30">
-                    <p className="text-[26px] font-bold text-white mb-1">{showcaseTabs[showcaseTab].title}</p>
-                    <p className="text-[13px] text-white/50 leading-[1.5] max-w-[280px]">{showcaseTabs[showcaseTab].desc}</p>
+                <div className="rounded-xl sm:rounded-2xl overflow-hidden relative" style={{ background: showcaseTabs[showcaseTab].bg, minHeight: "400px" }}>
+                  <div className="absolute top-5 left-5 sm:top-8 sm:left-10 z-30 max-w-[65%] sm:max-w-[280px]">
+                    <p className="text-[20px] sm:text-[26px] font-bold text-white mb-1">{showcaseTabs[showcaseTab].title}</p>
+                    <p className="text-[12px] sm:text-[13px] text-white/50 leading-[1.5]">{showcaseTabs[showcaseTab].desc}</p>
                   </div>
                   <div className="absolute right-0 top-0 bottom-0 w-[58%] hidden md:block">
                     <img src={showcaseTabs[showcaseTab].photo} alt="" className="w-full h-full object-cover" style={{ borderRadius: "12px", margin: "16px", width: "calc(100% - 32px)", height: "calc(100% - 32px)" }} />
@@ -5204,8 +5204,10 @@ export default function LandingPage() {
                       )}
                     </div>
                   </div>
-                  <div className="md:hidden absolute z-20 left-5 sm:left-8" style={{ top: "120px" }}>
-                    {showcaseTabs[showcaseTab].cards[0]}
+                  <div className="md:hidden absolute z-20 left-4 right-4 sm:left-8 sm:right-auto" style={{ top: "110px" }}>
+                    <div className="transform scale-[0.85] sm:scale-100 origin-top-left">
+                      {showcaseTabs[showcaseTab].cards[0]}
+                    </div>
                   </div>
                   {showcaseTabs[showcaseTab].cards[2] && (
                     <div className="absolute z-20 hidden md:block" style={{ bottom: "28px", right: "40px" }}>
@@ -5219,8 +5221,8 @@ export default function LandingPage() {
           );
         })()}
 
-        <section className="py-6 border-y border-[#f0f0f0] bg-[#fafafa]" data-testid="front-social-proof">
-          <div className="max-w-[900px] mx-auto px-6 flex flex-wrap items-center justify-center gap-x-10 gap-y-3">
+        <section className="py-4 sm:py-6 border-y border-[#f0f0f0] bg-[#fafafa]" data-testid="front-social-proof">
+          <div className="max-w-[900px] mx-auto px-4 sm:px-6 flex flex-wrap items-center justify-center gap-x-6 sm:gap-x-10 gap-y-2 sm:gap-y-3">
             {["23 Data Points Analyzed", "FCRA-Compliant Letters", "Real Lender Matching", "AES-256 Encryption", "No Hard Inquiries"].map((item) => (
               <span key={item} className="text-[12px] text-[#999] font-medium tracking-wide uppercase flex items-center gap-2">
                 <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M4 8l3 3 5-5" stroke="#999" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
@@ -5230,15 +5232,15 @@ export default function LandingPage() {
           </div>
         </section>
 
-        <section className="py-[80px] px-6 bg-white" data-testid="front-operating-system">
+        <section className="py-[50px] sm:py-[80px] px-4 sm:px-6 bg-white" data-testid="front-operating-system">
           <div className="max-w-[900px] mx-auto text-center">
-            <h2 className="text-[36px] sm:text-[48px] text-[#111] leading-[1.05] mb-4" style={{ fontFamily: "'Inter', system-ui, sans-serif", fontWeight: 900, letterSpacing: "-0.03em" }}>The operating system<br />for financial identity</h2>
-            <p className="text-[16px] text-[#888] max-w-[500px] mx-auto leading-[1.6]">Profundr brings your entire credit, capital, and funding journey into one unified system. Founders grow faster when everything works together.</p>
+            <h2 className="text-[28px] sm:text-[36px] md:text-[48px] text-[#111] leading-[1.1] sm:leading-[1.05] mb-4" style={{ fontFamily: "'Inter', system-ui, sans-serif", fontWeight: 900, letterSpacing: "-0.03em" }}>The operating system<br />for financial identity</h2>
+            <p className="text-[14px] sm:text-[16px] text-[#888] max-w-[500px] mx-auto leading-[1.6]">Profundr brings your entire credit, capital, and funding journey into one unified system. Founders grow faster when everything works together.</p>
           </div>
         </section>
 
-        <section className="py-[80px] px-6 bg-white border-t border-[#f0f0f0]" data-testid="front-all-in-one">
-          <div className="max-w-[1100px] mx-auto flex flex-col md:flex-row items-center gap-12">
+        <section className="py-[50px] sm:py-[80px] px-4 sm:px-6 bg-white border-t border-[#f0f0f0]" data-testid="front-all-in-one">
+          <div className="max-w-[1100px] mx-auto flex flex-col md:flex-row items-center gap-8 sm:gap-12">
             <div className="flex-1">
               <div className="bg-[#fafafa] border border-[#e8e8e8] rounded-xl p-6 shadow-sm">
                 <div className="flex items-center gap-3 mb-5 pb-4 border-b border-[#f0f0f0]">
@@ -5287,8 +5289,8 @@ export default function LandingPage() {
           </div>
         </section>
 
-        <section className="py-[80px] px-6 bg-white border-t border-[#f0f0f0]" data-testid="front-sell-confidence">
-          <div className="max-w-[1100px] mx-auto flex flex-col md:flex-row items-center gap-12">
+        <section className="py-[50px] sm:py-[80px] px-4 sm:px-6 bg-white border-t border-[#f0f0f0]" data-testid="front-sell-confidence">
+          <div className="max-w-[1100px] mx-auto flex flex-col md:flex-row items-center gap-8 sm:gap-12">
             <div className="flex-1 order-2 md:order-1">
               <h3 className="text-[28px] sm:text-[32px] font-bold text-[#111] leading-[1.1] mb-3" style={{ letterSpacing: "-0.02em" }}>Dispute and delete with precision</h3>
               <p className="text-[15px] text-[#888] leading-[1.6] mb-6">FCRA-compliant dispute letters generated in seconds. Track every deletion across Equifax, TransUnion, and Experian in real time.</p>
@@ -5327,8 +5329,8 @@ export default function LandingPage() {
           </div>
         </section>
 
-        <section className="py-[80px] px-6 bg-[#fafafa] border-t border-[#f0f0f0]" data-testid="front-funnels">
-          <div className="max-w-[1100px] mx-auto flex flex-col md:flex-row items-center gap-12">
+        <section className="py-[50px] sm:py-[80px] px-4 sm:px-6 bg-[#fafafa] border-t border-[#f0f0f0]" data-testid="front-funnels">
+          <div className="max-w-[1100px] mx-auto flex flex-col md:flex-row items-center gap-8 sm:gap-12">
             <div className="flex-1">
               <div className="relative">
                 <div className="bg-white rounded-xl p-5 shadow-lg border border-[#f0f0f0] w-[260px] mb-4">
@@ -5369,15 +5371,15 @@ export default function LandingPage() {
           </div>
         </section>
 
-        <section className="py-[60px] px-6 bg-white border-t border-[#f0f0f0]" data-testid="front-value-props">
-          <div className="max-w-[1100px] mx-auto grid grid-cols-1 md:grid-cols-3 gap-5">
+        <section className="py-[40px] sm:py-[60px] px-4 sm:px-6 bg-white border-t border-[#f0f0f0]" data-testid="front-value-props">
+          <div className="max-w-[1100px] mx-auto grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-5">
             {[
               { icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M12 2L3 7v10l9 5 9-5V7l-9-5z" stroke="#111" strokeWidth="1.5" strokeLinejoin="round"/><path d="M12 12v10M12 12L3 7M12 12l9-5" stroke="#111" strokeWidth="1.5"/></svg>, title: "AES-256 encrypted", desc: "Your bureau data is encrypted end-to-end with bank-level security. We never share or sell your information." },
               { icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="4" stroke="#111" strokeWidth="1.5"/><path d="M4 20c0-4 4-7 8-7s8 3 8 7" stroke="#111" strokeWidth="1.5" strokeLinecap="round"/></svg>, title: "Human support 24/7", desc: "Get help from real credit and funding specialists who understand founder finance. Support is available at any hour." },
               { icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="18" height="18" rx="2" stroke="#111" strokeWidth="1.5"/><path d="M7 12h2v5H7zM11 8h2v9h-2zM15 10h2v7h-2z" fill="#111"/></svg>, title: "Built to last", desc: "Profundr powers millions in funded capital with a stable, secure platform you can rely on as you grow." },
             ].map((item) => (
-              <div key={item.title} className="border border-[#e8e8e8] rounded-2xl p-8 bg-white">
-                <div className="w-12 h-12 rounded-xl border border-[#e8e8e8] flex items-center justify-center mb-16 mx-auto">{item.icon}</div>
+              <div key={item.title} className="border border-[#e8e8e8] rounded-2xl p-6 sm:p-8 bg-white">
+                <div className="w-12 h-12 rounded-xl border border-[#e8e8e8] flex items-center justify-center mb-10 sm:mb-16 mx-auto">{item.icon}</div>
                 <h4 className="text-[18px] font-bold text-[#111] mb-2">{item.title}</h4>
                 <p className="text-[14px] text-[#888] leading-[1.6]">{item.desc}</p>
               </div>
@@ -5395,28 +5397,28 @@ export default function LandingPage() {
           const prevIdx = testIdx === 0 ? testimonials.length - 1 : testIdx - 1;
           const nextIdx = testIdx === testimonials.length - 1 ? 0 : testIdx + 1;
           return (
-            <section className="py-[80px] bg-[#111]" data-testid="front-testimonials-kajabi">
-              <h2 className="text-[32px] sm:text-[42px] text-white leading-[1.05] mb-12 text-center px-6" style={{ fontFamily: "'Inter', system-ui, sans-serif", fontWeight: 900, letterSpacing: "-0.03em" }}>Why founders choose Profundr</h2>
-              <div className="px-8 sm:px-12 md:px-16 lg:px-24">
+            <section className="py-[50px] sm:py-[80px] bg-[#111]" data-testid="front-testimonials-kajabi">
+              <h2 className="text-[26px] sm:text-[32px] md:text-[42px] text-white leading-[1.1] sm:leading-[1.05] mb-8 sm:mb-12 text-center px-4 sm:px-6" style={{ fontFamily: "'Inter', system-ui, sans-serif", fontWeight: 900, letterSpacing: "-0.03em" }}>Why founders choose Profundr</h2>
+              <div className="px-4 sm:px-12 md:px-16 lg:px-24">
                 <div className="bg-[#1a1a1a] overflow-hidden">
                   <div className="flex flex-col md:flex-row">
                     <div className="md:w-[42%] shrink-0">
-                      <img src={t.photo} alt={t.name} className="w-full h-[300px] md:h-full object-cover" />
+                      <img src={t.photo} alt={t.name} className="w-full h-[220px] sm:h-[300px] md:h-full object-cover" />
                     </div>
-                    <div className="flex-1 p-8 md:p-12 flex flex-col justify-center">
-                      <svg width="32" height="24" viewBox="0 0 32 24" fill="none" className="mb-6"><path d="M0 24V14.4C0 6.4 4.8 1.6 14.4 0l1.6 3.2C10.4 4.8 8 8 7.2 12H14V24H0zm18 0V14.4C18 6.4 22.8 1.6 32 0l-1.6 3.2C24.8 4.8 22.4 8 21.6 12H28v12H18z" fill="#444"/></svg>
-                      <p className="text-[15px] text-white/80 leading-[1.7] mb-6">"{t.quote}"</p>
-                      <p className="text-[16px] font-bold text-white mb-0.5">{t.name}</p>
-                      <p className="text-[13px] text-white/50 mb-8">{t.role}</p>
+                    <div className="flex-1 p-6 sm:p-8 md:p-12 flex flex-col justify-center">
+                      <svg width="28" height="20" viewBox="0 0 32 24" fill="none" className="mb-4 sm:mb-6"><path d="M0 24V14.4C0 6.4 4.8 1.6 14.4 0l1.6 3.2C10.4 4.8 8 8 7.2 12H14V24H0zm18 0V14.4C18 6.4 22.8 1.6 32 0l-1.6 3.2C24.8 4.8 22.4 8 21.6 12H28v12H18z" fill="#444"/></svg>
+                      <p className="text-[14px] sm:text-[15px] text-white/80 leading-[1.7] mb-4 sm:mb-6">"{t.quote}"</p>
+                      <p className="text-[15px] sm:text-[16px] font-bold text-white mb-0.5">{t.name}</p>
+                      <p className="text-[12px] sm:text-[13px] text-white/50 mb-6 sm:mb-8">{t.role}</p>
                       <div>
-                        <p className="text-[36px] font-black text-white leading-none">{t.amount}</p>
-                        <p className="text-[13px] text-white/50 mt-1">{t.label}</p>
+                        <p className="text-[28px] sm:text-[36px] font-black text-white leading-none">{t.amount}</p>
+                        <p className="text-[12px] sm:text-[13px] text-white/50 mt-1">{t.label}</p>
                       </div>
                     </div>
                   </div>
                 </div>
               </div>
-              <div className="flex items-center justify-between mt-10 px-8 sm:px-12 md:px-16 lg:px-24">
+              <div className="flex items-center justify-between mt-6 sm:mt-10 px-4 sm:px-12 md:px-16 lg:px-24">
                 <div className="flex items-center gap-2">
                   {testimonials.map((_, i) => (
                     <div key={i} onClick={() => setTestIdx(i)} className={`h-[3px] cursor-pointer transition-all ${testIdx === i ? "w-8 bg-white" : "w-5 bg-white/20"}`} />
@@ -5431,20 +5433,20 @@ export default function LandingPage() {
           );
         })()}
 
-        <section className="py-6 px-6 bg-[#111] border-t border-white/10" data-testid="front-cta-bar">
+        <section className="py-5 sm:py-6 px-4 sm:px-6 bg-[#111] border-t border-white/10" data-testid="front-cta-bar">
           <div className="max-w-[1100px] mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-            <h3 className="text-[22px] sm:text-[28px] font-bold text-white" style={{ letterSpacing: "-0.02em" }}>Build your financial identity on Profundr</h3>
-            <button onClick={() => { setShowFrontPage(false); setAutoSendFile(true); handleUploadClick(); }} className="px-6 py-3 border border-white text-white text-[14px] font-semibold hover:bg-white hover:text-[#111] transition-colors shrink-0" data-testid="front-btn-final-cta">Start Free Trial</button>
+            <h3 className="text-[18px] sm:text-[22px] md:text-[28px] font-bold text-white text-center sm:text-left" style={{ letterSpacing: "-0.02em" }}>Build your financial identity on Profundr</h3>
+            <button onClick={() => { setShowFrontPage(false); setAutoSendFile(true); handleUploadClick(); }} className="w-full sm:w-auto px-6 py-3 border border-white text-white text-[14px] font-semibold hover:bg-white hover:text-[#111] transition-colors shrink-0" data-testid="front-btn-final-cta">Start Free Trial</button>
           </div>
         </section>
 
-        <footer className="py-14 px-6 bg-[#111] border-t border-white/10" data-testid="front-footer">
+        <footer className="py-10 sm:py-14 px-4 sm:px-6 bg-[#111] border-t border-white/10" data-testid="front-footer">
           <div className="max-w-[1100px] mx-auto">
-            <div className="flex flex-col md:flex-row items-start justify-between gap-10 mb-12">
+            <div className="flex flex-col md:flex-row items-start justify-between gap-8 sm:gap-10 mb-10 sm:mb-12">
               <div>
                 <ProfundrLogo size="md" variant="light" />
               </div>
-              <div className="flex flex-wrap gap-x-16 gap-y-6">
+              <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-x-12 sm:gap-x-16 gap-y-6">
                 <div>
                   <p className="text-[11px] font-semibold text-white uppercase tracking-wider mb-3">Company</p>
                   <div className="space-y-2">
