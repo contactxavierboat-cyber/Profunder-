@@ -5473,36 +5473,68 @@ export default function LandingPage() {
           const prevIdx = testIdx === 0 ? testimonials.length - 1 : testIdx - 1;
           const nextIdx = testIdx === testimonials.length - 1 ? 0 : testIdx + 1;
           return (
-            <section className="py-[50px] sm:py-[80px] bg-[#111]" data-testid="front-testimonials-kajabi">
-              <h2 className="text-[26px] sm:text-[32px] md:text-[42px] text-white leading-[1.1] sm:leading-[1.05] mb-8 sm:mb-12 text-center px-5 sm:px-6" style={{ fontFamily: "'Inter', system-ui, sans-serif", fontWeight: 900, letterSpacing: "-0.03em" }}>Why founders choose Profundr</h2>
-              <div className="px-0 sm:px-12 md:px-16 lg:px-24">
+            <section className="py-[50px] sm:py-[80px] bg-white sm:bg-[#111]" data-testid="front-testimonials-kajabi">
+              <h2 className="text-[30px] sm:text-[32px] md:text-[42px] text-[#111] sm:text-white leading-[1.1] sm:leading-[1.05] mb-8 sm:mb-12 px-5 sm:px-6 sm:text-center" style={{ fontFamily: "'Inter', system-ui, sans-serif", fontWeight: 900, letterSpacing: "-0.03em" }}>Why founders choose Profundr</h2>
+
+              <div className="md:hidden px-5">
+                <div className="rounded-2xl overflow-hidden mb-6">
+                  <img src={t.photo} alt={t.name} className="w-full h-[380px] object-cover object-top" style={{ background: "#222" }} />
+                </div>
+                <div className="mb-2">
+                  <svg width="36" height="28" viewBox="0 0 36 28" fill="none"><path d="M0 28V16.8C0 7.47 5.4 1.87 16.2 0l1.8 3.74C11.7 5.6 9 9.33 8.1 14H15.75V28H0zm19.8 0V16.8C19.8 7.47 25.2 1.87 36 0l-1.8 3.74C28.5 5.6 25.8 9.33 24.9 14H32.55v14H19.8z" fill="#111"/></svg>
+                </div>
+                <p className="text-[18px] text-[#111] leading-[1.6] mb-6" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>{t.quote}</p>
+                <div className="flex items-center gap-3 mb-2">
+                  <div>
+                    <p className="text-[15px] font-bold text-[#111]">{t.name}</p>
+                    <p className="text-[13px] text-[#888]">{t.role}</p>
+                  </div>
+                </div>
+                <div className="mt-4 pt-4 border-t border-[#f0f0f0]">
+                  <p className="text-[32px] font-black text-[#111] leading-none">{t.amount}</p>
+                  <p className="text-[13px] text-[#888] mt-1">{t.label}</p>
+                </div>
+                <div className="flex items-center justify-between mt-8">
+                  <div className="flex items-center gap-2">
+                    {testimonials.map((_, i) => (
+                      <div key={i} onClick={() => setTestIdx(i)} className={`h-[3px] cursor-pointer transition-all ${testIdx === i ? "w-8 bg-[#111]" : "w-5 bg-[#ddd]"}`} />
+                    ))}
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <button onClick={() => setTestIdx(prevIdx)} className="w-10 h-10 border border-[#ddd] flex items-center justify-center" data-testid="btn-test-prev-m"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M10 4l-4 4 4 4" stroke="#111" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg></button>
+                    <button onClick={() => setTestIdx(nextIdx)} className="w-10 h-10 border border-[#ddd] flex items-center justify-center" data-testid="btn-test-next-m"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M6 4l4 4-4 4" stroke="#111" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg></button>
+                  </div>
+                </div>
+              </div>
+
+              <div className="hidden md:block px-12 lg:px-24">
                 <div className="bg-[#1a1a1a] overflow-hidden">
-                  <div className="flex flex-col md:flex-row">
-                    <div className="md:w-[42%] shrink-0">
-                      <img src={t.photo} alt={t.name} className="w-full h-[350px] sm:h-[300px] md:h-full object-cover object-top" />
+                  <div className="flex flex-row">
+                    <div className="w-[42%] shrink-0">
+                      <img src={t.photo} alt={t.name} className="w-full h-full object-cover object-top" />
                     </div>
-                    <div className="flex-1 p-6 sm:p-8 md:p-12 flex flex-col justify-center">
-                      <svg width="28" height="20" viewBox="0 0 32 24" fill="none" className="mb-4 sm:mb-6"><path d="M0 24V14.4C0 6.4 4.8 1.6 14.4 0l1.6 3.2C10.4 4.8 8 8 7.2 12H14V24H0zm18 0V14.4C18 6.4 22.8 1.6 32 0l-1.6 3.2C24.8 4.8 22.4 8 21.6 12H28v12H18z" fill="#444"/></svg>
-                      <p className="text-[14px] sm:text-[15px] text-white/80 leading-[1.7] mb-4 sm:mb-6">"{t.quote}"</p>
-                      <p className="text-[15px] sm:text-[16px] font-bold text-white mb-0.5">{t.name}</p>
-                      <p className="text-[12px] sm:text-[13px] text-white/50 mb-6 sm:mb-8">{t.role}</p>
+                    <div className="flex-1 p-12 flex flex-col justify-center">
+                      <svg width="28" height="20" viewBox="0 0 32 24" fill="none" className="mb-6"><path d="M0 24V14.4C0 6.4 4.8 1.6 14.4 0l1.6 3.2C10.4 4.8 8 8 7.2 12H14V24H0zm18 0V14.4C18 6.4 22.8 1.6 32 0l-1.6 3.2C24.8 4.8 22.4 8 21.6 12H28v12H18z" fill="#444"/></svg>
+                      <p className="text-[15px] text-white/80 leading-[1.7] mb-6">"{t.quote}"</p>
+                      <p className="text-[16px] font-bold text-white mb-0.5">{t.name}</p>
+                      <p className="text-[13px] text-white/50 mb-8">{t.role}</p>
                       <div>
-                        <p className="text-[28px] sm:text-[36px] font-black text-white leading-none">{t.amount}</p>
-                        <p className="text-[12px] sm:text-[13px] text-white/50 mt-1">{t.label}</p>
+                        <p className="text-[36px] font-black text-white leading-none">{t.amount}</p>
+                        <p className="text-[13px] text-white/50 mt-1">{t.label}</p>
                       </div>
                     </div>
                   </div>
                 </div>
-              </div>
-              <div className="flex items-center justify-between mt-6 sm:mt-10 px-4 sm:px-12 md:px-16 lg:px-24" data-testid="testimonial-nav">
-                <div className="flex items-center gap-2">
-                  {testimonials.map((_, i) => (
-                    <div key={i} onClick={() => setTestIdx(i)} className={`h-[3px] cursor-pointer transition-all ${testIdx === i ? "w-8 bg-white" : "w-5 bg-white/20"}`} />
-                  ))}
-                </div>
-                <div className="flex items-center gap-2">
-                  <button onClick={() => setTestIdx(prevIdx)} className="w-10 h-10 border border-white/20 flex items-center justify-center hover:border-white/50 transition-colors" data-testid="btn-test-prev"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M10 4l-4 4 4 4" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg></button>
-                  <button onClick={() => setTestIdx(nextIdx)} className="w-10 h-10 border border-white/20 flex items-center justify-center hover:border-white/50 transition-colors" data-testid="btn-test-next"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M6 4l4 4-4 4" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg></button>
+                <div className="flex items-center justify-between mt-10" data-testid="testimonial-nav">
+                  <div className="flex items-center gap-2">
+                    {testimonials.map((_, i) => (
+                      <div key={i} onClick={() => setTestIdx(i)} className={`h-[3px] cursor-pointer transition-all ${testIdx === i ? "w-8 bg-white" : "w-5 bg-white/20"}`} />
+                    ))}
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <button onClick={() => setTestIdx(prevIdx)} className="w-10 h-10 border border-white/20 flex items-center justify-center hover:border-white/50 transition-colors" data-testid="btn-test-prev"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M10 4l-4 4 4 4" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg></button>
+                    <button onClick={() => setTestIdx(nextIdx)} className="w-10 h-10 border border-white/20 flex items-center justify-center hover:border-white/50 transition-colors" data-testid="btn-test-next"><svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M6 4l4 4-4 4" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg></button>
+                  </div>
                 </div>
               </div>
             </section>
