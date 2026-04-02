@@ -5519,9 +5519,9 @@ export default function LandingPage() {
 
         {(() => {
           const testimonials = [
-            { name: "Marcus Thompson", role: "E-commerce Founder", amount: "$120K+", label: "Funded on Profundr", quote: "I uploaded my bureau report and within a day I realized how much easier everything was for me. It wasn't until I joined Profundr and got my AIS score that I actually started getting approved.", photo: "/founders/founder6.jpg" },
-            { name: "Jasmine Rivera", role: "SaaS Founder", amount: "$85K+", label: "Funded on Profundr", quote: "The dispute letters worked instantly. Three negative items removed across two bureaus in 30 days. My AIS went from 41 to 73 and I got matched with four lenders.", photo: "/founders/founder1.jpg" },
-            { name: "David Kim", role: "Agency Owner", amount: "$200K+", label: "Funded on Profundr", quote: "I'd been applying blindly for months. Profundr showed me which lenders actually approve my profile. Got funded on the second try — the capital matching is unreal.", photo: "/founders/founder3.jpg" },
+            { name: "Ravi M.", role: "Import/Export Business", amount: "$120K+", label: "Funded on Profundr", quote: "I uploaded my bureau report and within a day I realized how much easier everything was for me. It wasn't until I joined Profundr and got my AIS score that I actually started getting approved.", photo: "/founders/founder6.jpg" },
+            { name: "Maya R.", role: "E-commerce Founder", amount: "$85K+", label: "Funded on Profundr", quote: "The dispute letters worked instantly. Three negative items removed across two bureaus in 30 days. My AIS went from 41 to 73 and I got matched with four lenders.", photo: "/founders/founder1.jpg" },
+            { name: "Kwame A.", role: "Tech Startup CEO", amount: "$200K+", label: "Funded on Profundr", quote: "I'd been applying blindly for months. Profundr showed me which lenders actually approve my profile. Got funded on the second try — the capital matching is unreal.", photo: "/founders/founder3.jpg" },
           ];
           const t = testimonials[testIdx];
           const prevIdx = testIdx === 0 ? testimonials.length - 1 : testIdx - 1;
