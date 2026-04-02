@@ -5235,8 +5235,10 @@ export default function LandingPage() {
                           <p className="text-[26px] font-bold text-white mb-2 leading-[1.15]">{tab.title}</p>
                           <p className="text-[13px] text-white/60 leading-[1.5]">{tab.desc}</p>
                         </div>
-                        <div className="absolute right-0 top-0 bottom-0 w-[58%]">
-                          <img src={tab.photo} alt="" className="w-full h-full object-contain" style={{ borderRadius: "14px", margin: "16px", width: "calc(100% - 32px)", height: "calc(100% - 32px)", border: "2px solid rgba(255,255,255,0.15)", boxShadow: "0 4px 24px rgba(0,0,0,0.3)" }} />
+                        <div className="absolute right-0 top-0 bottom-0 w-[58%]" style={{ padding: "16px" }}>
+                          <div style={{ width: "100%", height: "100%", borderRadius: "14px", border: "2px solid rgba(255,255,255,0.15)", boxShadow: "0 4px 24px rgba(0,0,0,0.3)", overflow: "hidden" }}>
+                            <img src={tab.photo} alt="" className="w-full h-full object-cover object-top" />
+                          </div>
                         </div>
                         <div className="absolute z-20" style={{ left: "28%", top: "130px" }}>
                           <div className="relative">
@@ -5263,7 +5265,7 @@ export default function LandingPage() {
                             </div>
                           </div>
                           <div className="flex-1 min-w-0">
-                            <img src={tab.photo} alt="" className="w-full h-[200px] object-contain rounded-xl" style={{ border: "2px solid rgba(255,255,255,0.15)", boxShadow: "0 4px 24px rgba(0,0,0,0.3)" }} />
+                            <div className="rounded-xl overflow-hidden" style={{ border: "2px solid rgba(255,255,255,0.15)", boxShadow: "0 4px 24px rgba(0,0,0,0.3)" }}><img src={tab.photo} alt="" className="w-full h-[200px] object-cover object-top" /></div>
                           </div>
                         </div>
                       </div>
