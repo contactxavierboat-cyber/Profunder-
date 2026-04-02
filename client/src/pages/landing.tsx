@@ -4863,11 +4863,14 @@ export default function LandingPage() {
     ];
 
     const faqs = [
-      { q: "Is this a lender?", a: "No. Profundr is a capital intelligence platform. We analyze your credit and financial profile to show you where you stand, what to fix, and which lenders are most likely to approve you. We never lend money or run hard inquiries." },
-      { q: "How does the AIS score work?", a: "Your Approval Index Score is calculated from 23 data points that banks evaluate during underwriting — including utilization, payment history, account age, inquiry velocity, and derogatory marks. Upload your bureau report and get your score in seconds." },
-      { q: "What makes this different from Credit Karma?", a: "Credit Karma shows you a Vantage score and serves you ads. Profundr analyzes your full bureau data the way a bank underwriter would, generates FCRA-compliant dispute letters, runs capital simulations, and matches you with lenders based on real approval data." },
-      { q: "Is my data safe?", a: "Yes. All data is encrypted with AES-256 at rest and TLS 1.3 in transit. Your information is never sold. You can request full data deletion at any time." },
-      { q: "What's included in each plan?", a: "Basic ($25/mo) includes AI chat and your AIS score. Repair ($50/mo) adds the Repair Center and dispute letters. Capital ($150/mo) unlocks everything including the Capital Simulator, Lender Match, Funding Timeline, and Community Intelligence." },
+      { q: "What is Profundr?", a: "Profundr is a system that shows you how banks evaluate your profile before you apply — so you know where you stand and how to get funded." },
+      { q: "How is this different from a credit score?", a: "Your score is just one number. Profundr analyzes your full profile — balances, timing, accounts, and activity — the same way lenders do." },
+      { q: "Will this help me get approved?", a: "Yes. You'll see what's helping, what's hurting, and exactly what to fix before applying." },
+      { q: "How much funding can I get?", a: "Profundr estimates your qualification range based on your current profile and structure." },
+      { q: "What if I'm not ready yet?", a: "You'll get a clear action plan showing what to improve and when to apply — so you don't waste opportunities." },
+      { q: "Does this affect my credit?", a: "No. Profundr does not run hard inquiries or submit applications." },
+      { q: "Is Profundr a lender?", a: "No. We don't lend money — we prepare your profile so you can get approved." },
+      { q: "Who is this for?", a: "Founders, creators, and anyone serious about accessing capital the right way." },
     ];
 
     return (
