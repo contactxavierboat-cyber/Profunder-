@@ -5236,7 +5236,7 @@ export default function LandingPage() {
                           <p className="text-[13px] text-white/60 leading-[1.5]">{tab.desc}</p>
                         </div>
                         <div className="absolute right-0 top-0 bottom-0 w-[58%]">
-                          <img src={tab.photo} alt="" className="w-full h-full object-cover" style={{ borderRadius: "12px", margin: "16px", width: "calc(100% - 32px)", height: "calc(100% - 32px)" }} />
+                          <img src={tab.photo} alt="" className="w-full h-full object-contain" style={{ borderRadius: "12px", margin: "16px", width: "calc(100% - 32px)", height: "calc(100% - 32px)" }} />
                         </div>
                         <div className="absolute z-20" style={{ left: "28%", top: "130px" }}>
                           <div className="relative">
@@ -5263,7 +5263,7 @@ export default function LandingPage() {
                             </div>
                           </div>
                           <div className="flex-1 min-w-0">
-                            <img src={tab.photo} alt="" className="w-full h-[200px] object-cover rounded-xl" />
+                            <img src={tab.photo} alt="" className="w-full h-[200px] object-contain rounded-xl" />
                           </div>
                         </div>
                       </div>
