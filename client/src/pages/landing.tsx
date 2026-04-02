@@ -5310,7 +5310,7 @@ export default function LandingPage() {
 
         <section id="features" className="py-[50px] sm:py-[80px] px-5 sm:px-6 bg-white scroll-mt-16" data-testid="front-operating-system">
           <div className="max-w-[900px] mx-auto text-center">
-            <h2 className="text-[28px] sm:text-[36px] md:text-[48px] text-[#000] leading-[1.1] sm:leading-[1.05] mb-4" style={{ fontFamily: "'Inter', system-ui, sans-serif", fontWeight: 800, letterSpacing: "-0.025em" }}>The operating system for your credit profile.</h2>
+            <h2 className="text-[28px] sm:text-[36px] md:text-[48px] text-[#000] leading-[1.1] sm:leading-[1.05] mb-4" style={{ fontFamily: "'Inter', system-ui, sans-serif", fontWeight: 800, letterSpacing: "-0.025em" }}>Your credit profile. One system.</h2>
             <p className="text-[14px] sm:text-[16px] text-[#888] max-w-[320px] sm:max-w-[520px] mx-auto leading-[1.7] sm:leading-[1.6]">Your credit, capital, and funding in one system — so you can see how banks evaluate you before you apply. Fix what matters. Move with precision. Get funded.</p>
           </div>
         </section>
