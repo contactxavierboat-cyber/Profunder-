@@ -5661,26 +5661,10 @@ export default function LandingPage() {
               </div>
               <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-x-12 sm:gap-x-16 gap-y-6">
                 <div>
-                  <p className="text-[11px] font-semibold text-white uppercase tracking-wider mb-3">Company</p>
-                  <div className="space-y-2">
-                    <span className="block text-[13px] text-white/50 hover:text-white cursor-pointer transition-colors">About</span>
-                    <span className="block text-[13px] text-white/50 hover:text-white cursor-pointer transition-colors">Careers</span>
-                    <span className="block text-[13px] text-white/50 hover:text-white cursor-pointer transition-colors">Contact</span>
-                  </div>
-                </div>
-                <div>
                   <p className="text-[11px] font-semibold text-white uppercase tracking-wider mb-3">Product</p>
                   <div className="space-y-2">
                     <a href="#features" className="block text-[13px] text-white/50 hover:text-white transition-colors">Overview</a>
                     <a href="#pricing" className="block text-[13px] text-white/50 hover:text-white transition-colors">Pricing</a>
-                    <span className="block text-[13px] text-white/50 hover:text-white cursor-pointer transition-colors">Updates</span>
-                  </div>
-                </div>
-                <div>
-                  <p className="text-[11px] font-semibold text-white uppercase tracking-wider mb-3">Resources</p>
-                  <div className="space-y-2">
-                    <span className="block text-[13px] text-white/50 hover:text-white cursor-pointer transition-colors">Blog</span>
-                    <span className="block text-[13px] text-white/50 hover:text-white cursor-pointer transition-colors">Help Center</span>
                     <a href="#faq" className="block text-[13px] text-white/50 hover:text-white transition-colors">FAQ</a>
                   </div>
                 </div>
@@ -5689,7 +5673,6 @@ export default function LandingPage() {
                   <div className="space-y-2">
                     <span className="block text-[13px] text-white/50 hover:text-white cursor-pointer transition-colors">Privacy Notice</span>
                     <span className="block text-[13px] text-white/50 hover:text-white cursor-pointer transition-colors">Terms</span>
-                    <span className="block text-[13px] text-white/50 hover:text-white cursor-pointer transition-colors">Income Disclaimer</span>
                   </div>
                 </div>
               </div>
