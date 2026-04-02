@@ -4949,7 +4949,7 @@ export default function LandingPage() {
                 className="px-8 py-2.5 sm:py-3.5 text-[#555] text-[14px] font-medium sm:border sm:border-[#ddd] sm:hover:bg-[#f8f8f8] transition-colors"
                 data-testid="front-btn-try-chat"
               >
-                Try the AI Chat
+                Try CreditOS
               </button>
             </div>
             <p className="text-[12px] text-[#bbb]">No hard inquiry. No credit card required to start.</p>
