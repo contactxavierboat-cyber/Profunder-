@@ -5237,7 +5237,7 @@ export default function LandingPage() {
                         </div>
                         <div className="absolute right-0 top-0 bottom-0 w-[58%]" style={{ padding: "16px" }}>
                           <div style={{ width: "100%", height: "100%", borderRadius: "14px", border: "2px solid rgba(255,255,255,0.15)", boxShadow: "0 4px 24px rgba(0,0,0,0.3)", overflow: "hidden" }}>
-                            <img src={tab.photo} alt="" className="w-full h-full object-cover object-center" />
+                            <img src={tab.photo} alt="" className="w-full h-full" style={{ objectFit: "cover", objectPosition: "center 15%", transform: "scale(0.85)", transformOrigin: "center center" }} />
                           </div>
                         </div>
                         <div className="absolute z-20" style={{ left: "28%", top: "130px" }}>
@@ -5265,7 +5265,7 @@ export default function LandingPage() {
                             </div>
                           </div>
                           <div className="flex-1 min-w-0">
-                            <div className="rounded-xl overflow-hidden" style={{ border: "2px solid rgba(255,255,255,0.15)", boxShadow: "0 4px 24px rgba(0,0,0,0.3)" }}><img src={tab.photo} alt="" className="w-full h-[200px] object-cover object-center" /></div>
+                            <div className="rounded-xl overflow-hidden" style={{ border: "2px solid rgba(255,255,255,0.15)", boxShadow: "0 4px 24px rgba(0,0,0,0.3)" }}><img src={tab.photo} alt="" className="w-full h-[200px]" style={{ objectFit: "cover", objectPosition: "center 15%", transform: "scale(0.85)", transformOrigin: "center center" }} /></div>
                           </div>
                         </div>
                       </div>
