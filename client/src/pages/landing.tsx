@@ -4934,7 +4934,7 @@ export default function LandingPage() {
               Know if you're fundable<br className="hidden sm:inline" /> before you apply
             </h1>
             <p className="text-[15px] sm:text-[18px] text-[#555] leading-[1.7] sm:leading-[1.6] max-w-[340px] sm:max-w-[480px] mx-auto mb-8 sm:mb-10" style={{ fontFamily: "'Inter', system-ui, sans-serif" }} data-testid="text-front-hero-sub">
-              Everything you need to analyze your credit profile — plus an <span className="underline underline-offset-[3px] decoration-[1px] decoration-[#999]">AI capital partner</span> to help you get funded.
+              See your profile like a bank — plus a <span className="underline underline-offset-[3px] decoration-[1px] decoration-[#999]">Credit Operating System</span> to help you get funded.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-4 mb-5 sm:mb-6 w-full sm:max-w-none mx-auto">
               <button
