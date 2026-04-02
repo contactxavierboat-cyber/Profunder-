@@ -5041,7 +5041,7 @@ export default function LandingPage() {
               gradientBase: "#1a3a2e",
               title: "AIS Score",
               desc: "Your Approval Intelligence Score — 23 data points analyzed to predict real lender decisions.",
-              photo: "/founders/founder3.jpg",
+              photo: "/pexels-gustavo-fring-7447388_1775149015902.jpg",
               cards: [
                 <div key="ais1" className="bg-white rounded-xl p-5 shadow-2xl w-[210px] shrink-0">
                   <p className="text-[11px] text-[#888] font-medium uppercase tracking-wider mb-1">AIS</p>
@@ -5068,7 +5068,7 @@ export default function LandingPage() {
               gradientBase: "#1a4030",
               title: "Credit Repair",
               desc: "Generate FCRA-compliant dispute letters and track deletions across all three bureaus.",
-              photo: "/founders/founder1.jpg",
+              photo: "/pexels-jay-brand-1763356224-34147233_1775149015900.jpg",
               cards: [
                 <div key="cr1" className="bg-white rounded-xl p-5 shadow-2xl w-[210px] shrink-0">
                   <p className="text-[11px] text-[#888] font-medium uppercase tracking-wider mb-1">Dispute</p>
@@ -5098,7 +5098,7 @@ export default function LandingPage() {
               gradientBase: "#1a3040",
               title: "Capital Matching",
               desc: "Get matched with real lenders based on your AIS score, bureau data, and funding profile.",
-              photo: "/founders/founder8.jpg",
+              photo: "/pexels-kevinbidwell-3934707_1775149015901.jpg",
               cards: [
                 <div key="cm1" className="bg-white rounded-xl p-5 shadow-2xl w-[210px] shrink-0">
                   <p className="text-[11px] text-[#888] font-medium uppercase tracking-wider mb-1">Top Match</p>
@@ -5128,7 +5128,7 @@ export default function LandingPage() {
               gradientBase: "#3e2835",
               title: "Capital Simulator",
               desc: "See how changes to utilization, inquiries, and tradelines affect your approval odds in real time.",
-              photo: "/founders/founder2.jpg",
+              photo: "/pexels-hasibullah-zhowandai-248954-1582920_1775149015902.jpg",
               cards: [
                 <div key="sim1" className="bg-white rounded-xl p-5 shadow-2xl w-[210px] shrink-0">
                   <p className="text-[11px] text-[#888] font-medium uppercase tracking-wider mb-1">Projected</p>
@@ -5154,7 +5154,7 @@ export default function LandingPage() {
               gradientBase: "#283e42",
               title: "Funding Timeline",
               desc: "Track your journey from report upload to funded — every milestone mapped out.",
-              photo: "/founders/founder4.jpg",
+              photo: "/pexels-sanketgraphy-34037221_1775149015902.jpg",
               cards: [
                 <div key="ft1" className="bg-white rounded-xl p-5 shadow-2xl w-[210px] shrink-0">
                   <p className="text-[11px] text-[#888] font-medium uppercase tracking-wider mb-3">Timeline</p>
@@ -5184,7 +5184,7 @@ export default function LandingPage() {
               gradientBase: "#3e3e1a",
               title: "Community Intelligence",
               desc: "Real data points from Reddit, myFICO, and founder communities — extracted and scored by AI.",
-              photo: "/founders/founder9.jpg",
+              photo: "/pexels-gustavo-fring-7447388_1775149015902.jpg",
               cards: [
                 <div key="co1" className="bg-white rounded-xl p-5 shadow-2xl w-[210px] shrink-0">
                   <p className="text-[11px] text-[#888] font-medium uppercase tracking-wider mb-2">Trending</p>
