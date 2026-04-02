@@ -5000,8 +5000,8 @@ export default function LandingPage() {
               { value: "94%", label: "Dispute success rate" },
             ].map((stat) => (
               <div key={stat.label} className="text-center" data-testid={`stat-${stat.label.replace(/\s+/g, "-").toLowerCase()}`}>
-                <p className="text-[52px] sm:text-[48px] font-semibold text-[#111] tracking-tight leading-none">{stat.value}</p>
-                <p className="text-[14px] sm:text-[14px] text-[#888] mt-2 sm:mt-2">{stat.label}</p>
+                <p className="text-[52px] sm:text-[48px] text-[#000] leading-none" style={{ fontFamily: "'Inter', system-ui, sans-serif", fontWeight: 700, letterSpacing: "-0.02em" }}>{stat.value}</p>
+                <p className="text-[14px] sm:text-[14px] text-[#888] mt-2 sm:mt-2" style={{ fontFamily: "'Inter', system-ui, sans-serif", fontWeight: 400 }}>{stat.label}</p>
               </div>
             ))}
           </div>
