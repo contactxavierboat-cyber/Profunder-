@@ -4930,7 +4930,7 @@ export default function LandingPage() {
 
         <section className="pt-[115px] sm:pt-[120px] pb-[40px] sm:pb-[50px] px-5 sm:px-6" data-testid="front-hero">
           <div className="max-w-[900px] mx-auto text-center">
-            <h1 className="text-[36px] sm:text-[50px] md:text-[60px] text-[#000] leading-[1.08] sm:leading-[0.95] mb-4 sm:mb-8 max-w-[300px] sm:max-w-none mx-auto" style={{ fontFamily: "'Inter', system-ui, sans-serif", fontWeight: 700, letterSpacing: "-0.02em" }} data-testid="text-front-hero-headline">
+            <h1 className="text-[36px] sm:text-[50px] md:text-[60px] text-[#000] leading-[1.08] sm:leading-[0.95] mb-4 sm:mb-8 max-w-[300px] sm:max-w-none mx-auto" style={{ fontFamily: "'Inter', system-ui, sans-serif", fontWeight: 800, letterSpacing: "-0.025em" }} data-testid="text-front-hero-headline">
               Know if you're fundable<br className="hidden sm:inline" /> before you apply
             </h1>
             <p className="text-[15px] sm:text-[18px] text-[#555] leading-[1.7] sm:leading-[1.6] max-w-[340px] sm:max-w-[480px] mx-auto mb-8 sm:mb-10" style={{ fontFamily: "'Inter', system-ui, sans-serif" }} data-testid="text-front-hero-sub">
@@ -5000,7 +5000,7 @@ export default function LandingPage() {
               { value: "94%", label: "Dispute success rate" },
             ].map((stat) => (
               <div key={stat.label} className="text-center" data-testid={`stat-${stat.label.replace(/\s+/g, "-").toLowerCase()}`}>
-                <p className="text-[52px] sm:text-[48px] text-[#000] leading-none" style={{ fontFamily: "'Inter', system-ui, sans-serif", fontWeight: 700, letterSpacing: "-0.02em" }}>{stat.value}</p>
+                <p className="text-[52px] sm:text-[48px] text-[#000] leading-none" style={{ fontFamily: "'Inter', system-ui, sans-serif", fontWeight: 800, letterSpacing: "-0.025em" }}>{stat.value}</p>
                 <p className="text-[14px] sm:text-[14px] text-[#888] mt-2 sm:mt-2" style={{ fontFamily: "'Inter', system-ui, sans-serif", fontWeight: 400 }}>{stat.label}</p>
               </div>
             ))}
@@ -5010,7 +5010,7 @@ export default function LandingPage() {
         <section id="how-it-works" className="py-12 sm:py-16 px-5 sm:px-6 scroll-mt-16" style={{ backgroundColor: "#e8e5e0" }} data-testid="front-newsletter">
           <div className="max-w-[1000px] mx-auto flex flex-col md:flex-row items-center md:items-center justify-between gap-6 sm:gap-8">
             <div className="max-w-[420px] text-center md:text-left">
-              <h3 className="text-[20px] sm:text-[24px] text-[#000] leading-[1.15] mb-3" style={{ fontFamily: "'Inter', system-ui, sans-serif", fontWeight: 700, letterSpacing: "-0.02em" }}>You already know more than you think</h3>
+              <h3 className="text-[20px] sm:text-[24px] text-[#000] leading-[1.15] mb-3" style={{ fontFamily: "'Inter', system-ui, sans-serif", fontWeight: 800, letterSpacing: "-0.025em" }}>You already know more than you think</h3>
               <p className="text-[14px] sm:text-[15px] text-[#555] leading-[1.7] sm:leading-[1.6]">Every week, we break down how real founders turn credit into capital, with strategy and tools you can actually use.</p>
             </div>
             <div className="flex flex-col sm:flex-row w-full md:w-auto gap-2 sm:gap-0">
@@ -5209,7 +5209,7 @@ export default function LandingPage() {
           return (
             <section className="py-[50px] sm:py-[80px] px-5 sm:px-6 bg-[#111]" data-testid="front-product-showcase">
               <div className="max-w-[1100px] mx-auto">
-                <h2 className="text-[28px] sm:text-[36px] md:text-[46px] text-white leading-[1.1] sm:leading-[1.05] mb-8 sm:mb-10 text-center max-w-[280px] sm:max-w-none mx-auto" style={{ fontFamily: "'Inter', system-ui, sans-serif", fontWeight: 700, letterSpacing: "-0.02em" }}>Choose how you turn credit into capital</h2>
+                <h2 className="text-[28px] sm:text-[36px] md:text-[46px] text-white leading-[1.1] sm:leading-[1.05] mb-8 sm:mb-10 text-center max-w-[280px] sm:max-w-none mx-auto" style={{ fontFamily: "'Inter', system-ui, sans-serif", fontWeight: 800, letterSpacing: "-0.025em" }}>Choose how you turn credit into capital</h2>
                 <div className="hidden sm:flex overflow-x-auto no-scrollbar items-center justify-center gap-2 sm:gap-3 mb-8 sm:mb-10">
                   {showcaseTabs.map((tab, i) => (
                     <span key={tab.label} onClick={() => setShowcaseTab(i)} className={`px-4 sm:px-5 py-2 text-[12px] sm:text-[13px] font-medium border cursor-pointer transition-colors whitespace-nowrap shrink-0 ${showcaseTab === i ? "bg-white text-[#111] border-white" : "bg-transparent text-white/70 border-white/20 hover:border-white/40"}`} data-testid={`showcase-tab-${tab.label.replace(/\s+/g, "-").toLowerCase()}`}>{tab.label}</span>
@@ -5310,7 +5310,7 @@ export default function LandingPage() {
 
         <section id="features" className="py-[50px] sm:py-[80px] px-5 sm:px-6 bg-white scroll-mt-16" data-testid="front-operating-system">
           <div className="max-w-[900px] mx-auto text-center">
-            <h2 className="text-[28px] sm:text-[36px] md:text-[48px] text-[#000] leading-[1.1] sm:leading-[1.05] mb-4" style={{ fontFamily: "'Inter', system-ui, sans-serif", fontWeight: 700, letterSpacing: "-0.02em" }}>The operating system for financial identity</h2>
+            <h2 className="text-[28px] sm:text-[36px] md:text-[48px] text-[#000] leading-[1.1] sm:leading-[1.05] mb-4" style={{ fontFamily: "'Inter', system-ui, sans-serif", fontWeight: 800, letterSpacing: "-0.025em" }}>The operating system for financial identity</h2>
             <p className="text-[14px] sm:text-[16px] text-[#888] max-w-[320px] sm:max-w-[500px] mx-auto leading-[1.7] sm:leading-[1.6]">Profundr brings your entire credit, capital, and funding journey into one unified system. Founders grow faster when everything works together.</p>
           </div>
         </section>
@@ -5525,7 +5525,7 @@ export default function LandingPage() {
           const nextIdx = testIdx === testimonials.length - 1 ? 0 : testIdx + 1;
           return (
             <section className="py-[50px] sm:py-[80px] bg-[#111]" data-testid="front-testimonials-kajabi">
-              <h2 className="text-[30px] sm:text-[32px] md:text-[42px] text-white leading-[1.1] sm:leading-[1.05] mb-8 sm:mb-12 px-5 sm:px-6 text-center" style={{ fontFamily: "'Inter', system-ui, sans-serif", fontWeight: 700, letterSpacing: "-0.02em" }}>Why founders choose Profundr</h2>
+              <h2 className="text-[30px] sm:text-[32px] md:text-[42px] text-white leading-[1.1] sm:leading-[1.05] mb-8 sm:mb-12 px-5 sm:px-6 text-center" style={{ fontFamily: "'Inter', system-ui, sans-serif", fontWeight: 800, letterSpacing: "-0.025em" }}>Why founders choose Profundr</h2>
 
               <div className="md:hidden px-5">
                 <div className="rounded-2xl overflow-hidden mb-6">
@@ -5594,7 +5594,7 @@ export default function LandingPage() {
 
         <section id="pricing" className="py-[50px] sm:py-[80px] px-5 sm:px-6 bg-white border-t border-[#f0f0f0] scroll-mt-16" data-testid="front-pricing">
           <div className="max-w-[1100px] mx-auto">
-            <h2 className="text-[28px] sm:text-[36px] md:text-[46px] text-[#000] leading-[1.1] sm:leading-[1.05] mb-3 text-center" style={{ fontFamily: "'Inter', system-ui, sans-serif", fontWeight: 700, letterSpacing: "-0.02em" }}>Simple, transparent pricing</h2>
+            <h2 className="text-[28px] sm:text-[36px] md:text-[46px] text-[#000] leading-[1.1] sm:leading-[1.05] mb-3 text-center" style={{ fontFamily: "'Inter', system-ui, sans-serif", fontWeight: 800, letterSpacing: "-0.025em" }}>Simple, transparent pricing</h2>
             <p className="text-[14px] sm:text-[16px] text-[#888] text-center mb-10 sm:mb-14 max-w-[400px] mx-auto leading-[1.6]">Choose the plan that matches where you are in your funding journey.</p>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-5">
               {[
@@ -5627,7 +5627,7 @@ export default function LandingPage() {
 
         <section id="faq" className="py-[50px] sm:py-[80px] px-5 sm:px-6 bg-[#fafafa] border-t border-[#f0f0f0] scroll-mt-16" data-testid="front-faq">
           <div className="max-w-[700px] mx-auto">
-            <h2 className="text-[28px] sm:text-[36px] md:text-[46px] text-[#000] leading-[1.1] sm:leading-[1.05] mb-10 sm:mb-14 text-center" style={{ fontFamily: "'Inter', system-ui, sans-serif", fontWeight: 700, letterSpacing: "-0.02em" }}>Frequently asked questions</h2>
+            <h2 className="text-[28px] sm:text-[36px] md:text-[46px] text-[#000] leading-[1.1] sm:leading-[1.05] mb-10 sm:mb-14 text-center" style={{ fontFamily: "'Inter', system-ui, sans-serif", fontWeight: 800, letterSpacing: "-0.025em" }}>Frequently asked questions</h2>
             <div className="space-y-0">
               {faqs.map((faq, i) => (
                 <div key={i} className="border-b border-[#e8e8e8]" data-testid={`faq-item-${i}`}>
