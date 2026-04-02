@@ -5310,8 +5310,8 @@ export default function LandingPage() {
 
         <section id="features" className="py-[50px] sm:py-[80px] px-5 sm:px-6 bg-white scroll-mt-16" data-testid="front-operating-system">
           <div className="max-w-[900px] mx-auto text-center">
-            <h2 className="text-[28px] sm:text-[36px] md:text-[48px] text-[#000] leading-[1.1] sm:leading-[1.05] mb-4" style={{ fontFamily: "'Inter', system-ui, sans-serif", fontWeight: 800, letterSpacing: "-0.025em" }}>The operating system for financial identity</h2>
-            <p className="text-[14px] sm:text-[16px] text-[#888] max-w-[320px] sm:max-w-[500px] mx-auto leading-[1.7] sm:leading-[1.6]">Profundr brings your entire credit, capital, and funding journey into one unified system. Founders grow faster when everything works together.</p>
+            <h2 className="text-[28px] sm:text-[36px] md:text-[48px] text-[#000] leading-[1.1] sm:leading-[1.05] mb-4" style={{ fontFamily: "'Inter', system-ui, sans-serif", fontWeight: 800, letterSpacing: "-0.025em" }}>The operating system for your credit profile.</h2>
+            <p className="text-[14px] sm:text-[16px] text-[#888] max-w-[320px] sm:max-w-[500px] mx-auto leading-[1.7] sm:leading-[1.6]">See everything. Fix what matters. Get funded.</p>
           </div>
         </section>
 
