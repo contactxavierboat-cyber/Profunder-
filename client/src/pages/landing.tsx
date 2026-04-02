@@ -5781,7 +5781,7 @@ export default function LandingPage() {
                 </div>
               )}
               <div data-testid="nav-logo">
-                <ProfundrLogo size="md" variant="dark" />
+                <span className="select-none" style={{ fontFamily: "'Inter', sans-serif", fontSize: "20px", fontWeight: 800, letterSpacing: "-0.05em", color: "#111", lineHeight: 1 }}>profundr<span style={{ marginLeft: "-0.15em" }}>.</span></span>
               </div>
             </div>
             {user ? (
