@@ -5010,8 +5010,8 @@ export default function LandingPage() {
         <section id="how-it-works" className="py-12 sm:py-16 px-5 sm:px-6 scroll-mt-16" style={{ backgroundColor: "#e8e5e0" }} data-testid="front-newsletter">
           <div className="max-w-[1000px] mx-auto flex flex-col md:flex-row items-center md:items-center justify-between gap-6 sm:gap-8">
             <div className="max-w-[420px] text-center md:text-left">
-              <h3 className="text-[20px] sm:text-[24px] text-[#000] leading-[1.15] mb-3" style={{ fontFamily: "'Inter', system-ui, sans-serif", fontWeight: 800, letterSpacing: "-0.025em" }}>You already know more than you think</h3>
-              <p className="text-[14px] sm:text-[15px] text-[#555] leading-[1.7] sm:leading-[1.6]">Every week, we break down how real founders turn credit into capital, with strategy and tools you can actually use.</p>
+              <h3 className="text-[20px] sm:text-[24px] text-[#000] leading-[1.15] mb-3" style={{ fontFamily: "'Inter', system-ui, sans-serif", fontWeight: 800, letterSpacing: "-0.025em" }}>You're closer to funding than you think.</h3>
+              <p className="text-[14px] sm:text-[15px] text-[#555] leading-[1.7] sm:leading-[1.6]">We show you how real profiles turn into capital — step by step.</p>
             </div>
             <div className="flex flex-col sm:flex-row w-full md:w-auto gap-2 sm:gap-0">
               <input
