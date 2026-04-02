@@ -5956,7 +5956,7 @@ export default function LandingPage() {
                         </div>
                       ) : (
                       <div className={`flex gap-3 min-w-0 ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
-                        {msg.role === "assistant" && (
+                        {msg.role === "assistant" && !(/(?:STRATEGY_DATA_START|CAPITAL_POTENTIAL_DATA_START|FUNDING_SEQUENCE_DATA_START|TRADELINE:|DISPUTE:.*\|.*\||Pillar\s*Scores:|Payment\s*Integrity:\s*\d|Utilization\s*Control:\s*\d|AIS.*(?:Approval\s*Index|Score).*:\s*\d)/i.test(msg.content)) && (
                           <ProfundrAvatar size={28} className="mt-0.5 shrink-0" />
                         )}
                         <div
