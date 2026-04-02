@@ -5,6 +5,7 @@ import { z } from "zod";
 import OpenAI from "openai";
 import session from "express-session";
 import MemoryStore from "memorystore";
+import bcrypt from "bcryptjs";
 // @ts-ignore
 import PDFParser from "pdf2json";
 import { execFile } from "child_process";
@@ -2204,30 +2205,63 @@ export async function registerRoutes(
     res.json(mentors);
   });
 
-  app.post("/api/login", async (req, res) => {
-    const { email } = req.body;
+  app.post("/api/register", async (req, res) => {
+    const { email, password } = req.body;
     if (!email || typeof email !== "string") {
       return res.status(400).json({ error: "Email is required" });
     }
+    if (!password || typeof password !== "string" || password.length < 6) {
+      return res.status(400).json({ error: "Password must be at least 6 characters" });
+    }
 
-    let user = await storage.getUserByEmail(email);
+    const existing = await storage.getUserByEmail(email);
+    if (existing) {
+      return res.status(400).json({ error: "An account with this email already exists" });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const user = await storage.createUser({
+      email,
+      password: hashedPassword,
+      displayName: null,
+      role: "user",
+      subscriptionStatus: "inactive",
+      monthlyUsage: 0,
+      maxUsage: 30,
+      creditScoreRange: null,
+      totalRevolvingLimit: null,
+      totalBalances: null,
+      inquiries: null,
+      derogatoryAccounts: null,
+      hasCreditReport: false,
+      hasBankStatement: false,
+    });
+
+    req.session.userId = user.id;
+    res.json(stripPassword(user));
+  });
+
+  app.post("/api/login", async (req, res) => {
+    const { email, password } = req.body;
+    if (!email || typeof email !== "string") {
+      return res.status(400).json({ error: "Email is required" });
+    }
+    if (!password || typeof password !== "string") {
+      return res.status(400).json({ error: "Password is required" });
+    }
+
+    const user = await storage.getUserByEmail(email);
     if (!user) {
-      user = await storage.createUser({
-        email,
-        password: "placeholder",
-        displayName: null,
-        role: "user",
-        subscriptionStatus: "inactive",
-        monthlyUsage: 0,
-        maxUsage: 30,
-        creditScoreRange: null,
-        totalRevolvingLimit: null,
-        totalBalances: null,
-        inquiries: null,
-        derogatoryAccounts: null,
-        hasCreditReport: false,
-        hasBankStatement: false,
-      });
+      return res.status(401).json({ error: "Invalid email or password" });
+    }
+
+    if (user.password === "placeholder") {
+      return res.status(401).json({ error: "Please create a new account with a password. Legacy accounts need to re-register." });
+    }
+
+    const valid = await bcrypt.compare(password, user.password);
+    if (!valid) {
+      return res.status(401).json({ error: "Invalid email or password" });
     }
 
     req.session.userId = user.id;

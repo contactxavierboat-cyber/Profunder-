@@ -4891,7 +4891,7 @@ export default function LandingPage() {
             </div>
             <div className="flex items-center gap-3">
               <button
-                onClick={() => setShowFrontPage(false)}
+                onClick={() => window.location.href = '/login'}
                 className="hidden sm:inline-block text-[13px] text-[#555] hover:text-[#111] font-medium transition-colors"
                 data-testid="front-btn-login"
               >
@@ -4924,7 +4924,7 @@ export default function LandingPage() {
               <a href="#pricing" onClick={() => setMobileMenuOpen(false)} className="block text-[15px] text-[#555]">Pricing</a>
               <a href="#faq" onClick={() => setMobileMenuOpen(false)} className="block text-[15px] text-[#555]">FAQ</a>
               <div className="pt-2 border-t border-[#f0f0f0] flex flex-col gap-3">
-                <button onClick={() => { setMobileMenuOpen(false); setShowFrontPage(false); }} className="text-[15px] text-[#555] text-left" data-testid="front-mobile-login">Log In</button>
+                <button onClick={() => { setMobileMenuOpen(false); window.location.href = '/login'; }} className="text-[15px] text-[#555] text-left" data-testid="front-mobile-login">Log In</button>
                 <button onClick={() => { setMobileMenuOpen(false); window.location.href = '/subscription'; }} className="w-full py-3 bg-[#111] text-white text-[14px] font-semibold" data-testid="front-mobile-get-started">Get Started</button>
               </div>
             </div>
@@ -5830,7 +5830,7 @@ export default function LandingPage() {
                   </svg>
                 </button>
                 <button
-                  onClick={() => window.location.href = '/subscription'}
+                  onClick={() => window.location.href = '/login'}
                   className="rounded-full px-5 py-2 text-[13px] font-medium border border-[#ddd] text-[#555] hover:bg-[#f0f0f0] transition-colors"
                   data-testid="button-signin"
                 >
