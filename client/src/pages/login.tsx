@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useAuth } from "@/lib/store";
 import { useLocation } from "wouter";
+import { ProfundrLogo } from "@/components/profundr-logo";
 
 export default function LoginPage() {
   const { login } = useAuth();
@@ -58,121 +59,123 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center px-4">
-      <div className="w-full max-w-[400px]">
-        <div className="text-center mb-8">
-          <button
-            onClick={() => setLocation("/")}
-            className="inline-block mb-6"
-            data-testid="login-logo"
-          >
-            <span className="text-[22px] font-[800] tracking-[-0.03em] text-white">
-              Profundr
-            </span>
-          </button>
-          <h1
-            className="text-[28px] font-[800] tracking-[-0.025em] text-white mb-2"
-            data-testid="login-heading"
-          >
-            {isRegister ? "Create your account" : "Welcome back"}
-          </h1>
-          <p className="text-[14px] text-[#888]">
-            {isRegister
-              ? "Sign up to access your capital operating system."
-              : "Sign in to your capital operating system."}
-          </p>
-        </div>
+    <div className="min-h-screen bg-white flex flex-col" style={{ fontFamily: "'Inter', sans-serif" }}>
+      <nav className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-[#eee] px-6 py-4 flex items-center justify-between">
+        <button onClick={() => setLocation("/")} data-testid="login-logo">
+          <ProfundrLogo size="sm" variant="dark" />
+        </button>
+        <button onClick={() => setLocation("/")} className="text-[13px] text-[#888] hover:text-[#111] transition-colors" data-testid="login-back">
+          ← Back to Home
+        </button>
+      </nav>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {error && (
-            <div
-              className="bg-red-500/10 border border-red-500/20 rounded-lg px-4 py-3 text-[13px] text-red-400"
-              data-testid="login-error"
+      <div className="flex-1 flex items-center justify-center px-4">
+        <div className="w-full max-w-[400px]">
+          <div className="text-center mb-8">
+            <h1
+              className="text-[28px] font-[800] tracking-[-0.025em] text-[#000] mb-2"
+              data-testid="login-heading"
             >
-              {error}
-            </div>
-          )}
-
-          <div>
-            <label className="block text-[12px] font-medium text-[#aaa] mb-1.5">
-              Email
-            </label>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-4 py-3 bg-[#1a1a1a] border border-[#333] rounded-lg text-white text-[14px] placeholder:text-[#555] focus:outline-none focus:border-[#555] transition-colors"
-              placeholder="you@company.com"
-              autoComplete="email"
-              data-testid="input-email"
-            />
+              {isRegister ? "Create your account" : "Welcome back"}
+            </h1>
+            <p className="text-[14px] text-[#888]">
+              {isRegister
+                ? "Sign up to access your capital operating system."
+                : "Sign in to your capital operating system."}
+            </p>
           </div>
 
-          <div>
-            <label className="block text-[12px] font-medium text-[#aaa] mb-1.5">
-              Password
-            </label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-4 py-3 bg-[#1a1a1a] border border-[#333] rounded-lg text-white text-[14px] placeholder:text-[#555] focus:outline-none focus:border-[#555] transition-colors"
-              placeholder="••••••••"
-              autoComplete={isRegister ? "new-password" : "current-password"}
-              data-testid="input-password"
-            />
-          </div>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            {error && (
+              <div
+                className="bg-red-50 border border-red-200 rounded-lg px-4 py-3 text-[13px] text-red-600"
+                data-testid="login-error"
+              >
+                {error}
+              </div>
+            )}
 
-          {isRegister && (
             <div>
-              <label className="block text-[12px] font-medium text-[#aaa] mb-1.5">
-                Confirm Password
+              <label className="block text-[12px] font-medium text-[#555] mb-1.5">
+                Email
+              </label>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full px-4 py-3 bg-white border border-[#ddd] rounded-lg text-[#111] text-[14px] placeholder:text-[#bbb] focus:outline-none focus:border-[#999] transition-colors"
+                placeholder="you@company.com"
+                autoComplete="email"
+                data-testid="input-email"
+              />
+            </div>
+
+            <div>
+              <label className="block text-[12px] font-medium text-[#555] mb-1.5">
+                Password
               </label>
               <input
                 type="password"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                className="w-full px-4 py-3 bg-[#1a1a1a] border border-[#333] rounded-lg text-white text-[14px] placeholder:text-[#555] focus:outline-none focus:border-[#555] transition-colors"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full px-4 py-3 bg-white border border-[#ddd] rounded-lg text-[#111] text-[14px] placeholder:text-[#bbb] focus:outline-none focus:border-[#999] transition-colors"
                 placeholder="••••••••"
-                autoComplete="new-password"
-                data-testid="input-confirm-password"
+                autoComplete={isRegister ? "new-password" : "current-password"}
+                data-testid="input-password"
               />
             </div>
-          )}
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full py-3 bg-white text-black text-[14px] font-semibold rounded-lg hover:bg-[#eee] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            data-testid="button-login-submit"
-          >
-            {loading
-              ? "Please wait..."
-              : isRegister
-              ? "Create Account"
-              : "Sign In"}
-          </button>
-        </form>
+            {isRegister && (
+              <div>
+                <label className="block text-[12px] font-medium text-[#555] mb-1.5">
+                  Confirm Password
+                </label>
+                <input
+                  type="password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  className="w-full px-4 py-3 bg-white border border-[#ddd] rounded-lg text-[#111] text-[14px] placeholder:text-[#bbb] focus:outline-none focus:border-[#999] transition-colors"
+                  placeholder="••••••••"
+                  autoComplete="new-password"
+                  data-testid="input-confirm-password"
+                />
+              </div>
+            )}
 
-        <div className="mt-6 text-center">
-          <button
-            onClick={() => {
-              setIsRegister(!isRegister);
-              setError("");
-              setConfirmPassword("");
-            }}
-            className="text-[13px] text-[#888] hover:text-white transition-colors"
-            data-testid="toggle-auth-mode"
-          >
-            {isRegister
-              ? "Already have an account? Sign in"
-              : "Don't have an account? Create one"}
-          </button>
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full py-3 bg-[#111] text-white text-[14px] font-semibold rounded-lg hover:bg-[#333] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              data-testid="button-login-submit"
+            >
+              {loading
+                ? "Please wait..."
+                : isRegister
+                ? "Create Account"
+                : "Sign In"}
+            </button>
+          </form>
+
+          <div className="mt-6 text-center">
+            <button
+              onClick={() => {
+                setIsRegister(!isRegister);
+                setError("");
+                setConfirmPassword("");
+              }}
+              className="text-[13px] text-[#888] hover:text-[#111] transition-colors"
+              data-testid="toggle-auth-mode"
+            >
+              {isRegister
+                ? "Already have an account? Sign in"
+                : "Don't have an account? Create one"}
+            </button>
+          </div>
+
+          <p className="mt-8 text-center text-[11px] text-[#bbb]">
+            Banks approve profiles, not people.
+          </p>
         </div>
-
-        <p className="mt-8 text-center text-[11px] text-[#555]">
-          Banks approve profiles, not people.
-        </p>
       </div>
     </div>
   );
