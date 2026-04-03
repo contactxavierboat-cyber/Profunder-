@@ -2288,6 +2288,30 @@ export async function registerRoutes(
     res.json(stripPassword(user));
   });
 
+  app.post("/api/newsletter", async (req, res) => {
+    try {
+      const { email } = req.body;
+      if (!email || !email.includes("@")) {
+        return res.status(400).json({ error: "Valid email required" });
+      }
+      const nodemailer = await import("nodemailer");
+      const transporter = nodemailer.default.createTransport({
+        service: "gmail",
+        auth: { user: "contactxavierboat@gmail.com", pass: process.env.GMAIL_APP_PASSWORD },
+      });
+      await transporter.sendMail({
+        from: '"Profundr" <contactxavierboat@gmail.com>',
+        to: "contactxavierboat@gmail.com",
+        subject: `New Newsletter Subscriber: ${email}`,
+        text: `New newsletter signup:\n\nEmail: ${email}\nDate: ${new Date().toISOString()}`,
+      });
+      res.json({ ok: true });
+    } catch (err: any) {
+      console.error("Newsletter error:", err);
+      res.status(500).json({ ok: false, error: "Failed to subscribe" });
+    }
+  });
+
   app.post("/api/logout", (req, res) => {
     req.session.destroy((err) => {
       res.clearCookie("connect.sid");

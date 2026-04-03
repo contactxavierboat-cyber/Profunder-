@@ -4836,6 +4836,9 @@ export default function LandingPage() {
   };
 
   const [showFrontPage, setShowFrontPage] = useState(!user && !hasMessages);
+  const [newsletterEmail, setNewsletterEmail] = useState("");
+  const [newsletterSubmitted, setNewsletterSubmitted] = useState(false);
+  const [newsletterLoading, setNewsletterLoading] = useState(false);
   const [showcaseTab, setShowcaseTab] = useState(0);
   const [testIdx, setTestIdx] = useState(0);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -4941,14 +4944,14 @@ export default function LandingPage() {
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-4 mb-5 sm:mb-6 w-full sm:max-w-none mx-auto">
               <button
-                onClick={() => { setShowFrontPage(false); setAutoSendFile(true); handleUploadClick(); }}
+                onClick={() => window.location.href = '/login'}
                 className="px-8 py-3 sm:py-3.5 bg-[#111] border border-[#111] text-white text-[14px] font-semibold hover:bg-[#333] transition-colors"
                 data-testid="front-btn-upload-hero"
               >
                 Upload Report
               </button>
               <button
-                onClick={() => { setShowFrontPage(false); }}
+                onClick={() => window.location.href = '/login'}
                 className="px-8 py-2.5 sm:py-3.5 text-[#555] text-[14px] font-medium sm:border sm:border-[#ddd] sm:hover:bg-[#f8f8f8] transition-colors"
                 data-testid="front-btn-try-chat"
               >
@@ -5017,18 +5020,49 @@ export default function LandingPage() {
               <p className="text-[14px] sm:text-[15px] text-[#555] leading-[1.7] sm:leading-[1.6]">We show you how real profiles turn into capital — step by step.</p>
             </div>
             <div className="flex flex-col sm:flex-row w-full md:w-auto gap-2 sm:gap-0">
-              <input
-                type="email"
-                placeholder="Enter email..."
-                className="flex-1 md:w-[260px] px-4 py-3 bg-white border border-[#ccc] text-[14px] text-[#111] outline-none placeholder-[#999]"
-                data-testid="input-newsletter-email"
-              />
-              <button
-                className="px-6 py-3 bg-[#111] text-white text-[14px] font-semibold hover:bg-[#333] transition-colors whitespace-nowrap"
-                data-testid="button-newsletter-submit"
-              >
-                Get Weekly Insights
-              </button>
+              {newsletterSubmitted ? (
+                <div className="flex items-center gap-2 px-4 py-3 text-[14px] text-[#2d7a3a] font-medium" data-testid="text-newsletter-success">
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 8l3 3 5-5" stroke="#2d7a3a" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                  You're in! Check your inbox.
+                </div>
+              ) : (
+                <>
+                  <input
+                    type="email"
+                    placeholder="Enter email..."
+                    value={newsletterEmail}
+                    onChange={(e) => setNewsletterEmail(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" && newsletterEmail.trim()) {
+                        setNewsletterLoading(true);
+                        fetch("/api/newsletter", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email: newsletterEmail.trim() }) })
+                          .then(r => { if (!r.ok) throw new Error("Failed"); return r.json(); })
+                          .then(() => { setNewsletterSubmitted(true); setNewsletterEmail(""); })
+                          .catch(() => alert("Something went wrong. Please try again."))
+                          .finally(() => setNewsletterLoading(false));
+                      }
+                    }}
+                    className="flex-1 md:w-[260px] px-4 py-3 bg-white border border-[#ccc] text-[14px] text-[#111] outline-none placeholder-[#999]"
+                    data-testid="input-newsletter-email"
+                  />
+                  <button
+                    disabled={newsletterLoading || !newsletterEmail.trim()}
+                    onClick={() => {
+                      if (!newsletterEmail.trim()) return;
+                      setNewsletterLoading(true);
+                      fetch("/api/newsletter", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email: newsletterEmail.trim() }) })
+                        .then(r => { if (!r.ok) throw new Error("Failed"); return r.json(); })
+                        .then(() => { setNewsletterSubmitted(true); setNewsletterEmail(""); })
+                        .catch(() => alert("Something went wrong. Please try again."))
+                        .finally(() => setNewsletterLoading(false));
+                    }}
+                    className="px-6 py-3 bg-[#111] text-white text-[14px] font-semibold hover:bg-[#333] transition-colors whitespace-nowrap disabled:opacity-50"
+                    data-testid="button-newsletter-submit"
+                  >
+                    {newsletterLoading ? "Submitting..." : "Get Weekly Insights"}
+                  </button>
+                </>
+              )}
             </div>
           </div>
         </section>
@@ -5367,7 +5401,7 @@ export default function LandingPage() {
                   <span key={r} className="text-[12px] px-3 py-1.5 bg-[#f5f5f5] text-[#666] font-medium rounded-full flex items-center gap-1.5"><span className="w-4 h-4 rounded-full bg-[#ddd] shrink-0" />{r}</span>
                 ))}
               </div>
-              <div className="text-center sm:text-left"><button className="px-5 py-2.5 bg-[#111] text-white text-[13px] font-semibold hover:bg-[#333] transition-colors" data-testid="btn-watch-demo-1">Get Started</button></div>
+              <div className="text-center sm:text-left"><button onClick={() => window.location.href = '/login'} className="px-5 py-2.5 bg-[#111] text-white text-[13px] font-semibold hover:bg-[#333] transition-colors" data-testid="btn-watch-demo-1">Get Started</button></div>
             </div>
           </div>
         </section>
@@ -5388,7 +5422,7 @@ export default function LandingPage() {
                   <span key={r} className="text-[12px] px-3 py-1.5 bg-[#f5f5f5] text-[#666] font-medium rounded-full flex items-center gap-1.5"><span className="w-4 h-4 rounded-full bg-[#ddd] shrink-0" />{r}</span>
                 ))}
               </div>
-              <div className="text-center sm:text-left"><button className="px-5 py-2.5 bg-[#111] text-white text-[13px] font-semibold hover:bg-[#333] transition-colors" data-testid="btn-watch-demo-2">Upload Report</button></div>
+              <div className="text-center sm:text-left"><button onClick={() => window.location.href = '/login'} className="px-5 py-2.5 bg-[#111] text-white text-[13px] font-semibold hover:bg-[#333] transition-colors" data-testid="btn-watch-demo-2">Upload Report</button></div>
             </div>
             <div className="flex-1 order-1 md:order-2 w-full">
               <div className="rounded-xl sm:rounded-2xl" style={{ background: "#f0ede8", padding: "28px 20px" }}>
@@ -5654,7 +5688,7 @@ export default function LandingPage() {
         <section className="py-10 sm:py-6 px-5 sm:px-6 bg-[#111] border-t border-white/10" data-testid="front-cta-bar">
           <div className="max-w-[1100px] mx-auto flex flex-col sm:flex-row items-center justify-between gap-6 sm:gap-4">
             <h3 className="text-[22px] sm:text-[22px] md:text-[28px] font-bold text-white text-center sm:text-left leading-[1.2]" style={{ letterSpacing: "-0.02em" }}>Build your financial identity on Profundr</h3>
-            <button onClick={() => { setShowFrontPage(false); setAutoSendFile(true); handleUploadClick(); }} className="px-5 py-2.5 bg-white text-[#111] text-[13px] font-semibold hover:bg-white/90 transition-colors shrink-0" data-testid="front-btn-final-cta">Get Started</button>
+            <button onClick={() => window.location.href = '/login'} className="px-5 py-2.5 bg-white text-[#111] text-[13px] font-semibold hover:bg-white/90 transition-colors shrink-0" data-testid="front-btn-final-cta">Get Started</button>
           </div>
         </section>
 
@@ -5685,12 +5719,12 @@ export default function LandingPage() {
             <div className="border-t border-white/10 pt-6 flex flex-col items-center sm:flex-row sm:justify-between gap-4">
               <div className="flex items-center gap-4 order-1 sm:order-none">
                 {[
-                  <svg key="li" width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M16 8a6 6 0 016 6v7h-4v-7a2 2 0 00-4 0v7h-4v-7a6 6 0 016-6zM2 9h4v12H2zM4 6a2 2 0 100-4 2 2 0 000 4z" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" opacity="0.4"/></svg>,
-                  <svg key="ig" width="18" height="18" viewBox="0 0 24 24" fill="none"><rect x="2" y="2" width="20" height="20" rx="5" stroke="white" strokeWidth="1.5" opacity="0.4"/><circle cx="12" cy="12" r="5" stroke="white" strokeWidth="1.5" opacity="0.4"/><circle cx="17.5" cy="6.5" r="1" fill="white" opacity="0.4"/></svg>,
-                  <svg key="yt" width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M22.54 6.42a2.78 2.78 0 00-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 00-1.94 2A29 29 0 001 12a29 29 0 00.46 5.58 2.78 2.78 0 001.94 2c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 001.94-2A29 29 0 0023 12a29 29 0 00-.46-5.58z" stroke="white" strokeWidth="1.5" opacity="0.4"/><path d="M9.75 15.02l5.75-3.27-5.75-3.27v6.54z" fill="white" opacity="0.4"/></svg>,
-                  <svg key="x" width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M4 4l6.5 8L4 20h2l5.5-6.8L16 20h4l-6.8-8.5L20 4h-2l-5.2 6.3L8 4H4z" stroke="white" strokeWidth="1.5" opacity="0.4"/></svg>,
-                ].map((icon) => (
-                  <span key={icon.key} className="cursor-pointer hover:opacity-100 transition-opacity">{icon}</span>
+                  { href: "https://linkedin.com/company/profundr", icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M16 8a6 6 0 016 6v7h-4v-7a2 2 0 00-4 0v7h-4v-7a6 6 0 016-6zM2 9h4v12H2zM4 6a2 2 0 100-4 2 2 0 000 4z" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" opacity="0.4"/></svg>, label: "LinkedIn" },
+                  { href: "https://instagram.com/profundr", icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><rect x="2" y="2" width="20" height="20" rx="5" stroke="white" strokeWidth="1.5" opacity="0.4"/><circle cx="12" cy="12" r="5" stroke="white" strokeWidth="1.5" opacity="0.4"/><circle cx="17.5" cy="6.5" r="1" fill="white" opacity="0.4"/></svg>, label: "Instagram" },
+                  { href: "https://youtube.com/@profundr", icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M22.54 6.42a2.78 2.78 0 00-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 00-1.94 2A29 29 0 001 12a29 29 0 00.46 5.58 2.78 2.78 0 001.94 2c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 001.94-2A29 29 0 0023 12a29 29 0 00-.46-5.58z" stroke="white" strokeWidth="1.5" opacity="0.4"/><path d="M9.75 15.02l5.75-3.27-5.75-3.27v6.54z" fill="white" opacity="0.4"/></svg>, label: "YouTube" },
+                  { href: "https://x.com/profundr", icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M4 4l6.5 8L4 20h2l5.5-6.8L16 20h4l-6.8-8.5L20 4h-2l-5.2 6.3L8 4H4z" stroke="white" strokeWidth="1.5" opacity="0.4"/></svg>, label: "X" },
+                ].map((social) => (
+                  <a key={social.label} href={social.href} target="_blank" rel="noopener noreferrer" className="cursor-pointer hover:opacity-100 transition-opacity" aria-label={social.label} data-testid={`link-social-${social.label.toLowerCase()}`}>{social.icon}</a>
                 ))}
               </div>
               <p className="text-[12px] text-white/30 order-2 sm:order-none">© 2026 Profundr. All rights reserved.</p>
