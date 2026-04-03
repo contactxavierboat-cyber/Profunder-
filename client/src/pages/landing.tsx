@@ -1505,11 +1505,14 @@ function DisputeDownloadButton({ disputes, onSave, userProfile, savedDocs }: { d
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload)
       });
-      if (!res.ok) throw new Error("Failed to generate");
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.error || errData.details || "Failed to generate");
+      }
       const data = await res.json();
       if (data.downloadUrl) {
         const pdfRes = await fetch(data.downloadUrl);
-        if (!pdfRes.ok) throw new Error("Download failed");
+        if (!pdfRes.ok) throw new Error("Download link expired. Please try again.");
         const blob = await pdfRes.blob();
         const url = URL.createObjectURL(blob);
         const a = document.createElement("a");
@@ -1518,11 +1521,11 @@ function DisputeDownloadButton({ disputes, onSave, userProfile, savedDocs }: { d
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
-        URL.revokeObjectURL(url);
+        setTimeout(() => URL.revokeObjectURL(url), 5000);
         onSave?.(disputes);
       }
-    } catch {
-      alert("Failed to generate dispute letters. Please try again.");
+    } catch (err: any) {
+      alert(err?.message || "Failed to generate dispute letters. Please try again.");
     } finally {
       setDownloading(false);
     }

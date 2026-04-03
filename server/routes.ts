@@ -3527,7 +3527,7 @@ Never give advice that ignores the current date or economic climate. Your intell
     const logoSize = 28;
     try { drawBrainLogo(doc, 65 + logoSize / 2, 30, logoSize); } catch {}
     doc.font("Helvetica").fontSize(7).fillColor("#bbbbbb")
-      .text("Insights for education only — not financial advice.", 65 + logoSize + 10, 30 + logoSize / 2 - 4, { width: pageWidth - 160 });
+      .text("Insights for education only — not financial advice.", 65 + logoSize + 10, 30 + logoSize / 2 - 4, { width: pageWidth - 160, lineBreak: false });
     doc.moveTo(65, 55).lineTo(pageWidth - 65, 55).strokeColor("#eeeeee").lineWidth(0.5).stroke();
     doc.y = 65;
   }
@@ -3537,7 +3537,7 @@ Never give advice that ignores the current date or economic climate. Your intell
     const footerY = doc.page.height - 35;
     doc.moveTo(65, footerY - 5).lineTo(pageWidth - 65, footerY - 5).strokeColor("#eeeeee").lineWidth(0.5).stroke();
     doc.font("Helvetica").fontSize(7).fillColor("#bbbbbb")
-      .text(`profundr.com  ·  ${today}`, 65, footerY, { width: pageWidth - 130, align: "center" });
+      .text(`profundr.com  ·  ${today}`, 65, footerY, { width: pageWidth - 130, align: "center", lineBreak: false });
   }
 
   function renderMarkdownLines(doc: InstanceType<typeof PDFDocument>, content: string, x: number, w: number, checkPage: (n?: number) => void) {
@@ -3760,7 +3760,8 @@ Never give advice that ignores the current date or economic climate. Your intell
     }).safeParse(req.body);
 
     if (!body.success) {
-      return res.status(400).json({ error: "Invalid dispute data" });
+      console.error("Dispute validation error:", JSON.stringify(body.error.issues, null, 2));
+      return res.status(400).json({ error: "Invalid dispute data", details: body.error.issues.map(i => i.message).join(", ") });
     }
 
     const { disputes, userName = "[YOUR NAME]", userAddress = "[YOUR ADDRESS]\n[CITY, STATE ZIP]", ssnLast4 = "[LAST 4 SSN]", dob = "[DATE OF BIRTH]", letterContent, attachmentPages = [] } = body.data;
@@ -3779,10 +3780,17 @@ Never give advice that ignores the current date or economic climate. Your intell
       doc.on("data", (chunk: Buffer) => chunks.push(chunk));
 
       let skipNextPageEvent = false;
+      let inPageHandler = false;
       doc.on("pageAdded", () => {
         if (skipNextPageEvent) { skipNextPageEvent = false; return; }
-        drawCleanHeader(doc);
-        drawCleanFooter(doc, today);
+        if (inPageHandler) return;
+        inPageHandler = true;
+        try {
+          drawCleanHeader(doc);
+          drawCleanFooter(doc, today);
+        } finally {
+          inPageHandler = false;
+        }
       });
 
       const pdfReady = new Promise<Buffer>((resolve) => {
