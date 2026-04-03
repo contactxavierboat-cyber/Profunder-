@@ -2227,7 +2227,7 @@ export async function registerRoutes(
       role: "user",
       subscriptionStatus: "inactive",
       monthlyUsage: 0,
-      maxUsage: 30,
+      maxUsage: 15,
       creditScoreRange: null,
       totalRevolvingLimit: null,
       totalBalances: null,
@@ -2679,7 +2679,7 @@ export async function registerRoutes(
           }
         }
 
-        const updates: Partial<{ subscriptionStatus: string; subscriptionTier: string | null }> = { subscriptionStatus: "active" };
+        const updates: Partial<{ subscriptionStatus: string; subscriptionTier: string | null; maxUsage: number }> = { subscriptionStatus: "active", maxUsage: 999999 };
         if (user.subscriptionTier !== tier) {
           updates.subscriptionTier = tier;
         }
@@ -2709,7 +2709,7 @@ export async function registerRoutes(
               tier = detectTierFromProductName(product.name);
             }
           }
-          await storage.updateUser(user.id, { subscriptionStatus: "active", subscriptionTier: tier });
+          await storage.updateUser(user.id, { subscriptionStatus: "active", subscriptionTier: tier, maxUsage: 999999 });
           return res.json({ active: true, tier });
         }
       } catch (stripeErr: any) {
@@ -2758,7 +2758,8 @@ export async function registerRoutes(
     if (!user) return res.status(404).json({ error: "User not found" });
 
     if (user.monthlyUsage >= user.maxUsage) {
-      return res.status(403).json({ error: "Monthly analysis limit reached. Please wait for reset." });
+      const msg = !user.subscriptionTier ? "You've used all 15 complimentary actions this month. Subscribe to unlock unlimited access." : "Monthly analysis limit reached. Please wait for reset.";
+      return res.status(403).json({ error: msg });
     }
 
     let extractedText = "";
@@ -4920,7 +4921,8 @@ Never give advice that ignores the current date or economic climate. Your intell
     if (!user) return res.status(404).json({ error: "User not found" });
 
     if (user.monthlyUsage >= user.maxUsage) {
-      return res.status(403).json({ error: "Monthly analysis limit reached. Please wait for reset." });
+      const msg = !user.subscriptionTier ? "You've used all 15 complimentary actions this month. Subscribe to unlock unlimited access." : "Monthly analysis limit reached. Please wait for reset.";
+      return res.status(403).json({ error: msg });
     }
 
     const userQuestion = await storage.createDashboardQuestion({ userId, role: "user", content: body.data.content.trim() });
@@ -5057,7 +5059,8 @@ Be concise but thorough. Use bullet points and formatting for readability. If th
     if (!user) return res.status(404).json({ error: "User not found" });
 
     if (user.monthlyUsage >= user.maxUsage) {
-      return res.status(403).json({ error: "Monthly analysis limit reached. Please wait for reset." });
+      const msg = !user.subscriptionTier ? "You've used all 15 complimentary actions this month. Subscribe to unlock unlimited access." : "Monthly analysis limit reached. Please wait for reset.";
+      return res.status(403).json({ error: msg });
     }
 
     let financialContext = "";
@@ -5179,7 +5182,8 @@ You MUST respond with valid JSON only (no markdown, no code blocks):
     if (!user) return res.status(404).json({ error: "User not found" });
 
     if (user.monthlyUsage >= user.maxUsage) {
-      return res.status(403).json({ error: "Monthly analysis limit reached. Please wait for reset." });
+      const msg = !user.subscriptionTier ? "You've used all 15 complimentary actions this month. Subscribe to unlock unlimited access." : "Monthly analysis limit reached. Please wait for reset.";
+      return res.status(403).json({ error: msg });
     }
 
     let financialContext = "";

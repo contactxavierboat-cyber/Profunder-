@@ -5820,6 +5820,16 @@ export default function LandingPage() {
                     <path d="M6 15h4M14 15h4" />
                   </svg>
                 </button>
+                {!user.subscriptionTier && (
+                  <button
+                    onClick={() => window.location.href = '/subscription'}
+                    className="hidden sm:flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#f0eeff] text-[#6366f1] text-[11px] font-medium hover:bg-[#e5e0ff] transition-colors"
+                    data-testid="badge-free-usage"
+                  >
+                    <span>{Math.max(0, (user.maxUsage || 15) - (user.monthlyUsage || 0))}/{user.maxUsage || 15} free</span>
+                    <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M3 2l4 3-4 3" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                  </button>
+                )}
                 <span className="text-[12px] text-[#999] hidden sm:inline" data-testid="text-user-email">{user.email}</span>
                 <label className="cursor-pointer relative group" title="Change profile photo" data-testid="button-profile-photo">
                   <ProfileAvatar photo={user.profilePhoto} name={user.displayName || user.email} size={30} />
