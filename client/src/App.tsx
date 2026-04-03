@@ -9,6 +9,7 @@ import LoginPage from "@/pages/login";
 import AdminPage from "@/pages/admin";
 import SubscriptionPage from "@/pages/subscription";
 import PrivacyPage from "@/pages/privacy";
+import TermsPage from "@/pages/terms";
 
 function Router() {
   return (
@@ -16,6 +17,7 @@ function Router() {
       <Route path="/" component={LandingPage} />
       <Route path="/login" component={LoginPage} />
       <Route path="/privacy" component={PrivacyPage} />
+      <Route path="/terms" component={TermsPage} />
       <Route path="/admin" component={AdminPage} />
       <Route path="/admin/users" component={AdminPage} />
       <Route path="/subscription" component={SubscriptionPage} />

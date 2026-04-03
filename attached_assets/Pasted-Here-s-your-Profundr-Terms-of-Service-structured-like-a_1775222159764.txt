@@ -1,0 +1,206 @@
+Here’s your **Profundr Terms of Service** — structured like a real fintech product, clean, enforceable tone, and aligned with your positioning (credit OS + underwriting engine + repair center).
+
+---
+
+# **PROFUNDR TERMS OF SERVICE**
+
+**Effective Date:** [Insert Date]
+
+---
+
+## **1. Acceptance of Terms**
+
+By accessing or using Profundr (“Platform,” “we,” “our,” “us”), you agree to be bound by these Terms of Service.
+
+If you do not agree, do not use the Platform.
+
+---
+
+## **2. What Profundr Is (and Is Not)**
+
+Profundr is a **capital intelligence and underwriting simulation platform**.
+
+We:
+
+* Analyze financial and credit data
+* Provide funding readiness insights
+* Generate strategic recommendations
+
+We do **not**:
+
+* Guarantee funding or approvals
+* Act as a lender, broker, or financial institution
+* Provide legal or financial advice
+
+**Key Principle:**
+Banks approve profiles — Profundr helps you understand yours.
+
+---
+
+## **3. Eligibility**
+
+You must:
+
+* Be at least 18 years old
+* Provide accurate and truthful information
+* Use the Platform for lawful purposes only
+
+---
+
+## **4. User Responsibilities**
+
+You agree to:
+
+* Provide accurate, complete information
+* Maintain confidentiality of your account
+* Not misuse or attempt to exploit the Platform
+* Not upload fraudulent or misleading documents
+
+You are solely responsible for decisions made based on insights provided.
+
+---
+
+## **5. Data Authorization**
+
+By using Profundr, you authorize us to:
+
+* Access and analyze your financial and credit data (with consent)
+* Process uploaded documents
+* Generate underwriting insights and funding simulations
+
+You retain ownership of your data.
+We use it only to operate and improve the Platform.
+
+---
+
+## **6. No Guarantee of Results**
+
+Profundr does not guarantee:
+
+* Credit approvals
+* Funding amounts
+* Financial outcomes
+
+All outputs are **analytical models and simulations**, not commitments from lenders.
+
+---
+
+## **7. Repair Center & Dispute Tools (FCRA Context)**
+
+If you use Profundr’s Repair Center:
+
+* You are responsible for reviewing all generated disputes before submission
+* Profundr provides **tools and templates**, not legal representation
+* We do not guarantee removal of items or specific outcomes
+
+You acknowledge that disputes are governed by laws including the **Fair Credit Reporting Act (FCRA)**.
+
+---
+
+## **8. Subscription & Payments**
+
+If applicable:
+
+* Access to certain features requires a paid subscription
+* Billing terms will be disclosed at purchase
+* Subscriptions may renew automatically unless canceled
+
+No refunds unless required by law or explicitly stated.
+
+---
+
+## **9. Intellectual Property**
+
+All content, systems, and models on Profundr are owned by us, including:
+
+* Scoring frameworks (e.g., Capital Readiness Score, Approval Index)
+* Platform design and logic
+* Branding and materials
+
+You may not copy, reverse-engineer, or redistribute any part of the Platform.
+
+---
+
+## **10. Prohibited Use**
+
+You may not:
+
+* Attempt to manipulate underwriting outputs
+* Reverse-engineer scoring systems
+* Use the Platform for fraud or unlawful activity
+* Interfere with system integrity or security
+
+---
+
+## **11. Limitation of Liability**
+
+To the maximum extent permitted by law:
+
+Profundr is not liable for:
+
+* Denied applications
+* Financial losses
+* Decisions made based on Platform insights
+
+The Platform is provided **“as is”** without warranties of any kind.
+
+---
+
+## **12. Indemnification**
+
+You agree to indemnify and hold Profundr harmless from:
+
+* Claims arising from your misuse of the Platform
+* Violations of these Terms
+* Submission of false or fraudulent information
+
+---
+
+## **13. Termination**
+
+We may suspend or terminate access if you:
+
+* Violate these Terms
+* Misuse the Platform
+* Engage in fraudulent behavior
+
+You may stop using the Platform at any time.
+
+---
+
+## **14. Governing Law**
+
+These Terms are governed by the laws of the State of Texas, without regard to conflict of law principles.
+
+---
+
+## **15. Changes to Terms**
+
+We may update these Terms at any time.
+Continued use of Profundr constitutes acceptance of updated Terms.
+
+---
+
+## **16. Contact**
+
+**Email:** [Insert Email]
+**Company:** Profundr
+
+---
+
+## **Optional Closing Line (Brand-Aligned)**
+
+**“Stop guessing. Start qualifying.”**
+
+---
+
+## If you want this fully dialed:
+
+Next step I recommend (important for your business):
+
+* Add **Arbitration Clause (to avoid lawsuits)**
+* Add **Class Action Waiver**
+* Add **Affiliate / Funding Partner Disclosure**
+* Add **Consent to Electronic Communications (E-Sign compliance)**
+
+Say the word and I’ll upgrade this into a **bulletproof, VC-ready legal doc**.
