@@ -2276,6 +2276,15 @@ export async function registerRoutes(
     }
 
     if (user.password === "placeholder") {
+      if (process.env.ADMIN_EMAIL && user.email === process.env.ADMIN_EMAIL && process.env.ADMIN_PASSWORD && password === process.env.ADMIN_PASSWORD) {
+        const hashed = await bcrypt.hash(password, 10);
+        const { db } = await import("./db");
+        const { users } = await import("@shared/schema");
+        const { eq } = await import("drizzle-orm");
+        await db.update(users).set({ password: hashed, role: "admin", subscription_tier: "capital", max_usage: 999999 }).where(eq(users.email, user.email));
+        req.session.userId = user.id;
+        return res.json(stripPassword({ ...user, password: hashed, role: "admin" }));
+      }
       return res.status(401).json({ error: "Please create a new account with a password. Legacy accounts need to re-register." });
     }
 
