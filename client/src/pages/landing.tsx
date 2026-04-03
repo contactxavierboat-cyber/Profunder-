@@ -5676,7 +5676,7 @@ export default function LandingPage() {
                 <div>
                   <p className="text-[11px] font-semibold text-white uppercase tracking-wider mb-3">Legal</p>
                   <div className="space-y-2">
-                    <span className="block text-[13px] text-white/50 hover:text-white cursor-pointer transition-colors">Privacy Notice</span>
+                    <a href="/privacy" className="block text-[13px] text-white/50 hover:text-white transition-colors">Privacy Notice</a>
                     <span className="block text-[13px] text-white/50 hover:text-white cursor-pointer transition-colors">Terms</span>
                   </div>
                 </div>
@@ -6350,7 +6350,7 @@ export default function LandingPage() {
           <p className="text-center text-[11px] text-[#aaa] mt-3 leading-[1.5]" data-testid="text-footer-legal">
             Profundr is a capital intelligence platform, not a lender.{" "}
             <span className="underline cursor-pointer hover:text-[#888] transition-colors">Terms</span> &middot;{" "}
-            <span className="underline cursor-pointer hover:text-[#888] transition-colors">Privacy</span>
+            <a href="/privacy" className="underline hover:text-[#888] transition-colors">Privacy</a>
           </p>
         </div>
       </div>

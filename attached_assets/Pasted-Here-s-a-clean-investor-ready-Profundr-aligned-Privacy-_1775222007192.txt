@@ -1,0 +1,145 @@
+Here’s a **clean, investor-ready, Profundr-aligned Privacy Notice** — written minimal, direct, and structured like a real fintech product (not fluff, not legal jargon overload):
+
+---
+
+# **PROFUNDR PRIVACY NOTICE**
+
+**Effective Date:** [Insert Date]
+
+---
+
+## **1. Overview**
+
+Profundr (“we,” “our,” “us”) is a **capital intelligence platform** designed to analyze financial profiles and determine funding eligibility before application.
+
+This Privacy Notice explains how we collect, use, and protect your information when you use Profundr.
+
+**Core principle:**
+We analyze profiles — not exploit data.
+
+---
+
+## **2. Information We Collect**
+
+### **A. Information You Provide**
+
+* Name, email, phone number
+* Business details (if applicable)
+* Uploaded documents (ID, proof of address, financial docs)
+* Messages, inquiries, and support interactions
+
+### **B. Financial & Credit Data**
+
+With your authorization, we may collect:
+
+* Credit report data (from credit bureaus)
+* Account balances and transaction history
+* Credit utilization, inquiries, and account structure
+
+### **C. Automated Data**
+
+* Device information (IP address, browser type)
+* Usage behavior (pages visited, actions taken)
+* Cookies and tracking technologies
+
+---
+
+## **3. How We Use Your Information**
+
+We use your data to:
+
+* Generate your **Capital Readiness Score / Approval Index**
+* Simulate lender decision outcomes
+* Identify risk factors and funding opportunities
+* Build personalized funding strategies
+* Provide dispute and repair documentation (if applicable)
+* Improve system accuracy and underwriting models
+
+**We do not sell your personal data.**
+
+---
+
+## **4. How We Share Information**
+
+We may share your data only when necessary:
+
+* **With service providers** (secure infrastructure, analytics, data processing)
+* **With financial data partners** (only with your consent)
+* **For legal compliance** (court orders, regulatory requirements)
+
+We do **not** sell or rent your data to third parties.
+
+---
+
+## **5. Data Security**
+
+We implement industry-standard safeguards, including:
+
+* Encryption of sensitive data
+* Secure cloud infrastructure
+* Access controls and authentication layers
+
+No system is 100% secure — but we operate to **bank-level standards**.
+
+---
+
+## **6. Your Rights**
+
+You have the right to:
+
+* Access your data
+* Request corrections
+* Request deletion of your data
+* Withdraw consent at any time
+
+To exercise these rights:
+**[Insert Contact Email]**
+
+---
+
+## **7. Data Retention**
+
+We retain your information only as long as necessary to:
+
+* Provide services
+* Comply with legal obligations
+* Maintain system integrity
+
+---
+
+## **8. Third-Party Services**
+
+Profundr may integrate with third-party providers (e.g., credit data sources).
+Their use of your data is governed by their own privacy policies.
+
+---
+
+## **9. Updates to This Notice**
+
+We may update this Privacy Notice periodically.
+Changes will be posted with a revised “Effective Date.”
+
+---
+
+## **10. Contact**
+
+For questions or concerns:
+
+**Email:** [Insert Email]
+**Company:** Profundr
+
+---
+
+## **Optional Footer (Brand-Aligned Tagline)**
+
+**“Banks fund profiles, not people. Profundr shows you where you stand—before you apply.”**
+
+---
+
+### If you want next level:
+
+I can also:
+
+* Convert this into **Terms of Service**
+* Add **FCRA-compliant language for Repair Center**
+* Or tailor it for **VC diligence / legal review (Delaware C-Corp standard)**
