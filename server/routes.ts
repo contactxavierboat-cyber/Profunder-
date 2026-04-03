@@ -3524,20 +3524,40 @@ Never give advice that ignores the current date or economic climate. Your intell
 
   function drawCleanHeader(doc: InstanceType<typeof PDFDocument>) {
     const pageWidth = doc.page.width;
-    const logoSize = 28;
-    try { drawBrainLogo(doc, 65 + logoSize / 2, 30, logoSize); } catch {}
-    doc.font("Helvetica").fontSize(7).fillColor("#bbbbbb")
-      .text("Insights for education only — not financial advice.", 65 + logoSize + 10, 30 + logoSize / 2 - 4, { width: pageWidth - 160, lineBreak: false });
-    doc.moveTo(65, 55).lineTo(pageWidth - 65, 55).strokeColor("#eeeeee").lineWidth(0.5).stroke();
-    doc.y = 65;
+    const mL = doc.page.margins.left;
+    const mR = doc.page.margins.right;
+    const logoSize = 22;
+    try { drawBrainLogo(doc, mL + logoSize / 2, 26, logoSize); } catch {}
+    doc.font("Helvetica-Bold").fontSize(8).fillColor("#1a1a2e")
+      .text("PROFUNDR", mL + logoSize + 8, 22, { lineBreak: false });
+    doc.font("Helvetica").fontSize(6.5).fillColor("#999999")
+      .text("Consumer Dispute Documentation", mL + logoSize + 8, 32, { lineBreak: false });
+    doc.save();
+    doc.moveTo(mL, 48).lineTo(pageWidth - mR, 48).strokeColor("#1a1a2e").lineWidth(1.2).stroke();
+    doc.moveTo(mL, 50).lineTo(pageWidth - mR, 50).strokeColor("#cccccc").lineWidth(0.3).stroke();
+    doc.restore();
+    doc.y = 60;
   }
 
   function drawCleanFooter(doc: InstanceType<typeof PDFDocument>, today: string) {
+    const savedY = doc.y;
+    const savedBottomMargin = doc.page.margins.bottom;
+    doc.page.margins.bottom = 0;
     const pageWidth = doc.page.width;
-    const footerY = doc.page.height - 35;
-    doc.moveTo(65, footerY - 5).lineTo(pageWidth - 65, footerY - 5).strokeColor("#eeeeee").lineWidth(0.5).stroke();
-    doc.font("Helvetica").fontSize(7).fillColor("#bbbbbb")
-      .text(`profundr.com  ·  ${today}`, 65, footerY, { width: pageWidth - 130, align: "center", lineBreak: false });
+    const mL = doc.page.margins.left;
+    const mR = doc.page.margins.right;
+    const footerY = doc.page.height - 40;
+    doc.save();
+    doc.moveTo(mL, footerY).lineTo(pageWidth - mR, footerY).strokeColor("#cccccc").lineWidth(0.3).stroke();
+    doc.moveTo(mL, footerY + 1.5).lineTo(pageWidth - mR, footerY + 1.5).strokeColor("#1a1a2e").lineWidth(0.8).stroke();
+    doc.restore();
+    doc.font("Helvetica").fontSize(6.5).fillColor("#999999")
+      .text("CONFIDENTIAL — Prepared by Profundr  |  For educational and consumer advocacy purposes  |  Not legal advice", mL, footerY + 6, { width: pageWidth - mL - mR, align: "center", lineBreak: false });
+    doc.font("Helvetica").fontSize(6.5).fillColor("#bbbbbb")
+      .text(today, mL, footerY + 16, { width: pageWidth - mL - mR, align: "center", lineBreak: false });
+    doc.page.margins.bottom = savedBottomMargin;
+    doc.y = savedY;
+    doc.font("Helvetica").fontSize(9.5).fillColor("#333333");
   }
 
   function renderMarkdownLines(doc: InstanceType<typeof PDFDocument>, content: string, x: number, w: number, checkPage: (n?: number) => void) {
@@ -3775,7 +3795,7 @@ Never give advice that ignores the current date or economic climate. Your intell
     };
 
     try {
-      const doc = new PDFDocument({ size: "LETTER", margins: { top: 60, bottom: 60, left: 65, right: 65 } });
+      const doc = new PDFDocument({ size: "LETTER", margins: { top: 65, bottom: 55, left: 65, right: 65 } });
       const chunks: Buffer[] = [];
       doc.on("data", (chunk: Buffer) => chunks.push(chunk));
 
@@ -3796,6 +3816,45 @@ Never give advice that ignores the current date or economic climate. Your intell
       const pdfReady = new Promise<Buffer>((resolve) => {
         doc.on("end", () => resolve(Buffer.concat(chunks)));
       });
+
+      const mL = 65;
+      const mR = 65;
+      const pw = 612 - mL - mR;
+      const bottomLimit = 792 - 55 - 50;
+
+      const newPage = () => {
+        skipNextPageEvent = true;
+        doc.addPage();
+        drawCleanHeader(doc);
+        drawCleanFooter(doc, today);
+      };
+
+      const checkPage = (needed = 50) => {
+        if (doc.y > bottomLimit - needed) newPage();
+      };
+
+      const drawRule = (weight = 0.5, color = "#cccccc") => {
+        doc.save();
+        doc.moveTo(mL, doc.y).lineTo(612 - mR, doc.y).strokeColor(color).lineWidth(weight).stroke();
+        doc.restore();
+        doc.moveDown(0.4);
+      };
+
+      const drawDoubleRule = () => {
+        doc.save();
+        doc.moveTo(mL, doc.y).lineTo(612 - mR, doc.y).strokeColor("#1a1a2e").lineWidth(1).stroke();
+        doc.moveTo(mL, doc.y + 2.5).lineTo(612 - mR, doc.y + 2.5).strokeColor("#cccccc").lineWidth(0.3).stroke();
+        doc.restore();
+        doc.y += 6;
+      };
+
+      const sectionTitle = (title: string) => {
+        checkPage(30);
+        doc.moveDown(0.3);
+        doc.font("Helvetica-Bold").fontSize(9).fillColor("#1a1a2e").text(title.toUpperCase(), { characterSpacing: 0.8 });
+        doc.moveDown(0.15);
+        drawDoubleRule();
+      };
 
       type DisputeItem = typeof disputes[number];
       const classifyDispute = (d: DisputeItem): string => {
@@ -3824,140 +3883,143 @@ Never give advice that ignores the current date or economic climate. Your intell
 
       const inquiryRoundLabels: Record<number, { subject: string; intro: string }> = {
         1: {
-          subject: "Request for Documentation of Permissible Purpose — Hard Inquiry Dispute",
-          intro: "After reviewing my consumer report, I identified the following hard inquiries that I do not recognize or do not recall authorizing. Under FCRA §604, a consumer report may only be accessed for a permissible purpose. I am requesting documentation demonstrating the permissible purpose that authorized each inquiry listed below."
+          subject: "FORMAL DISPUTE — Request for Documentation of Permissible Purpose (Hard Inquiries)",
+          intro: "I have conducted a review of my consumer file and identified the hard inquiries enumerated below. I do not recognize these inquiries, nor do I recall providing written authorization or initiating a transaction that would establish permissible purpose under 15 U.S.C. §1681b. Pursuant to FCRA §604(a), a consumer reporting agency may only furnish a consumer report under specifically enumerated circumstances. I am formally requesting that you produce documentation demonstrating the permissible purpose for each inquiry identified in this correspondence."
         },
         2: {
-          subject: "Request for Method of Verification — Hard Inquiry Dispute (Follow-Up)",
-          intro: "This letter serves as a follow-up to my prior dispute regarding the hard inquiries listed below. The inquiries were reported as verified or remain on my consumer report. Under FCRA §611(a)(6)(B)(iii), I am requesting the method of verification used in your investigation, including the name, address, and telephone number of the party contacted in verifying each inquiry."
+          subject: "FOLLOW-UP DISPUTE — Request for Method of Verification (Hard Inquiries, Round 2)",
+          intro: "This correspondence constitutes a formal follow-up to my prior dispute regarding the hard inquiries identified below. These items were reported as \"verified\" or continue to appear on my consumer file without substantive documentation of permissible purpose. Pursuant to FCRA §611(a)(6)(B)(iii) [15 U.S.C. §1681i(a)(6)(B)(iii)], I am exercising my statutory right to demand the method of verification used in your investigation, including the name, address, and telephone number of any party contacted during the verification process."
         },
         3: {
-          subject: "Failure to Provide Permissible Purpose Documentation — Escalation Notice",
-          intro: "This letter serves as a final notice regarding the hard inquiries listed below. Despite prior disputes, you have failed to provide documentation demonstrating the permissible purpose for the continued reporting of these inquiries. Continuing to report them without adequate verification may violate FCRA §604 and §611."
+          subject: "FINAL NOTICE — Failure to Provide Permissible Purpose Documentation (Hard Inquiries, Round 3)",
+          intro: "This letter constitutes a final demand regarding the unauthorized hard inquiries identified below. Despite two prior written disputes, your agency has failed to produce documentation demonstrating the permissible purpose that authorized access to my consumer file for these inquiries. The continued reporting of unverified inquiry data constitutes a potential violation of FCRA §604 [15 U.S.C. §1681b] and §611 [15 U.S.C. §1681i]. This matter will be escalated through regulatory channels if not resolved within the timeframe specified herein."
         }
       };
 
       const categoryLabels: Record<string, { subject: string; intro: string }> = {
         inquiry: inquiryRoundLabels[1],
         collection: {
-          subject: "Dispute of Collection Accounts — Request for Validation and Investigation",
-          intro: "I am writing to dispute the following collection account(s) appearing on my credit report pursuant to my rights under the Fair Credit Reporting Act (FCRA), 15 U.S.C. § 1681. I am requesting that each item be investigated, validated, and corrected or removed."
+          subject: "FORMAL DISPUTE — Collection Account(s): Request for Validation and Reinvestigation",
+          intro: "I am formally disputing the collection account(s) identified below, which appear on my consumer report. Pursuant to my rights under the Fair Credit Reporting Act (FCRA), 15 U.S.C. §1681 et seq., I am demanding a complete reinvestigation of each item. Each account must be validated with original documentation from the creditor. If the furnisher cannot produce a signed agreement, complete chain-of-title documentation, and payment ledger verifying the accuracy of the reported balance and status, the item must be deleted pursuant to §611(a)(5)(A)."
         },
         chargeoff: {
-          subject: "Dispute of Charge-Off Reporting — Request for Investigation",
-          intro: "I am writing to dispute the following charge-off account(s) appearing on my credit report pursuant to my rights under the Fair Credit Reporting Act (FCRA), 15 U.S.C. § 1681. I am requesting that each item be investigated and corrected or removed."
+          subject: "FORMAL DISPUTE — Charge-Off Account(s): Request for Reinvestigation",
+          intro: "I am formally disputing the charge-off account(s) identified below pursuant to my rights under the Fair Credit Reporting Act (FCRA), 15 U.S.C. §1681 et seq. I am demanding a reinvestigation of each item to verify the accuracy of the reported status, balance, dates, and payment history. Under §607(b) [15 U.S.C. §1681e(b)], your agency is required to follow reasonable procedures to assure maximum possible accuracy. If the furnisher cannot verify these items with original documentation, they must be deleted."
         },
         late_payment: {
-          subject: "Dispute of Late Payment Reporting — Request for Verification",
-          intro: "I am writing to dispute the following late payment notation(s) appearing on my credit report pursuant to my rights under the Fair Credit Reporting Act (FCRA), 15 U.S.C. § 1681. I am requesting that each item be investigated and corrected or removed."
+          subject: "FORMAL DISPUTE — Late Payment Notation(s): Request for Verification",
+          intro: "I am formally disputing the late payment notation(s) identified below pursuant to my rights under the Fair Credit Reporting Act (FCRA), 15 U.S.C. §1681 et seq. I am demanding verification that each notation accurately reflects my payment history. Under §623(a)(1)(A) [15 U.S.C. §1681s-2(a)(1)(A)], a furnisher shall not report information it knows or has reasonable cause to believe is inaccurate. If these notations cannot be verified with complete payment records, they must be corrected or deleted."
         },
         student_loan: {
-          subject: "Dispute of Student Loan Reporting — Request for Verification and Investigation",
-          intro: "I am writing to dispute the following student loan account(s) appearing on my credit report pursuant to my rights under the Fair Credit Reporting Act (FCRA), 15 U.S.C. § 1681. I am requesting that each item be investigated and corrected or removed."
+          subject: "FORMAL DISPUTE — Student Loan Account(s): Request for Verification and Reinvestigation",
+          intro: "I am formally disputing the student loan account(s) identified below pursuant to my rights under the Fair Credit Reporting Act (FCRA), 15 U.S.C. §1681 et seq. Under FCRA §1681c-2 [15 U.S.C. §1681c-2], if applicable, a consumer reporting agency shall block the reporting of information identified as resulting from identity theft. I am demanding a complete reinvestigation including verification of the loan origination documentation, servicer chain-of-custody, and accuracy of the reported balance, status, and payment history."
         },
         other: {
-          subject: "Dispute of Inaccurate Information — Request for Investigation",
-          intro: "I am writing to dispute inaccurate information on my credit report pursuant to my rights under the Fair Credit Reporting Act (FCRA), 15 U.S.C. § 1681. I am requesting that the following item(s) be investigated and corrected or removed."
+          subject: "FORMAL DISPUTE — Inaccurate Information: Request for Reinvestigation",
+          intro: "I am formally disputing the item(s) identified below pursuant to my rights under the Fair Credit Reporting Act (FCRA), 15 U.S.C. §1681 et seq. I am demanding a reinvestigation of each disputed item to verify accuracy, completeness, and verifiability. Under §607(b) [15 U.S.C. §1681e(b)], your agency must follow reasonable procedures to assure maximum possible accuracy of the information in my consumer file."
         }
       };
+
+      const categoryOrder = ["inquiry", "collection", "chargeoff", "late_payment", "student_loan", "other"];
+      const totalItems = disputes.length;
+      const bureauSet = [...new Set(disputes.map(d => d.bureau || "All"))];
 
       drawCleanHeader(doc);
       drawCleanFooter(doc, today);
 
-      doc.moveDown(1);
-      doc.font("Helvetica-Bold").fontSize(18).fillColor("#1a1a2e")
-        .text("Bureau Dispute Package", { align: "center" });
       doc.moveDown(0.5);
-      doc.font("Helvetica").fontSize(10).fillColor("#666666")
-        .text(today, { align: "center" });
-      doc.moveDown(2);
+      doc.font("Helvetica-Bold").fontSize(16).fillColor("#1a1a2e")
+        .text("BUREAU DISPUTE PACKAGE", { align: "center", characterSpacing: 1.5 });
+      doc.moveDown(0.2);
+      doc.font("Helvetica").fontSize(8).fillColor("#999999")
+        .text("Fair Credit Reporting Act (FCRA) Compliance Documentation", { align: "center" });
+      doc.moveDown(0.5);
+      drawDoubleRule();
+      doc.moveDown(0.5);
 
-      doc.font("Helvetica").fontSize(10).fillColor("#333333");
-      const coverLines = [
-        ["Prepared For", userName],
-        ["Address", userAddress.replace(/\n/g, ", ")],
-        ["SSN", `XXX-XX-${ssnLast4}`],
-        ["DOB", dob],
+      sectionTitle("Consumer Identification");
+      const idFields = [
+        ["Full Name", userName],
+        ["Mailing Address", userAddress.replace(/\n/g, ", ")],
+        ["SSN (Last 4)", `XXX-XX-${ssnLast4}`],
+        ["Date of Birth", dob],
+        ["Date Prepared", today],
       ];
-      for (const [label, value] of coverLines) {
-        doc.font("Helvetica-Bold").text(`${label}: `, { continued: true }).font("Helvetica").text(value);
-        doc.moveDown(0.3);
+      for (const [label, value] of idFields) {
+        doc.font("Helvetica-Bold").fontSize(9).fillColor("#333333").text(`${label}:  `, { continued: true });
+        doc.font("Helvetica").fontSize(9).fillColor("#444444").text(value);
+        doc.moveDown(0.15);
       }
-      doc.moveDown(1);
-
-      const totalItems = disputes.length;
-      const bureauSet = [...new Set(disputes.map(d => d.bureau || "All"))];
-      const catSet = [...new Set(Object.keys(grouped))];
-      doc.font("Helvetica-Bold").fontSize(11).fillColor("#1a1a2e").text("Package Summary");
       doc.moveDown(0.3);
-      doc.font("Helvetica").fontSize(10).fillColor("#333333");
-      doc.text(`Total Items Disputed: ${totalItems}`);
-      doc.text(`Bureaus: ${bureauSet.join(", ")}`);
-      doc.text(`Categories: ${catSet.map(c => (categoryLabels[c] || categoryLabels["other"]).subject.split(" — ")[0]).join(", ")}`);
-      doc.text(`Evidence Documents: ${attachmentPages.length > 0 ? attachmentPages.map(a => a.name).join(", ") : "None attached"}`);
-      doc.moveDown(2);
 
-      const categoryOrder = ["inquiry", "collection", "chargeoff", "late_payment", "student_loan", "other"];
-      doc.font("Helvetica-Bold").fontSize(11).fillColor("#1a1a2e").text("Table of Contents");
+      sectionTitle("Case Summary");
+      doc.font("Helvetica").fontSize(9).fillColor("#333333");
+      doc.text(`Total Items Under Dispute:  ${totalItems}`, { lineGap: 3 });
+      doc.text(`Bureau(s) Addressed:  ${bureauSet.join(", ")}`, { lineGap: 3 });
+      const catSummary = categoryOrder.filter(c => grouped[c]).map(c => {
+        const count = Object.values(grouped[c]!).reduce((s, arr) => s + arr.length, 0);
+        const label = (categoryLabels[c] || categoryLabels["other"]).subject.split(" — ")[0].replace("FORMAL DISPUTE", "").replace(/^[\s—]+/, "");
+        return `${label} (${count})`;
+      });
+      doc.text(`Categories:  ${catSummary.join(", ")}`, { lineGap: 3 });
+      doc.text(`Evidence Documents:  ${attachmentPages.length > 0 ? attachmentPages.map(a => a.name).join(", ") : "None attached"}`, { lineGap: 3 });
       doc.moveDown(0.3);
-      doc.font("Helvetica").fontSize(9).fillColor("#555555");
-      let tocIndex = 1;
-      doc.text(`1. Cover Page`);
+
+      sectionTitle("Table of Contents");
+      doc.font("Helvetica").fontSize(9).fillColor("#444444");
+      let tocIndex = 0;
+      tocIndex++; doc.text(`${tocIndex}.  Cover Page & Case Summary`, { indent: 10, lineGap: 2 });
       if (letterContent) {
-        tocIndex++;
-        doc.text(`${tocIndex}. AI-Generated Dispute Analysis`);
+        tocIndex++; doc.text(`${tocIndex}.  AI-Generated Dispute Analysis`, { indent: 10, lineGap: 2 });
       }
       for (const cat of categoryOrder) {
         if (!grouped[cat]) continue;
         for (const [bureau] of Object.entries(grouped[cat])) {
           tocIndex++;
-          const catLabel = (categoryLabels[cat] || categoryLabels["other"]).subject.split(" — ")[0];
-          doc.text(`${tocIndex}. ${catLabel} — ${bureau}`);
+          const catLabel = (categoryLabels[cat] || categoryLabels["other"]).subject.split(" — ")[1] || (categoryLabels[cat] || categoryLabels["other"]).subject;
+          doc.text(`${tocIndex}.  ${catLabel} [${bureau}]`, { indent: 10, lineGap: 2 });
         }
       }
       if (attachmentPages.length > 0) {
-        tocIndex++;
-        doc.text(`${tocIndex}. Evidence Appendix`);
+        tocIndex++; doc.text(`${tocIndex}.  Evidence Appendix`, { indent: 10, lineGap: 2 });
       }
-      tocIndex++;
-      doc.text(`${tocIndex}. Dispute Ledger`);
+      tocIndex++; doc.text(`${tocIndex}.  Dispute Ledger`, { indent: 10, lineGap: 2 });
+      doc.moveDown(0.5);
+
+      doc.font("Helvetica").fontSize(7.5).fillColor("#999999")
+        .text("This package was prepared in accordance with consumer rights under the Fair Credit Reporting Act, 15 U.S.C. §1681 et seq. Each letter cites the specific statutory authority under which the dispute is filed. This documentation is for educational and consumer advocacy purposes.", { align: "center", lineGap: 2 });
 
       if (letterContent) {
-        skipNextPageEvent = true; doc.addPage();
-        drawCleanHeader(doc);
-        drawCleanFooter(doc, today);
-        doc.moveDown(0.5);
-        doc.font("Helvetica-Bold").fontSize(14).fillColor("#1a1a2e").text("Dispute Letter Content", { align: "center" });
+        newPage();
         doc.moveDown(0.3);
-        doc.font("Helvetica").fontSize(8).fillColor("#888888").text("AI-generated dispute letter for your records", { align: "center" });
-        doc.moveDown(1);
+        sectionTitle("AI-Generated Dispute Analysis");
+        doc.font("Helvetica").fontSize(7.5).fillColor("#888888")
+          .text("The following content was generated by Profundr AI based on the consumer's uploaded bureau data.", { lineGap: 2 });
+        doc.moveDown(0.5);
 
         const lcLines = letterContent.split("\n");
         for (const line of lcLines) {
-          if (doc.y > doc.page.height - 80) {
-            skipNextPageEvent = true; doc.addPage();
-            drawCleanHeader(doc);
-            drawCleanFooter(doc, today);
-          }
+          checkPage(30);
           const trimmed = line.trim();
-          if (!trimmed) { doc.moveDown(0.3); continue; }
+          if (!trimmed) { doc.moveDown(0.25); continue; }
           if (trimmed.startsWith("# ")) {
-            doc.font("Helvetica-Bold").fontSize(14).fillColor("#1a1a2e").text(trimmed.slice(2), { lineGap: 2 });
-            doc.moveDown(0.3);
-          } else if (trimmed.startsWith("## ")) {
-            doc.font("Helvetica-Bold").fontSize(12).fillColor("#1a1a2e").text(trimmed.slice(3), { lineGap: 2 });
-            doc.moveDown(0.25);
-          } else if (trimmed.startsWith("### ")) {
-            doc.font("Helvetica-Bold").fontSize(10).fillColor("#333333").text(trimmed.slice(4), { lineGap: 2 });
+            doc.font("Helvetica-Bold").fontSize(12).fillColor("#1a1a2e").text(trimmed.slice(2), { lineGap: 3 });
             doc.moveDown(0.2);
+          } else if (trimmed.startsWith("## ")) {
+            doc.moveDown(0.2);
+            doc.font("Helvetica-Bold").fontSize(10).fillColor("#1a1a2e").text(trimmed.slice(3).toUpperCase(), { lineGap: 2, characterSpacing: 0.3 });
+            drawRule(0.3);
+          } else if (trimmed.startsWith("### ")) {
+            doc.font("Helvetica-Bold").fontSize(9.5).fillColor("#333333").text(trimmed.slice(4), { lineGap: 2 });
+            doc.moveDown(0.15);
           } else if (/^[-•]\s+/.test(trimmed)) {
-            doc.font("Helvetica").fontSize(9.5).fillColor("#333333").text(`  •  ${trimmed.replace(/^[-•]\s+/, "")}`, { lineGap: 2, indent: 10 });
+            doc.font("Helvetica").fontSize(9).fillColor("#333333").text(`    ${trimmed.replace(/^[-•]\s+/, "")}`, { lineGap: 2, indent: 8 });
             doc.moveDown(0.1);
           } else if (/^\d+\.\s+/.test(trimmed)) {
-            doc.font("Helvetica").fontSize(9.5).fillColor("#333333").text(`  ${trimmed}`, { lineGap: 2, indent: 10 });
+            doc.font("Helvetica").fontSize(9).fillColor("#333333").text(`  ${trimmed}`, { lineGap: 2, indent: 8 });
             doc.moveDown(0.1);
           } else {
-            doc.font("Helvetica").fontSize(9.5).fillColor("#333333").text(trimmed, { lineGap: 2, align: "justify" });
+            doc.font("Helvetica").fontSize(9).fillColor("#333333").text(trimmed, { lineGap: 2, align: "justify" });
             doc.moveDown(0.1);
           }
         }
@@ -3968,7 +4030,7 @@ Never give advice that ignores the current date or economic climate. Your intell
       for (const cat of categoryOrder) {
         if (!grouped[cat]) continue;
         for (const [bureau, items] of Object.entries(grouped[cat])) {
-          skipNextPageEvent = true; doc.addPage();
+          newPage();
           letterIndex++;
 
           const isInquiry = cat === "inquiry";
@@ -3976,187 +4038,221 @@ Never give advice that ignores the current date or economic climate. Your intell
           const inquiryRound = isInquiry ? (items[0]?.disputeRound || 1) : 1;
           const catInfo = isInquiry ? (inquiryRoundLabels[inquiryRound] || inquiryRoundLabels[1]) : (categoryLabels[cat] || categoryLabels["other"]);
 
-          drawCleanHeader(doc);
-          drawCleanFooter(doc, today);
+          const j: PDFKit.Mixins.TextOptions = { align: "justify", lineGap: 2.5 };
 
-          const j: PDFKit.Mixins.TextOptions = { align: "justify", lineGap: 2 };
-          const c: PDFKit.Mixins.TextOptions = { align: "center" };
+          doc.font("Helvetica").fontSize(9.5).fillColor("#333333")
+            .text(userName)
+            .text(userAddress)
+            .text(`SSN: XXX-XX-${ssnLast4}`)
+            .text(`DOB: ${dob}`);
+          doc.moveDown(0.6);
+          doc.text(today);
+          doc.moveDown(0.8);
+          drawRule(0.3);
+          doc.moveDown(0.2);
 
-          doc.font("Helvetica").fontSize(10).fillColor("#333333")
-            .text(userName, c)
-            .text(userAddress, c)
-            .text(`SSN: XXX-XX-${ssnLast4}`, c)
-            .text(`DOB: ${dob}`, c)
-            .moveDown(0.5)
-            .text(today, c)
-            .moveDown(1);
+          doc.font("Helvetica").fontSize(9.5).fillColor("#333333")
+            .text(bureauAddr);
+          doc.moveDown(0.8);
 
-          doc.text(bureauAddr, c)
-            .moveDown(1);
+          drawDoubleRule();
+          doc.moveDown(0.2);
 
-          doc.font("Helvetica-Bold").fontSize(10).fillColor("#111111")
-            .text(`Re: ${catInfo.subject}`, c)
-            .moveDown(0.8);
+          doc.font("Helvetica-Bold").fontSize(10).fillColor("#1a1a2e")
+            .text(`Re: ${catInfo.subject}`, { lineGap: 2 });
+          doc.moveDown(0.6);
 
-          doc.font("Helvetica").fontSize(10).fillColor("#333333")
-            .text("To Whom It May Concern,", c)
-            .moveDown(0.6);
+          drawRule(0.3);
+          doc.moveDown(0.2);
 
-          doc.text(catInfo.intro, j).moveDown(0.8);
+          doc.font("Helvetica").fontSize(9.5).fillColor("#333333")
+            .text("To Whom It May Concern:", j);
+          doc.moveDown(0.5);
+
+          doc.text(catInfo.intro, j);
+          doc.moveDown(0.6);
 
           if (isInquiry) {
             const round = items[0]?.disputeRound || 1;
-            const roundLabel = inquiryRoundLabels[round] || inquiryRoundLabels[1];
 
-            doc.font("Helvetica-Bold").fontSize(9).fillColor("#6366f1")
-              .text(`ROUND ${round} OF 3`, { align: "center" })
-              .moveDown(0.3);
-            doc.font("Helvetica-Bold").fontSize(10).fillColor("#333333")
-              .text(`Disputed Inquiries (${items.length} item${items.length > 1 ? "s" : ""}):`, { underline: true, align: "center" })
-              .moveDown(0.4);
-            doc.font("Helvetica").fontSize(10).fillColor("#333333");
+            if (round > 1) {
+              doc.font("Helvetica-Bold").fontSize(8).fillColor("#1a1a2e")
+                .text(`DISPUTE ROUND ${round} OF 3`, { align: "right", lineBreak: false });
+              doc.moveDown(0.3);
+            }
+
+            sectionTitle(`Disputed Inquiries  (${items.length} Item${items.length > 1 ? "s" : ""})`);
+            doc.font("Helvetica").fontSize(9.5).fillColor("#333333");
             for (let idx = 0; idx < items.length; idx++) {
+              checkPage(40);
               const d = items[idx];
-              doc.moveDown(0.2);
-              doc.font("Helvetica-Bold").text(`${idx + 1}. ${d.creditor}`, j);
-              doc.font("Helvetica");
+              doc.moveDown(0.15);
+              doc.font("Helvetica-Bold").fontSize(9.5).fillColor("#333333").text(`${idx + 1}.  ${d.creditor}`);
+              doc.font("Helvetica").fontSize(9).fillColor("#444444");
               if (d.accountNumber && d.accountNumber !== "N/A") {
-                doc.text(`   Reference/Account Number: ${d.accountNumber}`, j);
+                doc.text(`     Reference/Account No.:  ${d.accountNumber}`, { indent: 6 });
               }
-              doc.text(`   Issue: ${d.issue}`, j);
+              doc.text(`     Reported Issue:  ${d.issue}`, { indent: 6 });
+              if (idx < items.length - 1) {
+                doc.moveDown(0.15);
+                doc.save();
+                doc.moveTo(mL + 20, doc.y).lineTo(612 - mR - 20, doc.y).strokeColor("#e8e8e8").lineWidth(0.3).stroke();
+                doc.restore();
+              }
             }
             doc.moveDown(0.6);
 
             if (round === 1) {
-              doc.font("Helvetica-Bold").text("Legal Basis — FCRA §604 [15 USC §1681b]:", { underline: true, align: "center" }).moveDown(0.4);
-              doc.font("Helvetica").text(
-                "Under FCRA §604(a), a consumer reporting agency may furnish a consumer report only under the following circumstances and no other:",
-                j
-              ).moveDown(0.3);
-              doc.text("• §604(a)(2): In accordance with the written instructions of the consumer", j);
-              doc.text("• §604(a)(3)(A): In connection with a credit transaction involving the consumer — extension, review, or collection", j);
-              doc.text("• §604(a)(3)(F): Legitimate business need in connection with a business transaction initiated by the consumer", j);
+              sectionTitle("Statutory Authority");
+              doc.font("Helvetica").fontSize(9.5).fillColor("#333333")
+                .text("This dispute invokes the following provisions of the Fair Credit Reporting Act:", j);
               doc.moveDown(0.3);
-              doc.font("Helvetica-Bold").text("Request:", { underline: true }).moveDown(0.3);
-              doc.font("Helvetica");
-              doc.text("Please provide the following documentation for each inquiry listed above:", j).moveDown(0.2);
-              doc.text("1. Documentation showing the permissible purpose that authorized access to my consumer report under §604.", j);
-              doc.text("2. Documentation of the transaction initiated by me that created the permissible purpose, including any application or written authorization.", j);
-              doc.text("3. The date and nature of the transaction that justified accessing my report.", j);
+              doc.font("Helvetica-Bold").fontSize(9).fillColor("#333333").text("FCRA §604(a) [15 U.S.C. §1681b(a)]  —  Permissible Purposes");
+              doc.font("Helvetica").fontSize(9).fillColor("#444444")
+                .text("A consumer reporting agency may furnish a consumer report only under specifically enumerated circumstances. The following must apply:", { indent: 6, lineGap: 2 })
+                .moveDown(0.15);
+              doc.text("(a)(2)  In accordance with the written instructions of the consumer.", { indent: 16, lineGap: 2 });
+              doc.text("(a)(3)(A)  In connection with a credit transaction involving the consumer.", { indent: 16, lineGap: 2 });
+              doc.text("(a)(3)(F)  Legitimate business need in connection with a transaction initiated by the consumer.", { indent: 16, lineGap: 2 });
               doc.moveDown(0.4);
-              doc.text(
-                "If these inquiries cannot be verified through documentation demonstrating permissible purpose, they must be deleted pursuant to FCRA §611(a)(5)(A). Items that cannot be verified must be promptly deleted or modified.",
-                j
-              ).moveDown(0.4);
-              doc.text(
-                "I am requesting written notification of the results of your investigation per §611(a)(6), including the procedure used to determine accuracy and completeness.",
-                j
-              ).moveDown(1);
+
+              sectionTitle("Demand for Action");
+              doc.font("Helvetica").fontSize(9.5).fillColor("#333333")
+                .text("For each inquiry listed above, I demand that you produce:", j);
+              doc.moveDown(0.2);
+              doc.text("1.  Documentation demonstrating the permissible purpose that authorized access to my consumer report under §604.", { indent: 6, lineGap: 2.5 });
+              doc.text("2.  Evidence of the transaction I initiated that created permissible purpose, including any signed application or written authorization.", { indent: 6, lineGap: 2.5 });
+              doc.text("3.  The date and nature of the transaction that justified accessing my file.", { indent: 6, lineGap: 2.5 });
+              doc.moveDown(0.4);
+              doc.text("If these inquiries cannot be verified through original documentation demonstrating permissible purpose, they must be permanently deleted from my consumer file pursuant to FCRA §611(a)(5)(A) [15 U.S.C. §1681i(a)(5)(A)].", j);
+              doc.moveDown(0.4);
+
+              sectionTitle("Compliance Timeline");
+              doc.font("Helvetica").fontSize(9.5).fillColor("#333333")
+                .text("Pursuant to §611(a)(1)(A), you have 30 days from receipt to complete your reinvestigation. I am requesting written notification of your findings per §611(a)(6), including the procedure used to determine accuracy and completeness, the name and contact information of any party providing verification, and an updated copy of my consumer report.", j);
 
             } else if (round === 2) {
-              doc.font("Helvetica-Bold").text("Method of Verification Request — FCRA §611(a)(6)(B)(iii):", { underline: true, align: "center" }).moveDown(0.4);
-              doc.font("Helvetica").text(
-                "This letter serves as a request for the method of verification used in your investigation of the inquiries listed above. Under FCRA §611(a)(6)(B)(iii), upon request, you must provide:",
-                j
-              ).moveDown(0.3);
-              doc.text("1. The name, address, and telephone number of the party contacted in verifying each inquiry.", j);
-              doc.text("2. The specific method used to verify permissible purpose.", j);
-              doc.text("3. Documentation demonstrating the permissible purpose that authorized these inquiries under FCRA §604.", j);
+              sectionTitle("Method of Verification Demand");
+              doc.font("Helvetica").fontSize(9.5).fillColor("#333333")
+                .text("Pursuant to FCRA §611(a)(6)(B)(iii) [15 U.S.C. §1681i(a)(6)(B)(iii)], I am demanding the following for each inquiry listed above:", j);
+              doc.moveDown(0.2);
+              doc.text("1.  The name, address, and telephone number of the party contacted during the verification process.", { indent: 6, lineGap: 2.5 });
+              doc.text("2.  The specific method of verification employed (not merely a statement of \"verified\").", { indent: 6, lineGap: 2.5 });
+              doc.text("3.  Original documentation demonstrating permissible purpose under FCRA §604.", { indent: 6, lineGap: 2.5 });
               doc.moveDown(0.4);
-              doc.text(
-                "A response of \"verified\" without providing the above information does not satisfy your obligations under §611(a)(6)(B)(iii). If the inquiries cannot be verified through documentation of permissible purpose, they must be deleted pursuant to §611(a)(5)(A).",
-                j
-              ).moveDown(0.4);
-              doc.text(
-                "I am requesting written notification of your reinvestigation results, including the method of verification, per §611(a)(6).",
-                j
-              ).moveDown(1);
+              doc.text("A conclusory response of \"verified\" without production of the above documentation does not satisfy your statutory obligations under §611(a)(6)(B)(iii). If permissible purpose cannot be documented, the inquiries must be deleted pursuant to §611(a)(5)(A).", j);
+              doc.moveDown(0.4);
+
+              sectionTitle("Compliance Timeline");
+              doc.font("Helvetica").fontSize(9.5).fillColor("#333333")
+                .text("You have 30 days from receipt to complete your reinvestigation. Written notification of the method of verification and results is required per §611(a)(6).", j);
 
             } else {
-              doc.font("Helvetica-Bold").text("Escalation Notice — Failure to Provide Adequate Verification:", { underline: true, align: "center" }).moveDown(0.4);
-              doc.font("Helvetica").text(
-                "Despite prior disputes, you have failed to provide documentation demonstrating the permissible purpose for the continued reporting of the inquiries listed above. Continuing to report these inquiries without adequate verification may violate FCRA §604 and §611.",
-                j
-              ).moveDown(0.4);
-              doc.text(
-                "If these inquiries are not removed within 30 days, I intend to escalate this matter through formal complaints to:",
-                j
-              ).moveDown(0.2);
-              doc.text("• Consumer Financial Protection Bureau (CFPB)", j);
-              doc.text("• Federal Trade Commission (FTC)", j);
-              doc.text("• The appropriate State Attorney General", j);
+              sectionTitle("Notice of Regulatory Escalation");
+              doc.font("Helvetica").fontSize(9.5).fillColor("#333333")
+                .text("Despite two prior written disputes, your agency has failed to produce documentation establishing permissible purpose for the inquiries enumerated above. The continued reporting of unverified data constitutes a potential violation of FCRA §604 and §611.", j);
               doc.moveDown(0.4);
-              doc.text(
-                "I reserve all rights under FCRA §616 [15 USC §1681n] (willful noncompliance — liability of $100 to $1,000 per violation, plus punitive damages and attorney's fees) and §617 [15 USC §1681o] (negligent noncompliance — actual damages and attorney's fees). Per §618, I have 2 years from discovery to bring action.",
-                j
-              ).moveDown(0.4);
-              doc.text(
-                "This is a final notice before formal escalation. I expect prompt resolution.",
-                j
-              ).moveDown(1);
+              doc.text("If these inquiries are not permanently removed within 30 days of receipt, I will file formal complaints with:", j);
+              doc.moveDown(0.2);
+              doc.text("    Consumer Financial Protection Bureau (CFPB)", { lineGap: 2 });
+              doc.text("    Federal Trade Commission (FTC)", { lineGap: 2 });
+              doc.text("    Office of the State Attorney General", { lineGap: 2 });
+              doc.moveDown(0.4);
             }
 
           } else {
-            doc.font("Helvetica-Bold").fontSize(10)
-              .text(`Disputed Items (${items.length} account${items.length > 1 ? "s" : ""}):`, { underline: true, align: "center" })
-              .moveDown(0.4);
-            doc.font("Helvetica").fontSize(10).fillColor("#333333");
+            sectionTitle(`Disputed Items  (${items.length} Account${items.length > 1 ? "s" : ""})`);
+            doc.font("Helvetica").fontSize(9.5).fillColor("#333333");
             for (let idx = 0; idx < items.length; idx++) {
+              checkPage(50);
               const d = items[idx];
-              doc.moveDown(0.3);
-              doc.font("Helvetica-Bold").text(`Item ${idx + 1}: ${d.creditor}`, j);
-              doc.font("Helvetica");
+              doc.moveDown(0.15);
+              doc.font("Helvetica-Bold").fontSize(9.5).fillColor("#333333").text(`Item ${idx + 1}:  ${d.creditor}`);
+              doc.font("Helvetica").fontSize(9).fillColor("#444444");
               if (d.accountNumber && d.accountNumber !== "N/A") {
-                doc.text(`   Account Number: ${d.accountNumber}`, j);
+                doc.text(`     Account No.:  ${d.accountNumber}`, { indent: 6 });
               }
-              doc.text(`   Issue: ${d.issue}`, j);
-              doc.text(`   Dispute Basis: ${d.reason}`, j);
+              doc.text(`     Reported Issue:  ${d.issue}`, { indent: 6 });
+              doc.text(`     Dispute Basis:  ${d.reason}`, { indent: 6 });
+              if (idx < items.length - 1) {
+                doc.moveDown(0.15);
+                doc.save();
+                doc.moveTo(mL + 20, doc.y).lineTo(612 - mR - 20, doc.y).strokeColor("#e8e8e8").lineWidth(0.3).stroke();
+                doc.restore();
+              }
             }
-            doc.moveDown(0.8);
-
-            doc.font("Helvetica-Bold").text("Legal Basis — FCRA Statutory Authority:", { underline: true, align: "center" }).moveDown(0.4);
-            doc.font("Helvetica").text(
-              "This dispute is filed pursuant to my rights under the Fair Credit Reporting Act (FCRA), 15 U.S.C. §1681 et seq.:",
-              j
-            ).moveDown(0.3);
-            doc.text("• §611(a)(1)(A) [15 USC §1681i] — If the completeness or accuracy of any item is disputed by the consumer, the agency shall, free of charge, conduct a reasonable reinvestigation and record the current status or delete the item before the end of the 30-day period.", j);
-            doc.text("• §607(b) [15 USC §1681e(b)] — \"Whenever a consumer reporting agency prepares a consumer report it shall follow reasonable procedures to assure maximum possible accuracy.\"", j);
-            doc.text("• §623(b)(1) [15 USC §1681s-2(b)] — After receiving notice of a dispute, the furnisher shall: (A) conduct an investigation; (B) review all relevant information; (C) report results to the agency; (E) if inaccurate or unverifiable — modify, delete, or permanently block the item.", j);
-            doc.text("• §623(a)(1)(A) — A person shall not furnish information if the person knows or has reasonable cause to believe the information is inaccurate.", j);
             doc.moveDown(0.6);
 
-            doc.font("Helvetica-Bold").text("Required Action — FCRA §611 [15 USC §1681i]:", { underline: true, align: "center" }).moveDown(0.4);
-            doc.font("Helvetica").text(
-              `Under §611(a)(1)(A), you must complete your reinvestigation within 30 days. For each of the ${items.length} item(s) listed above, I am requesting:`,
-              j
-            ).moveDown(0.2);
-            doc.text("1. Complete verification from the original furnisher per §623(b)(1)(A), including the original signed agreement or contract.", j);
-            doc.text("2. Complete payment history and documentation supporting the reported status per §623(b)(1)(B).", j);
-            doc.text("3. Proof that the information is being reported with maximum possible accuracy per §607(b).", j);
+            sectionTitle("Statutory Authority");
+            doc.font("Helvetica").fontSize(9.5).fillColor("#333333")
+              .text("This dispute is filed pursuant to the following provisions of the Fair Credit Reporting Act (FCRA), 15 U.S.C. §1681 et seq.:", j);
+            doc.moveDown(0.3);
+
+            const statutes = [
+              ["§611(a)(1)(A) [15 U.S.C. §1681i]", "If the completeness or accuracy of any item is disputed by a consumer, the agency shall, free of charge, conduct a reasonable reinvestigation to determine whether the disputed information is inaccurate and record the current status of the disputed information, or delete the item, before the end of the 30-day period."],
+              ["§607(b) [15 U.S.C. §1681e(b)]", "A consumer reporting agency shall follow reasonable procedures to assure maximum possible accuracy of the information concerning the individual about whom the report relates."],
+              ["§623(b)(1) [15 U.S.C. §1681s-2(b)]", "After receiving notice of a dispute from a CRA, the furnisher shall: (A) conduct an investigation with respect to the disputed information; (B) review all relevant information provided by the CRA; (C) report the results to the CRA; and (E) if the information is found to be inaccurate, incomplete, or unverifiable — modify, delete, or permanently block reporting of that information."],
+              ["§623(a)(1)(A) [15 U.S.C. §1681s-2(a)]", "A person shall not furnish information relating to a consumer to any CRA if the person knows or has reasonable cause to believe the information is inaccurate."],
+            ];
+            if (cat === "student_loan") {
+              statutes.push(["§605B [15 U.S.C. §1681c-2]", "A consumer reporting agency shall block the reporting of any information identified as resulting from an alleged identity theft, no later than 4 business days after the date of receipt."]);
+            }
+            for (const [cite, text] of statutes) {
+              checkPage(40);
+              doc.font("Helvetica-Bold").fontSize(8.5).fillColor("#1a1a2e").text(cite);
+              doc.font("Helvetica").fontSize(9).fillColor("#444444").text(text, { indent: 6, lineGap: 2.5 });
+              doc.moveDown(0.25);
+            }
+            doc.moveDown(0.3);
+
+            sectionTitle("Demand for Action");
+            doc.font("Helvetica").fontSize(9.5).fillColor("#333333")
+              .text(`Under §611(a)(1)(A), you are required to complete your reinvestigation within 30 days of receipt. For each of the ${items.length} item(s) enumerated above, I demand:`, j);
+            doc.moveDown(0.2);
+            doc.text("1.  Complete verification from the original furnisher per §623(b)(1)(A), including the original signed contract or agreement.", { indent: 6, lineGap: 2.5 });
+            doc.text("2.  Complete payment history and documentation supporting the reported status, balance, and dates per §623(b)(1)(B).", { indent: 6, lineGap: 2.5 });
+            doc.text("3.  Proof that the information is being reported with maximum possible accuracy per §607(b).", { indent: 6, lineGap: 2.5 });
             doc.moveDown(0.4);
 
-            doc.text(
-              "Per §611(a)(5)(A), if any item is found inaccurate, incomplete, or cannot be verified, you must promptly delete or modify that item and notify the furnisher. Per §611(a)(5)(B), deleted information may not be reinserted unless the furnisher certifies accuracy and the consumer is notified in writing within 5 business days.",
-              j
-            ).moveDown(0.3);
+            checkPage(60);
+            doc.text("If any item is found inaccurate, incomplete, or cannot be verified, you must promptly delete or modify that item and notify the furnisher per §611(a)(5)(A). Deleted information may not be reinserted unless the furnisher certifies accuracy and the consumer is notified in writing within 5 business days per §611(a)(5)(B).", j);
+            doc.moveDown(0.4);
 
-            doc.text(
-              "Per §616 [15 USC §1681n], willful noncompliance subjects you to liability of $100 to $1,000 per violation, plus punitive damages and attorney's fees. Per §617 [15 USC §1681o], negligent noncompliance subjects you to actual damages and attorney's fees. Per §618 [15 USC §1681p], I have 2 years from discovery to bring action. I reserve all rights under the FCRA.",
-              j
-            ).moveDown(0.5);
-
-            doc.text(
-              "Per §611(a)(6), I request written notification of the results of your investigation within 5 business days of completion, including: a statement of completion, an updated consumer report, the procedure used to determine accuracy, furnisher contact information, and notice of my right to add a dispute statement.",
-              j
-            ).moveDown(1);
+            sectionTitle("Compliance Timeline");
+            doc.font("Helvetica").fontSize(9.5).fillColor("#333333")
+              .text("You have 30 days from receipt of this correspondence to complete your reinvestigation. Per §611(a)(6), I demand written notification of the results within 5 business days of completion, including:", j);
+            doc.moveDown(0.2);
+            doc.text("(i)   A statement that the reinvestigation has been completed.", { indent: 6, lineGap: 2.5 });
+            doc.text("(ii)  An updated consumer report reflecting any modifications or deletions.", { indent: 6, lineGap: 2.5 });
+            doc.text("(iii) The procedure used to determine the accuracy and completeness of each item.", { indent: 6, lineGap: 2.5 });
+            doc.text("(iv)  The business name, address, and telephone number of any furnisher contacted.", { indent: 6, lineGap: 2.5 });
+            doc.text("(v)   Notice of my right to add a consumer statement to my file per §611(b).", { indent: 6, lineGap: 2.5 });
           }
 
-          doc.text("Sincerely,", c).moveDown(0.8);
+          doc.moveDown(0.5);
+          checkPage(80);
+          sectionTitle("Reservation of Rights");
+          doc.font("Helvetica").fontSize(9.5).fillColor("#333333")
+            .text("I reserve all rights under the Fair Credit Reporting Act, including but not limited to:", j);
+          doc.moveDown(0.2);
+          doc.text("§616 [15 U.S.C. §1681n]  —  Willful noncompliance: statutory damages of $100 to $1,000 per violation, plus punitive damages and reasonable attorney's fees.", { indent: 6, lineGap: 2.5 });
+          doc.text("§617 [15 U.S.C. §1681o]  —  Negligent noncompliance: actual damages plus reasonable attorney's fees.", { indent: 6, lineGap: 2.5 });
+          doc.text("§618 [15 U.S.C. §1681p]  —  Statute of limitations: action may be brought within 2 years of discovery.", { indent: 6, lineGap: 2.5 });
+          doc.moveDown(0.4);
+          doc.text("Nothing in this correspondence shall be construed as a waiver of any right, claim, or remedy available to me under federal or state law.", j);
+
+          doc.moveDown(0.8);
+          drawRule(0.3);
+          doc.moveDown(0.3);
+          doc.font("Helvetica").fontSize(9.5).fillColor("#333333").text("Respectfully submitted,");
+          doc.moveDown(0.6);
           drawSignature(doc, userName);
 
-          doc.moveDown(1);
-          doc.font("Helvetica").fontSize(8).fillColor("#999999")
-            .text("Generated by Profundr. This letter is based on consumer rights under the FCRA and is for educational and advocacy purposes. Profundr is not a law firm and does not provide legal advice.", c);
+          doc.moveDown(0.8);
+          drawRule(0.3);
+          doc.moveDown(0.2);
+          doc.font("Helvetica").fontSize(7).fillColor("#999999")
+            .text("This letter was prepared using Profundr and is based on consumer rights under the Fair Credit Reporting Act, 15 U.S.C. §1681 et seq. Profundr is not a law firm and does not provide legal representation. This document is for educational and consumer advocacy purposes.", { align: "center", lineGap: 2 });
         }
       }
 
@@ -4168,25 +4264,21 @@ Never give advice that ignores the current date or economic climate. Your intell
           return (aIdx === -1 ? 99 : aIdx) - (bIdx === -1 ? 99 : bIdx);
         });
         for (const att of sorted) {
-          skipNextPageEvent = true;
-          doc.addPage();
-          drawCleanHeader(doc);
-          drawCleanFooter(doc, today);
+          newPage();
 
           const typeLabels: Record<string, string> = {
-            credit_report: "Bureau Report",
-            id_document: "Government-Issued Identification",
-            proof_of_residency: "Proof of Residency",
-            bank_statement: "Bank Statement"
+            credit_report: "EXHIBIT: Bureau Report",
+            id_document: "EXHIBIT: Government-Issued Identification",
+            proof_of_residency: "EXHIBIT: Proof of Residency",
+            bank_statement: "EXHIBIT: Bank Statement"
           };
-          const label = typeLabels[att.type] || "Supporting Document";
+          const label = typeLabels[att.type] || "EXHIBIT: Supporting Document";
 
-          doc.fontSize(10).font("Helvetica-Bold").fillColor("#333333")
-            .text(label, { align: "center" })
-            .moveDown(0.3);
-          doc.fontSize(8).font("Helvetica").fillColor("#888888")
+          doc.moveDown(0.3);
+          sectionTitle(label);
+          doc.font("Helvetica").fontSize(8).fillColor("#888888")
             .text(att.name, { align: "center" })
-            .moveDown(1);
+            .moveDown(0.8);
 
           const dataUrlMatch = att.dataUrl.match(/^data:(.*?);base64,(.*)$/);
           if (dataUrlMatch) {
@@ -4197,36 +4289,27 @@ Never give advice that ignores the current date or economic climate. Your intell
             if (/image\/(jpeg|jpg|png)/i.test(mimeType)) {
               try {
                 const pageW = doc.page.width - doc.page.margins.left - doc.page.margins.right;
-                const pageH = doc.page.height - doc.y - doc.page.margins.bottom - 40;
+                const pageH = doc.page.height - doc.y - doc.page.margins.bottom - 50;
 
                 if (att.type === "id_document") {
                   const bgPad = 20;
                   const maxImgW = pageW - bgPad * 2;
                   const maxImgH = pageH - bgPad * 2;
-
                   const img = doc.openImage(imgBuffer);
                   let imgW = img.width;
                   let imgH = img.height;
                   if (imgW > maxImgW) { const s = maxImgW / imgW; imgW *= s; imgH *= s; }
                   if (imgH > maxImgH) { const s = maxImgH / imgH; imgW *= s; imgH *= s; }
-
                   const bgW = imgW + bgPad * 2;
                   const bgH = imgH + bgPad * 2;
                   const bgX = doc.page.margins.left + (pageW - bgW) / 2;
                   const bgY = doc.y;
-
-                  doc.save()
-                    .rect(bgX, bgY, bgW, bgH)
-                    .fill("#ffffff")
-                    .restore();
-
+                  doc.save().rect(bgX, bgY, bgW, bgH).fill("#ffffff").restore();
                   doc.image(imgBuffer, bgX + bgPad, bgY + bgPad, { width: imgW, height: imgH });
                   doc.y = bgY + bgH + 10;
                 } else {
                   doc.image(imgBuffer, doc.page.margins.left, doc.y, {
-                    fit: [pageW, pageH],
-                    align: "center",
-                    valign: "center"
+                    fit: [pageW, pageH], align: "center", valign: "center"
                   });
                 }
               } catch (imgErr) {
@@ -4244,48 +4327,57 @@ Never give advice that ignores the current date or economic climate. Your intell
         }
       }
 
-      skipNextPageEvent = true;
-      doc.addPage();
-      drawCleanHeader(doc);
-      drawCleanFooter(doc, today);
-
-      doc.moveDown(0.5);
-      doc.font("Helvetica-Bold").fontSize(14).fillColor("#1a1a2e")
-        .text("Dispute Ledger", { align: "center" });
+      newPage();
       doc.moveDown(0.3);
-      doc.font("Helvetica").fontSize(8).fillColor("#888888")
-        .text(`Generated: ${today} | Items: ${disputes.length}`, { align: "center" });
-      doc.moveDown(1);
-
-      const ledgerColX = [65, 180, 290, 380, 470];
-      const ledgerY = doc.y;
-      doc.font("Helvetica-Bold").fontSize(8).fillColor("#1a1a2e");
-      doc.text("Creditor/Requestor", ledgerColX[0], ledgerY);
-      doc.text("Issue", ledgerColX[1], ledgerY);
-      doc.text("Bureau", ledgerColX[2], ledgerY);
-      doc.text("Basis", ledgerColX[3], ledgerY);
-      doc.text("Round", ledgerColX[4], ledgerY);
+      doc.font("Helvetica-Bold").fontSize(12).fillColor("#1a1a2e")
+        .text("DISPUTE LEDGER", { align: "center", characterSpacing: 1 });
+      doc.moveDown(0.15);
+      doc.font("Helvetica").fontSize(7.5).fillColor("#999999")
+        .text(`Case Date: ${today}  |  Total Items: ${disputes.length}`, { align: "center" });
       doc.moveDown(0.5);
-      doc.moveTo(65, doc.y).lineTo(545, doc.y).strokeColor("#dddddd").lineWidth(0.5).stroke();
-      doc.moveDown(0.3);
+      drawDoubleRule();
+      doc.moveDown(0.2);
+
+      const colX = [mL, mL + 120, mL + 235, mL + 325, mL + 400];
+      const colW = [115, 110, 85, 70, 60];
+      const headerY = doc.y;
+      doc.font("Helvetica-Bold").fontSize(7.5).fillColor("#1a1a2e");
+      doc.text("CREDITOR", colX[0], headerY, { width: colW[0], lineBreak: false });
+      doc.text("ISSUE", colX[1], headerY, { width: colW[1], lineBreak: false });
+      doc.text("BUREAU", colX[2], headerY, { width: colW[2], lineBreak: false });
+      doc.text("CATEGORY", colX[3], headerY, { width: colW[3], lineBreak: false });
+      doc.text("ROUND", colX[4], headerY, { width: colW[4], lineBreak: false });
+      doc.y = headerY + 12;
+      drawRule(0.8, "#1a1a2e");
 
       doc.font("Helvetica").fontSize(7.5).fillColor("#444444");
-      for (const d of disputes) {
-        const rowY = doc.y;
-        if (rowY > doc.page.height - 80) {
-          skipNextPageEvent = true;
-          doc.addPage();
-          drawCleanHeader(doc);
-          drawCleanFooter(doc, today);
+      for (let i = 0; i < disputes.length; i++) {
+        const d = disputes[i];
+        if (doc.y > bottomLimit - 20) {
+          newPage();
+          doc.moveDown(0.3);
+          const rHeaderY = doc.y;
+          doc.font("Helvetica-Bold").fontSize(7.5).fillColor("#1a1a2e");
+          doc.text("CREDITOR", colX[0], rHeaderY, { width: colW[0], lineBreak: false });
+          doc.text("ISSUE", colX[1], rHeaderY, { width: colW[1], lineBreak: false });
+          doc.text("BUREAU", colX[2], rHeaderY, { width: colW[2], lineBreak: false });
+          doc.text("CATEGORY", colX[3], rHeaderY, { width: colW[3], lineBreak: false });
+          doc.text("ROUND", colX[4], rHeaderY, { width: colW[4], lineBreak: false });
+          doc.y = rHeaderY + 12;
+          drawRule(0.8, "#1a1a2e");
+          doc.font("Helvetica").fontSize(7.5).fillColor("#444444");
         }
-        doc.text(d.creditor.slice(0, 25), ledgerColX[0], doc.y, { width: 110 });
-        const currentY = doc.y - 10;
-        doc.text(d.issue.slice(0, 30), ledgerColX[1], currentY, { width: 105 });
-        doc.text(d.bureau, ledgerColX[2], currentY, { width: 85 });
-        doc.text(classifyDispute(d), ledgerColX[3], currentY, { width: 85 });
-        const isInqCat = classifyDispute(d) === "inquiry";
-        doc.text(isInqCat ? `R${d.disputeRound || 1}` : "—", ledgerColX[4], currentY, { width: 50 });
-        doc.moveDown(0.3);
+        if (i % 2 === 0) {
+          doc.save().rect(mL - 4, doc.y - 2, pw + 8, 13).fill("#f5f5f5").restore();
+        }
+        const rowY = doc.y;
+        doc.text(d.creditor.slice(0, 22), colX[0], rowY, { width: colW[0], lineBreak: false });
+        doc.text(d.issue.slice(0, 22), colX[1], rowY, { width: colW[1], lineBreak: false });
+        doc.text(d.bureau, colX[2], rowY, { width: colW[2], lineBreak: false });
+        const catName = classifyDispute(d);
+        doc.text(catName.replace(/_/g, " "), colX[3], rowY, { width: colW[3], lineBreak: false });
+        doc.text(catName === "inquiry" ? `R${d.disputeRound || 1}` : "\u2014", colX[4], rowY, { width: colW[4], lineBreak: false });
+        doc.y = rowY + 14;
       }
 
       doc.end();
