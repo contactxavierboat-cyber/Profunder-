@@ -2177,7 +2177,27 @@ export async function registerRoutes(
 
   (async () => {
     try {
+      const adminEmail = process.env.ADMIN_EMAIL;
+      const adminPass = process.env.ADMIN_PASSWORD;
+      if (!adminEmail || !adminPass) return;
+      const { db } = await import("./db");
+      const { users } = await import("@shared/schema");
+      const { eq } = await import("drizzle-orm");
+      const [existingAdmin] = await db.select().from(users).where(eq(users.email, adminEmail)).limit(1);
+      if (existingAdmin) {
+        const needsUpdate = existingAdmin.password === "placeholder" || existingAdmin.role !== "admin";
+        if (needsUpdate) {
+          const hashed = await bcrypt.hash(adminPass, 10);
+          await db.update(users).set({ password: hashed, role: "admin", subscription_tier: "capital", max_usage: 999999 }).where(eq(users.email, adminEmail));
+          console.log("[Admin] Fixed admin account credentials");
+        }
+      } else {
+        const hashed = await bcrypt.hash(adminPass, 10);
+        await db.insert(users).values({ email: adminEmail, password: hashed, role: "admin", subscription_tier: "capital", max_usage: 999999 });
+        console.log("[Admin] Created admin account");
+      }
     } catch (err) {
+      console.error("[Admin] seed error:", err);
     }
   })();
 
