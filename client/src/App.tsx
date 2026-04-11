@@ -10,11 +10,13 @@ import AdminPage from "@/pages/admin";
 import SubscriptionPage from "@/pages/subscription";
 import PrivacyPage from "@/pages/privacy";
 import TermsPage from "@/pages/terms";
+import StudentRefundsPage from "@/pages/student-refunds";
 
 function Router() {
   return (
     <Switch>
       <Route path="/" component={LandingPage} />
+      <Route path="/student-refunds" component={StudentRefundsPage} />
       <Route path="/login" component={LoginPage} />
       <Route path="/privacy" component={PrivacyPage} />
       <Route path="/terms" component={TermsPage} />

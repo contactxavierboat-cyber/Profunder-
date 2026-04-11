@@ -4839,6 +4839,7 @@ export default function LandingPage() {
   };
 
   const [showFrontPage, setShowFrontPage] = useState(!user && !hasMessages);
+  const [showWelcomePopup, setShowWelcomePopup] = useState(false);
   const [newsletterEmail, setNewsletterEmail] = useState("");
   const [newsletterSubmitted, setNewsletterSubmitted] = useState(false);
   const [newsletterLoading, setNewsletterLoading] = useState(false);
@@ -4857,6 +4858,16 @@ export default function LandingPage() {
   useEffect(() => {
     if (user || hasMessages) setShowFrontPage(false);
   }, [user, hasMessages]);
+
+  useEffect(() => {
+    if (showFrontPage && !user) {
+      const dismissed = sessionStorage.getItem("profundr_popup_dismissed");
+      if (!dismissed) {
+        const timer = setTimeout(() => setShowWelcomePopup(true), 800);
+        return () => clearTimeout(timer);
+      }
+    }
+  }, [showFrontPage, user]);
 
   if (showFrontPage && !user) {
     const features = [
@@ -4882,6 +4893,74 @@ export default function LandingPage() {
     return (
       <div className="min-h-screen bg-white" style={{ fontFamily: "'Inter', sans-serif" }} data-testid="front-page">
         <input ref={fileInputRef} type="file" accept=".pdf,.txt,.csv" className="hidden" onChange={handleFileSelect} data-testid="input-file-upload" />
+
+        {showWelcomePopup && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center px-4" data-testid="welcome-popup-overlay">
+            <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => { setShowWelcomePopup(false); sessionStorage.setItem("profundr_popup_dismissed", "1"); }} />
+            <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-[440px] overflow-hidden animate-in fade-in zoom-in-95 duration-300" data-testid="welcome-popup">
+              <button
+                onClick={() => { setShowWelcomePopup(false); sessionStorage.setItem("profundr_popup_dismissed", "1"); }}
+                className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full bg-[#f5f5f5] hover:bg-[#eee] transition-colors z-10"
+                data-testid="button-close-popup"
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#666" strokeWidth="2" strokeLinecap="round"><line x1="6" y1="6" x2="18" y2="18"/><line x1="6" y1="18" x2="18" y2="6"/></svg>
+              </button>
+
+              <div className="bg-[#111] px-6 py-8 text-center">
+                <div className="flex items-center justify-center gap-2 mb-4">
+                  <img src="/profundr-brain-logo.png" alt="" className="w-10 h-10" style={{ borderRadius: "8px" }} />
+                  <span style={{ fontFamily: "'Inter', sans-serif", fontWeight: 800, letterSpacing: "-0.05em", color: "#fff" }} className="text-[24px]">profundr<span style={{ marginLeft: "-0.15em" }}>.</span></span>
+                </div>
+                <p className="text-[14px] text-white/70">Your Capital Operating System</p>
+              </div>
+
+              <div className="px-6 py-6">
+                <h3 className="text-[20px] sm:text-[22px] font-bold text-[#111] text-center mb-2 leading-tight" style={{ letterSpacing: "-0.02em" }}>How can we help you today?</h3>
+                <p className="text-[13px] text-[#888] text-center mb-6">Choose your path below or call us directly.</p>
+
+                <div className="space-y-3 mb-6">
+                  <button
+                    onClick={() => { setShowWelcomePopup(false); sessionStorage.setItem("profundr_popup_dismissed", "1"); }}
+                    className="w-full flex items-center gap-4 p-4 border border-[#e8e8e8] rounded-xl hover:border-[#111] hover:bg-[#fafafa] transition-all group"
+                    data-testid="button-popup-business-funding"
+                  >
+                    <div className="w-11 h-11 rounded-xl bg-[#111] flex items-center justify-center shrink-0">
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+                    </div>
+                    <div className="text-left">
+                      <p className="text-[15px] font-semibold text-[#111] group-hover:text-[#000]">Business Funding</p>
+                      <p className="text-[12px] text-[#888]">Credit analysis, disputes & capital matching</p>
+                    </div>
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="ml-auto shrink-0 opacity-30 group-hover:opacity-100 transition-opacity"><path d="M6 4l4 4-4 4" stroke="#111" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                  </button>
+
+                  <button
+                    onClick={() => { sessionStorage.setItem("profundr_popup_dismissed", "1"); window.location.href = '/student-refunds'; }}
+                    className="w-full flex items-center gap-4 p-4 border border-[#e8e8e8] rounded-xl hover:border-[#1a73e8] hover:bg-[#f8faff] transition-all group"
+                    data-testid="button-popup-student-refunds"
+                  >
+                    <div className="w-11 h-11 rounded-xl bg-[#1a73e8] flex items-center justify-center shrink-0">
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
+                    </div>
+                    <div className="text-left">
+                      <p className="text-[15px] font-semibold text-[#111] group-hover:text-[#1a73e8]">Student Refunds</p>
+                      <p className="text-[12px] text-[#888]">American Opportunity & Hope Credit recovery</p>
+                    </div>
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="ml-auto shrink-0 opacity-30 group-hover:opacity-100 transition-opacity"><path d="M6 4l4 4-4 4" stroke="#1a73e8" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                  </button>
+                </div>
+
+                <div className="text-center border-t border-[#f0f0f0] pt-5">
+                  <p className="text-[12px] text-[#888] mb-2">Questions? Call us directly</p>
+                  <a href="tel:8664207393" className="inline-flex items-center gap-2 text-[16px] font-bold text-[#111] hover:text-[#333] transition-colors" data-testid="link-popup-phone">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z"/></svg>
+                    (866) 420-7393
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
         <nav className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-sm border-b border-[#f0f0f0]" data-testid="front-nav">
           <div className="max-w-[1200px] mx-auto px-4 sm:px-6 h-[56px] sm:h-[64px] flex items-center justify-between">
