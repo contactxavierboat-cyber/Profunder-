@@ -17,7 +17,7 @@ export default function LandingPage() {
               href="/subscription"
               className="rounded-lg border border-white/15 px-3 py-2 text-white hover:border-white/25"
             >
-              Prequalify
+              Start
             </a>
           </nav>
         </div>
@@ -26,27 +26,33 @@ export default function LandingPage() {
       <main>
         <section className="mx-auto max-w-6xl px-5 py-16">
           <h1 className="text-4xl font-semibold leading-tight md:text-5xl">
-            Prequalify. Then we place funding.
+            Funding placement for operators and creators who are ready to scale.
           </h1>
           <p className="mt-5 max-w-3xl text-lg text-white/70">
-            Profundr acquires and prequalifies funding-ready borrowers. If you qualify, we pursue funding options on your behalf
-            (some applicants qualify for $0 upfront fee options).
+            We don’t send junk to lenders. We qualify you first, then place you into the right funding options.
+            If you’re not fundable, we tell you fast.
           </p>
 
           <div className="mt-7 flex flex-wrap gap-3">
             <a
-              href="/subscription"
-              className="rounded-xl bg-[#4f8cff] px-4 py-3 font-medium text-white hover:opacity-90"
-            >
-              Start prequalification
-            </a>
-            <a
               href="https://wa.me/18329746406"
-              className="rounded-xl border border-white/15 px-4 py-3 font-medium text-white hover:border-white/25"
+              className="rounded-xl bg-[#4f8cff] px-4 py-3 font-medium text-white hover:opacity-90"
               target="_blank"
               rel="noreferrer"
             >
-              Text/WhatsApp us
+              WhatsApp underwriting now
+            </a>
+            <a
+              href="tel:+18664207393"
+              className="rounded-xl border border-white/15 px-4 py-3 font-medium text-white hover:border-white/25"
+            >
+              Call (866) 420-7393
+            </a>
+            <a
+              href="/subscription"
+              className="rounded-xl border border-white/15 px-4 py-3 font-medium text-white hover:border-white/25"
+            >
+              Prequalify
             </a>
           </div>
 
@@ -90,29 +96,19 @@ export default function LandingPage() {
         </section>
 
         <section className="mx-auto max-w-6xl px-5 pb-16">
-          <h2 className="text-xl font-semibold">How it works</h2>
+          <h2 className="text-xl font-semibold">How it works (simple)</h2>
           <ol className="mt-3 space-y-2 text-white/70">
-            <li>
-              <b className="text-white">We acquire leads</b> (operators + creators who likely need capital).
-            </li>
-            <li>
-              <b className="text-white">They prequalify via Profundr</b> (filters out weak profiles).
-            </li>
-            <li>
-              <b className="text-white">We place funding</b> by routing qualified borrowers to the right options.
-            </li>
-            <li>
-              <b className="text-white">We monetize</b> on funded deals.
-            </li>
+            <li><b className="text-white">Prequalify</b> (fast filter, no wasted back-and-forth).</li>
+            <li><b className="text-white">Underwriting review</b> (is this actually fundable?).</li>
+            <li><b className="text-white">Placement</b> (we pursue the right options on your behalf).</li>
+            <li><b className="text-white">Close</b> (we earn when funding closes).</li>
           </ol>
 
           <div className="mt-8 rounded-2xl border border-[#4f8cff]/25 bg-white/5 p-5">
             <div className="flex flex-col items-start justify-between gap-4 md:flex-row md:items-center">
               <div>
-                <div className="text-base font-semibold">Want a quick answer?</div>
-                <div className="text-sm text-white/70">
-                  Text or WhatsApp and we’ll tell you straight what’s realistic.
-                </div>
+                <div className="text-base font-semibold">Talk to underwriting.</div>
+                <div className="text-sm text-white/70">Fast answer. If you’re a fit, we move.</div>
               </div>
               <div className="flex flex-wrap gap-3">
                 <a
@@ -122,6 +118,12 @@ export default function LandingPage() {
                   rel="noreferrer"
                 >
                   WhatsApp
+                </a>
+                <a
+                  href="tel:+18664207393"
+                  className="rounded-xl border border-white/15 px-4 py-3 font-medium text-white hover:border-white/25"
+                >
+                  Call
                 </a>
                 <a
                   href="mailto:underwriting@profundr.com"
@@ -153,4 +155,3 @@ export default function LandingPage() {
     </div>
   );
 }
-
