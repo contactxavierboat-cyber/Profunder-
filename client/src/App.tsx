@@ -5,6 +5,8 @@ import { Toaster } from "@/components/ui/toaster";
 import { AuthProvider } from "@/lib/store";
 import NotFound from "@/pages/not-found";
 import LandingPage from "@/pages/landing";
+import SMBPage from "@/pages/smb";
+import CreatorsPage from "@/pages/creators";
 import LoginPage from "@/pages/login";
 import AdminPage from "@/pages/admin";
 import SubscriptionPage from "@/pages/subscription";
@@ -16,6 +18,8 @@ function Router() {
   return (
     <Switch>
       <Route path="/" component={LandingPage} />
+      <Route path="/smb" component={SMBPage} />
+      <Route path="/creators" component={CreatorsPage} />
       <Route path="/student-refunds" component={StudentRefundsPage} />
       <Route path="/login" component={LoginPage} />
       <Route path="/privacy" component={PrivacyPage} />
